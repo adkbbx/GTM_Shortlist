@@ -24,6 +24,8 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 - [ ] Add freshness-aware source reuse and failure/unknown handling.
 
 ## 5. Extraction and qualification
+- [x] Save bounded invalid model output and schema issues locally; attempt one repair using the shared model budget.
+- [x] Test malformed JSON/schema, failed repair, transport failure, capped repair and restart after saved diagnostics.
 - [ ] Gemma structured output from supplied passages with explicit unknowns and labelled hypotheses.
 - [ ] Validate citation identity, exact passages, dates and mandatory criterion outcomes.
 - [ ] Run at least 30 labelled grounding cases, including negation, wrong company and old dates.

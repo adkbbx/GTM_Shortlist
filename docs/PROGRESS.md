@@ -23,3 +23,13 @@ Next priorities, continue without asking user:
 3. Improve query precision, successful-candidate selection and three-page coverage, source freshness reuse and full crash-recovery tests. The term private in the initial target search also returns private deployment products; evaluate query planning without weakening ownership evidence.
 4. Add hosted Postgres/Auth isolation and demo entitlements, then deployment preparation. Actual external SMTP, hosted credentials, provider benchmarks and observed human tests remain release gates. Build/test independent work while recording unavailable services.
 5. Maintain checklist, test changes appropriately, commit/push to the specified repository and check time/usage between steps. Goal remains active. Stop at 18:00 JST today or weekly exhaustion; scheduled heartbeat is resume-gtm-shortlist-build.
+
+## 14 October, 04:12 JST checkpoint
+
+GitHub CI for `52beace` passed both core and UI jobs. Impeccable finishing review returned `ship` after product status and extracted design-system documentation were reconciled. DESIGN.md and `.impeccable/design.json` now describe the actual interface. No layout changes.
+
+Bounded model diagnostics and one explicit shared-budget repair now implemented. Invalid JSON/schema retains up to32k characters plus sanitized validation issues in local checkpoints, separate from exported research. Unknown finding reason is explicit in the model instruction. Repair never happens on transport/auth failures. Eight-call cap includes both original and repair attempts. Tests cover successful repair, repeated-invalid stop, budget exhaustion and restarting after saved diagnostics without repeating original inference. 86 backend tests and Ruff pass; six UI tests pass again.
+
+New real assisted run `21f920ad6818469bbb302c9a3d59a4fe` passes saved-evidence verification: Smeron valid conservative unknowns, Prismatic three cited model assessments plus unknown ownership, B2B Hub fetch failure. No real repair was needed; do not portray fixture repair as an observed real failure recovery. Original run remains immutable. Both runs use imported web-search metadata, not live search adapters.
+
+Next: persist successful provider outcomes atomically so a crash between response and checkpoint can restore results instead of conservative duplicate-dispatch stop. Then implement explicit exclusion findings and meaningful 30-case semantic evaluation, richer source coverage/cache and hosted isolation. Legacy planning documents remain historical; docs/IMPLEMENTATION.md and this file carry current status. At last usage check 59% five-hour,17% weekly consumed, ordinary usage permitted. No credits/reset used. Continue current goal without asking user until cutoff.

@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Protocol
 
 import httpx
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from shortlist.config import Settings
 from shortlist.domain import (
@@ -23,6 +23,18 @@ from shortlist.fetch import FetchError, canonical_url, domain_of
 
 class ProviderError(ValueError):
     """Safe error text, never containing URLs with API keys or provider response bodies."""
+
+
+class ModelOutputError(ProviderError):
+    """Bounded model content for local diagnosis; never include it in the error message."""
+
+    def __init__(self, content: str, issues: list[dict]):
+        super().__init__("Gemma output failed validation")
+        self.content = content[:32000]
+        self.issues = issues
+
+    def diagnostic(self) -> dict:
+        return {"content": self.content, "issues": self.issues}
 
 
 DIRECTORIES = frozenset({"linkedin.com", "crunchbase.com", "g2.com", "capterra.com", "ycombinator.com",
@@ -202,12 +214,17 @@ class Gemma:
                 })
                 response.raise_for_status()
                 content = response.json()["choices"][0]["message"]["content"]
-                parsed = json.loads(content)
-                if not isinstance(parsed, dict):
-                    raise TypeError("Object required")
-                return parsed
+                if not isinstance(content, str):
+                    raise TypeError("Text required")
         except (httpx.HTTPError, ValueError, KeyError, IndexError, TypeError) as exc:
             raise ProviderError("Gemma request failed or returned invalid structured output") from exc
+        try:
+            parsed = json.loads(content)
+            if not isinstance(parsed, dict):
+                raise TypeError("Object required")
+            return parsed
+        except (ValueError, TypeError) as exc:
+            raise ModelOutputError(content, [{"type": "json_object_required"}]) from exc
 
     def seller(self, source: Source) -> SellerDraft:
         data = self.complete(
@@ -216,20 +233,30 @@ class Gemma:
             {"url": source.url, "text": source.text[:18000]}, SellerDraft.model_json_schema())
         try:
             return SellerDraft.model_validate(data)
-        except ValueError as exc:
-            raise ProviderError("Seller draft did not match the required schema") from exc
+        except ValidationError as exc:
+            raise ModelOutputError(json.dumps(data), exc.errors(include_input=False, include_url=False,
+                                                              include_context=False)) from exc
 
-    def research(self, profile: Profile, candidate: Candidate, sources: tuple[Source, ...]) -> Research:
+    def research(self, profile: Profile, candidate: Candidate, sources: tuple[Source, ...],
+                 repair: dict | None = None) -> Research:
+        payload = {"company_domain": candidate.domain, "profile": profile.model_dump(mode="json"),
+                   "sources": [s.model_dump(mode="json") for s in sources]}
+        if repair is not None:
+            payload["previous_invalid_output"] = repair
         data = self.complete(
             "Assess each confirmed criterion using ONLY the supplied company's source passages. "
             "Use supported, contradicted, or unknown. Every observation needs an exact verbatim passage and source_id. "
             "A passage must entail the claim and criterion; mere related words are insufficient. "
             "Account for negation and dates. Do not infer private ownership from absence of a ticker, or startup status "
             "from marketing language. Unknown is preferable to guessing. Label sales ideas as hypotheses with assumptions. "
-            "Never infer buying intent, budget or acquisition pain. Do not use a source about another entity.",
-            {"company_domain": candidate.domain, "profile": profile.model_dump(mode="json"),
-             "sources": [s.model_dump(mode="json") for s in sources]}, Extraction.model_json_schema())
+            "Never infer buying intent, budget or acquisition pain. Do not use a source about another entity. "
+            "If previous_invalid_output is provided, correct its structure using the original sources; "
+            "do not invent evidence to satisfy validation. Each unknown finding needs a reason.",
+            payload, Extraction.model_json_schema())
         try:
             return validate_extraction(data, profile, candidate.domain, sources)
+        except ValidationError as exc:
+            raise ModelOutputError(json.dumps(data), exc.errors(include_input=False, include_url=False,
+                                                              include_context=False)) from exc
         except ValueError as exc:
-            raise ProviderError("Company research did not match the required schema") from exc
+            raise ModelOutputError(json.dumps(data), [{"type": "criterion_identity_invalid"}]) from exc

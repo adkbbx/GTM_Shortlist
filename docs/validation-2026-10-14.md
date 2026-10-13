@@ -32,6 +32,16 @@ python scripts/verify_saved_run.py 4916be8efe824106921f620fb70712dc
 
 The local UI is served at `http://127.0.0.1:8014/?run=4916be8efe824106921f620fb70712dc` while the development server is running. It is not a deployed public service.
 
+## Structured output reliability, 04:12 JST
+
+The suite now has 86 passing backend tests and Ruff passes. Six browser tests passed again after worker changes. GitHub Actions for commit `52beace` passed both backend and UI jobs on Linux, including generated-schema drift checks, production build and browser flows.
+
+Model-generated malformed JSON and schema failures now save a bounded 32,000-character diagnostic with structured issue paths. Safe exception messages do not contain raw provider bodies or model output. Research gets at most one explicit repair attempt, atomically counted under the same eight-model-call cap. Transport/auth failures do not trigger repairs. Fixtures prove successful repair, second-invalid-output stop, cap exhaustion, and process restart after saving diagnostics without repeating the original dispatch. Full successful-outcome crash recovery remains pending.
+
+A second real assisted run, `21f920ad6818469bbb302c9a3d59a4fe`, used the same captured search queries with fresh live HTTPS pages and Gemma inference. Smeron now returns valid unknown findings with specific reasons: the page describes a studio building products for clients, without establishing its own SaaS offering or private ownership. Prismatic has three cited assessments and ownership unknown. B2B Hub still fails fetching. Three records, two sources and three supported findings are saved and independently rechecked by `scripts/verify_saved_run.py`. Neither model output needed repair on this real run; repair-path validation is from labelled fixtures, not a claim of a real automatic repair.
+
+The visual reviewer returned `ship` after PRODUCT.md and the extracted DESIGN.md/design sidecar were corrected. Interface composition remains unchanged.
+
 ## Open gates
 
-Live Tavily/SerpApi credentials and comparison; Eygentic HTTPS certificate failure; structured-output repair/diagnostics and model evaluation; richer page coverage and freshness-aware cache; explicit exclusion qualification; comprehensive restart/crash recovery; hosted Postgres/Auth/workspace isolation; external SMTP/deployment; five real runs across three profiles; observed external tests and physical-device checks. Current local tests are not evidence that these gates have passed.
+Live Tavily/SerpApi credentials and comparison; Eygentic HTTPS certificate failure; semantic model evaluation; richer page coverage and freshness-aware cache; explicit exclusion qualification; comprehensive successful-outcome restart/crash recovery; hosted Postgres/Auth/workspace isolation; external SMTP/deployment; five real runs across three profiles; observed external tests and physical-device checks. Current local tests are not evidence that these gates have passed.

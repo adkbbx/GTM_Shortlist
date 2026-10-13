@@ -1,0 +1,358 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-13T19:13:20.675780+00:00",
+  "title": "Design System: GTM Shortlist",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Engineering Paper",
+        "tonalRamp": [
+          "oklch(15% 0.015 80)",
+          "oklch(26% 0.015 80)",
+          "oklch(37% 0.015 80)",
+          "oklch(49% 0.015 80)",
+          "oklch(61% 0.015 80)",
+          "oklch(73% 0.015 80)",
+          "oklch(85% 0.015 80)",
+          "oklch(95% 0.015 80)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Charcoal Ink",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(61% 0 0)",
+          "oklch(73% 0 0)",
+          "oklch(85% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Warm Muted Text",
+        "tonalRamp": [
+          "oklch(15% 0.015 70)",
+          "oklch(26% 0.015 70)",
+          "oklch(37% 0.015 70)",
+          "oklch(49% 0.015 70)",
+          "oklch(61% 0.015 70)",
+          "oklch(73% 0.015 70)",
+          "oklch(85% 0.015 70)",
+          "oklch(95% 0.015 70)"
+        ]
+      },
+      "orange-ink": {
+        "role": "primary",
+        "displayName": "Action Orange Ink",
+        "tonalRamp": [
+          "oklch(15% 0.14 45)",
+          "oklch(26% 0.14 45)",
+          "oklch(37% 0.14 45)",
+          "oklch(49% 0.14 45)",
+          "oklch(61% 0.14 45)",
+          "oklch(73% 0.14 45)",
+          "oklch(85% 0.14 45)",
+          "oklch(95% 0.14 45)"
+        ]
+      },
+      "orange-hover": {
+        "role": "primary",
+        "displayName": "Deep Action Orange",
+        "tonalRamp": [
+          "oklch(15% 0.14 45)",
+          "oklch(26% 0.14 45)",
+          "oklch(37% 0.14 45)",
+          "oklch(49% 0.14 45)",
+          "oklch(61% 0.14 45)",
+          "oklch(73% 0.14 45)",
+          "oklch(85% 0.14 45)",
+          "oklch(95% 0.14 45)"
+        ]
+      },
+      "rust": {
+        "role": "primary",
+        "displayName": "Rust Detail",
+        "tonalRamp": [
+          "oklch(15% 0.09 45)",
+          "oklch(26% 0.09 45)",
+          "oklch(37% 0.09 45)",
+          "oklch(49% 0.09 45)",
+          "oklch(61% 0.09 45)",
+          "oklch(73% 0.09 45)",
+          "oklch(85% 0.09 45)",
+          "oklch(95% 0.09 45)"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Research Rule",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(61% 0 0)",
+          "oklch(73% 0 0)",
+          "oklch(85% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "drafting-grid": {
+        "role": "neutral",
+        "displayName": "Drafting Grid",
+        "tonalRamp": [
+          "oklch(15% 0.025 60)",
+          "oklch(26% 0.025 60)",
+          "oklch(37% 0.025 60)",
+          "oklch(49% 0.025 60)",
+          "oklch(61% 0.025 60)",
+          "oklch(73% 0.025 60)",
+          "oklch(85% 0.025 60)",
+          "oklch(95% 0.025 60)"
+        ]
+      },
+      "field": {
+        "role": "neutral",
+        "displayName": "Field White",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(37% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(61% 0 0)",
+          "oklch(73% 0 0)",
+          "oklch(85% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "field-border": {
+        "role": "neutral",
+        "displayName": "Field Border",
+        "tonalRamp": [
+          "oklch(15% 0.012 70)",
+          "oklch(26% 0.012 70)",
+          "oklch(37% 0.012 70)",
+          "oklch(49% 0.012 70)",
+          "oklch(61% 0.012 70)",
+          "oklch(73% 0.012 70)",
+          "oklch(85% 0.012 70)",
+          "oklch(95% 0.012 70)"
+        ]
+      },
+      "field-placeholder": {
+        "role": "neutral",
+        "displayName": "Field Placeholder",
+        "tonalRamp": [
+          "oklch(15% 0.015 70)",
+          "oklch(26% 0.015 70)",
+          "oklch(37% 0.015 70)",
+          "oklch(49% 0.015 70)",
+          "oklch(61% 0.015 70)",
+          "oklch(73% 0.015 70)",
+          "oklch(85% 0.015 70)",
+          "oklch(95% 0.015 70)"
+        ]
+      },
+      "quiet-selection": {
+        "role": "neutral",
+        "displayName": "Quiet Selection",
+        "tonalRamp": [
+          "oklch(15% 0.01 75)",
+          "oklch(26% 0.01 75)",
+          "oklch(37% 0.01 75)",
+          "oklch(49% 0.01 75)",
+          "oklch(61% 0.01 75)",
+          "oklch(73% 0.01 75)",
+          "oklch(85% 0.01 75)",
+          "oklch(95% 0.01 75)"
+        ]
+      },
+      "text-selection": {
+        "role": "neutral",
+        "displayName": "Peach Selection",
+        "tonalRamp": [
+          "oklch(15% 0.04 55)",
+          "oklch(26% 0.04 55)",
+          "oklch(37% 0.04 55)",
+          "oklch(49% 0.04 55)",
+          "oklch(61% 0.04 55)",
+          "oklch(73% 0.04 55)",
+          "oklch(85% 0.04 55)",
+          "oklch(95% 0.04 55)"
+        ]
+      },
+      "notice-paper": {
+        "role": "neutral",
+        "displayName": "Notice Paper",
+        "tonalRamp": [
+          "oklch(15% 0.02 60)",
+          "oklch(26% 0.02 60)",
+          "oklch(37% 0.02 60)",
+          "oklch(49% 0.02 60)",
+          "oklch(61% 0.02 60)",
+          "oklch(73% 0.02 60)",
+          "oklch(85% 0.02 60)",
+          "oklch(95% 0.02 60)"
+        ]
+      },
+      "notice-rule": {
+        "role": "neutral",
+        "displayName": "Notice Rule",
+        "tonalRamp": [
+          "oklch(15% 0.06 55)",
+          "oklch(26% 0.06 55)",
+          "oklch(37% 0.06 55)",
+          "oklch(49% 0.06 55)",
+          "oklch(61% 0.06 55)",
+          "oklch(73% 0.06 55)",
+          "oklch(85% 0.06 55)",
+          "oklch(95% 0.06 55)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Workspace heading",
+        "purpose": "The current research task."
+      },
+      "passage": {
+        "displayName": "Exact passage",
+        "purpose": "Readable quoted evidence with preserved whitespace."
+      }
+    },
+    "shadows": [
+      {
+        "name": "primary-button-ledge",
+        "value": "0 2px 0 #6a3417",
+        "purpose": "Approved inherited primary-button treatment only; research sheets, secondary actions and text actions remain flat."
+      }
+    ],
+    "motion": [
+      {
+        "name": "background-change",
+        "value": "background .2s",
+        "purpose": "Button state feedback."
+      },
+      {
+        "name": "button-movement",
+        "value": "transform .15s",
+        "purpose": "Existing 1px hover/press response; disabled for reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "compact-laptop",
+        "value": "1050px"
+      },
+      {
+        "name": "phone",
+        "value": "700px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Confirm or save a user decision.",
+      "html": "<button class=\"ds-primary\">Confirm target and discover</button>",
+      "css": ".ds-primary{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:52px;padding:12px 20px;border-radius:2px;font-weight:600;cursor:pointer;transition:background .2s,transform .15s;background:var(--orange,#b4501c);color:#fff;border:1px solid var(--orange,#b4501c);box-shadow:0 2px 0 #6a3417}.ds-primary:hover{background:#9b4215;transform:translateY(-1px)}.ds-primary:active{transform:translateY(1px)}.ds-primary:focus-visible{outline:2px solid var(--orange,#b4501c);outline-offset:4px}.ds-primary:disabled{opacity:.65;cursor:wait;transform:none}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}.ds-primary:hover,.ds-primary:active{transform:none}}"
+    },
+    {
+      "name": "Secondary action",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Review or add criteria without emphasizing a primary commitment.",
+      "html": "<button class=\"ds-secondary\">Needs research</button>",
+      "css": ".ds-secondary{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:52px;padding:12px 20px;border-radius:2px;font-weight:600;cursor:pointer;transition:background .2s,transform .15s;background:var(--paper,#f7f7f5);color:var(--ink,#1b1b1b);border:1px solid var(--ink,#1b1b1b)}.ds-secondary:hover{background:#eeede9;transform:translateY(-1px)}.ds-secondary:active{transform:translateY(1px)}.ds-secondary:focus-visible{outline:2px solid var(--orange,#b4501c);outline-offset:4px}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none}.ds-secondary:hover,.ds-secondary:active{transform:none}}"
+    },
+    {
+      "name": "Text action",
+      "kind": "button",
+      "refersTo": "button-text",
+      "description": "A lighter corrective or rejection action.",
+      "html": "<button class=\"ds-text\">Reject</button>",
+      "css": ".ds-text{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;min-height:44px;padding:8px 4px;background:none;color:var(--orange,#b4501c);border:0;border-radius:2px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:4px}.ds-text:hover{color:#6a3417}.ds-text:focus-visible{outline:2px solid var(--orange,#b4501c);outline-offset:4px}"
+    },
+    {
+      "name": "Text field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Editable seller information or research criteria.",
+      "html": "<label class=\"ds-label\" for=\"ds-website\">Seller website</label><input class=\"ds-field\" id=\"ds-website\" type=\"url\" placeholder=\"https://your-company.com\" />",
+      "css": ".ds-label{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;display:block;font-size:.9375rem;font-weight:600;margin-bottom:8px;color:var(--ink,#1b1b1b)}.ds-field{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;width:100%;min-height:48px;padding:12px;background:#fff;color:var(--ink,#1b1b1b);border:1px solid #8c8881;border-radius:2px;caret-color:var(--orange,#b4501c)}.ds-field::placeholder{color:#68635c}.ds-field:focus-visible{outline:2px solid var(--orange,#b4501c);outline-offset:4px}"
+    },
+    {
+      "name": "Saved run navigation",
+      "kind": "nav",
+      "refersTo": "research-sheet",
+      "description": "Persisted company domain, date, and research state.",
+      "html": "<nav class=\"ds-nav\"><button class=\"ds-run\" aria-current=\"page\"><span>example.com</span><small>14 Oct 2026</small><small>Partial</small></button></nav>",
+      "css": ".ds-run{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;display:block;text-align:left;width:100%;min-height:86px;padding:12px 10px;background:var(--paper,#f7f7f5);color:var(--ink,#1b1b1b);border:0;border-bottom:1px solid var(--line,rgba(27,27,27,.16));cursor:pointer}.ds-run span{display:block;font-weight:600}.ds-run small{display:block;font-size:.75rem;color:var(--muted,#5c5853);margin-top:2px}.ds-run:hover,.ds-run[aria-current=page]{background:#eeede9}.ds-run[aria-current=page]{border-left:1px solid var(--orange,#b4501c)}.ds-run:focus-visible{outline:2px solid var(--orange,#b4501c);outline-offset:4px}"
+    },
+    {
+      "name": "Research sheet",
+      "kind": "card",
+      "refersTo": "research-sheet",
+      "description": "A flat ruled container for company research.",
+      "html": "<section class=\"ds-sheet\"><h2>Confirm what a good fit means</h2><p>Edit the offer and criteria before discovery.</p></section>",
+      "css": ".ds-sheet{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;padding:28px 32px;background:var(--paper,#f7f7f5);color:var(--ink,#1b1b1b);border:1px solid var(--line,rgba(27,27,27,.16));border-top:1px solid var(--ink,#1b1b1b);border-radius:0}.ds-sheet h2{margin:0;font-size:1.375rem;line-height:1.3;font-weight:700;letter-spacing:-.015em}.ds-sheet p{margin:12px 0 0;color:var(--muted,#5c5853)}"
+    },
+    {
+      "name": "Source disclosure",
+      "kind": "custom",
+      "refersTo": "source-passage",
+      "description": "An exact passage and provenance directly under its claim.",
+      "html": "<details class=\"ds-evidence\"><summary>The company offers hosted software.<span>Inspect passage</span></summary><blockquote>Example passage for component preview only.</blockquote><a href=\"#source\">Source page</a><p>Publication date unknown</p></details>",
+      "css": ".ds-evidence{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;color:var(--ink,#1b1b1b)}.ds-evidence summary{cursor:pointer;min-height:44px;padding:10px 0;font-size:.9375rem;font-weight:600}.ds-evidence summary span{display:block;margin:5px 0 0 16px;font-size:.8125rem;font-weight:400;color:var(--orange,#b4501c)}.ds-evidence summary:focus-visible,.ds-evidence a:focus-visible{outline:2px solid var(--orange,#b4501c);outline-offset:4px}.ds-evidence blockquote{margin:12px 0 16px;padding:16px 20px;border:1px solid var(--line,rgba(27,27,27,.16));background:#fff;font-size:.9375rem;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}.ds-evidence a{display:inline-flex;align-items:center;min-height:44px;color:var(--orange,#b4501c);font-size:.8125rem;text-underline-offset:4px}.ds-evidence a:hover{color:#6a3417}.ds-evidence p{margin:3px 0 0;color:var(--muted,#5c5853);font-size:.8125rem}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Rocket assembly workshop and flight test lab",
+    "overview": "GTM Shortlist adopts Eygentic's existing engineering-paper identity. The implemented workspace feels like a technical research notebook: observations, criteria, source passages, and a shortlist a person can inspect before acting. Quiet paper, precise rules, restrained orange, and Schibsted Grotesk carry this world into the application.\n\nThis document records the local workspace in `web/styles.css` and `web/main.tsx`, inspected on 14 October 2026. It replaces the pre-implementation seed with observed application tokens while preserving the agreed identity. Eygentic's separate marketing website remains its own design authority; its marketing headline scale and illustrative palette are not application tokens.",
+    "keyCharacteristics": [
+      "Engineering paper behind flat, ruled research sheets.",
+      "Orange ink identifies actions and active research states.",
+      "Exact source passages remain readable beside labelled unknowns.",
+      "Human review is visually distinct from model qualification."
+    ],
+    "rules": [
+      {
+        "name": "The Action Ink Rule",
+        "body": "Reserve orange for something actionable or a meaningful state; paper and charcoal carry the research itself.",
+        "section": "colors"
+      },
+      {
+        "name": "The Readable Evidence Rule",
+        "body": "Preserve the passage role for source text; do not shrink or capitalize quotations to fit more records.",
+        "section": "typography"
+      },
+      {
+        "name": "The Shared Rule Rule",
+        "body": "Use aligned edges and thin separators to organize related research rather than detached dashboard tiles.",
+        "section": "layout"
+      }
+    ],
+    "dos": [
+      "**Do** use paper, Schibsted Grotesk, ruled alignment, and restrained orange ink for new application surfaces.",
+      "**Do** keep exact passages readable and show retrieval dates and unknown publication dates.",
+      "**Do** distinguish model qualification, human acceptance, and buying intent.",
+      "**Do** preserve visible keyboard focus, minimum control heights, and reduced-motion behavior.",
+      "**Do** verify content at phone and laptop widths, including narrow screens and enlarged text."
+    ],
+    "donts": [
+      "**Don't** introduce a dark sci-fi world, neon glows, glass, or glossy decorative rockets.",
+      "**Don't** substitute Inter or Geist for the approved Schibsted Grotesk identity.",
+      "**Don't** flood labels, rules, and backgrounds with orange.",
+      "**Don't** turn research into floating, rounded KPI cards or compress company sheets into three columns.",
+      "**Don't** present inferred pain, unknown ownership, buying intent, or progress as observed fact.",
+      "**Don't** extend the inherited primary-button ledge into a general shadow vocabulary."
+    ]
+  }
+}

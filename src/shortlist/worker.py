@@ -6,6 +6,7 @@ from shortlist.domain import Candidate, Profile, Research, Source, Unknown
 from shortlist.fetch import FetchError, fetch_page
 from shortlist.providers import (
     Gemma,
+    ModelOutputError,
     ProviderError,
     Search,
     SearchProvider,
@@ -46,6 +47,8 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 draft = call("model", model.name, "seller:model", lambda: model.seller(source))
                 checkpoint["draft"] = draft.model_dump(mode="json")
             except (FetchError, ProviderError) as exc:
+                if isinstance(exc, ModelOutputError):
+                    checkpoint["seller_model_output"] = exc.diagnostic()
                 error = str(exc) + ". Enter and confirm your offer and target manually to continue."
             store.checkpoint(run_id, fence, "confirmation", checkpoint, "awaiting_confirmation", error)
             return True
@@ -79,8 +82,26 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                     saved_sources[candidate.domain] = [source.model_dump(mode="json")]
                     store.checkpoint(run_id, fence, "research", checkpoint)
                 sources = tuple(Source.model_validate(s) for s in saved_sources[candidate.domain])
-                record = call("model", model.name, f"model:{candidate.domain}",
-                              lambda c=candidate, s=sources: model.research(profile, c, s))
+                diagnostics = checkpoint.setdefault("model_outputs", {})
+                previous = diagnostics.get(candidate.domain)
+                if previous is None:
+                    try:
+                        record = call("model", model.name, f"model:{candidate.domain}",
+                                      lambda c=candidate, s=sources: model.research(profile, c, s))
+                    except ModelOutputError as exc:
+                        previous = exc.diagnostic()
+                        diagnostics[candidate.domain] = previous
+                        # Save invalid output before another dispatch; a resumed worker can
+                        # repair it without paying for the original request again.
+                        store.checkpoint(run_id, fence, "research", checkpoint)
+                if previous is not None:
+                    try:
+                        record = call("model", model.name, f"repair:{candidate.domain}",
+                                      lambda c=candidate, s=sources, p=previous: model.research(profile, c, s, repair=p))
+                    except ModelOutputError as exc:
+                        diagnostics[candidate.domain]["repair_failure"] = exc.diagnostic()
+                        store.checkpoint(run_id, fence, "research", checkpoint)
+                        raise
             except (ProviderError, FetchError) as exc:
                 sources = tuple(Source.model_validate(s) for s in saved_sources.get(candidate.domain, []))
                 record = Research(domain=candidate.domain, name=candidate.name, profile_id=profile.id,
