@@ -188,6 +188,30 @@ export interface components {
             /** Claim */
             claim: string;
         };
+        /** ExclusionObserved */
+        ExclusionObserved: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            status: "cleared" | "matched";
+            /** Exclusion Id */
+            exclusion_id: string;
+            /** Evidence */
+            evidence: components["schemas"]["Evidence"][];
+        };
+        /** ExclusionUnknown */
+        ExclusionUnknown: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            status: "unknown";
+            /** Exclusion Id */
+            exclusion_id: string;
+            /** Reason */
+            reason: string;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -227,10 +251,6 @@ export interface components {
         };
         /** Profile */
         Profile: {
-            /** Id */
-            id: string;
-            /** Seller Url */
-            seller_url: string;
             /** Offer */
             offer: string;
             /** Target */
@@ -242,6 +262,10 @@ export interface components {
              * @default []
              */
             exclusions: string[];
+            /** Id */
+            id: string;
+            /** Seller Url */
+            seller_url: string;
             /**
              * Confirmed At
              * Format: date-time
@@ -260,6 +284,11 @@ export interface components {
             profile_id: string;
             /** Findings */
             findings: (components["schemas"]["Observed"] | components["schemas"]["Unknown"])[];
+            /**
+             * Exclusion Findings
+             * @default []
+             */
+            exclusion_findings: (components["schemas"]["ExclusionObserved"] | components["schemas"]["ExclusionUnknown"])[];
             /**
              * Hypotheses
              * @default []

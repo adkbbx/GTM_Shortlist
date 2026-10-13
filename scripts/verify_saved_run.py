@@ -25,9 +25,12 @@ for item in run["records"]:
     assert record.profile_id == profile.id
     checked = validate_extraction({"name": record.name,
                                    "findings": [f.model_dump(mode="json") for f in record.findings],
+                                   "exclusion_findings": [f.model_dump(mode="json") for f in record.exclusion_findings],
                                    "hypotheses": [h.model_dump(mode="json") for h in record.hypotheses]},
                                   profile, record.domain, record.sources)
     assert [f.status for f in checked.findings] == [f.status for f in record.findings], "Saved citation lost grounding"
+    assert [f.status for f in checked.exclusion_findings] == [f.status for f in record.exclusion_findings], "Exclusion lost grounding"
+    assert checked.qualification == record.qualification
     supported += sum(f.status == "supported" for f in checked.findings)
     sources += len(record.sources)
 assert sources > 0 and supported > 0, "Milestone needs actual inspectable supporting evidence"

@@ -347,9 +347,12 @@
           },
           "exclusions": {
             "items": {
-              "type": "string"
+              "type": "string",
+              "maxLength": 500,
+              "minLength": 3
             },
             "type": "array",
+            "maxItems": 12,
             "title": "Exclusions",
             "default": []
           }
@@ -448,6 +451,67 @@
         ],
         "title": "Evidence"
       },
+      "ExclusionObserved": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "matched",
+              "cleared"
+            ],
+            "title": "Status"
+          },
+          "exclusion_id": {
+            "type": "string",
+            "title": "Exclusion Id"
+          },
+          "evidence": {
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            },
+            "type": "array",
+            "maxItems": 6,
+            "minItems": 1,
+            "title": "Evidence"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "exclusion_id",
+          "evidence"
+        ],
+        "title": "ExclusionObserved"
+      },
+      "ExclusionUnknown": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "unknown",
+            "title": "Status",
+            "default": "unknown"
+          },
+          "exclusion_id": {
+            "type": "string",
+            "title": "Exclusion Id"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 3,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "exclusion_id",
+          "reason"
+        ],
+        "title": "ExclusionUnknown"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -545,14 +609,6 @@
       },
       "Profile": {
         "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "seller_url": {
-            "type": "string",
-            "title": "Seller Url"
-          },
           "offer": {
             "type": "string",
             "maxLength": 4000,
@@ -576,11 +632,22 @@
           },
           "exclusions": {
             "items": {
-              "type": "string"
+              "type": "string",
+              "maxLength": 500,
+              "minLength": 3
             },
             "type": "array",
+            "maxItems": 12,
             "title": "Exclusions",
             "default": []
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "seller_url": {
+            "type": "string",
+            "title": "Seller Url"
           },
           "confirmed_at": {
             "type": "string",
@@ -591,12 +658,12 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "id",
-          "seller_url",
           "offer",
           "target",
           "criteria",
           "exclusions",
+          "id",
+          "seller_url",
           "confirmed_at"
         ],
         "title": "Profile"
@@ -640,6 +707,29 @@
             },
             "type": "array",
             "title": "Findings"
+          },
+          "exclusion_findings": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ExclusionObserved"
+                },
+                {
+                  "$ref": "#/components/schemas/ExclusionUnknown"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "status",
+                "mapping": {
+                  "cleared": "#/components/schemas/ExclusionObserved",
+                  "matched": "#/components/schemas/ExclusionObserved",
+                  "unknown": "#/components/schemas/ExclusionUnknown"
+                }
+              }
+            },
+            "type": "array",
+            "title": "Exclusion Findings",
+            "default": []
           },
           "hypotheses": {
             "items": {
@@ -690,6 +780,7 @@
           "name",
           "profile_id",
           "findings",
+          "exclusion_findings",
           "hypotheses",
           "sources",
           "qualification",

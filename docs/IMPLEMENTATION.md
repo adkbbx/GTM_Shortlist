@@ -24,6 +24,9 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 - [ ] Add freshness-aware source reuse and failure/unknown handling.
 
 ## 5. Extraction and qualification
+- [x] Confirm bounded unique exclusions; persist matched/ruled-out/unknown assessments with citation checks in UI and JSON/CSV.
+- [x] Project unassessed exclusions in older runs as unknown without rewriting sources or human reviews.
+- [ ] Add an independent semantic gate for complete criterion/exclusion entailment; compound-negative failure is recorded in examples/evaluation/compound-exclusion.json.
 - [x] Save bounded invalid model output and schema issues locally; attempt one repair using the shared model budget.
 - [x] Test malformed JSON/schema, failed repair, transport failure, capped repair and restart after saved diagnostics.
 - [ ] Gemma structured output from supplied passages with explicit unknowns and labelled hypotheses.

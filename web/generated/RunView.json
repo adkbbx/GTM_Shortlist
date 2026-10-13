@@ -86,6 +86,67 @@
       "title": "Evidence",
       "type": "object"
     },
+    "ExclusionObserved": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "matched",
+            "cleared"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "exclusion_id": {
+          "title": "Exclusion Id",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "maxItems": 6,
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "exclusion_id",
+        "evidence"
+      ],
+      "title": "ExclusionObserved",
+      "type": "object"
+    },
+    "ExclusionUnknown": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "const": "unknown",
+          "default": "unknown",
+          "title": "Status",
+          "type": "string"
+        },
+        "exclusion_id": {
+          "title": "Exclusion Id",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 1000,
+          "minLength": 3,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "exclusion_id",
+        "reason"
+      ],
+      "title": "ExclusionUnknown",
+      "type": "object"
+    },
     "Hypothesis": {
       "additionalProperties": false,
       "properties": {
@@ -147,14 +208,6 @@
     "Profile": {
       "additionalProperties": false,
       "properties": {
-        "id": {
-          "title": "Id",
-          "type": "string"
-        },
-        "seller_url": {
-          "title": "Seller Url",
-          "type": "string"
-        },
         "offer": {
           "maxLength": 4000,
           "minLength": 10,
@@ -179,10 +232,21 @@
         "exclusions": {
           "default": [],
           "items": {
+            "maxLength": 500,
+            "minLength": 3,
             "type": "string"
           },
+          "maxItems": 12,
           "title": "Exclusions",
           "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "seller_url": {
+          "title": "Seller Url",
+          "type": "string"
         },
         "confirmed_at": {
           "format": "date-time",
@@ -191,12 +255,12 @@
         }
       },
       "required": [
-        "id",
-        "seller_url",
         "offer",
         "target",
         "criteria",
         "exclusions",
+        "id",
+        "seller_url",
         "confirmed_at"
       ],
       "title": "Profile",
@@ -241,6 +305,29 @@
             ]
           },
           "title": "Findings",
+          "type": "array"
+        },
+        "exclusion_findings": {
+          "default": [],
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "cleared": "#/$defs/ExclusionObserved",
+                "matched": "#/$defs/ExclusionObserved",
+                "unknown": "#/$defs/ExclusionUnknown"
+              },
+              "propertyName": "status"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ExclusionObserved"
+              },
+              {
+                "$ref": "#/$defs/ExclusionUnknown"
+              }
+            ]
+          },
+          "title": "Exclusion Findings",
           "type": "array"
         },
         "hypotheses": {
@@ -290,6 +377,7 @@
         "name",
         "profile_id",
         "findings",
+        "exclusion_findings",
         "hypotheses",
         "sources",
         "qualification",

@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from shortlist.config import Settings
-from shortlist.domain import Criterion, Profile, Research, Review
+from shortlist.domain import Profile, Research, Review, Target
 from shortlist.export import export_run
 from shortlist.fetch import canonical_url
 from shortlist.providers import SellerDraft
@@ -27,12 +27,8 @@ class SellerInput(BaseModel):
         return canonical_url(value)
 
 
-class Confirmation(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    offer: str = Field(min_length=10, max_length=4000)
-    target: str = Field(min_length=5, max_length=2000)
-    criteria: tuple[Criterion, ...] = Field(min_length=1, max_length=12)
-    exclusions: tuple[str, ...] = ()
+class Confirmation(Target):
+    pass
 
 
 class SavedRecord(BaseModel):

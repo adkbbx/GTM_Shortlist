@@ -2,7 +2,15 @@ import time
 from collections.abc import Callable
 
 from shortlist.config import Settings
-from shortlist.domain import Candidate, Profile, Research, Source, Unknown
+from shortlist.domain import (
+    Candidate,
+    ExclusionUnknown,
+    Profile,
+    Research,
+    Source,
+    Unknown,
+    exclusion_id,
+)
 from shortlist.fetch import FetchError, fetch_page
 from shortlist.journal import call_step
 from shortlist.providers import (
@@ -88,7 +96,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 previous = diagnostics.get(candidate.domain)
                 model_inputs = {"profile": profile.model_dump(mode="json"), "candidate": candidate.model_dump(mode="json"),
                                 "sources": [s.model_dump(mode="json") for s in sources],
-                                "model": settings.gemma_model, "endpoint": settings.gemma_base_url}
+                                "model": settings.gemma_model, "endpoint": settings.gemma_base_url, "exclusion_policy": 1}
                 if previous is None:
                     try:
                         record = call("model", model.name, f"model:{candidate.domain}",
@@ -115,6 +123,8 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 sources = tuple(Source.model_validate(s) for s in saved_sources.get(candidate.domain, []))
                 record = Research(domain=candidate.domain, name=candidate.name, profile_id=profile.id,
                                   findings=tuple(Unknown(criterion_id=c.id, reason=str(exc)) for c in profile.criteria),
+                                  exclusion_findings=tuple(ExclusionUnknown(exclusion_id=exclusion_id(i), reason=str(exc))
+                                                           for i in range(len(profile.exclusions))),
                                   sources=sources, qualification="needs_verification", status="partial", unknowns=(str(exc),))
             store.save_record(run_id, fence, record)
             store.checkpoint(run_id, fence, "research", checkpoint)

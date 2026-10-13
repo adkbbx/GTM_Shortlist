@@ -1,0 +1,17 @@
+{
+  "id": "compound-negative-smeron",
+  "label": "Engineering-labelled entailment regression from a real source excerpt",
+  "company_domain": "smeron.com",
+  "source_url": "https://www.smeron.com/",
+  "retrieved_at": "2026-10-13T19:31:40.131712Z",
+  "passage": "Smeron is an end-to-end product studio. Senior engineering pods build the software, a dedicated growth engine fills the pipeline, and one team stays accountable for the revenue number.",
+  "exclusion": "Consultancies without a software product",
+  "expected_status": "unknown",
+  "explanation": "A product studio building software for clients does not establish that it has no software product of its own. The negative condition is not entailed.",
+  "observed_model": "gemma-4-31B-it",
+  "observed_status": "matched",
+  "observed_run": "06de9543b1944597a7d2cfd1fc798b21",
+  "strict_prompt_recheck_run": "cd4421c831fd4684bc4ad43c6fc4f647",
+  "strict_prompt_recheck_status": "matched",
+  "resolution": "Unresolved; independent semantic verification and evaluation required"
+}

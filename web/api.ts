@@ -9,6 +9,8 @@ export type Health = components['schemas']['Health'];
 export type Confirmation = components['schemas']['Confirmation'];
 export type Record = Run['records'][number];
 export type Finding = Record['research']['findings'][number];
+export type ExclusionFinding = Record['research']['exclusion_findings'][number];
+export type Evidence = components['schemas']['Evidence'];
 export type Review = NonNullable<Record['review']>;
 
 const ajv = new Ajv({ strict: false });

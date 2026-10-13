@@ -10,12 +10,15 @@ from shortlist.config import Settings
 from shortlist.domain import (
     Candidate,
     Criterion,
+    ExclusionFinding,
+    ExclusionUnknown,
     Finding,
     Hypothesis,
     Profile,
     Research,
     Source,
     Unknown,
+    exclusion_id,
     qualify,
 )
 from shortlist.fetch import FetchError, canonical_url, domain_of
@@ -155,6 +158,7 @@ class Extraction(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str = Field(min_length=1, max_length=300)
     findings: list[Finding] = Field(max_length=12)
+    exclusion_findings: list[ExclusionFinding] = Field(default_factory=list, max_length=12)
     hypotheses: list[Hypothesis] = Field(default_factory=list, max_length=3)
 
 
@@ -182,10 +186,29 @@ def validate_extraction(raw: dict, profile: Profile, domain: str, sources: tuple
         by_criterion[finding.criterion_id] = finding
     findings = tuple(by_criterion.get(c.id, Unknown(criterion_id=c.id, reason="No supported observation returned"))
                      for c in profile.criteria)
-    unknowns = tuple(f.reason for f in findings if f.status == "unknown")
+    valid_exclusions = {exclusion_id(i) for i in range(len(profile.exclusions))}
+    by_exclusion = {}
+    for check in extraction.exclusion_findings:
+        if check.exclusion_id not in valid_exclusions or check.exclusion_id in by_exclusion:
+            raise ProviderError("Model returned unknown or duplicate exclusion IDs")
+        if check.status != "unknown":
+            for evidence in check.evidence:
+                source = by_source.get(evidence.source_id)
+                if source is None or source.company_domain != domain:
+                    check = ExclusionUnknown(exclusion_id=check.exclusion_id,
+                                             reason="Exclusion citation belongs to an unavailable or different company source")
+                    break
+                if " ".join(evidence.passage.split()) not in " ".join(source.text.split()):
+                    check = ExclusionUnknown(exclusion_id=check.exclusion_id,
+                                             reason="Exclusion quoted passage could not be found in source")
+                    break
+        by_exclusion[check.exclusion_id] = check
+    exclusions = tuple(by_exclusion.get(exclusion_id(i), ExclusionUnknown(exclusion_id=exclusion_id(i),
+                       reason="No supported exclusion assessment returned")) for i in range(len(profile.exclusions)))
+    unknowns = tuple(f.reason for f in (*findings, *exclusions) if f.status == "unknown")
     return Research(domain=domain, name=extraction.name, profile_id=profile.id, findings=findings,
-                    hypotheses=tuple(extraction.hypotheses), sources=sources,
-                    qualification=qualify(profile, findings), status="partial" if unknowns else "complete",
+                    exclusion_findings=exclusions, hypotheses=tuple(extraction.hypotheses), sources=sources,
+                    qualification=qualify(profile, findings, exclusions), status="partial" if unknowns else "complete",
                     unknowns=unknowns)
 
 
@@ -240,7 +263,8 @@ class Gemma:
     def research(self, profile: Profile, candidate: Candidate, sources: tuple[Source, ...],
                  repair: dict | None = None) -> Research:
         payload = {"company_domain": candidate.domain, "profile": profile.model_dump(mode="json"),
-                   "sources": [s.model_dump(mode="json") for s in sources]}
+                   "sources": [s.model_dump(mode="json") for s in sources],
+                   "exclusions": [{"id": exclusion_id(i), "description": text} for i, text in enumerate(profile.exclusions)]}
         if repair is not None:
             payload["previous_invalid_output"] = repair
         data = self.complete(
@@ -251,7 +275,13 @@ class Gemma:
             "from marketing language. Unknown is preferable to guessing. Label sales ideas as hypotheses with assumptions. "
             "Never infer buying intent, budget or acquisition pain. Do not use a source about another entity. "
             "If previous_invalid_output is provided, correct its structure using the original sources; "
-            "do not invent evidence to satisfy validation. Each unknown finding needs a reason.",
+            "do not invent evidence to satisfy validation. Each unknown finding needs a reason. "
+            "Assess every supplied exclusion ID separately in exclusion_findings: matched means the excluded "
+            "condition is explicitly evidenced; cleared means evidence explicitly rules out that condition. "
+            "Absence of a statement cannot clear an exclusion. A compound exclusion matches only when EVERY "
+            "part is explicitly established, including negative clauses such as without a software product. "
+            "Being an agency or studio alone cannot establish lack of a product. Do not invent rather-than "
+            "comparisons from silence. Otherwise return unknown with a reason.",
             payload, Extraction.model_json_schema())
         try:
             return validate_extraction(data, profile, candidate.domain, sources)

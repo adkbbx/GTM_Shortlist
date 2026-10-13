@@ -6,7 +6,7 @@ import time
 from contextlib import contextmanager
 from pathlib import Path
 
-from shortlist.domain import Profile, Research, Review, new_id, utcnow
+from shortlist.domain import Profile, Research, Review, new_id, read_research, utcnow
 
 
 class Conflict(ValueError):
@@ -90,6 +90,10 @@ class Store:
             result["records"] = [{"research": json.loads(r["research"]),
                                   "review": json.loads(r["review"]) if r["review"] else None}
                                  for r in db.execute("SELECT research,review FROM records WHERE run_id=? ORDER BY rowid", (run_id,))]
+            if result["profile"]:
+                profile = Profile.model_validate(result["profile"])
+                for item in result["records"]:
+                    item["research"] = read_research(profile, item["research"]).model_dump(mode="json")
             result["attempts"] = [dict(a) for a in db.execute(
                 "SELECT provider,kind,state,created_at FROM attempts WHERE run_id=? ORDER BY created_at,id", (run_id,))]
             return result

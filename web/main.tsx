@@ -5,7 +5,7 @@ import '@fontsource/schibsted-grotesk/400.css';
 import '@fontsource/schibsted-grotesk/600.css';
 import '@fontsource/schibsted-grotesk/700.css';
 import { api } from './api';
-import type { Confirmation, Finding, Health, Record, Review, Run } from './api';
+import type { Confirmation, Evidence, ExclusionFinding, Finding, Health, Record, Review, Run } from './api';
 import './styles.css';
 
 const describeError = (error: unknown) => error instanceof Error ? error.message : 'Something went wrong. Please try again.';
@@ -62,7 +62,8 @@ function ConfirmationForm({ run, onSaved }: { run: Run; onSaved: (run: Run) => v
         <button type="button" className="secondary" disabled={criteria.length >= 12} onClick={() => setCriteria([...criteria, { id: crypto.randomUUID(), description: '', required: true }])}>Add a criterion</button>
       </fieldset>
       <label htmlFor="exclusions">Exclude from consideration <span className="optional">Optional, one per line</span></label>
-      <textarea id="exclusions" value={exclusions} rows={2} onChange={e => setExclusions(e.target.value)} />
+      <textarea id="exclusions" value={exclusions} rows={2} maxLength={6012} onChange={e => setExclusions(e.target.value)} aria-describedby="exclusions-help" />
+      <p id="exclusions-help" className="hint">Up to 12 conditions, 3–500 characters each. Each needs evidence; an unverified exclusion stays unknown.</p>
       {run.draft?.unknowns.length ? <div className="unknowns"><h3>Still unknown about your offer</h3><ul>{run.draft.unknowns.map(u => <li key={u}>{u}</li>)}</ul></div> : null}
       {error && <p className="notice" role="alert">{error}</p>}
       <div className="form-footer"><p>No outreach is sent. You review every company.</p><button type="submit" disabled={saving}>{saving ? 'Saving target…' : 'Confirm target and discover'}<Arrow /></button></div>
@@ -70,16 +71,28 @@ function ConfirmationForm({ run, onSaved }: { run: Run; onSaved: (run: Run) => v
   </section>;
 }
 
-function FindingSheet({ finding, record, run }: { finding: Finding; record: Record; run: Run }) {
-  const criterion = run.profile?.criteria.find(c => c.id === finding.criterion_id);
-  return <section className="finding"><div className="finding-heading"><h4>{criterion?.description ?? finding.criterion_id}</h4><span className={`finding-status ${finding.status}`}>{finding.status === 'supported' ? 'Supported' : finding.status === 'contradicted' ? 'Contradicted' : 'Unknown'}</span></div>
-    {finding.status === 'unknown' ? <p className="unknown-reason">{finding.reason}</p> : finding.evidence.map((evidence, index) => {
+function EvidenceDetails({ passages, record }: { passages: Evidence[]; record: Record }) {
+  return passages.map((evidence, index) => {
       const source = record.research.sources.find(s => s.id === evidence.source_id);
       return <details className="evidence" key={`${evidence.source_id}-${index}`}><summary>{evidence.claim}<span>Inspect passage</span></summary>
         <blockquote>{evidence.passage}</blockquote>
         {source && <div className="source-meta"><a href={source.url} target="_blank" rel="noopener noreferrer">{source.title}<Arrow /></a><p>Retrieved {date(source.retrieved_at)}</p><p>{source.published_at ? `Published ${date(source.published_at)}` : 'Publication date unknown'}</p></div>}
       </details>;
-    })}
+    });
+}
+
+function FindingSheet({ finding, record, run }: { finding: Finding; record: Record; run: Run }) {
+  const criterion = run.profile?.criteria.find(c => c.id === finding.criterion_id);
+  return <section className="finding"><div className="finding-heading"><h4>{criterion?.description ?? finding.criterion_id}</h4><span className={`finding-status ${finding.status}`}>{finding.status === 'supported' ? 'Supported' : finding.status === 'contradicted' ? 'Contradicted' : 'Unknown'}</span></div>
+    {finding.status === 'unknown' ? <p className="unknown-reason">{finding.reason}</p> : <EvidenceDetails passages={finding.evidence} record={record} />}
+  </section>;
+}
+
+function ExclusionSheet({ finding, record, run }: { finding: ExclusionFinding; record: Record; run: Run }) {
+  const exclusion = run.profile?.exclusions.find((_, i) => `exclude-${i + 1}` === finding.exclusion_id);
+  const label = { matched: 'Matched', cleared: 'Ruled out', unknown: 'Unknown' };
+  return <section className="finding"><div className="finding-heading"><h4>{exclusion ?? finding.exclusion_id}</h4><span className={`finding-status ${finding.status === 'matched' ? 'contradicted' : finding.status}`}>{label[finding.status]}</span></div>
+    {finding.status === 'unknown' ? <p className="unknown-reason">{finding.reason}</p> : <EvidenceDetails passages={finding.evidence} record={record} />}
   </section>;
 }
 
@@ -97,6 +110,7 @@ function CompanySheet({ record, run, onSaved }: { record: Record; run: Run; onSa
     <header className="company-heading"><div><h3>{research.name}</h3><a href={`https://${research.domain}`} target="_blank" rel="noopener noreferrer">{research.domain}<Arrow /></a></div>
       <p className="qualification">{qualification[research.qualification]}<span>{research.status === 'partial' ? 'Partial research' : 'Research saved'}</span></p></header>
     <div className="findings">{research.findings.map(f => <FindingSheet key={f.criterion_id} finding={f} record={record} run={run} />)}</div>
+    {!!research.exclusion_findings.length && <section className="hypotheses exclusion-checks"><h4>Exclusion checks</h4><p className="hint">A matched exclusion means the company does not fit. Missing evidence remains unknown.</p>{research.exclusion_findings.map(f => <ExclusionSheet key={f.exclusion_id} finding={f} record={record} run={run} />)}</section>}
     {!!research.hypotheses.length && <section className="hypotheses"><h4>Hypotheses to test</h4><p className="hint">Possible relevance, not observed buying intent.</p>{research.hypotheses.map(h => <div key={h.text}><p>{h.text}</p><p className="hint">Assumptions: {h.assumptions.join('; ')}</p></div>)}</section>}
     {!research.sources.length && <p className="notice">No readable source was saved. Verify this company before accepting it.</p>}
     <section className="review"><div className="review-heading"><h4>Your review</h4><span aria-live="polite">{record.review ? `Saved: ${record.review.decision.replace('_', ' ')}` : 'Not reviewed'}</span></div>
@@ -169,7 +183,7 @@ function App() {
       {active?.status === 'awaiting_confirmation' && <ConfirmationForm key={active.id} run={active} onSaved={saved} />}
       {results && <><div className="results-toolbar"><div><h2>{active.records.length} {active.records.length === 1 ? 'company' : 'companies'} researched</h2><p>{active.status === 'partial' ? 'Some questions remain open. Review the unknowns before using these records.' : 'Model assessments are ready for your review.'}</p></div>{!!active.records.length && <div className="export-controls"><label className="checkbox-label"><input type="checkbox" checked={acceptedOnly} onChange={e => setAcceptedOnly(e.target.checked)} />Accepted only</label><div className="export-links">{(['csv', 'json'] as const).map(format => <a className="secondary button-link" key={format} href={`/api/runs/${active.id}/export?format=${format}&accepted_only=${acceptedOnly}`}>Export {format.toUpperCase()}</a>)}</div></div>}</div>
         {active.error && <p className="notice" role="status">{active.error}</p>}
-        {active.profile && <details className="target-summary"><summary>Confirmed target and offer</summary><p>{active.profile.offer}</p><p>{active.profile.target}</p><p className="hint">Confirmed {date(active.profile.confirmed_at)}. Start a new run to change this target.</p></details>}
+        {active.profile && <details className="target-summary"><summary>Confirmed target and offer</summary><p>{active.profile.offer}</p><p>{active.profile.target}</p>{!!active.profile.exclusions.length && <p>Exclusions: {active.profile.exclusions.join('; ')}</p>}<p className="hint">Confirmed {date(active.profile.confirmed_at)}. Start a new run to change this target.</p></details>}
         {active.records.length ? active.records.map(record => <CompanySheet key={record.research.id} record={record} run={active} onSaved={saved} />) : <section className="sheet"><h3>No company records yet</h3><p>The run stopped before usable research could be saved. Your confirmed target is preserved.</p><button className="secondary" onClick={() => select(null)}>Start another shortlist</button></section>}
       </>}
       <footer className="workspace-footer"><p>GTM Shortlist by Eygentic</p><p>Research supports judgment. It does not establish buying intent.</p>{health && <p className="hint">{health.search_ready && health.gemma_ready ? 'Research providers configured' : 'Local setup: research providers still need configuration'}</p>}</footer>

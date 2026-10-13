@@ -34,6 +34,8 @@ def fixture_fetch(url, expected_domain=None):
     text = ("TEST FIXTURE. This is synthetic test content, not a real company. "
             "We provide artificial intelligence software for business operations as a hosted subscription. "
             "Example Labs is a privately held startup. No buying intent has been observed.")
+    if expected_domain == "example-1.com":
+        text += " Example Labs is headquartered in Canada."
     return Source(url=url, company_domain=expected_domain or "eygentic.com", title="Labelled test source",
                   text=text, content_hash=hashlib.sha256(text.encode()).hexdigest())
 
@@ -58,8 +60,18 @@ class FixtureModel:
                 findings.append({"criterion_id": criterion.id, "status": "supported", "evidence": [{
                     "source_id": sources[0].id, "passage": passage,
                     "claim": "Test fixture observation from supplied text"}]})
+        exclusion_findings = []
+        for index, _ in enumerate(profile.exclusions):
+            if candidate.domain == "example-1.com":
+                passage = "Example Labs is headquartered in Canada." if index == 0 else "Example Labs is a privately held startup."
+                exclusion_findings.append({"exclusion_id": f"exclude-{index + 1}", "status": "matched" if index == 0 else "cleared",
+                                          "evidence": [{"source_id": sources[0].id, "passage": passage,
+                                                        "claim": "Test fixture exclusion assessment"}]})
+            else:
+                exclusion_findings.append({"exclusion_id": f"exclude-{index + 1}", "status": "unknown",
+                                           "reason": "Test fixture: no independent current evidence to assess this exclusion"})
         return validate_extraction({"name": f"Example research company {candidate.domain} (test fixture)",
-                                    "findings": findings, "hypotheses": [{
+                                    "findings": findings, "exclusion_findings": exclusion_findings, "hypotheses": [{
                                         "text": "Test fixture: acquisition experiments might be relevant",
                                         "assumptions": ["No need or buying intent has been established"]}]},
                                    profile, candidate.domain, sources)
