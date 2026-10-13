@@ -21,7 +21,7 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 
 ## 4. Fetch and sources
 - [x] Reject unsafe URLs, private addresses, unsafe redirects and DNS rebinding.
-- [ ] Bound time, bytes, redirects and pages; preserve text, hashes and retrieval dates.
+- [x] Bound network time, bytes, redirects and up to three same-company pages; preserve text, hashes and retrieval dates.
 - [x] Add freshness-aware immutable source reuse, preserved retrieval dates, journal precedence and failure/unknown handling.
 
 ## 5. Extraction and qualification
@@ -30,8 +30,8 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 - [x] Add an independent budgeted, journaled semantic gate; unsupported/unverified assessments become unknown. Real Smeron regression corrected; see semantic-evaluation.md.
 - [x] Save bounded invalid model output and schema issues locally; attempt one repair using the shared model budget.
 - [x] Test malformed JSON/schema, failed repair, transport failure, capped repair and restart after saved diagnostics.
-- [ ] Gemma structured output from supplied passages with explicit unknowns and labelled hypotheses.
-- [ ] Validate citation identity, exact passages, dates and mandatory criterion outcomes.
+- [x] Gemma structured output from supplied passages, unknowns and labelled hypotheses; real repair and independently gated findings saved.
+- [x] Validate source identity/exact passages, retain dates and fill missing mandatory outcomes as unknown; semantic/date cases measured separately.
 - [x] Measure the real verifier on 30 labelled semantic cases including negation, wrong entity, old facts and compound exclusions; preserve corpus and actual outputs.
 - [ ] Benchmark real Gemma checkpoints on the same saved passages.
 

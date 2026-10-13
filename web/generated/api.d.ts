@@ -424,6 +424,11 @@ export interface components {
             retrieved_at: string;
             /** Published At */
             published_at: string | null;
+            /**
+             * Research Links
+             * @default []
+             */
+            research_links: string[];
         };
         /** Unknown */
         Unknown: {

@@ -37,6 +37,10 @@ test('saved seller → confirmation → evidence → review → export survives 
   await first.locator('summary').first().click();
   await expect(first.locator('blockquote').first()).toContainText('artificial intelligence software');
   await expect(first.getByText('Publication date unknown').first()).toBeVisible();
+  const ownership = first.locator('.findings .finding').nth(1);
+  await ownership.locator('summary').click();
+  await expect(ownership.locator('blockquote')).toHaveText('Example Labs is a privately held startup.');
+  await expect(ownership.locator('.source-meta a')).toHaveAttribute('href', 'https://example-1.com/about');
   await expect(first.locator('.qualification')).toContainText('Does not fit');
   const exclusionChecks = first.locator('.exclusion-checks');
   await expect(exclusionChecks.getByText('Matched', { exact: true })).toBeVisible();
@@ -61,6 +65,9 @@ test('saved seller → confirmation → evidence → review → export survives 
   expect(exported.records).toHaveLength(1);
   expect(exported.records[0].review.decision).toBe('accepted');
   expect(exported.records[0].research.sources[0].text).toContain('TEST FIXTURE');
+  expect(exported.records[0].research.sources).toHaveLength(3);
+  expect(exported.records[0].research.sources[1].url).toContain('/about');
+  expect(exported.records[0].research.findings[1].evidence[0].source_id).toBe(exported.records[0].research.sources[1].id);
   expect(exported.profile.offer).toContain('edited offer');
   expect(exported.records[0].research.exclusion_findings[0].status).toBe('matched');
   expect(exported.records[0].research.qualification).toBe('does_not_fit');

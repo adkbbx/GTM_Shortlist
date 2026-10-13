@@ -92,6 +92,8 @@ class Store:
             if source.id != row["source_id"] or source.company_domain != domain or domain_of(source.url) != domain or \
                     source.retrieved_at.timestamp() != row["retrieved_epoch"]:
                 raise ValueError("Cached source identity changed")
+            if "research_links" not in json.loads(row["payload"]):
+                return None  # Older snapshots cannot prove which follow-up links were observed.
             return source
         except ValueError as exc:
             raise Conflict("Cached source is corrupt; inspect operator storage") from exc

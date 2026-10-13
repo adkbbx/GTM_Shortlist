@@ -1073,6 +1073,15 @@
               }
             ],
             "title": "Published At"
+          },
+          "research_links": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 2,
+            "title": "Research Links",
+            "default": []
           }
         },
         "additionalProperties": false,
@@ -1085,7 +1094,8 @@
           "text",
           "content_hash",
           "retrieved_at",
-          "published_at"
+          "published_at",
+          "research_links"
         ],
         "title": "Source"
       },

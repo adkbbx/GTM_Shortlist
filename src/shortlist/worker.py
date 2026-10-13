@@ -111,6 +111,23 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                     saved_sources[candidate.domain] = [source.model_dump(mode="json")]
                     store.checkpoint(run_id, fence, "research", checkpoint)
                 sources = tuple(Source.model_validate(s) for s in saved_sources[candidate.domain])
+                # Initial-page links define the entire follow-up frontier. Never recurse.
+                completed_pages = checkpoint.setdefault("completed_pages", {}).setdefault(candidate.domain, [])
+                failures = checkpoint.setdefault("page_failures", {}).setdefault(candidate.domain, {})
+                for index, link in enumerate(sources[0].research_links):
+                    if link in completed_pages or link in failures:
+                        continue
+                    try:
+                        if domain_of(link) != candidate.domain:
+                            raise FetchError("Research link changed company identity")
+                        additional = page(link, candidate.domain, f"fetch:{candidate.domain}:page:{index + 1}")
+                        if additional.url not in {s.url for s in sources}:
+                            sources = (*sources, additional)
+                            saved_sources[candidate.domain] = [s.model_dump(mode="json") for s in sources]
+                        completed_pages.append(link)
+                    except FetchError as exc:
+                        failures[link] = str(exc)
+                    store.checkpoint(run_id, fence, "research", checkpoint)
                 diagnostics = checkpoint.setdefault("model_outputs", {})
                 previous = diagnostics.get(candidate.domain)
                 model_inputs = {"profile": profile.model_dump(mode="json"), "candidate": candidate.model_dump(mode="json"),
@@ -170,10 +187,12 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
             store.save_record(run_id, fence, record)
             store.checkpoint(run_id, fence, "research", checkpoint)
         records = store.get_run(run_id)["records"]
-        partial = not records or any(r["research"]["status"] == "partial" for r in records)
+        incomplete_pages = any(checkpoint.get("page_failures", {}).values())
+        partial = not records or incomplete_pages or any(r["research"]["status"] == "partial" for r in records)
         store.checkpoint(run_id, fence, "review", checkpoint, "partial" if partial else "ready",
                          ("No readable company evidence could be collected" if checkpoint.get("candidate_failures")
-                          else "No candidate companies found") if not records else None)
+                          else "No candidate companies found") if not records else
+                         "Some linked company pages could not be fetched; review the saved sources." if incomplete_pages else None)
     except (ProviderError, FetchError, BudgetExceeded, Conflict) as exc:
         # Lost lease cannot write; the replacement worker owns the current state.
         try:

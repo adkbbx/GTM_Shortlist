@@ -70,6 +70,31 @@ def domain_of(url: str) -> str:
     return host.removeprefix("www.")
 
 
+def research_links(url: str, soup: BeautifulSoup) -> tuple[str, ...]:
+    """Select two observed company/about/product/pricing links, never invented paths."""
+    owner = domain_of(url)
+    priorities = {"about": 0, "about-us": 0, "company": 0, "product": 1, "products": 1,
+                  "platform": 1, "pricing": 2}
+    selected = {}
+    for anchor in soup.find_all("a", href=True):
+        href = anchor.get("href")
+        if not isinstance(href, str):
+            continue
+        try:
+            destination = canonical_url(urljoin(url, href))
+            parsed = urlsplit(destination)
+            if domain_of(destination) != owner or parsed.query or destination == canonical_url(url):
+                continue
+            parts = [part.lower() for part in parsed.path.split("/") if part]
+            # Keep static informational pages; avoid arbitrary paths merely containing a keyword.
+            if not 1 <= len(parts) <= 2 or not any(part in priorities for part in parts):
+                continue
+            selected[destination] = min(priorities[part] for part in parts if part in priorities)
+        except ValueError:
+            continue
+    return tuple(sorted(selected, key=lambda link: (selected[link], link))[:2])
+
+
 def resolve_public(host: str, timeout: float = 5) -> str:
     # System DNS cannot be cancelled reliably. Quarantine at most four outstanding
     # lookups in daemon threads; timeouts do not accumulate unbounded workers.
@@ -181,13 +206,14 @@ def fetch_page(url: str, expected_domain: str | None = None) -> Source:
             body = b"".join(chunks)
             soup = BeautifulSoup(body, "html.parser")
             title = soup.title.get_text(" ", strip=True) if soup.title else parsed.hostname
+            links = research_links(current, soup)
             for tag in soup(["script", "style", "noscript", "nav", "footer", "svg", "form"]):
                 tag.decompose()
             text = "\n".join(line.strip() for line in soup.get_text("\n").splitlines() if line.strip())[:MAX_TEXT]
             if len(text) < 30:
                 raise FetchError("Website has insufficient readable text")
             return Source(url=current, company_domain=owner, title=title[:500], text=text,
-                          content_hash=hashlib.sha256(body).hexdigest())
+                          content_hash=hashlib.sha256(body).hexdigest(), research_links=links)
         except (OSError, http.client.HTTPException) as exc:
             raise FetchError("Website connection failed") from exc
         finally:

@@ -37,8 +37,9 @@ def fixture_fetch(url, expected_domain=None):
             "Example Labs is a privately held startup. No buying intent has been observed.")
     if expected_domain == "example-1.com":
         text += " Example Labs is headquartered in Canada."
+    links = (f"https://{expected_domain}/about", f"https://{expected_domain}/pricing") if expected_domain and url.endswith("/") else ()
     return Source(url=url, company_domain=expected_domain or "eygentic.com", title="Labelled test source",
-                  text=text, content_hash=hashlib.sha256(text.encode()).hexdigest())
+                  text=text, content_hash=hashlib.sha256(text.encode()).hexdigest(), research_links=links)
 
 
 class FixtureModel:
@@ -63,7 +64,7 @@ class FixtureModel:
             else:
                 passage = "Example Labs is a privately held startup." if criterion.id == "private" else "We provide artificial intelligence software for business operations as a hosted subscription."
                 findings.append({"criterion_id": criterion.id, "status": "supported", "evidence": [{
-                    "source_id": sources[0].id, "passage": passage,
+                    "source_id": sources[1].id if criterion.id == "private" else sources[0].id, "passage": passage,
                     "claim": "Test fixture observation from supplied text"}]})
         exclusion_findings = []
         for index, _ in enumerate(profile.exclusions):

@@ -81,3 +81,9 @@ Real assisted discovery e09d48680f454ddcb14f1d6038fbe530 verified the full Smero
 ## Readable candidate fallback, 05:07 JST
 
 167 backend tests, Ruff and six phone/laptop browser tests passed. Labelled fixtures prove replacement selection within six candidates, failure persistence/export, accurate all-page-failure messaging and restart without repeated failed fetches. Three review slots contain records with readable source evidence; extraction failures from readable pages remain partial unknown records. This is not a new live search/discovery or external user test.
+
+## Three-page evidence coverage, 08:46 JST
+
+172 backend tests, Ruff, regenerated contracts and TypeScript/Vite build passed. Six browser flows passed with secondary-page citation inspection and three saved source snapshots per company, on phone/laptop including narrow/zoom/keyboard/reduced motion. Coverage/recovery fixtures test observed-link selection, same-company guards, bounded scope, follow-up failure and restart without duplicate dispatch.
+
+Real run 30df0fd257044ad2934f831190760c29 saves six sources, three company records and six independently gated supported findings. Prismatic has initial/about/platform pages; Smeron has initial/products; Tandemworks replaces unreadable B2B Hub. Sources and unknown ownership are inspectable. Seven Gemma attempts include one observed successful repair of malformed Tandemworks output; this repair result is now real evidence, separate from earlier mocked repair tests. Seven fetch attempts are recorded. Search remains imported; all five fresh discoveries still use one seller profile. Saved-evidence/export checks pass. No hosted account, payment, external interview or launch claim.

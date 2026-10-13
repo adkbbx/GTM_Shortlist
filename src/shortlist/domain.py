@@ -60,6 +60,7 @@ class Source(Value):
     content_hash: str
     retrieved_at: datetime = Field(default_factory=utcnow)
     published_at: datetime | None = None
+    research_links: tuple[str, ...] = Field(default=(), max_length=2)
 
 
 class Evidence(Value):
