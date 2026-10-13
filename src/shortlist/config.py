@@ -15,6 +15,7 @@ class Settings(BaseModel):
     gemma_base_url: str = ""
     gemma_model: str = ""
     global_search_cap: int = Field(default=200, ge=1, le=250)
+    source_cache_hours: int = Field(default=24, ge=0, le=168)
 
     @classmethod
     def load(cls):
@@ -28,6 +29,7 @@ class Settings(BaseModel):
             gemma_base_url=os.getenv("GEMMA_BASE_URL", ""),
             gemma_model=os.getenv("GEMMA_MODEL", ""),
             global_search_cap=os.getenv("SHORTLIST_GLOBAL_SEARCH_CAP", "200"),
+            source_cache_hours=os.getenv("SHORTLIST_SOURCE_CACHE_HOURS", "24"),
         )
 
     def readiness(self):

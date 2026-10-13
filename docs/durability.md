@@ -13,3 +13,9 @@ Run `python -m shortlist.cli worker` to process queued runs and recover abandone
 Rerun `pytest -q tests/test_journal.py tests/test_model_repair.py tests/test_store.py` to verify recovery, caps and fencing. The subprocess fixtures intentionally exit abruptly after actual SQLite commits, but their external providers are labelled synthetic and make no network calls.
 
 Extraction and independent entailment verification are separate journaled model operations sharing the eight-attempt cap. Verifier results are stored in the run checkpoint; the original extraction remains in the result journal. Missing judgments, verifier failures and exhausted verification budgets downgrade observations to unknown with their sources preserved. Corrupt saved verifier identities stop replay without another dispatch. A fourth subprocess interruption case now covers the verifier commit.
+
+## Public page reuse
+
+Fresh snapshots are reused across local runs by exact canonical requested URL and company domain. SHORTLIST_SOURCE_CACHE_HOURS defaults to 24, accepts 0–168, and 0 disables reuse. Reuse preserves the original ID, text/hash and retrieval date; it never claims the page was fetched again. The checkpoint records source_reuse metadata. A cache hit makes no fetch reservation and consumes no fetch attempt. Expired/future-dated snapshots are not reused. Stored snapshots are immutable and cache writes require the active worker fence. Corrupt cache values stop explicitly.
+
+An existing fetch journal entry takes precedence over the cache, including unresolved attempts. Recovery therefore cannot use a fresh page from another run to hide an uncertain dispatch. Old snapshots remain in prior records; cache expiry does not rewrite evidence. The current cache stores successful public sources only, without cookies or credentials. Hosted retention and tenant policy remain release work.

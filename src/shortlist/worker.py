@@ -11,7 +11,7 @@ from shortlist.domain import (
     Unknown,
     exclusion_id,
 )
-from shortlist.fetch import FetchError, fetch_page
+from shortlist.fetch import FetchError, canonical_url, domain_of, fetch_page
 from shortlist.journal import call_step
 from shortlist.providers import (
     Gemma,
@@ -45,13 +45,28 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
         return call_step(store, run_id, fence, settings.global_search_cap, kind=kind, provider=provider,
                          operation=operation, function=function, inputs=inputs, decode=decode)
 
+    def page(url: str, domain: str, operation: str, *, seller: bool = False):
+        url = canonical_url(url)
+        source = store.cached_source(url, domain, settings.source_cache_hours, run_id=run_id, operation=operation)
+        if source is not None:
+            checkpoint.setdefault("source_reuse", {})[operation] = {
+                "source_id": source.id, "retrieved_at": source.retrieved_at.isoformat(),
+                "max_age_hours": settings.source_cache_hours}
+            return source
+        source = call("fetch", "https", operation,
+                      lambda: fetch(url) if seller else fetch(url, expected_domain=domain),
+                      {"url": url} if seller else {"url": url, "expected_domain": domain}, Source.model_validate)
+        if source.company_domain != domain:
+            raise FetchError("Fetched source changed company identity")
+        store.cache_source(run_id, fence, url, source)
+        return source
+
     try:
         if run["stage"] == "seller":
             error = None
             try:
                 if "seller_source" not in checkpoint:
-                    source = call("fetch", "https", "seller:fetch", lambda: fetch(checkpoint["seller_url"]),
-                                  {"url": checkpoint["seller_url"]}, Source.model_validate)
+                    source = page(checkpoint["seller_url"], domain_of(checkpoint["seller_url"]), "seller:fetch", seller=True)
                     checkpoint["seller_source"] = source.model_dump(mode="json")
                     store.checkpoint(run_id, fence, "seller", checkpoint)
                 source = Source.model_validate(checkpoint["seller_source"])
@@ -92,9 +107,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
             saved_sources = checkpoint.setdefault("sources", {})
             try:
                 if candidate.domain not in saved_sources:
-                    source = call("fetch", "https", f"fetch:{candidate.domain}",
-                                  lambda c=candidate: fetch(c.url, expected_domain=c.domain),
-                                  {"url": candidate.url, "expected_domain": candidate.domain}, Source.model_validate)
+                    source = page(candidate.url, candidate.domain, f"fetch:{candidate.domain}")
                     saved_sources[candidate.domain] = [source.model_dump(mode="json")]
                     store.checkpoint(run_id, fence, "research", checkpoint)
                 sources = tuple(Source.model_validate(s) for s in saved_sources[candidate.domain])

@@ -6,7 +6,16 @@ import time
 from contextlib import contextmanager
 from pathlib import Path
 
-from shortlist.domain import Profile, Research, Review, new_id, read_research, utcnow
+from shortlist.domain import (
+    Profile,
+    Research,
+    Review,
+    Source,
+    new_id,
+    read_research,
+    utcnow,
+)
+from shortlist.fetch import domain_of
 
 
 class Conflict(ValueError):
@@ -45,6 +54,11 @@ class Store:
                     attempt_id TEXT PRIMARY KEY REFERENCES attempts(id),
                     request_hash TEXT NOT NULL, payload TEXT
                 );
+                CREATE TABLE IF NOT EXISTS source_cache (
+                    source_id TEXT PRIMARY KEY, requested_url TEXT NOT NULL, domain TEXT NOT NULL,
+                    retrieved_epoch REAL NOT NULL, payload TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS source_cache_lookup ON source_cache(requested_url,domain,retrieved_epoch);
             """)
 
     @contextmanager
@@ -60,6 +74,39 @@ class Store:
             raise
         finally:
             db.close()
+
+    def cached_source(self, url: str, domain: str, max_age_hours: int, *, run_id: str, operation: str) -> Source | None:
+        if max_age_hours == 0:
+            return None
+        now = utcnow().timestamp()
+        with self.connection() as db:
+            if db.execute("SELECT 1 FROM attempts WHERE run_id=? AND operation_key=?", (run_id, operation)).fetchone():
+                return None  # Journal recovery/uncertainty takes precedence over cache reuse.
+            row = db.execute("SELECT * FROM source_cache WHERE requested_url=? AND domain=? "
+                             "AND retrieved_epoch BETWEEN ? AND ? ORDER BY retrieved_epoch DESC,rowid DESC LIMIT 1",
+                             (url, domain, now - max_age_hours * 3600, now)).fetchone()
+        if row is None:
+            return None
+        try:
+            source = Source.model_validate_json(row["payload"])
+            if source.id != row["source_id"] or source.company_domain != domain or domain_of(source.url) != domain or \
+                    source.retrieved_at.timestamp() != row["retrieved_epoch"]:
+                raise ValueError("Cached source identity changed")
+            return source
+        except ValueError as exc:
+            raise Conflict("Cached source is corrupt; inspect operator storage") from exc
+
+    def cache_source(self, run_id: str, fence: int, url: str, source: Source):
+        if domain_of(url) != source.company_domain or domain_of(source.url) != source.company_domain:
+            raise Conflict("Cached source URL must belong to its company")
+        with self.connection() as db:
+            db.execute("BEGIN IMMEDIATE")
+            self._assert_lease(db, run_id, fence)
+            existing = db.execute("SELECT payload FROM source_cache WHERE source_id=?", (source.id,)).fetchone()
+            if existing and existing["payload"] != source.model_dump_json():
+                raise Conflict("Source snapshots cannot be changed")
+            db.execute("INSERT OR IGNORE INTO source_cache VALUES (?,?,?,?,?)",
+                       (source.id, url, source.company_domain, source.retrieved_at.timestamp(), source.model_dump_json()))
 
     def create_run(self, profile: Profile, request_key: str) -> str:
         # Confirmation ID/time are generated values, not part of the caller's command identity.

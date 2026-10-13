@@ -21,7 +21,7 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 ## 4. Fetch and sources
 - [x] Reject unsafe URLs, private addresses, unsafe redirects and DNS rebinding.
 - [ ] Bound time, bytes, redirects and pages; preserve text, hashes and retrieval dates.
-- [ ] Add freshness-aware source reuse and failure/unknown handling.
+- [x] Add freshness-aware immutable source reuse, preserved retrieval dates, journal precedence and failure/unknown handling.
 
 ## 5. Extraction and qualification
 - [x] Confirm bounded unique exclusions; persist matched/ruled-out/unknown assessments with citation checks in UI and JSON/CSV.
