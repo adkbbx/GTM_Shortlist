@@ -22,7 +22,7 @@ def setup(tmp_path):
     return store, run_id
 
 
-@pytest.mark.parametrize("crash", ("search", "fetch", "model"))
+@pytest.mark.parametrize("crash", ("search", "fetch", "model", "verify"))
 def test_actual_process_death_after_outcome_replays_without_paid_dispatch(setup, crash):
     store, run_id = setup
     fixture = Path(__file__).parent / "fixtures/crash_worker.py"
@@ -40,15 +40,38 @@ def test_actual_process_death_after_outcome_replays_without_paid_dispatch(setup,
     assert saved["status"] == "ready"
     assert len(saved["records"]) == 1
     calls = [json.loads(line)["kind"] for line in store.path.with_suffix(".calls.jsonl").read_text().splitlines()]
-    assert calls == ["search", "search", "fetch", "model"]
-    assert len(saved["attempts"]) == 4
+    assert calls == ["search", "search", "fetch", "model", "verify"]
+    assert len(saved["attempts"]) == 5
     store.review(run_id, saved["records"][0]["research"]["id"], Review(decision="accepted", reason="Fixture review"))
     with store.connection() as db:
         db.execute("UPDATE runs SET status='queued' WHERE id=?", (run_id,))
     rerun = subprocess.run(command, check=False, timeout=20, capture_output=True)
     assert rerun.returncode == 0, rerun.stderr.decode()
     assert Store(store.path).get_run(run_id)["records"][0]["review"]["decision"] == "accepted"
-    assert store.path.with_suffix(".calls.jsonl").read_text().count("kind") == 4
+    assert store.path.with_suffix(".calls.jsonl").read_text().count("kind") == 5
+
+
+def test_corrupt_saved_verification_identity_stops_without_redispatch(setup):
+    store, run_id = setup
+    fixture = Path(__file__).parent / "fixtures/crash_worker.py"
+    command = [sys.executable, str(fixture), str(store.path), run_id]
+    interrupted = subprocess.run([*command, "--crash", "verify"], check=False, timeout=20, capture_output=True)
+    assert interrupted.returncode == 91, interrupted.stderr.decode()
+    with store.connection() as db:
+        row = db.execute("SELECT r.attempt_id,r.payload FROM attempt_results r JOIN attempts a ON a.id=r.attempt_id "
+                         "WHERE a.run_id=? AND a.operation_key LIKE 'verify:%'", (run_id,)).fetchone()
+        payload = json.loads(row["payload"])
+        payload["judgments"][0]["assessment_id"] = "criterion:invented"
+        db.execute("UPDATE attempt_results SET payload=? WHERE attempt_id=?",
+                   (json.dumps(payload), row["attempt_id"]))
+        db.execute("UPDATE runs SET lease_until=0 WHERE id=?", (run_id,))
+    resumed = subprocess.run(command, check=False, timeout=20, capture_output=True)
+    assert resumed.returncode == 0, resumed.stderr.decode()
+    saved = Store(store.path).get_run(run_id)
+    assert saved["status"] == "partial"
+    assert not saved["records"]
+    assert "does not match this runtime" in saved["error"]
+    assert store.path.with_suffix(".calls.jsonl").read_text().count("kind") == 5
 
 
 def step(store, run_id, fence, function, *, inputs=None, provider="fixture"):

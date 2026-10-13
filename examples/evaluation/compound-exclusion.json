@@ -13,5 +13,8 @@
   "observed_run": "06de9543b1944597a7d2cfd1fc798b21",
   "strict_prompt_recheck_run": "cd4421c831fd4684bc4ad43c6fc4f647",
   "strict_prompt_recheck_status": "matched",
-  "resolution": "Unresolved; independent semantic verification and evaluation required"
+  "resolution": "Independent verifier rejected the unsupported compound inference; final saved exclusion is unknown. Human ownership/product investigation remains necessary.",
+  "verified_run": "e09d48680f454ddcb14f1d6038fbe530",
+  "verified_status": "unknown",
+  "verifier_corpus_report": "gemma-verifier-2026-10-14.json"
 }

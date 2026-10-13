@@ -1,0 +1,496 @@
+{
+  "model": "gemma-4-31B-it",
+  "verification_policy": 2,
+  "evaluated_at": "2026-10-13T19:52:09.936992+00:00",
+  "scope": "Verifier only on labelled proposed assessments; not extraction or discovery quality",
+  "cases": 30,
+  "expected_cases": 30,
+  "errors": 0,
+  "correct": 30,
+  "false_acceptances": 0,
+  "false_rejections": 0,
+  "results": [
+    {
+      "id": "ai-positive",
+      "run_id": "601c2975e9344f9fbd87a704be136d63",
+      "expected_entailed": true,
+      "actual_entailed": true,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "entailed",
+            "reason": "The source text explicitly states 'We sell AI software for business operations', which directly establishes that the company offers AI software."
+          }
+        ]
+      }
+    },
+    {
+      "id": "ai-negation",
+      "run_id": "424addf97afe460aa56a6a6e774b481e",
+      "expected_entailed": false,
+      "actual_entailed": false,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "unsupported",
+            "reason": "The evidence explicitly states that the company does not use artificial intelligence in its software, which contradicts the claim that it offers AI software."
+          }
+        ]
+      }
+    },
+    {
+      "id": "ai-contradiction",
+      "run_id": "e70a0ea341a24330a95636a55fc19bc5",
+      "expected_entailed": true,
+      "actual_entailed": true,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "entailed",
+            "reason": "The source text explicitly states 'We do not use artificial intelligence in our software,' which logically contradicts the condition that the company offers AI software."
+          }
+        ]
+      }
+    },
+    {
+      "id": "ai-related",
+      "run_id": "b38c8ca4156f4ae3991a859ffa7354e1",
+      "expected_entailed": false,
+      "actual_entailed": false,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "unsupported",
+            "reason": "Publishing a newsletter about AI does not establish that the company offers AI software."
+          }
+        ]
+      }
+    },
+    {
+      "id": "ai-roadmap",
+      "run_id": "55bfd8e634f94549ae3a8ec02335ea89",
+      "expected_entailed": false,
+      "actual_entailed": false,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "unsupported",
+            "reason": "The source states the company plans to launch its first AI software product 'next year', which indicates they do not currently offer AI software."
+          }
+        ]
+      }
+    },
+    {
+      "id": "ai-client",
+      "run_id": "b9458887ea2f4bc18c4767fe5e8ef6ef",
+      "expected_entailed": false,
+      "actual_entailed": false,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "unsupported",
+            "reason": "The evidence states that the AI systems are owned by the clients, which contradicts the claim that the company itself owns an AI software product."
+          }
+        ]
+      }
+    },
+    {
+      "id": "ai-partner",
+      "run_id": "24504f3095a54fe4a805bdd5dfd97d79",
+      "expected_entailed": false,
+      "actual_entailed": false,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "unsupported",
+            "reason": "The text states that a partner (Acme) offers AI software, not the company itself, which provides accounting services."
+          }
+        ]
+      }
+    },
+    {
+      "id": "ai-historical",
+      "run_id": "f5b058e7b9a94fa5a676ebb8413ac5ad",
+      "expected_entailed": false,
+      "actual_entailed": false,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "unsupported",
+            "reason": "The evidence states the AI product was discontinued in 2021, which contradicts the claim that the company currently offers AI software."
+          }
+        ]
+      }
+    },
+    {
+      "id": "saas-subscription",
+      "run_id": "5d6810dd851349189e6a1ab246f12dee",
+      "expected_entailed": true,
+      "actual_entailed": true,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "entailed",
+            "reason": "The source text explicitly states that the company's cloud software is hosted by them and sold as a monthly subscription."
+          }
+        ]
+      }
+    },
+    {
+      "id": "saas-services",
+      "run_id": "5fb6667ffa124a57bb9cf596cf395e9b",
+      "expected_entailed": false,
+      "actual_entailed": false,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "unsupported",
+            "reason": "Marketing services on a monthly retainer are services, not hosted subscription software."
+          }
+        ]
+      }
+    },
+    {
+      "id": "saas-download",
+      "run_id": "6bdeff5e04374fefa4b8f57c8d5fc05e",
+      "expected_entailed": false,
+      "actual_entailed": false,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "unsupported",
+            "reason": "The evidence describes a perpetual license for downloaded desktop software, which contradicts the condition of hosted subscription software."
+          }
+        ]
+      }
+    },
+    {
+      "id": "b2b-explicit",
+      "run_id": "d7df45bde7154b00a7772ed40035a6a9",
+      "expected_entailed": true,
+      "actual_entailed": true,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "entailed",
+            "reason": "The source explicitly states that the company sells workflow software to businesses."
+          }
+        ]
+      }
+    },
+    {
+      "id": "b2b-consumers",
+      "run_id": "658d0d9617ce46c6acda82875b2e3a1e",
+      "expected_entailed": false,
+      "actual_entailed": false,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "unsupported",
+            "reason": "The evidence explicitly states the product is sold exclusively to individual consumers, which contradicts the claim that it sells software to businesses."
+          }
+        ]
+      }
+    },
+    {
+      "id": "private-explicit",
+      "run_id": "13d2ef1ccbfa4b3bae31981734167375",
+      "expected_entailed": true,
+      "actual_entailed": true,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "entailed",
+            "reason": "The source text explicitly states that the company is a privately held company."
+          }
+        ]
+      }
+    },
+    {
+      "id": "private-silence",
+      "run_id": "8f8826db1e6b4f6586d525d0e5a74571",
+      "expected_entailed": false,
+      "actual_entailed": false,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "unsupported",
+            "reason": "The source text mentions software development and office locations, but contains no information regarding the company's ownership structure; silence about ownership does not establish private ownership."
+          }
+        ]
+      }
+    },
+    {
+      "id": "private-listed",
+      "run_id": "53b258b19360473b8dadd0ea5b10ba32",
+      "expected_entailed": true,
+      "actual_entailed": true,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "entailed",
+            "reason": "The source text explicitly states the company is publicly listed on the Tokyo Stock Exchange, which directly contradicts the condition of being a privately held company."
+          }
+        ]
+      }
+    },
+    {
+      "id": "startup-old",
+      "run_id": "296984c4875944019d55a85e3c6368bf",
+      "expected_entailed": false,
+      "actual_entailed": false,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "unsupported",
+            "reason": "The source states the company was founded in 1994, which contradicts the claim that it was founded after 2020."
+          }
+        ]
+      }
+    },
+    {
+      "id": "startup-founded",
+      "run_id": "15c2b9ae1fb044a7b7c00e8db382868f",
+      "expected_entailed": true,
+      "actual_entailed": true,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "entailed",
+            "reason": "The source text explicitly states the company was founded in 2023, which is after 2020."
+          }
+        ]
+      }
+    },
+    {
+      "id": "compound-studio",
+      "run_id": "41f818af77e14f0ab9c5cd80a5c95ffa",
+      "expected_entailed": false,
+      "actual_entailed": false,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "exclusion:exclude-1",
+            "verdict": "unsupported",
+            "reason": "The text describes Smeron as a 'product studio' that builds software, but it does not explicitly state that they lack their own software product. Silence about ownership of a product does not establish that they do not have one."
+          }
+        ]
+      }
+    },
+    {
+      "id": "compound-explicit",
+      "run_id": "3ff7b3b2c05f4e9e96b0622c30e221b2",
+      "expected_entailed": true,
+      "actual_entailed": true,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "exclusion:exclude-1",
+            "verdict": "entailed",
+            "reason": "The text explicitly states the company is a consultancy and has no software product of its own, satisfying both clauses of the exclusion."
+          }
+        ]
+      }
+    },
+    {
+      "id": "compound-product",
+      "run_id": "dfeefc8925bb4af08a91f64028aa64fe",
+      "expected_entailed": true,
+      "actual_entailed": true,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "exclusion:exclude-1",
+            "verdict": "entailed",
+            "reason": "The source text explicitly states the company owns and sells a hosted workflow software product, which directly refutes the exclusion 'Consultancies without a software product'."
+          }
+        ]
+      }
+    },
+    {
+      "id": "compound-silence-clear",
+      "run_id": "3d6d3469b7eb4a39890743483fe2fea0",
+      "expected_entailed": false,
+      "actual_entailed": false,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "exclusion:exclude-1",
+            "verdict": "unsupported",
+            "reason": "The provided text mentions an experienced team and global customers, but it does not mention whether the company has a software product. Silence about ownership or product offerings does not establish that a company has a product to clear the exclusion."
+          }
+        ]
+      }
+    },
+    {
+      "id": "canada-match",
+      "run_id": "5ff524fb35e446a09ec3fef91e9e152e",
+      "expected_entailed": true,
+      "actual_entailed": true,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "exclusion:exclude-1",
+            "verdict": "entailed",
+            "reason": "The source text explicitly states the company is headquartered in Toronto, Canada, which satisfies the exclusion condition."
+          }
+        ]
+      }
+    },
+    {
+      "id": "canada-office",
+      "run_id": "81ae756319e0416b83b14dc0ab068753",
+      "expected_entailed": false,
+      "actual_entailed": false,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "exclusion:exclude-1",
+            "verdict": "unsupported",
+            "reason": "The source text explicitly states the company is headquartered in Japan, not Canada; having a sales office in Canada does not satisfy the condition of being headquartered there."
+          }
+        ]
+      }
+    },
+    {
+      "id": "canada-clear",
+      "run_id": "3b17609388b0476a8f451da1f615848a",
+      "expected_entailed": true,
+      "actual_entailed": true,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "exclusion:exclude-1",
+            "verdict": "entailed",
+            "reason": "The source text explicitly states the company is headquartered in Tokyo, Japan, which rules out it being headquartered in Canada."
+          }
+        ]
+      }
+    },
+    {
+      "id": "listed-match",
+      "run_id": "00f8da1bf9964d3e8caf00ec70fcd1f3",
+      "expected_entailed": true,
+      "actual_entailed": true,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "exclusion:exclude-1",
+            "verdict": "entailed",
+            "reason": "The source text explicitly states that Example is publicly listed on NASDAQ, which matches the exclusion condition for publicly listed companies."
+          }
+        ]
+      }
+    },
+    {
+      "id": "listed-ticker-silence",
+      "run_id": "4ccb8714d3c74347a0e5c2bed29a861e",
+      "expected_entailed": false,
+      "actual_entailed": false,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "exclusion:exclude-1",
+            "verdict": "unsupported",
+            "reason": "The source text describes the company's product and customer base but does not explicitly rule out that the company is publicly listed."
+          }
+        ]
+      }
+    },
+    {
+      "id": "listed-private-clear",
+      "run_id": "b66e0aea7ae740419802fc0f0ca294b6",
+      "expected_entailed": true,
+      "actual_entailed": true,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "exclusion:exclude-1",
+            "verdict": "entailed",
+            "reason": "The source text explicitly states the company is privately held and has never been publicly listed, which rules out the exclusion for publicly listed companies."
+          }
+        ]
+      }
+    },
+    {
+      "id": "intent-invented",
+      "run_id": "f5147f9c75544d7eaeaa6b4b71a502b7",
+      "expected_entailed": false,
+      "actual_entailed": false,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "unsupported",
+            "reason": "The provided text mentions launching a product and employee count, but contains no mention of seeking an outbound agency."
+          }
+        ]
+      }
+    },
+    {
+      "id": "invented-evidence-claim",
+      "run_id": "68984c2f213349aaae61c7938731345d",
+      "expected_entailed": false,
+      "actual_entailed": false,
+      "correct": true,
+      "audit": {
+        "judgments": [
+          {
+            "assessment_id": "criterion:check",
+            "verdict": "unsupported",
+            "reason": "The proposed evidence claim ('Example is privately held and seeking an outbound agency') is not entailed by the source text, which only discusses the sale of AI-powered workflow software."
+          }
+        ]
+      }
+    }
+  ],
+  "note": "30 final cases. Two contradiction claims were clarified and those two cases rerun; their prior results are excluded. Engineering labels, not independent human annotation.",
+  "corpus_sha256": "7d0ae3b5f49a31dde0d4c86d0a876b10fd9068bb96e6f467355b0dd41a7b78a4"
+}

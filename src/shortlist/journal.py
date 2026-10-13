@@ -54,7 +54,7 @@ def call_step(store: Store, run_id: str, fence: int, global_cap: int, *, kind: s
             raise error_type(failure.message)
         try:
             return decode(payload)
-        except (ValidationError, TypeError, KeyError) as exc:
+        except (ValueError, TypeError, KeyError) as exc:
             raise Conflict("Saved provider result does not match this runtime; inspect or start a new run") from exc
     attempt = store.reserve(run_id, fence, provider, kind, operation, global_cap, request_hash=digest)
     try:

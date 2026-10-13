@@ -34,6 +34,10 @@ def flow(tmp_path):
     return settings, store, run_id, source, good
 
 
+AUDIT = json.dumps({"judgments": [{"assessment_id": "criterion:ai", "verdict": "entailed",
+                                  "reason": "Explicit AI software statement in fixture"}]})
+
+
 def provider(monkeypatch, contents):
     requests = []
     def reply(request):
@@ -47,11 +51,11 @@ def provider(monkeypatch, contents):
 def test_schema_error_retained_and_repaired_once(flow, monkeypatch):
     settings, store, run_id, source, good = flow
     bad = json.dumps({"name": "Fixture", "findings": [{"status": "unknown", "criterion_id": "ai"}]})
-    requests = provider(monkeypatch, [bad, json.dumps(good)])
+    requests = provider(monkeypatch, [bad, json.dumps(good), AUDIT])
     execute_run(store, settings, run_id)
     saved = Store(store.path).get_run(run_id)
     assert saved["status"] == "ready"
-    assert [a["state"] for a in saved["attempts"]] == ["failed", "succeeded"]
+    assert [a["state"] for a in saved["attempts"]] == ["failed", "succeeded", "succeeded"]
     diagnostic = saved["checkpoint"]["model_outputs"][source.company_domain]
     assert json.loads(diagnostic["content"]) == json.loads(bad)
     assert diagnostic["issues"][0]["type"] == "missing"
@@ -99,16 +103,16 @@ def test_restart_after_diagnostic_skips_original_dispatch(flow, monkeypatch):
         if "model_outputs" in args[3] and args[3]["model_outputs"]:
             raise SimulatedCrash()
     monkeypatch.setattr(store, "checkpoint", crash_after_save)
-    requests = provider(monkeypatch, ["broken JSON", json.dumps(good)])
+    requests = provider(monkeypatch, ["broken JSON", json.dumps(good), AUDIT])
     with pytest.raises(SimulatedCrash):
         execute_run(store, settings, run_id)
     with store.connection() as db:
         db.execute("UPDATE runs SET lease_until=0 WHERE id=?", (run_id,))
     execute_run(Store(store.path), settings, run_id)
     run = store.get_run(run_id)
-    assert len(requests) == 2
+    assert len(requests) == 3
     assert run["status"] == "ready"
-    assert len(run["attempts"]) == 2
+    assert len(run["attempts"]) == 3
 
 
 def test_diagnostics_bounded_and_not_in_exception_message():

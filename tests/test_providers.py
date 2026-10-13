@@ -60,6 +60,7 @@ def test_worker_real_database_flow(tmp_path, example):
     from shortlist.domain import Review
     from shortlist.export import export_run
     from shortlist.store import Store
+    from shortlist.verification import Judgment, Verification, assessments
     from shortlist.worker import execute_run
 
     profile, source = example
@@ -69,6 +70,10 @@ def test_worker_real_database_flow(tmp_path, example):
             return [Candidate(domain="example.com", name="Example", url=source.url, query=query, provider=self.name)]
     class FixtureModel:
         name = "labelled_fixture"
+        def verify(self, profile, record):
+            return Verification(judgments=[Judgment(assessment_id=a["assessment_id"], verdict="entailed",
+                reason="Labelled synthetic fixture judgment") for a in assessments(profile, record)])
+
         def research(self, profile, candidate, sources):
             return validate_extraction({"name": "Example", "findings": [{"status": "supported", "criterion_id": "ai",
                 "evidence": [{"source_id": source.id, "passage": source.text, "claim": "AI software"}]}]},
@@ -81,7 +86,7 @@ def test_worker_real_database_flow(tmp_path, example):
     run = reopened.get_run(run_id)
     assert run["status"] == "ready"
     assert len(run["records"]) == 1
-    assert len(run["attempts"]) == 4
+    assert len(run["attempts"]) == 5
     assert not execute_run(reopened, settings, run_id)
     reopened.review(run_id, run["records"][0]["research"]["id"], Review(decision="accepted"))
     exported = export_run(reopened.get_run(run_id), "json", accepted_only=True)

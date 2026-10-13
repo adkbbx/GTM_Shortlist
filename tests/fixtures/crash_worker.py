@@ -9,12 +9,13 @@ from shortlist.config import Settings
 from shortlist.domain import Candidate, Source
 from shortlist.providers import validate_extraction
 from shortlist.store import Store
+from shortlist.verification import Judgment, Verification, assessments
 from shortlist.worker import execute_run
 
 parser = argparse.ArgumentParser()
 parser.add_argument("db", type=Path)
 parser.add_argument("run_id")
-parser.add_argument("--crash", choices=("search", "fetch", "model"))
+parser.add_argument("--crash", choices=("search", "fetch", "model", "verify"))
 args = parser.parse_args()
 settings = Settings(db_path=args.db)
 store = Store(args.db)
@@ -45,6 +46,11 @@ def fetch(url, expected_domain=None):
 class Model:
     name = "labelled_crash_fixture"
 
+    def verify(self, profile, record):
+        count("verify")
+        return Verification(judgments=[Judgment(assessment_id=a["assessment_id"], verdict="entailed",
+            reason="Labelled synthetic fixture judgment") for a in assessments(profile, record)])
+
     def research(self, profile, candidate, sources):
         count("model")
         return validate_extraction({"name": "Labelled crash fixture", "findings": [
@@ -59,8 +65,8 @@ original = store.outcome
 def outcome(attempt_id, state, **kwargs):
     original(attempt_id, state, **kwargs)
     with store.connection() as db:
-        kind = db.execute("SELECT kind FROM attempts WHERE id=?", (attempt_id,)).fetchone()[0]
-    if kind == args.crash:
+        kind = db.execute("SELECT kind, operation_key FROM attempts WHERE id=?", (attempt_id,)).fetchone()
+    if ("verify" if kind[1].startswith("verify:") else kind[0]) == args.crash:
         os._exit(91)  # No Python cleanup; outcome has already committed.
 
 

@@ -23,6 +23,12 @@ from shortlist.providers import (
     queries_for,
 )
 from shortlist.store import BudgetExceeded, Conflict, Store
+from shortlist.verification import (
+    Verification,
+    apply_verification,
+    assessments,
+    unavailable,
+)
 
 
 def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search | None = None,
@@ -126,6 +132,23 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                                   exclusion_findings=tuple(ExclusionUnknown(exclusion_id=exclusion_id(i), reason=str(exc))
                                                            for i in range(len(profile.exclusions))),
                                   sources=sources, qualification="needs_verification", status="partial", unknowns=(str(exc),))
+            if assessments(profile, record):
+                def decode_verification(payload, proposed=record):
+                    audit = Verification.model_validate(payload)
+                    apply_verification(profile, proposed, audit)
+                    return audit
+
+                try:
+                    audit = call("model", model.name, f"verify:{candidate.domain}",
+                                 lambda r=record: model.verify(profile, r),
+                                 {"profile": profile.model_dump(mode="json"), "research": record.model_dump(mode="json"),
+                                  "model": settings.gemma_model, "endpoint": settings.gemma_base_url,
+                                  "verification_policy": 2}, decode_verification)
+                    record = apply_verification(profile, record, audit)
+                    checkpoint.setdefault("verification", {})[candidate.domain] = audit.model_dump(mode="json")
+                except (ProviderError, BudgetExceeded) as exc:
+                    record = unavailable(profile, record, str(exc))
+                    checkpoint.setdefault("verification", {})[candidate.domain] = {"error": str(exc)}
             store.save_record(run_id, fence, record)
             store.checkpoint(run_id, fence, "research", checkpoint)
         records = store.get_run(run_id)["records"]

@@ -15,6 +15,7 @@ from shortlist.config import Settings
 from shortlist.domain import Candidate, Criterion, Source
 from shortlist.providers import SellerDraft, validate_extraction
 from shortlist.store import Store
+from shortlist.verification import Judgment, Verification, assessments
 from shortlist.worker import execute_run
 
 settings = Settings(db_path=Path(os.environ.get("SHORTLIST_UI_TEST_DB", "data/ui-test.sqlite3")))
@@ -48,6 +49,10 @@ class FixtureModel:
                            target="Private AI B2B SaaS startups", criteria=[
                                Criterion(id="ai", description="Offers AI software to businesses"),
                                Criterion(id="private", description="Privately held startup")], unknowns=[])
+
+    def verify(self, profile, record):
+        return Verification(judgments=[Judgment(assessment_id=a["assessment_id"], verdict="entailed",
+            reason="Labelled synthetic fixture judgment") for a in assessments(profile, record)])
 
     def research(self, profile, candidate, sources):
         findings = []
