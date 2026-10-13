@@ -1,0 +1,12 @@
+{
+  "seller_url": "https://eygentic.com/",
+  "offer": "Eygentic helps B2B SaaS companies test customer acquisition hypotheses through focused experiments, from GTM diagnosis to ongoing experimentation.",
+  "target": "Private AI B2B SaaS startups",
+  "criteria": [
+    {"id": "ai", "description": "Offers software with artificial intelligence as a core capability", "required": true},
+    {"id": "b2b", "description": "Sells software to businesses", "required": true},
+    {"id": "saas", "description": "Offers software as a subscription or hosted service", "required": true},
+    {"id": "private", "description": "Privately held startup, with explicit current evidence of ownership and startup stage", "required": true}
+  ],
+  "exclusions": ["Consultancies without a software product", "Publicly listed companies"]
+}
