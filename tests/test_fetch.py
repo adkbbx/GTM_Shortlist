@@ -3,6 +3,45 @@ import pytest
 from shortlist.fetch import FetchError, canonical_url, domain_of, resolve_public
 
 
+def test_stalled_dns_has_deadline_and_bounded_outstanding_lookups(monkeypatch):
+    import time
+    from threading import BoundedSemaphore, Event
+
+    release = Event()
+    slots = BoundedSemaphore(2)
+    monkeypatch.setattr("shortlist.fetch.DNS_SLOTS", slots)
+
+    def stalled(*args, **kwargs):
+        assert release.wait(2)
+        return [(None, None, None, None, ("8.8.8.8", 443))]
+
+    monkeypatch.setattr("socket.getaddrinfo", stalled)
+    try:
+        started = time.monotonic()
+        for _ in range(2):
+            with pytest.raises(FetchError, match="DNS deadline"):
+                resolve_public("example.com", timeout=.02)
+        with pytest.raises(FetchError, match="capacity"):
+            resolve_public("example.com", timeout=.02)
+        assert time.monotonic() - started < 1
+    finally:
+        release.set()
+        # Both abandoned lookups finish and return their slots before monkeypatch cleanup.
+        assert slots.acquire(timeout=1)
+        assert slots.acquire(timeout=1)
+        slots.release()
+        slots.release()
+    assert resolve_public("example.com", timeout=1) == "8.8.8.8"
+
+
+def test_expired_dns_budget_does_not_dispatch(monkeypatch):
+    def unexpected(*args, **kwargs):
+        raise AssertionError("DNS must not start after the fetch deadline")
+    monkeypatch.setattr("socket.getaddrinfo", unexpected)
+    with pytest.raises(FetchError, match="fetch deadline"):
+        resolve_public("example.com", timeout=0)
+
+
 @pytest.mark.parametrize("url", [
     "http://example.com", "https://127.0.0.1", "https://127.1", "https://2130706433",
     "https://0x7f000001", "https://[::1]", "https://localhost", "https://metadata.google.internal",
@@ -43,7 +82,10 @@ def test_unicode_path_is_encoded_once():
 def test_tls_connect_pins_validated_ip_and_keeps_original_hostname(monkeypatch):
     from shortlist.fetch import PinnedHTTPSConnection
     connected = []
-    raw = object()
+    class RawSocket:
+        def settimeout(self, timeout):
+            assert 0 < timeout <= 10
+    raw = RawSocket()
     monkeypatch.setattr("socket.create_connection", lambda address, timeout: connected.append(address) or raw)
     connection = PinnedHTTPSConnection("example.com", "8.8.8.8", 10)
     class TLSContext:
@@ -58,7 +100,7 @@ def test_tls_connect_pins_validated_ip_and_keeps_original_hostname(monkeypatch):
 
 def test_redirect_and_byte_limit_use_actual_fetch_path(monkeypatch):
     from shortlist.fetch import MAX_BYTES, fetch_page
-    monkeypatch.setattr("shortlist.fetch.resolve_public", lambda host: "8.8.8.8")
+    monkeypatch.setattr("shortlist.fetch.resolve_public", lambda host, **kwargs: "8.8.8.8")
     class Stream:
         def settimeout(self, timeout):
             pass
@@ -71,6 +113,8 @@ def test_redirect_and_byte_limit_use_actual_fetch_path(monkeypatch):
     class Connection:
         stream_socket = Stream()
         def __init__(self, *args):
+            pass
+        def connect(self):
             pass
         def request(self, *args, **kwargs):
             pass

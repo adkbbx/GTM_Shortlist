@@ -73,3 +73,7 @@ Real assisted discovery e09d48680f454ddcb14f1d6038fbe530 verified the full Smero
 ## Fresh source reuse, 05:00 JST
 
 162 backend tests, Ruff and six phone/laptop browser tests pass. Two complete worker/database fixture runs share one immutable fresh page with exactly one fetch request and no second fetch reservation; original source ID/date/text/hash survive. Cache expiry, future dates, disabled reuse, exact URL/domain separation, journal precedence, worker fencing, immutable writes and corrupted payloads are tested. The two actual saved company snapshots also round-trip through local cache with zero provider requests in b352443fcdb241209ff27996e58aec13. This check is not a new discovery or live cache-miss test. Larger page coverage, DNS timeout, hosted retention and external users remain unfinished.
+
+## DNS and network budget, 05:04 JST
+
+164 backend tests passed. Final 30 fetch tests and Ruff pass after refining connect/write/header budgets. Stalled-DNS tests verify timeout, bounded outstanding lookups, explicit saturated-capacity failure and capacity recovery. The real HTTPS Smeron probe succeeds with verified TLS and 4,586 characters in 0.33 seconds. A system lookup that has timed out may remain running, but cannot consume more than the four resolver slots per process. This is not a claim that operating-system DNS can be cancelled. No UI changes or new discovery/inference were made.

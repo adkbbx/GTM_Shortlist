@@ -10,6 +10,8 @@ import re
 import socket
 import ssl
 import time
+from concurrent.futures import Future
+from threading import BoundedSemaphore, Thread
 from urllib.parse import quote, urljoin, urlsplit, urlunsplit
 
 from bs4 import BeautifulSoup
@@ -18,6 +20,7 @@ from shortlist.domain import Source
 
 MAX_BYTES = 1_000_000
 MAX_TEXT = 40_000
+DNS_SLOTS = BoundedSemaphore(4)
 
 
 class FetchError(ValueError):
@@ -67,9 +70,32 @@ def domain_of(url: str) -> str:
     return host.removeprefix("www.")
 
 
-def resolve_public(host: str) -> str:
+def resolve_public(host: str, timeout: float = 5) -> str:
+    # System DNS cannot be cancelled reliably. Quarantine at most four outstanding
+    # lookups in daemon threads; timeouts do not accumulate unbounded workers.
+    if timeout <= 0:
+        raise FetchError("Website fetch deadline exceeded")
+    if not DNS_SLOTS.acquire(blocking=False):
+        raise FetchError("Website DNS capacity is busy; try a new run later")
+    result = Future()
+
+    def lookup():
+        try:
+            result.set_result(socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM))
+        except OSError as exc:
+            result.set_exception(exc)
+        finally:
+            DNS_SLOTS.release()
+
     try:
-        addresses = {item[4][0] for item in socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM)}
+        Thread(target=lookup, name="shortlist-dns", daemon=True).start()
+    except RuntimeError as exc:
+        DNS_SLOTS.release()
+        raise FetchError("Website DNS is unavailable") from exc
+    try:
+        addresses = {item[4][0] for item in result.result(timeout=timeout)}
+    except TimeoutError as exc:
+        raise FetchError("Website DNS deadline exceeded") from exc
     except OSError as exc:
         raise FetchError("Website DNS is unavailable") from exc
     if not addresses or any(not ipaddress.ip_address(address).is_global for address in addresses):
@@ -83,8 +109,13 @@ class PinnedHTTPSConnection(http.client.HTTPSConnection):
         self.address = address
 
     def connect(self):
+        deadline = time.monotonic() + self.timeout
         raw = socket.create_connection((self.address, 443), self.timeout)
         try:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError("TLS deadline exceeded")
+            raw.settimeout(remaining)
             self.sock = self._context.wrap_socket(raw, server_hostname=self.host)
             self.stream_socket = self.sock
         except BaseException:
@@ -100,16 +131,25 @@ def fetch_page(url: str, expected_domain: str | None = None) -> Source:
         if domain_of(current) != owner:
             raise FetchError("Redirect changed company identity; manual verification required")
         parsed = urlsplit(current)
-        address = resolve_public(parsed.hostname)
+        address = resolve_public(parsed.hostname, timeout=min(5, deadline - time.monotonic()))
         remaining = deadline - time.monotonic()
         if remaining <= 0:
             raise FetchError("Website fetch deadline exceeded")
         connection = PinnedHTTPSConnection(parsed.hostname, address, min(10, remaining))
         try:
+            connection.connect()
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise FetchError("Website fetch deadline exceeded")
+            connection.stream_socket.settimeout(min(10, remaining))
             connection.request("GET", urlunsplit(("", "", parsed.path, parsed.query, "")), headers={
                 "User-Agent": "GTMShortlist/0.1 (+https://github.com/adkbbx/GTM_Shortlist)",
                 "Accept": "text/html,text/plain", "Accept-Encoding": "identity",
             })
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise FetchError("Website fetch deadline exceeded")
+            connection.stream_socket.settimeout(min(10, remaining))
             response = connection.getresponse()
             if response.status in (301, 302, 303, 307, 308):
                 location = response.getheader("Location")
