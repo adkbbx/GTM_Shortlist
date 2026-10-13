@@ -7,6 +7,7 @@ def export_run(run: dict, format: str, accepted_only: bool = False) -> str:
     records = [r for r in run["records"] if not accepted_only or r["review"] and r["review"]["decision"] == "accepted"]
     payload = {"run_id": run["id"], "profile": run["profile"], "status": run["status"],
                "records": records, "discovery": run["checkpoint"].get("candidates", []),
+               "candidate_failures": run["checkpoint"].get("candidate_failures", {}),
                "note": "Human acceptance is not buying intent. Findings are model assessments requiring review."}
     if format == "json":
         return json.dumps(payload, ensure_ascii=False, indent=2)

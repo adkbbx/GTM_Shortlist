@@ -100,7 +100,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
         researched = {r["research"]["domain"] for r in store.get_run(run_id)["records"]}
         for data in checkpoint["candidates"][:6]:
             candidate = Candidate.model_validate(data)
-            if candidate.domain in researched:
+            if candidate.domain in researched or candidate.domain in checkpoint.get("candidate_failures", {}):
                 continue
             if len(store.get_run(run_id)["records"]) >= 3:
                 break
@@ -140,6 +140,11 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                         raise
             except (ProviderError, FetchError) as exc:
                 sources = tuple(Source.model_validate(s) for s in saved_sources.get(candidate.domain, []))
+                if isinstance(exc, FetchError) and not sources:
+                    checkpoint.setdefault("candidate_failures", {})[candidate.domain] = {
+                        "url": candidate.url, "reason": str(exc)}
+                    store.checkpoint(run_id, fence, "research", checkpoint)
+                    continue
                 record = Research(domain=candidate.domain, name=candidate.name, profile_id=profile.id,
                                   findings=tuple(Unknown(criterion_id=c.id, reason=str(exc)) for c in profile.criteria),
                                   exclusion_findings=tuple(ExclusionUnknown(exclusion_id=exclusion_id(i), reason=str(exc))
@@ -167,7 +172,8 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
         records = store.get_run(run_id)["records"]
         partial = not records or any(r["research"]["status"] == "partial" for r in records)
         store.checkpoint(run_id, fence, "review", checkpoint, "partial" if partial else "ready",
-                         "No candidate companies found" if not records else None)
+                         ("No readable company evidence could be collected" if checkpoint.get("candidate_failures")
+                          else "No candidate companies found") if not records else None)
     except (ProviderError, FetchError, BudgetExceeded, Conflict) as exc:
         # Lost lease cannot write; the replacement worker owns the current state.
         try:

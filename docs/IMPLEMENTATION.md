@@ -16,6 +16,7 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 ## 3. Discovery and identity
 - [ ] Implement SerpApi and Tavily adapters, bounded query planner and saved search provenance.
 - [x] Canonicalize domains, deduplicate and exclude directories/seller domains.
+- [x] Preserve unreadable candidate failures and try replacements within six candidates without consuming the three review slots.
 - [ ] Compare providers on identical queries and actual measured cost/coverage.
 
 ## 4. Fetch and sources

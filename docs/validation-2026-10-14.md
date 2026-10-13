@@ -77,3 +77,7 @@ Real assisted discovery e09d48680f454ddcb14f1d6038fbe530 verified the full Smero
 ## DNS and network budget, 05:04 JST
 
 164 backend tests passed. Final 30 fetch tests and Ruff pass after refining connect/write/header budgets. Stalled-DNS tests verify timeout, bounded outstanding lookups, explicit saturated-capacity failure and capacity recovery. The real HTTPS Smeron probe succeeds with verified TLS and 4,586 characters in 0.33 seconds. A system lookup that has timed out may remain running, but cannot consume more than the four resolver slots per process. This is not a claim that operating-system DNS can be cancelled. No UI changes or new discovery/inference were made.
+
+## Readable candidate fallback, 05:07 JST
+
+167 backend tests, Ruff and six phone/laptop browser tests passed. Labelled fixtures prove replacement selection within six candidates, failure persistence/export, accurate all-page-failure messaging and restart without repeated failed fetches. Three review slots contain records with readable source evidence; extraction failures from readable pages remain partial unknown records. This is not a new live search/discovery or external user test.
