@@ -77,7 +77,7 @@ def test_repair_uses_shared_cap(flow, monkeypatch):
     fence = store.claim(run_id)
     for i in range(7):
         attempt = store.reserve(run_id, fence, "fixture", "model", f"prior:{i}")
-        store.outcome(attempt, "failed")
+        store.outcome(attempt, "failed", run_id=run_id, fence=fence)
     checkpoint = store.get_run(run_id)["checkpoint"]
     store.checkpoint(run_id, fence, "research", checkpoint, "queued")
     requests = provider(monkeypatch, ["broken JSON"])

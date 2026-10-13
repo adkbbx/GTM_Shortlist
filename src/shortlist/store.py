@@ -41,6 +41,10 @@ class Store:
                     kind TEXT NOT NULL, month TEXT NOT NULL, operation_key TEXT NOT NULL,
                     state TEXT NOT NULL, created_at TEXT NOT NULL, UNIQUE(run_id, operation_key)
                 );
+                CREATE TABLE IF NOT EXISTS attempt_results (
+                    attempt_id TEXT PRIMARY KEY REFERENCES attempts(id),
+                    request_hash TEXT NOT NULL, payload TEXT
+                );
             """)
 
     @contextmanager
@@ -93,7 +97,13 @@ class Store:
     def list_runs(self) -> list[dict]:
         with self.connection() as db:
             return [dict(row) for row in db.execute(
-                "SELECT id,status,stage,created_at,updated_at,error FROM runs ORDER BY created_at DESC LIMIT 100")]
+                "SELECT id,status,stage,created_at,updated_at,error FROM runs ORDER BY created_at DESC,rowid DESC LIMIT 100")]
+
+    def pending_runs(self) -> list[str]:
+        with self.connection() as db:
+            return [row["id"] for row in db.execute(
+                "SELECT id FROM runs WHERE status IN ('queued','running') AND lease_until<=? "
+                "ORDER BY created_at,rowid LIMIT 50", (time.time(),))]
 
     def create_draft(self, seller_url: str, request_key: str) -> str:
         digest = hashlib.sha256(seller_url.encode()).hexdigest()
@@ -157,7 +167,7 @@ class Store:
                         time.time() + 180 if status == "running" else 0, run_id))
 
     def reserve(self, run_id: str, fence: int, provider: str, kind: str, operation_key: str,
-                global_cap: int = 200) -> str:
+                global_cap: int = 200, request_hash: str = "") -> str:
         caps = {"search": 4, "model": 8, "fetch": 21}
         month = utcnow().strftime("%Y-%m")
         with self.connection() as db:
@@ -176,13 +186,45 @@ class Store:
             attempt_id = new_id()
             db.execute("INSERT INTO attempts VALUES (?,?,?,?,?,?,?,?)",
                        (attempt_id, run_id, provider, kind, month, operation_key, "outcome_unknown", utcnow().isoformat()))
+            db.execute("INSERT INTO attempt_results(attempt_id,request_hash) VALUES (?,?)", (attempt_id, request_hash))
             return attempt_id
 
-    def outcome(self, attempt_id: str, state: str):
+    def restore(self, run_id: str, fence: int, provider: str, kind: str, operation_key: str,
+                request_hash: str) -> dict | None:
+        with self.connection() as db:
+            self._assert_lease(db, run_id, fence)
+            row = db.execute("SELECT a.state,a.provider,a.kind,r.request_hash,r.payload FROM attempts a "
+                             "LEFT JOIN attempt_results r ON r.attempt_id=a.id "
+                             "WHERE a.run_id=? AND a.operation_key=?", (run_id, operation_key)).fetchone()
+            if not row:
+                return None
+            if row["request_hash"] is None:
+                raise Conflict("Legacy attempt has no recoverable result; automatic redispatch stopped")
+            if row["request_hash"] != request_hash or row["provider"] != provider or row["kind"] != kind:
+                raise Conflict("Saved operation inputs or provider changed; start a new run")
+            if row["state"] == "outcome_unknown" or row["payload"] is None:
+                raise Conflict("Provider outcome is uncertain; automatic redispatch stopped to protect allowance")
+            try:
+                payload = json.loads(row["payload"])
+            except ValueError as exc:
+                raise Conflict("Saved provider result is corrupt; inspect or start a new run") from exc
+            return {"state": row["state"], "payload": payload}
+
+    def outcome(self, attempt_id: str, state: str, *, run_id: str, fence: int, payload: dict | list | None = None):
         if state not in ("succeeded", "failed"):
             raise ValueError("Invalid provider outcome")
         with self.connection() as db:
-            db.execute("UPDATE attempts SET state=? WHERE id=?", (state, attempt_id))
+            db.execute("BEGIN IMMEDIATE")
+            self._assert_lease(db, run_id, fence)
+            changed = db.execute("UPDATE attempts SET state=? WHERE id=? AND run_id=? AND state='outcome_unknown'",
+                                 (state, attempt_id, run_id)).rowcount
+            if not changed:
+                raise Conflict("Provider outcome is already final or belongs to another run")
+            # State and result are one transaction: a crash cannot expose success
+            # without its replayable value. No provider bodies or credentials here.
+            if not db.execute("UPDATE attempt_results SET payload=? WHERE attempt_id=?",
+                              (json.dumps(payload) if payload is not None else None, attempt_id)).rowcount:
+                raise Conflict("Provider attempt has no result journal")
 
     def save_record(self, run_id: str, fence: int, record: Research):
         with self.connection() as db:

@@ -32,10 +32,10 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 - [ ] Benchmark real Gemma checkpoints on the same saved passages.
 
 ## 6. Durable execution and limits
-- [ ] Persist stage jobs, leases, fencing, checkpoints and restart/resume.
+- [x] Persist stage jobs, leases, fencing, checkpoints and replayable provider outcomes for restart/resume.
 - [x] Idempotent commands reject changed payloads under reused request keys.
-- [ ] Atomically cap run/global provider attempts including failed/uncertain dispatches.
-- [ ] Test retries, concurrent starts, expired leases and restart with actual saved data.
+- [x] Atomically cap run/global provider attempts including failed/uncertain dispatches.
+- [x] Test retries, concurrent starts, expired leases and actual process death against persisted SQLite data.
 
 ## First milestone
 - [x] One real assisted Eygentic run discovers companies, saves inspectable evidence and exports research. See validation-2026-10-14.md; fully unattended SerpApi/Tavily discovery is still pending.

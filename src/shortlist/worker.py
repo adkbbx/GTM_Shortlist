@@ -4,12 +4,14 @@ from collections.abc import Callable
 from shortlist.config import Settings
 from shortlist.domain import Candidate, Profile, Research, Source, Unknown
 from shortlist.fetch import FetchError, fetch_page
+from shortlist.journal import call_step
 from shortlist.providers import (
     Gemma,
     ModelOutputError,
     ProviderError,
     Search,
     SearchProvider,
+    SellerDraft,
     queries_for,
 )
 from shortlist.store import BudgetExceeded, Conflict, Store
@@ -25,26 +27,23 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
     search = search or SearchProvider(settings)
     model = model or Gemma(settings)
 
-    def call(kind: str, provider: str, operation: str, function):
-        attempt = store.reserve(run_id, fence, provider, kind, operation, settings.global_search_cap)
-        try:
-            result = function()
-        except (ProviderError, FetchError):
-            store.outcome(attempt, "failed")
-            raise
-        store.outcome(attempt, "succeeded")
-        return result
+    def call(kind: str, provider: str, operation: str, function, inputs: dict, decode):
+        return call_step(store, run_id, fence, settings.global_search_cap, kind=kind, provider=provider,
+                         operation=operation, function=function, inputs=inputs, decode=decode)
 
     try:
         if run["stage"] == "seller":
             error = None
             try:
                 if "seller_source" not in checkpoint:
-                    source = call("fetch", "https", "seller:fetch", lambda: fetch(checkpoint["seller_url"]))
+                    source = call("fetch", "https", "seller:fetch", lambda: fetch(checkpoint["seller_url"]),
+                                  {"url": checkpoint["seller_url"]}, Source.model_validate)
                     checkpoint["seller_source"] = source.model_dump(mode="json")
                     store.checkpoint(run_id, fence, "seller", checkpoint)
                 source = Source.model_validate(checkpoint["seller_source"])
-                draft = call("model", model.name, "seller:model", lambda: model.seller(source))
+                draft = call("model", model.name, "seller:model", lambda: model.seller(source),
+                             {"source": source.model_dump(mode="json"), "model": settings.gemma_model,
+                              "endpoint": settings.gemma_base_url}, SellerDraft.model_validate)
                 checkpoint["draft"] = draft.model_dump(mode="json")
             except (FetchError, ProviderError) as exc:
                 if isinstance(exc, ModelOutputError):
@@ -59,7 +58,9 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
             for index, query in enumerate(queries_for(profile)):
                 if index in completed_queries:
                     continue
-                candidates = call("search", search.name, f"search:{index}", lambda q=query: search.search(q, profile.seller_url))
+                candidates = call("search", search.name, f"search:{index}", lambda q=query: search.search(q, profile.seller_url),
+                                  {"query": query, "seller_url": profile.seller_url},
+                                  lambda results: [Candidate.model_validate(c) for c in results])
                 discovered.extend(c.model_dump(mode="json") for c in candidates)
                 completed_queries.append(index)
                 checkpoint.update(discovered=discovered, completed_queries=completed_queries)
@@ -78,16 +79,21 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
             try:
                 if candidate.domain not in saved_sources:
                     source = call("fetch", "https", f"fetch:{candidate.domain}",
-                                  lambda c=candidate: fetch(c.url, expected_domain=c.domain))
+                                  lambda c=candidate: fetch(c.url, expected_domain=c.domain),
+                                  {"url": candidate.url, "expected_domain": candidate.domain}, Source.model_validate)
                     saved_sources[candidate.domain] = [source.model_dump(mode="json")]
                     store.checkpoint(run_id, fence, "research", checkpoint)
                 sources = tuple(Source.model_validate(s) for s in saved_sources[candidate.domain])
                 diagnostics = checkpoint.setdefault("model_outputs", {})
                 previous = diagnostics.get(candidate.domain)
+                model_inputs = {"profile": profile.model_dump(mode="json"), "candidate": candidate.model_dump(mode="json"),
+                                "sources": [s.model_dump(mode="json") for s in sources],
+                                "model": settings.gemma_model, "endpoint": settings.gemma_base_url}
                 if previous is None:
                     try:
                         record = call("model", model.name, f"model:{candidate.domain}",
-                                      lambda c=candidate, s=sources: model.research(profile, c, s))
+                                      lambda c=candidate, s=sources: model.research(profile, c, s),
+                                      model_inputs, Research.model_validate)
                     except ModelOutputError as exc:
                         previous = exc.diagnostic()
                         diagnostics[candidate.domain] = previous
@@ -95,9 +101,12 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                         # repair it without paying for the original request again.
                         store.checkpoint(run_id, fence, "research", checkpoint)
                 if previous is not None:
+                    repair_input = {k: v for k, v in previous.items() if k != "repair_failure"}
                     try:
                         record = call("model", model.name, f"repair:{candidate.domain}",
-                                      lambda c=candidate, s=sources, p=previous: model.research(profile, c, s, repair=p))
+                                      lambda c=candidate, s=sources, p=repair_input: model.research(profile, c, s, repair=p),
+                                      {**model_inputs, "repair": repair_input},
+                                      Research.model_validate)
                     except ModelOutputError as exc:
                         diagnostics[candidate.domain]["repair_failure"] = exc.diagnostic()
                         store.checkpoint(run_id, fence, "research", checkpoint)
@@ -125,9 +134,8 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
 def work(settings: Settings, once: bool = False):
     store = Store(settings.db_path)
     while True:
-        pending = [r for r in store.list_runs() if r["status"] in ("queued", "running")]
-        for run in reversed(pending):
-            execute_run(store, settings, run["id"])
+        for run_id in store.pending_runs():
+            execute_run(store, settings, run_id)
         if once:
             return
         time.sleep(2)

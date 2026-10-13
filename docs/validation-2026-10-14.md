@@ -44,4 +44,12 @@ The visual reviewer returned `ship` after PRODUCT.md and the extracted DESIGN.md
 
 ## Open gates
 
-Live Tavily/SerpApi credentials and comparison; Eygentic HTTPS certificate failure; semantic model evaluation; richer page coverage and freshness-aware cache; explicit exclusion qualification; comprehensive successful-outcome restart/crash recovery; hosted Postgres/Auth/workspace isolation; external SMTP/deployment; five real runs across three profiles; observed external tests and physical-device checks. Current local tests are not evidence that these gates have passed.
+Live Tavily/SerpApi credentials and comparison; Eygentic HTTPS certificate failure; semantic model evaluation; richer page coverage and freshness-aware cache; explicit exclusion qualification; hosted Postgres/Auth/workspace isolation; external SMTP/deployment; five real runs across three profiles; observed external tests and physical-device checks. Current local tests are not evidence that these gates have passed.
+
+## Durable recovery, 04:20 JST
+
+101 backend tests and Ruff pass; six browser tests pass again. Completed provider values now have an atomic SQLite result journal and stable input hashes. A restored value incurs no new attempt. Legacy operations without recoverable values, corrupt saved output, changed inputs/provider and unresolved dispatches stop explicitly.
+
+Three real subprocess tests use synthetic providers, commit a provider outcome, then exit abruptly without cleanup. A second process resumes the same SQLite database after lease expiry. Search, page-fetch and model-result interruption cases all finish with exactly four total external fixture calls (two searches, one fetch, one model) and preserve human review on subsequent replay. Other tests verify failed-result replay, uncertain-outcome protection, fenced writes, transaction rollback, concurrent claims, and oldest-job selection beyond 100 visible UI runs. This closes the successful-outcome restart gate for the local core. The unavoidable HTTP-response-before-journal crash window remains conservative: never silently redispatch an uncertain paid request.
+
+The actual saved assisted run 21f920ad6818469bbb302c9a3d59a4fe still passes evidence/export verification after the journal table is added. No live provider request was needed for this validation.
