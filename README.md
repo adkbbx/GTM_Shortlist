@@ -31,6 +31,22 @@ The example profile is user-supplied planning input, not a fetched seller assess
 
 Run `pytest -q` and `ruff check --isolated src tests scripts`. Tests use labelled synthetic sources unless explicitly described as live. TLS verification and public-address validation stay enabled; unsafe or unavailable pages produce explicit partial results. The citation gate verifies exact passages and company source identity. Semantic entailment is still a model assessment requiring evaluation and human review.
 
+## Guided local UI
+
+```sh
+npm ci
+python scripts/export_schema.py
+npm run schema
+npm run build
+python -m uvicorn shortlist.api:app --host 127.0.0.1 --port 8014
+# In another terminal, same project/environment:
+shortlist worker
+```
+
+Open `http://127.0.0.1:8014`. The API serves the built UI. `npm run dev` starts the frontend dev server on port 5174 with an API proxy. Use the project virtual environment for Python commands.
+
+`npx playwright install chromium` then `npm run test:ui` exercises the production build at 1366px laptop and 390px phone, plus 320px and 200% text sizing. It uses the actual API, worker, SQLite, review and download code with explicitly labelled synthetic providers. The test server is not a real discovery service. Screenshots are saved under `.impeccable/review/`. Generated TypeScript and runtime JSON validation schemas come from the Python API contracts.
+
 ## Boundaries
 
 The local SQLite app is for one trusted operator and must bind to loopback. Do not expose it publicly. Postgres workspace isolation, verified signup, shared demo grants, external SMTP and actual deployment tests are required before hosted release.

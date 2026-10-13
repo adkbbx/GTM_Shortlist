@@ -1,4 +1,6 @@
 import json
+from datetime import datetime
+from pathlib import Path
 from typing import Protocol
 
 import httpx
@@ -96,8 +98,41 @@ class SearchProvider:
             raise ProviderError("Search request failed; check provider configuration or allowance") from exc
 
 
-class SellerDraft(BaseModel):
+class SearchHit(BaseModel):
     model_config = ConfigDict(extra="forbid")
+    url: str
+    title: str
+
+
+class SearchCapture(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    provider: str = Field(min_length=3, max_length=80)
+    captured_at: datetime
+    note: str
+    queries: dict[str, list[SearchHit]]
+
+
+class CapturedSearch:
+    """Replay operator-captured real searches, explicitly separate from live adapters.
+
+    Useful for BYO-search, deterministic evaluation and inspecting provider outputs.
+    Does not call a search API or establish that SerpApi/Tavily integration works.
+    """
+    name = "imported_web_search"
+
+    def __init__(self, path: Path):
+        self.capture = SearchCapture.model_validate_json(path.read_text(encoding="utf-8"))
+
+    def search(self, query: str, seller_url: str) -> list[Candidate]:
+        if query not in self.capture.queries:
+            raise ProviderError("The imported search capture does not contain this confirmed target query")
+        candidates = candidates_from_results([hit.model_dump() for hit in self.capture.queries[query]],
+                                             query, self.name, seller_url)
+        return [candidate.model_copy(update={"discovered_at": self.capture.captured_at}) for candidate in candidates]
+
+
+class SellerDraft(BaseModel):
+    model_config = ConfigDict(extra="forbid", json_schema_serialization_defaults_required=True)
     offer: str = Field(min_length=10, max_length=4000)
     target: str = Field(min_length=5, max_length=2000)
     criteria: list[Criterion] = Field(min_length=1, max_length=12)

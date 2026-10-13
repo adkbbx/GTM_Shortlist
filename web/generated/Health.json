@@ -1,0 +1,24 @@
+{
+  "properties": {
+    "mode": {
+      "const": "local",
+      "default": "local",
+      "title": "Mode",
+      "type": "string"
+    },
+    "search_ready": {
+      "title": "Search Ready",
+      "type": "boolean"
+    },
+    "gemma_ready": {
+      "title": "Gemma Ready",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "search_ready",
+    "gemma_ready"
+  ],
+  "title": "Health",
+  "type": "object"
+}

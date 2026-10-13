@@ -1,0 +1,59 @@
+{
+  "provider": "Codex web search tool, operator capture",
+  "captured_at": "2026-10-13T19:00:57.354429+00:00",
+  "note": "Real external web search results captured during development. Timestamp records when this capture file was saved. URL/title metadata only; snippets are not company evidence. Application replays this capture, fetches actual pages and runs real Gemma extraction. This is assisted discovery, not a live SerpApi/Tavily benchmark.",
+  "queries": {
+    "Private AI B2B SaaS startups software company official website": [
+      {
+        "url": "https://www.smeron.com/",
+        "title": "Smeron | Custom AI Applications & B2B SaaS Growth Studio"
+      },
+      {
+        "url": "https://prismatic.io/",
+        "title": "Embedded iPaaS for B2B Software Companies | Prismatic"
+      },
+      {
+        "url": "https://b2bhub.ltd/",
+        "title": "B2B Hub | AI-Native Business Operating System"
+      },
+      {
+        "url": "https://tandemworks.ai/",
+        "title": "TandemWorks | Agentic AI for B2B Revenue Teams"
+      },
+      {
+        "url": "https://siesta.ai/",
+        "title": "Siesta AI | Context-Native Enterprise AI Platform"
+      },
+      {
+        "url": "https://backofficeboss.ai/",
+        "title": "BackOfficeBoss.ai — Custom AI automation built around your business"
+      }
+    ],
+    "Private AI B2B SaaS startups startup platform pricing": [
+      {
+        "url": "https://freshify.io/pricing",
+        "title": "Pricing — Freshify software products"
+      },
+      {
+        "url": "https://www.happyfox.com/crm/pricing/",
+        "title": "HappyFox CRM Pricing | Plans for B2B SaaS Teams"
+      },
+      {
+        "url": "https://delegatezero.com/",
+        "title": "DelegateZero - AI Decision Proxy for B2B SaaS Founders"
+      },
+      {
+        "url": "https://www.actaa.ai/startups",
+        "title": "Actaa — For startups"
+      },
+      {
+        "url": "https://caacgo.cresclab.com/pricing",
+        "title": "Pricing — CAAC Go | Start Free, Scale as You Grow"
+      },
+      {
+        "url": "https://www.runwork.ai/pricing/",
+        "title": "Pricing | Runwork"
+      }
+    ]
+  }
+}

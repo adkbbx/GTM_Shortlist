@@ -4,22 +4,22 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 
 ## 1. Project and contracts
 - [x] Clone dedicated repository and preserve planning sources.
-- [ ] Install pinned dependencies, CLI and API health/config checks.
-- [ ] Define immutable confirmed profiles, identity, dated sources, evidence, findings, hypotheses, review decisions and run states.
-- [ ] Establish open-source licence, contributor setup and CI checks.
+- [x] Install pinned dependencies, CLI and API health/config checks.
+- [x] Define immutable confirmed profiles, identity, dated sources, evidence, findings, hypotheses, review decisions and run states.
+- [x] Establish open-source licence, contributor setup and CI checks.
 
 ## 2. Seller and confirmation
 - [ ] Fetch seller pages with provenance and draft offer/target using Gemma.
-- [ ] Persist editable draft and explicit immutable confirmation before discovery.
+- [x] Persist editable draft and explicit immutable confirmation before discovery.
 - [ ] Validate Eygentic offer and configurable targets for other sellers.
 
 ## 3. Discovery and identity
 - [ ] Implement SerpApi and Tavily adapters, bounded query planner and saved search provenance.
-- [ ] Canonicalize domains, deduplicate and exclude directories/seller domains.
+- [x] Canonicalize domains, deduplicate and exclude directories/seller domains.
 - [ ] Compare providers on identical queries and actual measured cost/coverage.
 
 ## 4. Fetch and sources
-- [ ] Reject unsafe URLs, private addresses, unsafe redirects and DNS rebinding.
+- [x] Reject unsafe URLs, private addresses, unsafe redirects and DNS rebinding.
 - [ ] Bound time, bytes, redirects and pages; preserve text, hashes and retrieval dates.
 - [ ] Add freshness-aware source reuse and failure/unknown handling.
 
@@ -31,20 +31,20 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 
 ## 6. Durable execution and limits
 - [ ] Persist stage jobs, leases, fencing, checkpoints and restart/resume.
-- [ ] Idempotent commands reject changed payloads under reused request keys.
+- [x] Idempotent commands reject changed payloads under reused request keys.
 - [ ] Atomically cap run/global provider attempts including failed/uncertain dispatches.
 - [ ] Test retries, concurrent starts, expired leases and restart with actual saved data.
 
 ## First milestone
-- [ ] One real Eygentic run discovers companies, saves inspectable evidence and exports research.
-- [ ] Saved report distinguishes verified findings, unknowns, hypotheses and human acceptance.
+- [x] One real assisted Eygentic run discovers companies, saves inspectable evidence and exports research. See validation-2026-10-14.md; fully unattended SerpApi/Tavily discovery is still pending.
+- [x] Saved report distinguishes source-cited model assessments, unknowns, hypotheses and human acceptance.
 
 ## 7. Guided UI and export
-- [ ] Seller website, editable confirmation, persisted run status and honest partial results.
-- [ ] Research sheets with evidence passages, source dates and independent accept/reject decisions.
-- [ ] CSV/JSON export preserves evidence and protects against spreadsheet formulas.
-- [ ] Test complete flow at 390px phone and 1366px laptop; also 320px, zoom, keyboard and reduced motion.
-- [ ] Save browser screenshots and repeatable functional checks; repair discovered defects.
+- [x] Seller website, editable confirmation, persisted run status and honest partial results.
+- [x] Research sheets with evidence passages, source dates and independent accept/reject decisions.
+- [x] CSV/JSON export preserves evidence and protects against spreadsheet formulas.
+- [x] Test complete flow at 390px phone and 1366px laptop; also 320px, zoom, keyboard and reduced motion.
+- [x] Save browser screenshots and repeatable functional checks; repair discovered defects.
 
 ## 8. Hosted product
 - [ ] Postgres persistence and migrations, Supabase verified signup and JWT validation.

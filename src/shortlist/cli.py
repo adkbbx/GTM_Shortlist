@@ -5,6 +5,7 @@ from pathlib import Path
 from shortlist.config import Settings
 from shortlist.domain import Profile
 from shortlist.export import export_run
+from shortlist.providers import CapturedSearch
 from shortlist.store import Store
 from shortlist.worker import execute_run, work
 
@@ -16,6 +17,7 @@ def main():
     run = sub.add_parser("run")
     run.add_argument("profile", type=Path)
     run.add_argument("--request-key", required=True)
+    run.add_argument("--search-capture", type=Path, help="Replay a labelled, saved external search capture")
     resume = sub.add_parser("resume")
     resume.add_argument("run_id")
     worker = sub.add_parser("worker")
@@ -36,7 +38,7 @@ def main():
         profile = Profile.model_validate_json(args.profile.read_text(encoding="utf-8"))
         run_id = store.create_run(profile, args.request_key)
         print(run_id)
-        execute_run(store, settings, run_id)
+        execute_run(store, settings, run_id, search=CapturedSearch(args.search_capture) if args.search_capture else None)
     elif args.command == "resume":
         execute_run(store, settings, args.run_id)
     elif args.command == "worker":

@@ -4,7 +4,13 @@ from collections.abc import Callable
 from shortlist.config import Settings
 from shortlist.domain import Candidate, Profile, Research, Source, Unknown
 from shortlist.fetch import FetchError, fetch_page
-from shortlist.providers import Gemma, ProviderError, Search, SearchProvider, queries_for
+from shortlist.providers import (
+    Gemma,
+    ProviderError,
+    Search,
+    SearchProvider,
+    queries_for,
+)
 from shortlist.store import BudgetExceeded, Conflict, Store
 
 
@@ -14,7 +20,6 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
     if fence is None:
         return False
     run = store.get_run(run_id)
-    profile = Profile.model_validate(run["profile"])
     checkpoint = run["checkpoint"]
     search = search or SearchProvider(settings)
     model = model or Gemma(settings)
@@ -30,6 +35,21 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
         return result
 
     try:
+        if run["stage"] == "seller":
+            error = None
+            try:
+                if "seller_source" not in checkpoint:
+                    source = call("fetch", "https", "seller:fetch", lambda: fetch(checkpoint["seller_url"]))
+                    checkpoint["seller_source"] = source.model_dump(mode="json")
+                    store.checkpoint(run_id, fence, "seller", checkpoint)
+                source = Source.model_validate(checkpoint["seller_source"])
+                draft = call("model", model.name, "seller:model", lambda: model.seller(source))
+                checkpoint["draft"] = draft.model_dump(mode="json")
+            except (FetchError, ProviderError) as exc:
+                error = str(exc) + ". Enter and confirm your offer and target manually to continue."
+            store.checkpoint(run_id, fence, "confirmation", checkpoint, "awaiting_confirmation", error)
+            return True
+        profile = Profile.model_validate(run["profile"])
         if "candidates" not in checkpoint:
             discovered = checkpoint.get("discovered", [])
             completed_queries = checkpoint.get("completed_queries", [])

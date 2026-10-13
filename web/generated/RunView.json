@@ -1,0 +1,583 @@
+{
+  "$defs": {
+    "AttemptView": {
+      "properties": {
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "state": {
+          "title": "State",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "kind",
+        "state",
+        "created_at"
+      ],
+      "title": "AttemptView",
+      "type": "object"
+    },
+    "Criterion": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Description",
+          "type": "string"
+        },
+        "required": {
+          "default": true,
+          "title": "Required",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "description",
+        "required"
+      ],
+      "title": "Criterion",
+      "type": "object"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "passage": {
+          "maxLength": 1500,
+          "minLength": 15,
+          "title": "Passage",
+          "type": "string"
+        },
+        "claim": {
+          "maxLength": 1500,
+          "minLength": 3,
+          "title": "Claim",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_id",
+        "passage",
+        "claim"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "Hypothesis": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "maxLength": 1500,
+          "minLength": 5,
+          "title": "Text",
+          "type": "string"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Assumptions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "text",
+        "assumptions"
+      ],
+      "title": "Hypothesis",
+      "type": "object"
+    },
+    "Observed": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "supported",
+            "contradicted"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "criterion_id": {
+          "title": "Criterion Id",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "maxItems": 6,
+          "minItems": 1,
+          "title": "Evidence",
+          "type": "array"
+        }
+      },
+      "required": [
+        "status",
+        "criterion_id",
+        "evidence"
+      ],
+      "title": "Observed",
+      "type": "object"
+    },
+    "Profile": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "seller_url": {
+          "title": "Seller Url",
+          "type": "string"
+        },
+        "offer": {
+          "maxLength": 4000,
+          "minLength": 10,
+          "title": "Offer",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 2000,
+          "minLength": 5,
+          "title": "Target",
+          "type": "string"
+        },
+        "criteria": {
+          "items": {
+            "$ref": "#/$defs/Criterion"
+          },
+          "maxItems": 12,
+          "minItems": 1,
+          "title": "Criteria",
+          "type": "array"
+        },
+        "exclusions": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclusions",
+          "type": "array"
+        },
+        "confirmed_at": {
+          "format": "date-time",
+          "title": "Confirmed At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "seller_url",
+        "offer",
+        "target",
+        "criteria",
+        "exclusions",
+        "confirmed_at"
+      ],
+      "title": "Profile",
+      "type": "object"
+    },
+    "Research": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "domain": {
+          "title": "Domain",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "profile_id": {
+          "title": "Profile Id",
+          "type": "string"
+        },
+        "findings": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "contradicted": "#/$defs/Observed",
+                "supported": "#/$defs/Observed",
+                "unknown": "#/$defs/Unknown"
+              },
+              "propertyName": "status"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/Observed"
+              },
+              {
+                "$ref": "#/$defs/Unknown"
+              }
+            ]
+          },
+          "title": "Findings",
+          "type": "array"
+        },
+        "hypotheses": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Hypothesis"
+          },
+          "title": "Hypotheses",
+          "type": "array"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/Source"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "qualification": {
+          "enum": [
+            "fits",
+            "needs_verification",
+            "does_not_fit"
+          ],
+          "title": "Qualification",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "complete",
+            "partial"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "unknowns": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Unknowns",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "domain",
+        "name",
+        "profile_id",
+        "findings",
+        "hypotheses",
+        "sources",
+        "qualification",
+        "status",
+        "unknowns"
+      ],
+      "title": "Research",
+      "type": "object"
+    },
+    "Review": {
+      "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "enum": [
+            "accepted",
+            "rejected",
+            "needs_research"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "reason": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Reason",
+          "type": "string"
+        },
+        "reviewed_at": {
+          "format": "date-time",
+          "title": "Reviewed At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "decision",
+        "reason",
+        "reviewed_at"
+      ],
+      "title": "Review",
+      "type": "object"
+    },
+    "SavedRecord": {
+      "properties": {
+        "research": {
+          "$ref": "#/$defs/Research"
+        },
+        "review": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Review"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "research"
+      ],
+      "title": "SavedRecord",
+      "type": "object"
+    },
+    "SellerDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "offer": {
+          "maxLength": 4000,
+          "minLength": 10,
+          "title": "Offer",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 2000,
+          "minLength": 5,
+          "title": "Target",
+          "type": "string"
+        },
+        "criteria": {
+          "items": {
+            "$ref": "#/$defs/Criterion"
+          },
+          "maxItems": 12,
+          "minItems": 1,
+          "title": "Criteria",
+          "type": "array"
+        },
+        "unknowns": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "title": "Unknowns",
+          "type": "array"
+        }
+      },
+      "required": [
+        "offer",
+        "target",
+        "criteria",
+        "unknowns"
+      ],
+      "title": "SellerDraft",
+      "type": "object"
+    },
+    "Source": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "company_domain": {
+          "title": "Company Domain",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "content_hash": {
+          "title": "Content Hash",
+          "type": "string"
+        },
+        "retrieved_at": {
+          "format": "date-time",
+          "title": "Retrieved At",
+          "type": "string"
+        },
+        "published_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Published At"
+        }
+      },
+      "required": [
+        "id",
+        "url",
+        "company_domain",
+        "title",
+        "text",
+        "content_hash",
+        "retrieved_at",
+        "published_at"
+      ],
+      "title": "Source",
+      "type": "object"
+    },
+    "Unknown": {
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "const": "unknown",
+          "default": "unknown",
+          "title": "Status",
+          "type": "string"
+        },
+        "criterion_id": {
+          "title": "Criterion Id",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 1000,
+          "minLength": 3,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "criterion_id",
+        "reason"
+      ],
+      "title": "Unknown",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "seller_url": {
+      "title": "Seller Url",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "queued",
+        "running",
+        "awaiting_confirmation",
+        "ready",
+        "partial"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "stage": {
+      "title": "Stage",
+      "type": "string"
+    },
+    "profile": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Profile"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "draft": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SellerDraft"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "records": {
+      "items": {
+        "$ref": "#/$defs/SavedRecord"
+      },
+      "title": "Records",
+      "type": "array"
+    },
+    "error": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    },
+    "attempts": {
+      "items": {
+        "$ref": "#/$defs/AttemptView"
+      },
+      "title": "Attempts",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "seller_url",
+    "status",
+    "stage",
+    "records",
+    "created_at",
+    "updated_at",
+    "attempts"
+  ],
+  "title": "RunView",
+  "type": "object"
+}

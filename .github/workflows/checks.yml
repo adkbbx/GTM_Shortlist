@@ -12,3 +12,29 @@ jobs:
       - run: pip install -e . --no-deps
       - run: pytest -q
       - run: ruff check --isolated src tests scripts
+  ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m venv .venv
+      - run: .venv/bin/pip install -r requirements.lock.txt
+      - run: .venv/bin/pip install -e . --no-deps
+      - run: npm ci
+      - run: .venv/bin/python scripts/export_schema.py && npm run schema
+      - run: git diff --exit-code -- web/generated
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:ui
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-verification
+          path: |
+            .impeccable/review/
+            test-results/

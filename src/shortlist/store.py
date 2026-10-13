@@ -87,13 +87,48 @@ class Store:
                                   "review": json.loads(r["review"]) if r["review"] else None}
                                  for r in db.execute("SELECT research,review FROM records WHERE run_id=? ORDER BY rowid", (run_id,))]
             result["attempts"] = [dict(a) for a in db.execute(
-                "SELECT provider,kind,state,created_at FROM attempts WHERE run_id=?", (run_id,))]
+                "SELECT provider,kind,state,created_at FROM attempts WHERE run_id=? ORDER BY created_at,id", (run_id,))]
             return result
 
     def list_runs(self) -> list[dict]:
         with self.connection() as db:
             return [dict(row) for row in db.execute(
                 "SELECT id,status,stage,created_at,updated_at,error FROM runs ORDER BY created_at DESC LIMIT 100")]
+
+    def create_draft(self, seller_url: str, request_key: str) -> str:
+        digest = hashlib.sha256(seller_url.encode()).hexdigest()
+        with self.connection() as db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("SELECT id,payload_hash FROM runs WHERE request_key=?", (request_key,)).fetchone()
+            if row:
+                if row["payload_hash"] != digest:
+                    raise Conflict("Request key was already used for a different website")
+                return row["id"]
+            run_id = new_id()
+            now = utcnow().isoformat()
+            db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,checkpoint,created_at,updated_at) "
+                       "VALUES (?,?,?,?,?,?,?,?,?)", (run_id, request_key, digest, "{}", "queued", "seller",
+                       json.dumps({"seller_url": seller_url}), now, now))
+            return run_id
+
+    def confirm_draft(self, run_id: str, profile: Profile):
+        with self.connection() as db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("SELECT * FROM runs WHERE id=?", (run_id,)).fetchone()
+            if not row:
+                raise KeyError(run_id)
+            existing = json.loads(row["profile"])
+            payload = profile.model_dump(mode="json", exclude={"id", "confirmed_at"})
+            if existing:
+                previous = Profile.model_validate(existing).model_dump(mode="json", exclude={"id", "confirmed_at"})
+                if previous != payload:
+                    raise Conflict("Target was already confirmed; start a new run to change it")
+                return
+            checkpoint = json.loads(row["checkpoint"])
+            if row["status"] != "awaiting_confirmation" or checkpoint["seller_url"] != profile.seller_url:
+                raise Conflict("Seller draft is not ready for confirmation")
+            db.execute("UPDATE runs SET profile=?,stage='discovery',status='queued',error=NULL,updated_at=? WHERE id=?",
+                       (profile.model_dump_json(), utcnow().isoformat(), run_id))
 
     def claim(self, run_id: str, lease_seconds: int = 180) -> int | None:
         with self.connection() as db:

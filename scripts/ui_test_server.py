@@ -1,0 +1,78 @@
+"""Labelled synthetic providers for browser tests of the real API/worker/database.
+
+Never use this as the live application server. It performs no company discovery.
+"""
+import hashlib
+import os
+import threading
+import time
+from pathlib import Path
+
+import uvicorn
+
+from shortlist.api import create_app
+from shortlist.config import Settings
+from shortlist.domain import Candidate, Criterion, Source
+from shortlist.providers import SellerDraft, validate_extraction
+from shortlist.store import Store
+from shortlist.worker import execute_run
+
+settings = Settings(db_path=Path(os.environ.get("SHORTLIST_UI_TEST_DB", "data/ui-test.sqlite3")))
+store = Store(settings.db_path)
+
+
+class FixtureSearch:
+    name = "labelled_test_fixture"
+
+    def search(self, query, seller_url):
+        return [Candidate(domain=f"example-{index}.com", name=f"Example {index} (test fixture)",
+                          url=f"https://example-{index}.com/", query=query, provider=self.name)
+                for index in (1, 2)]
+
+
+def fixture_fetch(url, expected_domain=None):
+    text = ("TEST FIXTURE. This is synthetic test content, not a real company. "
+            "We provide artificial intelligence software for business operations as a hosted subscription. "
+            "Example Labs is a privately held startup. No buying intent has been observed.")
+    return Source(url=url, company_domain=expected_domain or "eygentic.com", title="Labelled test source",
+                  text=text, content_hash=hashlib.sha256(text.encode()).hexdigest())
+
+
+class FixtureModel:
+    name = "labelled_test_fixture"
+
+    def seller(self, source):
+        return SellerDraft(offer="Test fixture: customer acquisition experiments for software businesses",
+                           target="Private AI B2B SaaS startups", criteria=[
+                               Criterion(id="ai", description="Offers AI software to businesses"),
+                               Criterion(id="private", description="Privately held startup")], unknowns=[])
+
+    def research(self, profile, candidate, sources):
+        findings = []
+        for criterion in profile.criteria:
+            if candidate.domain == "example-2.com" and criterion.id == "private":
+                findings.append({"criterion_id": criterion.id, "status": "unknown",
+                                 "reason": "Test fixture: ownership needs an independent dated source"})
+            else:
+                passage = "Example Labs is a privately held startup." if criterion.id == "private" else "We provide artificial intelligence software for business operations as a hosted subscription."
+                findings.append({"criterion_id": criterion.id, "status": "supported", "evidence": [{
+                    "source_id": sources[0].id, "passage": passage,
+                    "claim": "Test fixture observation from supplied text"}]})
+        return validate_extraction({"name": f"Example research company {candidate.domain} (test fixture)",
+                                    "findings": findings, "hypotheses": [{
+                                        "text": "Test fixture: acquisition experiments might be relevant",
+                                        "assumptions": ["No need or buying intent has been established"]}]},
+                                   profile, candidate.domain, sources)
+
+
+def loop():
+    while True:
+        for run in store.list_runs():
+            if run["status"] in ("queued", "running"):
+                execute_run(store, settings, run["id"], search=FixtureSearch(), model=FixtureModel(), fetch=fixture_fetch)
+        time.sleep(.1)
+
+
+if __name__ == "__main__":
+    threading.Thread(target=loop, daemon=True).start()
+    uvicorn.run(create_app(settings), host="127.0.0.1", port=8015, log_level="warning")

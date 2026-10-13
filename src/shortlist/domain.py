@@ -14,7 +14,7 @@ def new_id() -> str:
 
 
 class Value(BaseModel):
-    model_config = ConfigDict(extra="forbid", frozen=True)
+    model_config = ConfigDict(extra="forbid", frozen=True, json_schema_serialization_defaults_required=True)
 
 
 class Criterion(Value):

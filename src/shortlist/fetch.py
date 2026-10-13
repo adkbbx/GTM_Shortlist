@@ -10,7 +10,7 @@ import re
 import socket
 import ssl
 import time
-from urllib.parse import urljoin, urlsplit, urlunsplit
+from urllib.parse import quote, urljoin, urlsplit, urlunsplit
 
 from bs4 import BeautifulSoup
 
@@ -42,7 +42,9 @@ def canonical_url(url: str) -> str:
         raise FetchError("Invalid website hostname") from exc
     if not re.fullmatch(r"[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?", host):
         raise FetchError("Invalid website hostname")
-    if "." not in host or any(not part or len(part) > 63 for part in host.split(".")):
+    if len(host) > 253 or "." not in host or any(
+        not re.fullmatch(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?", part) for part in host.split(".")
+    ):
         raise FetchError("Use a public website domain")
     if host.endswith((".local", ".internal", ".localhost")) or host == "localhost":
         raise FetchError("Private website is not permitted")
@@ -55,7 +57,9 @@ def canonical_url(url: str) -> str:
     # Reject abbreviated/encoded address forms such as 127.1 and 0x7f000001.
     if host.split(".")[-1].isdigit():
         raise FetchError("Numeric website hostname is not permitted")
-    return urlunsplit(("https", host, parsed.path or "/", parsed.query, ""))
+    path = quote(parsed.path or "/", safe="/%:@!$&'()*+,;=-._~")
+    query = quote(parsed.query, safe="%:@!$&'()*+,;=/?-._~")
+    return urlunsplit(("https", host, path, query, ""))
 
 
 def domain_of(url: str) -> str:
