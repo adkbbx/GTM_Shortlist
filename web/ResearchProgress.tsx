@@ -1,4 +1,25 @@
+import { useEffect, useState } from 'react';
 import type { Run } from './api';
+
+function ResearchActivity({ run, connected }: { run: Run; connected: boolean }) {
+  const [visible, setVisible] = useState(!document.hidden);
+  useEffect(() => {
+    const change = () => setVisible(!document.hidden);
+    document.addEventListener('visibilitychange', change);
+    return () => document.removeEventListener('visibilitychange', change);
+  }, []);
+  const working = connected && visible && run.status === 'running' && run.progress.worker_online;
+  const offer = run.profile?.offer ?? run.draft?.offer;
+  const domain = run.seller_url ? new URL(run.seller_url).hostname : run.company_name;
+  return <div className={`agent-activity ${working ? 'is-working' : ''}`}>
+    <div className="agent-paper" aria-hidden="true"><svg viewBox="0 0 80 96" fill="none"><path d="M14 4h36l16 16v72H14V4Z" stroke="currentColor" strokeWidth="1.5"/><path d="M50 4v17h16M25 34h30M25 44h25M25 54h30M25 64h19M25 74h26" stroke="currentColor" strokeWidth="1.5"/></svg><span className="agent-scan" /></div>
+    <div className="agent-observation"><p className="agent-domain">{domain ?? 'Your company research'}</p>
+      <p>{working ? run.stage === 'seller' || run.stage === 'identity' ? 'Reading your company before proposing a target.' : run.stage === 'discovery' ? 'Looking for companies that match your confirmed target.' : 'Reading sources and checking each assessment.' : !connected ? 'Connection interrupted. Your saved work is safe.' : !run.progress.worker_online ? 'Saved and waiting for an available worker.' : 'Your saved research is ready to continue.'}</p>
+      {offer && <details className="agent-offer"><summary>Your offer summary</summary><p>{offer}</p></details>}
+      <span className="agent-state"><i aria-hidden="true" />{working ? 'Worker active' : !connected ? 'Reconnecting' : !run.progress.worker_online ? 'Worker unavailable' : 'Saved'}</span>
+    </div>
+  </div>;
+}
 
 const time = (value: string) => new Intl.DateTimeFormat(undefined, {
   hour: '2-digit', minute: '2-digit', second: '2-digit',
@@ -23,7 +44,7 @@ export function ResearchProgress({ run, connected = true }: { run: Run; connecte
   const checkpoints = [...steps.values()].sort((a, b) => a.id - b.id);
   const visible = pending ? checkpoints.slice(-6) : checkpoints;
   const phases = [
-    { label: 'Understand offer', complete: !!run.draft || !!run.profile, active: run.status === 'running' && run.stage === 'seller' },
+    { label: 'Understand offer', complete: !!run.draft || !!run.profile, active: run.status === 'running' && ['seller', 'identity'].includes(run.stage) },
     { label: 'Confirm target', complete: !!run.profile, active: run.status === 'awaiting_confirmation' },
     { label: 'Discover companies', complete: progress.candidates > 0, active: run.status === 'running' && run.stage === 'discovery' },
     { label: 'Research evidence', complete: run.stage === 'review', active: run.status === 'running' && run.stage === 'research' },
@@ -33,6 +54,7 @@ export function ResearchProgress({ run, connected = true }: { run: Run; connecte
       : run.stage === 'identity' ? 'Finding your company website' : run.stage === 'seller' ? 'Understanding your company' : 'Building your shortlist'
     : 'Research checkpoints';
   const content = <>
+    {pending && <ResearchActivity run={run} connected={connected} />}
     <ol className="research-phases" aria-label="Research stages">{phases.map(phase => <li key={phase.label}
       className={phase.complete ? 'phase-complete' : phase.active ? 'phase-current' : ''}
       aria-current={phase.active && !phase.complete ? 'step' : undefined}>
@@ -45,7 +67,7 @@ export function ResearchProgress({ run, connected = true }: { run: Run; connecte
       : latest?.label ?? 'Waiting for the worker to pick up your saved run.'}</p>}
     {(progress.candidates > 0 || progress.sources > 0) && <p className="progress-counts">
       <span>{progress.candidates} candidates discovered</span><span>{progress.sources} company pages saved</span>
-      <span>{progress.companies} of up to 3 companies researched</span>
+      <span>{progress.companies} of up to {run.credits?.maximum ?? 3} companies researched</span>
     </p>}
     {visible.length > 0 && <ol className="checkpoint-list" aria-label="Saved research checkpoints">{visible.map(event => <li key={event.id}>
       <CheckpointIcon state={event.state} active={connected && pending && progress.worker_online && event.id === latest?.id && event.state === 'started'} />
@@ -55,7 +77,7 @@ export function ResearchProgress({ run, connected = true }: { run: Run; connecte
     </li>)}</ol>}
     {!pending && !checkpoints.length && <p className="hint">This older run predates the activity timeline. Its saved sources and review remain available.</p>}
     {pending && <p className="hint">Every checkpoint is saved. You can leave this page and return.</p>}
-    {pending && !progress.worker_online && <p className="notice">The local worker is offline. Start the app with <code>shortlist serve</code> to run the website and worker together.</p>}
+    {pending && !progress.worker_online && <p className="notice">The research worker is unavailable. Your run is saved and will continue when the worker reconnects.</p>}
   </>;
   return pending ? <section className="sheet research-progress" aria-labelledby="progress-heading"><h2 id="progress-heading">{heading}</h2>{content}</section>
     : <details className="sheet research-progress progress-history"><summary><span>{heading}</span><span className="history-meta">{checkpoints.length} saved steps<svg className="history-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m8 4 8 8-8 8" stroke="currentColor" strokeWidth="1.5" /></svg></span></summary>{content}</details>;

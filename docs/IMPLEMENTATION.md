@@ -88,7 +88,7 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 - [ ] Identify 30 potential buyers and prioritize 10; prepare offer-specific samples.
 - [ ] Validate three $99 reviewed pilots and repeat demand before $49 subscription/billing.
 
-Out of scope: automated outreach, contact databases, CRM integrations and Experiment Judge.
+Out of scope: automated outreach sending, contact databases, CRM integrations and Experiment Judge. On 15 October the user expanded the goal to public decision-maker research and draft emails, plus competitors and campaigns. Track the complete expanded scope in [agent-experience.md](agent-experience.md).
 
 ## Continuation rules
 The unattended window ended on 14 October and its heartbeat is paused. Subsequent work follows new human requests; do not silently extend the old schedule.

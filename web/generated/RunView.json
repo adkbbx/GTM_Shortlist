@@ -56,6 +56,12 @@
           "format": "date-time",
           "title": "Discovered At",
           "type": "string"
+        },
+        "excerpt": {
+          "default": "",
+          "maxLength": 3000,
+          "title": "Excerpt",
+          "type": "string"
         }
       },
       "required": [
@@ -64,7 +70,8 @@
         "url",
         "query",
         "provider",
-        "discovered_at"
+        "discovered_at",
+        "excerpt"
       ],
       "title": "Candidate",
       "type": "object"
@@ -774,6 +781,78 @@
       "title": "SavedRecord",
       "type": "object"
     },
+    "SearchClue": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "passage": {
+          "maxLength": 3000,
+          "title": "Passage",
+          "type": "string"
+        },
+        "source_url": {
+          "title": "Source Url",
+          "type": "string"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "passage",
+        "source_url",
+        "observed_at"
+      ],
+      "title": "SearchClue",
+      "type": "object"
+    },
+    "Selection": {
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "title": "Domain",
+          "type": "string"
+        },
+        "position": {
+          "minimum": 1,
+          "title": "Position",
+          "type": "integer"
+        },
+        "target_terms": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Target Terms",
+          "type": "array"
+        },
+        "clues": {
+          "items": {
+            "$ref": "#/$defs/SearchClue"
+          },
+          "title": "Clues",
+          "type": "array"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "domain",
+        "position",
+        "target_terms",
+        "clues",
+        "explanation"
+      ],
+      "title": "Selection",
+      "type": "object"
+    },
     "SellerDraft": {
       "additionalProperties": false,
       "properties": {
@@ -1053,6 +1132,14 @@
         "type": "string"
       },
       "title": "Draft Exclusions",
+      "type": "array"
+    },
+    "selection": {
+      "items": {
+        "$ref": "#/$defs/Selection"
+      },
+      "maxItems": 12,
+      "title": "Selection",
       "type": "array"
     },
     "termination": {

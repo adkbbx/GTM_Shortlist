@@ -26,6 +26,7 @@ from shortlist.providers import (
     company_name_matches,
     queries_for,
 )
+from shortlist.selection import prioritize
 from shortlist.store import BudgetExceeded, Conflict, Store
 from shortlist.verification import (
     Verification,
@@ -149,10 +150,14 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 checkpoint.update(discovered=discovered, completed_queries=completed_queries)
                 store.checkpoint(run_id, fence, "discovery", checkpoint)
             unique = {c["domain"]: c for c in reversed(discovered)}
-            checkpoint["candidates"] = list(reversed(list(unique.values())))[:12]
+            candidates, selection = prioritize(profile, [Candidate.model_validate(c) for c in reversed(list(unique.values()))][:12])
+            checkpoint["candidates"] = [c.model_dump(mode="json") for c in candidates]
+            checkpoint["selection"] = [item.model_dump(mode="json") for item in selection]
             store.checkpoint(run_id, fence, "research", checkpoint)
             store.event(run_id, fence, ProgressUpdate(phase="discovery",
                 label=f"Saved {len(checkpoint['candidates'])} unique company candidates", state="succeeded"))
+            store.event(run_id, fence, ProgressUpdate(phase="discovery", label="Prioritized candidates against your target",
+                detail="Target wording first, then public event clues. Search clues still need verification.", state="succeeded"))
         researched = {r["research"]["domain"] for r in store.get_run(run_id)["records"]}
         for data in checkpoint["candidates"][:6]:
             candidate = Candidate.model_validate(data)

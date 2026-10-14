@@ -20,6 +20,28 @@ async function capture(page: Page, path: string) {
   await page.screenshot({ path, fullPage: true });
 }
 
+test('research activity follows the real worker and respects reduced motion', async ({ page }, info) => {
+  const fixture = await page.request.post('/__fixture_held_run');
+  const { id } = await fixture.json();
+  try {
+    await page.goto(`/?run=${id}`);
+    await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toContainText('Saved research for example-1.com', { timeout: 15000 });
+    await expect(page.locator('.agent-activity')).toHaveClass(/is-working/);
+    await expect(page.locator('.agent-state')).toHaveText('Worker active');
+    await page.getByText('Your offer summary', { exact: true }).click();
+    await expect(page.locator('.agent-offer')).toContainText('customer acquisition');
+    await expect(page.getByRole('progressbar')).toHaveCount(0);
+    await noOverflow(page);
+    await capture(page, `.impeccable/review/${info.project.name}-agent-activity.png`);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    expect(await page.locator('.agent-scan').evaluate(element => getComputedStyle(element).animationName)).toBe('none');
+    await page.request.post(`/__fixture_release/${id}`);
+    await expect(page.locator('.agent-activity')).toHaveCount(0, { timeout: 15000 });
+    await page.getByText('Why this company was researched', { exact: true }).first().click();
+    await expect(page.locator('.selection-reason').first()).toContainText('do not establish fit or buying intent');
+  } finally { await page.request.post(`/__fixture_release/${id}`); }
+});
+
 test('stopping actual held research keeps completed sheets and ignores an older progress response', async ({ page }, info) => {
   const fixture = await page.request.post('/__fixture_held_run');
   expect(fixture.ok()).toBeTruthy();
@@ -276,7 +298,7 @@ test('saved seller → confirmation → evidence → review → export survives 
   await capture(page, `.impeccable/review/${testInfo.project.name}-progress.png`);
   await expect(page.getByRole('heading', { name: '2 companies researched' })).toBeVisible({ timeout: 15000 });
   const first = page.locator('.company-sheet').first();
-  await first.locator('summary').first().click();
+  await first.locator('.findings .evidence > summary').first().click();
   await expect(first.locator('blockquote').first()).toContainText('artificial intelligence software');
   await expect(first.getByText('Publication date unknown').first()).toBeVisible();
   const ownership = first.locator('.findings .finding').nth(1);
@@ -298,7 +320,7 @@ test('saved seller → confirmation → evidence → review → export survives 
   await page.locator('.progress-history > summary').click();
   await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toContainText('Checking that the evidence supports');
   await page.locator('.progress-history > summary').click();
-  await first.locator('summary').first().click();
+  await first.locator('.findings .evidence > summary').first().click();
   await first.locator('.exclusion-checks summary').first().click();
   await noOverflow(page);
   await capture(page, `.impeccable/review/${testInfo.project.name}-results.png`);
@@ -364,7 +386,8 @@ test('queued run explains an offline worker without pretending to research', asy
   await page.route(`**/api/runs/${queued.id}`, route => route.fulfill({ json: snapshot }));
   await page.goto(`/?run=${queued.id}`);
   await expect(page.getByRole('heading', { name: 'Research is waiting for a worker' })).toBeVisible();
-  await expect(page.getByText('The local worker is offline.', { exact: false })).toBeVisible();
+  await expect(page.getByText('The research worker is unavailable.', { exact: false })).toBeVisible();
+  await expect(page.locator('.agent-activity')).not.toHaveClass(/is-working/);
   await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toHaveCount(0);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await noOverflow(page);

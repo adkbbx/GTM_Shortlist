@@ -73,7 +73,9 @@ def candidates_from_results(results: list[dict], query: str, provider: str, sell
             continue
         seen.add(domain)
         title = result.get("title", domain)
-        candidates.append(Candidate(domain=domain, name=str(title)[:300], url=url, query=query, provider=provider))
+        excerpt = result.get("content") or result.get("snippet") or ""
+        candidates.append(Candidate(domain=domain, name=str(title)[:300], url=url, query=query, provider=provider,
+                                    excerpt=excerpt[:3000] if isinstance(excerpt, str) else ""))
     return candidates[:12]
 
 

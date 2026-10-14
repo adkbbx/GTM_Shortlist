@@ -317,6 +317,11 @@ export interface components {
              * Format: date-time
              */
             discovered_at: string;
+            /**
+             * Excerpt
+             * @default
+             */
+            excerpt: string;
         };
         /** Confirmation */
         Confirmation: {
@@ -732,6 +737,8 @@ export interface components {
             reused_offer: boolean;
             /** Draft Exclusions */
             draft_exclusions?: string[];
+            /** Selection */
+            selection?: components["schemas"]["Selection"][];
             /** Termination */
             termination?: "user_stopped" | null;
         };
@@ -742,6 +749,33 @@ export interface components {
             operator_review?: components["schemas"]["OperatorReview"] | null;
             /** Credits Used */
             credits_used?: number | null;
+        };
+        /** SearchClue */
+        SearchClue: {
+            /** Label */
+            label: string;
+            /** Passage */
+            passage: string;
+            /** Source Url */
+            source_url: string;
+            /**
+             * Observed At
+             * Format: date-time
+             */
+            observed_at: string;
+        };
+        /** Selection */
+        Selection: {
+            /** Domain */
+            domain: string;
+            /** Position */
+            position: number;
+            /** Target Terms */
+            target_terms: string[];
+            /** Clues */
+            clues: components["schemas"]["SearchClue"][];
+            /** Explanation */
+            explanation: string;
         };
         /** SellerDraft */
         SellerDraft: {

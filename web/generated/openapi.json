@@ -808,6 +808,12 @@
             "type": "string",
             "format": "date-time",
             "title": "Discovered At"
+          },
+          "excerpt": {
+            "type": "string",
+            "maxLength": 3000,
+            "title": "Excerpt",
+            "default": ""
           }
         },
         "additionalProperties": false,
@@ -818,7 +824,8 @@
           "url",
           "query",
           "provider",
-          "discovered_at"
+          "discovered_at",
+          "excerpt"
         ],
         "title": "Candidate"
       },
@@ -1911,6 +1918,14 @@
             "type": "array",
             "title": "Draft Exclusions"
           },
+          "selection": {
+            "items": {
+              "$ref": "#/components/schemas/Selection"
+            },
+            "type": "array",
+            "maxItems": 12,
+            "title": "Selection"
+          },
           "termination": {
             "anyOf": [
               {
@@ -1982,6 +1997,78 @@
           "research"
         ],
         "title": "SavedRecord"
+      },
+      "SearchClue": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "passage": {
+            "type": "string",
+            "maxLength": 3000,
+            "title": "Passage"
+          },
+          "source_url": {
+            "type": "string",
+            "title": "Source Url"
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Observed At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "label",
+          "passage",
+          "source_url",
+          "observed_at"
+        ],
+        "title": "SearchClue"
+      },
+      "Selection": {
+        "properties": {
+          "domain": {
+            "type": "string",
+            "title": "Domain"
+          },
+          "position": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Position"
+          },
+          "target_terms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Target Terms"
+          },
+          "clues": {
+            "items": {
+              "$ref": "#/components/schemas/SearchClue"
+            },
+            "type": "array",
+            "title": "Clues"
+          },
+          "explanation": {
+            "type": "string",
+            "title": "Explanation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "domain",
+          "position",
+          "target_terms",
+          "clues",
+          "explanation"
+        ],
+        "title": "Selection"
       },
       "SellerDraft": {
         "properties": {

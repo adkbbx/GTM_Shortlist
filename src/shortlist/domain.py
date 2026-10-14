@@ -170,6 +170,7 @@ class Candidate(Value):
     query: str
     provider: str
     discovered_at: datetime = Field(default_factory=utcnow)
+    excerpt: str = Field(default="", max_length=3000)
 
 
 def qualify(profile: Profile, findings: tuple[Finding, ...], exclusions: tuple[ExclusionFinding, ...] = ()) -> str:

@@ -26,6 +26,7 @@ from shortlist.local_credentials import (
 )
 from shortlist.progress import RunProgress
 from shortlist.providers import SellerDraft, company_name_matches
+from shortlist.selection import Selection
 from shortlist.store import BudgetExceeded, Conflict, Store
 
 
@@ -148,6 +149,7 @@ class RunView(BaseModel):
     legacy_credit_exempt: bool = False
     reused_offer: bool = False
     draft_exclusions: list[str] = Field(default_factory=list)
+    selection: list[Selection] = Field(default_factory=list, max_length=12)
     termination: Literal["user_stopped"] | None = None
 
 
@@ -251,6 +253,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                        updated_at=run["updated_at"], attempts=run["attempts"], credits=run.get("credits"),
                        legacy_credit_exempt=run.get("legacy_credit_exempt", False),
                        reused_offer=run["checkpoint"].get("reused_offer", False),
+                       selection=run["checkpoint"].get("selection", []),
                        termination=run["checkpoint"].get("termination"),
                        draft_exclusions=run["checkpoint"].get("draft_exclusions", []), progress=RunProgress(
                            worker_online=store.worker_online(), candidates=len(run["checkpoint"].get("candidates", [])),
