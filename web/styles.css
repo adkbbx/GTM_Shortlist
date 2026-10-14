@@ -61,3 +61,20 @@ input:focus,textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px #b450
 
 .reuse-offer { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
 .reuse-offer > p { flex: 1 1 20rem; }
+
+/* Compact controls must not inherit text-field padding or focus shadows. */
+input[type=checkbox] { padding: 0; width: 20px; height: 20px; min-height: 20px; border-radius: 4px; box-shadow: none; cursor: pointer; }
+input[type=checkbox]:focus { box-shadow: none; }
+.checkbox-label { cursor: pointer; padding: 4px 8px; border-radius: var(--radius-control); gap: 10px; }
+.checkbox-label:hover { background: var(--paper); }
+.checkbox-label:has(:focus-visible) { outline: 2px solid var(--orange); outline-offset: 2px; }
+.checkbox-label input:focus-visible { outline: none; }
+.checkbox-label:has(:disabled) { cursor: default; opacity: .65; }
+.text-button { text-decoration: none; padding: 8px 12px; font-weight: 500; }
+.text-button:hover { background: #f6e0d3; color: #6a3417; }
+.text-button:disabled:hover { background: transparent; }
+.website a, .company-heading a, .source-meta a { text-decoration-line: underline; text-decoration-color: #d4d1ca; text-decoration-thickness: 1px; text-underline-offset: 4px; transition: color .18s ease, text-decoration-color .18s ease; }
+.website a:hover, .company-heading a:hover, .source-meta a:hover { color: #6a3417; text-decoration-color: currentColor; }
+.company-heading a svg, .source-meta a svg { flex: none; width: 16px; height: 16px; }
+@media (forced-colors: active) { .checkbox-label:has(:focus-visible) { outline-color: Highlight; } }
+@media (prefers-reduced-motion: reduce) { .website a, .company-heading a, .source-meta a { transition: none; } }

@@ -165,7 +165,7 @@ Buttons transition state properties over .18s and do not lift on hover; active p
 
 ## Shapes
 
-Research sheets and controls use the extracted rounded scale with quiet 1px borders. Primary actions have a minimum height of 52px, inputs 48px, and source disclosures and text actions 44px. Checkbox labels provide a 44px interaction row around a 20px checkbox. Keyboard focus is a 2px orange-ink outline with a 4px offset.
+Research sheets and controls use the extracted rounded scale with quiet 1px borders. Primary actions have a minimum height of 52px, inputs 48px, and source disclosures and text actions 44px. Checkbox labels provide a 44px interaction row around a native 20px checkbox. Checkbox inputs reset text-field padding and shadows; focus outlines surround the label row, and high-contrast mode retains native rendering. Keyboard focus is a 2px orange-ink outline with a 4px offset.
 
 The identity mark is thin SVG construction linework. Arrow SVGs accompany navigation and source actions. No glyph icons, pill-shaped dashboards, or ornamental rocket illustrations are implemented.
 
@@ -173,7 +173,7 @@ The identity mark is thin SVG construction linework. Arrow SVGs accompany naviga
 
 ### Buttons
 
-Primary actions use orange ink, white text, a 600 weight, and the extracted padding. Secondary actions use white with a warm neutral border and quiet hover fill. Text actions use an underlined orange label and no fill. Disabled actions reduce opacity to .65 and retain their labels. Keyboard focus follows the shared outline treatment.
+Primary actions use orange ink, white text, a 600 weight, and the extracted padding. Secondary actions use white with a warm neutral border and quiet hover fill. Text actions use an orange label without an underline and a warm hover fill. Actual source and website links keep a fine neutral underline that darkens on hover. Disabled actions reduce opacity to .65 and retain their labels. Keyboard focus follows the shared outline treatment.
 
 ### Inputs / Fields
 

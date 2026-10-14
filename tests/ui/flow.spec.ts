@@ -33,6 +33,25 @@ test('saved seller → confirmation → evidence → review → export survives 
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
   await page.getByLabel('What do you sell?').fill('Test fixture edited offer: acquisition experiments for software businesses');
   await page.getByLabel('Exclude from consideration').fill('Companies headquartered in Canada\nPublicly listed companies');
+  const required = page.getByRole('checkbox', { name: 'Required', exact: true }).first();
+  const control = await required.evaluate(element => ({
+    width: element.getBoundingClientRect().width, height: element.getBoundingClientRect().height,
+    padding: getComputedStyle(element).padding,
+    targetHeight: element.closest('label')?.getBoundingClientRect().height ?? 0,
+  }));
+  expect(control.width).toBe(20);
+  expect(control.height).toBe(20);
+  expect(control.padding).toBe('0px');
+  expect(control.targetHeight).toBeGreaterThanOrEqual(44);
+  await required.focus();
+  await page.keyboard.press('Space');
+  await expect(required).not.toBeChecked();
+  await page.keyboard.press('Space');
+  await expect(required).toBeChecked();
+  await page.emulateMedia({ forcedColors: 'active' });
+  await expect(required).toBeVisible();
+  await expect(required).toBeFocused();
+  await page.emulateMedia({ forcedColors: 'none' });
   await noOverflow(page);
   await capture(page, `.impeccable/review/${testInfo.project.name}-confirmation.png`);
   await page.getByRole('button', { name: 'Confirm target and discover' }).click();
@@ -69,6 +88,7 @@ test('saved seller → confirmation → evidence → review → export survives 
   await noOverflow(page);
   await capture(page, `.impeccable/review/${testInfo.project.name}-results.png`);
   await page.getByLabel('Accepted only').check();
+  await capture(page, `.impeccable/review/${testInfo.project.name}-export-filter.png`);
   const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('link', { name: 'Export JSON' }).click()]);
   const outputPath = testInfo.outputPath('accepted.json');
   await download.saveAs(outputPath);
