@@ -58,6 +58,14 @@ function parseRun(data: unknown): Run {
 }
 
 export const api = {
+  async deleteRun(id: string) {
+    const response = await authorizedFetch(`/api/runs/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    if (!response.ok) {
+      const data: unknown = await response.json();
+      throw new Error(data && typeof data === 'object' && 'detail' in data && typeof data.detail === 'string'
+        ? data.detail : 'Research could not be deleted. Please try again.');
+    }
+  },
   async credits() {
     const data = await request('/api/credits');
     if (!isWallet(data)) throw new Error('Credit balance is unavailable. Please reload.');

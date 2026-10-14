@@ -60,7 +60,8 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 - [x] Build signup/login/confirmation/password recovery, session refresh/signout and authenticated export; verify with real SDK and labelled browser transport fixtures.
 - [ ] Postgres persistence and migrations, Supabase verified signup and JWT validation.
 - [ ] Workspace isolation tested with two actual accounts; private schema/role policies.
-- [ ] Atomic one-demo entitlement with shared attempt caps; account deletion/retention.
+- [x] Preserve once-only signup grants and shared attempt caps through research deletion; provide bounded retention preview/apply command.
+- [ ] Complete account closure, Supabase identity/session removal and production retention/backup policy.
 - [ ] Optional configured booking link and operator review queue; separate click/booked metrics.
 - [ ] Container/web/worker deployment and persistent database with configured external SMTP.
 - [ ] Five real runs across three sellers and observed external user test.

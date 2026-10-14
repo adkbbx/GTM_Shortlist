@@ -4,6 +4,7 @@ import json
 import sqlite3
 import time
 from contextlib import contextmanager
+from datetime import UTC, datetime
 from pathlib import Path
 
 from shortlist.domain import (
@@ -72,6 +73,8 @@ class Store:
             """)
             if "detail" not in {row["name"] for row in db.execute("PRAGMA table_info(run_events)")}:
                 db.execute("ALTER TABLE run_events ADD COLUMN detail TEXT")
+            if "deleted_at" not in {row["name"] for row in db.execute("PRAGMA table_info(runs)")}:
+                db.execute("ALTER TABLE runs ADD COLUMN deleted_at TEXT")
 
     @contextmanager
     def connection(self):
@@ -173,8 +176,10 @@ class Store:
         digest = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
         with self.connection() as db:
             self.begin(db)
-            existing = db.execute("SELECT id,payload_hash FROM runs WHERE request_key=?", (request_key,)).fetchone()
+            existing = db.execute("SELECT id,payload_hash,deleted_at FROM runs WHERE request_key=?", (request_key,)).fetchone()
             if existing:
+                if existing["deleted_at"]:
+                    raise Conflict("This request was deleted. Start a new shortlist")
                 if existing["payload_hash"] != digest:
                     raise Conflict("Request key was already used for different inputs")
                 return existing["id"]
@@ -189,7 +194,7 @@ class Store:
 
     def get_run(self, run_id: str) -> dict:
         with self.connection() as db:
-            row = db.execute("SELECT * FROM runs WHERE id=?", (run_id,)).fetchone()
+            row = db.execute("SELECT * FROM runs WHERE id=? AND deleted_at IS NULL", (run_id,)).fetchone()
             if not row:
                 raise KeyError(run_id)
             result = dict(row)
@@ -212,7 +217,43 @@ class Store:
     def list_runs(self) -> list[dict]:
         with self.connection() as db:
             return [dict(row) for row in db.execute(
-                f"SELECT id,status,stage,created_at,updated_at,error FROM runs ORDER BY created_at DESC,{self.order_key} DESC LIMIT 100")]
+                f"SELECT id,status,stage,created_at,updated_at,error FROM runs WHERE deleted_at IS NULL ORDER BY created_at DESC,{self.order_key} DESC LIMIT 100")]
+
+    def clear_source_cache(self, db):
+        db.execute("DELETE FROM source_cache")
+
+    def retention_candidates(self, cutoff: datetime) -> list[str]:
+        if cutoff.tzinfo is None:
+            raise ValueError("Retention cutoff must include a timezone")
+        with self.connection() as db:
+            return [row["id"] for row in db.execute(
+                "SELECT id FROM runs WHERE deleted_at IS NULL "
+                "AND status IN ('ready','partial','awaiting_confirmation') AND updated_at<? "
+                f"ORDER BY updated_at,{self.order_key} LIMIT 100",
+                (cutoff.astimezone(UTC).isoformat(),))]
+
+    def delete_run(self, run_id: str):
+        """Erase research content; retain minimal command/spending identities."""
+        with self.connection() as db:
+            self.begin(db)
+            row = db.execute("SELECT status,deleted_at FROM runs WHERE id=?", (run_id,)).fetchone()
+            if not row:
+                raise KeyError(run_id)
+            if row["deleted_at"]:
+                return
+            if row["status"] in ("queued", "running"):
+                raise Conflict("Wait for research to finish before deleting this shortlist")
+            self.finished(db, run_id)
+            db.execute("DELETE FROM records WHERE run_id=?", (run_id,))
+            db.execute("DELETE FROM run_events WHERE run_id=?", (run_id,))
+            db.execute("UPDATE attempt_results SET payload=NULL,request_hash='' "
+                       "WHERE attempt_id IN (SELECT id FROM attempts WHERE run_id=?)", (run_id,))
+            db.execute("UPDATE attempts SET operation_key=id WHERE run_id=?", (run_id,))
+            self.clear_source_cache(db)
+            now = utcnow().isoformat()
+            db.execute("UPDATE runs SET profile='{}',checkpoint='{}',payload_hash='',error=NULL,stage='deleted',"
+                       "status='partial',deleted_at=?,updated_at=?,lease_until=0,fence=fence+1 WHERE id=?",
+                       (now, now, run_id))
 
     def pending_runs(self) -> list[str]:
         with self.connection() as db:
@@ -224,8 +265,10 @@ class Store:
         digest = hashlib.sha256(seller_url.encode()).hexdigest()
         with self.connection() as db:
             self.begin(db)
-            row = db.execute("SELECT id,payload_hash FROM runs WHERE request_key=?", (request_key,)).fetchone()
+            row = db.execute("SELECT id,payload_hash,deleted_at FROM runs WHERE request_key=?", (request_key,)).fetchone()
             if row:
+                if row["deleted_at"]:
+                    raise Conflict("This request was deleted. Start a new shortlist")
                 if row["payload_hash"] != digest:
                     raise Conflict("Request key was already used for a different website")
                 return row["id"]
@@ -240,7 +283,7 @@ class Store:
     def confirm_draft(self, run_id: str, profile: Profile, company_limit: int = 3):
         with self.connection() as db:
             self.begin(db)
-            row = db.execute("SELECT * FROM runs WHERE id=?", (run_id,)).fetchone()
+            row = db.execute("SELECT * FROM runs WHERE id=? AND deleted_at IS NULL", (run_id,)).fetchone()
             if not row:
                 raise KeyError(run_id)
             existing = json.loads(row["profile"])

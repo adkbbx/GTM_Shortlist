@@ -197,6 +197,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def read_run(run_id: str, store: owned):
         return view(store, run_id)
 
+    @app.delete("/api/runs/{run_id}", status_code=204)
+    def delete_run(run_id: str, store: owned):
+        store.delete_run(run_id)
+        return Response(status_code=204)
+
     @app.post("/api/runs/{run_id}/confirm", response_model=RunView)
     def confirm(run_id: str, input: Confirmation, store: owned):
         run = store.get_run(run_id)

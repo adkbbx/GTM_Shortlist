@@ -3,6 +3,10 @@ import type { Page } from '@playwright/test';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync, readFileSync } from 'node:fs';
 
+test.afterEach(async ({ page }) => {
+  await page.unrouteAll({ behavior: 'wait' });
+});
+
 async function hostedFixture(page: Page) {
   const identity = randomUUID();
   const expiry = Math.floor(Date.now() / 1000) + 3600;
@@ -31,6 +35,10 @@ async function hostedFixture(page: Page) {
 async function capture(page: Page, path: string) {
   mkdirSync('.impeccable/review', { recursive: true });
   await page.evaluate(async () => { await document.fonts.ready; });
+  await page.evaluate(async () => {
+    window.scrollTo(0, 0);
+    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+  });
   await page.screenshot({ path, fullPage: true });
 }
 
@@ -81,4 +89,53 @@ test('selected batch size sets the actual worker limit and quoted cost', async (
       .map(element => `${element.tagName}.${element.className}`).slice(0, 12),
   }));
   expect(layout.scroll, JSON.stringify(layout)).toBeLessThanOrEqual(layout.width + 1);
+});
+
+test('deletion has explicit confirmation, retry recovery and unchanged credits', async ({ page }, info) => {
+  const originalViewport = page.viewportSize();
+  await hostedFixture(page);
+  await page.getByLabel('Seller website', { exact: true }).fill('https://eygentic.com/');
+  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await expect(page.getByLabel('Companies in this batch')).toBeVisible({ timeout: 15000 });
+  await page.getByLabel('Companies in this batch').selectOption('1');
+  await page.getByRole('button', { name: 'Confirm target and discover' }).click();
+  await expect(page.getByRole('heading', { name: '1 company researched' })).toBeVisible({ timeout: 15000 });
+  const runId = new URL(page.url()).searchParams.get('run');
+  expect(runId).toBeTruthy();
+  await page.getByRole('button', { name: 'Delete saved research' }).click();
+  await expect(page.getByRole('button', { name: 'Keep research' })).toBeFocused();
+  await page.getByRole('button', { name: 'Keep research' }).click();
+  await expect(page.getByRole('heading', { name: '1 company researched' })).toBeVisible();
+  await page.getByRole('button', { name: 'Delete saved research' }).click();
+  await capture(page, `.impeccable/review/${info.project.name}-delete-confirmation.png`);
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+  const enlarged = await page.evaluate(() => ({ width: innerWidth, scroll: document.documentElement.scrollWidth }));
+  expect(enlarged.scroll).toBeLessThanOrEqual(enlarged.width + 1);
+  await page.evaluate(() => { document.documentElement.style.fontSize = ''; });
+  if (originalViewport) await page.setViewportSize(originalViewport);
+  // A failed mutation keeps research visible and offers a retry.
+  await page.route(`https://app.example/api/runs/${runId}`, async route => {
+    if (route.request().method() === 'DELETE') await route.fulfill({ status: 503, json: { detail: 'Deletion unavailable. Try again.' } });
+    else await route.fallback();
+  });
+  await page.getByRole('button', { name: 'Delete permanently' }).click();
+  await expect(page.getByRole('alert')).toHaveText('Deletion unavailable. Try again.');
+  await expect(page.getByRole('heading', { name: '1 company researched' })).toBeVisible();
+  await page.unroute(`https://app.example/api/runs/${runId}`);
+  await page.getByRole('button', { name: 'Delete permanently' }).click();
+  await expect(page.getByText('Saved research deleted. Your credit balance is unchanged.')).toBeVisible();
+  await expect(page.getByText('2 credits available', { exact: true })).toBeVisible();
+  expect(new URL(page.url()).searchParams.has('run')).toBe(false);
+  await expect(page.getByText('Your research will stay here after you close the browser.')).toHaveCount(1);
+  await expect(page.locator('.saved-run')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Understand my offer' })).toBeEnabled();
+  await capture(page, `.impeccable/review/${info.project.name}-deleted-workspace.png`);
+  await page.reload();
+  await expect(page.getByLabel('Seller website', { exact: true })).toBeVisible();
+  await expect(page.getByText('2 credits available', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '1 company researched' })).toHaveCount(0);
+  await page.goto(`/?run=${runId}`);
+  await expect(page.getByLabel('Seller website', { exact: true })).toBeVisible();
+  await expect(page.getByText('Loading saved research…')).toHaveCount(0);
 });

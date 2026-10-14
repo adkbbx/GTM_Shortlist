@@ -176,6 +176,11 @@ class PostgresStore(Store):
                     )
         return run
 
+    def clear_source_cache(self, db):
+        if self.workspace_id is None:
+            raise ValueError("Research deletion requires an assigned workspace")
+        db.execute("DELETE FROM source_cache WHERE workspace_id=?", (self.workspace_id,))
+
     def reserve_global_search(self, db, provider: str, month: str, cap: int):
         if not db.execute("SELECT reserve_search_quota(?,?,?)", (provider, month, cap)).fetchone()[0]:
             raise BudgetExceeded("Global monthly search cap reached")

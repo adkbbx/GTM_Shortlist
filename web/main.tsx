@@ -132,6 +132,20 @@ function CompanySheet({ record, run, onSaved }: { record: Record; run: Run; onSa
   </article>;
 }
 
+function DeleteResearch({ run, onDeleted }: { run: Run; onDeleted: () => void }) {
+  const [confirming, setConfirming] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState('');
+  const remove = async () => {
+    setDeleting(true); setError('');
+    try { await api.deleteRun(run.id); onDeleted(); }
+    catch (reason) { setError(describeError(reason)); setDeleting(false); }
+  };
+  return <section className="delete-research" aria-label="Delete research">
+    {confirming ? <><h3>Delete this saved research?</h3><p>Export anything you need first. This removes the offer, company sheets, reviews and saved source content. It cannot be undone. Used credits are not refunded; billing and spending records remain.</p><div className="review-actions"><button className="secondary" autoFocus disabled={deleting} onClick={() => { setConfirming(false); setError(''); }}>Keep research</button><button className="danger-button" disabled={deleting} onClick={() => void remove()}>{deleting ? 'Deleting…' : 'Delete permanently'}</button></div>{error && <p role="alert" className="notice">{error}</p>}</> : <button className="text-button" onClick={() => setConfirming(true)}>Delete saved research</button>}
+  </section>;
+}
+
 function App({ account }: { account: ReactNode }) {
   const [health, setHealth] = useState<Health | null>(null);
   const [wallet, setWallet] = useState<Wallet | null>(null);
@@ -142,6 +156,7 @@ function App({ account }: { account: ReactNode }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [acceptedOnly, setAcceptedOnly] = useState(false);
+  const [message, setMessage] = useState('');
   const requestKey = useRef(crypto.randomUUID());
   const headingRef = useRef<HTMLHeadingElement>(null);
 
@@ -177,11 +192,16 @@ function App({ account }: { account: ReactNode }) {
   }, [active?.id, active?.status]);
 
   const select = (run: Run | null, focus = true) => {
-    setActive(run); setError(''); setAcceptedOnly(false);
+    setActive(run); setError(''); setMessage(''); setAcceptedOnly(false);
     window.history.replaceState(null, '', run ? `?run=${run.id}` : window.location.pathname);
     if (focus) window.setTimeout(() => headingRef.current?.focus(), 0);
   };
   const saved = (run: Run) => { setActive(run); setRuns(old => [run, ...old.filter(r => r.id !== run.id)]); };
+  const deleted = () => {
+    if (!active) return;
+    setRuns(old => old.filter(run => run.id !== active.id)); select(null);
+    requestKey.current = crypto.randomUUID(); setMessage('Saved research deleted. Your credit balance is unchanged.');
+  };
   const start = async (event: FormEvent) => {
     event.preventDefault(); setSaving(true); setError('');
     try {
@@ -208,6 +228,8 @@ function App({ account }: { account: ReactNode }) {
         {active.profile && <details className="target-summary"><summary>Confirmed target and offer</summary><p>{active.profile.offer}</p><p>{active.profile.target}</p>{!!active.profile.exclusions.length && <p>Exclusions: {active.profile.exclusions.join('; ')}</p>}<p className="hint">Confirmed {date(active.profile.confirmed_at)}. Start a new run to change this target.</p></details>}
         {active.records.length ? active.records.map(record => <CompanySheet key={record.research.id} record={record} run={active} onSaved={saved} />) : <section className="sheet"><h3>No company records yet</h3><p>The run stopped before usable research could be saved. Your confirmed target is preserved.</p><button className="secondary" onClick={() => select(null)}>Start another shortlist</button></section>}
       </>}
+      {active && !pending && <DeleteResearch key={active.id} run={active} onDeleted={deleted} />}
+      {message && <p className="notice" role="status">{message}</p>}
       <footer className="workspace-footer"><p>GTM Shortlist by Eygentic</p><p>Research supports judgment. It does not establish buying intent.</p>{health && <p className="hint">{health.search_ready && health.gemma_ready ? 'Research providers configured' : 'Research providers still need configuration'}</p>}</footer>
     </main></div>
   </>;

@@ -278,6 +278,8 @@ def test_hosted_api_verifies_identity_and_scopes_every_route(owners, monkeypatch
                              "criteria": [{"id": "ai", "description": "AI software"}]}).status_code == 404
     assert client.post(f"/api/runs/{first_id}/records/invented/review", headers=second_headers,
                        json={"decision": "accepted"}).status_code == 404
+    assert client.delete(f"/api/runs/{first_id}", headers=second_headers).status_code == 404
+    assert client.delete(f"/api/runs/{first_id}", headers=first_headers).status_code == 409
     scheduler = PostgresStore(worker, None, worker=True)
     scoped = scheduler.for_run(first_id)
     assert scoped.workspace_id == a.workspace_id
@@ -575,3 +577,40 @@ os._exit(23)
         db.execute("UPDATE runs SET lease_until=0 WHERE id=?", (run_id,))
     scoped.save_record(run_id, scoped.claim(run_id), record)
     assert len(a.get_run(run_id)["records"]) == CreditWallet(a).balance().used == 1
+
+
+def test_research_deletion_preserves_wallet_and_other_workspace_cache(owners):
+    a, b, worker, profile = owners
+    identity = a.create_run(profile, "delete-research")
+    scoped = PostgresStore(worker, a.workspace_id, worker=True)
+    fence = scoped.claim(identity)
+    text = "We offer AI software for business teams."
+    source = Source(url="https://delete.example/", company_domain="delete.example", title="Labelled deletion fixture",
+                    text=text, content_hash=hashlib.sha256(text.encode()).hexdigest())
+    scoped.cache_source(identity, fence, source.url, source)
+    record = validate_extraction({"name": "Deletion fixture", "findings": [{"criterion_id": "ai", "status": "supported",
+                                  "evidence": [{"source_id": source.id, "passage": text, "claim": text}]}]},
+                                 profile, source.company_domain, (source,))
+    scoped.save_record(identity, fence, record)
+    scoped.checkpoint(identity, fence, "complete", {}, "ready")
+    other = b.create_run(profile, "unrelated-research")
+    scoped_b = PostgresStore(worker, b.workspace_id, worker=True)
+    other_source = source.model_copy(update={"id": uuid4().hex})
+    scoped_b.cache_source(other, scoped_b.claim(other), source.url, other_source)
+    before = CreditWallet(a).balance()
+    with pytest.raises(KeyError):
+        b.delete_run(identity)
+    a.delete_run(identity)
+    a.delete_run(identity)
+    assert CreditWallet(a).balance() == before
+    assert before.available == 2 and before.used == 1
+    assert a.list_runs() == []
+    with pytest.raises(KeyError):
+        a.get_run(identity)
+    with pytest.raises(Conflict):
+        a.create_run(profile, "delete-research")
+    assert scoped_b.cached_source(source.url, source.company_domain, 24, run_id=other, operation="fetch:new") == other_source
+    with a.connection() as db:
+        assert db.execute("SELECT count(*) FROM records WHERE run_id=?", (identity,)).fetchone()[0] == 0
+        assert db.execute("SELECT count(*) FROM source_cache").fetchone()[0] == 0
+        assert db.execute("SELECT count(*) FROM credit_entries").fetchone()[0] == 2
