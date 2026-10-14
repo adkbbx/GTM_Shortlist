@@ -58,6 +58,7 @@ def run():
             supabase_url="https://shortlist-auth.example",
             supabase_publishable_key="sb_publishable_fixture",
             app_url="https://app.example",
+            booking_url="https://cal.example/eygentic/setup-fixture",
             tavily_key="labelled-fixture",
             gemma_model="labelled-fixture",
             gemma_base_url="https://labelled-fixture.example",

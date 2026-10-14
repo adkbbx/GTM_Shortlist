@@ -5,7 +5,7 @@ import '@fontsource/schibsted-grotesk/400.css';
 import '@fontsource/schibsted-grotesk/600.css';
 import '@fontsource/schibsted-grotesk/700.css';
 import { api } from './api';
-import type { Confirmation, Evidence, ExclusionFinding, Finding, Health, Record, Review, Run, Wallet } from './api';
+import type { Confirmation, Evidence, ExclusionFinding, Finding, Health, Record, Review, Run, Service, Wallet } from './api';
 import { ResearchProgress } from './ResearchProgress';
 import { ResearchPreview } from './ResearchPreview';
 import { AuthGate } from './AuthGate';
@@ -149,6 +149,7 @@ function DeleteResearch({ run, onDeleted }: { run: Run; onDeleted: () => void })
 function App({ account }: { account: ReactNode }) {
   const [health, setHealth] = useState<Health | null>(null);
   const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [service, setService] = useState<Service | null>(null);
   const [runs, setRuns] = useState<Run[]>([]);
   const [active, setActive] = useState<Run | null>(null);
   const [website, setWebsite] = useState('');
@@ -159,6 +160,12 @@ function App({ account }: { account: ReactNode }) {
   const [message, setMessage] = useState('');
   const requestKey = useRef(crypto.randomUUID());
   const headingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    api.service().then(value => { if (!cancelled) setService(value); }).catch(() => { if (!cancelled) setService(null); });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -228,6 +235,7 @@ function App({ account }: { account: ReactNode }) {
         {active.profile && <details className="target-summary"><summary>Confirmed target and offer</summary><p>{active.profile.offer}</p><p>{active.profile.target}</p>{!!active.profile.exclusions.length && <p>Exclusions: {active.profile.exclusions.join('; ')}</p>}<p className="hint">Confirmed {date(active.profile.confirmed_at)}. Start a new run to change this target.</p></details>}
         {active.records.length ? active.records.map(record => <CompanySheet key={record.research.id} record={record} run={active} onSaved={saved} />) : <section className="sheet"><h3>No company records yet</h3><p>The run stopped before usable research could be saved. Your confirmed target is preserved.</p><button className="secondary" onClick={() => select(null)}>Start another shortlist</button></section>}
       </>}
+      {results && active.profile && active.records.length > 0 && service?.booking_url && <section className="setup-call" aria-labelledby="setup-heading"><div><h2 id="setup-heading">Discuss your shortlist</h2><p>Get help with your target, evidence and next steps. The setup call is optional.</p></div><a className="secondary button-link" href={service.booking_url} target="_blank" rel="noopener noreferrer" onClick={() => { if (navigator.doNotTrack !== '1') void api.bookingClick(active.id).catch(() => undefined); }}>Book an optional setup call<Arrow /></a></section>}
       {active && !pending && <DeleteResearch key={active.id} run={active} onDeleted={deleted} />}
       {message && <p className="notice" role="status">{message}</p>}
       <footer className="workspace-footer"><p>GTM Shortlist by Eygentic</p><p>Research supports judgment. It does not establish buying intent.</p>{health && <p className="hint">{health.search_ready && health.gemma_ready ? 'Research providers configured' : 'Research providers still need configuration'}</p>}</footer>

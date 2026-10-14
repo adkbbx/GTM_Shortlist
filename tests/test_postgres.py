@@ -593,6 +593,16 @@ def test_research_deletion_preserves_wallet_and_other_workspace_cache(owners):
                                  profile, source.company_domain, (source,))
     scoped.save_record(identity, fence, record)
     scoped.checkpoint(identity, fence, "complete", {}, "ready")
+    before_booking = CreditWallet(a).balance()
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        list(pool.map(lambda _: a.booking_click(identity, "same-booking-click"), range(6)))
+    assert CreditWallet(a).balance() == before_booking
+    with a.connection() as db:
+        assert db.execute("SELECT count(*) FROM booking_clicks").fetchone()[0] == 1
+    with b.connection() as db:
+        assert db.execute("SELECT count(*) FROM booking_clicks").fetchone()[0] == 0
+    with pytest.raises(KeyError):
+        b.booking_click(identity, "foreign-click")
     other = b.create_run(profile, "unrelated-research")
     scoped_b = PostgresStore(worker, b.workspace_id, worker=True)
     other_source = source.model_copy(update={"id": uuid4().hex})
@@ -614,3 +624,4 @@ def test_research_deletion_preserves_wallet_and_other_workspace_cache(owners):
         assert db.execute("SELECT count(*) FROM records WHERE run_id=?", (identity,)).fetchone()[0] == 0
         assert db.execute("SELECT count(*) FROM source_cache").fetchone()[0] == 0
         assert db.execute("SELECT count(*) FROM credit_entries").fetchone()[0] == 2
+        assert db.execute("SELECT count(*) FROM booking_clicks").fetchone()[0] == 0

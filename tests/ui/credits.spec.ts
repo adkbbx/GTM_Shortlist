@@ -139,3 +139,40 @@ test('deletion has explicit confirmation, retry recovery and unchanged credits',
   await expect(page.getByLabel('Seller website', { exact: true })).toBeVisible();
   await expect(page.getByText('Loading saved research…')).toHaveCount(0);
 });
+
+test('optional setup call opens a clean external link; click is not a booked appointment', async ({ page }, info) => {
+  await hostedFixture(page);
+  await page.getByLabel('Seller website', { exact: true }).fill('https://eygentic.com/');
+  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await expect(page.getByLabel('Companies in this batch')).toBeVisible({ timeout: 15000 });
+  await page.getByLabel('Companies in this batch').selectOption('1');
+  await page.getByRole('button', { name: 'Confirm target and discover' }).click();
+  await expect(page.getByRole('heading', { name: '1 company researched' })).toBeVisible({ timeout: 15000 });
+  const link = page.getByRole('link', { name: 'Book an optional setup call' });
+  await expect(link).toHaveAttribute('href', 'https://cal.example/eygentic/setup-fixture');
+  await capture(page, `.impeccable/review/${info.project.name}-optional-setup.png`);
+  await page.context().route('https://cal.example/**', async route => {
+    expect(route.request().headers().referer).toBeUndefined();
+    await route.fulfill({ contentType: 'text/html', body: '<h1>Labelled external booking fixture</h1>' });
+  });
+  const clicked = page.waitForResponse(response => response.url().endsWith('/booking-click') && response.status() === 204);
+  const popupPromise = page.waitForEvent('popup');
+  await link.click();
+  const popup = await popupPromise;
+  await expect(popup.getByRole('heading', { name: 'Labelled external booking fixture' })).toBeVisible();
+  expect(popup.url()).toBe('https://cal.example/eygentic/setup-fixture');
+  await clicked;
+  await expect(page.getByText('2 credits available', { exact: true })).toBeVisible();
+  await expect(page.getByText('Call booked', { exact: true })).toHaveCount(0);
+  await popup.close();
+  let tracked = 0;
+  page.on('request', request => { if (request.url().endsWith('/booking-click')) tracked++; });
+  await page.evaluate(() => Object.defineProperty(navigator, 'doNotTrack', { value: '1', configurable: true }));
+  const privatePopup = page.waitForEvent('popup');
+  await link.click();
+  const untracked = await privatePopup;
+  await expect(untracked.getByRole('heading', { name: 'Labelled external booking fixture' })).toBeVisible();
+  expect(tracked).toBe(0);
+  await untracked.close();
+  await page.context().unrouteAll({ behavior: 'wait' });
+});

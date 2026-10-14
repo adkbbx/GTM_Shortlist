@@ -70,6 +70,10 @@ class Store:
                 CREATE TABLE IF NOT EXISTS worker_heartbeats (
                     id TEXT PRIMARY KEY, expires_at REAL NOT NULL
                 );
+                CREATE TABLE IF NOT EXISTS booking_clicks (
+                    id TEXT PRIMARY KEY,run_id TEXT NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
+                    request_key TEXT NOT NULL,created_at TEXT NOT NULL,UNIQUE(run_id,request_key)
+                );
             """)
             if "detail" not in {row["name"] for row in db.execute("PRAGMA table_info(run_events)")}:
                 db.execute("ALTER TABLE run_events ADD COLUMN detail TEXT")
@@ -246,6 +250,7 @@ class Store:
             self.finished(db, run_id)
             db.execute("DELETE FROM records WHERE run_id=?", (run_id,))
             db.execute("DELETE FROM run_events WHERE run_id=?", (run_id,))
+            db.execute("DELETE FROM booking_clicks WHERE run_id=?", (run_id,))
             db.execute("UPDATE attempt_results SET payload=NULL,request_hash='' "
                        "WHERE attempt_id IN (SELECT id FROM attempts WHERE run_id=?)", (run_id,))
             db.execute("UPDATE attempts SET operation_key=id WHERE run_id=?", (run_id,))
@@ -254,6 +259,24 @@ class Store:
             db.execute("UPDATE runs SET profile='{}',checkpoint='{}',payload_hash='',error=NULL,stage='deleted',"
                        "status='partial',deleted_at=?,updated_at=?,lease_until=0,fence=fence+1 WHERE id=?",
                        (now, now, run_id))
+
+    def booking_click(self, run_id: str, request_key: str):
+        """Record a link click only; never infer an appointment or buying intent."""
+        with self.connection() as db:
+            self.begin(db)
+            row = db.execute("SELECT status,profile FROM runs WHERE id=? AND deleted_at IS NULL", (run_id,)).fetchone()
+            if row is None:
+                raise KeyError(run_id)
+            if row["status"] not in ("ready", "partial") or row["profile"] == "{}" or not db.execute(
+                "SELECT 1 FROM records WHERE run_id=? LIMIT 1", (run_id,)).fetchone():
+                raise Conflict("Finish company research before requesting a setup call")
+            if db.execute("SELECT 1 FROM booking_clicks WHERE run_id=? AND request_key=?", (run_id, request_key)).fetchone():
+                return
+            if db.execute("SELECT count(*) FROM booking_clicks WHERE created_at>=?",
+                          (utcnow().date().isoformat(),)).fetchone()[0] >= 100:
+                raise BudgetExceeded("Setup-call click allowance reached")
+            db.execute("INSERT INTO booking_clicks(id,run_id,request_key,created_at) VALUES (?,?,?,?)",
+                       (new_id(), run_id, request_key, utcnow().isoformat()))
 
     def pending_runs(self) -> list[str]:
         with self.connection() as db:

@@ -54,3 +54,7 @@ input:focus,textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px #b450
 .delete-research p { max-width: 65ch; color: var(--muted); }
 .danger-button { background: #a33224; border-color: #a33224; color: #fff; }
 .danger-button:hover { background: #84291e; }
+.setup-call { display: flex; align-items: center; flex-wrap: wrap; gap: 1.5rem; border-top: 1px solid var(--line); padding-top: 1.5rem; margin-top: 2rem; }
+.setup-call > div { flex: 1 1 20rem; }
+.setup-call p { max-width: 55ch; color: var(--muted); }
+.setup-call a { flex: 0 1 auto; }

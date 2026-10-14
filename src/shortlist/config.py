@@ -4,7 +4,7 @@ from typing import Literal
 from urllib.parse import urlsplit
 
 from dotenv import load_dotenv
-from pydantic import BaseModel, ConfigDict, Field, SecretStr, model_validator
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator, model_validator
 
 
 class Settings(BaseModel):
@@ -24,6 +24,15 @@ class Settings(BaseModel):
     supabase_url: str = ""
     supabase_publishable_key: str = ""
     app_url: str = ""
+    booking_url: str = ""
+
+    @field_validator("booking_url")
+    @classmethod
+    def booking_destination(cls, value):
+        if not value:
+            return ""
+        from shortlist.fetch import canonical_url
+        return canonical_url(value)
 
     @model_validator(mode="after")
     def hosted_configuration(self):
@@ -58,6 +67,7 @@ class Settings(BaseModel):
             supabase_url=os.getenv("SUPABASE_URL", ""),
             supabase_publishable_key=os.getenv("SUPABASE_PUBLISHABLE_KEY", ""),
             app_url=os.getenv("SHORTLIST_APP_URL", ""),
+            booking_url=os.getenv("SHORTLIST_BOOKING_URL", ""),
         )
 
     def readiness(self):

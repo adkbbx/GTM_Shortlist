@@ -56,6 +56,24 @@
         }
       }
     },
+    "/api/service": {
+      "get": {
+        "summary": "Service",
+        "operationId": "service_api_service_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceView"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/runs": {
       "get": {
         "summary": "Runs",
@@ -211,6 +229,53 @@
             }
           }
         ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/runs/{run_id}/booking-click": {
+      "post": {
+        "summary": "Booking Click",
+        "operationId": "booking_click_api_runs__run_id__booking_click_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookingInput"
+              }
+            }
+          }
+        },
         "responses": {
           "204": {
             "description": "Successful Response"
@@ -442,6 +507,22 @@
           "created_at"
         ],
         "title": "AttemptView"
+      },
+      "BookingInput": {
+        "properties": {
+          "request_key": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 8,
+            "title": "Request Key"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_key"
+        ],
+        "title": "BookingInput"
       },
       "Confirmation": {
         "properties": {
@@ -1379,6 +1460,23 @@
           "request_key"
         ],
         "title": "SellerInput"
+      },
+      "ServiceView": {
+        "properties": {
+          "booking_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Booking Url"
+          }
+        },
+        "type": "object",
+        "title": "ServiceView"
       },
       "Source": {
         "properties": {

@@ -1,6 +1,6 @@
 # Hosted image and deployment preparation
 
-Status: image, Compose edge/API/worker configuration and a real disposable container smoke check are prepared. Local Docker is unavailable; record the GitHub container job result before calling the image verified. No public deployment or real Supabase/email/provider/payment test is claimed.
+Status: the image and disposable container smoke are verified in GitHub Checks for c68e7d1 (run38520391013). Real image build, migrations/replay, restricted schema access, private Postgres, non-root API/worker, built assets, unauthorized401 and restart checks passed. Compose syntax passed; public Caddy TLS and live hosting are still unverified. Local Docker is unavailable. No real Supabase/email/provider/payment test is claimed.
 
 ## Image
 

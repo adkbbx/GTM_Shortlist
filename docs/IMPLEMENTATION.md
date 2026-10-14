@@ -14,7 +14,8 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 - [ ] Validate Eygentic offer and configurable targets for other sellers.
 
 ## 3. Discovery and identity
-- [ ] Implement SerpApi and Tavily adapters, bounded query planner and saved search provenance.
+- [x] Implement SerpApi and Tavily adapters, bounded query planner and saved search provenance.
+- [ ] Verify unattended discovery with actual search-provider credentials.
 - [x] Canonicalize domains, deduplicate and exclude directories/seller domains.
 - [x] Preserve unreadable candidate failures and try replacements within six candidates without consuming the three review slots.
 - [ ] Compare providers on identical queries and actual measured cost/coverage.
@@ -58,12 +59,14 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 - [x] Wire verified-user API access, request-scoped Postgres and workspace-selected worker; reject invalid/unconfirmed sessions and atomically reserve one demo per workspace in actual database tests.
 - [ ] Build signup/login/session recovery UI and verify hosted accounts on phone/laptop.
 - [x] Build signup/login/confirmation/password recovery, session refresh/signout and authenticated export; verify with real SDK and labelled browser transport fixtures.
-- [ ] Postgres persistence and migrations, Supabase verified signup and JWT validation.
+- [ ] Validate signup/email/identity verification against an actual Supabase project.
 - [ ] Workspace isolation tested with two actual accounts; private schema/role policies.
 - [x] Preserve once-only signup grants and shared attempt caps through research deletion; provide bounded retention preview/apply command.
 - [ ] Complete account closure, Supabase identity/session removal and production retention/backup policy.
-- [ ] Optional configured booking link and operator review queue; separate click/booked metrics.
-- [ ] Container/web/worker deployment and persistent database with configured external SMTP.
+- [x] Add optional configured setup-call link and owner-scoped click tracking; never infer a booked appointment.
+- [ ] Add operator review queue and verified external calendar confirmation if required.
+- [x] Build and test the actual non-root web/API/worker image, isolated database migration/replay and restart in CI; validate private Compose edge configuration.
+- [ ] Public HTTPS deployment and persistent database with configured external SMTP.
 - [ ] Five real runs across three sellers and observed external user test.
 - [ ] Publish accurate demo/setup/evaluation documentation and launch only after checks pass.
 

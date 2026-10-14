@@ -55,6 +55,15 @@ class WalletView(BaseModel):
     used: int = Field(default=0, ge=0)
 
 
+class ServiceView(BaseModel):
+    booking_url: str | None = None
+
+
+class BookingInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    request_key: str = Field(min_length=8, max_length=100)
+
+
 class AttemptView(BaseModel):
     provider: str
     kind: str
@@ -178,6 +187,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return HostedAuth(supabase_url=settings.supabase_url, publishable_key=settings.supabase_publishable_key,
                           redirect_url=settings.app_url.rstrip("/") + "/")
 
+    @app.get("/api/service", response_model=ServiceView)
+    def service():
+        return ServiceView(booking_url=settings.booking_url or None)
+
     @app.get("/api/runs", response_model=list[RunView])
     def runs(store: owned):
         return [view(store, run["id"]) for run in store.list_runs()]
@@ -200,6 +213,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.delete("/api/runs/{run_id}", status_code=204)
     def delete_run(run_id: str, store: owned):
         store.delete_run(run_id)
+        return Response(status_code=204)
+
+    @app.post("/api/runs/{run_id}/booking-click", status_code=204)
+    def booking_click(run_id: str, input: BookingInput, store: owned):
+        if not settings.booking_url:
+            raise Conflict("Setup-call booking is not configured")
+        store.booking_click(run_id, input.request_key)
         return Response(status_code=204)
 
     @app.post("/api/runs/{run_id}/confirm", response_model=RunView)

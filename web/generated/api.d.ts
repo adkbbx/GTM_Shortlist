@@ -38,6 +38,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/service": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Service */
+        get: operations["service_api_service_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/runs": {
         parameters: {
             query?: never;
@@ -102,6 +119,23 @@ export interface paths {
         post?: never;
         /** Delete Run */
         delete: operations["delete_run_api_runs__run_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/runs/{run_id}/booking-click": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Booking Click */
+        post: operations["booking_click_api_runs__run_id__booking_click_post"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -175,6 +209,11 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /** BookingInput */
+        BookingInput: {
+            /** Request Key */
+            request_key: string;
         };
         /** Confirmation */
         Confirmation: {
@@ -524,6 +563,11 @@ export interface components {
             /** Request Key */
             request_key: string;
         };
+        /** ServiceView */
+        ServiceView: {
+            /** Booking Url */
+            booking_url?: string | null;
+        };
         /** Source */
         Source: {
             /** Id */
@@ -648,6 +692,26 @@ export interface operations {
             };
         };
     };
+    service_api_service_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceView"];
+                };
+            };
+        };
+    };
     runs_api_runs_get: {
         parameters: {
             query?: never;
@@ -762,6 +826,39 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    booking_click_api_runs__run_id__booking_click_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookingInput"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             204: {

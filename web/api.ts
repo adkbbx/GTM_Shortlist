@@ -5,11 +5,13 @@ import runSchema from './generated/RunView.json';
 import healthSchema from './generated/Health.json';
 import authSchema from './generated/AuthSetup.json';
 import walletSchema from './generated/WalletView.json';
+import serviceSchema from './generated/ServiceView.json';
 
 export type Run = components['schemas']['RunView'];
 export type Health = components['schemas']['Health'];
 export type AuthSetup = components['schemas']['LocalAuth'] | components['schemas']['HostedAuth'];
 export type Wallet = components['schemas']['WalletView'];
+export type Service = components['schemas']['ServiceView'];
 export type Confirmation = components['schemas']['Confirmation'];
 export type Record = Run['records'][number];
 export type Finding = Record['research']['findings'][number];
@@ -23,6 +25,7 @@ const isRun = ajv.compile<Run>(runSchema);
 const isHealth = ajv.compile<Health>(healthSchema);
 const isAuthSetup = ajv.compile<AuthSetup>(authSchema);
 const isWallet = ajv.compile<Wallet>(walletSchema);
+const isService = ajv.compile<Service>(serviceSchema);
 let accessToken: (() => Promise<string | null>) | null = null;
 let sessionExpired: ((token: string | null) => void) | null = null;
 
@@ -58,6 +61,18 @@ function parseRun(data: unknown): Run {
 }
 
 export const api = {
+  async service() {
+    const data = await request('/api/service');
+    if (!isService(data)) throw new Error('Setup-call configuration is unavailable.');
+    return data;
+  },
+  async bookingClick(id: string) {
+    const response = await authorizedFetch(`/api/runs/${encodeURIComponent(id)}/booking-click`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ request_key: crypto.randomUUID() }), keepalive: true,
+    });
+    if (!response.ok) throw new Error('Setup-call click was not recorded');
+  },
   async deleteRun(id: string) {
     const response = await authorizedFetch(`/api/runs/${encodeURIComponent(id)}`, { method: 'DELETE' });
     if (!response.ok) {
