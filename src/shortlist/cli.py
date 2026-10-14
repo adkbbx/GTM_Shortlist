@@ -5,7 +5,7 @@ from pathlib import Path
 from uuid import UUID
 
 from shortlist.config import Settings
-from shortlist.domain import Profile, utcnow
+from shortlist.domain import OperatorReviewCommand, Profile, utcnow
 from shortlist.export import export_run
 from shortlist.local_server import serve
 from shortlist.providers import CapturedSearch
@@ -36,8 +36,15 @@ def main():
     retention = sub.add_parser("retention", help="Preview or erase old inactive research; never resets credits")
     retention.add_argument("--older-than-days", type=int, choices=range(1, 3651), required=True, metavar="DAYS")
     retention.add_argument("--apply", action="store_true", help="Erase the previewed eligible content (up to100 per command)")
-    queue = sub.add_parser("review-queue", help="Read-only triage of unreviewed/needs-research sheets (up to25)")
+    queue = sub.add_parser("review-queue", help="Read-only triage of pending operator reviews (up to25)")
     queue.add_argument("--workspace", type=UUID, help="Required explicit workspace for hosted operator access")
+    annotation = sub.add_parser("annotate", help="Append an independent operator review from a JSON command file")
+    annotation.add_argument("command_file", type=Path)
+    annotation.add_argument("--workspace", type=UUID)
+    history = sub.add_parser("review-history", help="Inspect up to100 saved operator notes for a company sheet")
+    history.add_argument("run_id")
+    history.add_argument("record_id")
+    history.add_argument("--workspace", type=UUID)
     args = parser.parse_args()
     settings = Settings.load()
     if args.command == "config":
@@ -46,18 +53,25 @@ def main():
     if args.command == "worker":
         work(settings, args.once)
         return
-    if args.command == "review-queue":
+    if args.command in ("review-queue", "annotate", "review-history"):
         if settings.mode == "hosted":
             if args.workspace is None or not settings.worker_database_url.get_secret_value():
-                parser.error("Hosted triage requires an explicit workspace and the separate worker credential")
+                parser.error("Hosted operator access requires an explicit workspace and the separate worker credential")
             from shortlist.postgres import PostgresStore
             store = PostgresStore(settings.worker_database_url, args.workspace, worker=True)
         else:
             if args.workspace is not None:
                 parser.error("Local research has one operator; no hosted workspace selector")
             store = Store(settings.db_path)
-        from shortlist.review_queue import review_queue
-        print(json.dumps(review_queue(store), ensure_ascii=False, indent=2))
+        if args.command == "annotate":
+            command = OperatorReviewCommand.model_validate_json(args.command_file.read_text(encoding="utf-8"))
+            result = store.annotate(command)
+        elif args.command == "review-history":
+            result = store.operator_history(args.run_id, args.record_id)
+        else:
+            from shortlist.review_queue import review_queue
+            result = review_queue(store)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
         return
     if args.command == "retention":
         if settings.mode == "hosted":

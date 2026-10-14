@@ -8,6 +8,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from shortlist.domain import (
+    OperatorReview,
+    OperatorReviewCommand,
     Profile,
     Research,
     Review,
@@ -30,6 +32,7 @@ class BudgetExceeded(ValueError):
 
 class Store:
     order_key = "rowid"
+    operator_access = True
 
     def __init__(self, path: Path):
         self.path = path
@@ -73,6 +76,13 @@ class Store:
                 CREATE TABLE IF NOT EXISTS booking_clicks (
                     id TEXT PRIMARY KEY,run_id TEXT NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
                     request_key TEXT NOT NULL,created_at TEXT NOT NULL,UNIQUE(run_id,request_key)
+                );
+                CREATE UNIQUE INDEX IF NOT EXISTS records_run_identity ON records(id,run_id);
+                CREATE TABLE IF NOT EXISTS operator_reviews (
+                    id TEXT PRIMARY KEY, run_id TEXT NOT NULL, record_id TEXT NOT NULL,
+                    request_key TEXT NOT NULL, command_hash TEXT NOT NULL, payload TEXT NOT NULL,
+                    UNIQUE(run_id,record_id,request_key),
+                    FOREIGN KEY(record_id,run_id) REFERENCES records(id,run_id) ON DELETE CASCADE
                 );
             """)
             if "detail" not in {row["name"] for row in db.execute("PRAGMA table_info(run_events)")}:
@@ -205,8 +215,9 @@ class Store:
             result["profile"] = json.loads(result["profile"])
             result["checkpoint"] = json.loads(result["checkpoint"])
             result["records"] = [{"research": json.loads(r["research"]),
-                                  "review": json.loads(r["review"]) if r["review"] else None}
-                                 for r in db.execute(f"SELECT research,review FROM records WHERE run_id=? ORDER BY {self.order_key}", (run_id,))]
+                                  "review": json.loads(r["review"]) if r["review"] else None,
+                                  "operator_review": self._latest_operator_review(db, run_id, r["id"])}
+                                 for r in db.execute(f"SELECT id,research,review FROM records WHERE run_id=? ORDER BY {self.order_key}", (run_id,))]
             if result["profile"]:
                 profile = Profile.model_validate(result["profile"])
                 for item in result["records"]:
@@ -217,6 +228,57 @@ class Store:
                 "SELECT * FROM (SELECT id,phase,label,state,detail,created_at FROM run_events WHERE run_id=? "
                 "ORDER BY id DESC LIMIT 100) recent ORDER BY id", (run_id,))]
             return result
+
+    def _operator_history(self, db, run_id: str, record_id: str, limit: int = 100) -> list[dict]:
+        return [OperatorReview.model_validate_json(row["payload"]).model_dump(mode="json") for row in db.execute(
+            f"SELECT payload FROM operator_reviews WHERE run_id=? AND record_id=? ORDER BY {self.order_key} DESC LIMIT ?",
+            (run_id, record_id, limit))]
+
+    def _latest_operator_review(self, db, run_id: str, record_id: str) -> dict | None:
+        history = self._operator_history(db, run_id, record_id, limit=1)
+        return history[0] if history else None
+
+    def operator_history(self, run_id: str, record_id: str) -> list[dict]:
+        with self.connection() as db:
+            if not db.execute("SELECT id FROM records WHERE run_id=? AND id=?", (run_id, record_id)).fetchone():
+                raise KeyError(record_id)
+            return self._operator_history(db, run_id, record_id)
+
+    def annotate(self, command: OperatorReviewCommand) -> dict:
+        if not self.operator_access:
+            raise ValueError("Operator annotations require the separate scoped worker credential")
+        digest = hashlib.sha256(json.dumps(command.model_dump(mode="json"), sort_keys=True).encode()).hexdigest()
+        with self.connection() as db:
+            self.begin(db)
+            record = db.execute("SELECT research FROM records WHERE id=? AND run_id=?",
+                                (command.record_id, command.run_id)).fetchone()
+            if record is None:
+                raise KeyError(command.record_id)
+            run = db.execute("SELECT status,deleted_at FROM runs WHERE id=?", (command.run_id,)).fetchone()
+            if run is None or run["deleted_at"]:
+                raise KeyError(command.run_id)
+            if run["status"] not in ("ready", "partial"):
+                raise Conflict("Wait for research to finish before recording an operator review")
+            replay = db.execute("SELECT command_hash,payload FROM operator_reviews WHERE run_id=? AND record_id=? AND request_key=?",
+                                (command.run_id, command.record_id, command.request_key)).fetchone()
+            if replay:
+                if replay["command_hash"] != digest:
+                    raise Conflict("Review request key was already used for different inputs")
+                return OperatorReview.model_validate_json(replay["payload"]).model_dump(mode="json")
+            history = self._operator_history(db, command.run_id, command.record_id)
+            previous = history[0]["id"] if history else None
+            if command.previous_id != previous:
+                raise Conflict("Operator review changed. Read the latest history before adding a note")
+            if len(history) >= 100:
+                raise BudgetExceeded("This sheet has reached its 100 operator-note limit")
+            sources = {source["id"] for source in json.loads(record["research"])["sources"]}
+            if not set(command.annotation.source_ids) <= sources:
+                raise ValueError("Operator review references a source outside this saved sheet")
+            review = OperatorReview(annotation=command.annotation,
+                                    research_hash=hashlib.sha256(record["research"].encode()).hexdigest())
+            db.execute("INSERT INTO operator_reviews(id,run_id,record_id,request_key,command_hash,payload) VALUES (?,?,?,?,?,?)",
+                       (review.id, command.run_id, command.record_id, command.request_key, digest, review.model_dump_json()))
+            return review.model_dump(mode="json")
 
     def list_runs(self) -> list[dict]:
         with self.connection() as db:

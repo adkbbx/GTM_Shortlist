@@ -205,6 +205,131 @@
       "title": "Observed",
       "type": "object"
     },
+    "OperatorNeedsResearch": {
+      "additionalProperties": false,
+      "properties": {
+        "reviewer": {
+          "maxLength": 100,
+          "minLength": 2,
+          "title": "Reviewer",
+          "type": "string"
+        },
+        "note": {
+          "maxLength": 2000,
+          "minLength": 3,
+          "title": "Note",
+          "type": "string"
+        },
+        "source_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 21,
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "outcome": {
+          "const": "needs_research",
+          "default": "needs_research",
+          "title": "Outcome",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reviewer",
+        "note",
+        "source_ids",
+        "outcome"
+      ],
+      "title": "OperatorNeedsResearch",
+      "type": "object"
+    },
+    "OperatorReview": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "annotation": {
+          "discriminator": {
+            "mapping": {
+              "needs_research": "#/$defs/OperatorNeedsResearch",
+              "reviewed": "#/$defs/OperatorReviewed"
+            },
+            "propertyName": "outcome"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/OperatorReviewed"
+            },
+            {
+              "$ref": "#/$defs/OperatorNeedsResearch"
+            }
+          ],
+          "title": "Annotation"
+        },
+        "research_hash": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Research Hash",
+          "type": "string"
+        },
+        "reviewed_at": {
+          "format": "date-time",
+          "title": "Reviewed At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "annotation",
+        "research_hash",
+        "reviewed_at"
+      ],
+      "title": "OperatorReview",
+      "type": "object"
+    },
+    "OperatorReviewed": {
+      "additionalProperties": false,
+      "properties": {
+        "reviewer": {
+          "maxLength": 100,
+          "minLength": 2,
+          "title": "Reviewer",
+          "type": "string"
+        },
+        "note": {
+          "maxLength": 2000,
+          "minLength": 3,
+          "title": "Note",
+          "type": "string"
+        },
+        "source_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 21,
+          "minItems": 1,
+          "title": "Source Ids",
+          "type": "array"
+        },
+        "outcome": {
+          "const": "reviewed",
+          "default": "reviewed",
+          "title": "Outcome",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reviewer",
+        "note",
+        "source_ids",
+        "outcome"
+      ],
+      "title": "OperatorReviewed",
+      "type": "object"
+    },
     "Profile": {
       "additionalProperties": false,
       "properties": {
@@ -570,6 +695,17 @@
           "anyOf": [
             {
               "$ref": "#/$defs/Review"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "operator_review": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OperatorReview"
             },
             {
               "type": "null"

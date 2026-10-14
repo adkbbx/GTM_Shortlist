@@ -6,7 +6,7 @@ Status: research deletion and a repeatable operator retention command are implem
 
 The user can delete finished or confirmation-stage research after an explicit confirmation. Queued/running work rejects deletion: it must finish before its outputs can be erased safely. Deletion is idempotent and uses the verified workspace boundary. Other accounts are unaffected.
 
-One transaction removes company sheets, review notes and progress events; clears the seller profile, checkpoint, diagnostic error and provider-response payloads; and invalidates that workspace's source cache. In local mode the single-operator cache is cleared. Saved research in other runs stays intact; its optional reusable cache may need to be fetched again.
+One transaction removes company sheets, customer review notes, independent operator annotation history and progress events; clears the seller profile, checkpoint, diagnostic error and provider-response payloads; and invalidates that workspace's source cache. In local mode the single-operator cache is cleared. Saved research in other runs stays intact; its optional reusable cache may need to be fetched again.
 
 A content-free run tombstone and request identity remain so a replay cannot recreate deleted research. Provider attempt counts, kinds, provider names, timestamps and outcome states remain to enforce spending limits. Operation URLs and result request hashes are removed. The hosted signup decision, credit ledger and settled reservation remain: deleting research neither refunds delivered work nor issues a new free grant. These records are not exposed as research or exportable company sheets.
 

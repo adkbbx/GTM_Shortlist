@@ -10,12 +10,13 @@ def review_queue(store: Store) -> list[dict]:
         run = store.get_run(summary["id"])
         for item in run["records"]:
             decision = item["review"]
-            if decision and decision["decision"] != "needs_research":
+            operator = item["operator_review"]
+            if operator and operator["annotation"]["outcome"] == "reviewed":
                 continue
             queue.append({"run_id": run["id"], "seller_url": run["profile"]["seller_url"],
                           "offer": run["profile"]["offer"], "target": run["profile"]["target"],
                           "research": item["research"], "customer_review": decision,
-                          "operator_review": None})
+                          "operator_review": operator})
             if len(queue) == 25:
                 return queue
     return queue

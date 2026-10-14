@@ -413,6 +413,51 @@ export interface components {
             /** Evidence */
             evidence: components["schemas"]["Evidence"][];
         };
+        /** OperatorNeedsResearch */
+        OperatorNeedsResearch: {
+            /** Reviewer */
+            reviewer: string;
+            /** Note */
+            note: string;
+            /**
+             * Source Ids
+             * @default []
+             */
+            source_ids: string[];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            outcome: "needs_research";
+        };
+        /** OperatorReview */
+        OperatorReview: {
+            /** Id */
+            id: string;
+            /** Annotation */
+            annotation: components["schemas"]["OperatorReviewed"] | components["schemas"]["OperatorNeedsResearch"];
+            /** Research Hash */
+            research_hash: string;
+            /**
+             * Reviewed At
+             * Format: date-time
+             */
+            reviewed_at: string;
+        };
+        /** OperatorReviewed */
+        OperatorReviewed: {
+            /** Reviewer */
+            reviewer: string;
+            /** Note */
+            note: string;
+            /** Source Ids */
+            source_ids: string[];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            outcome: "reviewed";
+        };
         /** Profile */
         Profile: {
             /** Offer */
@@ -615,6 +660,7 @@ export interface components {
         SavedRecord: {
             research: components["schemas"]["Research"];
             review?: components["schemas"]["Review-Output"] | null;
+            operator_review?: components["schemas"]["OperatorReview"] | null;
             /** Credits Used */
             credits_used?: number | null;
         };

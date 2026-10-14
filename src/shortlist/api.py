@@ -12,7 +12,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from shortlist.auth import AuthenticationError, AuthUnavailable, verify_user
 from shortlist.config import Settings
-from shortlist.domain import Profile, Research, Review, Target
+from shortlist.domain import OperatorReview, Profile, Research, Review, Target
 from shortlist.export import export_run
 from shortlist.fetch import canonical_url
 from shortlist.progress import RunProgress
@@ -38,6 +38,7 @@ class Confirmation(Target):
 class SavedRecord(BaseModel):
     research: Research
     review: Review | None = None
+    operator_review: OperatorReview | None = None
     credits_used: int | None = Field(default=None, ge=0, le=1)
 
 

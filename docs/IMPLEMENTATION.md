@@ -65,7 +65,8 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 - [ ] Complete account closure, Supabase identity/session removal and production retention/backup policy.
 - [x] Add optional configured setup-call link and owner-scoped click tracking; never infer a booked appointment.
 - [x] Add a bounded owner-scoped read-only operator triage queue for unreviewed/needs-research sheets.
-- [ ] Complete independent operator annotations/outcomes and verified external calendar confirmation if required.
+- [x] Save independent append-only operator annotations/outcomes, scoped history, source references and separate API/export fields.
+- [ ] Expose service-review notes in the customer UI and observe an actual human review; verify external calendar confirmation if required.
 - [x] Build and test the actual non-root web/API/worker image, isolated database migration/replay and restart in CI; validate private Compose edge configuration.
 - [ ] Public HTTPS deployment and persistent database with configured external SMTP.
 - [ ] Five real runs across three sellers and observed external user test.
@@ -84,6 +85,6 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 Out of scope: automated outreach, contact databases, CRM integrations and Experiment Judge.
 
 ## Continuation rules
-The user manually requested Continue after the 18:00 cutoff on 14 October 2026. This renews active implementation authorization. The expired heartbeat is paused; no new automatic work window or rolling retry has been scheduled. Continue small verified steps with ordinary usage, preserving unfinished acceptance gates. The original scheduled window below is historical.
+The user manually requested Continue after the 18:00 cutoff and then explicitly extended work until 21:30 JST on 14 October 2026. Continue small verified steps until that cutoff or weekly exhaustion, checking ordinary usage between steps. The same heartbeat now has a single 21:30 cutoff/handoff check; no rolling five-hour retry is scheduled. Preserve unfinished acceptance gates. The original scheduled window below is historical.
 
 Continue without clarification until 18:00 JST on 14 October 2026 or weekly usage exhaustion. Preserve a handoff at each step and session limit. The13:40JST wake-up occurred after the user’s13:39reset. The same heartbeat now has one final18:00JST cutoff-only check to disable itself/save a handoff; it must not resume implementation at that wake-up. Do not use a rolling five-hour delay. No fabricated results, user tests, credentials, buying intent, deployments or payments. Provider/hosting credentials and actual external testing may create release blockers; implement and test independent work while recording them. Do not copy secrets from unrelated projects into Git. User requested thorough phone and laptop validation.

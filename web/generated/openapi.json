@@ -1004,6 +1004,131 @@
         ],
         "title": "Observed"
       },
+      "OperatorNeedsResearch": {
+        "properties": {
+          "reviewer": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 2,
+            "title": "Reviewer"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Note"
+          },
+          "source_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 21,
+            "title": "Source Ids",
+            "default": []
+          },
+          "outcome": {
+            "type": "string",
+            "const": "needs_research",
+            "title": "Outcome",
+            "default": "needs_research"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reviewer",
+          "note",
+          "source_ids",
+          "outcome"
+        ],
+        "title": "OperatorNeedsResearch"
+      },
+      "OperatorReview": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "annotation": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OperatorReviewed"
+              },
+              {
+                "$ref": "#/components/schemas/OperatorNeedsResearch"
+              }
+            ],
+            "title": "Annotation",
+            "discriminator": {
+              "propertyName": "outcome",
+              "mapping": {
+                "needs_research": "#/components/schemas/OperatorNeedsResearch",
+                "reviewed": "#/components/schemas/OperatorReviewed"
+              }
+            }
+          },
+          "research_hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Research Hash"
+          },
+          "reviewed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Reviewed At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "annotation",
+          "research_hash",
+          "reviewed_at"
+        ],
+        "title": "OperatorReview"
+      },
+      "OperatorReviewed": {
+        "properties": {
+          "reviewer": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 2,
+            "title": "Reviewer"
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 3,
+            "title": "Note"
+          },
+          "source_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 21,
+            "minItems": 1,
+            "title": "Source Ids"
+          },
+          "outcome": {
+            "type": "string",
+            "const": "reviewed",
+            "title": "Outcome",
+            "default": "reviewed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reviewer",
+          "note",
+          "source_ids",
+          "outcome"
+        ],
+        "title": "OperatorReviewed"
+      },
       "Profile": {
         "properties": {
           "offer": {
@@ -1539,6 +1664,16 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/Review-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "operator_review": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OperatorReview"
               },
               {
                 "type": "null"

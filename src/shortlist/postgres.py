@@ -41,6 +41,7 @@ class PostgresStore(Store):
         self.dsn = dsn
         self.workspace_id = workspace_id
         self.worker = worker
+        self.operator_access = worker and workspace_id is not None
 
     @contextmanager
     def connection(self):

@@ -124,6 +124,45 @@ class Review(Value):
     reviewed_at: datetime = Field(default_factory=utcnow)
 
 
+class OperatorNoteBase(Value):
+    reviewer: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=100)]
+    note: Annotated[str, StringConstraints(strip_whitespace=True, min_length=3, max_length=2000)]
+    source_ids: tuple[str, ...] = Field(default=(), max_length=21)
+
+    @model_validator(mode="after")
+    def unique_sources(self):
+        if len(set(self.source_ids)) != len(self.source_ids):
+            raise ValueError("Inspected source references must be unique")
+        return self
+
+
+class OperatorReviewed(OperatorNoteBase):
+    outcome: Literal["reviewed"] = "reviewed"
+    source_ids: tuple[str, ...] = Field(min_length=1, max_length=21)
+
+
+class OperatorNeedsResearch(OperatorNoteBase):
+    outcome: Literal["needs_research"] = "needs_research"
+
+
+OperatorNote = Annotated[OperatorReviewed | OperatorNeedsResearch, Field(discriminator="outcome")]
+
+
+class OperatorReview(Value):
+    id: str = Field(default_factory=new_id)
+    annotation: OperatorNote
+    research_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+    reviewed_at: datetime = Field(default_factory=utcnow)
+
+
+class OperatorReviewCommand(Value):
+    run_id: str = Field(min_length=1, max_length=100)
+    record_id: str = Field(min_length=1, max_length=100)
+    request_key: str = Field(min_length=8, max_length=100)
+    previous_id: str | None = Field(default=None, min_length=1, max_length=100)
+    annotation: OperatorNote
+
+
 class Candidate(Value):
     domain: str
     name: str

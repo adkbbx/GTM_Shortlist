@@ -671,3 +671,46 @@ def test_offer_reuse_bypasses_only_profiling_not_credits_or_workspace_scope(owne
     scoped.checkpoint(exhausted, scoped.claim(exhausted), "complete", {}, "ready")
     with pytest.raises(BudgetExceeded):
         a.reuse_draft(original, "no-free-research")
+
+
+def test_operator_annotations_are_scoped_append_only_and_erased_with_research(owners):
+    from test_review_queue import completed_sheet, review_command
+
+    from shortlist.review_queue import review_queue
+
+    a, b, credential, _ = owners
+    scoped = PostgresStore(credential, a.workspace_id, worker=True)
+    identity, research = completed_sheet(scoped)
+    command = review_command(identity, research)
+    with pytest.raises(ValueError, match="scoped worker"):
+        a.annotate(command)
+    foreign = PostgresStore(credential, b.workspace_id, worker=True)
+    with pytest.raises(KeyError):
+        foreign.annotate(command)
+    with pytest.raises(ValueError):
+        PostgresStore(credential, None, worker=True).annotate(command)
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        reviews = list(pool.map(lambda _: scoped.annotate(command), range(6)))
+    assert len({review["id"] for review in reviews}) == 1
+    first = reviews[0]
+    assert a.get_run(identity)["records"][0]["operator_review"] == first
+    assert a.operator_history(identity, research.id) == [first]
+    assert review_queue(a) == []
+    with b.connection() as db:
+        assert db.execute("SELECT count(*) FROM operator_reviews").fetchone()[0] == 0
+    with scoped.connection() as db, pytest.raises(psycopg.errors.InsufficientPrivilege):
+        db.execute("UPDATE operator_reviews SET payload='{}'")
+    with scoped.connection() as db, pytest.raises(psycopg.errors.InsufficientPrivilege):
+        db.execute("DELETE FROM operator_reviews")
+    with a.connection() as db, pytest.raises(psycopg.errors.InsufficientPrivilege):
+        db.execute("INSERT INTO operator_reviews(id,run_id,record_id,request_key,command_hash,payload) VALUES (?,?,?,?,?,?)",
+                   ("forged", identity, research.id, "forged-key", "forged", "{}"))
+    unrelated = a.create_run(Profile.model_validate(a.get_run(identity)["profile"]), "different-operator-run")
+    with scoped.connection() as db, pytest.raises(psycopg.errors.ForeignKeyViolation):
+        db.execute("INSERT INTO operator_reviews(id,run_id,record_id,request_key,command_hash,payload) VALUES (?,?,?,?,?,?)",
+                   ("cross-linked", unrelated, research.id, "cross-link-key", "forged", "{}"))
+    a.delete_run(identity)
+    with scoped.connection() as db:
+        assert db.execute("SELECT count(*) FROM operator_reviews").fetchone()[0] == 0
+    with pytest.raises(KeyError):
+        scoped.operator_history(identity, research.id)
