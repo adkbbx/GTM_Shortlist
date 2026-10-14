@@ -18,6 +18,7 @@ function AccountForm({ client, setup, recovery, expired, externalError, onRecove
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [confirmationSent, setConfirmationSent] = useState(false);
   const title = recovery ? 'Choose a new password' : mode === 'signup' ? 'Create your account' : mode === 'reset' ? 'Reset your password' : 'Sign in to your shortlist';
   const submit = async (event: FormEvent) => {
     event.preventDefault(); setSaving(true); setError(''); setNotice('');
@@ -34,6 +35,7 @@ function AccountForm({ client, setup, recovery, expired, externalError, onRecove
         const result = await client.auth.signUp({ email, password, options: { emailRedirectTo: setup.redirect_url } });
         if (result.error) throw result.error;
         setPassword(''); setNotice('Check your inbox for an account confirmation link, then sign in.');
+        setConfirmationSent(true);
       } else {
         const result = await client.auth.signInWithPassword({ email, password });
         if (result.error) throw result.error;
@@ -41,11 +43,24 @@ function AccountForm({ client, setup, recovery, expired, externalError, onRecove
       }
     } catch (reason) { setError(message(reason)); } finally { setSaving(false); }
   };
-  const changeMode = (next: typeof mode) => { setMode(next); setError(''); setNotice(''); setPassword(''); };
-  return <main className="account-page"><section className="sheet account-sheet" aria-labelledby="account-heading">
-    <a className="account-brand" href="/">GTM Shortlist <span>Company research</span></a>
+  const resend = async () => {
+    setSaving(true); setError(''); setNotice('');
+    try {
+      const result = await client.auth.resend({ type: 'signup', email, options: { emailRedirectTo: setup.redirect_url } });
+      if (result.error) throw result.error;
+      setNotice('A new confirmation link has been requested. Check your inbox and use the newest email.');
+    } catch (reason) { setError(message(reason)); } finally { setSaving(false); }
+  };
+  const changeMode = (next: typeof mode) => { setMode(next); setError(''); setNotice(''); setPassword(''); setConfirmationSent(false); };
+  return <main className="account-page account-entry">
+    <header className="account-header"><a className="account-brand" href="/">GTM Shortlist</a><a href="https://github.com/adkbbx/GTM_Shortlist" target="_blank" rel="noreferrer">Open-source project</a></header>
+    <div className="account-layout"><aside className="account-context" aria-label="About GTM Shortlist">
+      <h2>A shortlist you can<br />check for yourself.</h2>
+      <p>Find potential customer companies and see the sources behind each fit assessment.</p>
+      <ol><li><strong>Start with your company</strong><span>Confirm your offer and the customers you want to reach.</span></li><li><strong>Research the evidence</strong><span>Inspect source passages, unknowns and labelled hypotheses.</span></li><li><strong>Keep the useful companies</strong><span>Review your shortlist and export it to Excel.</span></li></ol>
+    </aside><section className="sheet account-sheet" aria-labelledby="account-heading">
     <h1 id="account-heading">{title}</h1>
-    <p className="intro">Research company fit. Inspect the evidence. Keep your shortlist in your own workspace.</p>
+    <p className="intro">{mode === 'signup' ? 'Create a workspace for your company research. We will email you a confirmation link.' : mode === 'reset' ? 'Enter your account email and we will send a password reset link.' : recovery ? 'Set a new password to reopen your workspace.' : 'Welcome back. Open your saved company research.'}</p>
     {expired && <p className="notice" role="status">Your session needs verification. Sign in again to reopen your saved research.</p>}
     {externalError && <p className="notice" role="alert">{externalError}</p>}
     <form onSubmit={submit}>
@@ -54,8 +69,9 @@ function AccountForm({ client, setup, recovery, expired, externalError, onRecove
       {error && <p className="notice" role="alert">{error}</p>}{notice && <p className="notice" role="status">{notice}</p>}
       <button type="submit" disabled={saving}>{saving ? 'Please wait…' : recovery ? 'Save new password' : mode === 'signup' ? 'Create account' : mode === 'reset' ? 'Send reset link' : 'Sign in'}</button>
     </form>
+    {confirmationSent && <div className="account-confirmation"><h2>Next, check your inbox</h2><p>Use the newest confirmation email for <strong>{email}</strong>. Open it in this browser to finish signing up.</p><button type="button" className="text-button" disabled={saving} onClick={() => { void resend(); }}>Resend confirmation email</button></div>}
     {!recovery && <div className="account-actions"><button type="button" className="text-button" disabled={saving} onClick={() => changeMode(mode === 'signin' ? 'signup' : 'signin')}>{mode === 'signin' ? 'Create an account' : 'Back to sign in'}</button>{mode === 'signin' && <button type="button" className="text-button" disabled={saving} onClick={() => changeMode('reset')}>Forgot password?</button>}</div>}
-  </section><p className="account-footer">Research supports judgment. It does not establish buying intent.</p></main>;
+  </section></div><footer className="account-footer">Company fit is a research assessment. Buying intent still needs a conversation.</footer></main>;
 }
 
 export function AuthGate({ workspace }: { workspace: (identity: string, account: ReactNode) => ReactNode }) {

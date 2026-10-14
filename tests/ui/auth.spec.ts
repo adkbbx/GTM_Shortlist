@@ -18,11 +18,13 @@ async function fixture(page: Page, unconfirmed = false) {
   const calls: string[] = [];
   let rejectSignin = false;
   let rejectSignout = false;
+  const mailRedirects: string[] = [];
   await page.route('**/api/auth/setup', route => route.fulfill({ json: { mode: 'hosted', supabase_url: authOrigin,
     publishable_key: 'sb_publishable_fixture', redirect_url: 'http://127.0.0.1:8015/' } }));
   await page.route(`${authOrigin}/auth/v1/**`, async route => {
     const request = route.request();
     const url = new URL(request.url());
+    if (['/signup', '/recover', '/resend'].some(path => url.pathname.endsWith(path))) mailRedirects.push(url.searchParams.get('redirect_to') ?? '');
     calls.push(url.pathname + url.search);
     const headers = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*', 'Access-Control-Allow-Methods': '*' };
     if (request.method() === 'OPTIONS') return route.fulfill({ status: 204, headers });
@@ -38,7 +40,7 @@ async function fixture(page: Page, unconfirmed = false) {
     if (url.pathname.endsWith('/user')) return route.fulfill({ headers, json: session().user });
     return route.fulfill({ headers, json: {} });
   });
-  return { calls, reject: () => { rejectSignin = true; }, accept: () => { rejectSignin = false; },
+  return { calls, mailRedirects, reject: () => { rejectSignin = true; }, accept: () => { rejectSignin = false; },
     rejectSignout: () => { rejectSignout = true; }, acceptSignout: () => { rejectSignout = false; } };
 }
 async function signIn(page: Page) {
@@ -79,10 +81,14 @@ test('signup confirmation, sign-in errors and password reset remain usable', asy
   await expect(page.getByRole('heading', { name: 'Sign in to your shortlist' })).toBeVisible();
   await capture(page, `.impeccable/review/${info.project.name}-signin.png`);
   await page.getByRole('button', { name: 'Create an account' }).click();
+  await capture(page, `.impeccable/review/${info.project.name}-signup.png`);
   await page.getByLabel('Email', { exact: true }).fill('fixture@example.test');
   await page.getByLabel('Password', { exact: true }).fill('labelled-fixture-password');
   await page.getByRole('button', { name: 'Create account', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('confirmation link');
+  await expect(page.getByRole('heading', { name: 'Next, check your inbox' })).toBeVisible();
+  await page.getByRole('button', { name: 'Resend confirmation email' }).click();
+  await expect(page.getByRole('status')).toContainText('new confirmation link');
   await capture(page, `.impeccable/review/${info.project.name}-signup-confirmation.png`);
   await page.getByRole('button', { name: 'Back to sign in' }).click();
   backend.reject();
@@ -92,6 +98,7 @@ test('signup confirmation, sign-in errors and password reset remain usable', asy
   await page.getByRole('button', { name: 'Forgot password?' }).click();
   await page.getByRole('button', { name: 'Send reset link' }).click();
   await expect(page.getByRole('status')).toContainText('If this email has an account');
+  expect(backend.mailRedirects).toEqual(Array(3).fill('http://127.0.0.1:8015/'));
   await capture(page, `.impeccable/review/${info.project.name}-password-reset.png`);
   await page.setViewportSize({ width: 320, height: 740 });
   await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
