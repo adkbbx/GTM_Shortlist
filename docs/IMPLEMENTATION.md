@@ -64,7 +64,8 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 - [x] Preserve once-only signup grants and shared attempt caps through research deletion; provide bounded retention preview/apply command.
 - [ ] Complete account closure, Supabase identity/session removal and production retention/backup policy.
 - [x] Add optional configured setup-call link and owner-scoped click tracking; never infer a booked appointment.
-- [ ] Add operator review queue and verified external calendar confirmation if required.
+- [x] Add a bounded owner-scoped read-only operator triage queue for unreviewed/needs-research sheets.
+- [ ] Complete independent operator annotations/outcomes and verified external calendar confirmation if required.
 - [x] Build and test the actual non-root web/API/worker image, isolated database migration/replay and restart in CI; validate private Compose edge configuration.
 - [ ] Public HTTPS deployment and persistent database with configured external SMTP.
 - [ ] Five real runs across three sellers and observed external user test.
@@ -81,4 +82,4 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 Out of scope: automated outreach, contact databases, CRM integrations and Experiment Judge.
 
 ## Continuation rules
-Continue without clarification until 18:00 JST on 14 October 2026 or weekly usage exhaustion. Preserve a handoff at each step and session limit. Resume heartbeat is now scheduled for 13:40 JST on 14 October 2026, after the user’s 13:39 reset; do not use a rolling five-hour delay. No fabricated results, user tests, credentials, buying intent, deployments or payments. Provider/hosting credentials and actual external testing may create release blockers; implement and test independent work while recording them. Do not copy secrets from unrelated projects into Git. User requested thorough phone and laptop validation.
+Continue without clarification until 18:00 JST on 14 October 2026 or weekly usage exhaustion. Preserve a handoff at each step and session limit. The13:40JST wake-up occurred after the user’s13:39reset. The same heartbeat now has one final18:00JST cutoff-only check to disable itself/save a handoff; it must not resume implementation at that wake-up. Do not use a rolling five-hour delay. No fabricated results, user tests, credentials, buying intent, deployments or payments. Provider/hosting credentials and actual external testing may create release blockers; implement and test independent work while recording them. Do not copy secrets from unrelated projects into Git. User requested thorough phone and laptop validation.

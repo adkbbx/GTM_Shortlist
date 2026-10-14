@@ -2,6 +2,7 @@ import argparse
 import json
 from datetime import timedelta
 from pathlib import Path
+from uuid import UUID
 
 from shortlist.config import Settings
 from shortlist.domain import Profile, utcnow
@@ -35,6 +36,8 @@ def main():
     retention = sub.add_parser("retention", help="Preview or erase old inactive research; never resets credits")
     retention.add_argument("--older-than-days", type=int, choices=range(1, 3651), required=True, metavar="DAYS")
     retention.add_argument("--apply", action="store_true", help="Erase the previewed eligible content (up to100 per command)")
+    queue = sub.add_parser("review-queue", help="Read-only triage of unreviewed/needs-research sheets (up to25)")
+    queue.add_argument("--workspace", type=UUID, help="Required explicit workspace for hosted operator access")
     args = parser.parse_args()
     settings = Settings.load()
     if args.command == "config":
@@ -42,6 +45,19 @@ def main():
         return
     if args.command == "worker":
         work(settings, args.once)
+        return
+    if args.command == "review-queue":
+        if settings.mode == "hosted":
+            if args.workspace is None or not settings.worker_database_url.get_secret_value():
+                parser.error("Hosted triage requires an explicit workspace and the separate worker credential")
+            from shortlist.postgres import PostgresStore
+            store = PostgresStore(settings.worker_database_url, args.workspace, worker=True)
+        else:
+            if args.workspace is not None:
+                parser.error("Local research has one operator; no hosted workspace selector")
+            store = Store(settings.db_path)
+        from shortlist.review_queue import review_queue
+        print(json.dumps(review_queue(store), ensure_ascii=False, indent=2))
         return
     if args.command == "retention":
         if settings.mode == "hosted":

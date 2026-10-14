@@ -593,6 +593,9 @@ def test_research_deletion_preserves_wallet_and_other_workspace_cache(owners):
                                  profile, source.company_domain, (source,))
     scoped.save_record(identity, fence, record)
     scoped.checkpoint(identity, fence, "complete", {}, "ready")
+    from shortlist.review_queue import review_queue
+    assert [item["run_id"] for item in review_queue(scoped)] == [identity]
+    assert review_queue(PostgresStore(worker, b.workspace_id, worker=True)) == []
     before_booking = CreditWallet(a).balance()
     with ThreadPoolExecutor(max_workers=6) as pool:
         list(pool.map(lambda _: a.booking_click(identity, "same-booking-click"), range(6)))
