@@ -14,6 +14,7 @@ from concurrent.futures import Future
 from threading import BoundedSemaphore, Thread
 from urllib.parse import quote, urljoin, urlsplit, urlunsplit
 
+import certifi
 from bs4 import BeautifulSoup
 
 from shortlist.domain import Source
@@ -130,7 +131,9 @@ def resolve_public(host: str, timeout: float = 5) -> str:
 
 class PinnedHTTPSConnection(http.client.HTTPSConnection):
     def __init__(self, host: str, address: str, timeout: float):
-        super().__init__(host, timeout=timeout, context=ssl.create_default_context())
+        # Match the public CA bundle used by our HTTPX provider clients. Windows
+        # system roots can select an expired chain for an otherwise valid site.
+        super().__init__(host, timeout=timeout, context=ssl.create_default_context(cafile=certifi.where()))
         self.address = address
 
     def connect(self):

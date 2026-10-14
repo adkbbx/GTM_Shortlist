@@ -98,6 +98,43 @@ def test_tls_connect_pins_validated_ip_and_keeps_original_hostname(monkeypatch):
     assert connected == [("8.8.8.8", 443)]
 
 
+def test_fetch_uses_public_ca_bundle_and_requires_hostname_verification():
+    import ssl
+
+    import certifi
+
+    from shortlist.fetch import PinnedHTTPSConnection
+
+    connection = PinnedHTTPSConnection("example.com", "8.8.8.8", 5)
+    expected = ssl.create_default_context(cafile=certifi.where())
+    assert connection._context.check_hostname is True
+    assert connection._context.verify_mode == ssl.CERT_REQUIRED
+    assert set(connection._context.get_ca_certs(binary_form=True)) == set(expected.get_ca_certs(binary_form=True))
+
+
+def test_certificate_rejection_never_requests_a_page_or_retries_unverified(monkeypatch):
+    import ssl
+
+    from shortlist.fetch import fetch_page
+
+    closed = []
+    monkeypatch.setattr("shortlist.fetch.resolve_public", lambda host, **kwargs: "8.8.8.8")
+    class InvalidCertificate:
+        def __init__(self, *args):
+            pass
+        def connect(self):
+            raise ssl.SSLCertVerificationError("Labelled invalid certificate")
+        def request(self, *args, **kwargs):
+            raise AssertionError("A rejected certificate must prevent the HTTP request")
+        def close(self):
+            closed.append(True)
+    monkeypatch.setattr("shortlist.fetch.PinnedHTTPSConnection", InvalidCertificate)
+    with pytest.raises(FetchError) as failure:
+        fetch_page("https://example.com")
+    assert isinstance(failure.value.__cause__, ssl.SSLCertVerificationError)
+    assert closed == [True]
+
+
 def test_redirect_and_byte_limit_use_actual_fetch_path(monkeypatch):
     from shortlist.fetch import MAX_BYTES, fetch_page
     monkeypatch.setattr("shortlist.fetch.resolve_public", lambda host, **kwargs: "8.8.8.8")
