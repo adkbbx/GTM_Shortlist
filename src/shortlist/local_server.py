@@ -7,11 +7,13 @@ import sys
 import time
 
 from shortlist.config import Settings
+from shortlist.windows_job import protect_process_tree
 
 
 def serve(settings: Settings, port: int):
     with socket.socket() as probe:
         probe.bind(("127.0.0.1", port))  # Fail before launching children if the port is in use.
+    protect_process_tree()
     environment = {**os.environ, "SHORTLIST_DB": str(settings.db_path.resolve())}
     flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
     processes = []

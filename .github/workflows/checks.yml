@@ -1,6 +1,17 @@
 name: Checks
 on: [push, pull_request]
 jobs:
+  windows-lifecycle:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m venv .venv
+      - run: .venv/Scripts/pip install -r requirements.lock.txt
+      - run: .venv/Scripts/pip install -e . --no-deps
+      - run: .venv/Scripts/python -m pytest -q tests/test_windows_job.py
   postgres:
     runs-on: ubuntu-latest
     services:

@@ -181,3 +181,12 @@ Found a worker-scoping root bug during non-fit billing tests: assigned workers r
 
 Paid checkout/signature validation, history, cancellation/larger batches, Windows descendant cleanup, deletion/retention, booking/operator queue and deployment remain unfinished. Real Supabase/SMTP/search credentials, provider comparison, three sellers and observed external tests remain gates. Current usage44%five-hour/41%weekly at14:31; ordinary usage allowed, no resets or purchases. Cutoff18:00JST and unfinished goal preserved.
 Final unchanged-artifact browser run:26 passed across local/auth and actual hosted credit flows on laptop and phone. CI now provisions Postgres for hosted browser checks.
+
+## 14 October, 14:38 JST Windows supervisor lifetime
+
+Fixed orphaned runtime descendants with a native Windows kill-on-close job assigned to the standalone supervisor before launching children. Its sole non-inheritable handle lives until actual process exit, so normal exit, os._exit and forced termination all reap launcher/runtime descendants. Assignment failures stop startup instead of silently weakening guarantees; non-Windows behavior is unchanged. Native Microsoft job-object documentation informed the implementation. No process name scans or arbitrary PID kills in product code.
+
+Four actual Windows tests pass: unprotected control reproduces an orphan holding a port, then protected normal exit, crash and forced termination prove all pre-opened process handles signalled and port reusable. Added dedicated Windows CI job so these checks cannot silently skip on Linux. Independently stopped the actual loopback API after verifying exact owned ancestry; supervisor, wrappers and runtime worker all exited and8014 released. Restart succeeded. Current live service session1003 serves updated credit endpoint in local mode and built UI. Full backend recheck running; final result below. Prior UI26passed, no UI changes in this step. Ordinary allowance48%five-hour/42%weekly at14:37; cutoff18:00 remains.
+
+Next deletion/retention and operator/booking/deployment pieces. Paid processing, actual provider credentials, real accounts/SMTP, cross-device email, external users and three-seller research remain incomplete.
+Final Windows chunk:226 backend tests passed including25 actual Postgres checks and4 actual Windows lifecycle proofs. Ruffpassed. GitHub Checks for creditintegration8b8620e succeeded (run38517371325); foundation438f21a also succeeded.
