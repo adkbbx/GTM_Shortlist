@@ -66,6 +66,8 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 - [ ] Publish accurate demo/setup/evaluation documentation and launch only after checks pass.
 
 ## Commercial validation, after product readiness
+- [x] Plan credit wallet, three-company signup grant, batch reservation/settlement and paid top-ups in docs/credits.md; pricing remains unvalidated.
+- [ ] Implement credit ledger, failure refunds, replay-safe paid grants and batch-cost UI; migrate legacy demo entitlement without a second signup grant.
 - [ ] Identify 30 potential buyers and prioritize 10; prepare offer-specific samples.
 - [ ] Validate three $99 reviewed pilots and repeat demand before $49 subscription/billing.
 

@@ -144,3 +144,7 @@ Finish reviewer first requested three fixes: 200% text overflow, two decorative 
 
 The built local UI is served from updated dist by the existing service; reload to see it. This is a product workspace redesign, not hosted deployment or new signup implementation. Hosted browser authentication, retention/deletion, booking/review and release checks remain next; goal unfinished. Resume schedule13:40 JST/cutoff18:00 unchanged.
 Final reviewer confirmed all three fixes resolved and ship at scoped fix-list ceiling; all ten captures valid with no visible regression from the correction batch. Actual local HTTP health200 confirms worker_online=true; search_ready=false remains honest until Tavily is configured.
+
+## Credit product direction
+
+User proposed signup credits and paid credit increases with per-batch deductions. Saved docs/credits.md as a proposed structure: one credit per completed company sheet, free grant3once, requested batch size determines maximum reservation, settlement charges delivered sheets and releases failures. Explicitly distinguishes three company researches from three full batches (nine companies). Suggested20/100-credit packs are illustrative and unpriced. Valid unknown/non-fit outcomes count, provider-failure fallback sheets do not; reopening/export/review is free. Ledger/RLS/payment idempotency, legacy demo migration, abuse limits and bounded larger-batch implementation are planned, not implemented. No billing provider chosen, payment collected or code limit changed. Implementation checklist updated.
