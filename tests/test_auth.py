@@ -56,6 +56,26 @@ def test_actual_container_startup_reports_missing_setting_privately(variable):
     assert "private-startup-database-value" not in process.stderr + process.stdout
 
 
+@pytest.mark.parametrize("missing", [("SHORTLIST_DATABASE_URL",), ("SUPABASE_PUBLISHABLE_KEY",),
+                                   ("SHORTLIST_DATABASE_URL", "SUPABASE_PUBLISHABLE_KEY")])
+def test_actual_container_startup_names_missing_database_or_public_key(missing):
+    import os
+    import subprocess
+    import sys
+
+    environment = dict(os.environ, SHORTLIST_MODE="hosted", SUPABASE_URL="https://auth.example",
+                       SHORTLIST_APP_URL="https://app.example", SUPABASE_PUBLISHABLE_KEY="sb_publishable_fixture",
+                       SHORTLIST_DATABASE_URL="private-startup-database-value", GEMMA_API_KEY="private-inference-value")
+    for variable in missing:
+        environment[variable] = ""
+    process = subprocess.run([sys.executable, "-m", "shortlist.container_entrypoint", "api"],
+                             env=environment, capture_output=True, text=True, timeout=10, check=False)
+    assert process.returncode != 0
+    assert all(variable in process.stderr for variable in missing)
+    assert "private-startup-database-value" not in process.stderr + process.stdout
+    assert "private-inference-value" not in process.stderr + process.stdout
+
+
 def test_verified_identity_comes_from_trusted_user_endpoint():
     identity = uuid4()
 

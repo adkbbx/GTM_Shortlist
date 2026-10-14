@@ -62,8 +62,10 @@ class Settings(BaseModel):
                     valid = False
                 if not valid:
                     raise ValueError(f"{name} must be a plain HTTPS origin (https://hostname), without paths, credentials or Markdown")
-            if not self.database_url.get_secret_value() or not self.supabase_publishable_key:
-                raise ValueError("Hosted mode requires database and Supabase public configuration")
+            missing = [name for name, value in (("SHORTLIST_DATABASE_URL", self.database_url.get_secret_value()),
+                                                ("SUPABASE_PUBLISHABLE_KEY", self.supabase_publishable_key)) if not value]
+            if missing:
+                raise ValueError("Hosted mode is missing required environment settings: " + ", ".join(missing))
             if not self.supabase_publishable_key.startswith("sb_publishable_"):
                 raise ValueError("Use a Supabase publishable key; secret/service-role keys must not reach the browser")
         return self
