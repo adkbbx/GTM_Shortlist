@@ -97,6 +97,8 @@ The unattended window ended on 14 October and its heartbeat is paused. Subsequen
 - [x] Remove preferred-seller behavior: all names use the same identity lookup, and the public UI/exports use GTM Shortlist without company-specific presets or promotion.
 - [x] Prepare a reusable Render web/worker Blueprint and validate its structure against Render's published schema; identify startup configuration errors by environment variable.
 - [ ] Complete actual Supabase database provisioning, SMTP and successful Render startup with real accounts and persisted research.
+- [x] Apply actual Supabase schema migrations, provision restricted API/worker logins, and verify TLS, role separation and replay without credential rotation.
+- [ ] Import private runtime settings into Render and verify actual API/worker deployment, email and real account isolation.
 - [x] Provide customer-readable Excel Shortlist/Evidence sheets and plain CSV columns; keep complete technical JSON, owner scoping and free accepted-only downloads.
 - [ ] Separate observable target criteria from pain-point hypotheses; improve candidate selection before detailed research.
 
