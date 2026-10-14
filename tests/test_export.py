@@ -1,5 +1,6 @@
 import csv
 import io
+import json
 from copy import deepcopy
 from xml.etree import ElementTree as ET
 from zipfile import ZipFile
@@ -95,6 +96,23 @@ def test_csv_has_one_physical_line_per_company_even_with_multiple_sources_and_no
     assert row["Source links"] == "https://example.com/about; https://example.com/pricing"
     assert row["Review note"] == "First check; Second check; Third check; Fourth check"
     assert customer_run["records"][0]["review"]["reason"].count("\n") == 2  # Stored notes stay intact.
+
+
+def test_customer_files_omit_internal_ids_and_termination_codes_but_json_retains_them(customer_run):
+    customer_run["checkpoint"]["termination"] = "user_stopped"
+    customer_run["records"][0]["operator_review"]["annotation"]["source_ids"] = ["source-one"]
+    csv_text = export_run(customer_run, "csv")
+    package = workbook_xml(export_run(customer_run, "xlsx"))
+    workbook_text = " ".join(" ".join(root.itertext()) for name, root in package.items() if name.startswith("xl/worksheets/sheet"))
+    for text in (csv_text, workbook_text):
+        for internal in ("Research ID", "Run termination", "run-one", "record-one", "source-one", "user_stopped"):
+            assert internal not in text
+    assert "Run stopped by user; completed research retained." in workbook_text
+    assert "Inspected sources: https://example.com/about" in workbook_text
+    technical = json.loads(export_run(customer_run, "json"))
+    assert technical["run_id"] == "run-one"
+    assert technical["termination"] == "user_stopped"
+    assert technical["records"][0]["research"]["id"] == "record-one"
 
 
 def test_actual_api_workbook_download_preserves_run_and_review(tmp_path, customer_run):

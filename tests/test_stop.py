@@ -69,7 +69,8 @@ def assert_held_worker_stops(store, settings, run_id):
     assert after["records"][0]["review"]["decision"] == "accepted"
     assert execute_run(store, settings, run_id, model=Model(), fetch=fetch) is False
     assert json.loads(export_run(after, "json"))["termination"] == "user_stopped"
-    assert "user_stopped" in export_run(after, "csv")
+    assert "user_stopped" not in export_run(after, "csv")
+    assert "Accepted" in export_run(after, "csv")
     return after
 
 

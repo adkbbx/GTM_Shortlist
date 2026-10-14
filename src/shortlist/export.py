@@ -20,24 +20,24 @@ def export_run(run: dict, format: str, accepted_only: bool = False) -> str | byt
     if format == "xlsx":
         profile = run.get("profile") or {}
         notes = ["GTM Shortlist · Eygentic", "Target: " + profile.get("target", "Not confirmed"),
-                 f'{len(records)} companies · {"accepted only" if accepted_only else "all saved records"} · Run {run["id"]}',
+                 f'{len(records)} companies · {"accepted only" if accepted_only else "all saved records"}',
                  "Human acceptance is not buying intent. Unknown means unverified, not a failed criterion."]
         if run["checkpoint"].get("termination"):
             notes.append("Run stopped by user; completed research retained.")
         return workbook_bytes([
-            ("Shortlist", notes, HEADERS, summary, [24, 30, 25, 45, 50, 35, 22, 35, 40, 40, 34]),
+            ("Shortlist", notes, HEADERS, summary, [24, 30, 25, 45, 50, 35, 22, 35, 40, 40]),
             ("Evidence", ["Evidence and open questions", "Exact saved passages; hypotheses are unverified. Dates are UTC."],
              ["Company", "Type", "Criterion", "Assessment", "Explanation / claim", "Source passage / assumptions",
-              "Source URL", "Retrieved (UTC)", "Published (UTC)", "Domain", "Research ID"], details,
-             [24, 22, 45, 20, 55, 65, 45, 24, 24, 30, 34]),
+              "Source URL", "Retrieved (UTC)", "Published (UTC)", "Domain"], details,
+             [24, 22, 45, 20, 55, 65, 45, 24, 24, 30]),
         ])
     if format != "csv":
         raise ValueError("Choose Excel, CSV or JSON")
     buffer = io.StringIO(newline="")
     writer = csv.writer(buffer)
-    writer.writerow([*HEADERS, "Run termination"])
+    writer.writerow(HEADERS)
     for row in summary:
-        cells = [*row, run["checkpoint"].get("termination", "")]
+        cells = row
         cells = ["'" + cell if cell.lstrip().startswith(("=", "+", "-", "@", "\t", "\r")) else cell for cell in cells]
         # CSV has no row sizing or alignment. Embedded source-link/review-note
         # newlines make Excel expand whole rows, so use one physical line per company.

@@ -1,6 +1,6 @@
 """Human-readable projections of saved assessments; no new fit claims or scores."""
 HEADERS = ["Company", "Website", "Fit assessment", "Evidence supporting fit", "What needs checking",
-           "Suggested next step", "Your decision", "Review note", "Service review", "Source links", "Research ID"]
+           "Suggested next step", "Your decision", "Review note", "Service review", "Source links"]
 FIT = {"fits": "Meets required criteria", "needs_verification": "Fit unverified", "does_not_fit": "Does not meet criteria"}
 DECISION = {"accepted": "Accepted", "rejected": "Rejected", "needs_research": "Needs more research"}
 
@@ -47,7 +47,7 @@ def customer_tables(run, records):
         service = (f'{annotation.get("reviewer", "")}: {annotation.get("note", "")}' if annotation else "Not reviewed")
         if annotation:
             details.append([research["name"], "Service review", "", annotation["outcome"], service,
-                            "Inspected source IDs: " + "; ".join(annotation.get("source_ids", [])), "",
+                            "Inspected sources: " + "; ".join(sources[source_id]["url"] for source_id in annotation.get("source_ids", []) if source_id in sources), "",
                             operator.get("reviewed_at", ""), ""])
         step = {"fits": "Review the evidence before deciding to pursue",
                 "needs_verification": "Verify the open criteria before deciding to pursue",
@@ -57,9 +57,9 @@ def customer_tables(run, records):
         else:
             checks = ("Mismatch: " + "; ".join(negatives) if negatives else "; ".join(questions)) or "; ".join(research.get("unknowns", [])) or "None recorded"
         for detail in details[first_detail:]:
-            detail.extend([research["domain"], research.get("id", "")])
+            detail.append(research["domain"])
         summary.append([research["name"], "https://" + research["domain"], FIT[research["qualification"]],
                         "; ".join(positives) or "No supported fit criteria", checks, step,
                         DECISION.get(review.get("decision"), "Not reviewed"), review.get("reason", ""), service,
-                        "\n".join(source["url"] for source in sources.values()), research.get("id", "")])
+                        "\n".join(source["url"] for source in sources.values())])
     return summary, details
