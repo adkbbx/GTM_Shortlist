@@ -1,0 +1,19 @@
+# Local Tavily setup
+
+Implemented and verified against the full phone/laptop suite. The user asked for a masked key-entry box rather than terminal setup. The box belongs to the trusted local workspace only. Hosted customers use the managed provider and cannot replace a service-wide key.
+
+Three choices considered: browser storage makes a background worker depend on that browser; editing the main .env risks unrelated settings and requires restart; a separate owner-private provider database gives the API and worker one transaction boundary. Choose the third, outside Git and research/export storage. Its path appends .providers to the complete configured database filename, keeping different database paths independent.
+
+On Windows, encrypt with current-user DPAPI, with UI forbidden and no machine-wide protection flag. On POSIX, require an owner-only regular file, mode0600; the payload is protected by permissions rather than encryption. SQLite commits leave either the previous complete key or the new complete key, including after abrupt process exit. An initial file-replacement prototype hit Windows sharing failures under concurrent readers/writers; using the existing SQLite transaction mechanism removes that custom file lifecycle. Never log, return, preload or include a key in a request-validation error. Keep a bounded tvly-prefixed token and generic failures. Hosted mode never reads this local file.
+
+Only the loopback workspace can submit: require a matching Origin and application/json, restrict the route to local mode, bound the streamed body before parsing and keep the existing trusted-host/cross-origin protections. The local workspace is a trusted single-user interface, not an authenticated public settings service. Do not expose it on the LAN or through a public tunnel to accept secrets on a phone.
+
+Saving config is not proof the provider accepted a key. Make no extra paid search just to test it. Explain that the next separately confirmed run uses the key; provider failures stay in the existing durable attempt journal. The worker loads the saved key between runs without changing a request already underway. Existing source reuse, attempt caps, leases and company credits remain authoritative.
+
+Required proof: actual Windows encrypt/decrypt and a separate process reading the ciphertext; malformed/oversized/cross-origin/hosted requests leave the previous key intact and never echo input; generated public schemas/exports contain no secret value; the actual next worker receives the saved config; phone/laptop masked-entry and retry/clear states remain usable. Physical phone access still depends on a hosted deployment, whose customers do not configure global provider keys.
+
+Provider reference: [Tavily quickstart](https://docs.tavily.com/documentation/quickstart) and [search endpoint](https://docs.tavily.com/documentation/api-reference/endpoint/search). The existing bounded adapter performs real searches after target confirmation; key entry itself performs no search.
+
+The private file and journals are ignored by Git. It is not a portable plaintext .env export. Windows recovery requires the same OS-user protection context; reinstall/migration may require entering the key again. POSIX backups must preserve owner-only permissions. If a first interrupted save leaves unavailable configuration, retry through setup; corrupt data never gets treated as a valid key. Closing the form clears browser input, not the saved server configuration. Revoke a compromised key in Tavily and save its replacement.
+
+Local verification: actual DPAPI encryption/decryption, separate-process reads, concurrent transactions, and child os._exit before/after commit. Two POSIX permission/symlink cases run in Linux CI rather than being claimed from Windows. See PROGRESS.md for full-suite evidence and remaining real-provider/deployment gates.

@@ -8,7 +8,8 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, ValidationError, field_validator
+from starlette.concurrency import run_in_threadpool
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from shortlist.auth import AuthenticationError, AuthUnavailable, verify_user
@@ -16,6 +17,12 @@ from shortlist.config import Settings
 from shortlist.domain import OperatorReview, Profile, Research, Review, Target
 from shortlist.export import export_run
 from shortlist.fetch import canonical_url
+from shortlist.local_credentials import (
+    CredentialUnavailable,
+    LocalCredentials,
+    apply_local_credentials,
+    validate_tavily_key,
+)
 from shortlist.progress import RunProgress
 from shortlist.providers import SellerDraft
 from shortlist.store import BudgetExceeded, Conflict, Store
@@ -30,6 +37,11 @@ class SellerInput(BaseModel):
     @classmethod
     def public_url(cls, value):
         return canonical_url(value)
+
+
+class LocalKeyInput(BaseModel):
+    model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
+    key: SecretStr = Field(min_length=13, max_length=256)
 
 
 class Confirmation(Target):
@@ -186,6 +198,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def auth_unavailable(request, exc):
         return JSONResponse({"detail": str(exc)}, status_code=503)
 
+    @app.exception_handler(CredentialUnavailable)
+    async def credential_unavailable(request, exc):
+        return JSONResponse({"detail": str(exc)}, status_code=503)
+
     @app.exception_handler(BudgetExceeded)
     async def allowance_exhausted(request, exc):
         return JSONResponse({"detail": str(exc)}, status_code=403)
@@ -207,9 +223,38 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/api/health", response_model=Health)
     def health():
-        readiness = settings.readiness()
+        readiness = apply_local_credentials(settings).readiness()
         return Health(mode=settings.mode, search_ready=readiness["search"], gemma_ready=readiness["gemma"],
                       worker_online=local_store.worker_online() if local_store else False)
+
+    @app.post("/api/local/tavily", response_model=Health, openapi_extra={
+        "requestBody": {"required": True, "content": {"application/json": {"schema": LocalKeyInput.model_json_schema()}}}})
+    async def configure_tavily(request: Request):
+        if settings.mode != "local":
+            raise HTTPException(404, "Local provider setup is unavailable")
+        if request.headers.get("origin") != str(request.base_url).rstrip("/") or \
+                request.client is None or request.client.host not in ("127.0.0.1", "::1", "testclient"):
+            raise HTTPException(403, "Open provider setup from this local workspace")
+        if request.headers.get("content-type", "").split(";", 1)[0].lower() != "application/json":
+            raise HTTPException(415, "Provider setup requires JSON")
+        body = bytearray()
+        async for chunk in request.stream():
+            body.extend(chunk)
+            if len(body) > 2048:
+                raise HTTPException(413, "Provider setup request is too large")
+        try:
+            command = LocalKeyInput.model_validate_json(body)
+            key = validate_tavily_key(command.key.get_secret_value())
+        except (ValidationError, ValueError):
+            # FastAPI's default validation response echoes rejected input. This
+            # boundary deliberately returns no submitted key or parser details.
+            raise HTTPException(422, "Enter a valid tvly-prefixed Tavily API key") from None
+        finally:
+            body.clear()
+        # Short local I/O; native protection and the committed private database
+        # are shared by this API and the separately running worker.
+        await run_in_threadpool(LocalCredentials(settings.db_path).save, key)
+        return await run_in_threadpool(health)
 
     @app.get("/api/auth/setup", response_model=AuthSetup)
     def auth_setup():

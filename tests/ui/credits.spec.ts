@@ -47,6 +47,7 @@ async function capture(page: Page, path: string) {
 
 test('real hosted API and Postgres settle partial research; review/export are free', async ({ page }, info) => {
   await hostedFixture(page);
+  await expect(page.getByRole('button', { name: 'Connect Tavily', exact: true })).toHaveCount(0);
   await expect(page.getByText('3 credits available', { exact: true })).toBeVisible();
   const activityButton = page.getByRole('button', { name: 'Credit activity', exact: true });
   await activityButton.click();

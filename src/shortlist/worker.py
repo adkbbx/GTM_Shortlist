@@ -14,6 +14,7 @@ from shortlist.domain import (
 )
 from shortlist.fetch import FetchError, canonical_url, domain_of, fetch_page
 from shortlist.journal import call_step
+from shortlist.local_credentials import apply_local_credentials
 from shortlist.progress import ProgressUpdate, step_label
 from shortlist.providers import (
     Gemma,
@@ -259,7 +260,8 @@ def work(settings: Settings, once: bool = False):
     try:
         while True:
             for run_id in store.pending_runs():
-                execute_run(store.for_run(run_id) if settings.mode == "hosted" else store, settings, run_id)
+                execute_run(store.for_run(run_id) if settings.mode == "hosted" else store,
+                            apply_local_credentials(settings), run_id)
             if once:
                 return
             stopped.wait(2)

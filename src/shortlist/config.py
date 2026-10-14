@@ -67,7 +67,7 @@ class Settings(BaseModel):
     @classmethod
     def load(cls):
         load_dotenv()
-        return cls(
+        settings = cls(
             db_path=os.getenv("SHORTLIST_DB", "data/shortlist.sqlite3"),
             search_provider=os.getenv("SHORTLIST_SEARCH_PROVIDER", "tavily"),
             tavily_key=os.getenv("TAVILY_API_KEY", ""),
@@ -86,6 +86,8 @@ class Settings(BaseModel):
             booking_url=os.getenv("SHORTLIST_BOOKING_URL", ""),
             supabase_admin_key=os.getenv("SUPABASE_ADMIN_SECRET_KEY", ""),
         )
+        from shortlist.local_credentials import apply_local_credentials
+        return apply_local_credentials(settings)
 
     def readiness(self):
         return {

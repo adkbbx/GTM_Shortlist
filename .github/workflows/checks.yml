@@ -21,7 +21,7 @@ jobs:
       - run: python -m venv .venv
       - run: .venv/Scripts/pip install -r requirements.lock.txt
       - run: .venv/Scripts/pip install -e . --no-deps
-      - run: .venv/Scripts/python -m pytest -q tests/test_windows_job.py
+      - run: .venv/Scripts/python -m pytest -q tests/test_windows_job.py tests/test_local_credentials.py
   postgres:
     runs-on: ubuntu-latest
     services:

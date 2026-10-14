@@ -3,6 +3,10 @@ __pycache__/
 .pytest_cache/
 *.egg-info/
 .env
+*.providers
+*.providers-journal
+*.providers-wal
+*.providers-shm
 deploy/secrets/
 data/
 node_modules/

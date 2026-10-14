@@ -15,6 +15,7 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 
 ## 3. Discovery and identity
 - [x] Implement SerpApi and Tavily adapters, bounded query planner and saved search provenance.
+- [x] Add private local masked Tavily key setup and dynamic next-run configuration; verify native encryption/transactions and responsive UI without claiming a live key.
 - [ ] Verify unattended discovery with actual search-provider credentials.
 - [x] Canonicalize domains, deduplicate and exclude directories/seller domains.
 - [x] Preserve unreadable candidate failures and try replacements within six candidates without consuming the three review slots.

@@ -98,3 +98,7 @@ input[type=checkbox]:focus { box-shadow: none; }
 .activity-pagination button:disabled { cursor: default; }
 .stop-research { margin: -8px 0 24px; }
 .stop-research > p { max-width: 65ch; color: var(--muted); margin-top: 10px; }
+.local-search-setup { margin: -8px 0 24px; }
+.local-search-setup > div { max-width: 640px; margin-top: 20px; padding: 24px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.local-search-setup p { color: var(--muted); }
+.local-search-setup input { width: 100%; }

@@ -64,7 +64,7 @@ test('stopping actual held research keeps completed sheets and ignores an older 
     await expect(page.getByRole('alert')).toHaveText('Labelled temporary stop failure');
     await page.getByRole('button', { name: 'Stop research', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Research stopped', exact: true })).toBeFocused();
-    releaseOld();
+    releaseOld?.();
     await fulfilled;
     await page.unrouteAll({ behavior: 'wait' });
     await expect(page.getByRole('heading', { name: 'Research stopped', exact: true })).toBeVisible();
@@ -90,6 +90,45 @@ test('stopping actual held research keeps completed sheets and ignores an older 
     await page.request.post(`/__fixture_release/${id}`);
     await page.unrouteAll({ behavior: 'wait' });
   }
+});
+
+test('local masked Tavily setup saves privately, recovers and clears browser input', async ({ page }, info) => {
+  await page.goto('/');
+  const trigger = page.getByRole('button', { name: 'Connect Tavily', exact: true });
+  await trigger.press('Enter');
+  const keyInput = page.getByLabel('Tavily API key', { exact: true });
+  await expect(keyInput).toHaveAttribute('type', 'password');
+  await expect(keyInput).toBeFocused();
+  const key = 'tvly-labelled-browser-fixture-not-real';
+  await keyInput.fill(key);
+  await page.route('**/api/local/tavily', route => route.fulfill({ status: 503, json: { detail: 'Labelled temporary settings failure' } }), { times: 1 });
+  await page.getByRole('button', { name: 'Save search key' }).click();
+  await expect(page.getByRole('alert')).toHaveText('Labelled temporary settings failure');
+  await expect(keyInput).toHaveValue(key);
+  const savedRequest = page.waitForResponse(response => new URL(response.url()).pathname === '/api/local/tavily');
+  await page.getByRole('button', { name: 'Save search key' }).click();
+  const response = await savedRequest;
+  expect(response.status()).toBe(200);
+  expect(await response.text()).not.toContain(key);
+  await expect(keyInput).toHaveValue('');
+  const saved = page.getByRole('status').filter({ hasText: 'Tavily key saved' });
+  await expect(saved).toBeFocused();
+  expect(await page.evaluate(() => JSON.stringify([localStorage, sessionStorage]))).not.toContain(key);
+  expect(await page.locator('body').textContent()).not.toContain(key);
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${info.project.name}-tavily-saved.png`);
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${info.project.name}-tavily-large-text.png`);
+  await page.getByRole('button', { name: 'Close setup' }).press('Enter');
+  await expect(trigger).toBeFocused();
+  await trigger.press('Enter');
+  await expect(keyInput).toHaveValue('');
+  await page.reload();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  await trigger.click();
+  await expect(keyInput).toHaveValue('');
 });
 
 test('saved seller → confirmation → evidence → review → export survives reload', async ({ page }, testInfo) => {

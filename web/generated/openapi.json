@@ -23,6 +23,49 @@
         }
       }
     },
+    "/api/local/tavily": {
+      "post": {
+        "summary": "Configure Tavily",
+        "operationId": "configure_tavily_api_local_tavily_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "key": {
+                    "type": "string",
+                    "maxLength": 256,
+                    "minLength": 13,
+                    "format": "password",
+                    "title": "Key",
+                    "writeOnly": true
+                  }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "key"
+                ],
+                "title": "LocalKeyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/setup": {
       "get": {
         "summary": "Auth Setup",
