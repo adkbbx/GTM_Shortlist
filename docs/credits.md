@@ -86,3 +86,7 @@ Confirmed batches now replace the one-demo restriction. Previously granted legac
 ## Reuse a confirmed offer
 
 A completed or partial confirmed run now offers Reuse this offer. It copies only the saved offer, target, criteria and exclusions into a new editable draft; no website/model profiling, source research or customer review is copied. The draft requires a fresh explicit confirmation and an upfront batch-cost quote. Balance and one-active-run guards still apply; there is no signup grant or research credit bypass. Automated profiling limits do not block this path because it makes no profiling call. Prior run inputs remain immutable. New research may return companies from earlier batches, which the confirmation screen states before charging.
+
+## Recent activity API
+
+GET /api/credits/history returns the latest50 committed signup/addition/usage/refund entries for the verified owner, with entry identity, integer amount and timestamp. Holds and unused returns remain on the run summary; they are not invented ledger refunds. Local unmetered mode returns an empty list. The endpoint does not expose another account, payment secrets, source text or credit command keys. Customer-facing activity UI and full pagination remain unfinished.

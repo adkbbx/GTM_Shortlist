@@ -124,6 +124,29 @@
         ]
       }
     },
+    "/api/credits/history": {
+      "get": {
+        "summary": "Credit History",
+        "operationId": "credit_history_api_credits_history_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreditHistory"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/sellers": {
       "post": {
         "summary": "Seller",
@@ -628,6 +651,68 @@
           "criteria"
         ],
         "title": "Confirmation"
+      },
+      "CreditEntry": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "signup",
+              "purchase",
+              "usage",
+              "refund"
+            ],
+            "title": "Kind"
+          },
+          "amount": {
+            "type": "integer",
+            "minimum": -1.0,
+            "title": "Amount"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "amount",
+          "created_at"
+        ],
+        "title": "CreditEntry"
+      },
+      "CreditHistory": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "local",
+              "hosted"
+            ],
+            "title": "Mode"
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/CreditEntry"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "title": "Entries"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode",
+          "entries"
+        ],
+        "title": "CreditHistory"
       },
       "Criterion-Input": {
         "properties": {

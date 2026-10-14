@@ -59,6 +59,18 @@ class ServiceView(BaseModel):
     booking_url: str | None = None
 
 
+class CreditEntry(BaseModel):
+    id: str
+    kind: Literal["signup", "purchase", "usage", "refund"]
+    amount: int = Field(ge=-1)
+    created_at: datetime
+
+
+class CreditHistory(BaseModel):
+    mode: Literal["local", "hosted"]
+    entries: list[CreditEntry] = Field(max_length=50)
+
+
 class BookingInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
     request_key: str = Field(min_length=8, max_length=100)
@@ -210,6 +222,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             return WalletView(mode="local")
         from shortlist.credits import CreditWallet
         return WalletView(mode="hosted", **CreditWallet(store).balance().model_dump())
+
+    @app.get("/api/credits/history", response_model=CreditHistory)
+    def credit_history(store: owned):
+        if settings.mode == "local":
+            return CreditHistory(mode="local", entries=[])
+        from shortlist.credits import CreditWallet
+        return CreditHistory(mode="hosted", entries=CreditWallet(store).history())
 
     @app.post("/api/sellers", response_model=RunView, status_code=201)
     def seller(input: SellerInput, store: owned):

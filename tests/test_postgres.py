@@ -259,6 +259,9 @@ def test_hosted_api_verifies_identity_and_scopes_every_route(owners, monkeypatch
     first_headers = {"Authorization": "Bearer owner-a"}
     second_headers = {"Authorization": "Bearer owner-b"}
     assert client.get("/api/runs").status_code == 401
+    assert client.get("/api/credits/history").status_code == 401
+    assert client.get("/api/credits/history", headers=first_headers).json()["entries"][0]["amount"] == 3
+    assert client.get("/api/credits/history", headers=second_headers).json()["entries"][0]["amount"] == 3
     assert client.get("/api/runs", headers={"Authorization": "Bearer invalid"}).status_code == 401
     assert client.get("/api/runs", headers={**first_headers, "Host": "attacker.example"}).status_code == 400
     assert client.post("/api/sellers", headers={**first_headers, "Origin": "https://attacker.example"}, json={}).status_code == 403
@@ -334,6 +337,10 @@ def test_credit_signup_reserve_delivery_refund_and_replay(owners):
     with pytest.raises(Conflict):
         delivery.consume(run_id, "late-company.example")
     assert other.balance().available == 3
+    history = wallet.history()
+    assert {entry["kind"] for entry in history} == {"signup", "usage"}
+    assert sum(entry["amount"] for entry in history) == 2
+    assert len(other.history()) == 1
 
 
 def test_credit_concurrent_reservations_cannot_overspend(owners):

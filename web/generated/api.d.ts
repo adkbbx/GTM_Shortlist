@@ -89,6 +89,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/credits/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Credit History */
+        get: operations["credit_history_api_credits_history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/sellers": {
         parameters: {
             query?: never;
@@ -250,6 +267,33 @@ export interface components {
              * @default 3
              */
             company_limit: number;
+        };
+        /** CreditEntry */
+        CreditEntry: {
+            /** Id */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "signup" | "purchase" | "usage" | "refund";
+            /** Amount */
+            amount: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /** CreditHistory */
+        CreditHistory: {
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "local" | "hosted";
+            /** Entries */
+            entries: components["schemas"]["CreditEntry"][];
         };
         /** Criterion */
         "Criterion-Input": {
@@ -777,6 +821,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WalletView"];
+                };
+            };
+        };
+    };
+    credit_history_api_credits_history_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreditHistory"];
                 };
             };
         };

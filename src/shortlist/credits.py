@@ -38,6 +38,13 @@ class CreditWallet:
             self.store.begin(db)
             return self._balance(db)
 
+    def history(self) -> list[dict]:
+        """Recent committed ledger changes; holds are displayed on their runs."""
+        with self.store.connection() as db:
+            return [dict(row) for row in db.execute(
+                "SELECT id,kind,amount,created_at FROM credit_entries WHERE workspace_id=? "
+                "ORDER BY created_at DESC,id DESC LIMIT 50", (self.store.workspace_id,))]
+
     def grant(self, quantity: int, operation_key: str, description: str):
         if not self.store.worker:
             raise ValueError("Only verified server purchase/operator processing can grant credits")
