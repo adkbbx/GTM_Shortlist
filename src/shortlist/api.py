@@ -210,9 +210,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def view(store: Store, run_id: str) -> RunView:
         run = store.get_run(run_id)
         profile = Profile.model_validate(run["profile"]) if run["profile"] else None
+        error = run["error"]
+        if profile is None and run["status"] == "awaiting_confirmation" and "seller_model_output" in run["checkpoint"]:
+            error = ("We couldn't create a usable offer summary from this page. Company search hasn't started. "
+                     "Enter what you sell and who you want to reach below, or choose New shortlist "
+                     "and use a product or services page.")
         return RunView(id=run_id, seller_url=profile.seller_url if profile else run["checkpoint"]["seller_url"],
                        status=run["status"], stage=run["stage"], profile=profile, draft=run["checkpoint"].get("draft"),
-                       records=run["records"], error=run["error"], created_at=run["created_at"],
+                       records=run["records"], error=error, created_at=run["created_at"],
                        updated_at=run["updated_at"], attempts=run["attempts"], credits=run.get("credits"),
                        legacy_credit_exempt=run.get("legacy_credit_exempt", False),
                        reused_offer=run["checkpoint"].get("reused_offer", False),

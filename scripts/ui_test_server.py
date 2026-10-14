@@ -61,6 +61,18 @@ if __name__ == "__main__":
     thread.start()
     application = FastAPI()
 
+    @application.post("/__fixture_failed_offer")
+    def failed_offer():
+        from uuid import uuid4
+        with held_lock:
+            identity = store.create_draft("https://seller.example/", "failed-offer-" + uuid4().hex)
+            fence = store.claim(identity)
+            checkpoint = store.get_run(identity)["checkpoint"]
+            checkpoint["seller_model_output"] = {"content": "{}", "issues": [{"type": "missing"}]}
+            store.checkpoint(identity, fence, "confirmation", checkpoint, "awaiting_confirmation",
+                            "Gemma output failed validation. Enter and confirm your offer and target manually to continue.")
+        return {"id": identity}
+
     @application.post("/__fixture_corrupt_provider")
     def corrupt_provider():
         credentials = LocalCredentials(settings.db_path)

@@ -6,6 +6,37 @@ from shortlist.store import Store
 from shortlist.worker import execute_run
 
 
+def test_failed_offer_summary_explains_recovery_in_saved_and_listed_runs(tmp_path):
+    import hashlib
+
+    from shortlist.domain import Source
+    from shortlist.providers import ModelOutputError
+    settings = Settings(db_path=tmp_path / "copy.sqlite3")
+    store = Store(settings.db_path)
+    identity = store.create_draft("https://seller.example/", "bad-seller-summary")
+    text = "Labelled fixture page; no valid model summary."
+    source = Source(url="https://seller.example/", company_domain="seller.example", title="Labelled fixture",
+                    text=text, content_hash=hashlib.sha256(text.encode()).hexdigest())
+    class Model:
+        name = "labelled-invalid-draft"
+        def seller(self, source):
+            raise ModelOutputError("{}", [{"type": "missing", "loc": ["offer"]}])
+    execute_run(store, settings, identity, model=Model(), fetch=lambda *args: source)
+    before = store.get_run(identity)
+    client = TestClient(create_app(settings))
+    response = client.get(f"/api/runs/{identity}").json()
+    assert response["status"] == "awaiting_confirmation"
+    assert "usable offer summary" in response["error"]
+    assert "Company search hasn't started" in response["error"]
+    assert "Enter what you sell" in response["error"]
+    assert "New shortlist" in response["error"]
+    assert "product or services page" in response["error"]
+    assert "Gemma" not in response["error"]
+    assert "validation" not in response["error"]
+    assert client.get("/api/runs").json()[0]["error"] == response["error"]
+    assert store.get_run(identity) == before  # Presentation changes no source/journal/diagnostic.
+
+
 def test_guided_manual_confirmation_and_idempotency(tmp_path):
     settings = Settings(db_path=tmp_path / "api.sqlite3")
     client = TestClient(create_app(settings))

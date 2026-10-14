@@ -139,6 +139,24 @@ test('local masked Tavily setup saves privately, recovers and clears browser inp
   await expect(keyInput).toHaveValue('');
 });
 
+test('failed offer summary explains next steps on saved runs', async ({ page }, info) => {
+  const response = await page.request.post('/__fixture_failed_offer');
+  expect(response.ok()).toBeTruthy();
+  const { id } = await response.json();
+  await page.goto(`/?run=${id}`);
+  const notice = page.getByRole('status').filter({ hasText: "We couldn't create a usable offer summary" });
+  await expect(notice).toContainText("Company search hasn't started");
+  await expect(notice).toContainText('product or services page');
+  await expect(page.getByLabel('What do you sell?')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Confirm target and discover' })).toBeVisible();
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${info.project.name}-failed-offer-guidance.png`);
+  await page.reload();
+  await expect(notice).toBeVisible();
+  await page.getByRole('button', { name: 'New shortlist', exact: true }).press('Enter');
+  await expect(page.getByLabel('Seller website', { exact: true })).toBeVisible();
+});
+
 test('saved seller → confirmation → evidence → review → export survives reload', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
