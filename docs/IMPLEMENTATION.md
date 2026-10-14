@@ -62,7 +62,8 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 - [ ] Validate signup/email/identity verification against an actual Supabase project.
 - [ ] Workspace isolation tested with two actual accounts; private schema/role policies.
 - [x] Preserve once-only signup grants and shared attempt caps through research deletion; provide bounded retention preview/apply command.
-- [ ] Complete account closure, Supabase identity/session removal and production retention/backup policy.
+- [x] Implement bounded server-operator closure, monotonic workspace access guard and retryable identity deletion; verify real Postgres and labelled Auth transports.
+- [ ] Add customer self-service closure, observe actual Supabase identity/session removal and publish production retention/backup policy.
 - [x] Add optional configured setup-call link and owner-scoped click tracking; never infer a booked appointment.
 - [x] Add a bounded owner-scoped read-only operator triage queue for unreviewed/needs-research sheets.
 - [x] Save independent append-only operator annotations/outcomes, scoped history, source references and separate API/export fields.

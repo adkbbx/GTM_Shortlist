@@ -17,6 +17,8 @@ async function hostedFixture(page: Page) {
     const response = await page.request.fetch('http://127.0.0.1:8016' + path, {
       method: request.method(), data: request.postDataBuffer() ?? undefined,
       headers: { ...request.headers(), host: 'app.example', origin: 'https://app.example' },
+      // Browser routing replaces native read retries; bound fixture ECONNRESET recovery to GETs.
+      maxRetries: request.method() === 'GET' ? 2 : 0,
     });
     await route.fulfill({ response });
   });
@@ -139,6 +141,23 @@ test('actual owner credit history pages earlier and newer without losing tied en
   await activity.getByRole('button', { name: 'Refresh activity' }).click();
   await expect(activity.getByRole('status')).toHaveText('Page 1 · 50 recorded changes');
   await expect(activity.getByRole('button', { name: 'Newer activity' })).toBeDisabled();
+});
+
+test('managed closure rejects a stale verified session and clears private browser data', async ({ page }) => {
+  const identity = await hostedFixture(page);
+  await page.getByLabel('Seller website', { exact: true }).fill('https://eygentic.com/');
+  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await expect(page.getByLabel('Companies in this batch')).toBeVisible({ timeout: 15000 });
+  await page.getByLabel('Companies in this batch').selectOption('1');
+  await page.getByRole('button', { name: 'Confirm target and discover' }).click();
+  await expect(page.getByRole('heading', { name: '1 company researched' })).toBeVisible({ timeout: 15000 });
+  const closure = await page.request.post('http://127.0.0.1:8016/__fixture_close_account', { data: { workspace_id: identity } });
+  expect(closure.ok()).toBeTruthy();
+  expect((await closure.json()).state).toBe('closed');
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
+  await expect(page.locator('.company-sheet')).toHaveCount(0);
+  await expect(page.locator('.wallet-balance')).toHaveCount(0);
 });
 
 test('selected batch size sets the actual worker limit and quoted cost', async ({ page }) => {

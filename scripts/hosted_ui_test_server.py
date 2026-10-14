@@ -136,6 +136,14 @@ def run():
                                 "Labelled browser operator grant; no payment"))
             return {"fixture": True}
 
+        @application.post("/__fixture_close_account")
+        def close_fixture(input: CreditFixture):
+            from shortlist.account_closure import close_account
+            fixture_settings = settings.model_copy(update={"supabase_admin_key": SecretStr("sb_secret_labelled_fixture_admin")})
+            result = close_account(fixture_settings, input.workspace_id, input.workspace_id,
+                                   transport=httpx.MockTransport(lambda _: httpx.Response(200, json={"id": str(input.workspace_id)})))
+            return result.model_dump(mode="json")
+
         application.mount("/", api_module.create_app(settings))
         try:
             uvicorn.run(application, host="127.0.0.1", port=8016, log_level="warning")

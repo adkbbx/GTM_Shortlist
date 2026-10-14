@@ -1,6 +1,7 @@
 """Real PostgreSQL checks. CI supplies its isolated service; local tests use loopback."""
 import hashlib
 import importlib.util
+import json
 import os
 import subprocess
 import sys
@@ -750,3 +751,189 @@ def test_credit_pages_keep_tied_timestamps_unique_and_foreign_cursors_private(ow
         wallet.history_page(UUID(foreign))
     with pytest.raises(KeyError):
         wallet.history_page(uuid4())
+
+
+def closure_settings(a, credential):
+    return Settings(mode="hosted", database_url=a.dsn, worker_database_url=credential,
+                    supabase_url="https://auth.example", supabase_publishable_key="sb_publishable_fixture",
+                    supabase_admin_key="sb_secret_labelled_admin_fixture", app_url="https://app.example")
+
+
+def test_account_closure_freezes_access_erases_content_and_retries_unknown_identity(owners):
+    from test_review_queue import completed_sheet, review_command
+
+    from shortlist.account_closure import close_account
+    from shortlist.auth import AuthenticationError
+
+    a, b, credential, profile = owners
+    scoped = PostgresStore(credential, a.workspace_id, worker=True)
+    identity, research = completed_sheet(scoped)
+    scoped.annotate(review_command(identity, research))
+    other = PostgresStore(credential, b.workspace_id, worker=True)
+    b_run, other_research = completed_sheet(other)
+    other.annotate(review_command(b_run, other_research))
+    untouched = b.get_run(b_run)
+    calls = []
+
+    def provider(request):
+        calls.append(request.method)
+        assert request.url.path == f"/auth/v1/admin/users/{a.workspace_id}"
+        assert request.headers["apikey"] == "sb_secret_labelled_admin_fixture"
+        assert "authorization" not in request.headers
+        if request.method == "GET":
+            return httpx.Response(200, json={"id": str(a.workspace_id), "email": "private-fixture@example.test"})
+        assert json.loads(request.content) == {"should_soft_delete": False}
+        if calls.count("DELETE") == 1:
+            raise httpx.ReadTimeout("Labelled uncertain identity deletion")
+        return httpx.Response(404, json={"error_code": "user_not_found"})
+
+    settings = closure_settings(a, credential)
+    first = close_account(settings, a.workspace_id, a.workspace_id, transport=httpx.MockTransport(provider))
+    assert first.state == "closing" and first.reason == "identity_unavailable"
+    assert first.erased_in_batch == 1 and first.identity_removal == "unconfirmed"
+    for read in (a.list_runs, a.ensure_workspace, lambda: CreditWallet(a).balance(),
+                 lambda: scoped.create_draft(profile.seller_url, "cannot-restart-closed")):
+        with pytest.raises(AuthenticationError):
+            read()
+    maintenance = PostgresStore(credential, a.workspace_id, worker=True, maintenance=True)
+    with maintenance.connection() as db:
+        assert db.execute("SELECT count(*) FROM records").fetchone()[0] == 0
+        assert db.execute("SELECT count(*) FROM operator_reviews").fetchone()[0] == 0
+        assert db.execute("SELECT count(*) FROM source_cache").fetchone()[0] == 0
+        assert db.execute("SELECT count(*) FROM runs WHERE deleted_at IS NULL").fetchone()[0] == 0
+        assert db.execute("SELECT count(*) FROM credit_entries").fetchone()[0] == 1
+    second = close_account(settings, a.workspace_id, a.workspace_id, transport=httpx.MockTransport(provider))
+    assert second.state == "closed" and second.identity_removal == "confirmed_deleted"
+    assert second.erased_in_batch == 0
+    assert close_account(settings, a.workspace_id, a.workspace_id, transport=httpx.MockTransport(provider)).state == "closed"
+    assert calls == ["GET", "DELETE", "DELETE"]
+    assert b.get_run(b_run) == untouched
+    with maintenance.connection() as db, pytest.raises(psycopg.errors.InsufficientPrivilege):
+        db.execute("UPDATE workspaces SET closure_state='open',closure_requested_at=NULL,closure_completed_at=NULL WHERE id=?",
+                   (a.workspace_id,))
+    with pytest.raises(psycopg.errors.InsufficientPrivilege):
+        maintenance.create_draft(profile.seller_url, "maintenance-cannot-reopen")
+    with pytest.raises(ValueError):
+        PostgresStore(a.dsn, a.workspace_id, maintenance=True)
+
+
+def test_account_closure_preflight_and_active_work_never_erase_research(owners):
+    from shortlist.account_closure import close_account
+    from shortlist.auth import AuthUnavailable
+
+    a, _, credential, profile = owners
+    identity = a.create_run(profile, "active-closure-fixture")
+    before = a.get_run(identity)
+    settings = closure_settings(a, credential)
+    with pytest.raises(ValueError, match="exact workspace"):
+        close_account(settings, a.workspace_id, uuid4())
+    for response in (httpx.Response(403, json={"secret": "never-log-provider-payload"}),
+                     httpx.Response(200, json={"id": str(uuid4())}),
+                     httpx.Response(404, json={"error_code": "user_not_found"})):
+        with pytest.raises(AuthUnavailable):
+            close_account(settings, a.workspace_id, a.workspace_id, transport=httpx.MockTransport(lambda _, reply=response: reply))
+        assert a.get_run(identity) == before
+    with pytest.raises(Conflict, match="active research"):
+        close_account(settings, a.workspace_id, a.workspace_id,
+                      transport=httpx.MockTransport(lambda _: httpx.Response(200, json={"id": str(a.workspace_id)})))
+    assert a.get_run(identity) == before
+
+
+def test_account_closure_is_bounded_and_mutations_recheck_after_lock(owners):
+    from shortlist.account_closure import close_account
+    from shortlist.auth import AuthenticationError
+
+    a, _, credential, _ = owners
+    scoped = PostgresStore(credential, a.workspace_id, worker=True)
+    with scoped.connection() as db:
+        for index in range(101):
+            db.execute("INSERT INTO runs(id,workspace_id,request_key,payload_hash,profile,status,stage,created_at,updated_at) "
+                       "VALUES (?,?,?,'fixture','{}','partial','review','fixture','fixture')",
+                       (f"closure-fixture-{index}-{a.workspace_id}", a.workspace_id, f"close-{index}"))
+    calls = []
+
+    def provider(request):
+        calls.append(request.method)
+        return httpx.Response(200, json={"id": str(a.workspace_id)})
+
+    settings = closure_settings(a, credential)
+    with a.connection() as stale:
+        first = close_account(settings, a.workspace_id, a.workspace_id, transport=httpx.MockTransport(provider))
+        assert first.state == "closing" and first.reason == "research_remaining"
+        assert first.erased_in_batch == 100 and first.remaining_runs == 1
+        assert calls == ["GET"]
+        with pytest.raises(AuthenticationError):
+            a.begin(stale)
+    second = close_account(settings, a.workspace_id, a.workspace_id, transport=httpx.MockTransport(provider))
+    assert second.state == "closed" and second.erased_in_batch == 1
+    assert calls == ["GET", "DELETE"]
+
+
+def test_closed_account_api_denies_still_verified_tokens_and_cannot_regrant(owners, monkeypatch):
+    from test_review_queue import completed_sheet
+
+    from shortlist.account_closure import close_account
+
+    a, b, credential, _ = owners
+    completed_sheet(PostgresStore(credential, a.workspace_id, worker=True))
+    settings = closure_settings(a, credential)
+
+    def user_endpoint(request):
+        # Labelled stale identity fixture: remote verification still says authenticated.
+        identity = a.workspace_id if request.headers["authorization"] == "Bearer closing-fixture" else b.workspace_id
+        return httpx.Response(200, json={"id": str(identity), "role": "authenticated",
+                                        "email_confirmed_at": "2026-10-14T00:00:00Z"})
+
+    monkeypatch.setattr("shortlist.api.verify_user", lambda cfg, token: verify_user(
+        cfg, token, transport=httpx.MockTransport(user_endpoint)))
+    client = TestClient(create_app(settings), base_url="https://app.example")
+    headers = {"Authorization": "Bearer closing-fixture"}
+    assert client.get("/api/runs", headers=headers).status_code == 200
+    result = close_account(settings, a.workspace_id, a.workspace_id,
+                           transport=httpx.MockTransport(lambda _: httpx.Response(200, json={"id": str(a.workspace_id)})))
+    assert result.state == "closed"
+    for route in ("/api/runs", "/api/credits", "/api/credits/history"):
+        denied = client.get(route, headers=headers)
+        assert denied.status_code == 401 and "records" not in denied.text
+    assert client.post("/api/sellers", headers=headers, json={"seller_url": "https://seller.example/",
+                                                           "request_key": "no-recreated-allowance"}).status_code == 401
+    assert client.get("/api/credits", headers={"Authorization": "Bearer other-fixture"}).json()["available"] == 3
+    maintenance = PostgresStore(credential, a.workspace_id, worker=True, maintenance=True)
+    assert len(CreditWallet(maintenance).history_page()[0]) == 1
+
+
+def test_actual_process_death_after_remote_delete_keeps_closure_retryable(owners, tmp_path):
+    from test_review_queue import completed_sheet
+
+    from shortlist.account_closure import close_account
+
+    a, _, credential, _ = owners
+    completed_sheet(PostgresStore(credential, a.workspace_id, worker=True))
+    marker = tmp_path / "labelled-identity-effect.txt"
+    script = """
+import os
+from pathlib import Path
+from uuid import UUID
+import httpx
+from shortlist.account_closure import close_account
+from shortlist.config import Settings
+identity=UUID(os.environ['CLOSURE_FIXTURE_ID'])
+settings=Settings(mode='hosted',database_url=os.environ['CLOSURE_FIXTURE_DSN'],worker_database_url=os.environ['CLOSURE_FIXTURE_DSN'],supabase_url='https://auth.example',supabase_publishable_key='sb_publishable_fixture',supabase_admin_key='sb_secret_fixture',app_url='https://app.example')
+def provider(request):
+    if request.method=='DELETE':
+        Path(os.environ['CLOSURE_FIXTURE_MARKER']).write_text('labelled remote deletion effect')
+        os._exit(17)
+    return httpx.Response(200,json={'id':str(identity)})
+close_account(settings,identity,identity,transport=httpx.MockTransport(provider))
+"""
+    environment = {**os.environ, "CLOSURE_FIXTURE_ID": str(a.workspace_id),
+                   "CLOSURE_FIXTURE_DSN": credential.get_secret_value(), "CLOSURE_FIXTURE_MARKER": str(marker)}
+    child = subprocess.run([sys.executable, "-c", script], env=environment, timeout=20, check=False)
+    assert child.returncode == 17 and marker.exists()
+    maintenance = PostgresStore(credential, a.workspace_id, worker=True, maintenance=True)
+    with maintenance.connection() as db:
+        assert db.execute("SELECT closure_state FROM workspaces WHERE id=?", (a.workspace_id,)).fetchone()[0] == "closing"
+        assert db.execute("SELECT count(*) FROM runs WHERE deleted_at IS NULL").fetchone()[0] == 0
+    resumed = close_account(closure_settings(a, credential), a.workspace_id, a.workspace_id,
+                            transport=httpx.MockTransport(lambda _: httpx.Response(404, json={"error_code": "user_not_found"})))
+    assert resumed.state == "closed" and resumed.erased_in_batch == 0

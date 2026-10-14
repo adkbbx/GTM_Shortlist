@@ -32,6 +32,15 @@ class Settings(BaseModel):
     supabase_publishable_key: str = ""
     app_url: str = ""
     booking_url: str = ""
+    supabase_admin_key: SecretStr = SecretStr("")
+
+    @field_validator("supabase_admin_key")
+    @classmethod
+    def server_admin_key(cls, value):
+        key = value.get_secret_value()
+        if key and not key.startswith("sb_secret_"):
+            raise ValueError("Account closure requires a server-only Supabase secret key")
+        return value
 
     @field_validator("booking_url")
     @classmethod
@@ -75,6 +84,7 @@ class Settings(BaseModel):
             supabase_publishable_key=os.getenv("SUPABASE_PUBLISHABLE_KEY", ""),
             app_url=os.getenv("SHORTLIST_APP_URL", ""),
             booking_url=os.getenv("SHORTLIST_BOOKING_URL", ""),
+            supabase_admin_key=os.getenv("SUPABASE_ADMIN_SECRET_KEY", ""),
         )
 
     def readiness(self):

@@ -1,6 +1,6 @@
 # Research deletion and retention
 
-Status: research deletion and a repeatable operator retention command are implemented. Account closure, Supabase identity removal, published retention terms and backup rotation remain release gates.
+Status: research deletion, repeatable operator retention and bounded managed account closure are implemented. Customer self-service, observed real Supabase identity removal, published retention terms and backup rotation remain release gates.
 
 ## What deletion does
 
@@ -34,4 +34,6 @@ No recurring retention job is enabled on the current development database. Choos
 
 Deletion removes content from application access. Database free pages, PostgreSQL old row versions, SQLite WAL, logs and backups require a separate storage/backup lifecycle. Do not claim immediate forensic erasure or backup removal. Production configuration must define backup expiration, restoration handling, logging redaction and a tested deletion replay after restore.
 
-Research deletion is not account deletion. Complete closure must disable further workspace creation/access, reconcile any in-flight work and wallet/payment records, erase account-associated research and cache, revoke sessions and remove the Supabase identity using a server-only admin credential. The one-time grant/anti-abuse retention policy must be explicit; deleting and recreating a workspace must not silently grant credits again. This flow remains unfinished, as do actual SMTP/two-account and external-user checks.
+Research deletion is not account deletion. The new managed operator command freezes the exact workspace, rejects active jobs, erases at most100 inactive runs per call and removes the Supabase identity only after research is erased. It uses a dedicated server-only admin secret and persistent closing/closed state; ambiguous provider outcomes stay unconfirmed and retryable. API reads and mutation locks reject closing/closed accounts even if an old token is still accepted remotely. A closed user UUID cannot recreate its signup grant. See account-closure.md for the command and precise retained fields.
+
+Operator procedures must reconcile wallet/payment obligations before running closure; this command does not issue refunds. The credit ledger and its business identifiers remain under the current spending policy. Matching a new Auth UUID to a previous person is not implemented. Customer self-service, an actual Supabase deletion/session test, explicit retention/anti-abuse terms and backup expiration/replay remain unfinished, as do actual SMTP/two-account and external-user checks.

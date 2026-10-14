@@ -53,6 +53,7 @@ def completed_sheet(store):
                     text="TEST FIXTURE. Company offers software.", content_hash="fixture-hash")
     research = Research(domain="company.example", name="Operator test fixture", profile_id=profile.id,
                         findings=(), sources=(source,), qualification="needs_verification", status="partial")
+    store.cache_source(identity, fence, source.url, source)
     store.save_record(identity, fence, research, billable=False)
     store.checkpoint(identity, fence, "complete", {}, "partial")
     return identity, research

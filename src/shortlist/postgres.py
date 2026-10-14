@@ -7,6 +7,7 @@ from uuid import UUID
 import psycopg
 from pydantic import SecretStr
 
+from shortlist.auth import AuthenticationError
 from shortlist.store import BudgetExceeded, Store
 
 
@@ -35,13 +36,16 @@ class Connection:
 class PostgresStore(Store):
     order_key = "position"
 
-    def __init__(self, dsn: SecretStr, workspace_id: UUID | None, *, worker: bool = False):
+    def __init__(self, dsn: SecretStr, workspace_id: UUID | None, *, worker: bool = False, maintenance: bool = False):
         if workspace_id is None and not worker:
             raise ValueError("Hosted access requires a verified workspace")
+        if maintenance and (not worker or workspace_id is None):
+            raise ValueError("Account maintenance requires an explicitly scoped worker credential")
         self.dsn = dsn
         self.workspace_id = workspace_id
         self.worker = worker
         self.operator_access = worker and workspace_id is not None
+        self.maintenance = maintenance
 
     @contextmanager
     def connection(self):
@@ -59,12 +63,22 @@ class PostgresStore(Store):
                 "SELECT set_config('shortlist.workspace_id',%s,true)",
                 (str(self.workspace_id) if self.workspace_id else "",),
             )
-            yield Connection(db)
+            connection = Connection(db)
+            self.require_open_workspace(connection)
+            yield connection
+
+    def require_open_workspace(self, db):
+        if self.workspace_id is None or self.maintenance:
+            return
+        workspace = db.execute("SELECT closure_state FROM workspaces WHERE id=?", (self.workspace_id,)).fetchone()
+        if workspace and workspace["closure_state"] != "open":
+            raise AuthenticationError("This account is closing or closed. Contact the service operator")
 
     def begin(self, db):
         # Short command transactions serialize global quotas/idempotent commands.
         # Provider dispatch is outside this transaction. The lock is database-wide.
         db.execute("SELECT pg_advisory_xact_lock(7421391)")
+        self.require_open_workspace(db)
 
     def ensure_workspace(self):
         if self.workspace_id is None:

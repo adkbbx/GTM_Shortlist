@@ -45,8 +45,18 @@ def main():
     history.add_argument("run_id")
     history.add_argument("record_id")
     history.add_argument("--workspace", type=UUID)
+    closure = sub.add_parser("close-account", help="Server-only irreversible managed account closure (up to100 runs per call)")
+    closure.add_argument("--workspace", type=UUID, required=True)
+    closure.add_argument("--confirm", type=UUID, required=True, help="Repeat the exact workspace UUID to confirm closure")
     args = parser.parse_args()
     settings = Settings.load()
+    if args.command == "close-account":
+        from shortlist.account_closure import close_account
+        result = close_account(settings, args.workspace, args.confirm)
+        print(result.model_dump_json())
+        if result.state == "closing":
+            raise SystemExit(2)
+        return
     if args.command == "config":
         print(json.dumps({"db": str(settings.db_path), "providers": settings.readiness()}))
         return

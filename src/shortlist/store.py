@@ -298,7 +298,7 @@ class Store:
                 f"ORDER BY updated_at,{self.order_key} LIMIT 100",
                 (cutoff.astimezone(UTC).isoformat(),))]
 
-    def delete_run(self, run_id: str):
+    def delete_run(self, run_id: str) -> bool:
         """Erase research content; retain minimal command/spending identities."""
         with self.connection() as db:
             self.begin(db)
@@ -306,7 +306,7 @@ class Store:
             if not row:
                 raise KeyError(run_id)
             if row["deleted_at"]:
-                return
+                return False
             if row["status"] in ("queued", "running"):
                 raise Conflict("Wait for research to finish before deleting this shortlist")
             self.finished(db, run_id)
@@ -321,6 +321,7 @@ class Store:
             db.execute("UPDATE runs SET profile='{}',checkpoint='{}',payload_hash='',error=NULL,stage='deleted',"
                        "status='partial',deleted_at=?,updated_at=?,lease_until=0,fence=fence+1 WHERE id=?",
                        (now, now, run_id))
+            return True
 
     def booking_click(self, run_id: str, request_key: str):
         """Record a link click only; never infer an appointment or buying intent."""
