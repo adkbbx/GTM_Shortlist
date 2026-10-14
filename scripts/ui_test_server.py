@@ -9,10 +9,12 @@ import time
 from pathlib import Path
 
 import uvicorn
+from fastapi import FastAPI
 from ui_test_providers import FixtureModel, FixtureSearch, fixture_fetch
 
 from shortlist.api import create_app
 from shortlist.config import Settings
+from shortlist.domain import OperatorReviewCommand
 from shortlist.store import Store
 from shortlist.worker import execute_run
 
@@ -43,4 +45,12 @@ def loop():
 
 if __name__ == "__main__":
     threading.Thread(target=loop, daemon=True).start()
-    uvicorn.run(create_app(settings), host="127.0.0.1", port=8015, log_level="warning")
+    application = FastAPI()
+
+    @application.post("/__fixture_operator_review")
+    def annotation(command: OperatorReviewCommand):
+        # Isolated browser fixture only; never exposed by the production API.
+        return store.annotate(command)
+
+    application.mount("/", create_app(settings))
+    uvicorn.run(application, host="127.0.0.1", port=8015, log_level="warning")

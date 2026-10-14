@@ -66,7 +66,8 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 - [x] Add optional configured setup-call link and owner-scoped click tracking; never infer a booked appointment.
 - [x] Add a bounded owner-scoped read-only operator triage queue for unreviewed/needs-research sheets.
 - [x] Save independent append-only operator annotations/outcomes, scoped history, source references and separate API/export fields.
-- [ ] Expose service-review notes in the customer UI and observe an actual human review; verify external calendar confirmation if required.
+- [x] Expose saved service-review notes and inspected sources separately from customer acceptance in the responsive UI.
+- [ ] Observe an actual external human review; verify external calendar confirmation if required.
 - [x] Build and test the actual non-root web/API/worker image, isolated database migration/replay and restart in CI; validate private Compose edge configuration.
 - [ ] Public HTTPS deployment and persistent database with configured external SMTP.
 - [ ] Five real runs across three sellers and observed external user test.

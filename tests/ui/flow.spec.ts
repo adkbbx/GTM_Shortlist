@@ -110,6 +110,24 @@ test('saved seller → confirmation → evidence → review → export survives 
   expect(readFileSync(csvPath, 'utf-8')).toContain('artificial intelligence software');
   expect(readFileSync(csvPath, 'utf-8')).toContain('sources_json');
   expect(readFileSync(csvPath, 'utf-8')).toContain('exclusion_findings_json');
+  const runId = new URL(page.url()).searchParams.get('run');
+  const response = await page.request.post('/__fixture_operator_review', { data: {
+    run_id: runId, record_id: exported.records[0].research.id, request_key: `operator-fixture-${testInfo.project.name}`,
+    previous_id: null, annotation: { outcome: 'reviewed', reviewer: 'Labelled fixture reviewer',
+      note: 'TEST FIXTURE service note. The supplied source was inspected. This does not change the customer decision.',
+      source_ids: [exported.records[0].research.sources[0].id] },
+  } });
+  expect(response.ok()).toBeTruthy();
+  await page.reload();
+  const serviceReview = first.getByRole('region', { name: 'Service review', exact: true });
+  await expect(serviceReview.getByText('Evidence reviewed', { exact: true })).toBeVisible();
+  await expect(serviceReview.getByText('TEST FIXTURE service note.', { exact: false })).toBeVisible();
+  await expect(first.getByText('Saved: accepted')).toBeVisible();
+  await expect(first.locator('.qualification')).toContainText('Does not fit');
+  await expect(serviceReview.getByRole('link')).toHaveAttribute('rel', 'noopener noreferrer');
+  await expect(serviceReview.getByRole('link')).toHaveAttribute('href', exported.records[0].research.sources[0].url);
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${testInfo.project.name}-service-review.png`);
   expect(errors).toEqual([]);
 });
 

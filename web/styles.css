@@ -89,3 +89,8 @@ input[type=checkbox]:focus { box-shadow: none; }
 .activity-amount { font-weight: 600; font-variant-numeric: tabular-nums; }
 .activity-notice { margin-top: 20px; color: var(--muted); }
 @media (max-width: 700px) { .workspace-account { flex-wrap: wrap; } .wallet-access { gap: 8px; } }
+.service-review { margin: 0 28px; padding: 24px 0; border-bottom: 1px solid var(--line); }
+.service-note { white-space: pre-wrap; overflow-wrap: anywhere; }
+.service-review > .hint { margin-top: 10px; }
+.service-sources { margin-top: 16px; }
+@media (max-width: 700px) { .service-review { margin: 0 20px; } }
