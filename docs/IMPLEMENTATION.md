@@ -94,6 +94,8 @@ Out of scope: automated outreach, contact databases, CRM integrations and Experi
 The unattended window ended on 14 October and its heartbeat is paused. Subsequent work follows new human requests; do not silently extend the old schedule.
 
 - [x] Accept bare domains, full HTTPS URLs and the approved Eygentic name; add durable website lookup and explicit selection for other company names, with safe manual fallback and phone/laptop verification.
+- [x] Provide customer-readable Excel Shortlist/Evidence sheets and plain CSV columns; keep complete technical JSON, owner scoping and free accepted-only downloads.
+- [ ] Separate observable target criteria from pain-point hypotheses; improve candidate selection before detailed research.
 
 The user manually requested Continue after the 18:00 cutoff and then explicitly extended work until 21:30 JST on 14 October 2026. Continue small verified steps until that cutoff or weekly exhaustion, checking ordinary usage between steps. The same heartbeat now has a single 21:30 cutoff/handoff check; no rolling five-hour retry is scheduled. Preserve unfinished acceptance gates. The original scheduled window below is historical.
 

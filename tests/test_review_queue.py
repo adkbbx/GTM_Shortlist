@@ -98,7 +98,8 @@ def test_operator_history_is_independent_immutable_replay_safe_and_deleted(tmp_p
     assert review_queue(store)[0]["operator_review"] == second
     exported = json.loads(export_run(store.get_run(identity), "json", accepted_only=True))
     assert exported["records"][0]["operator_review"] == second
-    assert "operator_review_json" in export_run(store.get_run(identity), "csv")
+    assert "Service review" in export_run(store.get_run(identity), "csv")
+    assert "A separate ownership source still needs inspection." in export_run(store.get_run(identity), "csv")
     store.delete_run(identity)
     with store.connection() as db:
         assert db.execute("SELECT count(*) FROM operator_reviews").fetchone()[0] == 0

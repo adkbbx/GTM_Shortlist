@@ -96,6 +96,10 @@ test('signed-in requests and exports carry tokens; sign-out clears the workspace
   await page.getByRole('link', { name: 'Export JSON' }).click();
   await download;
   expect(requests.some(request => request.url.includes('/export?format=json'))).toBe(true);
+  const excelDownload = page.waitForEvent('download');
+  await page.getByRole('link', { name: 'Export Excel' }).click();
+  expect((await excelDownload).suggestedFilename()).toMatch(/\.xlsx$/);
+  expect(requests.some(request => request.url.includes('/export?format=xlsx'))).toBe(true);
   expect(requests.length).toBeGreaterThan(2);
   expect(requests.every(request => request.bearer?.startsWith('Bearer '))).toBe(true);
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();

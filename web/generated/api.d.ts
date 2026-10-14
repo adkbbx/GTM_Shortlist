@@ -1329,7 +1329,7 @@ export interface operations {
     export_api_runs__run_id__export_get: {
         parameters: {
             query?: {
-                format?: "json" | "csv";
+                format?: "json" | "csv" | "xlsx";
                 accepted_only?: boolean;
             };
             header?: never;

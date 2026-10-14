@@ -25,9 +25,12 @@ shortlist worker
 shortlist show RUN_ID
 shortlist export RUN_ID --format json
 shortlist export RUN_ID --format csv --accepted-only
+shortlist export RUN_ID --format xlsx --output shortlist.xlsx
 ```
 
 The example profile is user-supplied planning input, not a fetched seller assessment. Correct it before using it for other offers. Commands with the same request key return the original run; changed input under that key is rejected.
+
+Excel exports have a readable Shortlist sheet and an Evidence sheet with exact passages, open questions, source links and dates. CSV now uses readable columns instead of nested JSON cells; use JSON for the complete technical record and unchanged integration contract. See [customer exports](docs/customer-export.md).
 
 Run `pytest -q` and `ruff check --config pyproject.toml src tests scripts`. Tests use labelled synthetic sources unless explicitly described as live. TLS verification and public-address validation stay enabled; unsafe or unavailable pages produce explicit partial results. The citation gate verifies exact passages and company source identity. Semantic entailment is still a model assessment requiring evaluation and human review.
 

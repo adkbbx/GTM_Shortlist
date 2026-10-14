@@ -693,7 +693,8 @@
             "schema": {
               "enum": [
                 "json",
-                "csv"
+                "csv",
+                "xlsx"
               ],
               "type": "string",
               "default": "json",

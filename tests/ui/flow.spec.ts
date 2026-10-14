@@ -316,9 +316,15 @@ test('saved seller → confirmation → evidence → review → export survives 
   const [csv] = await Promise.all([page.waitForEvent('download'), page.getByRole('link', { name: 'Export CSV' }).click()]);
   const csvPath = testInfo.outputPath('accepted.csv');
   await csv.saveAs(csvPath);
-  expect(readFileSync(csvPath, 'utf-8')).toContain('artificial intelligence software');
-  expect(readFileSync(csvPath, 'utf-8')).toContain('sources_json');
-  expect(readFileSync(csvPath, 'utf-8')).toContain('exclusion_findings_json');
+  expect(readFileSync(csvPath, 'utf-8')).toContain('Offers AI software to businesses');
+  expect(readFileSync(csvPath, 'utf-8')).toContain('Source links');
+  expect(readFileSync(csvPath, 'utf-8')).toContain('What needs checking');
+  expect(readFileSync(csvPath, 'utf-8')).not.toContain('sources_json');
+  const [excel] = await Promise.all([page.waitForEvent('download'), page.getByRole('link', { name: 'Export Excel' }).click()]);
+  expect(excel.suggestedFilename()).toMatch(/\.xlsx$/);
+  const excelPath = testInfo.outputPath('accepted.xlsx');
+  await excel.saveAs(excelPath);
+  expect(readFileSync(excelPath).subarray(0, 2).toString()).toBe('PK');
   const runId = new URL(page.url()).searchParams.get('run');
   const response = await page.request.post('/__fixture_operator_review', { data: {
     run_id: runId, record_id: exported.records[0].research.id, request_key: `operator-fixture-${testInfo.project.name}`,

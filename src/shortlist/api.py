@@ -385,9 +385,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return view(store, run_id)
 
     @app.get("/api/runs/{run_id}/export")
-    def export(run_id: str, store: owned, format: Literal["json", "csv"] = "json", accepted_only: bool = False):
+    def export(run_id: str, store: owned, format: Literal["json", "csv", "xlsx"] = "json", accepted_only: bool = False):
         content = export_run(store.get_run(run_id), format, accepted_only)
-        return Response(content, media_type="application/json" if format == "json" else "text/csv",
+        types = {"json": "application/json", "csv": "text/csv",
+                 "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
+        return Response(content, media_type=types[format],
                         headers={"Content-Disposition": f'attachment; filename="shortlist-{run_id}.{format}"'})
 
     dist = Path(__file__).resolve().parents[2] / "dist"

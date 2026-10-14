@@ -113,7 +113,7 @@ export const api = {
     if (!isAuthSetup(data)) throw new Error('Account setup is unavailable. Please reload.');
     return data;
   },
-  async download(id: string, format: 'csv' | 'json', acceptedOnly: boolean) {
+  async download(id: string, format: 'xlsx' | 'csv' | 'json', acceptedOnly: boolean) {
     const response = await authorizedFetch(`/api/runs/${encodeURIComponent(id)}/export?format=${format}&accepted_only=${acceptedOnly}`);
     if (!response.ok) throw new Error('Export could not be downloaded. Check your session and try again.');
     const url = URL.createObjectURL(await response.blob());

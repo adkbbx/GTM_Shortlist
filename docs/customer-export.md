@@ -1,0 +1,11 @@
+# Customer exports
+
+Excel is the primary customer handoff. Shortlist contains one row per saved company, observable supported criteria, explicit open criteria/exclusion checks, the next verification step and separate customer and service review notes. These are deterministic projections of the saved research, not new model claims, scores, buying intent or a ranked prospect list. Evidence contains exact saved passages and claims, unknown reasons, labelled hypotheses/assumptions, source URLs, numeric sortable UTC dates, and domain/research IDs that keep same-name companies distinct. Missing publication dates say Not provided. Entire source pages remain in the original saved record and technical JSON export.
+
+The workbook uses two sheets, wrapped text, frozen headings, filters and public HTTPS links validated by the URL boundary. Public web text is stored as inline strings, never executable formulas; illegal XML control characters are removed. The fixed OOXML writer uses Python's standard library, so deployed API/worker containers need no desktop spreadsheet package or bundled artifact runtime. JSON retains its existing full evidence contract. CSV now contains the readable shortlist columns, not JSON blobs; downstream integrations that relied on the previous CSV schema should use JSON. CSV retains formula-prefix escaping and includes a UTF-8 BOM so Excel recognizes Unicode names. This is an intentional customer-facing CSV schema change.
+
+API: GET /api/runs/{id}/export?format=xlsx, with the same verified-owner boundary, accepted_only filter and free download behavior as CSV/JSON. Empty filtered workbooks retain headings and explicitly show zero companies. Filtering affects both sheets. Accepted records may still fail fit criteria: customer acceptance never overwrites the assessment. Stopped runs retain a clear stopped notice.
+
+CLI: shortlist export RUN_ID --format xlsx --output shortlist.xlsx. Binary Excel requires an output path; CSV/JSON can also use --output. The customer UI offers Export Excel, Export CSV and Export JSON.
+
+This slice improves the handoff, not discovery quality. Broad targets, internal pain points used as hard criteria, candidate ranking and weak source coverage remain separate product work. Do not claim these are fixed by formatting.

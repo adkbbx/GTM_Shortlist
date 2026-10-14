@@ -83,6 +83,12 @@ test('real hosted API and Postgres settle partial research; review/export are fr
   expect(path).toBeTruthy();
   const exported = JSON.parse(readFileSync(path!, 'utf8'));
   expect(exported.records.map((record: { credits_used: number }) => record.credits_used)).toEqual([1, 0]);
+  const excelDownload = page.waitForEvent('download');
+  await page.getByRole('link', { name: 'Export Excel' }).click();
+  expect((await excelDownload).suggestedFilename()).toMatch(/\.xlsx$/);
+  await activityButton.click();
+  await expect(activity.getByRole('list', { name: 'Recorded credit changes' }).locator('li')).toHaveCount(2);
+  await activityButton.click();
   await page.reload();
   await expect(page.getByText('2 credits available', { exact: true })).toBeVisible();
   await expect(page.getByText('Saved: accepted')).toBeVisible();

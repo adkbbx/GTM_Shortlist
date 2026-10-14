@@ -98,7 +98,8 @@ def test_matched_exclusion_passage_persists_in_both_exports(setup, tmp_path):
     exported = json.loads(export_run(reopened, "json"))
     assert exported["records"][0]["research"]["exclusion_findings"][0]["evidence"][0]["passage"] == source.text
     csv = export_run(reopened, "csv")
-    assert "exclusion_findings_json" in csv and source.text in csv
+    assert "What needs checking" in csv and "Does not meet criteria" in csv
+    assert profile.exclusions[0] in csv
 
 
 def test_old_record_gets_unknown_exclusion_without_rewriting_snapshot_or_review(setup, tmp_path):

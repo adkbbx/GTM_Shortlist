@@ -31,7 +31,8 @@ def main():
     show.add_argument("run_id")
     export = sub.add_parser("export")
     export.add_argument("run_id")
-    export.add_argument("--format", choices=("json", "csv"), default="json")
+    export.add_argument("--format", choices=("json", "csv", "xlsx"), default="json")
+    export.add_argument("--output", type=Path, help="Save the export to this file (required for Excel)")
     export.add_argument("--accepted-only", action="store_true")
     retention = sub.add_parser("retention", help="Preview or erase old inactive research; never resets credits")
     retention.add_argument("--older-than-days", type=int, choices=range(1, 3651), required=True, metavar="DAYS")
@@ -115,7 +116,16 @@ def main():
     elif args.command == "show":
         print(json.dumps(store.get_run(args.run_id), ensure_ascii=False, indent=2))
     elif args.command == "export":
-        print(export_run(store.get_run(args.run_id), args.format, args.accepted_only))
+        if args.format == "xlsx" and args.output is None:
+            parser.error("Excel export requires --output FILE.xlsx")
+        content = export_run(store.get_run(args.run_id), args.format, args.accepted_only)
+        if args.output:
+            if isinstance(content, bytes):
+                args.output.write_bytes(content)
+            else:
+                args.output.write_text(content, encoding="utf-8")
+        else:
+            print(content)
 
 
 if __name__ == "__main__":
