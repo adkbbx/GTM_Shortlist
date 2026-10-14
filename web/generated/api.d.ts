@@ -395,6 +395,8 @@ export interface components {
         };
         /** Health */
         Health: {
+            /** Local Search Error */
+            local_search_error?: "unavailable" | null;
             /**
              * Mode
              * @default local

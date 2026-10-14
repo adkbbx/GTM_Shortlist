@@ -50,6 +50,9 @@ def main():
     closure.add_argument("--confirm", type=UUID, required=True, help="Repeat the exact workspace UUID to confirm closure")
     args = parser.parse_args()
     settings = Settings.load()
+    if args.command not in ("serve", "worker", "close-account"):
+        from shortlist.local_credentials import apply_local_credentials
+        settings = apply_local_credentials(settings)
     if args.command == "close-account":
         from shortlist.account_closure import close_account
         result = close_account(settings, args.workspace, args.confirm)

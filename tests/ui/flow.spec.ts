@@ -93,7 +93,9 @@ test('stopping actual held research keeps completed sheets and ignores an older 
 });
 
 test('local masked Tavily setup saves privately, recovers and clears browser input', async ({ page }, info) => {
+  expect((await page.request.post('/__fixture_corrupt_provider')).ok()).toBeTruthy();
   await page.goto('/');
+  await expect(page.getByRole('alert')).toContainText('Local search settings could not be read');
   const trigger = page.getByRole('button', { name: 'Connect Tavily', exact: true });
   await trigger.press('Enter');
   const keyInput = page.getByLabel('Tavily API key', { exact: true });
@@ -103,12 +105,13 @@ test('local masked Tavily setup saves privately, recovers and clears browser inp
   await keyInput.fill(key);
   await page.route('**/api/local/tavily', route => route.fulfill({ status: 503, json: { detail: 'Labelled temporary settings failure' } }), { times: 1 });
   await page.getByRole('button', { name: 'Save search key' }).click();
-  await expect(page.getByRole('alert')).toHaveText('Labelled temporary settings failure');
+  await expect(page.getByRole('alert').filter({ hasText: 'Labelled temporary settings failure' })).toBeVisible();
   await expect(keyInput).toHaveValue(key);
   const savedRequest = page.waitForResponse(response => new URL(response.url()).pathname === '/api/local/tavily');
   await page.getByRole('button', { name: 'Save search key' }).click();
   const response = await savedRequest;
   expect(response.status()).toBe(200);
+  await expect(page.getByRole('alert')).toHaveCount(0);
   expect(await response.text()).not.toContain(key);
   await expect(keyInput).toHaveValue('');
   const saved = page.getByRole('status').filter({ hasText: 'Tavily key saved' });

@@ -4,6 +4,7 @@ Never use this as the live application server. It performs no company discovery.
 """
 
 import os
+import sqlite3
 import tempfile
 import threading
 from pathlib import Path
@@ -16,6 +17,7 @@ from shortlist.api import create_app
 from shortlist.config import Settings
 from shortlist.domain import OperatorReviewCommand, Profile
 from shortlist.fetch import FetchError
+from shortlist.local_credentials import LocalCredentials, validate_tavily_key
 from shortlist.store import Store
 from shortlist.worker import execute_run
 
@@ -58,6 +60,14 @@ if __name__ == "__main__":
     thread = threading.Thread(target=loop, daemon=True)
     thread.start()
     application = FastAPI()
+
+    @application.post("/__fixture_corrupt_provider")
+    def corrupt_provider():
+        credentials = LocalCredentials(settings.db_path)
+        credentials.save(validate_tavily_key("tvly-labelled-corruption-fixture"))
+        with sqlite3.connect(credentials.path) as db:
+            db.execute("UPDATE local_provider SET payload=?", (b"labelled corrupt fixture",))
+        return {"fixture": True}
 
     @application.post("/__fixture_held_run")
     def held_run():

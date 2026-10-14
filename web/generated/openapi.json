@@ -1013,6 +1013,18 @@
       },
       "Health": {
         "properties": {
+          "local_search_error": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "unavailable"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Local Search Error"
+          },
           "mode": {
             "type": "string",
             "enum": [

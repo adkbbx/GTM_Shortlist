@@ -86,8 +86,7 @@ class Settings(BaseModel):
             booking_url=os.getenv("SHORTLIST_BOOKING_URL", ""),
             supabase_admin_key=os.getenv("SUPABASE_ADMIN_SECRET_KEY", ""),
         )
-        from shortlist.local_credentials import apply_local_credentials
-        return apply_local_credentials(settings)
+        return settings
 
     def readiness(self):
         return {

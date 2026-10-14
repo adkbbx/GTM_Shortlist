@@ -1,5 +1,18 @@
 {
   "properties": {
+    "local_search_error": {
+      "anyOf": [
+        {
+          "const": "unavailable",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Local Search Error"
+    },
     "mode": {
       "default": "local",
       "enum": [

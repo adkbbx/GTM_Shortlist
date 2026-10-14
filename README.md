@@ -29,7 +29,7 @@ shortlist export RUN_ID --format csv --accepted-only
 
 The example profile is user-supplied planning input, not a fetched seller assessment. Correct it before using it for other offers. Commands with the same request key return the original run; changed input under that key is rejected.
 
-Run `pytest -q` and `ruff check --isolated src tests scripts`. Tests use labelled synthetic sources unless explicitly described as live. TLS verification and public-address validation stay enabled; unsafe or unavailable pages produce explicit partial results. The citation gate verifies exact passages and company source identity. Semantic entailment is still a model assessment requiring evaluation and human review.
+Run `pytest -q` and `ruff check --config pyproject.toml src tests scripts`. Tests use labelled synthetic sources unless explicitly described as live. TLS verification and public-address validation stay enabled; unsafe or unavailable pages produce explicit partial results. The citation gate verifies exact passages and company source identity. Semantic entailment is still a model assessment requiring evaluation and human review.
 
 ## Guided local UI
 
@@ -58,3 +58,7 @@ No automated outreach, personal contact database, CRM integration or Experiment 
 See [architecture](docs/planning/architecture.md), [design](DESIGN.md), and [implementation handoff](docs/planning/IMPLEMENTATION_HANDOFF.md).
 
 On Windows, the local supervisor owns its API/worker descendants through a native job object; exiting or losing either child stops the service and releases its port. Restart with the same `shortlist serve` command. The dedicated Windows lifecycle checks reproduce and prevent orphaned launcher/runtime processes.
+
+In the local workspace, open **Connect Tavily** to paste a masked API key. Saving performs no search; the next confirmed run uses the saved key without a worker restart. The private provider database is ignored by Git, protected with current-user DPAPI on Windows and owner-only permissions on POSIX. The UI never retrieves the saved key. See [local provider setup](docs/local-provider-setup.md). This loopback address belongs to the computer running the app; a phone needs a properly configured hosted service rather than a publicly exposed local workspace.
+
+**Stop this run** preserves completed research and reviews, returns unused credit holds and prevents the previous worker from saving another sheet. A remote request already underway may finish. Review/export remain free; completed usable company research remains charged. See [research stop](docs/research-stop.md) and [credits](docs/credits.md). Hosted credit activity has owner-scoped earlier/newer pages. Independent service-review notes appear separately from the customer's decision.

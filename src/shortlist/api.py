@@ -129,6 +129,7 @@ class RunView(BaseModel):
 
 
 class Health(BaseModel):
+    local_search_error: Literal["unavailable"] | None = None
     mode: Literal["local", "hosted"] = "local"
     search_ready: bool
     gemma_ready: bool
@@ -223,9 +224,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/api/health", response_model=Health)
     def health():
-        readiness = apply_local_credentials(settings).readiness()
+        error = None
+        try:
+            readiness = apply_local_credentials(settings).readiness()
+        except CredentialUnavailable:
+            readiness = {**settings.readiness(), "search": False}
+            error = "unavailable"
         return Health(mode=settings.mode, search_ready=readiness["search"], gemma_ready=readiness["gemma"],
-                      worker_online=local_store.worker_online() if local_store else False)
+                      worker_online=local_store.worker_online() if local_store else False, local_search_error=error)
 
     @app.post("/api/local/tavily", response_model=Health, openapi_extra={
         "requestBody": {"required": True, "content": {"application/json": {"schema": LocalKeyInput.model_json_schema()}}}})

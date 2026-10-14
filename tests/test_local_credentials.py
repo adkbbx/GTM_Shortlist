@@ -150,6 +150,44 @@ def test_next_worker_run_loads_new_key_without_restarting_original_settings(tmp_
     assert not store.worker_online()
 
 
+def test_corrupt_payload_keeps_startup_and_setup_available_without_provider_dispatch(tmp_path, monkeypatch):
+    settings = Settings(db_path=tmp_path / "research.sqlite3")
+    credentials = LocalCredentials(settings.db_path)
+    credentials.save(SecretStr("tvly-labelled-before-corruption"))
+    with sqlite3.connect(credentials.path) as db:
+        db.execute("UPDATE local_provider SET payload=?", (b"corrupt payload",))
+    monkeypatch.setenv("SHORTLIST_DB", str(settings.db_path))
+    monkeypatch.setenv("SHORTLIST_MODE", "local")
+    loaded = Settings.load()  # Corrupt private payload must not prevent API startup.
+    assert loaded.db_path == settings.db_path
+    client = TestClient(create_app(loaded), base_url="http://127.0.0.1:8014")
+    health = client.get("/api/health")
+    assert health.status_code == 200
+    assert health.json()["search_ready"] is False
+    assert health.json()["local_search_error"] == "unavailable"
+    assert client.get("/api/auth/setup").json()["mode"] == "local"
+    assert client.get("/api/runs").status_code == 200
+    from shortlist.domain import Criterion, Profile
+    from shortlist.store import Store
+    from shortlist.worker import work
+    store = Store(settings.db_path)
+    identity = store.create_run(Profile(seller_url="https://seller.example/", offer="Labelled seller offer",
+        target="Labelled software target", criteria=(Criterion(id="ai", description="AI software"),)), "corrupt-config")
+    calls = []
+    monkeypatch.setattr("shortlist.worker.execute_run", lambda *args: calls.append(args))
+    with pytest.raises(CredentialUnavailable):
+        work(settings, once=True)
+    assert calls == []
+    assert store.get_run(identity)["status"] == "queued"
+    assert store.get_run(identity)["attempts"] == []
+    assert not store.worker_online()
+    key = "tvly-labelled-replacement-fixture"
+    saved = client.post("/api/local/tavily", headers={"Origin": "http://127.0.0.1:8014"}, json={"key": key})
+    assert saved.status_code == 200
+    assert saved.json()["local_search_error"] is None
+    assert credentials.read().get_secret_value() == key
+
+
 @pytest.mark.parametrize("committed", [False, True])
 def test_real_process_death_recovers_the_last_committed_private_key(tmp_path, committed):
     credentials = LocalCredentials(tmp_path / "research.sqlite3")
