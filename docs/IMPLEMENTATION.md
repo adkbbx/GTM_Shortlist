@@ -49,6 +49,7 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 ## 7. Guided UI and export
 - [x] Seller website, editable confirmation, persisted run status and honest partial results.
 - [x] Real checkpoint timeline, saved counts, worker availability, offline/reconnect states and one-command API/worker startup.
+- [x] Stop queued/running research with confirmation, atomic unused-credit settlement and stale-worker fencing; retain saved sheets/reviews/export.
 - [x] Research sheets with evidence passages, source dates and independent accept/reject decisions.
 - [x] CSV/JSON export preserves evidence and protects against spreadsheet formulas.
 - [x] Test complete flow at 390px phone and 1366px laptop; also 320px, zoom, keyboard and reduced motion.
@@ -81,7 +82,8 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 - [x] Add verified-owner recent credit activity API; prove grant/usage history and two-workspace isolation.
 - [x] Expose recent owner-scoped credit activity with authenticated runtime validation, refresh/retry and responsive customer UI.
 - [x] Page the full committed ledger with owner-scoped cursors, earlier/newer navigation and keyboard focus recovery.
-- [ ] Implement verified paid checkout, cancellation and measured larger batches.
+- [x] Implement explicit research stop; preserve completed charges and return unused holds.
+- [ ] Implement verified paid checkout, subscription cancellation and measured larger batches.
 - [ ] Identify 30 potential buyers and prioritize 10; prepare offer-specific samples.
 - [ ] Validate three $99 reviewed pilots and repeat demand before $49 subscription/billing.
 

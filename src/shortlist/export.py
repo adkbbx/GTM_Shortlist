@@ -6,6 +6,7 @@ import json
 def export_run(run: dict, format: str, accepted_only: bool = False) -> str:
     records = [r for r in run["records"] if not accepted_only or r["review"] and r["review"]["decision"] == "accepted"]
     payload = {"run_id": run["id"], "profile": run["profile"], "status": run["status"],
+               "termination": run["checkpoint"].get("termination"),
                "records": records, "discovery": run["checkpoint"].get("candidates", []),
                "candidate_failures": run["checkpoint"].get("candidate_failures", {}),
                "page_failures": run["checkpoint"].get("page_failures", {}),
@@ -18,7 +19,7 @@ def export_run(run: dict, format: str, accepted_only: bool = False) -> str:
     writer = csv.writer(buffer)
     writer.writerow(["company", "domain", "qualification", "research_status", "review", "findings_json",
                      "sources_json", "hypotheses_json", "unknowns_json", "exclusion_findings_json", "confirmed_profile_json",
-                     "operator_review_json"])
+                     "operator_review_json", "termination"])
     for record in records:
         research = record["research"]
         cells = [research["name"], research["domain"], research["qualification"], research["status"],
@@ -26,6 +27,6 @@ def export_run(run: dict, format: str, accepted_only: bool = False) -> str:
                  *[json.dumps(research[key], ensure_ascii=False) for key in ("findings", "sources", "hypotheses", "unknowns")],
                  json.dumps(research.get("exclusion_findings", []), ensure_ascii=False),
                  json.dumps(run["profile"], ensure_ascii=False),
-                 json.dumps(record.get("operator_review"), ensure_ascii=False)]
+                 json.dumps(record.get("operator_review"), ensure_ascii=False), run["checkpoint"].get("termination", "")]
         writer.writerow(["'" + cell if cell.lstrip().startswith(("=", "+", "-", "@", "\t", "\r")) else cell for cell in cells])
     return buffer.getvalue()

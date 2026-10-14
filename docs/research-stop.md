@@ -1,0 +1,11 @@
+# Stopping research
+
+Implemented core and UI; real database and full browser verification passed. A stop preserves completed sheets and their independent reviews, returns unused research holds and rejects later saves by the previous worker. It does not refund delivered company work, reset signup/profile/search allowances or pretend an already-dispatched network request was undone.
+
+Two shapes considered: a cancelling state that waits for a worker to acknowledge, or an immediate database transition that revokes that worker's lease. Waiting cannot reliably release a queued/offline run and leaves the user dependent on the worker they want to stop. Choose the existing lease/fence transition and atomically settle held credits. Preserve incomplete results as partial with an explicit user_stopped termination reason, not a new success claim.
+
+The run ID is the unique stop-operation identity. Repeating the same stop is safe and keeps the original timestamp/fence; stopping an already normally completed run returns a conflict. A confirmed stop increments the fence, clears the lease, records a checkpoint and marks the run inactive in one transaction with wallet settlement. Provider attempts remain counted, including unknown outcomes. No previous worker can dispatch its next operation or save a new sheet/debit afterward.
+
+The customer UI uses a quiet stop action and inline confirmation while research is pending. Keep researching cancels the confirmation; Stop research performs the server command. Explain that completed work remains charged and an in-flight request may finish. Saved user_stopped runs show Research stopped and retain review/export/reuse where a confirmed offer exists. A stopped seller-profile run must not imply it had a confirmed target.
+
+This is a research stop, not account closure or research deletion. Starting a new confirmed batch is a separate reservation and may find earlier companies again. Real cancellation-versus-delivery races and worker continuation must be tested against persisted SQLite and Postgres, including a provider held across the stop boundary.

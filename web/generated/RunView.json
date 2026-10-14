@@ -987,6 +987,19 @@
       },
       "title": "Draft Exclusions",
       "type": "array"
+    },
+    "termination": {
+      "anyOf": [
+        {
+          "const": "user_stopped",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Termination"
     }
   },
   "required": [

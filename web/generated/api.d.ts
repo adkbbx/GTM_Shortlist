@@ -192,6 +192,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/runs/{run_id}/stop": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Stop */
+        post: operations["stop_api_runs__run_id__stop_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/runs/{run_id}/records/{record_id}/review": {
         parameters: {
             query?: never;
@@ -657,6 +674,8 @@ export interface components {
             reused_offer: boolean;
             /** Draft Exclusions */
             draft_exclusions?: string[];
+            /** Termination */
+            termination?: "user_stopped" | null;
         };
         /** SavedRecord */
         SavedRecord: {
@@ -715,6 +734,14 @@ export interface components {
              * @default []
              */
             research_links: string[];
+        };
+        /** StopInput */
+        StopInput: {
+            /**
+             * Confirmation
+             * @constant
+             */
+            confirmation: "stop";
         };
         /** Unknown */
         Unknown: {
@@ -1077,6 +1104,41 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["Confirmation"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    stop_api_runs__run_id__stop_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StopInput"];
             };
         };
         responses: {

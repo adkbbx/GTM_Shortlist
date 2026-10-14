@@ -14,7 +14,8 @@ from ui_test_providers import FixtureModel, FixtureSearch, fixture_fetch
 
 from shortlist.api import create_app
 from shortlist.config import Settings
-from shortlist.domain import OperatorReviewCommand
+from shortlist.domain import OperatorReviewCommand, Profile
+from shortlist.fetch import FetchError
 from shortlist.store import Store
 from shortlist.worker import execute_run
 
@@ -27,6 +28,8 @@ settings = Settings(
 )
 store = Store(settings.db_path)
 stopped = threading.Event()
+held_runs = {}
+held_lock = threading.Lock()
 
 
 def loop():
@@ -34,13 +37,19 @@ def loop():
         store.worker_heartbeat("labelled_browser_fixture")
         for run in store.list_runs():
             if run["status"] in ("queued", "running"):
+                with held_lock:
+                    hold = held_runs.get(run["id"])
+                def fetch(url, expected_domain=None, hold=hold):
+                    if hold and expected_domain == "example-2.com" and not hold.wait(30):
+                        raise FetchError("Labelled browser stop fixture was not released")
+                    return fixture_fetch(url, expected_domain)
                 execute_run(
                     store,
-                    settings,
+                    settings.model_copy(update={"source_cache_hours": 0}) if hold else settings,
                     run["id"],
                     search=FixtureSearch(),
                     model=FixtureModel(),
-                    fetch=fixture_fetch,
+                    fetch=fetch,
                 )
         stopped.wait(0.1)
 
@@ -49,6 +58,23 @@ if __name__ == "__main__":
     thread = threading.Thread(target=loop, daemon=True)
     thread.start()
     application = FastAPI()
+
+    @application.post("/__fixture_held_run")
+    def held_run():
+        draft = FixtureModel().seller(None)
+        profile = Profile(seller_url="https://eygentic.com/", offer=draft.offer, target=draft.target,
+                          criteria=tuple(draft.criteria))
+        from uuid import uuid4
+        with held_lock:
+            identity = store.create_run(profile, "held-browser-" + uuid4().hex)
+            held_runs[identity] = threading.Event()
+        return {"id": identity}
+
+    @application.post("/__fixture_release/{run_id}")
+    def release_run(run_id: str):
+        with held_lock:
+            held_runs[run_id].set()
+        return {"fixture": True}
 
     @application.post("/__fixture_operator_review")
     def annotation(command: OperatorReviewCommand):
@@ -60,5 +86,8 @@ if __name__ == "__main__":
         uvicorn.run(application, host="127.0.0.1", port=8015, log_level="warning")
     finally:
         stopped.set()
+        with held_lock:
+            for hold in held_runs.values():
+                hold.set()
         thread.join(timeout=10)
         test_directory.cleanup()

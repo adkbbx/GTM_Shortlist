@@ -7,6 +7,7 @@ import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from threading import Event
 from uuid import uuid4
 
 import httpx
@@ -16,6 +17,7 @@ from fastapi.testclient import TestClient
 from psycopg import sql
 from psycopg.conninfo import conninfo_to_dict, make_conninfo
 from pydantic import SecretStr
+from test_stop import assert_held_worker_stops
 
 from shortlist.api import create_app
 from shortlist.auth import verify_user
@@ -290,10 +292,16 @@ def test_hosted_api_verifies_identity_and_scopes_every_route(owners, monkeypatch
                        json={"decision": "accepted"}).status_code == 404
     assert client.delete(f"/api/runs/{first_id}", headers=second_headers).status_code == 404
     assert client.delete(f"/api/runs/{first_id}", headers=first_headers).status_code == 409
+    stop_path = f"/api/runs/{first_id}/stop"
+    assert client.post(stop_path, json={"confirmation": "stop"}).status_code == 401
+    assert client.post(stop_path, headers=second_headers, json={"confirmation": "stop"}).status_code == 404
     scheduler = PostgresStore(worker, None, worker=True)
     scoped = scheduler.for_run(first_id)
     assert scoped.workspace_id == a.workspace_id
     assert scoped.get_run(first_id)["workspace_id"] == a.workspace_id
+    assert client.post(stop_path, headers=first_headers, json={"confirmation": "stop"}).json()["termination"] == "user_stopped"
+    assert a.get_run(first_id)["status"] == "partial"
+    assert b.get_run(second_id)["status"] == "queued"
 
 
 def test_hosted_worker_loop_selects_workspace_for_each_run(owners, monkeypatch):
@@ -349,6 +357,62 @@ def test_credit_signup_reserve_delivery_refund_and_replay(owners):
     assert {entry["kind"] for entry in history} == {"signup", "usage"}
     assert sum(entry["amount"] for entry in history) == 2
     assert len(other.history_page()[0]) == 1
+
+
+def test_stop_fences_actual_worker_and_atomically_returns_only_unused_credits(owners):
+    a, b, worker, profile = owners
+    run_id = a.create_run(profile, "held-stop")
+    scoped = PostgresStore(worker, a.workspace_id, worker=True)
+    with pytest.raises(KeyError):
+        b.stop_run(run_id)
+    result = assert_held_worker_stops(scoped, Settings(), run_id)
+    assert result["credits"] == {"maximum": 3, "used": 1, "reserved": 0, "returned": 2}
+    assert CreditWallet(a).balance().model_dump() == {"available": 2, "reserved": 0, "used": 1}
+    assert CreditWallet(b).balance().available == 3
+    scoped.stop_run(run_id)
+    assert len(CreditWallet(a).history_page()[0]) == 2
+
+
+@pytest.mark.parametrize("stop_first", [True, False])
+def test_stop_and_delivery_transaction_order_has_no_late_or_duplicate_debit(owners, stop_first):
+    a, _, worker, profile = owners
+    scoped = PostgresStore(worker, a.workspace_id, worker=True)
+    run_id = a.create_run(profile, "ordered-stop")
+    fence = scoped.claim(run_id)
+    record = validate_extraction({"name": "Labelled race fixture", "findings": []}, profile, "race.example", ())
+    # Hold the actual first transaction open; the second actor must wait on its lock.
+    entered, release, waiting = Event(), Event(), Event()
+    class HeldStore(PostgresStore):
+        def begin(self, db):
+            super().begin(db)
+            entered.set()
+            assert release.wait(10)
+    first = HeldStore(worker if not stop_first else a.dsn, a.workspace_id, worker=not stop_first)
+    class WaitingStore(PostgresStore):
+        def begin(self, db):
+            waiting.set()
+            super().begin(db)
+    second = WaitingStore(worker if stop_first else a.dsn, a.workspace_id, worker=stop_first)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        command = first.stop_run if stop_first else lambda identity: first.save_record(identity, fence, record)
+        initial = pool.submit(command, run_id)
+        try:
+            assert entered.wait(10)
+            later = pool.submit(second.save_record, run_id, fence, record) if stop_first else pool.submit(second.stop_run, run_id)
+            assert waiting.wait(10)
+        finally:
+            release.set()
+        initial.result(timeout=10)
+        if stop_first:
+            with pytest.raises(Conflict):
+                later.result(timeout=10)
+        else:
+            later.result(timeout=10)
+    result = a.get_run(run_id)
+    charged = int(not stop_first)
+    assert len(result["records"]) == charged
+    assert result["credits"] == {"maximum": 3, "used": charged, "reserved": 0, "returned": 3 - charged}
+    assert CreditWallet(a).balance().model_dump() == {"available": 3 - charged, "reserved": 0, "used": charged}
 
 
 def test_credit_concurrent_reservations_cannot_overspend(owners):

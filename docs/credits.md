@@ -1,6 +1,6 @@
 # Research credits plan
 
-Status: integrated research credits, 14 October 2026. Hosted accounts receive three signup credits once. Confirmed batches reserve 1–3 credits; saved completed research and its debit commit together, and terminal runs return unused holds. Balance, quoted batch cost and per-sheet charges are visible. Paid checkout, activity history, cancellation and larger batches remain unfinished. Local trusted mode has no customer wallet.
+Status: integrated research credits, 14 October 2026. Hosted accounts receive three signup credits once. Confirmed batches reserve 1–3 credits; saved completed research and its debit commit together, and terminal runs return unused holds. Balance, quoted batch cost and per-sheet charges are visible. Full activity history and research stop are implemented. Paid checkout, subscription cancellation and larger batches remain unfinished. Local trusted mode has no customer wallet.
 
 ## Unit and packages
 
@@ -75,7 +75,7 @@ Current worker has a three-record limit, six candidate attempts, four searches, 
 - [x] Add balance, batch-size/cost confirmation and insufficient-credit states; test phone/laptop, accessibility and actual hosted API settlement.
 - [x] Show recent authenticated credit activity with refresh/retry on phone and laptop.
 - [x] Add owner-scoped complete activity pagination with stable timestamp/identity ordering and keyboard navigation.
-- [ ] Add explicit cancellation.
+- [x] Add explicit research stop with preserved delivered charges and returned unused holds.
 - [x] Prove simultaneous starts cannot overspend and process death cannot double-charge or lose a committed charge.
 - [x] Prove partial results, real unknown/non-fit outcomes, duplicate companies and provider failures settle correctly.
 - [ ] Build one-time top-up checkout and verified, replay-safe purchase grants. Validate actual payment test-mode behavior before selling.
@@ -95,4 +95,4 @@ GET /api/credits/history returns up to50 committed signup/addition/usage/refund 
 
 Holds and unused returns remain on the run summary; they are not invented ledger refunds. The endpoint does not expose another account, payment secrets, source text or credit command keys. Hosted customers can open Credit activity beside their balance, inspect signed amounts and dates, move earlier/newer, and refresh to the latest page. The client validates responses against the generated server schema. Credits added is deliberately neutral because operator grants do not prove a completed payment. Each page holds at most50rows; no growing client-side ledger copy or total page count is fabricated. Pagination controls remain mounted while loading, and user page navigation focuses the activity heading after resolution.
 
-Pages read committed data, not a persistent transaction snapshot. A newly committed or late transaction may require refreshing and browsing again; this customer reading interface is not a payment reconciliation or change-data-capture feed. Paid checkout and explicit research cancellation remain unfinished.
+Pages read committed data, not a persistent transaction snapshot. A newly committed or late transaction may require refreshing and browsing again; this customer reading interface is not a payment reconciliation or change-data-capture feed. Explicit research stop is implemented; see research-stop.md. Paid checkout and subscription cancellation remain unfinished.

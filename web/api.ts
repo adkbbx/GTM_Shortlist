@@ -64,6 +64,9 @@ function parseRun(data: unknown): Run {
 }
 
 export const api = {
+  async stop(id: string) {
+    return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/stop`, { confirmation: 'stop' }));
+  },
   async creditHistory(before: string | null = null) {
     const data = await request(`/api/credits/history${before ? `?before=${encodeURIComponent(before)}` : ''}`);
     if (!isCreditHistory(data)) throw new Error('Credit activity is unavailable. Please try again.');

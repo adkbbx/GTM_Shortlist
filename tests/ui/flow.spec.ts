@@ -19,6 +19,79 @@ async function capture(page: Page, path: string) {
   await page.screenshot({ path, fullPage: true });
 }
 
+test('stopping actual held research keeps completed sheets and ignores an older progress response', async ({ page }, info) => {
+  const fixture = await page.request.post('/__fixture_held_run');
+  expect(fixture.ok()).toBeTruthy();
+  const { id } = await fixture.json();
+  let releaseOld: (() => void) | undefined;
+  try {
+    await page.goto(`/?run=${id}`);
+    await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toContainText('Saved research for example-1.com', { timeout: 15000 });
+    let oldRequested: (() => void) | undefined;
+    let oldFulfilled: (() => void) | undefined;
+    const oldRequest = new Promise<void>(resolve => { oldRequested = resolve; });
+    const fulfilled = new Promise<void>(resolve => { oldFulfilled = resolve; });
+    const heldResponse = new Promise<void>(resolve => { releaseOld = resolve; });
+    let holdNextRead = true;
+    let failNextStop = true;
+    // Keep routing patterns fixed while a request is held: changing interception
+    // patterns can let Chromium handle that paused request before fulfill().
+    await page.route('**/api/runs/**', async route => {
+      const path = new URL(route.request().url()).pathname;
+      if (path === `/api/runs/${id}/stop` && failNextStop) {
+        failNextStop = false;
+        await route.fulfill({ status: 503, json: { detail: 'Labelled temporary stop failure' } });
+        return;
+      }
+      if (path !== `/api/runs/${id}` || !holdNextRead) { await route.continue(); return; }
+      holdNextRead = false;
+      const response = await page.request.get(route.request().url());
+      const body = await response.json();
+      oldRequested?.();
+      await heldResponse;
+      await route.fulfill({ json: body });
+      oldFulfilled?.();
+    });
+    await oldRequest;
+    await page.getByRole('button', { name: 'Stop this run', exact: true }).press('Enter');
+    await expect(page.getByRole('button', { name: 'Keep researching' })).toBeFocused();
+    await noOverflow(page);
+    await capture(page, `.impeccable/review/${info.project.name}-stop-confirmation.png`);
+    await page.getByRole('button', { name: 'Keep researching' }).press('Enter');
+    await expect(page.getByRole('button', { name: 'Stop this run', exact: true })).toBeFocused();
+    await page.getByRole('button', { name: 'Stop this run', exact: true }).click();
+    await page.getByRole('button', { name: 'Stop research', exact: true }).click();
+    await expect(page.getByRole('alert')).toHaveText('Labelled temporary stop failure');
+    await page.getByRole('button', { name: 'Stop research', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Research stopped', exact: true })).toBeFocused();
+    releaseOld();
+    await fulfilled;
+    await page.unrouteAll({ behavior: 'wait' });
+    await expect(page.getByRole('heading', { name: 'Research stopped', exact: true })).toBeVisible();
+    await expect(page.locator('.company-sheet')).toHaveCount(1);
+    await expect(page.getByRole('button', { name: 'Stop this run', exact: true })).toHaveCount(0);
+    await page.getByRole('button', { name: 'Accept company', exact: true }).click();
+    await expect(page.getByText('Saved: accepted')).toBeVisible();
+    const download = page.waitForEvent('download');
+    await page.getByRole('link', { name: 'Export JSON' }).click();
+    const path = await (await download).path();
+    expect(path).toBeTruthy();
+    const exported = JSON.parse(readFileSync(path!, 'utf8'));
+    expect(exported.termination).toBe('user_stopped');
+    expect(exported.records).toHaveLength(1);
+    await page.request.post(`/__fixture_release/${id}`);
+    await page.reload();
+    await expect(page.getByRole('heading', { name: 'Research stopped', exact: true })).toBeVisible();
+    await expect(page.getByText('Saved: accepted')).toBeVisible();
+    await noOverflow(page);
+    await capture(page, `.impeccable/review/${info.project.name}-stop-results.png`);
+  } finally {
+    releaseOld?.();
+    await page.request.post(`/__fixture_release/${id}`);
+    await page.unrouteAll({ behavior: 'wait' });
+  }
+});
+
 test('saved seller → confirmation → evidence → review → export survives reload', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));

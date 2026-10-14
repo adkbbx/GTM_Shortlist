@@ -323,6 +323,25 @@ class Store:
                        (now, now, run_id))
             return True
 
+    def stop_run(self, run_id: str):
+        with self.connection() as db:
+            self.begin(db)
+            row = db.execute("SELECT status,checkpoint,deleted_at FROM runs WHERE id=?", (run_id,)).fetchone()
+            if row is None or row["deleted_at"]:
+                raise KeyError(run_id)
+            checkpoint = json.loads(row["checkpoint"])
+            if checkpoint.get("termination") == "user_stopped":
+                return
+            if row["status"] not in ("queued", "running", "awaiting_confirmation"):
+                raise Conflict("Research finished before it could be stopped. Review the saved results")
+            now = utcnow().isoformat()
+            checkpoint.update(termination="user_stopped", stopped_at=now)
+            db.execute("UPDATE runs SET status='partial',stage='stopped',checkpoint=?,error='Research stopped at your request',"
+                       "updated_at=?,lease_until=0,fence=fence+1 WHERE id=?", (json.dumps(checkpoint), now, run_id))
+            db.execute("INSERT INTO run_events(run_id,phase,label,state,created_at) VALUES (?,?,?,?,?)",
+                       (run_id, "review", "Stopped further research at your request", "succeeded", now))
+            self.finished(db, run_id)
+
     def booking_click(self, run_id: str, request_key: str):
         """Record a link click only; never infer an appointment or buying intent."""
         with self.connection() as db:

@@ -96,3 +96,5 @@ input[type=checkbox]:focus { box-shadow: none; }
 @media (max-width: 700px) { .service-review { margin: 0 20px; } }
 .activity-pagination { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 20px; }
 .activity-pagination button:disabled { cursor: default; }
+.stop-research { margin: -8px 0 24px; }
+.stop-research > p { max-width: 65ch; color: var(--muted); margin-top: 10px; }

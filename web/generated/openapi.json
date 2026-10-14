@@ -453,6 +453,60 @@
         }
       }
     },
+    "/api/runs/{run_id}/stop": {
+      "post": {
+        "summary": "Stop",
+        "operationId": "stop_api_runs__run_id__stop_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StopInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/runs/{run_id}/records/{record_id}/review": {
       "post": {
         "summary": "Review",
@@ -1680,6 +1734,18 @@
             },
             "type": "array",
             "title": "Draft Exclusions"
+          },
+          "termination": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "user_stopped"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Termination"
           }
         },
         "type": "object",
@@ -1889,6 +1955,21 @@
           "research_links"
         ],
         "title": "Source"
+      },
+      "StopInput": {
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "const": "stop",
+            "title": "Confirmation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "confirmation"
+        ],
+        "title": "StopInput"
       },
       "Unknown": {
         "properties": {

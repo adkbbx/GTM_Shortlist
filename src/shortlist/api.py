@@ -84,6 +84,11 @@ class ReuseInput(BaseModel):
     request_key: str = Field(min_length=8, max_length=100)
 
 
+class StopInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    confirmation: Literal["stop"]
+
+
 class AttemptView(BaseModel):
     provider: str
     kind: str
@@ -108,6 +113,7 @@ class RunView(BaseModel):
     legacy_credit_exempt: bool = False
     reused_offer: bool = False
     draft_exclusions: list[str] = Field(default_factory=list)
+    termination: Literal["user_stopped"] | None = None
 
 
 class Health(BaseModel):
@@ -193,6 +199,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                        updated_at=run["updated_at"], attempts=run["attempts"], credits=run.get("credits"),
                        legacy_credit_exempt=run.get("legacy_credit_exempt", False),
                        reused_offer=run["checkpoint"].get("reused_offer", False),
+                       termination=run["checkpoint"].get("termination"),
                        draft_exclusions=run["checkpoint"].get("draft_exclusions", []), progress=RunProgress(
                            worker_online=store.worker_online(), candidates=len(run["checkpoint"].get("candidates", [])),
                            sources=len({s["id"] for pages in run["checkpoint"].get("sources", {}).values() for s in pages}),
@@ -267,6 +274,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         seller_url = run["profile"].get("seller_url") or run["checkpoint"]["seller_url"]
         profile = Profile(seller_url=seller_url, **input.model_dump(exclude={"company_limit"}))
         store.confirm_draft(run_id, profile, input.company_limit)
+        return view(store, run_id)
+
+    @app.post("/api/runs/{run_id}/stop", response_model=RunView)
+    def stop(run_id: str, input: StopInput, store: owned):
+        store.stop_run(run_id)
         return view(store, run_id)
 
     @app.post("/api/runs/{run_id}/records/{record_id}/review", response_model=RunView)

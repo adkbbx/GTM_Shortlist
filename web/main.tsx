@@ -10,6 +10,7 @@ import { ResearchProgress } from './ResearchProgress';
 import { ResearchPreview } from './ResearchPreview';
 import { AuthGate } from './AuthGate';
 import { CreditActivity } from './CreditActivity';
+import { ResearchStop } from './ResearchStop';
 import './styles.css';
 
 const describeError = (error: unknown) => error instanceof Error ? error.message : 'Something went wrong. Please try again.';
@@ -176,6 +177,9 @@ function App({ account }: { account: ReactNode }) {
   const [message, setMessage] = useState('');
   const requestKey = useRef(crypto.randomUUID());
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const activeRef = useRef(active);
+  activeRef.current = active;
+  const selectionEpoch = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -202,12 +206,13 @@ function App({ account }: { account: ReactNode }) {
   useEffect(() => {
     if (!active || !['queued', 'running'].includes(active.status)) return;
     let cancelled = false;
+    const epoch = selectionEpoch.current;
     let timer: number | undefined;
     const poll = async () => {
       try {
         const run = await api.run(active.id);
-        if (!cancelled) { setActive(run); setError(''); setRuns(old => old.map(r => r.id === run.id ? run : r)); }
-      } catch (e) { if (!cancelled) setError(describeError(e)); }
+        if (!cancelled && epoch === selectionEpoch.current) { setActive(run); setError(''); setRuns(old => old.map(r => r.id === run.id ? run : r)); }
+      } catch (e) { if (!cancelled && epoch === selectionEpoch.current) setError(describeError(e)); }
       finally { if (!cancelled) timer = window.setTimeout(poll, 700); }
     };
     void poll();
@@ -215,11 +220,20 @@ function App({ account }: { account: ReactNode }) {
   }, [active?.id, active?.status]);
 
   const select = (run: Run | null, focus = true) => {
+    selectionEpoch.current += 1; activeRef.current = run;
     setActive(run); setError(''); setMessage(''); setAcceptedOnly(false);
     window.history.replaceState(null, '', run ? `?run=${run.id}` : window.location.pathname);
     if (focus) window.setTimeout(() => headingRef.current?.focus(), 0);
   };
   const saved = (run: Run) => { setActive(run); setRuns(old => [run, ...old.filter(r => r.id !== run.id)]); };
+  const stopped = (run: Run) => {
+    setRuns(old => old.map(value => value.id === run.id ? run : value));
+    if (activeRef.current?.id === run.id) {
+      selectionEpoch.current += 1; activeRef.current = run; setActive(run);
+      window.setTimeout(() => { if (activeRef.current?.id === run.id) headingRef.current?.focus(); }, 0);
+    }
+    void api.credits().then(setWallet).catch(reason => setError(describeError(reason)));
+  };
   const deleted = () => {
     if (!active) return;
     setRuns(old => old.filter(run => run.id !== active.id)); select(null);
@@ -241,17 +255,17 @@ function App({ account }: { account: ReactNode }) {
       {loading ? <p>Loading saved research…</p> : runs.length ? <nav>{runs.map(run => <button key={run.id} className={`saved-run ${active?.id === run.id ? 'selected' : ''}`} onClick={() => select(run)} aria-current={active?.id === run.id ? 'page' : undefined}><span>{new URL(run.seller_url).hostname}</span><small>{date(run.created_at)}</small><small>{run.status.replaceAll('_', ' ')}</small></button>)}</nav> : <p className="hint">Your research will stay here after you close the browser.</p>}
       <div className="sidebar-note"><p>Evidence before outreach.</p><p className="hint">Company fit, your acceptance, and buying intent are separate things.</p></div>
     </aside>
-    <main id="main" className="main" tabIndex={-1}><div className="page-heading"><h1 ref={headingRef} tabIndex={-1}>{active ? active.profile ? 'Review your shortlist' : 'Define your shortlist' : 'Find your next shortlist.'}</h1><p>{active ? 'Saved research. Trace every assessment back to its source.' : 'Turn your offer into a focused list of companies. Understand the fit, inspect the sources, and make the call.'}</p></div>
+    <main id="main" className="main" tabIndex={-1}><div className="page-heading"><h1 ref={headingRef} tabIndex={-1}>{active?.termination === 'user_stopped' ? 'Research stopped' : active ? active.profile ? 'Review your shortlist' : 'Define your shortlist' : 'Find your next shortlist.'}</h1><p>{active ? 'Saved research. Trace every assessment back to its source.' : 'Turn your offer into a focused list of companies. Understand the fit, inspect the sources, and make the call.'}</p></div>
       {wallet?.mode === 'hosted' && <div id="credit-activity" hidden={!showActivity}>{showActivity && <CreditActivity wallet={wallet} />}</div>}
       {error && <div className="notice" role="alert">{error}<button className="text-button" onClick={() => window.location.reload()}>Reload workspace</button></div>}
       {!active && <><div className="start-grid"><section className="sheet start-sheet" aria-labelledby="start-heading"><h2 id="start-heading">What is your company website?</h2><p>We’ll draft your offer and target from the website. You can correct both before any company discovery starts.</p><form onSubmit={start}><label htmlFor="website">Seller website</label><div className="website-form"><input id="website" type="url" placeholder="https://your-company.com" required maxLength={2048} value={website} onChange={e => { setWebsite(e.target.value); requestKey.current = crypto.randomUUID(); }} /><button disabled={saving || loading} type="submit">{saving ? 'Saving…' : 'Understand my offer'}<Arrow /></button></div></form><p className="hint">Up to three research sheets. Saved sources. CSV and JSON export.</p></section><ResearchPreview /></div><section className="method" aria-label="How research works"><h2>A shortlist you can inspect</h2><ol><li><span>Confirm your offer</span><p>Edit who you serve and what counts as a fit.</p></li><li><span>Trace the evidence</span><p>Read source passages and see what remains unknown.</p></li><li><span>Review and export</span><p>Accept or reject each company using your own judgment.</p></li></ol></section></>}
-      {active && <ResearchProgress run={active} connected={!error} />}{active?.credits && <p className="batch-credit-summary" role="status">{active.credits.used} {active.credits.used === 1 ? 'credit' : 'credits'} used · {active.credits.reserved} reserved · {active.credits.returned} returned</p>}
+      {active && <ResearchProgress run={active} connected={!error} />}{pending && active && <ResearchStop key={active.id} run={active} onStopped={stopped} />}{active?.credits && <p className="batch-credit-summary" role="status">{active.credits.used} {active.credits.used === 1 ? 'credit' : 'credits'} used · {active.credits.reserved} reserved · {active.credits.returned} returned</p>}
       {active?.status === 'awaiting_confirmation' && <>{health && !health.search_ready && <p className="notice">Live company search is not configured yet. Your target can be saved, but discovery needs Tavily or SerpApi connected.</p>}<ConfirmationForm key={active.id} run={active} wallet={wallet} hostedAccount={account != null} onSaved={saved} /></>}
       {results && <><div className="results-toolbar"><div><h2>{active.records.length} {active.records.length === 1 ? 'company' : 'companies'} researched</h2><p>{active.status === 'partial' ? 'Some questions remain open. Review the unknowns before using these records.' : 'Model assessments are ready for your review.'}</p></div>{!!active.records.length && <div className="export-controls"><label className="checkbox-label"><input type="checkbox" checked={acceptedOnly} onChange={e => setAcceptedOnly(e.target.checked)} />Accepted only</label><div className="export-links">{(['csv', 'json'] as const).map(format => <a className="secondary button-link" key={format} href={`/api/runs/${active.id}/export?format=${format}&accepted_only=${acceptedOnly}`} onClick={event => { event.preventDefault(); void api.download(active.id, format, acceptedOnly).catch(reason => setError(describeError(reason))); }}>Export {format.toUpperCase()}</a>)}</div></div>}</div>
         {active.error && <p className="notice" role="status">{active.error}</p>}
         {active.profile && <details className="target-summary"><summary>Confirmed target and offer</summary><p>{active.profile.offer}</p><p>{active.profile.target}</p>{!!active.profile.exclusions.length && <p>Exclusions: {active.profile.exclusions.join('; ')}</p>}<p className="hint">Confirmed {date(active.profile.confirmed_at)}. Start a new run to change this target.</p></details>}
         {active.profile && <ReuseOffer key={active.id} run={active} onSaved={run => { saved(run); select(run); }} />}
-        {active.records.length ? active.records.map(record => <CompanySheet key={record.research.id} record={record} run={active} onSaved={saved} />) : <section className="sheet"><h3>No company records yet</h3><p>The run stopped before usable research could be saved. Your confirmed target is preserved.</p><button className="secondary" onClick={() => select(null)}>Start another shortlist</button></section>}
+        {active.records.length ? active.records.map(record => <CompanySheet key={record.research.id} record={record} run={active} onSaved={saved} />) : <section className="sheet"><h3>No company records yet</h3><p>The run stopped before usable research could be saved. {active.profile ? 'Your confirmed target is preserved.' : 'Your saved seller inputs remain available.'}</p><button className="secondary" onClick={() => select(null)}>Start another shortlist</button></section>}
       </>}
       {results && active.profile && active.records.length > 0 && service?.booking_url && <section className="setup-call" aria-labelledby="setup-heading"><div><h2 id="setup-heading">Discuss your shortlist</h2><p>Get help with your target, evidence and next steps. The setup call is optional.</p></div><a className="secondary button-link" href={service.booking_url} target="_blank" rel="noopener noreferrer" onClick={() => { if (navigator.doNotTrack !== '1') void api.bookingClick(active.id).catch(() => undefined); }}>Book an optional setup call<Arrow /></a></section>}
       {active && !pending && <DeleteResearch key={active.id} run={active} onDeleted={deleted} />}
