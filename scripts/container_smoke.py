@@ -108,6 +108,10 @@ CREATE ROLE worker_fixture LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD 'labelled-work
         docker("restart", api)
         wait_ready(worker)
         wait_ready(api)
+        # Docker may allocate a different host port when restarting a container
+        # whose published port was intentionally ephemeral. Resolve it again.
+        port = docker("port", api, "8000").rsplit(":", 1)[1]
+        origin = "http://127.0.0.1:" + port
         assert get("/").decode() == html
         print("PASS: non-root image, real migrations/replay, private Postgres, separate worker/API, assets, auth boundary and restart")
     finally:
