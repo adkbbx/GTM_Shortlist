@@ -69,6 +69,20 @@ class Health(BaseModel):
     worker_online: bool
 
 
+class LocalAuth(BaseModel):
+    mode: Literal["local"] = "local"
+
+
+class HostedAuth(BaseModel):
+    mode: Literal["hosted"] = "hosted"
+    supabase_url: str
+    publishable_key: str
+    redirect_url: str
+
+
+AuthSetup = Annotated[LocalAuth | HostedAuth, Field(discriminator="mode")]
+
+
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings.load()
     local_store = Store(settings.db_path) if settings.mode == "local" else None
@@ -138,6 +152,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         readiness = settings.readiness()
         return Health(mode=settings.mode, search_ready=readiness["search"], gemma_ready=readiness["gemma"],
                       worker_online=local_store.worker_online() if local_store else False)
+
+    @app.get("/api/auth/setup", response_model=AuthSetup)
+    def auth_setup():
+        if settings.mode == "local":
+            return LocalAuth()
+        return HostedAuth(supabase_url=settings.supabase_url, publishable_key=settings.supabase_publishable_key,
+                          redirect_url=settings.app_url.rstrip("/") + "/")
 
     @app.get("/api/runs", response_model=list[RunView])
     def runs(store: owned):

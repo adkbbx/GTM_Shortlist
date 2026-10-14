@@ -21,6 +21,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/setup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Auth Setup */
+        get: operations["auth_setup_api_auth_setup_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/runs": {
         parameters: {
             query?: never;
@@ -232,12 +249,34 @@ export interface components {
             /** Worker Online */
             worker_online: boolean;
         };
+        /** HostedAuth */
+        HostedAuth: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            mode: "hosted";
+            /** Supabase Url */
+            supabase_url: string;
+            /** Publishable Key */
+            publishable_key: string;
+            /** Redirect Url */
+            redirect_url: string;
+        };
         /** Hypothesis */
         Hypothesis: {
             /** Text */
             text: string;
             /** Assumptions */
             assumptions: string[];
+        };
+        /** LocalAuth */
+        LocalAuth: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            mode: "local";
         };
         /** Observed */
         Observed: {
@@ -520,6 +559,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
+    auth_setup_api_auth_setup_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LocalAuth"] | components["schemas"]["HostedAuth"];
                 };
             };
         };

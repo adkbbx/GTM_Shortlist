@@ -1,5 +1,5 @@
 import { StrictMode, useEffect, useRef, useState } from 'react';
-import type { FormEvent } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '@fontsource/schibsted-grotesk/400.css';
 import '@fontsource/schibsted-grotesk/600.css';
@@ -8,6 +8,7 @@ import { api } from './api';
 import type { Confirmation, Evidence, ExclusionFinding, Finding, Health, Record, Review, Run } from './api';
 import { ResearchProgress } from './ResearchProgress';
 import { ResearchPreview } from './ResearchPreview';
+import { AuthGate } from './AuthGate';
 import './styles.css';
 
 const describeError = (error: unknown) => error instanceof Error ? error.message : 'Something went wrong. Please try again.';
@@ -124,7 +125,7 @@ function CompanySheet({ record, run, onSaved }: { record: Record; run: Run; onSa
   </article>;
 }
 
-function App() {
+function App({ account }: { account: ReactNode }) {
   const [health, setHealth] = useState<Health | null>(null);
   const [runs, setRuns] = useState<Run[]>([]);
   const [active, setActive] = useState<Run | null>(null);
@@ -178,7 +179,7 @@ function App() {
   const results = active && ['ready', 'partial'].includes(active.status);
   return <>
     <a className="skip-link" href="#main">Skip to research</a>
-    <header className="topbar"><a className="brand" href="/" onClick={e => { e.preventDefault(); select(null); }}><span className="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M5 25 16 5l11 20H5Zm6-7h10M16 5v22M8 28h16" stroke="currentColor" strokeWidth="1.2" /></svg></span><span>eygentic<span className="brand-product">GTM Shortlist</span></span></a><span className="local-label">Local research workspace</span></header>
+    <header className="topbar"><a className="brand" href="/" onClick={e => { e.preventDefault(); select(null); }}><span className="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M5 25 16 5l11 20H5Zm6-7h10M16 5v22M8 28h16" stroke="currentColor" strokeWidth="1.2" /></svg></span><span>eygentic<span className="brand-product">GTM Shortlist</span></span></a>{account ?? <span className="local-label">Local research workspace</span>}</header>
     <div className={`workspace ${active ? 'has-research' : 'new-research'}`}><aside className="sidebar" aria-label="Saved research"><button className="new-run secondary" onClick={() => { select(null); requestKey.current = crypto.randomUUID(); }}>New shortlist<Arrow /></button><h2>Saved runs</h2>
       {loading ? <p>Loading saved research…</p> : runs.length ? <nav>{runs.map(run => <button key={run.id} className={`saved-run ${active?.id === run.id ? 'selected' : ''}`} onClick={() => select(run)} aria-current={active?.id === run.id ? 'page' : undefined}><span>{new URL(run.seller_url).hostname}</span><small>{date(run.created_at)}</small><small>{run.status.replaceAll('_', ' ')}</small></button>)}</nav> : <p className="hint">Your research will stay here after you close the browser.</p>}
       <div className="sidebar-note"><p>Evidence before outreach.</p><p className="hint">Company fit, your acceptance, and buying intent are separate things.</p></div>
@@ -188,16 +189,16 @@ function App() {
       {!active && <><div className="start-grid"><section className="sheet start-sheet" aria-labelledby="start-heading"><h2 id="start-heading">What is your company website?</h2><p>We’ll draft your offer and target from the website. You can correct both before any company discovery starts.</p><form onSubmit={start}><label htmlFor="website">Seller website</label><div className="website-form"><input id="website" type="url" placeholder="https://your-company.com" required maxLength={2048} value={website} onChange={e => { setWebsite(e.target.value); requestKey.current = crypto.randomUUID(); }} /><button disabled={saving || loading} type="submit">{saving ? 'Saving…' : 'Understand my offer'}<Arrow /></button></div></form><p className="hint">Up to three research sheets. Saved sources. CSV and JSON export.</p></section><ResearchPreview /></div><section className="method" aria-label="How research works"><h2>A shortlist you can inspect</h2><ol><li><span>Confirm your offer</span><p>Edit who you serve and what counts as a fit.</p></li><li><span>Trace the evidence</span><p>Read source passages and see what remains unknown.</p></li><li><span>Review and export</span><p>Accept or reject each company using your own judgment.</p></li></ol></section></>}
       {active && <ResearchProgress run={active} connected={!error} />}
       {active?.status === 'awaiting_confirmation' && <>{health && !health.search_ready && <p className="notice">Live company search is not configured yet. Your target can be saved, but discovery needs Tavily or SerpApi connected.</p>}<ConfirmationForm key={active.id} run={active} onSaved={saved} /></>}
-      {results && <><div className="results-toolbar"><div><h2>{active.records.length} {active.records.length === 1 ? 'company' : 'companies'} researched</h2><p>{active.status === 'partial' ? 'Some questions remain open. Review the unknowns before using these records.' : 'Model assessments are ready for your review.'}</p></div>{!!active.records.length && <div className="export-controls"><label className="checkbox-label"><input type="checkbox" checked={acceptedOnly} onChange={e => setAcceptedOnly(e.target.checked)} />Accepted only</label><div className="export-links">{(['csv', 'json'] as const).map(format => <a className="secondary button-link" key={format} href={`/api/runs/${active.id}/export?format=${format}&accepted_only=${acceptedOnly}`}>Export {format.toUpperCase()}</a>)}</div></div>}</div>
+      {results && <><div className="results-toolbar"><div><h2>{active.records.length} {active.records.length === 1 ? 'company' : 'companies'} researched</h2><p>{active.status === 'partial' ? 'Some questions remain open. Review the unknowns before using these records.' : 'Model assessments are ready for your review.'}</p></div>{!!active.records.length && <div className="export-controls"><label className="checkbox-label"><input type="checkbox" checked={acceptedOnly} onChange={e => setAcceptedOnly(e.target.checked)} />Accepted only</label><div className="export-links">{(['csv', 'json'] as const).map(format => <a className="secondary button-link" key={format} href={`/api/runs/${active.id}/export?format=${format}&accepted_only=${acceptedOnly}`} onClick={event => { event.preventDefault(); void api.download(active.id, format, acceptedOnly).catch(reason => setError(describeError(reason))); }}>Export {format.toUpperCase()}</a>)}</div></div>}</div>
         {active.error && <p className="notice" role="status">{active.error}</p>}
         {active.profile && <details className="target-summary"><summary>Confirmed target and offer</summary><p>{active.profile.offer}</p><p>{active.profile.target}</p>{!!active.profile.exclusions.length && <p>Exclusions: {active.profile.exclusions.join('; ')}</p>}<p className="hint">Confirmed {date(active.profile.confirmed_at)}. Start a new run to change this target.</p></details>}
         {active.records.length ? active.records.map(record => <CompanySheet key={record.research.id} record={record} run={active} onSaved={saved} />) : <section className="sheet"><h3>No company records yet</h3><p>The run stopped before usable research could be saved. Your confirmed target is preserved.</p><button className="secondary" onClick={() => select(null)}>Start another shortlist</button></section>}
       </>}
-      <footer className="workspace-footer"><p>GTM Shortlist by Eygentic</p><p>Research supports judgment. It does not establish buying intent.</p>{health && <p className="hint">{health.search_ready && health.gemma_ready ? 'Research providers configured' : 'Local setup: research providers still need configuration'}</p>}</footer>
+      <footer className="workspace-footer"><p>GTM Shortlist by Eygentic</p><p>Research supports judgment. It does not establish buying intent.</p>{health && <p className="hint">{health.search_ready && health.gemma_ready ? 'Research providers configured' : 'Research providers still need configuration'}</p>}</footer>
     </main></div>
   </>;
 }
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Application root is missing');
-createRoot(root).render(<StrictMode><App /></StrictMode>);
+createRoot(root).render(<StrictMode><AuthGate workspace={(identity, account) => <App key={identity} account={account} />} /></StrictMode>);

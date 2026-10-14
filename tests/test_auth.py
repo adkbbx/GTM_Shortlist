@@ -69,3 +69,23 @@ def test_hosted_configuration_rejects_unsafe_or_ambiguous_origins(origin):
     with pytest.raises(ValidationError):
         Settings(mode="hosted", supabase_url=origin, app_url="https://app.example",
                  supabase_publishable_key="fixture", database_url="fixture")
+
+
+@pytest.mark.parametrize("key", ["sb_secret_do_not_expose", "legacy-service-role-token"])
+def test_secret_keys_cannot_be_exposed_in_auth_setup(key):
+    with pytest.raises(ValidationError, match="publishable key"):
+        Settings(mode="hosted", supabase_url="https://auth.example", app_url="https://app.example",
+                 supabase_publishable_key=key, database_url="fixture")
+
+
+def test_public_auth_setup_exposes_only_public_configuration(tmp_path):
+    from fastapi.testclient import TestClient
+
+    from shortlist.api import create_app
+    local = TestClient(create_app(Settings(db_path=tmp_path / "local.sqlite3")))
+    assert local.get("/api/auth/setup").json() == {"mode": "local"}
+    hosted = TestClient(create_app(hosted_settings()), base_url="https://app.example")
+    assert hosted.get("/api/auth/setup").json() == {
+        "mode": "hosted", "supabase_url": "https://auth.example",
+        "publishable_key": "sb_publishable_fixture", "redirect_url": "https://app.example/",
+    }

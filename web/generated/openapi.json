@@ -23,6 +23,39 @@
         }
       }
     },
+    "/api/auth/setup": {
+      "get": {
+        "summary": "Auth Setup",
+        "operationId": "auth_setup_api_auth_setup_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/LocalAuth"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HostedAuth"
+                    }
+                  ],
+                  "title": "Response Auth Setup Api Auth Setup Get",
+                  "discriminator": {
+                    "propertyName": "mode",
+                    "mapping": {
+                      "local": "#/components/schemas/LocalAuth",
+                      "hosted": "#/components/schemas/HostedAuth"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/runs": {
       "get": {
         "summary": "Runs",
@@ -587,6 +620,35 @@
         ],
         "title": "Health"
       },
+      "HostedAuth": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "const": "hosted",
+            "title": "Mode",
+            "default": "hosted"
+          },
+          "supabase_url": {
+            "type": "string",
+            "title": "Supabase Url"
+          },
+          "publishable_key": {
+            "type": "string",
+            "title": "Publishable Key"
+          },
+          "redirect_url": {
+            "type": "string",
+            "title": "Redirect Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "supabase_url",
+          "publishable_key",
+          "redirect_url"
+        ],
+        "title": "HostedAuth"
+      },
       "Hypothesis": {
         "properties": {
           "text": {
@@ -611,6 +673,18 @@
           "assumptions"
         ],
         "title": "Hypothesis"
+      },
+      "LocalAuth": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "const": "local",
+            "title": "Mode",
+            "default": "local"
+          }
+        },
+        "type": "object",
+        "title": "LocalAuth"
       },
       "Observed": {
         "properties": {

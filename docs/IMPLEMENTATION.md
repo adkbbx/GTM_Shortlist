@@ -57,6 +57,7 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 - [x] Implement checksummed Postgres migrations and adapter; verify private roles, two synthetic workspace isolation, concurrent claims, shared quotas and journal replay against PostgreSQL 18.6.
 - [x] Wire verified-user API access, request-scoped Postgres and workspace-selected worker; reject invalid/unconfirmed sessions and atomically reserve one demo per workspace in actual database tests.
 - [ ] Build signup/login/session recovery UI and verify hosted accounts on phone/laptop.
+- [x] Build signup/login/confirmation/password recovery, session refresh/signout and authenticated export; verify with real SDK and labelled browser transport fixtures.
 - [ ] Postgres persistence and migrations, Supabase verified signup and JWT validation.
 - [ ] Workspace isolation tested with two actual accounts; private schema/role policies.
 - [ ] Atomic one-demo entitlement with shared attempt caps; account deletion/retention.

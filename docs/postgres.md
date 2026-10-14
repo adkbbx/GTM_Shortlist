@@ -1,6 +1,6 @@
 # PostgreSQL foundation
 
-The adapter, migrations, verified-user API access and hosted worker selection are implemented and tested against PostgreSQL 18.6. The existing local service remains in SQLite mode. Hosted browser signup/login and actual Supabase accounts remain unfinished; this is not a deployed hosted service.
+The adapter, migrations, verified-user API access, hosted worker selection and browser account flows are implemented. PostgreSQL 18.6 tests use restricted database roles; browser tests use the actual Supabase SDK with explicitly labelled transport fixtures. The existing local service remains in SQLite mode. Actual Supabase accounts/email delivery and deployment remain unverified.
 
 Install the `hosted` extra or use the pinned repository requirements. Apply migrations with a dedicated operator credential:
 
@@ -46,3 +46,9 @@ Launch the API with `uvicorn shortlist.api:app` behind the HTTPS ingress and the
 Protected research routes require `Authorization: Bearer <user-access-token>`. The API calls the configured Supabase `/auth/v1/user` endpoint over verified HTTPS for each request. It never trusts caller-selected workspace IDs or decoded JWT claims. Supabase verifies the token; the API requires a confirmed, non-anonymous, non-deleted, non-banned authenticated user and derives the personal workspace UUID from that user's ID. Auth errors return 401; unavailable/malformed provider responses return 503 without authorizing access. Requests use bounded response size, no redirects and a five-second transport timeout. No service-role key is required for verification.
 
 Each personal workspace receives one demo run. The grant and run insertion are one locked transaction. Retrying the same request key returns the original run; different keys cannot reserve a second grant. Deleting run rows does not reset the grant. Complete account deletion, retention and paid entitlements remain separate unfinished features. The public health route reports hosted worker availability as false before authentication; the authenticated run progress contains the actual shared worker heartbeat.
+
+### Browser accounts and email setup
+
+The public /api/auth/setup response distinguishes local access from hosted account configuration. It exposes only a publishable key and the trusted auth/redirect origins; secret/service-role keys are rejected at settings validation. New publishable keys must begin sb_publishable_. The SDK is loaded only in hosted mode. API calls and exports carry the active user access token in headers, never URL parameters. Sign-out removes the current workspace from the screen; API401 returns to sign-in and preserves server research. An old request's token cannot expire a newer account session.
+
+In Supabase, enable email confirmation, configure external SMTP, and set the Site URL and allowed redirect URL to SHORTLIST_APP_URL plus the trailing slash. The browser uses PKCE signup/recovery links; open the email link in the browser that began the request. Cross-browser/device link completion remains an external-testing case; an email-code flow may be preferable if those tests show confusion. Do not disable confirmation to hide an email configuration failure. Sign-in, signup notices, reset request, PKCE password update, expired-token refresh, failed sign-out recovery and authenticated export are covered with labelled fixtures, not actual email or production accounts. Keep the two-real-account isolation check as a release gate.

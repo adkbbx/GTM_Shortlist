@@ -3,9 +3,11 @@ import addFormats from 'ajv-formats';
 import type { components } from './generated/api';
 import runSchema from './generated/RunView.json';
 import healthSchema from './generated/Health.json';
+import authSchema from './generated/AuthSetup.json';
 
 export type Run = components['schemas']['RunView'];
 export type Health = components['schemas']['Health'];
+export type AuthSetup = components['schemas']['LocalAuth'] | components['schemas']['HostedAuth'];
 export type Confirmation = components['schemas']['Confirmation'];
 export type Record = Run['records'][number];
 export type Finding = Record['research']['findings'][number];
@@ -17,9 +19,25 @@ const ajv = new Ajv({ strict: false });
 addFormats(ajv);
 const isRun = ajv.compile<Run>(runSchema);
 const isHealth = ajv.compile<Health>(healthSchema);
+const isAuthSetup = ajv.compile<AuthSetup>(authSchema);
+let accessToken: (() => Promise<string | null>) | null = null;
+let sessionExpired: ((token: string | null) => void) | null = null;
+
+export function setSessionAccess(token: (() => Promise<string | null>) | null, expired: ((token: string | null) => void) | null) {
+  accessToken = token; sessionExpired = expired;
+}
+
+async function authorizedFetch(path: string, options: RequestInit = {}) {
+  const token = await accessToken?.();
+  const headers = new Headers(options.headers);
+  if (token) headers.set('Authorization', `Bearer ${token}`);
+  const response = await fetch(path, { ...options, headers });
+  if (response.status === 401) sessionExpired?.(token ?? null);
+  return response;
+}
 
 async function request(path: string, body?: unknown): Promise<unknown> {
-  const response = await fetch(path, body === undefined ? undefined : {
+  const response = await authorizedFetch(path, body === undefined ? undefined : {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
   });
   const data: unknown = await response.json();
@@ -37,6 +55,20 @@ function parseRun(data: unknown): Run {
 }
 
 export const api = {
+  async authSetup() {
+    const data = await request('/api/auth/setup');
+    if (!isAuthSetup(data)) throw new Error('Account setup is unavailable. Please reload.');
+    return data;
+  },
+  async download(id: string, format: 'csv' | 'json', acceptedOnly: boolean) {
+    const response = await authorizedFetch(`/api/runs/${encodeURIComponent(id)}/export?format=${format}&accepted_only=${acceptedOnly}`);
+    if (!response.ok) throw new Error('Export could not be downloaded. Check your session and try again.');
+    const url = URL.createObjectURL(await response.blob());
+    const link = document.createElement('a');
+    link.href = url; link.download = `shortlist-${id}.${format}`;
+    document.body.append(link); link.click(); link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  },
   async health() {
     const data = await request('/api/health');
     if (!isHealth(data)) throw new Error('Service status is unavailable.');

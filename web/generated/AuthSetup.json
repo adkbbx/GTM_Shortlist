@@ -1,0 +1,60 @@
+{
+  "$defs": {
+    "HostedAuth": {
+      "properties": {
+        "mode": {
+          "const": "hosted",
+          "default": "hosted",
+          "title": "Mode",
+          "type": "string"
+        },
+        "supabase_url": {
+          "title": "Supabase Url",
+          "type": "string"
+        },
+        "publishable_key": {
+          "title": "Publishable Key",
+          "type": "string"
+        },
+        "redirect_url": {
+          "title": "Redirect Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "supabase_url",
+        "publishable_key",
+        "redirect_url"
+      ],
+      "title": "HostedAuth",
+      "type": "object"
+    },
+    "LocalAuth": {
+      "properties": {
+        "mode": {
+          "const": "local",
+          "default": "local",
+          "title": "Mode",
+          "type": "string"
+        }
+      },
+      "title": "LocalAuth",
+      "type": "object"
+    }
+  },
+  "discriminator": {
+    "mapping": {
+      "hosted": "#/$defs/HostedAuth",
+      "local": "#/$defs/LocalAuth"
+    },
+    "propertyName": "mode"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/LocalAuth"
+    },
+    {
+      "$ref": "#/$defs/HostedAuth"
+    }
+  ]
+}

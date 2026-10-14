@@ -2,10 +2,14 @@
 import json
 from pathlib import Path
 
-from shortlist.api import Health, RunView, create_app
+from pydantic import TypeAdapter
+
+from shortlist.api import AuthSetup, Health, RunView, create_app
 
 root = Path(__file__).resolve().parents[1]
 (root / "web/generated").mkdir(parents=True, exist_ok=True)
 (root / "web/generated/openapi.json").write_text(json.dumps(create_app().openapi(), indent=2), encoding="utf-8")
 for model in (RunView, Health):
     (root / f"web/generated/{model.__name__}.json").write_text(json.dumps(model.model_json_schema(mode="serialization"), indent=2), encoding="utf-8")
+(root / "web/generated/AuthSetup.json").write_text(
+    json.dumps(TypeAdapter(AuthSetup).json_schema(mode="serialization"), indent=2), encoding="utf-8")

@@ -35,6 +35,8 @@ class Settings(BaseModel):
                     raise ValueError("Hosted auth and app URLs must be HTTPS origins")
             if not self.database_url.get_secret_value() or not self.supabase_publishable_key:
                 raise ValueError("Hosted mode requires database and Supabase public configuration")
+            if not self.supabase_publishable_key.startswith("sb_publishable_"):
+                raise ValueError("Use a Supabase publishable key; secret/service-role keys must not reach the browser")
         return self
 
     @classmethod
