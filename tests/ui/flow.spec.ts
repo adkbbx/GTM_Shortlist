@@ -113,7 +113,7 @@ test('saved seller → confirmation → evidence → review → export survives 
   const runId = new URL(page.url()).searchParams.get('run');
   const response = await page.request.post('/__fixture_operator_review', { data: {
     run_id: runId, record_id: exported.records[0].research.id, request_key: `operator-fixture-${testInfo.project.name}`,
-    previous_id: null, annotation: { outcome: 'reviewed', reviewer: 'Labelled fixture reviewer',
+    previous_id: null, annotation: { outcome: 'reviewed', reviewer: `Labelled fixture reviewer ${'x'.repeat(70)}`,
       note: 'TEST FIXTURE service note. The supplied source was inspected. This does not change the customer decision.',
       source_ids: [exported.records[0].research.sources[0].id] },
   } });

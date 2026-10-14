@@ -1,5 +1,7 @@
 """Hosted credit accounting; company delivery integration is a separate boundary."""
 
+from uuid import UUID
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from shortlist.postgres import PostgresStore
@@ -38,12 +40,22 @@ class CreditWallet:
             self.store.begin(db)
             return self._balance(db)
 
-    def history(self) -> list[dict]:
-        """Recent committed ledger changes; holds are displayed on their runs."""
+    def history_page(self, before: UUID | None = None) -> tuple[list[dict], str | None]:
+        """Bounded owner-scoped keyset pages over committed ledger changes."""
         with self.store.connection() as db:
-            return [dict(row) for row in db.execute(
-                "SELECT id,kind,amount,created_at FROM credit_entries WHERE workspace_id=? "
-                "ORDER BY created_at DESC,id DESC LIMIT 50", (self.store.workspace_id,))]
+            parameters = [self.store.workspace_id]
+            boundary = ""
+            if before is not None:
+                anchor = db.execute("SELECT created_at,id FROM credit_entries WHERE workspace_id=? AND id=?",
+                                    (self.store.workspace_id, str(before))).fetchone()
+                if anchor is None:
+                    raise KeyError("Credit activity cursor unavailable")
+                boundary = "AND (created_at,id)<(?,?) "
+                parameters.extend((anchor["created_at"], anchor["id"]))
+            rows = [dict(row) for row in db.execute(
+                "SELECT id,kind,amount,created_at FROM credit_entries WHERE workspace_id=? " + boundary +
+                "ORDER BY created_at DESC,id DESC LIMIT 51", parameters)]
+            return rows[:50], rows[49]["id"] if len(rows) > 50 else None
 
     def grant(self, quantity: int, operation_key: str, description: str):
         if not self.store.worker:

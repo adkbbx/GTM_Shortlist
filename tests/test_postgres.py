@@ -262,6 +262,12 @@ def test_hosted_api_verifies_identity_and_scopes_every_route(owners, monkeypatch
     assert client.get("/api/credits/history").status_code == 401
     assert client.get("/api/credits/history", headers=first_headers).json()["entries"][0]["amount"] == 3
     assert client.get("/api/credits/history", headers=second_headers).json()["entries"][0]["amount"] == 3
+    foreign_cursor = client.get("/api/credits/history", headers=second_headers).json()["entries"][0]["id"]
+    hidden = client.get(f"/api/credits/history?before={foreign_cursor}", headers=first_headers)
+    unknown = client.get(f"/api/credits/history?before={uuid4()}", headers=first_headers)
+    assert hidden.status_code == unknown.status_code == 400
+    assert hidden.json() == unknown.json()
+    assert client.get("/api/credits/history?before=malformed", headers=first_headers).status_code == 422
     assert client.get("/api/runs", headers={"Authorization": "Bearer invalid"}).status_code == 401
     assert client.get("/api/runs", headers={**first_headers, "Host": "attacker.example"}).status_code == 400
     assert client.post("/api/sellers", headers={**first_headers, "Origin": "https://attacker.example"}, json={}).status_code == 403
@@ -337,10 +343,11 @@ def test_credit_signup_reserve_delivery_refund_and_replay(owners):
     with pytest.raises(Conflict):
         delivery.consume(run_id, "late-company.example")
     assert other.balance().available == 3
-    history = wallet.history()
+    history, cursor = wallet.history_page()
+    assert cursor is None
     assert {entry["kind"] for entry in history} == {"signup", "usage"}
     assert sum(entry["amount"] for entry in history) == 2
-    assert len(other.history()) == 1
+    assert len(other.history_page()[0]) == 1
 
 
 def test_credit_concurrent_reservations_cannot_overspend(owners):
@@ -714,3 +721,32 @@ def test_operator_annotations_are_scoped_append_only_and_erased_with_research(ow
         assert db.execute("SELECT count(*) FROM operator_reviews").fetchone()[0] == 0
     with pytest.raises(KeyError):
         scoped.operator_history(identity, research.id)
+
+
+def test_credit_pages_keep_tied_timestamps_unique_and_foreign_cursors_private(owners):
+    from uuid import UUID
+
+    a, b, credential, _ = owners
+    scoped = PostgresStore(credential, a.workspace_id, worker=True)
+    with scoped.connection() as db:
+        scoped.begin(db)
+        for index in range(101):
+            db.execute("INSERT INTO credit_entries(workspace_id,operation_key,kind,amount,description) VALUES (?,?,?,?,?)",
+                       (a.workspace_id, f"pagination-fixture-{index}", "purchase", 1, "Labelled operator pagination grant"))
+    wallet = CreditWallet(a)
+    first, cursor = wallet.history_page()
+    assert len(first) == 50 and cursor == first[-1]["id"]
+    assert len({entry["created_at"] for entry in first}) == 1
+    CreditWallet(scoped).grant(5, "during-pagination", "Labelled new committed grant")
+    second, next_cursor = wallet.history_page(UUID(cursor))
+    assert len(second) == 50 and next_cursor == second[-1]["id"]
+    third, end = wallet.history_page(UUID(next_cursor))
+    assert len(third) == 2 and end is None
+    identities = [row["id"] for row in [*first, *second, *third]]
+    assert len(set(identities)) == len(identities) == 102
+    assert wallet.history_page()[0][0]["amount"] == 5
+    foreign = CreditWallet(b).history_page()[0][0]["id"]
+    with pytest.raises(KeyError):
+        wallet.history_page(UUID(foreign))
+    with pytest.raises(KeyError):
+        wallet.history_page(uuid4())

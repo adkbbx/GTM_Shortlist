@@ -294,6 +294,8 @@ export interface components {
             mode: "local" | "hosted";
             /** Entries */
             entries: components["schemas"]["CreditEntry"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
         };
         /** Criterion */
         "Criterion-Input": {
@@ -873,7 +875,9 @@ export interface operations {
     };
     credit_history_api_credits_history_get: {
         parameters: {
-            query?: never;
+            query?: {
+                before?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -887,6 +891,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CreditHistory"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

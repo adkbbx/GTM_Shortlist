@@ -53,6 +53,19 @@
       "maxItems": 50,
       "title": "Entries",
       "type": "array"
+    },
+    "next_cursor": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Next Cursor"
     }
   },
   "required": [

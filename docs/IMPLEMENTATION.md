@@ -79,7 +79,8 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 - [x] Integrate credit reservation, atomic research delivery/debit, technical-failure returns and batch-cost UI; preserve legacy demos without a second signup grant.
 - [x] Add verified-owner recent credit activity API; prove grant/usage history and two-workspace isolation.
 - [x] Expose recent owner-scoped credit activity with authenticated runtime validation, refresh/retry and responsive customer UI.
-- [ ] Implement verified paid checkout, complete activity pagination, cancellation and measured larger batches.
+- [x] Page the full committed ledger with owner-scoped cursors, earlier/newer navigation and keyboard focus recovery.
+- [ ] Implement verified paid checkout, cancellation and measured larger batches.
 - [ ] Identify 30 potential buyers and prioritize 10; prepare offer-specific samples.
 - [ ] Validate three $99 reviewed pilots and repeat demand before $49 subscription/billing.
 

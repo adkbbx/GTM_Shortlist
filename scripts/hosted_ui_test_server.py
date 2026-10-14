@@ -16,7 +16,7 @@ from fastapi import FastAPI
 from migrate_postgres import migrate
 from psycopg import sql
 from psycopg.conninfo import conninfo_to_dict, make_conninfo
-from pydantic import SecretStr
+from pydantic import BaseModel, SecretStr
 from ui_test_providers import FixtureModel, FixtureSearch, fixture_fetch
 
 import shortlist.api as api_module
@@ -117,6 +117,23 @@ def run():
 
         @application.get("/__fixture_ready")
         def ready():
+            return {"fixture": True}
+
+        class CreditFixture(BaseModel):
+            workspace_id: UUID
+
+        @application.post("/__fixture_credit_grants")
+        def credit_grants(input: CreditFixture):
+            # Fixed, isolated operator grants for pagination verification, never payments.
+            scoped = PostgresStore(worker_dsn, input.workspace_id, worker=True)
+            scoped.ensure_workspace()
+            with scoped.connection() as db:
+                scoped.begin(db)
+                for index in range(101):
+                    db.execute("INSERT INTO credit_entries(workspace_id,operation_key,kind,amount,description) VALUES (?,?,?,?,?) "
+                               "ON CONFLICT(workspace_id,operation_key) DO NOTHING",
+                               (input.workspace_id, f"pagination-fixture-{index}", "purchase", 1,
+                                "Labelled browser operator grant; no payment"))
             return {"fixture": True}
 
         application.mount("/", api_module.create_app(settings))

@@ -2,8 +2,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Literal
 from urllib.parse import urlsplit
+from uuid import UUID
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
@@ -70,6 +71,7 @@ class CreditEntry(BaseModel):
 class CreditHistory(BaseModel):
     mode: Literal["local", "hosted"]
     entries: list[CreditEntry] = Field(max_length=50)
+    next_cursor: UUID | None = None
 
 
 class BookingInput(BaseModel):
@@ -225,11 +227,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return WalletView(mode="hosted", **CreditWallet(store).balance().model_dump())
 
     @app.get("/api/credits/history", response_model=CreditHistory)
-    def credit_history(store: owned):
+    def credit_history(store: owned, before: UUID | None = None):
         if settings.mode == "local":
             return CreditHistory(mode="local", entries=[])
         from shortlist.credits import CreditWallet
-        return CreditHistory(mode="hosted", entries=CreditWallet(store).history())
+        try:
+            entries, next_cursor = CreditWallet(store).history_page(before)
+        except KeyError:
+            raise HTTPException(400, "Credit activity page is unavailable. Refresh to see the latest changes.") from None
+        return CreditHistory(mode="hosted", entries=entries, next_cursor=next_cursor)
 
     @app.post("/api/sellers", response_model=RunView, status_code=201)
     def seller(input: SellerInput, store: owned):

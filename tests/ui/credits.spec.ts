@@ -31,6 +31,7 @@ async function hostedFixture(page: Page) {
   await page.getByLabel('Password', { exact: true }).fill('labelled-fixture-password');
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await expect(page.getByLabel('Seller website', { exact: true })).toBeVisible();
+  return identity;
 }
 async function capture(page: Page, path: string) {
   mkdirSync('.impeccable/review', { recursive: true });
@@ -106,6 +107,38 @@ test('credit activity recovers from errors and malformed data without blocking r
   await page.getByRole('button', { name: 'Credit activity', exact: true }).press('Enter');
   await expect(activity).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Credit activity', exact: true })).toHaveAttribute('aria-expanded', 'false');
+});
+
+test('actual owner credit history pages earlier and newer without losing tied entries', async ({ page }, info) => {
+  const identity = await hostedFixture(page);
+  const seed = await page.request.post('http://127.0.0.1:8016/__fixture_credit_grants', { data: { workspace_id: identity } });
+  expect(seed.ok()).toBeTruthy();
+  await page.reload();
+  await expect(page.getByText('104 credits available', { exact: true })).toBeVisible();
+  const firstRequest = page.waitForResponse(response => new URL(response.url()).pathname === '/api/credits/history');
+  await page.getByRole('button', { name: 'Credit activity', exact: true }).click();
+  const first = await (await firstRequest).json();
+  const activity = page.getByRole('region', { name: 'Credit activity', exact: true });
+  await expect(activity.getByRole('status')).toHaveText('Page 1 · 50 recorded changes');
+  const secondRequest = page.waitForResponse(response => new URL(response.url()).searchParams.get('before') === first.next_cursor);
+  await activity.getByRole('button', { name: 'Earlier activity' }).click();
+  const second = await (await secondRequest).json();
+  await expect(activity.getByRole('status')).toHaveText('Page 2 · 50 recorded changes');
+  const thirdRequest = page.waitForResponse(response => new URL(response.url()).searchParams.get('before') === second.next_cursor);
+  await activity.getByRole('button', { name: 'Earlier activity' }).click();
+  const third = await (await thirdRequest).json();
+  await expect(activity.getByRole('status')).toHaveText('Page 3 · 2 recorded changes');
+  await expect(activity.getByText('Signup credits', { exact: true })).toBeVisible();
+  await expect(activity.getByRole('button', { name: 'Earlier activity' })).toBeDisabled();
+  await expect(activity.getByRole('heading', { name: 'Credit activity', exact: true })).toBeFocused();
+  expect(new Set([...first.entries, ...second.entries, ...third.entries].map((entry: { id: string }) => entry.id)).size).toBe(102);
+  await capture(page, `.impeccable/review/${info.project.name}-credit-history-last-page.png`);
+  await activity.getByRole('button', { name: 'Newer activity' }).press('Enter');
+  await expect(activity.getByRole('status')).toHaveText('Page 2 · 50 recorded changes');
+  await expect(activity.getByRole('heading', { name: 'Credit activity', exact: true })).toBeFocused();
+  await activity.getByRole('button', { name: 'Refresh activity' }).click();
+  await expect(activity.getByRole('status')).toHaveText('Page 1 · 50 recorded changes');
+  await expect(activity.getByRole('button', { name: 'Newer activity' })).toBeDisabled();
 });
 
 test('selected batch size sets the actual worker limit and quoted cost', async ({ page }) => {
