@@ -1,6 +1,6 @@
 # Research credits plan
 
-Status: proposed product structure, 14 October 2026. This plans the user's request for free signup credits and paid credit increases. No payment collection, wallet or credit settlement is implemented yet. Existing hosted code still enforces one demo run per workspace.
+Status: product structure and tested accounting foundation, 14 October 2026. The private ledger, signup grants, legacy migration, holds and settlement commands are implemented. Research delivery integration, customer balance/batch controls and actual paid purchase processing remain unfinished. Existing hosted research code still enforces one demo run per workspace; foundation commands do not change that behavior yet.
 
 ## Unit and packages
 
@@ -69,7 +69,7 @@ Current worker has a three-record limit, six candidate attempts, four searches, 
 
 - [ ] Model grants, holds, delivery outcomes and versioned pricing separately from provider attempts.
 - [ ] Add RLS-protected ledger/reservations/purchases and unique command keys.
-- [ ] Migrate unused legacy demo entitlement to one3-credit grant. Already-used demos receive no second free grant; preserve their saved records and allow existing in-progress demo work to finish under its original entitlement. No retroactive charges.
+- [x] Migrate unused legacy demo entitlement to one3-credit grant. Already-used demos receive a zero signup entry recording that their demo was granted; saved records remain untouched and there are no retroactive charges. Actual migration tested against pre-wallet tables.
 - [ ] Replace hosted demo_run_id enforcement with credit reservation at confirmed batch submission. Bound free profiling separately.
 - [ ] Atomically commit company delivery and one debit; return unused credits on terminal partial/failure/cancellation outcomes.
 - [ ] Add balance, batch-size/cost confirmation, activity history and insufficient-credit states; test phone/laptop, accessibility and slow responses.
@@ -78,4 +78,6 @@ Current worker has a three-record limit, six candidate attempts, four searches, 
 - [ ] Build one-time top-up checkout and verified, replay-safe purchase grants. Validate actual payment test-mode behavior before selling.
 - [ ] Expand durable batches and benchmark cost/margin before choosing pack prices.
 
-This plan supersedes the long-term one-demo restriction as a proposed product direction. It does not mark hosted billing, credits or larger batches complete.
+Accounting acceptance: real PostgreSQL tests prove concurrent reservations cannot overspend, repeated delivery keys debit once, privileged grants replay once and reject changed quantities, runtime logins cannot alter ledger history, another workspace cannot read its entries, failed batches release all holds, transaction rollback restores both debit and hold state, and actual process death before/after commit never double-charges. These are accounting checks, not live payments or company delivery proof.
+
+This plan supersedes the long-term one-demo restriction as a product direction. It does not mark hosted billing, integrated research credits or larger batches complete.

@@ -2,6 +2,8 @@
 import hashlib
 import importlib.util
 import os
+import subprocess
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from uuid import uuid4
@@ -17,6 +19,7 @@ from pydantic import SecretStr
 from shortlist.api import create_app
 from shortlist.auth import verify_user
 from shortlist.config import Settings
+from shortlist.credits import CreditWallet
 from shortlist.domain import Candidate, Criterion, Profile, Review, Source
 from shortlist.export import export_run
 from shortlist.journal import call_step
@@ -295,3 +298,147 @@ def test_hosted_worker_loop_selects_workspace_for_each_run(owners, monkeypatch):
     work(settings, once=True)
     assert processed == {first: a.workspace_id, second: b.workspace_id}
     assert a.get_run(first)["status"] == b.get_run(second)["status"] == "awaiting_confirmation"
+
+
+def test_credit_signup_reserve_delivery_refund_and_replay(owners):
+    a, b, worker, profile = owners
+    a.ensure_workspace()
+    wallet = CreditWallet(a)
+    other = CreditWallet(b)
+    delivery = CreditWallet(PostgresStore(worker, a.workspace_id, worker=True))
+    assert wallet.balance().model_dump() == {"available": 3, "reserved": 0, "used": 0}
+    run_id = a.create_run(profile, "wallet-demo")
+    wallet.reserve(run_id, 3)
+    wallet.reserve(run_id, 3)
+    assert wallet.balance().model_dump() == {"available": 0, "reserved": 3, "used": 0}
+    with pytest.raises(Conflict):
+        wallet.reserve(run_id, 2)
+    with pytest.raises(KeyError):
+        other.reserve(run_id, 1)
+    delivery.consume(run_id, "company.example")
+    delivery.consume(run_id, "company.example")
+    assert wallet.balance().model_dump() == {"available": 0, "reserved": 2, "used": 1}
+    delivery.settle(run_id)
+    delivery.settle(run_id)
+    assert wallet.balance().model_dump() == {"available": 2, "reserved": 0, "used": 1}
+    with pytest.raises(Conflict):
+        delivery.consume(run_id, "late-company.example")
+    assert other.balance().available == 3
+
+
+def test_credit_concurrent_reservations_cannot_overspend(owners):
+    a, _, worker, profile = owners
+    first = a.create_run(profile, "credit-first")
+    scoped = PostgresStore(worker, a.workspace_id, worker=True)
+    # Construct a second labelled run with the worker, without resetting the legacy demo.
+    second = uuid4().hex
+    with scoped.connection() as db:
+        db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,created_at,updated_at) "
+                   "SELECT ?,?,payload_hash,profile,status,stage,created_at,updated_at FROM runs WHERE id=?",
+                   (second, "credit-second", first))
+    wallet = CreditWallet(a)
+
+    def reserve(identity):
+        try:
+            wallet.reserve(identity, 3)
+            return identity
+        except BudgetExceeded:
+            return None
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(reserve, (first, second)))
+    assert sum(result is not None for result in results) == 1
+    assert wallet.balance().available == 0
+    charged = CreditWallet(scoped)
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        list(pool.map(lambda _: charged.consume(next(result for result in results if result), "same.example"), range(6)))
+    assert wallet.balance().used == 1
+
+
+def test_credit_grants_replay_once_and_ledger_cannot_be_changed(owners):
+    a, b, worker, _ = owners
+    wallet = CreditWallet(a)
+    delivery = CreditWallet(PostgresStore(worker, a.workspace_id, worker=True))
+    with pytest.raises(ValueError):
+        wallet.grant(20, "unverified-purchase", "Never a client grant")
+    delivery.grant(20, "labelled-purchase", "Labelled operator grant, not a real payment")
+    delivery.grant(20, "labelled-purchase", "Labelled operator grant, not a real payment")
+    assert wallet.balance().available == 23
+    with pytest.raises(Conflict):
+        delivery.grant(100, "labelled-purchase", "Changed quantity")
+    with pytest.raises(psycopg.errors.InsufficientPrivilege), delivery.store.connection() as db:
+        db.execute("UPDATE credit_entries SET amount=100 WHERE operation_key='signup'")
+    with pytest.raises(psycopg.errors.InsufficientPrivilege), a.connection() as db:
+        db.execute("INSERT INTO credit_entries(workspace_id,operation_key,kind,amount,description) VALUES (?,'fake','purchase',100,'fake')",
+                   (a.workspace_id,))
+    with b.connection() as db:
+        assert db.execute("SELECT count(*) FROM credit_entries WHERE workspace_id=?", (a.workspace_id,)).fetchone()[0] == 0
+
+
+def test_credit_failed_batch_releases_all_and_debit_rollback_is_atomic(owners):
+    a, _, worker, profile = owners
+    run_id = a.create_run(profile, "credit-rollback")
+    wallet = CreditWallet(a)
+    delivery = CreditWallet(PostgresStore(worker, a.workspace_id, worker=True))
+    wallet.reserve(run_id, 3)
+    with pytest.raises(RuntimeError, match="Labelled crash"), delivery.store.connection() as db:
+        delivery.store.begin(db)
+        delivery.consume_in_transaction(db, run_id, "rollback.example")
+        raise RuntimeError("Labelled crash before transaction commit")
+    assert wallet.balance().model_dump() == {"available": 0, "reserved": 3, "used": 0}
+    delivery.settle(run_id)
+    assert wallet.balance().model_dump() == {"available": 3, "reserved": 0, "used": 0}
+
+
+@pytest.mark.parametrize("committed", [False, True])
+def test_actual_process_death_never_duplicates_credit_debits(owners, committed):
+    a, _, worker, profile = owners
+    run_id = a.create_run(profile, "credit-process-death")
+    wallet = CreditWallet(a)
+    wallet.reserve(run_id, 3)
+    script = """
+import os
+from uuid import UUID
+from pydantic import SecretStr
+from shortlist.postgres import PostgresStore
+from shortlist.credits import CreditWallet
+store=PostgresStore(SecretStr(os.environ['CREDIT_TEST_DSN']),UUID(os.environ['CREDIT_TEST_OWNER']),worker=True)
+wallet=CreditWallet(store)
+if os.environ['CREDIT_TEST_COMMITTED']=='yes':
+    wallet.consume(os.environ['CREDIT_TEST_RUN'],'crash.example')
+    os._exit(23)
+with store.connection() as db:
+    store.begin(db)
+    wallet.consume_in_transaction(db,os.environ['CREDIT_TEST_RUN'],'crash.example')
+    os._exit(23)
+"""
+    child = subprocess.run([sys.executable, "-c", script], check=False, capture_output=True, timeout=15,
+                           env={**os.environ, "CREDIT_TEST_DSN": worker.get_secret_value(),
+                                "CREDIT_TEST_OWNER": str(a.workspace_id), "CREDIT_TEST_RUN": run_id,
+                                "CREDIT_TEST_COMMITTED": "yes" if committed else "no"})
+    assert child.returncode == 23
+    assert wallet.balance().used == int(committed)
+    CreditWallet(PostgresStore(worker, a.workspace_id, worker=True)).consume(run_id, "crash.example")
+    assert wallet.balance().used == 1
+
+
+def test_credit_migration_preserves_already_used_legacy_demo(database):
+    _, _, operator = database
+    name = "shortlist_credit_migration_" + uuid4().hex
+    admin = make_conninfo(operator, dbname="postgres")
+    fresh, used = uuid4(), uuid4()
+    with psycopg.connect(admin, autocommit=True) as db:
+        db.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(name)))
+    try:
+        with psycopg.connect(make_conninfo(operator, dbname=name)) as db:
+            folder = Path(__file__).parents[1] / "migrations"
+            for filename in ("001_hosted.sql", "002_demo.sql"):
+                db.execute((folder / filename).read_text(encoding="utf-8"))
+            db.execute("INSERT INTO shortlist.workspaces(id,demo_run_id) VALUES (%s,NULL),(%s,'legacy-run')", (fresh, used))
+            db.execute((folder / "003_credit_wallet.sql").read_text(encoding="utf-8"))
+            grants = dict(db.execute("SELECT workspace_id,amount FROM shortlist.credit_entries").fetchall())
+            assert grants == {fresh: 3, used: 0}
+            assert db.execute("SELECT demo_run_id FROM shortlist.workspaces WHERE id=%s", (used,)).fetchone()[0] == "legacy-run"
+    finally:
+        with psycopg.connect(admin, autocommit=True) as db:
+            db.execute(sql.SQL("DROP DATABASE {} WITH (FORCE)").format(sql.Identifier(name)))
