@@ -83,6 +83,20 @@ def test_xlsx_untrusted_strings_are_never_formulas(customer_run):
     assert "evil.example" in " ".join(package["xl/worksheets/sheet1.xml"].itertext())
 
 
+def test_csv_has_one_physical_line_per_company_even_with_multiple_sources_and_notes(customer_run):
+    record = customer_run["records"][0]
+    source = deepcopy(record["research"]["sources"][0])
+    source.update(id="source-two", url="https://example.com/pricing")
+    record["research"]["sources"].append(source)
+    record["review"]["reason"] = "First check\r\nSecond check\rThird check\nFourth check"
+    content = export_run(customer_run, "csv")
+    assert len(content.splitlines()) == 2
+    row = next(csv.DictReader(io.StringIO(content.lstrip("\ufeff"))))
+    assert row["Source links"] == "https://example.com/about; https://example.com/pricing"
+    assert row["Review note"] == "First check; Second check; Third check; Fourth check"
+    assert customer_run["records"][0]["review"]["reason"].count("\n") == 2  # Stored notes stay intact.
+
+
 def test_actual_api_workbook_download_preserves_run_and_review(tmp_path, customer_run):
     from fastapi.testclient import TestClient
 

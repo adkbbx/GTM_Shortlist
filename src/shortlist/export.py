@@ -38,5 +38,9 @@ def export_run(run: dict, format: str, accepted_only: bool = False) -> str | byt
     writer.writerow([*HEADERS, "Run termination"])
     for row in summary:
         cells = [*row, run["checkpoint"].get("termination", "")]
-        writer.writerow(["'" + cell if cell.lstrip().startswith(("=", "+", "-", "@", "\t", "\r")) else cell for cell in cells])
+        cells = ["'" + cell if cell.lstrip().startswith(("=", "+", "-", "@", "\t", "\r")) else cell for cell in cells]
+        # CSV has no row sizing or alignment. Embedded source-link/review-note
+        # newlines make Excel expand whole rows, so use one physical line per company.
+        cells = ["; ".join(cell.replace("\r\n", "\n").replace("\r", "\n").split("\n")) for cell in cells]
+        writer.writerow(cells)
     return "\ufeff" + buffer.getvalue()  # Excel detects UTF-8 names instead of guessing a legacy code page.
