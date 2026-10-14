@@ -56,7 +56,7 @@ jobs:
       - run: pip install -r requirements.lock.txt
       - run: pip install -e . --no-deps
       - run: pytest -q
-      - run: ruff check --isolated src tests scripts
+      - run: ruff check --config pyproject.toml src tests scripts
   ui:
     runs-on: ubuntu-latest
     services:

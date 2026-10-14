@@ -176,3 +176,31 @@ test('optional setup call opens a clean external link; click is not a booked app
   await untracked.close();
   await page.context().unrouteAll({ behavior: 'wait' });
 });
+
+test('reuse offer skips profiling, preserves edits and quotes a separately charged batch', async ({ page }, info) => {
+  await hostedFixture(page);
+  await page.getByLabel('Seller website', { exact: true }).fill('https://eygentic.com/');
+  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await expect(page.getByLabel('Companies in this batch')).toBeVisible({ timeout: 15000 });
+  await page.getByLabel('Companies in this batch').selectOption('1');
+  await page.getByLabel('Exclude from consideration', { exact: false }).fill('Publicly listed companies');
+  await page.getByRole('button', { name: 'Confirm target and discover' }).click();
+  await expect(page.getByRole('heading', { name: '1 company researched' })).toBeVisible({ timeout: 15000 });
+  const firstId = new URL(page.url()).searchParams.get('run');
+  await page.getByRole('button', { name: 'Reuse this offer' }).click();
+  await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible();
+  expect(new URL(page.url()).searchParams.get('run')).not.toBe(firstId);
+  await expect(page.getByLabel('Exclude from consideration', { exact: false })).toHaveValue('Publicly listed companies');
+  await expect(page.getByText(/Copied from your saved offer/)).toBeVisible();
+  await expect(page.getByText('Maximum 2 credits · 2 available')).toBeVisible();
+  await page.getByLabel('Companies in this batch').selectOption('1');
+  await expect(page.getByText('Maximum 1 credit · 2 available')).toBeVisible();
+  await capture(page, `.impeccable/review/${info.project.name}-reused-offer.png`);
+  await page.reload();
+  await expect(page.getByLabel('Exclude from consideration', { exact: false })).toHaveValue('Publicly listed companies');
+  await page.getByLabel('Companies in this batch').selectOption('1');
+  await page.getByRole('button', { name: 'Confirm target and discover' }).click();
+  await expect(page.getByRole('heading', { name: '1 company researched' })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText('1 credit available', { exact: true })).toBeVisible();
+  await expect(page.getByText('1 credit used · 0 reserved · 0 returned')).toBeVisible();
+});

@@ -246,6 +246,60 @@
         }
       }
     },
+    "/api/runs/{run_id}/reuse": {
+      "post": {
+        "summary": "Reuse Offer",
+        "operationId": "reuse_offer_api_runs__run_id__reuse_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReuseInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/runs/{run_id}/booking-click": {
       "post": {
         "summary": "Booking Click",
@@ -1111,6 +1165,22 @@
         ],
         "title": "Research"
       },
+      "ReuseInput": {
+        "properties": {
+          "request_key": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 8,
+            "title": "Request Key"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_key"
+        ],
+        "title": "ReuseInput"
+      },
       "Review-Input": {
         "properties": {
           "decision": {
@@ -1347,6 +1417,18 @@
             "type": "boolean",
             "title": "Legacy Credit Exempt",
             "default": false
+          },
+          "reused_offer": {
+            "type": "boolean",
+            "title": "Reused Offer",
+            "default": false
+          },
+          "draft_exclusions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Draft Exclusions"
           }
         },
         "type": "object",

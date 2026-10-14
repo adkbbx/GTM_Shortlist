@@ -124,6 +124,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/runs/{run_id}/reuse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reuse Offer */
+        post: operations["reuse_offer_api_runs__run_id__reuse_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/runs/{run_id}/booking-click": {
         parameters: {
             query?: never;
@@ -439,6 +456,11 @@ export interface components {
              */
             unknowns: string[];
         };
+        /** ReuseInput */
+        ReuseInput: {
+            /** Request Key */
+            request_key: string;
+        };
         /** Review */
         "Review-Input": {
             /**
@@ -537,6 +559,13 @@ export interface components {
              * @default false
              */
             legacy_credit_exempt: boolean;
+            /**
+             * Reused Offer
+             * @default false
+             */
+            reused_offer: boolean;
+            /** Draft Exclusions */
+            draft_exclusions?: string[];
         };
         /** SavedRecord */
         SavedRecord: {
@@ -833,6 +862,41 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reuse_offer_api_runs__run_id__reuse_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReuseInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"];
+                };
             };
             /** @description Validation Error */
             422: {

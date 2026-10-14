@@ -64,6 +64,11 @@ class BookingInput(BaseModel):
     request_key: str = Field(min_length=8, max_length=100)
 
 
+class ReuseInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    request_key: str = Field(min_length=8, max_length=100)
+
+
 class AttemptView(BaseModel):
     provider: str
     kind: str
@@ -86,6 +91,8 @@ class RunView(BaseModel):
     progress: RunProgress
     credits: RunCredits | None = None
     legacy_credit_exempt: bool = False
+    reused_offer: bool = False
+    draft_exclusions: list[str] = Field(default_factory=list)
 
 
 class Health(BaseModel):
@@ -169,7 +176,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                        status=run["status"], stage=run["stage"], profile=profile, draft=run["checkpoint"].get("draft"),
                        records=run["records"], error=run["error"], created_at=run["created_at"],
                        updated_at=run["updated_at"], attempts=run["attempts"], credits=run.get("credits"),
-                       legacy_credit_exempt=run.get("legacy_credit_exempt", False), progress=RunProgress(
+                       legacy_credit_exempt=run.get("legacy_credit_exempt", False),
+                       reused_offer=run["checkpoint"].get("reused_offer", False),
+                       draft_exclusions=run["checkpoint"].get("draft_exclusions", []), progress=RunProgress(
                            worker_online=store.worker_online(), candidates=len(run["checkpoint"].get("candidates", [])),
                            sources=len({s["id"] for pages in run["checkpoint"].get("sources", {}).values() for s in pages}),
                            companies=len(run["records"]), events=run["events"]))
@@ -214,6 +223,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def delete_run(run_id: str, store: owned):
         store.delete_run(run_id)
         return Response(status_code=204)
+
+    @app.post("/api/runs/{run_id}/reuse", response_model=RunView, status_code=201)
+    def reuse_offer(run_id: str, input: ReuseInput, store: owned):
+        return view(store, store.reuse_draft(run_id, input.request_key))
 
     @app.post("/api/runs/{run_id}/booking-click", status_code=204)
     def booking_click(run_id: str, input: BookingInput, store: owned):

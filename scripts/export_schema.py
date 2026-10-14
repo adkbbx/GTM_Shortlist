@@ -4,7 +4,14 @@ from pathlib import Path
 
 from pydantic import TypeAdapter
 
-from shortlist.api import AuthSetup, Health, RunView, ServiceView, WalletView, create_app
+from shortlist.api import (
+    AuthSetup,
+    Health,
+    RunView,
+    ServiceView,
+    WalletView,
+    create_app,
+)
 
 root = Path(__file__).resolve().parents[1]
 (root / "web/generated").mkdir(parents=True, exist_ok=True)

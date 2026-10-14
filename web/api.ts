@@ -61,6 +61,9 @@ function parseRun(data: unknown): Run {
 }
 
 export const api = {
+  async reuse(id: string, request_key: string) {
+    return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/reuse`, { request_key }));
+  },
   async service() {
     const data = await request('/api/service');
     if (!isService(data)) throw new Error('Setup-call configuration is unavailable.');

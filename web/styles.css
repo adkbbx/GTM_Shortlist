@@ -58,3 +58,6 @@ input:focus,textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px #b450
 .setup-call > div { flex: 1 1 20rem; }
 .setup-call p { max-width: 55ch; color: var(--muted); }
 .setup-call a { flex: 0 1 auto; }
+
+.reuse-offer { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+.reuse-offer > p { flex: 1 1 20rem; }

@@ -303,6 +303,35 @@ class Store:
                        json.dumps({"seller_url": seller_url}), now, now))
             return run_id
 
+    def reuse_draft(self, source_id: str, request_key: str) -> str:
+        digest = hashlib.sha256(("reuse:" + source_id).encode()).hexdigest()
+        with self.connection() as db:
+            self.begin(db)
+            previous = db.execute("SELECT id,payload_hash,deleted_at FROM runs WHERE request_key=?", (request_key,)).fetchone()
+            if previous:
+                if previous["deleted_at"] or previous["payload_hash"] != digest:
+                    raise Conflict("Request key was deleted or used for a different offer")
+                return previous["id"]
+            source = db.execute("SELECT profile,status FROM runs WHERE id=? AND deleted_at IS NULL", (source_id,)).fetchone()
+            if source is None:
+                raise KeyError(source_id)
+            if source["status"] not in ("ready", "partial") or not json.loads(source["profile"]):
+                raise Conflict("Finish a confirmed shortlist before reusing its offer")
+            profile = Profile.model_validate_json(source["profile"])
+            identity = new_id()
+            self.reserve_run(db, identity)  # Balance/one-active-run checks; no automated profiling.
+            checkpoint = {"seller_url": profile.seller_url, "reused_offer": True,
+                          "draft_exclusions": list(profile.exclusions), "draft": {
+                              "offer": profile.offer, "target": profile.target,
+                              "criteria": [item.model_dump(mode="json") for item in profile.criteria], "unknowns": []}}
+            now = utcnow().isoformat()
+            db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,checkpoint,created_at,updated_at) "
+                       "VALUES (?,?,?,?,?,?,?,?,?)", (identity, request_key, digest, "{}", "awaiting_confirmation", "confirmation",
+                                                      json.dumps(checkpoint), now, now))
+            db.execute("INSERT INTO run_events(run_id,phase,label,state,created_at) VALUES (?,?,?,?,?)",
+                       (identity, "confirmation", "Saved offer copied; review before starting a new batch", "waiting", now))
+            return identity
+
     def confirm_draft(self, run_id: str, profile: Profile, company_limit: int = 3):
         with self.connection() as db:
             self.begin(db)

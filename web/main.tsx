@@ -23,7 +23,7 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run; w
   const [offer, setOffer] = useState(run.draft?.offer ?? '');
   const [target, setTarget] = useState(run.draft?.target ?? '');
   const [criteria, setCriteria] = useState<Confirmation['criteria']>(run.draft?.criteria ?? [{ id: 'criterion-1', description: '', required: true }]);
-  const [exclusions, setExclusions] = useState('');
+  const [exclusions, setExclusions] = useState((run.draft_exclusions ?? []).join('\n'));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [companyLimit, setCompanyLimit] = useState(3);
@@ -49,6 +49,7 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run; w
   return <section className="sheet confirmation" aria-labelledby="confirm-heading">
     <div className="sheet-heading"><h2 id="confirm-heading">Confirm what a good fit means</h2><span className="step-label">Your target</span></div>
     <p className="intro">Edit the offer and criteria before discovery. This version stays attached to the research it produces.</p>
+    {run.reused_offer && <p className="notice">Copied from your saved offer. Review it and choose the maximum cost before starting. New research may return companies from earlier batches.</p>}
     {run.error && <div className="notice" role="status">{run.error}</div>}
     <p className="website">Seller website <a href={run.seller_url} target="_blank" rel="noopener noreferrer">{run.seller_url}</a></p>
     {['eygentic.com', 'www.eygentic.com'].includes(new URL(run.seller_url).hostname) && <button type="button" className="text-button" onClick={useEygentic}>Use the agreed Eygentic brief</button>}
@@ -130,6 +131,18 @@ function CompanySheet({ record, run, onSaved }: { record: Record; run: Run; onSa
       {error && <p role="alert" className="notice">{error}</p>}
     </section>
   </article>;
+}
+
+function ReuseOffer({ run, onSaved }: { run: Run; onSaved: (run: Run) => void }) {
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const requestKey = useRef(crypto.randomUUID());
+  const reuse = async () => {
+    setSaving(true); setError('');
+    try { onSaved(await api.reuse(run.id, requestKey.current)); }
+    catch (reason) { setError(describeError(reason)); setSaving(false); }
+  };
+  return <div className="reuse-offer"><button className="secondary" disabled={saving} onClick={() => void reuse()}>{saving ? 'Copying offer…' : 'Reuse this offer'}<Arrow /></button><p className="hint">Skip website profiling. Review the target and batch cost before new research starts.</p>{error && <p className="notice" role="alert">{error}</p>}</div>;
 }
 
 function DeleteResearch({ run, onDeleted }: { run: Run; onDeleted: () => void }) {
@@ -233,6 +246,7 @@ function App({ account }: { account: ReactNode }) {
       {results && <><div className="results-toolbar"><div><h2>{active.records.length} {active.records.length === 1 ? 'company' : 'companies'} researched</h2><p>{active.status === 'partial' ? 'Some questions remain open. Review the unknowns before using these records.' : 'Model assessments are ready for your review.'}</p></div>{!!active.records.length && <div className="export-controls"><label className="checkbox-label"><input type="checkbox" checked={acceptedOnly} onChange={e => setAcceptedOnly(e.target.checked)} />Accepted only</label><div className="export-links">{(['csv', 'json'] as const).map(format => <a className="secondary button-link" key={format} href={`/api/runs/${active.id}/export?format=${format}&accepted_only=${acceptedOnly}`} onClick={event => { event.preventDefault(); void api.download(active.id, format, acceptedOnly).catch(reason => setError(describeError(reason))); }}>Export {format.toUpperCase()}</a>)}</div></div>}</div>
         {active.error && <p className="notice" role="status">{active.error}</p>}
         {active.profile && <details className="target-summary"><summary>Confirmed target and offer</summary><p>{active.profile.offer}</p><p>{active.profile.target}</p>{!!active.profile.exclusions.length && <p>Exclusions: {active.profile.exclusions.join('; ')}</p>}<p className="hint">Confirmed {date(active.profile.confirmed_at)}. Start a new run to change this target.</p></details>}
+        {active.profile && <ReuseOffer key={active.id} run={active} onSaved={run => { saved(run); select(run); }} />}
         {active.records.length ? active.records.map(record => <CompanySheet key={record.research.id} record={record} run={active} onSaved={saved} />) : <section className="sheet"><h3>No company records yet</h3><p>The run stopped before usable research could be saved. Your confirmed target is preserved.</p><button className="secondary" onClick={() => select(null)}>Start another shortlist</button></section>}
       </>}
       {results && active.profile && active.records.length > 0 && service?.booking_url && <section className="setup-call" aria-labelledby="setup-heading"><div><h2 id="setup-heading">Discuss your shortlist</h2><p>Get help with your target, evidence and next steps. The setup call is optional.</p></div><a className="secondary button-link" href={service.booking_url} target="_blank" rel="noopener noreferrer" onClick={() => { if (navigator.doNotTrack !== '1') void api.bookingClick(active.id).catch(() => undefined); }}>Book an optional setup call<Arrow /></a></section>}

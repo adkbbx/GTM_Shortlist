@@ -601,6 +601,7 @@ def test_research_deletion_preserves_wallet_and_other_workspace_cache(owners):
         assert db.execute("SELECT count(*) FROM booking_clicks").fetchone()[0] == 1
     with b.connection() as db:
         assert db.execute("SELECT count(*) FROM booking_clicks").fetchone()[0] == 0
+
     with pytest.raises(KeyError):
         b.booking_click(identity, "foreign-click")
     other = b.create_run(profile, "unrelated-research")
@@ -625,3 +626,38 @@ def test_research_deletion_preserves_wallet_and_other_workspace_cache(owners):
         assert db.execute("SELECT count(*) FROM source_cache").fetchone()[0] == 0
         assert db.execute("SELECT count(*) FROM credit_entries").fetchone()[0] == 2
         assert db.execute("SELECT count(*) FROM booking_clicks").fetchone()[0] == 0
+
+
+def test_offer_reuse_bypasses_only_profiling_not_credits_or_workspace_scope(owners):
+    a, b, worker, profile = owners
+    original = a.create_run(profile, "reuse-origin")
+    scoped = PostgresStore(worker, a.workspace_id, worker=True)
+    scoped.checkpoint(original, scoped.claim(original), "complete", {}, "partial")
+    with a.connection() as db:
+        db.execute("UPDATE workspaces SET free_profiles=3 WHERE id=?", (a.workspace_id,))
+    with pytest.raises(BudgetExceeded):
+        a.create_draft(profile.seller_url, "no-more-automated-profiling")
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        identities = list(pool.map(lambda _: a.reuse_draft(original, "same-reuse"), range(6)))
+    assert len(set(identities)) == 1
+    identity = identities[0]
+    assert a.get_run(identity)["attempts"] == []
+    assert a.get_run(identity)["status"] == "awaiting_confirmation"
+    assert CreditWallet(a).balance().model_dump() == {"available": 3, "reserved": 0, "used": 0}
+    with pytest.raises(KeyError):
+        b.reuse_draft(original, "foreign-reuse")
+    with pytest.raises(BudgetExceeded):
+        a.reuse_draft(original, "another-active-draft")
+    a.confirm_draft(identity, profile, 1)
+    assert CreditWallet(a).balance().reserved == 1
+    assert a.get_run(identity)["credits"]["maximum"] == 1
+    scoped.checkpoint(identity, scoped.claim(identity), "complete", {}, "ready")
+    with a.connection() as db:
+        assert db.execute("SELECT free_profiles FROM workspaces WHERE id=?", (a.workspace_id,)).fetchone()[0] == 3
+    scoped_wallet = CreditWallet(scoped)
+    exhausted = a.create_run(profile, "exhaust-credit-fixture")
+    for domain in ("one.example", "two.example", "three.example"):
+        scoped_wallet.consume(exhausted, domain)
+    scoped.checkpoint(exhausted, scoped.claim(exhausted), "complete", {}, "ready")
+    with pytest.raises(BudgetExceeded):
+        a.reuse_draft(original, "no-free-research")

@@ -839,6 +839,18 @@
       "default": false,
       "title": "Legacy Credit Exempt",
       "type": "boolean"
+    },
+    "reused_offer": {
+      "default": false,
+      "title": "Reused Offer",
+      "type": "boolean"
+    },
+    "draft_exclusions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Draft Exclusions",
+      "type": "array"
     }
   },
   "required": [
