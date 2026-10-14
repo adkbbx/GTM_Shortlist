@@ -113,9 +113,13 @@ test('local masked Tavily setup saves privately, recovers and clears browser inp
   expect(response.status()).toBe(200);
   await expect(page.getByRole('alert')).toHaveCount(0);
   expect(await response.text()).not.toContain(key);
-  await expect(keyInput).toHaveValue('');
+  await expect(keyInput).toHaveCount(0);
   const saved = page.getByRole('status').filter({ hasText: 'Tavily key saved' });
   await expect(saved).toBeFocused();
+  const update = page.getByRole('button', { name: 'Update search key', exact: true });
+  await expect(update).toHaveAttribute('aria-expanded', 'false');
+  await page.getByRole('button', { name: 'Continue to your website' }).press('Enter');
+  await expect(page.getByLabel('Seller website', { exact: true })).toBeFocused();
   expect(await page.evaluate(() => JSON.stringify([localStorage, sessionStorage]))).not.toContain(key);
   expect(await page.locator('body').textContent()).not.toContain(key);
   await noOverflow(page);
@@ -124,13 +128,14 @@ test('local masked Tavily setup saves privately, recovers and clears browser inp
   await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
   await noOverflow(page);
   await capture(page, `.impeccable/review/${info.project.name}-tavily-large-text.png`);
-  await page.getByRole('button', { name: 'Close setup' }).press('Enter');
-  await expect(trigger).toBeFocused();
-  await trigger.press('Enter');
+  await update.press('Enter');
   await expect(keyInput).toHaveValue('');
+  await page.getByRole('button', { name: 'Close setup' }).press('Enter');
+  await expect(update).toBeFocused();
   await page.reload();
-  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
-  await trigger.click();
+  await expect(update).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByRole('status').filter({ hasText: 'Search key saved' })).toBeVisible();
+  await update.click();
   await expect(keyInput).toHaveValue('');
 });
 

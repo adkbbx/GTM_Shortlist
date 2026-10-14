@@ -5,7 +5,7 @@ import type { Health } from './api';
 
 type SaveState = { kind: 'idle' } | { kind: 'saving' } | { kind: 'saved' } | { kind: 'error'; message: string };
 
-export function LocalSearchSetup({ onSaved }: { onSaved: (health: Health) => void }) {
+export function LocalSearchSetup({ ready, onSaved, onContinue }: { ready: boolean; onSaved: (health: Health) => void; onContinue?: () => void }) {
   const [open, setOpen] = useState(false);
   const [key, setKey] = useState('');
   const [state, setState] = useState<SaveState>({ kind: 'idle' });
@@ -17,11 +17,15 @@ export function LocalSearchSetup({ onSaved }: { onSaved: (health: Health) => voi
     event.preventDefault(); setState({ kind: 'saving' });
     try {
       const health = await api.configureTavily(key.trim());
-      setKey(''); setState({ kind: 'saved' }); onSaved(health);
+      setKey(''); setOpen(false); setState({ kind: 'saved' }); onSaved(health);
     } catch (error) { setState({ kind: 'error', message: error instanceof Error ? error.message : 'Search setup could not be saved. Please try again.' }); }
   };
   return <section className="local-search-setup" aria-label="Local search setup">
-    <button className="text-button" ref={trigger} aria-expanded={open} aria-controls="local-search-form" disabled={state.kind === 'saving'} onClick={() => open ? close() : setOpen(true)}>Connect Tavily</button>
+    {!open && (ready || state.kind === 'saved') && <div className="search-setup-summary">
+      <p ref={status} tabIndex={-1} role="status">{state.kind === 'saved' ? 'Tavily key saved.' : 'Search key saved.'}<span className="hint">{onContinue ? 'Enter your company website to continue.' : 'Your next confirmed run will use the saved key.'}</span></p>
+      {onContinue && <button className="secondary" onClick={onContinue}>Continue to your website</button>}
+    </div>}
+    <button className="text-button" ref={trigger} aria-expanded={open} aria-controls="local-search-form" disabled={state.kind === 'saving'} onClick={() => open ? close() : setOpen(true)}>{ready ? 'Update search key' : 'Connect Tavily'}</button>
     {open && <div id="local-search-form">
       <h2>Connect your search provider</h2>
       <p>Paste your Tavily API key here. It stays in this computer’s research workspace and is never included in research exports.</p>
@@ -31,7 +35,6 @@ export function LocalSearchSetup({ onSaved }: { onSaved: (health: Health) => voi
         <p className="hint">Saving makes no search request. Your next confirmed run uses this key; requests already underway keep their current settings.</p>
         <div className="review-actions"><button disabled={state.kind === 'saving'} type="submit">{state.kind === 'saving' ? 'Saving key…' : 'Save search key'}</button><button className="secondary" type="button" disabled={state.kind === 'saving'} onClick={close}>Close setup</button></div>
       </form>
-      {state.kind === 'saved' && <p ref={status} tabIndex={-1} role="status">Tavily key saved. Its validity will be checked on your next confirmed search.</p>}
       {state.kind === 'error' && <p className="notice" role="alert">{state.message}</p>}
     </div>}
   </section>;
