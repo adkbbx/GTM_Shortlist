@@ -1,8 +1,11 @@
 {
   "properties": {
     "mode": {
-      "const": "local",
       "default": "local",
+      "enum": [
+        "local",
+        "hosted"
+      ],
       "title": "Mode",
       "type": "string"
     },

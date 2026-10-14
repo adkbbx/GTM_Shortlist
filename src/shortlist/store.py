@@ -90,6 +90,9 @@ class Store:
     def begin(self, db):
         db.execute("BEGIN IMMEDIATE")
 
+    def reserve_run(self, db, run_id: str):
+        """Local operators have no demo restriction; hosted storage owns its grant."""
+
     def event(self, run_id: str, fence: int, update: ProgressUpdate):
         with self.connection() as db:
             self.begin(db)
@@ -164,6 +167,7 @@ class Store:
                     raise Conflict("Request key was already used for different inputs")
                 return existing["id"]
             run_id = new_id()
+            self.reserve_run(db, run_id)
             now = utcnow().isoformat()
             db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,created_at,updated_at) "
                        "VALUES (?,?,?,?,?,?,?,?)", (run_id, request_key, digest, profile.model_dump_json(),
@@ -213,6 +217,7 @@ class Store:
                     raise Conflict("Request key was already used for a different website")
                 return row["id"]
             run_id = new_id()
+            self.reserve_run(db, run_id)
             now = utcnow().isoformat()
             db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,checkpoint,created_at,updated_at) "
                        "VALUES (?,?,?,?,?,?,?,?,?)", (run_id, request_key, digest, "{}", "queued", "seller",

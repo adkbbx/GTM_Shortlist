@@ -36,6 +36,11 @@ def main():
     if args.command == "config":
         print(json.dumps({"db": str(settings.db_path), "providers": settings.readiness()}))
         return
+    if args.command == "worker":
+        work(settings, args.once)
+        return
+    if settings.mode == "hosted":
+        parser.error("Hosted research commands require verified API access; launch API and worker separately")
     store = Store(settings.db_path)
     if args.command == "run":
         profile = Profile.model_validate_json(args.profile.read_text(encoding="utf-8"))
@@ -44,8 +49,6 @@ def main():
         execute_run(store, settings, run_id, search=CapturedSearch(args.search_capture) if args.search_capture else None)
     elif args.command == "resume":
         execute_run(store, settings, args.run_id)
-    elif args.command == "worker":
-        work(settings, args.once)
     elif args.command == "serve":
         serve(settings, args.port)
     elif args.command == "show":

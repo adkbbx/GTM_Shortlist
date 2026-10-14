@@ -6,12 +6,16 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from uuid import uuid4
 
+import httpx
 import psycopg
 import pytest
+from fastapi.testclient import TestClient
 from psycopg import sql
 from psycopg.conninfo import conninfo_to_dict, make_conninfo
 from pydantic import SecretStr
 
+from shortlist.api import create_app
+from shortlist.auth import verify_user
 from shortlist.config import Settings
 from shortlist.domain import Candidate, Criterion, Profile, Review, Source
 from shortlist.export import export_run
@@ -201,3 +205,93 @@ def test_result_replay_and_stale_fences_preserve_budget(owners):
     assert replacement > fence
     with pytest.raises(Conflict):
         a.checkpoint(run_id, fence, "research", {})
+
+
+def test_demo_grant_is_atomic_and_idempotent(owners):
+    a, _, _, _ = owners
+
+    def start(index):
+        try:
+            return a.create_draft("https://seller.example/", "demo-" + str(index))
+        except BudgetExceeded:
+            return None
+
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        ids = list(pool.map(start, range(6)))
+    assert sum(identity is not None for identity in ids) == 1
+    winner = next(index for index, identity in enumerate(ids) if identity)
+    assert a.create_draft("https://seller.example/", "demo-" + str(winner)) == ids[winner]
+    assert len(a.list_runs()) == 1
+    with a.connection() as db:
+        db.execute("DELETE FROM runs WHERE id=?", (ids[winner],))
+    with pytest.raises(BudgetExceeded):
+        a.create_draft("https://seller.example/", "after-deletion")
+
+
+def test_hosted_api_verifies_identity_and_scopes_every_route(owners, monkeypatch):
+    a, b, worker, _ = owners
+    settings = Settings(mode="hosted", database_url=a.dsn, worker_database_url=worker,
+                        supabase_url="https://auth.example", supabase_publishable_key="sb_publishable_fixture",
+                        app_url="https://app.example")
+
+    def endpoint(request):
+        token = request.headers["authorization"]
+        if token not in ("Bearer owner-a", "Bearer owner-b"):
+            return httpx.Response(401)
+        identity = a.workspace_id if token == "Bearer owner-a" else b.workspace_id
+        return httpx.Response(200, json={"id": str(identity), "role": "authenticated",
+                                        "email_confirmed_at": "2026-10-14T00:00:00Z"})
+
+    monkeypatch.setattr("shortlist.api.verify_user", lambda configuration, token: verify_user(
+        configuration, token, transport=httpx.MockTransport(endpoint)))
+    client = TestClient(create_app(settings), base_url="https://app.example")
+    first_headers = {"Authorization": "Bearer owner-a"}
+    second_headers = {"Authorization": "Bearer owner-b"}
+    assert client.get("/api/runs").status_code == 401
+    assert client.get("/api/runs", headers={"Authorization": "Bearer invalid"}).status_code == 401
+    assert client.get("/api/runs", headers={**first_headers, "Host": "attacker.example"}).status_code == 400
+    assert client.post("/api/sellers", headers={**first_headers, "Origin": "https://attacker.example"}, json={}).status_code == 403
+    body = {"seller_url": "https://seller.example/", "request_key": "same-tenant-key"}
+    first = client.post("/api/sellers", headers=first_headers, json=body)
+    second = client.post("/api/sellers", headers=second_headers, json=body)
+    assert first.status_code == second.status_code == 201
+    first_id, second_id = first.json()["id"], second.json()["id"]
+    assert first_id != second_id
+    assert client.post("/api/sellers", headers=first_headers, json=body).json()["id"] == first_id
+    assert client.post("/api/sellers", headers=first_headers, json={**body, "request_key": "another-run"}).status_code == 403
+    assert {r["id"] for r in client.get("/api/runs", headers=first_headers).json()} == {first_id}
+    for route in (f"/api/runs/{first_id}", f"/api/runs/{first_id}/export"):
+        assert client.get(route, headers=second_headers).status_code == 404
+    assert client.post(f"/api/runs/{first_id}/confirm", headers=second_headers,
+                       json={"offer": "Labelled offer", "target": "AI software",
+                             "criteria": [{"id": "ai", "description": "AI software"}]}).status_code == 404
+    assert client.post(f"/api/runs/{first_id}/records/invented/review", headers=second_headers,
+                       json={"decision": "accepted"}).status_code == 404
+    scheduler = PostgresStore(worker, None, worker=True)
+    scoped = scheduler.for_run(first_id)
+    assert scoped.workspace_id == a.workspace_id
+    assert scoped.get_run(first_id)["workspace_id"] == a.workspace_id
+
+
+def test_hosted_worker_loop_selects_workspace_for_each_run(owners, monkeypatch):
+    a, b, worker, _ = owners
+    first = a.create_draft("https://first.example/", "hosted-worker-a")
+    second = b.create_draft("https://second.example/", "hosted-worker-b")
+    settings = Settings(mode="hosted", database_url=a.dsn, worker_database_url=worker,
+                        supabase_url="https://auth.example", supabase_publishable_key="sb_publishable_fixture",
+                        app_url="https://app.example")
+    processed = {}
+
+    def execute(store, configuration, run_id):
+        # Use actual DB writes through the selected worker's default workspace.
+        if run_id in (first, second):
+            processed[run_id] = store.workspace_id
+            fence = store.claim(run_id)
+            store.checkpoint(run_id, fence, "confirmation", {"seller_url": "https://fixture.example/"},
+                             status="awaiting_confirmation")
+
+    monkeypatch.setattr("shortlist.worker.execute_run", execute)
+    from shortlist.worker import work
+    work(settings, once=True)
+    assert processed == {first: a.workspace_id, second: b.workspace_id}
+    assert a.get_run(first)["status"] == b.get_run(second)["status"] == "awaiting_confirmation"

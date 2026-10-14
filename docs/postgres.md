@@ -1,6 +1,6 @@
 # PostgreSQL foundation
 
-The adapter and migrations are implemented and tested against PostgreSQL 18.6. The public API and worker still use local SQLite; hosted account wiring is the next step. This is not a deployed hosted service.
+The adapter, migrations, verified-user API access and hosted worker selection are implemented and tested against PostgreSQL 18.6. The existing local service remains in SQLite mode. Hosted browser signup/login and actual Supabase accounts remain unfinished; this is not a deployed hosted service.
 
 Install the `hosted` extra or use the pinned repository requirements. Apply migrations with a dedicated operator credential:
 
@@ -26,4 +26,23 @@ pytest -q tests/test_postgres.py
 
 The fixture creates a uniquely named database, applies migrations twice, provisions restricted test login roles, and drops only the database it created. Use a disposable cluster: the login roles remain after tests. CI runs this module against its PostgreSQL service. Without the environment variable, the module explicitly skips; skipped checks do not establish database compatibility.
 
-The six checks cover two synthetic workspaces, cross-workspace read/write rejection, role escalation rejection, operator credential rejection, concurrent claims and shared quota reservations, worker research/review/export with labelled providers, isolated source caching, saved progress events, replay without duplicate dispatch and stale lease fencing. They do not prove actual Supabase account signup, SMTP, hosted deployment or PostgreSQL process-death recovery. Those remain release checks.
+Database checks cover two synthetic workspaces, cross-workspace read/write rejection, role escalation rejection, operator credential rejection, concurrent claims and shared quota reservations, worker research/review/export with labelled providers, isolated source caching, saved progress events, replay without duplicate dispatch and stale lease fencing. They also exercise verified-user API scoping, worker-loop workspace selection and concurrent one-demo grants. Supabase responses are explicitly stubbed in these tests. They do not prove actual Supabase account signup, SMTP, hosted deployment or PostgreSQL process-death recovery. Those remain release checks.
+
+## Hosted runtime configuration
+
+Keep `SHORTLIST_MODE=local` for the existing trusted loopback service. To exercise the hosted API after provisioning the database and credentials, set these server environment variables:
+
+| Variable | Value |
+| --- | --- |
+| `SHORTLIST_MODE` | `hosted` |
+| `SHORTLIST_DATABASE_URL` | Restricted API login's PostgreSQL connection string |
+| `SHORTLIST_WORKER_DATABASE_URL` | Separate restricted worker login's connection string |
+| `SUPABASE_URL` | Your Supabase project's HTTPS origin |
+| `SUPABASE_PUBLISHABLE_KEY` | Your project's public publishable key |
+| `SHORTLIST_APP_URL` | Your app's HTTPS origin |
+
+Launch the API with `uvicorn shortlist.api:app` behind the HTTPS ingress and the durable worker separately with `shortlist worker`. The local `shortlist serve` and direct research CLI commands reject hosted mode. Do not deploy this configuration publicly until the remaining release checks pass.
+
+Protected research routes require `Authorization: Bearer <user-access-token>`. The API calls the configured Supabase `/auth/v1/user` endpoint over verified HTTPS for each request. It never trusts caller-selected workspace IDs or decoded JWT claims. Supabase verifies the token; the API requires a confirmed, non-anonymous, non-deleted, non-banned authenticated user and derives the personal workspace UUID from that user's ID. Auth errors return 401; unavailable/malformed provider responses return 503 without authorizing access. Requests use bounded response size, no redirects and a five-second transport timeout. No service-role key is required for verification.
+
+Each personal workspace receives one demo run. The grant and run insertion are one locked transaction. Retrying the same request key returns the original run; different keys cannot reserve a second grant. Deleting run rows does not reset the grant. Complete account deletion, retention and paid entitlements remain separate unfinished features. The public health route reports hosted worker availability as false before authentication; the authenticated run progress contains the actual shared worker heartbeat.

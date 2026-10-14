@@ -66,6 +66,21 @@ class PostgresStore(Store):
             self.begin(db)
             db.execute("INSERT INTO workspaces(id) VALUES (?) ON CONFLICT(id) DO NOTHING", (self.workspace_id,))
 
+    def for_run(self, run_id: str):
+        if not self.worker:
+            raise ValueError("Only the worker can select a run workspace")
+        with self.connection() as db:
+            row = db.execute("SELECT workspace_id FROM runs WHERE id=?", (run_id,)).fetchone()
+            if row is None:
+                raise KeyError(run_id)
+        return PostgresStore(self.dsn, row["workspace_id"], worker=True)
+
+    def reserve_run(self, db, run_id: str):
+        granted = db.execute("UPDATE workspaces SET demo_run_id=? WHERE id=? AND demo_run_id IS NULL RETURNING id",
+                             (run_id, self.workspace_id)).fetchone()
+        if granted is None:
+            raise BudgetExceeded("Your demo run has already been used. Open your saved research to continue")
+
     def reserve_global_search(self, db, provider: str, month: str, cap: int):
         if not db.execute("SELECT reserve_search_quota(?,?,?)", (provider, month, cap)).fetchone()[0]:
             raise BudgetExceeded("Global monthly search cap reached")

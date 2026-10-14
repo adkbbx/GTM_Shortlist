@@ -1,8 +1,10 @@
 import os
 from pathlib import Path
+from typing import Literal
+from urllib.parse import urlsplit
 
 from dotenv import load_dotenv
-from pydantic import BaseModel, ConfigDict, Field, SecretStr
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, model_validator
 
 
 class Settings(BaseModel):
@@ -16,6 +18,24 @@ class Settings(BaseModel):
     gemma_model: str = ""
     global_search_cap: int = Field(default=200, ge=1, le=250)
     source_cache_hours: int = Field(default=24, ge=0, le=168)
+    mode: Literal["local", "hosted"] = "local"
+    database_url: SecretStr = SecretStr("")
+    worker_database_url: SecretStr = SecretStr("")
+    supabase_url: str = ""
+    supabase_publishable_key: str = ""
+    app_url: str = ""
+
+    @model_validator(mode="after")
+    def hosted_configuration(self):
+        if self.mode == "hosted":
+            for value in (self.supabase_url, self.app_url):
+                parsed = urlsplit(value)
+                if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password or \
+                        parsed.port not in (None, 443) or parsed.path not in ("", "/") or parsed.query or parsed.fragment:
+                    raise ValueError("Hosted auth and app URLs must be HTTPS origins")
+            if not self.database_url.get_secret_value() or not self.supabase_publishable_key:
+                raise ValueError("Hosted mode requires database and Supabase public configuration")
+        return self
 
     @classmethod
     def load(cls):
@@ -30,6 +50,12 @@ class Settings(BaseModel):
             gemma_model=os.getenv("GEMMA_MODEL", ""),
             global_search_cap=os.getenv("SHORTLIST_GLOBAL_SEARCH_CAP", "200"),
             source_cache_hours=os.getenv("SHORTLIST_SOURCE_CACHE_HOURS", "24"),
+            mode=os.getenv("SHORTLIST_MODE", "local"),
+            database_url=os.getenv("SHORTLIST_DATABASE_URL", ""),
+            worker_database_url=os.getenv("SHORTLIST_WORKER_DATABASE_URL", ""),
+            supabase_url=os.getenv("SUPABASE_URL", ""),
+            supabase_publishable_key=os.getenv("SUPABASE_PUBLISHABLE_KEY", ""),
+            app_url=os.getenv("SHORTLIST_APP_URL", ""),
         )
 
     def readiness(self):

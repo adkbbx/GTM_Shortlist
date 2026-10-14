@@ -51,7 +51,7 @@ The research view shows persisted, timestamped checkpoints, actual saved page/co
 
 The local SQLite app is for one trusted operator and must bind to loopback. Do not expose it publicly. Postgres workspace isolation, verified signup, shared demo grants, external SMTP and actual deployment tests are required before hosted release.
 
-The [Postgres foundation](docs/postgres.md) documents tested migrations and runtime roles. Hosted API/account wiring remains unfinished.
+The [Postgres setup](docs/postgres.md) documents tested migrations, runtime roles, verified-user API access and hosted worker configuration. Hosted browser signup/login and actual account/deployment validation remain unfinished.
 
 No automated outreach, personal contact database, CRM integration or Experiment Judge. Proposed managed-service pricing is an unvalidated $99 reviewed pilot, with a $49 subscription considered only after repeat demand.
 

@@ -236,7 +236,13 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
 
 
 def work(settings: Settings, once: bool = False):
-    store = Store(settings.db_path)
+    if settings.mode == "hosted":
+        from shortlist.postgres import PostgresStore
+        if not settings.worker_database_url.get_secret_value():
+            raise ValueError("Hosted worker requires its separate database credential")
+        store = PostgresStore(settings.worker_database_url, None, worker=True)
+    else:
+        store = Store(settings.db_path)
     worker_id = new_id()
     stopped = Event()
     store.worker_heartbeat(worker_id)
@@ -250,7 +256,7 @@ def work(settings: Settings, once: bool = False):
     try:
         while True:
             for run_id in store.pending_runs():
-                execute_run(store, settings, run_id)
+                execute_run(store.for_run(run_id) if settings.mode == "hosted" else store, settings, run_id)
             if once:
                 return
             stopped.wait(2)

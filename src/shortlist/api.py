@@ -1,20 +1,23 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
+from urllib.parse import urlsplit
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.responses import JSONResponse, Response
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
+from shortlist.auth import AuthenticationError, AuthUnavailable, verify_user
 from shortlist.config import Settings
 from shortlist.domain import Profile, Research, Review, Target
 from shortlist.export import export_run
 from shortlist.fetch import canonical_url
 from shortlist.progress import RunProgress
 from shortlist.providers import SellerDraft
-from shortlist.store import Conflict, Store
+from shortlist.store import BudgetExceeded, Conflict, Store
 
 
 class SellerInput(BaseModel):
@@ -60,7 +63,7 @@ class RunView(BaseModel):
 
 
 class Health(BaseModel):
-    mode: Literal["local"] = "local"
+    mode: Literal["local", "hosted"] = "local"
     search_ready: bool
     gemma_ready: bool
     worker_online: bool
@@ -68,15 +71,30 @@ class Health(BaseModel):
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings.load()
-    store = Store(settings.db_path)
-    app = FastAPI(title="GTM Shortlist local core", version="0.1.0")
-    # Local-only until hosted identity and isolation are implemented.
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1", "testserver"])
+    local_store = Store(settings.db_path) if settings.mode == "local" else None
+    app = FastAPI(title="GTM Shortlist", version="0.1.0")
+    hosts = ["localhost", "127.0.0.1", "testserver"] if settings.mode == "local" else [urlsplit(settings.app_url).hostname]
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=hosts)
+    bearer = HTTPBearer(auto_error=False)
+
+    def owned_store(credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)]) -> Store:
+        if local_store is not None:
+            return local_store
+        if credentials is None:
+            raise AuthenticationError("Sign in to access your research")
+        user = verify_user(settings, credentials.credentials)
+        from shortlist.postgres import PostgresStore
+        store = PostgresStore(settings.database_url, user.id)
+        store.ensure_workspace()
+        return store
+
+    owned = Annotated[Store, Depends(owned_store)]
 
     @app.middleware("http")
     async def local_origin(request: Request, call_next):
         origin = request.headers.get("origin")
-        if origin and origin != str(request.base_url).rstrip("/"):
+        expected_origin = settings.app_url.rstrip("/") if settings.mode == "hosted" else str(request.base_url).rstrip("/")
+        if origin and origin != expected_origin:
             return JSONResponse({"detail": "Cross-origin access is not permitted"}, status_code=403)
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
@@ -92,7 +110,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def conflict(request, exc):
         return JSONResponse({"detail": str(exc)}, status_code=409)
 
-    def view(run_id: str) -> RunView:
+    @app.exception_handler(AuthenticationError)
+    async def unauthorized(request, exc):
+        return JSONResponse({"detail": str(exc)}, status_code=401, headers={"WWW-Authenticate": "Bearer"})
+
+    @app.exception_handler(AuthUnavailable)
+    async def auth_unavailable(request, exc):
+        return JSONResponse({"detail": str(exc)}, status_code=503)
+
+    @app.exception_handler(BudgetExceeded)
+    async def allowance_exhausted(request, exc):
+        return JSONResponse({"detail": str(exc)}, status_code=403)
+
+    def view(store: Store, run_id: str) -> RunView:
         run = store.get_run(run_id)
         profile = Profile.model_validate(run["profile"]) if run["profile"] else None
         return RunView(id=run_id, seller_url=profile.seller_url if profile else run["checkpoint"]["seller_url"],
@@ -106,35 +136,36 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/api/health", response_model=Health)
     def health():
         readiness = settings.readiness()
-        return Health(search_ready=readiness["search"], gemma_ready=readiness["gemma"], worker_online=store.worker_online())
+        return Health(mode=settings.mode, search_ready=readiness["search"], gemma_ready=readiness["gemma"],
+                      worker_online=local_store.worker_online() if local_store else False)
 
     @app.get("/api/runs", response_model=list[RunView])
-    def runs():
-        return [view(run["id"]) for run in store.list_runs()]
+    def runs(store: owned):
+        return [view(store, run["id"]) for run in store.list_runs()]
 
     @app.post("/api/sellers", response_model=RunView, status_code=201)
-    def seller(input: SellerInput):
-        return view(store.create_draft(input.seller_url, input.request_key))
+    def seller(input: SellerInput, store: owned):
+        return view(store, store.create_draft(input.seller_url, input.request_key))
 
     @app.get("/api/runs/{run_id}", response_model=RunView)
-    def read_run(run_id: str):
-        return view(run_id)
+    def read_run(run_id: str, store: owned):
+        return view(store, run_id)
 
     @app.post("/api/runs/{run_id}/confirm", response_model=RunView)
-    def confirm(run_id: str, input: Confirmation):
+    def confirm(run_id: str, input: Confirmation, store: owned):
         run = store.get_run(run_id)
         seller_url = run["profile"].get("seller_url") or run["checkpoint"]["seller_url"]
         profile = Profile(seller_url=seller_url, **input.model_dump())
         store.confirm_draft(run_id, profile)
-        return view(run_id)
+        return view(store, run_id)
 
     @app.post("/api/runs/{run_id}/records/{record_id}/review", response_model=RunView)
-    def review(run_id: str, record_id: str, input: Review):
+    def review(run_id: str, record_id: str, input: Review, store: owned):
         store.review(run_id, record_id, input)
-        return view(run_id)
+        return view(store, run_id)
 
     @app.get("/api/runs/{run_id}/export")
-    def export(run_id: str, format: Literal["json", "csv"] = "json", accepted_only: bool = False):
+    def export(run_id: str, store: owned, format: Literal["json", "csv"] = "json", accepted_only: bool = False):
         content = export_run(store.get_run(run_id), format, accepted_only)
         return Response(content, media_type="application/json" if format == "json" else "text/csv",
                         headers={"Content-Disposition": f'attachment; filename="shortlist-{run_id}.{format}"'})

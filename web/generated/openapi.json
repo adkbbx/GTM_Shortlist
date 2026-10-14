@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "GTM Shortlist local core",
+    "title": "GTM Shortlist",
     "version": "0.1.0"
   },
   "paths": {
@@ -42,7 +42,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/api/sellers": {
@@ -80,13 +85,23 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/api/runs/{run_id}": {
       "get": {
         "summary": "Read Run",
         "operationId": "read_run_api_runs__run_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "run_id",
@@ -126,6 +141,11 @@
       "post": {
         "summary": "Confirm",
         "operationId": "confirm_api_runs__run_id__confirm_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "run_id",
@@ -175,6 +195,11 @@
       "post": {
         "summary": "Review",
         "operationId": "review_api_runs__run_id__records__record_id__review_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "run_id",
@@ -233,6 +258,11 @@
       "get": {
         "summary": "Export",
         "operationId": "export_api_runs__run_id__export_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
             "name": "run_id",
@@ -529,7 +559,10 @@
         "properties": {
           "mode": {
             "type": "string",
-            "const": "local",
+            "enum": [
+              "local",
+              "hosted"
+            ],
             "title": "Mode",
             "default": "local"
           },
@@ -1280,6 +1313,12 @@
           "type"
         ],
         "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }

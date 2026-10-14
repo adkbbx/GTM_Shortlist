@@ -222,9 +222,9 @@ export interface components {
             /**
              * Mode
              * @default local
-             * @constant
+             * @enum {string}
              */
-            mode: "local";
+            mode: "local" | "hosted";
             /** Search Ready */
             search_ready: boolean;
             /** Gemma Ready */
