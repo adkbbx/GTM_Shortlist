@@ -11,6 +11,7 @@ async function noOverflow(page: Page) {
 }
 
 async function capture(page: Page, path: string) {
+  mkdirSync('.impeccable/review', { recursive: true });
   await page.evaluate(async () => {
     await document.fonts.ready;
     await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
@@ -119,7 +120,7 @@ test('local masked Tavily setup saves privately, recovers and clears browser inp
   const update = page.getByRole('button', { name: 'Update search key', exact: true });
   await expect(update).toHaveAttribute('aria-expanded', 'false');
   await page.getByRole('button', { name: 'Continue to your website' }).press('Enter');
-  await expect(page.getByLabel('Seller website', { exact: true })).toBeFocused();
+  await expect(page.getByLabel('Company name or website', { exact: true })).toBeFocused();
   expect(await page.evaluate(() => JSON.stringify([localStorage, sessionStorage]))).not.toContain(key);
   expect(await page.locator('body').textContent()).not.toContain(key);
   await noOverflow(page);
@@ -154,7 +155,77 @@ test('failed offer summary explains next steps on saved runs', async ({ page }, 
   await page.reload();
   await expect(notice).toBeVisible();
   await page.getByRole('button', { name: 'New shortlist', exact: true }).press('Enter');
-  await expect(page.getByLabel('Seller website', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
+});
+
+test('seller field accepts Eygentic, domains and full HTTPS URLs', async ({ page }, info) => {
+  for (const value of ['Eygentic', 'eygentic.com', 'https://eygentic.com']) {
+    await page.goto('/');
+    await page.getByLabel('Company name or website', { exact: true }).fill(value);
+    if (value === 'eygentic.com') {
+      await noOverflow(page);
+      await capture(page, `.impeccable/review/${info.project.name}-bare-domain-input.png`);
+    }
+    const request = page.waitForResponse(response => new URL(response.url()).pathname === '/api/sellers' && response.request().method() === 'POST');
+    await page.getByRole('button', { name: 'Understand my offer' }).click();
+    const response = await request;
+    expect(response.status()).toBe(201);
+    expect((await response.json()).seller_url).toBe('https://eygentic.com/');
+    await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
+    await noOverflow(page);
+  }
+  await capture(page, `.impeccable/review/${info.project.name}-domain-input-confirmation.png`);
+});
+
+test('company name lookup waits for website choice, retries and survives reload', async ({ page }, info) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/');
+  await page.getByLabel('Company name or website', { exact: true }).fill('Example Software');
+  const created = page.waitForResponse(response => new URL(response.url()).pathname === '/api/sellers');
+  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  const run = await (await created).json();
+  expect(run.seller_url).toBeNull();
+  expect(run.company_name).toBe('Example Software');
+  await expect(page.getByRole('heading', { name: 'Which website belongs to Example Software?' })).toBeVisible();
+  const matches = page.getByRole('list', { name: 'Company website matches' });
+  await expect(matches.locator('li')).toHaveCount(2);
+  await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toHaveCount(0);
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${info.project.name}-company-name-matches.png`);
+  await page.reload();
+  await expect(matches).toBeVisible();
+  await page.route(`**/api/runs/${run.id}/website`, route => route.fulfill({ status: 503, json: { detail: 'Labelled website save failure' } }), { times: 1 });
+  await page.getByRole('button', { name: 'Use example-1.com', exact: true }).click();
+  await expect(page.getByRole('alert')).toHaveText('Labelled website save failure');
+  await page.getByRole('button', { name: 'Use example-1.com', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByLabel('What do you sell?')).not.toHaveValue('');
+  const saved = await (await page.request.get(`/api/runs/${run.id}`)).json();
+  expect(saved.seller_url).toBe('https://example-1.com/');
+  expect(saved.attempts.filter((attempt: { kind: string }) => attempt.kind === 'search')).toHaveLength(1);
+  expect(saved.profile).toBeNull();
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible();
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${info.project.name}-company-name-chosen.png`);
+  expect(errors).toEqual([]);
+});
+
+test('empty or unavailable company lookup accepts a manual website', async ({ page }, info) => {
+  for (const company of ['No matches fixture', 'Lookup unavailable fixture']) {
+    await page.goto('/');
+    await page.getByLabel('Company name or website', { exact: true }).fill(company);
+    await page.getByRole('button', { name: 'Understand my offer' }).click();
+    await expect(page.getByRole('heading', { name: `Which website belongs to ${company}?` })).toBeVisible();
+    await expect(page.getByRole('list', { name: 'Company website matches' })).toHaveCount(0);
+    await expect(page.getByRole('status').filter({ hasText: "website below to continue" })).toBeVisible();
+    await page.getByLabel('Company website', { exact: true }).fill('eygentic.com');
+    await noOverflow(page);
+    await capture(page, `.impeccable/review/${info.project.name}-company-lookup-fallback.png`);
+    await page.getByRole('button', { name: 'Use this website', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
+  }
 });
 
 test('saved seller → confirmation → evidence → review → export survives reload', async ({ page }, testInfo) => {
@@ -162,11 +233,11 @@ test('saved seller → confirmation → evidence → review → export survives 
   page.on('pageerror', error => errors.push(error.message));
   mkdirSync('.impeccable/review', { recursive: true });
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'What is your company website?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'What is your company?' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Understand my offer' })).toBeEnabled();
   await noOverflow(page);
   await capture(page, `.impeccable/review/${testInfo.project.name}-start.png`);
-  await page.getByLabel('Seller website', { exact: true }).fill('https://eygentic.com/');
+  await page.getByLabel('Company name or website', { exact: true }).fill('https://eygentic.com/');
   await page.getByRole('button', { name: 'Understand my offer' }).click();
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
   await page.getByLabel('What do you sell?').fill('Test fixture edited offer: acquisition experiments for software businesses');
@@ -320,12 +391,12 @@ test('small screen, large text, keyboard and reduced motion remain usable', asyn
   await page.setViewportSize({ width: 320, height: 740 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  await expect(page.getByLabel('Seller website', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Understand my offer' })).toBeEnabled();
   await noOverflow(page);
   await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
   await noOverflow(page);
-  const input = page.getByLabel('Seller website', { exact: true });
+  const input = page.getByLabel('Company name or website', { exact: true });
   await input.focus();
   await expect(input).toBeFocused();
   await page.keyboard.press('Tab');
@@ -335,10 +406,10 @@ test('small screen, large text, keyboard and reduced motion remain usable', asyn
 
 test('unsafe seller URL shows an actionable error', async ({ page }) => {
   await page.goto('/');
-  await page.getByLabel('Seller website', { exact: true }).fill('https://127.1');
+  await page.getByLabel('Company name or website', { exact: true }).fill('https://127.1');
   await page.getByRole('button', { name: 'Understand my offer' }).click();
   await expect(page.getByRole('alert')).toContainText('Check the fields');
-  await expect(page.getByLabel('Seller website', { exact: true })).toHaveValue('https://127.1');
+  await expect(page.getByLabel('Company name or website', { exact: true })).toHaveValue('https://127.1');
 });
 
 test('research preview explains evidence and unknowns without inventing results', async ({ page }) => {

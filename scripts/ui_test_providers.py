@@ -4,7 +4,8 @@ import hashlib
 import time
 
 from shortlist.domain import Candidate, Criterion, Source
-from shortlist.providers import SellerDraft, validate_extraction
+from shortlist.fetch import domain_of
+from shortlist.providers import ProviderError, SellerDraft, validate_extraction
 from shortlist.verification import Judgment, Verification, assessments
 
 
@@ -12,6 +13,10 @@ class FixtureSearch:
     name = "labelled_test_fixture"
 
     def search(self, query, seller_url):
+        if seller_url is None and query.startswith('"No matches fixture"'):
+            return []
+        if seller_url is None and query.startswith('"Lookup unavailable fixture"'):
+            raise ProviderError("Labelled unavailable website lookup")
         return [
             Candidate(
                 domain=f"example-{index}.com",
@@ -40,7 +45,7 @@ def fixture_fetch(url, expected_domain=None):
     )
     return Source(
         url=url,
-        company_domain=expected_domain or "eygentic.com",
+        company_domain=expected_domain or domain_of(url),
         title="Labelled test source",
         text=text,
         content_hash=hashlib.sha256(text.encode()).hexdigest(),

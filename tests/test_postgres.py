@@ -17,6 +17,7 @@ from fastapi.testclient import TestClient
 from psycopg import sql
 from psycopg.conninfo import conninfo_to_dict, make_conninfo
 from pydantic import SecretStr
+from test_company_lookup import assert_lookup_lifecycle
 from test_stop import assert_held_worker_stops
 
 from shortlist.api import create_app
@@ -95,6 +96,18 @@ def test_isolation_idempotency_and_no_ownerless_access(owners):
         assert db.execute("SELECT current_setting('shortlist.workspace_id')").fetchone()[0] == str(a.workspace_id)
     with b.connection() as db:
         assert db.execute("SELECT current_setting('shortlist.workspace_id')").fetchone()[0] == str(b.workspace_id)
+
+
+def test_company_lookup_preserves_owner_profile_grant_and_no_company_debit(owners):
+    a, b, worker, _ = owners
+    scoped = PostgresStore(worker, a.workspace_id, worker=True)
+    identity = assert_lookup_lifecycle(scoped, Settings())
+    assert CreditWallet(a).balance().model_dump() == {"available": 3, "reserved": 0, "used": 0}
+    with a.connection() as db:
+        assert db.execute("SELECT free_profiles FROM workspaces WHERE id=?", (a.workspace_id,)).fetchone()[0] == 1
+    with pytest.raises(KeyError):
+        b.confirm_website(identity, "https://business.example/")
+    assert b.list_runs() == []
 
 
 def test_cannot_disable_policies_cross_link_records_or_assume_worker(owners):

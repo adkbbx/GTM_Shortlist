@@ -1,4 +1,5 @@
 import json
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Protocol
@@ -45,9 +46,20 @@ DIRECTORIES = frozenset({"linkedin.com", "crunchbase.com", "g2.com", "capterra.c
                          "techcrunch.com", "wellfound.com", "producthunt.com", "tracxn.com", "github.com"})
 
 
-def candidates_from_results(results: list[dict], query: str, provider: str, seller_url: str) -> list[Candidate]:
+def company_name_matches(candidate: Candidate, name: str) -> bool:
+    """A relevance filter for suggestions, not proof of legal company identity."""
+    directories = DIRECTORIES | {"wikipedia.org", "wikidata.org"}
+    if any(candidate.domain == domain or candidate.domain.endswith("." + domain) for domain in directories):
+        return False
+    words = set(re.findall(r"\w+", name.casefold())) - {"the", "company", "inc", "llc", "ltd", "limited", "corp", "corporation"}
+    title_words = set(re.findall(r"\w+", candidate.name.casefold()))
+    domain = candidate.domain.replace("-", "").casefold()
+    return bool(words & title_words) or any(len(word) >= 3 and word in domain for word in words)
+
+
+def candidates_from_results(results: list[dict], query: str, provider: str, seller_url: str | None) -> list[Candidate]:
     candidates = []
-    seen = {domain_of(seller_url)}
+    seen = {domain_of(seller_url)} if seller_url else set()
     for result in results:
         url = result.get("url") or result.get("link")
         if not isinstance(url, str):
@@ -74,7 +86,7 @@ def queries_for(profile: Profile) -> tuple[str, ...]:
 class Search(Protocol):
     name: str
 
-    def search(self, query: str, seller_url: str) -> list[Candidate]: ...
+    def search(self, query: str, seller_url: str | None) -> list[Candidate]: ...
 
 
 class SearchProvider:
@@ -84,7 +96,7 @@ class SearchProvider:
         self.settings = settings
         self.name = settings.search_provider
 
-    def search(self, query: str, seller_url: str) -> list[Candidate]:
+    def search(self, query: str, seller_url: str | None) -> list[Candidate]:
         settings = self.settings
         key = settings.tavily_key if self.name == "tavily" else settings.serpapi_key
         if not key.get_secret_value():
@@ -139,7 +151,7 @@ class CapturedSearch:
     def __init__(self, path: Path):
         self.capture = SearchCapture.model_validate_json(path.read_text(encoding="utf-8"))
 
-    def search(self, query: str, seller_url: str) -> list[Candidate]:
+    def search(self, query: str, seller_url: str | None) -> list[Candidate]:
         if query not in self.capture.queries:
             raise ProviderError("The imported search capture does not contain this confirmed target query")
         candidates = candidates_from_results([hit.model_dump() for hit in self.capture.queries[query]],

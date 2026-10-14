@@ -366,8 +366,10 @@ class Store:
                 "SELECT id FROM runs WHERE status IN ('queued','running') AND lease_until<=? "
                 f"ORDER BY created_at,{self.order_key} LIMIT 50", (time.time(),))]
 
-    def create_draft(self, seller_url: str, request_key: str) -> str:
-        digest = hashlib.sha256(seller_url.encode()).hexdigest()
+    def create_draft(self, seller_url: str | None, request_key: str, *, company_name: str | None = None) -> str:
+        if bool(seller_url) == bool(company_name):
+            raise ValueError("Provide either a website or a company name")
+        digest = hashlib.sha256((seller_url if seller_url else "company:" + company_name.casefold()).encode()).hexdigest()
         with self.connection() as db:
             self.begin(db)
             row = db.execute("SELECT id,payload_hash,deleted_at FROM runs WHERE request_key=?", (request_key,)).fetchone()
@@ -381,9 +383,32 @@ class Store:
             self.reserve_run(db, run_id, draft=True)
             now = utcnow().isoformat()
             db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,checkpoint,created_at,updated_at) "
-                       "VALUES (?,?,?,?,?,?,?,?,?)", (run_id, request_key, digest, "{}", "queued", "seller",
-                       json.dumps({"seller_url": seller_url}), now, now))
+                       "VALUES (?,?,?,?,?,?,?,?,?)", (run_id, request_key, digest, "{}", "queued", "seller" if seller_url else "identity",
+                       json.dumps({"seller_url": seller_url, **({"company_name": company_name} if company_name else {})}), now, now))
             return run_id
+
+    def confirm_website(self, run_id: str, website_url: str):
+        from shortlist.fetch import canonical_url
+        website_url = canonical_url(website_url)
+        with self.connection() as db:
+            self.begin(db)
+            row = db.execute("SELECT status,stage,checkpoint FROM runs WHERE id=? AND deleted_at IS NULL", (run_id,)).fetchone()
+            if row is None:
+                raise KeyError(run_id)
+            checkpoint = json.loads(row["checkpoint"])
+            if checkpoint.get("termination") == "user_stopped":
+                raise Conflict("This research was stopped; start a new shortlist")
+            if checkpoint["seller_url"] is not None:
+                if checkpoint["seller_url"] == website_url:
+                    return
+                raise Conflict("Website already selected; start a new shortlist to change it")
+            if row["status"] not in ("awaiting_confirmation", "partial") or row["stage"] not in ("website", "identity"):
+                raise Conflict("Wait for website lookup before choosing your website")
+            checkpoint["seller_url"] = website_url
+            db.execute("UPDATE runs SET status='queued',stage='seller',checkpoint=?,error=NULL,updated_at=? WHERE id=?",
+                       (json.dumps(checkpoint), utcnow().isoformat(), run_id))
+            db.execute("INSERT INTO run_events(run_id,phase,label,state,created_at) VALUES (?,?,?,?,?)",
+                       (run_id, "seller", "You confirmed the company website", "succeeded", utcnow().isoformat()))
 
     def reuse_draft(self, source_id: str, request_key: str) -> str:
         digest = hashlib.sha256(("reuse:" + source_id).encode()).hexdigest()

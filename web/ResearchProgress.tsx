@@ -30,7 +30,7 @@ export function ResearchProgress({ run, connected = true }: { run: Run; connecte
   ];
   const heading = pending ? !connected ? 'Reconnecting to your research' : !progress.worker_online ? 'Research is waiting for a worker'
     : run.status === 'queued' ? 'Your research is next in line'
-      : run.stage === 'seller' ? 'Understanding your company' : 'Building your shortlist'
+      : run.stage === 'identity' ? 'Finding your company website' : run.stage === 'seller' ? 'Understanding your company' : 'Building your shortlist'
     : 'Research checkpoints';
   const content = <>
     <ol className="research-phases" aria-label="Research stages">{phases.map(phase => <li key={phase.label}

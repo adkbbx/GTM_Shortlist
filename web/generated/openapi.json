@@ -262,6 +262,60 @@
         ]
       }
     },
+    "/api/runs/{run_id}/website": {
+      "post": {
+        "summary": "Choose Website",
+        "operationId": "choose_website_api_runs__run_id__website_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebsiteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/runs/{run_id}": {
       "get": {
         "summary": "Read Run",
@@ -726,6 +780,46 @@
           "request_key"
         ],
         "title": "BookingInput"
+      },
+      "Candidate": {
+        "properties": {
+          "domain": {
+            "type": "string",
+            "title": "Domain"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "discovered_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Discovered At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "domain",
+          "name",
+          "url",
+          "query",
+          "provider",
+          "discovered_at"
+        ],
+        "title": "Candidate"
       },
       "Confirmation": {
         "properties": {
@@ -1687,8 +1781,34 @@
             "title": "Id"
           },
           "seller_url": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Seller Url"
+          },
+          "company_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Name"
+          },
+          "website_matches": {
+            "items": {
+              "$ref": "#/components/schemas/Candidate"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "title": "Website Matches"
           },
           "status": {
             "type": "string",
@@ -2128,6 +2248,20 @@
           "mode"
         ],
         "title": "WalletView"
+      },
+      "WebsiteInput": {
+        "properties": {
+          "website_url": {
+            "type": "string",
+            "title": "Website Url"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "website_url"
+        ],
+        "title": "WebsiteInput"
       }
     },
     "securitySchemes": {

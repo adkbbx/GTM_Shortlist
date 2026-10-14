@@ -29,6 +29,46 @@
       "title": "AttemptView",
       "type": "object"
     },
+    "Candidate": {
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "title": "Domain",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "query": {
+          "title": "Query",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "discovered_at": {
+          "format": "date-time",
+          "title": "Discovered At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "domain",
+        "name",
+        "url",
+        "query",
+        "provider",
+        "discovered_at"
+      ],
+      "title": "Candidate",
+      "type": "object"
+    },
     "Criterion": {
       "additionalProperties": false,
       "properties": {
@@ -881,8 +921,35 @@
       "type": "string"
     },
     "seller_url": {
-      "title": "Seller Url",
-      "type": "string"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Seller Url"
+    },
+    "company_name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Company Name"
+    },
+    "website_matches": {
+      "items": {
+        "$ref": "#/$defs/Candidate"
+      },
+      "maxItems": 3,
+      "title": "Website Matches",
+      "type": "array"
     },
     "status": {
       "enum": [

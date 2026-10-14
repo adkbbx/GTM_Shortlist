@@ -64,6 +64,9 @@ function parseRun(data: unknown): Run {
 }
 
 export const api = {
+  async chooseWebsite(id: string, website_url: string) {
+    return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/website`, { website_url }));
+  },
   async configureTavily(key: string) {
     const data = await request('/api/local/tavily', { key });
     if (!isHealth(data)) throw new Error('Search setup could not be confirmed. Please reload.');

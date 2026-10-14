@@ -28,6 +28,8 @@ class RunProgress(Value):
 
 
 def step_label(kind: str, operation: str, domain: str | None = None) -> str:
+    if operation == "seller:identity":
+        return "Looking up your company's website"
     if operation == "seller:fetch":
         return "Reading your company website"
     if operation == "seller:model":

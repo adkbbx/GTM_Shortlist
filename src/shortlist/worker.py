@@ -23,6 +23,7 @@ from shortlist.providers import (
     Search,
     SearchProvider,
     SellerDraft,
+    company_name_matches,
     queries_for,
 )
 from shortlist.store import BudgetExceeded, Conflict, Store
@@ -84,8 +85,35 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
         return source
 
     try:
-        store.event(run_id, fence, ProgressUpdate(phase="seller" if run["stage"] == "seller" else "discovery",
+        store.event(run_id, fence, ProgressUpdate(phase="seller" if run["stage"] in ("seller", "identity") else "discovery",
                                                    label="Research worker picked up your saved run", state="succeeded"))
+        if run["stage"] == "identity":
+            error = None
+            def decode_lookup(values):
+                try:
+                    matches = [Candidate.model_validate(value) for value in values]
+                    for match in matches:
+                        if canonical_url(match.url) != match.url or domain_of(match.url) != match.domain:
+                            raise ValueError("Website identity mismatch")
+                    return matches
+                except ValueError as exc:
+                    raise ProviderError("Website lookup returned an invalid public website") from exc
+            try:
+                query = '"' + checkpoint["company_name"] + '" official company website'
+                matches = call("search", search.name, "seller:identity", lambda: decode_lookup(search.search(query, None)),
+                               {"query": query, "company_name": checkpoint["company_name"]},
+                               decode_lookup)
+                matches = [match for match in matches if company_name_matches(match, checkpoint["company_name"])]
+                checkpoint["website_matches"] = [match.model_dump(mode="json") for match in matches[:3]]
+                if not matches:
+                    error = "No website matches were found. Enter your company's website below to continue."
+            except (ProviderError, BudgetExceeded, Conflict) as exc:
+                checkpoint["website_matches"] = []
+                checkpoint["website_lookup_error"] = str(exc)
+                error = "We couldn't finish the website lookup. Enter your company's website below to continue."
+            store.event(run_id, fence, ProgressUpdate(phase="seller", label="Choose the website for your company", state="waiting"))
+            store.checkpoint(run_id, fence, "website", checkpoint, "awaiting_confirmation", error)
+            return True
         if run["stage"] == "seller":
             error = None
             try:

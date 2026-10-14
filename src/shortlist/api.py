@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Literal
@@ -14,7 +15,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from shortlist.auth import AuthenticationError, AuthUnavailable, verify_user
 from shortlist.config import Settings
-from shortlist.domain import OperatorReview, Profile, Research, Review, Target
+from shortlist.domain import Candidate, OperatorReview, Profile, Research, Review, Target
 from shortlist.export import export_run
 from shortlist.fetch import canonical_url
 from shortlist.local_credentials import (
@@ -24,7 +25,7 @@ from shortlist.local_credentials import (
     validate_tavily_key,
 )
 from shortlist.progress import RunProgress
-from shortlist.providers import SellerDraft
+from shortlist.providers import SellerDraft, company_name_matches
 from shortlist.store import BudgetExceeded, Conflict, Store
 
 
@@ -36,7 +37,31 @@ class SellerInput(BaseModel):
     @field_validator("seller_url")
     @classmethod
     def public_url(cls, value):
+        value = value.strip()
+        # Approved first-party identity from this project's Eygentic brief.
+        # Other names are looked up; this is not a generic guess of name.com.
+        if value.casefold() == "eygentic":
+            return "https://eygentic.com/"
+        if not any(symbol in value for symbol in "/:") and ("." not in value or " " in value):
+            if value.casefold() == "localhost" or not 2 <= len(value) <= 120 or \
+                    not any(character.isalpha() for character in value) or not re.fullmatch(r"[\w &.'()\-]+", value):
+                raise ValueError("Enter a company name or a public website")
+            return " ".join(value.split())
+        if value.startswith("//"):
+            value = "https:" + value
+        elif not re.match(r"^[a-z][a-z0-9+.-]*://", value, re.IGNORECASE):
+            value = "https://" + value
         return canonical_url(value)
+
+
+class WebsiteInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    website_url: str
+
+    @field_validator("website_url")
+    @classmethod
+    def public_website(cls, value):
+        return canonical_url(SellerInput.public_url(value))
 
 
 class LocalKeyInput(BaseModel):
@@ -110,7 +135,9 @@ class AttemptView(BaseModel):
 
 class RunView(BaseModel):
     id: str
-    seller_url: str
+    seller_url: str | None
+    company_name: str | None = None
+    website_matches: list[Candidate] = Field(default_factory=list, max_length=3)
     status: Literal["queued", "running", "awaiting_confirmation", "ready", "partial"]
     stage: str
     profile: Profile | None = None
@@ -211,11 +238,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         run = store.get_run(run_id)
         profile = Profile.model_validate(run["profile"]) if run["profile"] else None
         error = run["error"]
+        matches = [Candidate.model_validate(value) for value in run["checkpoint"].get("website_matches", [])]
+        company_name = run["checkpoint"].get("company_name")
+        if company_name:
+            matches = [match for match in matches if company_name_matches(match, company_name)]
+            if run["stage"] == "website" and not matches and not error:
+                error = "No clear website match was found. Enter your company's website below to continue."
         if profile is None and run["status"] == "awaiting_confirmation" and "seller_model_output" in run["checkpoint"]:
             error = ("We couldn't create a usable offer summary from this page. Company search hasn't started. "
                      "Enter what you sell and who you want to reach below, or choose New shortlist "
                      "and use a product or services page.")
         return RunView(id=run_id, seller_url=profile.seller_url if profile else run["checkpoint"]["seller_url"],
+                       company_name=company_name, website_matches=matches,
                        status=run["status"], stage=run["stage"], profile=profile, draft=run["checkpoint"].get("draft"),
                        records=run["records"], error=error, created_at=run["created_at"],
                        updated_at=run["updated_at"], attempts=run["attempts"], credits=run.get("credits"),
@@ -302,7 +336,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.post("/api/sellers", response_model=RunView, status_code=201)
     def seller(input: SellerInput, store: owned):
-        return view(store, store.create_draft(input.seller_url, input.request_key))
+        website = input.seller_url if input.seller_url.startswith("https://") else None
+        return view(store, store.create_draft(website, input.request_key, company_name=None if website else input.seller_url))
+
+    @app.post("/api/runs/{run_id}/website", response_model=RunView)
+    def choose_website(run_id: str, input: WebsiteInput, store: owned):
+        store.confirm_website(run_id, input.website_url)
+        return view(store, run_id)
 
     @app.get("/api/runs/{run_id}", response_model=RunView)
     def read_run(run_id: str, store: owned):
@@ -328,6 +368,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def confirm(run_id: str, input: Confirmation, store: owned):
         run = store.get_run(run_id)
         seller_url = run["profile"].get("seller_url") or run["checkpoint"]["seller_url"]
+        if seller_url is None:
+            raise Conflict("Choose your company website before confirming its offer")
         profile = Profile(seller_url=seller_url, **input.model_dump(exclude={"company_limit"}))
         store.confirm_draft(run_id, profile, input.company_limit)
         return view(store, run_id)

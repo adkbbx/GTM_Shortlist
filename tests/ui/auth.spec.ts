@@ -45,7 +45,7 @@ async function signIn(page: Page) {
   await page.getByLabel('Email', { exact: true }).fill('fixture@example.test');
   await page.getByLabel('Password', { exact: true }).fill('labelled-fixture-password');
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-  await expect(page.getByLabel('Seller website', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
 }
 async function capture(page: Page, path: string) {
   mkdirSync('.impeccable/review', { recursive: true });
@@ -85,7 +85,7 @@ test('signed-in requests and exports carry tokens; sign-out clears the workspace
   page.on('request', request => { if (request.url().includes('/api/') && !request.url().includes('/auth/setup'))
     requests.push({ url: request.url(), bearer: request.headers()['authorization'] }); });
   await signIn(page);
-  await page.getByLabel('Seller website', { exact: true }).fill('https://eygentic.com/');
+  await page.getByLabel('Company name or website', { exact: true }).fill('https://eygentic.com/');
   await page.getByRole('button', { name: 'Understand my offer' }).click();
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
   const runId = new URL(page.url()).searchParams.get('run');
@@ -109,10 +109,11 @@ test('expired stored session refreshes and API rejection returns to sign-in', as
   const backend = await fixture(page);
   await page.addInitScript(expired => localStorage.setItem('sb-shortlist-auth-auth-token', JSON.stringify(expired)), session(now() - 60));
   await page.goto('/');
-  await expect(page.getByLabel('Seller website', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
   expect(backend.calls.some(call => call.includes('grant_type=refresh_token'))).toBe(true);
   await page.route('**/api/runs', route => route.fulfill({ status: 401, json: { detail: 'Labelled expired session' } }));
-  await page.getByRole('button', { name: 'New shortlist' }).click();
+  // The rejected in-flight read may already have removed the workspace. Reload
+  // exercises the same verified-session rejection without clicking stale UI.
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Sign in to your shortlist' })).toBeVisible();
   await expect(page.getByRole('status')).toContainText('session needs verification');
@@ -126,7 +127,7 @@ test('PKCE recovery opens a new-password form and updates the account', async ({
   await capture(page, `.impeccable/review/${info.project.name}-new-password.png`);
   await page.getByLabel('New password', { exact: true }).fill('updated-fixture-password');
   await page.getByRole('button', { name: 'Save new password' }).click();
-  await expect(page.getByLabel('Seller website', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
   expect(backend.calls.some(call => call.includes('grant_type=pkce'))).toBe(true);
   expect(backend.calls.some(call => call.endsWith('/user'))).toBe(true);
 });
@@ -138,7 +139,7 @@ test('unconfirmed account can retry failed sign-out without entering research', 
   await page.getByLabel('Password', { exact: true }).fill('labelled-fixture-password');
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Confirm your email' })).toBeVisible();
-  await expect(page.getByLabel('Seller website', { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel('Company name or website', { exact: true })).toHaveCount(0);
   backend.rejectSignout();
   await page.getByRole('button', { name: 'Back to sign in' }).click();
   await expect(page.getByRole('alert')).toContainText('Could not sign out');

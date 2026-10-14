@@ -47,6 +47,8 @@ Open `http://127.0.0.1:8014`. This command starts and supervises the API and dur
 
 The research view shows persisted, timestamped checkpoints, actual saved page/company counts, source reuse, repairs and failures. Worker availability is heartbeat-based; an offline worker produces a clear waiting state. Requests poll serially, so slow responses cannot overwrite newer progress. No fabricated percentage or ETA is shown. Completed activity remains in the saved history. Older runs without events are labelled accordingly.
 
+Enter a company name, bare domain or full HTTPS URL. `Eygentic`, `eygentic.com` and `https://eygentic.com` resolve to the approved Eygentic website. Other names start a bounded website lookup; confirm a suggested website or enter one manually before offer drafting. Matches are suggestions and can refer to another company. Offer and target confirmation still precede prospect discovery. See [company input](docs/company-name-input.md).
+
 ## Boundaries
 
 The local SQLite app is for one trusted operator and must bind to loopback. Do not expose it publicly. Hosted mode has verified-user API boundaries, Postgres workspace isolation, account UI and research-credit accounting (three signup credits; batches of 1–3). Real Supabase accounts, external SMTP, paid checkout and actual deployment tests remain required before hosted release.

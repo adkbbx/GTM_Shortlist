@@ -140,6 +140,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/runs/{run_id}/website": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Choose Website */
+        post: operations["choose_website_api_runs__run_id__website_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/runs/{run_id}": {
         parameters: {
             query?: never;
@@ -282,6 +299,24 @@ export interface components {
         BookingInput: {
             /** Request Key */
             request_key: string;
+        };
+        /** Candidate */
+        Candidate: {
+            /** Domain */
+            domain: string;
+            /** Name */
+            name: string;
+            /** Url */
+            url: string;
+            /** Query */
+            query: string;
+            /** Provider */
+            provider: string;
+            /**
+             * Discovered At
+             * Format: date-time
+             */
+            discovered_at: string;
         };
         /** Confirmation */
         Confirmation: {
@@ -653,7 +688,11 @@ export interface components {
             /** Id */
             id: string;
             /** Seller Url */
-            seller_url: string;
+            seller_url: string | null;
+            /** Company Name */
+            company_name?: string | null;
+            /** Website Matches */
+            website_matches?: components["schemas"]["Candidate"][];
             /**
              * Status
              * @enum {string}
@@ -809,6 +848,11 @@ export interface components {
              * @default 0
              */
             used: number;
+        };
+        /** WebsiteInput */
+        WebsiteInput: {
+            /** Website Url */
+            website_url: string;
         };
     };
     responses: never;
@@ -995,6 +1039,41 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    choose_website_api_runs__run_id__website_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WebsiteInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

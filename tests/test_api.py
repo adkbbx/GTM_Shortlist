@@ -1,9 +1,28 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from shortlist.api import create_app
 from shortlist.config import Settings
 from shortlist.store import Store
 from shortlist.worker import execute_run
+
+
+@pytest.mark.parametrize("website", ["Eygentic", "eygentic", "eygentic.com", "https://eygentic.com", " Eygentic.com ", "eygentic.com:443", "//eygentic.com"])
+def test_bare_and_explicit_seller_urls_share_one_canonical_command(tmp_path, website):
+    client = TestClient(create_app(Settings(db_path=tmp_path / "website.sqlite3")))
+    first = client.post("/api/sellers", json={"seller_url": website, "request_key": "website-input"})
+    assert first.status_code == 201
+    assert first.json()["seller_url"] == "https://eygentic.com/"
+    second = client.post("/api/sellers", json={"seller_url": "https://eygentic.com/", "request_key": "website-input"})
+    assert second.status_code == 201
+    assert second.json()["id"] == first.json()["id"]
+
+
+@pytest.mark.parametrize("website", ["127.0.0.1", "127.1", "localhost", "host.internal", "ftp://example.com", "javascript:alert(1)", "user:password@example.com", "example.com:8080", "<bad company>"])
+def test_seller_convenience_preserves_unsafe_url_rejection(tmp_path, website):
+    client = TestClient(create_app(Settings(db_path=tmp_path / "website.sqlite3")))
+    assert client.post("/api/sellers", json={"seller_url": website, "request_key": "unsafe-input"}).status_code == 422
+    assert client.get("/api/runs").json() == []
 
 
 def test_failed_offer_summary_explains_recovery_in_saved_and_listed_runs(tmp_path):
