@@ -9,6 +9,7 @@ import type { Confirmation, Evidence, ExclusionFinding, Finding, Health, Record,
 import { ResearchProgress } from './ResearchProgress';
 import { ResearchPreview } from './ResearchPreview';
 import { AuthGate } from './AuthGate';
+import { CreditActivity } from './CreditActivity';
 import './styles.css';
 
 const describeError = (error: unknown) => error instanceof Error ? error.message : 'Something went wrong. Please try again.';
@@ -162,6 +163,7 @@ function DeleteResearch({ run, onDeleted }: { run: Run; onDeleted: () => void })
 function App({ account }: { account: ReactNode }) {
   const [health, setHealth] = useState<Health | null>(null);
   const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [showActivity, setShowActivity] = useState(false);
   const [service, setService] = useState<Service | null>(null);
   const [runs, setRuns] = useState<Run[]>([]);
   const [active, setActive] = useState<Run | null>(null);
@@ -233,12 +235,13 @@ function App({ account }: { account: ReactNode }) {
   const results = active && ['ready', 'partial'].includes(active.status);
   return <>
     <a className="skip-link" href="#main">Skip to research</a>
-    <header className="topbar"><a className="brand" href="/" onClick={e => { e.preventDefault(); select(null); }}><span className="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M5 25 16 5l11 20H5Zm6-7h10M16 5v22M8 28h16" stroke="currentColor" strokeWidth="1.2" /></svg></span><span>eygentic<span className="brand-product">GTM Shortlist</span></span></a><div className="workspace-account">{wallet?.mode === 'hosted' && <p className="wallet-balance" aria-live="polite">{wallet.available} {wallet.available === 1 ? 'credit' : 'credits'} available{wallet.reserved > 0 && <span>{wallet.reserved} reserved</span>}</p>}{account ?? <span className="local-label">Local research workspace</span>}</div></header>
+    <header className="topbar"><a className="brand" href="/" onClick={e => { e.preventDefault(); select(null); }}><span className="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M5 25 16 5l11 20H5Zm6-7h10M16 5v22M8 28h16" stroke="currentColor" strokeWidth="1.2" /></svg></span><span>eygentic<span className="brand-product">GTM Shortlist</span></span></a><div className="workspace-account">{wallet?.mode === 'hosted' && <div className="wallet-access"><p className="wallet-balance" aria-live="polite">{wallet.available} {wallet.available === 1 ? 'credit' : 'credits'} available{wallet.reserved > 0 && <span>{wallet.reserved} reserved</span>}</p><button className="text-button" aria-expanded={showActivity} aria-controls="credit-activity" onClick={() => setShowActivity(value => !value)}>Credit activity</button></div>}{account ?? <span className="local-label">Local research workspace</span>}</div></header>
     <div className={`workspace ${active ? 'has-research' : 'new-research'}`}><aside className="sidebar" aria-label="Saved research"><button className="new-run secondary" onClick={() => { select(null); requestKey.current = crypto.randomUUID(); }}>New shortlist<Arrow /></button><h2>Saved runs</h2>
       {loading ? <p>Loading saved research…</p> : runs.length ? <nav>{runs.map(run => <button key={run.id} className={`saved-run ${active?.id === run.id ? 'selected' : ''}`} onClick={() => select(run)} aria-current={active?.id === run.id ? 'page' : undefined}><span>{new URL(run.seller_url).hostname}</span><small>{date(run.created_at)}</small><small>{run.status.replaceAll('_', ' ')}</small></button>)}</nav> : <p className="hint">Your research will stay here after you close the browser.</p>}
       <div className="sidebar-note"><p>Evidence before outreach.</p><p className="hint">Company fit, your acceptance, and buying intent are separate things.</p></div>
     </aside>
     <main id="main" className="main" tabIndex={-1}><div className="page-heading"><h1 ref={headingRef} tabIndex={-1}>{active ? active.profile ? 'Review your shortlist' : 'Define your shortlist' : 'Find your next shortlist.'}</h1><p>{active ? 'Saved research. Trace every assessment back to its source.' : 'Turn your offer into a focused list of companies. Understand the fit, inspect the sources, and make the call.'}</p></div>
+      {wallet?.mode === 'hosted' && <div id="credit-activity" hidden={!showActivity}>{showActivity && <CreditActivity wallet={wallet} />}</div>}
       {error && <div className="notice" role="alert">{error}<button className="text-button" onClick={() => window.location.reload()}>Reload workspace</button></div>}
       {!active && <><div className="start-grid"><section className="sheet start-sheet" aria-labelledby="start-heading"><h2 id="start-heading">What is your company website?</h2><p>We’ll draft your offer and target from the website. You can correct both before any company discovery starts.</p><form onSubmit={start}><label htmlFor="website">Seller website</label><div className="website-form"><input id="website" type="url" placeholder="https://your-company.com" required maxLength={2048} value={website} onChange={e => { setWebsite(e.target.value); requestKey.current = crypto.randomUUID(); }} /><button disabled={saving || loading} type="submit">{saving ? 'Saving…' : 'Understand my offer'}<Arrow /></button></div></form><p className="hint">Up to three research sheets. Saved sources. CSV and JSON export.</p></section><ResearchPreview /></div><section className="method" aria-label="How research works"><h2>A shortlist you can inspect</h2><ol><li><span>Confirm your offer</span><p>Edit who you serve and what counts as a fit.</p></li><li><span>Trace the evidence</span><p>Read source passages and see what remains unknown.</p></li><li><span>Review and export</span><p>Accept or reject each company using your own judgment.</p></li></ol></section></>}
       {active && <ResearchProgress run={active} connected={!error} />}{active?.credits && <p className="batch-credit-summary" role="status">{active.credits.used} {active.credits.used === 1 ? 'credit' : 'credits'} used · {active.credits.reserved} reserved · {active.credits.returned} returned</p>}

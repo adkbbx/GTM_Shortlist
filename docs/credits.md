@@ -73,7 +73,8 @@ Current worker has a three-record limit, six candidate attempts, four searches, 
 - [x] Replace hosted demo_run_id enforcement with credit reservation at confirmed batch submission. Bound free profiling separately.
 - [x] Atomically commit company delivery and one debit; return unused credits on terminal ready/partial outcomes. Cancellation remains unfinished.
 - [x] Add balance, batch-size/cost confirmation and insufficient-credit states; test phone/laptop, accessibility and actual hosted API settlement.
-- [ ] Add credit activity history and explicit cancellation.
+- [x] Show recent authenticated credit activity with refresh/retry on phone and laptop.
+- [ ] Add complete activity pagination and explicit cancellation.
 - [x] Prove simultaneous starts cannot overspend and process death cannot double-charge or lose a committed charge.
 - [x] Prove partial results, real unknown/non-fit outcomes, duplicate companies and provider failures settle correctly.
 - [ ] Build one-time top-up checkout and verified, replay-safe purchase grants. Validate actual payment test-mode behavior before selling.
@@ -89,4 +90,4 @@ A completed or partial confirmed run now offers Reuse this offer. It copies only
 
 ## Recent activity API
 
-GET /api/credits/history returns the latest50 committed signup/addition/usage/refund entries for the verified owner, with entry identity, integer amount and timestamp. Holds and unused returns remain on the run summary; they are not invented ledger refunds. Local unmetered mode returns an empty list. The endpoint does not expose another account, payment secrets, source text or credit command keys. Customer-facing activity UI and full pagination remain unfinished.
+GET /api/credits/history returns the latest50 committed signup/addition/usage/refund entries for the verified owner, with entry identity, integer amount and timestamp. Holds and unused returns remain on the run summary; they are not invented ledger refunds. Local unmetered mode returns an empty list. The endpoint does not expose another account, payment secrets, source text or credit command keys. Hosted customers can now open Credit activity beside their balance, inspect signed amounts and dates, and refresh or retry. The client validates responses against the generated server schema. Credits added is deliberately neutral because operator grants do not prove a completed payment. Full pagination remains unfinished.

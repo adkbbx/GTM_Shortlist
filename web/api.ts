@@ -6,11 +6,13 @@ import healthSchema from './generated/Health.json';
 import authSchema from './generated/AuthSetup.json';
 import walletSchema from './generated/WalletView.json';
 import serviceSchema from './generated/ServiceView.json';
+import creditHistorySchema from './generated/CreditHistory.json';
 
 export type Run = components['schemas']['RunView'];
 export type Health = components['schemas']['Health'];
 export type AuthSetup = components['schemas']['LocalAuth'] | components['schemas']['HostedAuth'];
 export type Wallet = components['schemas']['WalletView'];
+export type CreditHistory = components['schemas']['CreditHistory'];
 export type Service = components['schemas']['ServiceView'];
 export type Confirmation = components['schemas']['Confirmation'];
 export type Record = Run['records'][number];
@@ -26,6 +28,7 @@ const isHealth = ajv.compile<Health>(healthSchema);
 const isAuthSetup = ajv.compile<AuthSetup>(authSchema);
 const isWallet = ajv.compile<Wallet>(walletSchema);
 const isService = ajv.compile<Service>(serviceSchema);
+const isCreditHistory = ajv.compile<CreditHistory>(creditHistorySchema);
 let accessToken: (() => Promise<string | null>) | null = null;
 let sessionExpired: ((token: string | null) => void) | null = null;
 
@@ -61,6 +64,11 @@ function parseRun(data: unknown): Run {
 }
 
 export const api = {
+  async creditHistory() {
+    const data = await request('/api/credits/history');
+    if (!isCreditHistory(data)) throw new Error('Credit activity is unavailable. Please try again.');
+    return data;
+  },
   async reuse(id: string, request_key: string) {
     return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/reuse`, { request_key }));
   },

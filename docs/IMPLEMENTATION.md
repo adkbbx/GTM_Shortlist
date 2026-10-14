@@ -76,11 +76,14 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 - [x] Implement private append-only wallet ledger, automatic signup grants, legacy grant migration and batch holds; prove isolation/concurrency/replay/rollback/process death against real Postgres.
 - [x] Integrate credit reservation, atomic research delivery/debit, technical-failure returns and batch-cost UI; preserve legacy demos without a second signup grant.
 - [x] Add verified-owner recent credit activity API; prove grant/usage history and two-workspace isolation.
-- [ ] Implement verified paid checkout, customer activity UI/pagination, cancellation and measured larger batches.
+- [x] Expose recent owner-scoped credit activity with authenticated runtime validation, refresh/retry and responsive customer UI.
+- [ ] Implement verified paid checkout, complete activity pagination, cancellation and measured larger batches.
 - [ ] Identify 30 potential buyers and prioritize 10; prepare offer-specific samples.
 - [ ] Validate three $99 reviewed pilots and repeat demand before $49 subscription/billing.
 
 Out of scope: automated outreach, contact databases, CRM integrations and Experiment Judge.
 
 ## Continuation rules
+The user manually requested Continue after the 18:00 cutoff on 14 October 2026. This renews active implementation authorization. The expired heartbeat is paused; no new automatic work window or rolling retry has been scheduled. Continue small verified steps with ordinary usage, preserving unfinished acceptance gates. The original scheduled window below is historical.
+
 Continue without clarification until 18:00 JST on 14 October 2026 or weekly usage exhaustion. Preserve a handoff at each step and session limit. The13:40JST wake-up occurred after the user’s13:39reset. The same heartbeat now has one final18:00JST cutoff-only check to disable itself/save a handoff; it must not resume implementation at that wake-up. Do not use a rolling five-hour delay. No fabricated results, user tests, credentials, buying intent, deployments or payments. Provider/hosting credentials and actual external testing may create release blockers; implement and test independent work while recording them. Do not copy secrets from unrelated projects into Git. User requested thorough phone and laptop validation.

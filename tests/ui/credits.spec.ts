@@ -45,6 +45,13 @@ async function capture(page: Page, path: string) {
 test('real hosted API and Postgres settle partial research; review/export are free', async ({ page }, info) => {
   await hostedFixture(page);
   await expect(page.getByText('3 credits available', { exact: true })).toBeVisible();
+  const activityButton = page.getByRole('button', { name: 'Credit activity', exact: true });
+  await activityButton.click();
+  const activity = page.getByRole('region', { name: 'Credit activity', exact: true });
+  await expect(activity.getByText('Signup credits', { exact: true })).toBeVisible();
+  await expect(activity.getByText('+3 credits', { exact: true })).toBeVisible();
+  await activityButton.click();
+  await expect(activity).toHaveCount(0);
   await page.getByLabel('Seller website', { exact: true }).fill('https://eygentic.com/');
   await page.getByRole('button', { name: 'Understand my offer' }).click();
   await expect(page.getByLabel('Companies in this batch')).toBeVisible({ timeout: 15000 });
@@ -54,6 +61,13 @@ test('real hosted API and Postgres settle partial research; review/export are fr
   await expect(page.getByRole('heading', { name: '2 companies researched' })).toBeVisible({ timeout: 15000 });
   await expect(page.getByText('1 credit used · 0 reserved · 2 returned')).toBeVisible();
   await expect(page.getByText('2 credits available', { exact: true })).toBeVisible();
+  await activityButton.click();
+  await expect(activity.getByText('Company research', { exact: true })).toBeVisible();
+  await expect(activity.getByText('-1 credit', { exact: true })).toBeVisible();
+  await expect(activity.getByRole('list', { name: 'Recorded credit changes' }).locator('li')).toHaveCount(2);
+  await expect(activity.getByText('Credits refunded', { exact: true })).toHaveCount(0);
+  await capture(page, `.impeccable/review/${info.project.name}-credit-activity.png`);
+  await activityButton.click();
   await expect(page.getByText('1 research credit used')).toHaveCount(1);
   await expect(page.getByText('No research credit charged')).toHaveCount(1);
   await page.getByRole('button', { name: 'Accept company', exact: true }).first().click();
@@ -69,6 +83,29 @@ test('real hosted API and Postgres settle partial research; review/export are fr
   await expect(page.getByText('2 credits available', { exact: true })).toBeVisible();
   await expect(page.getByText('Saved: accepted')).toBeVisible();
   await capture(page, `.impeccable/review/${info.project.name}-credit-results.png`);
+});
+
+test('credit activity recovers from errors and malformed data without blocking research', async ({ page }, info) => {
+  await hostedFixture(page);
+  await page.route('https://app.example/api/credits/history', route => route.fulfill({ status: 503, json: { detail: 'Credit activity temporarily unavailable.' } }));
+  await page.getByRole('button', { name: 'Credit activity', exact: true }).click();
+  const activity = page.getByRole('region', { name: 'Credit activity', exact: true });
+  await expect(activity.getByRole('alert')).toHaveText('Credit activity temporarily unavailable.');
+  await expect(page.getByRole('button', { name: 'Understand my offer' })).toBeEnabled();
+  await page.unroute('https://app.example/api/credits/history');
+  await page.route('https://app.example/api/credits/history', route => route.fulfill({ json: { mode: 'hosted', entries: [{ amount: 'bad' }] } }));
+  await activity.getByRole('button', { name: 'Refresh activity' }).click();
+  await expect(activity.getByRole('alert')).toHaveText('Credit activity is unavailable. Please try again.');
+  await page.unroute('https://app.example/api/credits/history');
+  await activity.getByRole('button', { name: 'Refresh activity' }).click();
+  await expect(activity.getByText('Signup credits', { exact: true })).toBeVisible();
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(321);
+  await capture(page, `.impeccable/review/${info.project.name}-credit-activity-large-text.png`);
+  await page.getByRole('button', { name: 'Credit activity', exact: true }).press('Enter');
+  await expect(activity).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Credit activity', exact: true })).toHaveAttribute('aria-expanded', 'false');
 });
 
 test('selected batch size sets the actual worker limit and quoted cost', async ({ page }) => {

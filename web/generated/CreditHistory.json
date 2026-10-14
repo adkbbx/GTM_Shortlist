@@ -1,0 +1,64 @@
+{
+  "$defs": {
+    "CreditEntry": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "signup",
+            "purchase",
+            "usage",
+            "refund"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "amount": {
+          "minimum": -1,
+          "title": "Amount",
+          "type": "integer"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "amount",
+        "created_at"
+      ],
+      "title": "CreditEntry",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "mode": {
+      "enum": [
+        "local",
+        "hosted"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "entries": {
+      "items": {
+        "$ref": "#/$defs/CreditEntry"
+      },
+      "maxItems": 50,
+      "title": "Entries",
+      "type": "array"
+    }
+  },
+  "required": [
+    "mode",
+    "entries"
+  ],
+  "title": "CreditHistory",
+  "type": "object"
+}
