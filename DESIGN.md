@@ -1,6 +1,6 @@
 ---
 name: GTM Shortlist
-description: Eygentic company discovery and prospect research
+description: Company discovery and prospect research for B2B sellers
 colors:
   paper: "#f7f7f5"
   ink: "#1b1b1b"

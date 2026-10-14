@@ -17,10 +17,11 @@ class FixtureSearch:
             return []
         if seller_url is None and query.startswith('"Lookup unavailable fixture"'):
             raise ProviderError("Labelled unavailable website lookup")
+        company = query.split('"')[1] if seller_url is None else "Example"
         return [
             Candidate(
                 domain=f"example-{index}.com",
-                name=f"Example {index} (test fixture)",
+                name=f"{company} {index} (test fixture)",
                 url=f"https://example-{index}.com/",
                 query=query,
                 provider=self.name,

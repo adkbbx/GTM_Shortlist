@@ -1,6 +1,8 @@
 # GTM Shortlist
 
-Eygentic's open-source company discovery and research core. Confirm a seller's offer and targeting criteria, discover candidates, inspect dated source passages, and review/export a shortlist. Human acceptance never means buying intent.
+Open-source company discovery and research for B2B sellers. Confirm your offer and targeting criteria, discover candidates, inspect dated source passages, and review/export a shortlist. Human acceptance never means buying intent.
+
+Created by Eygentic. Every seller uses the same workflow; Eygentic profiles are optional examples and test inputs, not product defaults.
 
 This is an early local implementation. Hosted accounts, external signup, deployment, real provider benchmarks and observed user testing remain release gates in [the checklist](docs/IMPLEMENTATION.md). [Progress](docs/PROGRESS.md) records what has actually passed.
 
@@ -50,7 +52,7 @@ Open `http://127.0.0.1:8014`. This command starts and supervises the API and dur
 
 The research view shows persisted, timestamped checkpoints, actual saved page/company counts, source reuse, repairs and failures. Worker availability is heartbeat-based; an offline worker produces a clear waiting state. Requests poll serially, so slow responses cannot overwrite newer progress. No fabricated percentage or ETA is shown. Completed activity remains in the saved history. Older runs without events are labelled accordingly.
 
-Enter a company name, bare domain or full HTTPS URL. `Eygentic`, `eygentic.com` and `https://eygentic.com` resolve to the approved Eygentic website. Other names start a bounded website lookup; confirm a suggested website or enter one manually before offer drafting. Matches are suggestions and can refer to another company. Offer and target confirmation still precede prospect discovery. See [company input](docs/company-name-input.md).
+Enter a company name, bare domain or full HTTPS URL. All company names use the same bounded website lookup; confirm a suggested website or enter one manually before offer drafting. Bare domains and HTTPS URLs go directly to website profiling. Matches are suggestions and can refer to another company. Offer and target confirmation still precede prospect discovery. See [company input](docs/company-name-input.md).
 
 ## Boundaries
 

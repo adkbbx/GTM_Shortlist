@@ -112,13 +112,14 @@ def test_failed_lookup_allows_manual_public_website_without_redispatch(tmp_path,
     assert store.get_run(identity)["checkpoint"]["seller_url"] == "https://manual.example/"
 
 
-def test_company_api_handles_unresolved_identity_and_stopped_selection(tmp_path):
+@pytest.mark.parametrize("company", ["Example Software", "Eygentic", "eygentic"])
+def test_company_api_handles_unresolved_identity_and_stopped_selection(tmp_path, company):
     settings = Settings(db_path=tmp_path / "identity.sqlite3")
     client = TestClient(create_app(settings))
-    response = client.post("/api/sellers", json={"seller_url": "Example Software", "request_key": "lookup-api"})
+    response = client.post("/api/sellers", json={"seller_url": company, "request_key": "lookup-api"})
     assert response.status_code == 201
     identity = response.json()["id"]
-    assert response.json()["seller_url"] is None and response.json()["company_name"] == "Example Software"
+    assert response.json()["seller_url"] is None and response.json()["company_name"] == company
     store = Store(settings.db_path)
     execute_run(store, settings, identity, search=LookupSearch())
     assert client.get(f"/api/runs/{identity}").json()["website_matches"][0]["domain"] == "business.example"

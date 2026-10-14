@@ -158,10 +158,12 @@ test('failed offer summary explains next steps on saved runs', async ({ page }, 
   await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
 });
 
-test('seller field accepts Eygentic, domains and full HTTPS URLs', async ({ page }, info) => {
-  for (const value of ['Eygentic', 'eygentic.com', 'https://eygentic.com']) {
+test('seller field accepts domains and full HTTPS URLs', async ({ page }, info) => {
+  for (const value of ['eygentic.com', 'https://eygentic.com']) {
     await page.goto('/');
     await page.getByLabel('Company name or website', { exact: true }).fill(value);
+    await expect(page).toHaveTitle('GTM Shortlist');
+    await expect(page.getByRole('banner')).not.toContainText(/eygentic/i);
     if (value === 'eygentic.com') {
       await noOverflow(page);
       await capture(page, `.impeccable/review/${info.project.name}-bare-domain-input.png`);
@@ -172,22 +174,25 @@ test('seller field accepts Eygentic, domains and full HTTPS URLs', async ({ page
     expect(response.status()).toBe(201);
     expect((await response.json()).seller_url).toBe('https://eygentic.com/');
     await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('button', { name: /Eygentic brief/ })).toHaveCount(0);
+    await expect(page.getByLabel('What do you sell?')).toHaveValue('Test fixture: customer acquisition experiments for software businesses');
     await noOverflow(page);
   }
   await capture(page, `.impeccable/review/${info.project.name}-domain-input-confirmation.png`);
 });
 
-test('company name lookup waits for website choice, retries and survives reload', async ({ page }, info) => {
+for (const company of ['Example Software', 'Eygentic']) {
+test(`company name ${company} waits for website choice, retries and survives reload`, async ({ page }, info) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
-  await page.getByLabel('Company name or website', { exact: true }).fill('Example Software');
+  await page.getByLabel('Company name or website', { exact: true }).fill(company);
   const created = page.waitForResponse(response => new URL(response.url()).pathname === '/api/sellers');
   await page.getByRole('button', { name: 'Understand my offer' }).click();
   const run = await (await created).json();
   expect(run.seller_url).toBeNull();
-  expect(run.company_name).toBe('Example Software');
-  await expect(page.getByRole('heading', { name: 'Which website belongs to Example Software?' })).toBeVisible();
+  expect(run.company_name).toBe(company);
+  await expect(page.getByRole('heading', { name: `Which website belongs to ${company}?` })).toBeVisible();
   const matches = page.getByRole('list', { name: 'Company website matches' });
   await expect(matches.locator('li')).toHaveCount(2);
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toHaveCount(0);
@@ -211,6 +216,7 @@ test('company name lookup waits for website choice, retries and survives reload'
   await capture(page, `.impeccable/review/${info.project.name}-company-name-chosen.png`);
   expect(errors).toEqual([]);
 });
+}
 
 test('empty or unavailable company lookup accepts a manual website', async ({ page }, info) => {
   for (const company of ['No matches fixture', 'Lookup unavailable fixture']) {

@@ -43,7 +43,7 @@ function AccountForm({ client, setup, recovery, expired, externalError, onRecove
   };
   const changeMode = (next: typeof mode) => { setMode(next); setError(''); setNotice(''); setPassword(''); };
   return <main className="account-page"><section className="sheet account-sheet" aria-labelledby="account-heading">
-    <a className="account-brand" href="/">eygentic <span>GTM Shortlist</span></a>
+    <a className="account-brand" href="/">GTM Shortlist <span>Company research</span></a>
     <h1 id="account-heading">{title}</h1>
     <p className="intro">Research company fit. Inspect the evidence. Keep your shortlist in your own workspace.</p>
     {expired && <p className="notice" role="status">Your session needs verification. Sign in again to reopen your saved research.</p>}

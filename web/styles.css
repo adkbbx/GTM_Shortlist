@@ -10,7 +10,7 @@
 
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.research-phases li>.sr-only{display:block}.progress-history>summary>span:first-child{font-size:1rem;font-weight:600;color:var(--ink)}.history-meta{display:inline-flex;align-items:center;gap:12px}.history-chevron{flex:none;transition:transform .18s ease-out}.progress-history[open] .history-chevron{transform:rotate(90deg)}
 
-/* Eygentic product workspace: quiet chrome, clear research surfaces. */
+/* Company research workspace: quiet chrome, clear research surfaces. */
 :root{--line:#e1dfd9;--muted:#64615b;--surface:#fff;--radius-control:8px;--radius-sheet:14px}
 body{background:var(--paper)}
 button,.button-link{border-radius:var(--radius-control);box-shadow:none;transition:background .18s ease,color .18s ease,border-color .18s ease,transform .18s ease}

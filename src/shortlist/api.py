@@ -38,10 +38,6 @@ class SellerInput(BaseModel):
     @classmethod
     def public_url(cls, value):
         value = value.strip()
-        # Approved first-party identity from this project's Eygentic brief.
-        # Other names are looked up; this is not a generic guess of name.com.
-        if value.casefold() == "eygentic":
-            return "https://eygentic.com/"
         if not any(symbol in value for symbol in "/:") and ("." not in value or " " in value):
             if value.casefold() == "localhost" or not 2 <= len(value) <= 120 or \
                     not any(character.isalpha() for character in value) or not re.fullmatch(r"[\w &.'()\-]+", value):

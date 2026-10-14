@@ -19,7 +19,7 @@ def export_run(run: dict, format: str, accepted_only: bool = False) -> str | byt
     summary, details = customer_tables(run, records)
     if format == "xlsx":
         profile = run.get("profile") or {}
-        notes = ["GTM Shortlist · Eygentic", "Target: " + profile.get("target", "Not confirmed"),
+        notes = ["GTM Shortlist", "Target: " + profile.get("target", "Not confirmed"),
                  f'{len(records)} companies · {"accepted only" if accepted_only else "all saved records"}',
                  "Human acceptance is not buying intent. Unknown means unverified, not a failed criterion."]
         if run["checkpoint"].get("termination"):

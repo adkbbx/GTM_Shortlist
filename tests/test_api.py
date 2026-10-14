@@ -7,7 +7,7 @@ from shortlist.store import Store
 from shortlist.worker import execute_run
 
 
-@pytest.mark.parametrize("website", ["Eygentic", "eygentic", "eygentic.com", "https://eygentic.com", " Eygentic.com ", "eygentic.com:443", "//eygentic.com"])
+@pytest.mark.parametrize("website", ["eygentic.com", "https://eygentic.com", " Eygentic.com ", "eygentic.com:443", "//eygentic.com"])
 def test_bare_and_explicit_seller_urls_share_one_canonical_command(tmp_path, website):
     client = TestClient(create_app(Settings(db_path=tmp_path / "website.sqlite3")))
     first = client.post("/api/sellers", json={"seller_url": website, "request_key": "website-input"})

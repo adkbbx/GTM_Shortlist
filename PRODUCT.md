@@ -3,7 +3,7 @@
 
 ## Platform
 
-Web application with an open-source local UI and CLI, plus an Eygentic managed hosted service.
+Company-neutral open-source web application and CLI. Optional managed hosting is separate from the public core.
 
 ## Stack
 
@@ -23,9 +23,9 @@ The verified local flow covers seller website, editable offer and target confirm
 
 ## Brand and offering
 
-The user selected GTM Shortlist as an Eygentic offering alongside GTM Booster, GTM Raptor, and GTM Starship. On 14 October 2026, the user explicitly confirmed an open-source core with an Eygentic managed service. Describe it as Eygentic's AI system for company discovery and prospect research. Do not claim that the public core is closed source or that we own the underlying open-weight models.
+On 15 October 2026, the user clarified that the public product is for Hacktoberfest and must behave consistently for every seller. Use GTM Shortlist as the application brand. No Eygentic-specific targeting button, name alias, preferred seller, or promotional copy belongs in the normal UI or customer exports. Keep Eygentic creator attribution in repository documentation and any Eygentic examples explicitly optional. Do not claim that the public core is closed source or that we own the underlying open-weight models.
 
-GTM Shortlist can be sold independently or supply company research for a Raptor experiment. It does not replace Booster's acquisition diagnosis or Starship's ongoing experiments.
+Managed-service packaging is independent of the core workflow and must not change company discovery or targeting defaults.
 
 ## Product principles
 
