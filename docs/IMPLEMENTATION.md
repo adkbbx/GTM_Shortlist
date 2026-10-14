@@ -47,6 +47,7 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 
 ## 7. Guided UI and export
 - [x] Seller website, editable confirmation, persisted run status and honest partial results.
+- [x] Real checkpoint timeline, saved counts, worker availability, offline/reconnect states and one-command API/worker startup.
 - [x] Research sheets with evidence passages, source dates and independent accept/reject decisions.
 - [x] CSV/JSON export preserves evidence and protects against spreadsheet formulas.
 - [x] Test complete flow at 390px phone and 1366px laptop; also 320px, zoom, keyboard and reduced motion.

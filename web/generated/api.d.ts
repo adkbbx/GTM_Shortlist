@@ -229,6 +229,8 @@ export interface components {
             search_ready: boolean;
             /** Gemma Ready */
             gemma_ready: boolean;
+            /** Worker Online */
+            worker_online: boolean;
         };
         /** Hypothesis */
         Hypothesis: {
@@ -271,6 +273,30 @@ export interface components {
              * Format: date-time
              */
             confirmed_at: string;
+        };
+        /** ProgressEvent */
+        ProgressEvent: {
+            /**
+             * Phase
+             * @enum {string}
+             */
+            phase: "seller" | "confirmation" | "discovery" | "research" | "review";
+            /** Label */
+            label: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "started" | "succeeded" | "failed" | "reused" | "waiting";
+            /** Detail */
+            detail: string | null;
+            /** Id */
+            id: number;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /** Research */
         Research: {
@@ -348,6 +374,19 @@ export interface components {
              */
             reviewed_at: string;
         };
+        /** RunProgress */
+        RunProgress: {
+            /** Worker Online */
+            worker_online: boolean;
+            /** Candidates */
+            candidates: number;
+            /** Sources */
+            sources: number;
+            /** Companies */
+            companies: number;
+            /** Events */
+            events: components["schemas"]["ProgressEvent"][];
+        };
         /** RunView */
         RunView: {
             /** Id */
@@ -379,6 +418,7 @@ export interface components {
             updated_at: string;
             /** Attempts */
             attempts: components["schemas"]["AttemptView"][];
+            progress: components["schemas"]["RunProgress"];
         };
         /** SavedRecord */
         SavedRecord: {

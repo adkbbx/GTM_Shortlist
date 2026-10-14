@@ -6,6 +6,7 @@ import '@fontsource/schibsted-grotesk/600.css';
 import '@fontsource/schibsted-grotesk/700.css';
 import { api } from './api';
 import type { Confirmation, Evidence, ExclusionFinding, Finding, Health, Record, Review, Run } from './api';
+import { ResearchProgress } from './ResearchProgress';
 import './styles.css';
 
 const describeError = (error: unknown) => error instanceof Error ? error.message : 'Something went wrong. Please try again.';
@@ -147,10 +148,15 @@ function App() {
   useEffect(() => {
     if (!active || !['queued', 'running'].includes(active.status)) return;
     let cancelled = false;
-    const timer = window.setInterval(() => {
-      api.run(active.id).then(run => { if (!cancelled) { setActive(run); setError(''); setRuns(old => old.map(r => r.id === run.id ? run : r)); } })
-        .catch(e => { if (!cancelled) setError(describeError(e)); });
-    }, 1500);
+    let timer: number | undefined;
+    const poll = async () => {
+      try {
+        const run = await api.run(active.id);
+        if (!cancelled) { setActive(run); setError(''); setRuns(old => old.map(r => r.id === run.id ? run : r)); }
+      } catch (e) { if (!cancelled) setError(describeError(e)); }
+      finally { if (!cancelled) timer = window.setTimeout(poll, 700); }
+    };
+    void poll();
     return () => { cancelled = true; window.clearInterval(timer); };
   }, [active?.id, active?.status]);
 
@@ -179,8 +185,8 @@ function App() {
     <main id="main" className="main" tabIndex={-1}><div className="page-heading"><h1 ref={headingRef} tabIndex={-1}>{active ? active.profile ? 'Review your shortlist' : 'Define your shortlist' : 'Find companies worth a closer look'}</h1><p>{active ? 'Saved research. Trace every assessment back to its source.' : 'Start with your offer. Discover companies, inspect the evidence, and make the call yourself.'}</p></div>
       {error && <div className="notice" role="alert">{error}<button className="text-button" onClick={() => window.location.reload()}>Reload workspace</button></div>}
       {!active && <><section className="sheet start-sheet" aria-labelledby="start-heading"><h2 id="start-heading">What is your company website?</h2><p>We’ll draft your offer and target from the website. You can correct both before any company discovery starts.</p><form onSubmit={start}><label htmlFor="website">Seller website</label><div className="website-form"><input id="website" type="url" placeholder="https://your-company.com" required maxLength={2048} value={website} onChange={e => { setWebsite(e.target.value); requestKey.current = crypto.randomUUID(); }} /><button disabled={saving || loading} type="submit">{saving ? 'Saving…' : 'Understand my offer'}<Arrow /></button></div></form><p className="hint">Up to three research sheets. Saved sources. CSV and JSON export.</p></section><section className="method" aria-label="How research works"><h2>A shortlist you can inspect</h2><ol><li><span>Confirm your offer</span><p>Edit who you serve and what counts as a fit.</p></li><li><span>Trace the evidence</span><p>Read source passages and see what remains unknown.</p></li><li><span>Review and export</span><p>Accept or reject each company using your own judgment.</p></li></ol></section></>}
-      {pending && <section className="sheet pending" aria-live="polite"><h2>{active.stage === 'seller' ? 'Reading your seller website' : 'Research is saved and in progress'}</h2><p>{active.stage === 'seller' ? 'Your offer draft will appear here for confirmation.' : 'The worker is discovering and researching candidates against your confirmed criteria.'}</p><p className="hint">Current stage: {active.stage}. You can close this page and come back.</p><p className="hint">If progress stops, check that the local research worker is running.</p></section>}
-      {active?.status === 'awaiting_confirmation' && <ConfirmationForm key={active.id} run={active} onSaved={saved} />}
+      {active && <ResearchProgress run={active} connected={!error} />}
+      {active?.status === 'awaiting_confirmation' && <>{health && !health.search_ready && <p className="notice">Live company search is not configured yet. Your target can be saved, but discovery needs Tavily or SerpApi connected.</p>}<ConfirmationForm key={active.id} run={active} onSaved={saved} /></>}
       {results && <><div className="results-toolbar"><div><h2>{active.records.length} {active.records.length === 1 ? 'company' : 'companies'} researched</h2><p>{active.status === 'partial' ? 'Some questions remain open. Review the unknowns before using these records.' : 'Model assessments are ready for your review.'}</p></div>{!!active.records.length && <div className="export-controls"><label className="checkbox-label"><input type="checkbox" checked={acceptedOnly} onChange={e => setAcceptedOnly(e.target.checked)} />Accepted only</label><div className="export-links">{(['csv', 'json'] as const).map(format => <a className="secondary button-link" key={format} href={`/api/runs/${active.id}/export?format=${format}&accepted_only=${acceptedOnly}`}>Export {format.toUpperCase()}</a>)}</div></div>}</div>
         {active.error && <p className="notice" role="status">{active.error}</p>}
         {active.profile && <details className="target-summary"><summary>Confirmed target and offer</summary><p>{active.profile.offer}</p><p>{active.profile.target}</p>{!!active.profile.exclusions.length && <p>Exclusions: {active.profile.exclusions.join('; ')}</p>}<p className="hint">Confirmed {date(active.profile.confirmed_at)}. Start a new run to change this target.</p></details>}

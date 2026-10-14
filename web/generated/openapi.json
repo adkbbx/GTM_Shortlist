@@ -540,12 +540,17 @@
           "gemma_ready": {
             "type": "boolean",
             "title": "Gemma Ready"
+          },
+          "worker_online": {
+            "type": "boolean",
+            "title": "Worker Online"
           }
         },
         "type": "object",
         "required": [
           "search_ready",
-          "gemma_ready"
+          "gemma_ready",
+          "worker_online"
         ],
         "title": "Health"
       },
@@ -667,6 +672,70 @@
           "confirmed_at"
         ],
         "title": "Profile"
+      },
+      "ProgressEvent": {
+        "properties": {
+          "phase": {
+            "type": "string",
+            "enum": [
+              "seller",
+              "confirmation",
+              "discovery",
+              "research",
+              "review"
+            ],
+            "title": "Phase"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 400,
+            "minLength": 3,
+            "title": "Label"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "started",
+              "succeeded",
+              "failed",
+              "reused",
+              "waiting"
+            ],
+            "title": "State"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 400
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "phase",
+          "label",
+          "state",
+          "detail",
+          "id",
+          "created_at"
+        ],
+        "title": "ProgressEvent"
       },
       "Research": {
         "properties": {
@@ -851,6 +920,47 @@
         ],
         "title": "Review"
       },
+      "RunProgress": {
+        "properties": {
+          "worker_online": {
+            "type": "boolean",
+            "title": "Worker Online"
+          },
+          "candidates": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Candidates"
+          },
+          "sources": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Sources"
+          },
+          "companies": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Companies"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/ProgressEvent"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Events"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "worker_online",
+          "candidates",
+          "sources",
+          "companies",
+          "events"
+        ],
+        "title": "RunProgress"
+      },
       "RunView": {
         "properties": {
           "id": {
@@ -930,6 +1040,9 @@
             },
             "type": "array",
             "title": "Attempts"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/RunProgress"
           }
         },
         "type": "object",
@@ -941,7 +1054,8 @@
           "records",
           "created_at",
           "updated_at",
-          "attempts"
+          "attempts",
+          "progress"
         ],
         "title": "RunView"
       },

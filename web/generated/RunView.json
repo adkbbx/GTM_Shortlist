@@ -266,6 +266,71 @@
       "title": "Profile",
       "type": "object"
     },
+    "ProgressEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "phase": {
+          "enum": [
+            "seller",
+            "confirmation",
+            "discovery",
+            "research",
+            "review"
+          ],
+          "title": "Phase",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 400,
+          "minLength": 3,
+          "title": "Label",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "started",
+            "succeeded",
+            "failed",
+            "reused",
+            "waiting"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "maxLength": 400,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "id": {
+          "title": "Id",
+          "type": "integer"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "phase",
+        "label",
+        "state",
+        "detail",
+        "id",
+        "created_at"
+      ],
+      "title": "ProgressEvent",
+      "type": "object"
+    },
     "Research": {
       "additionalProperties": false,
       "properties": {
@@ -417,6 +482,47 @@
         "reviewed_at"
       ],
       "title": "Review",
+      "type": "object"
+    },
+    "RunProgress": {
+      "additionalProperties": false,
+      "properties": {
+        "worker_online": {
+          "title": "Worker Online",
+          "type": "boolean"
+        },
+        "candidates": {
+          "minimum": 0,
+          "title": "Candidates",
+          "type": "integer"
+        },
+        "sources": {
+          "minimum": 0,
+          "title": "Sources",
+          "type": "integer"
+        },
+        "companies": {
+          "minimum": 0,
+          "title": "Companies",
+          "type": "integer"
+        },
+        "events": {
+          "items": {
+            "$ref": "#/$defs/ProgressEvent"
+          },
+          "maxItems": 100,
+          "title": "Events",
+          "type": "array"
+        }
+      },
+      "required": [
+        "worker_online",
+        "candidates",
+        "sources",
+        "companies",
+        "events"
+      ],
+      "title": "RunProgress",
       "type": "object"
     },
     "SavedRecord": {
@@ -664,6 +770,9 @@
       },
       "title": "Attempts",
       "type": "array"
+    },
+    "progress": {
+      "$ref": "#/$defs/RunProgress"
     }
   },
   "required": [
@@ -674,7 +783,8 @@
     "records",
     "created_at",
     "updated_at",
-    "attempts"
+    "attempts",
+    "progress"
   ],
   "title": "RunView",
   "type": "object"

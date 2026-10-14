@@ -18,7 +18,9 @@ from shortlist.store import Store
 from shortlist.verification import Judgment, Verification, assessments
 from shortlist.worker import execute_run
 
-settings = Settings(db_path=Path(os.environ.get("SHORTLIST_UI_TEST_DB", "data/ui-test.sqlite3")))
+settings = Settings(db_path=Path(os.environ.get("SHORTLIST_UI_TEST_DB", "data/ui-test.sqlite3")),
+                    tavily_key="labelled_fixture_not_a_real_key", gemma_base_url="https://labelled-fixture.example",
+                    gemma_model="labelled_fixture")
 store = Store(settings.db_path)
 
 
@@ -32,6 +34,7 @@ class FixtureSearch:
 
 
 def fixture_fetch(url, expected_domain=None):
+    time.sleep(.15)  # Observable test-provider work, not a simulated UI progress timer.
     text = ("TEST FIXTURE. This is synthetic test content, not a real company. "
             "We provide artificial intelligence software for business operations as a hosted subscription. "
             "Example Labs is a privately held startup. No buying intent has been observed.")
@@ -52,10 +55,12 @@ class FixtureModel:
                                Criterion(id="private", description="Privately held startup")], unknowns=[])
 
     def verify(self, profile, record):
+        time.sleep(.2)
         return Verification(judgments=[Judgment(assessment_id=a["assessment_id"], verdict="entailed",
             reason="Labelled synthetic fixture judgment") for a in assessments(profile, record)])
 
     def research(self, profile, candidate, sources):
+        time.sleep(.5)
         findings = []
         for criterion in profile.criteria:
             if candidate.domain == "example-2.com" and criterion.id == "private":
@@ -85,6 +90,7 @@ class FixtureModel:
 
 def loop():
     while True:
+        store.worker_heartbeat("labelled_browser_fixture")
         for run in store.list_runs():
             if run["status"] in ("queued", "running"):
                 execute_run(store, settings, run["id"], search=FixtureSearch(), model=FixtureModel(), fetch=fixture_fetch)

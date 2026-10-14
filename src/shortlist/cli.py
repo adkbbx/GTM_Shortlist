@@ -5,6 +5,7 @@ from pathlib import Path
 from shortlist.config import Settings
 from shortlist.domain import Profile
 from shortlist.export import export_run
+from shortlist.local_server import serve
 from shortlist.providers import CapturedSearch
 from shortlist.store import Store
 from shortlist.worker import execute_run, work
@@ -22,6 +23,8 @@ def main():
     resume.add_argument("run_id")
     worker = sub.add_parser("worker")
     worker.add_argument("--once", action="store_true")
+    server = sub.add_parser("serve", help="Start the local API and research worker together")
+    server.add_argument("--port", type=int, choices=range(1024, 65536), default=8014, metavar="PORT")
     show = sub.add_parser("show")
     show.add_argument("run_id")
     export = sub.add_parser("export")
@@ -43,6 +46,8 @@ def main():
         execute_run(store, settings, args.run_id)
     elif args.command == "worker":
         work(settings, args.once)
+    elif args.command == "serve":
+        serve(settings, args.port)
     elif args.command == "show":
         print(json.dumps(store.get_run(args.run_id), ensure_ascii=False, indent=2))
     elif args.command == "export":

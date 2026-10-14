@@ -12,6 +12,7 @@ from shortlist.config import Settings
 from shortlist.domain import Profile, Research, Review, Target
 from shortlist.export import export_run
 from shortlist.fetch import canonical_url
+from shortlist.progress import RunProgress
 from shortlist.providers import SellerDraft
 from shortlist.store import Conflict, Store
 
@@ -55,12 +56,14 @@ class RunView(BaseModel):
     created_at: datetime
     updated_at: datetime
     attempts: list[AttemptView]
+    progress: RunProgress
 
 
 class Health(BaseModel):
     mode: Literal["local"] = "local"
     search_ready: bool
     gemma_ready: bool
+    worker_online: bool
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -95,12 +98,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return RunView(id=run_id, seller_url=profile.seller_url if profile else run["checkpoint"]["seller_url"],
                        status=run["status"], stage=run["stage"], profile=profile, draft=run["checkpoint"].get("draft"),
                        records=run["records"], error=run["error"], created_at=run["created_at"],
-                       updated_at=run["updated_at"], attempts=run["attempts"])
+                       updated_at=run["updated_at"], attempts=run["attempts"], progress=RunProgress(
+                           worker_online=store.worker_online(), candidates=len(run["checkpoint"].get("candidates", [])),
+                           sources=len({s["id"] for pages in run["checkpoint"].get("sources", {}).values() for s in pages}),
+                           companies=len(run["records"]), events=run["events"]))
 
     @app.get("/api/health", response_model=Health)
     def health():
         readiness = settings.readiness()
-        return Health(search_ready=readiness["search"], gemma_ready=readiness["gemma"])
+        return Health(search_ready=readiness["search"], gemma_ready=readiness["gemma"], worker_online=store.worker_online())
 
     @app.get("/api/runs", response_model=list[RunView])
     def runs():

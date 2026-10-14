@@ -13,11 +13,16 @@
     "gemma_ready": {
       "title": "Gemma Ready",
       "type": "boolean"
+    },
+    "worker_online": {
+      "title": "Worker Online",
+      "type": "boolean"
     }
   },
   "required": [
     "search_ready",
-    "gemma_ready"
+    "gemma_ready",
+    "worker_online"
   ],
   "title": "Health",
   "type": "object"

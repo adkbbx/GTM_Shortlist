@@ -1,5 +1,5 @@
-import time
 from collections.abc import Callable
+from threading import Event, Thread
 
 from shortlist.config import Settings
 from shortlist.domain import (
@@ -10,9 +10,11 @@ from shortlist.domain import (
     Source,
     Unknown,
     exclusion_id,
+    new_id,
 )
 from shortlist.fetch import FetchError, canonical_url, domain_of, fetch_page
 from shortlist.journal import call_step
+from shortlist.progress import ProgressUpdate, step_label
 from shortlist.providers import (
     Gemma,
     ModelOutputError,
@@ -42,8 +44,25 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
     model = model or Gemma(settings)
 
     def call(kind: str, provider: str, operation: str, function, inputs: dict, decode):
-        return call_step(store, run_id, fence, settings.global_search_cap, kind=kind, provider=provider,
-                         operation=operation, function=function, inputs=inputs, decode=decode)
+        phase = "seller" if operation.startswith("seller:") else "discovery" if kind == "search" else "research"
+        label = step_label(kind, operation)
+        dispatched = False
+
+        def traced():
+            nonlocal dispatched
+            dispatched = True
+            store.event(run_id, fence, ProgressUpdate(phase=phase, label=label, state="started"))
+            return function()
+
+        try:
+            result = call_step(store, run_id, fence, settings.global_search_cap, kind=kind, provider=provider,
+                               operation=operation, function=traced, inputs=inputs, decode=decode)
+        except (ProviderError, FetchError, BudgetExceeded) as exc:
+            store.event(run_id, fence, ProgressUpdate(phase=phase, label=label, detail=str(exc)[:400], state="failed"))
+            raise
+        store.event(run_id, fence, ProgressUpdate(phase=phase, label=label,
+                                                  state="succeeded" if dispatched else "reused"))
+        return result
 
     def page(url: str, domain: str, operation: str, *, seller: bool = False):
         url = canonical_url(url)
@@ -52,6 +71,8 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
             checkpoint.setdefault("source_reuse", {})[operation] = {
                 "source_id": source.id, "retrieved_at": source.retrieved_at.isoformat(),
                 "max_age_hours": settings.source_cache_hours}
+            store.event(run_id, fence, ProgressUpdate(phase="seller" if seller else "research",
+                label="Reusing a fresh saved page from " + domain, state="reused"))
             return source
         source = call("fetch", "https", operation,
                       lambda: fetch(url) if seller else fetch(url, expected_domain=domain),
@@ -62,6 +83,8 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
         return source
 
     try:
+        store.event(run_id, fence, ProgressUpdate(phase="seller" if run["stage"] == "seller" else "discovery",
+                                                   label="Research worker picked up your saved run", state="succeeded"))
         if run["stage"] == "seller":
             error = None
             try:
@@ -78,6 +101,8 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 if isinstance(exc, ModelOutputError):
                     checkpoint["seller_model_output"] = exc.diagnostic()
                 error = str(exc) + ". Enter and confirm your offer and target manually to continue."
+            store.event(run_id, fence, ProgressUpdate(phase="confirmation", label="Ready for your offer and target confirmation",
+                                                       state="waiting"))
             store.checkpoint(run_id, fence, "confirmation", checkpoint, "awaiting_confirmation", error)
             return True
         profile = Profile.model_validate(run["profile"])
@@ -97,6 +122,8 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
             unique = {c["domain"]: c for c in reversed(discovered)}
             checkpoint["candidates"] = list(reversed(list(unique.values())))[:12]
             store.checkpoint(run_id, fence, "research", checkpoint)
+            store.event(run_id, fence, ProgressUpdate(phase="discovery",
+                label=f"Saved {len(checkpoint['candidates'])} unique company candidates", state="succeeded"))
         researched = {r["research"]["domain"] for r in store.get_run(run_id)["records"]}
         for data in checkpoint["candidates"][:6]:
             candidate = Candidate.model_validate(data)
@@ -185,10 +212,14 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                     record = unavailable(profile, record, str(exc))
                     checkpoint.setdefault("verification", {})[candidate.domain] = {"error": str(exc)}
             store.save_record(run_id, fence, record)
+            store.event(run_id, fence, ProgressUpdate(phase="research", label="Saved research for " + candidate.domain,
+                                                       state="succeeded"))
             store.checkpoint(run_id, fence, "research", checkpoint)
         records = store.get_run(run_id)["records"]
         incomplete_pages = any(checkpoint.get("page_failures", {}).values())
         partial = not records or incomplete_pages or any(r["research"]["status"] == "partial" for r in records)
+        store.event(run_id, fence, ProgressUpdate(phase="review", label=f"Saved {len(records)} companies for your review",
+                                                   state="waiting"))
         store.checkpoint(run_id, fence, "review", checkpoint, "partial" if partial else "ready",
                          ("No readable company evidence could be collected" if checkpoint.get("candidate_failures")
                           else "No candidate companies found") if not records else
@@ -196,6 +227,8 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
     except (ProviderError, FetchError, BudgetExceeded, Conflict) as exc:
         # Lost lease cannot write; the replacement worker owns the current state.
         try:
+            store.event(run_id, fence, ProgressUpdate(phase="seller" if run["stage"] == "seller" else "research",
+                                                       label=str(exc)[:400], state="failed"))
             store.checkpoint(run_id, fence, run["stage"], checkpoint, "partial", str(exc))
         except Conflict:
             pass
@@ -204,9 +237,24 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
 
 def work(settings: Settings, once: bool = False):
     store = Store(settings.db_path)
-    while True:
-        for run_id in store.pending_runs():
-            execute_run(store, settings, run_id)
-        if once:
-            return
-        time.sleep(2)
+    worker_id = new_id()
+    stopped = Event()
+    store.worker_heartbeat(worker_id)
+
+    def heartbeat():
+        while not stopped.wait(5):
+            store.worker_heartbeat(worker_id)
+
+    thread = Thread(target=heartbeat, name="shortlist-worker-heartbeat", daemon=True)
+    thread.start()
+    try:
+        while True:
+            for run_id in store.pending_runs():
+                execute_run(store, settings, run_id)
+            if once:
+                return
+            stopped.wait(2)
+    finally:
+        stopped.set()
+        thread.join(timeout=5)
+        store.remove_worker(worker_id)

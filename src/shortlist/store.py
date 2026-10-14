@@ -16,6 +16,7 @@ from shortlist.domain import (
     utcnow,
 )
 from shortlist.fetch import domain_of
+from shortlist.progress import ProgressUpdate
 
 
 class Conflict(ValueError):
@@ -27,6 +28,8 @@ class BudgetExceeded(ValueError):
 
 
 class Store:
+    order_key = "rowid"
+
     def __init__(self, path: Path):
         self.path = path
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -59,7 +62,16 @@ class Store:
                     retrieved_epoch REAL NOT NULL, payload TEXT NOT NULL
                 );
                 CREATE INDEX IF NOT EXISTS source_cache_lookup ON source_cache(requested_url,domain,retrieved_epoch);
+                CREATE TABLE IF NOT EXISTS run_events (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT, run_id TEXT NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
+                    phase TEXT NOT NULL, label TEXT NOT NULL, state TEXT NOT NULL, created_at TEXT NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS worker_heartbeats (
+                    id TEXT PRIMARY KEY, expires_at REAL NOT NULL
+                );
             """)
+            if "detail" not in {row["name"] for row in db.execute("PRAGMA table_info(run_events)")}:
+                db.execute("ALTER TABLE run_events ADD COLUMN detail TEXT")
 
     @contextmanager
     def connection(self):
@@ -75,6 +87,35 @@ class Store:
         finally:
             db.close()
 
+    def begin(self, db):
+        db.execute("BEGIN IMMEDIATE")
+
+    def event(self, run_id: str, fence: int, update: ProgressUpdate):
+        with self.connection() as db:
+            self.begin(db)
+            self._assert_lease(db, run_id, fence)
+            db.execute("INSERT INTO run_events(run_id,phase,label,state,detail,created_at) VALUES (?,?,?,?,?,?)",
+                       (run_id, update.phase, update.label, update.state, update.detail, utcnow().isoformat()))
+
+    def worker_heartbeat(self, worker_id: str):
+        with self.connection() as db:
+            db.execute("INSERT INTO worker_heartbeats(id,expires_at) VALUES (?,?) "
+                       "ON CONFLICT(id) DO UPDATE SET expires_at=excluded.expires_at", (worker_id, time.time() + 20))
+
+    def worker_online(self) -> bool:
+        with self.connection() as db:
+            return bool(db.execute("SELECT 1 FROM worker_heartbeats WHERE expires_at>? LIMIT 1", (time.time(),)).fetchone())
+
+    def remove_worker(self, worker_id: str):
+        with self.connection() as db:
+            db.execute("DELETE FROM worker_heartbeats WHERE id=?", (worker_id,))
+
+    def reserve_global_search(self, db, provider: str, month: str, cap: int):
+        total = db.execute("SELECT count(*) FROM attempts WHERE provider=? AND kind='search' AND month=?",
+                           (provider, month)).fetchone()[0]
+        if total >= cap:
+            raise BudgetExceeded("Global monthly search cap reached")
+
     def cached_source(self, url: str, domain: str, max_age_hours: int, *, run_id: str, operation: str) -> Source | None:
         if max_age_hours == 0:
             return None
@@ -83,7 +124,7 @@ class Store:
             if db.execute("SELECT 1 FROM attempts WHERE run_id=? AND operation_key=?", (run_id, operation)).fetchone():
                 return None  # Journal recovery/uncertainty takes precedence over cache reuse.
             row = db.execute("SELECT * FROM source_cache WHERE requested_url=? AND domain=? "
-                             "AND retrieved_epoch BETWEEN ? AND ? ORDER BY retrieved_epoch DESC,rowid DESC LIMIT 1",
+                             f"AND retrieved_epoch BETWEEN ? AND ? ORDER BY retrieved_epoch DESC,{self.order_key} DESC LIMIT 1",
                              (url, domain, now - max_age_hours * 3600, now)).fetchone()
         if row is None:
             return None
@@ -102,12 +143,13 @@ class Store:
         if domain_of(url) != source.company_domain or domain_of(source.url) != source.company_domain:
             raise Conflict("Cached source URL must belong to its company")
         with self.connection() as db:
-            db.execute("BEGIN IMMEDIATE")
+            self.begin(db)
             self._assert_lease(db, run_id, fence)
             existing = db.execute("SELECT payload FROM source_cache WHERE source_id=?", (source.id,)).fetchone()
             if existing and existing["payload"] != source.model_dump_json():
                 raise Conflict("Source snapshots cannot be changed")
-            db.execute("INSERT OR IGNORE INTO source_cache VALUES (?,?,?,?,?)",
+            db.execute("INSERT INTO source_cache(source_id,requested_url,domain,retrieved_epoch,payload) VALUES (?,?,?,?,?) "
+                       "ON CONFLICT(source_id) DO NOTHING",
                        (source.id, url, source.company_domain, source.retrieved_at.timestamp(), source.model_dump_json()))
 
     def create_run(self, profile: Profile, request_key: str) -> str:
@@ -115,7 +157,7 @@ class Store:
         payload = profile.model_dump(mode="json", exclude={"id", "confirmed_at"})
         digest = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
         with self.connection() as db:
-            db.execute("BEGIN IMMEDIATE")
+            self.begin(db)
             existing = db.execute("SELECT id,payload_hash FROM runs WHERE request_key=?", (request_key,)).fetchone()
             if existing:
                 if existing["payload_hash"] != digest:
@@ -138,30 +180,33 @@ class Store:
             result["checkpoint"] = json.loads(result["checkpoint"])
             result["records"] = [{"research": json.loads(r["research"]),
                                   "review": json.loads(r["review"]) if r["review"] else None}
-                                 for r in db.execute("SELECT research,review FROM records WHERE run_id=? ORDER BY rowid", (run_id,))]
+                                 for r in db.execute(f"SELECT research,review FROM records WHERE run_id=? ORDER BY {self.order_key}", (run_id,))]
             if result["profile"]:
                 profile = Profile.model_validate(result["profile"])
                 for item in result["records"]:
                     item["research"] = read_research(profile, item["research"]).model_dump(mode="json")
             result["attempts"] = [dict(a) for a in db.execute(
                 "SELECT provider,kind,state,created_at FROM attempts WHERE run_id=? ORDER BY created_at,id", (run_id,))]
+            result["events"] = [dict(e) for e in db.execute(
+                "SELECT * FROM (SELECT id,phase,label,state,detail,created_at FROM run_events WHERE run_id=? "
+                "ORDER BY id DESC LIMIT 100) recent ORDER BY id", (run_id,))]
             return result
 
     def list_runs(self) -> list[dict]:
         with self.connection() as db:
             return [dict(row) for row in db.execute(
-                "SELECT id,status,stage,created_at,updated_at,error FROM runs ORDER BY created_at DESC,rowid DESC LIMIT 100")]
+                f"SELECT id,status,stage,created_at,updated_at,error FROM runs ORDER BY created_at DESC,{self.order_key} DESC LIMIT 100")]
 
     def pending_runs(self) -> list[str]:
         with self.connection() as db:
             return [row["id"] for row in db.execute(
                 "SELECT id FROM runs WHERE status IN ('queued','running') AND lease_until<=? "
-                "ORDER BY created_at,rowid LIMIT 50", (time.time(),))]
+                f"ORDER BY created_at,{self.order_key} LIMIT 50", (time.time(),))]
 
     def create_draft(self, seller_url: str, request_key: str) -> str:
         digest = hashlib.sha256(seller_url.encode()).hexdigest()
         with self.connection() as db:
-            db.execute("BEGIN IMMEDIATE")
+            self.begin(db)
             row = db.execute("SELECT id,payload_hash FROM runs WHERE request_key=?", (request_key,)).fetchone()
             if row:
                 if row["payload_hash"] != digest:
@@ -176,7 +221,7 @@ class Store:
 
     def confirm_draft(self, run_id: str, profile: Profile):
         with self.connection() as db:
-            db.execute("BEGIN IMMEDIATE")
+            self.begin(db)
             row = db.execute("SELECT * FROM runs WHERE id=?", (run_id,)).fetchone()
             if not row:
                 raise KeyError(run_id)
@@ -195,7 +240,7 @@ class Store:
 
     def claim(self, run_id: str, lease_seconds: int = 180) -> int | None:
         with self.connection() as db:
-            db.execute("BEGIN IMMEDIATE")
+            self.begin(db)
             now = time.time()
             row = db.execute("SELECT status,lease_until,fence FROM runs WHERE id=?", (run_id,)).fetchone()
             if not row or row["status"] not in ("queued", "running") or row["lease_until"] > now:
@@ -213,7 +258,7 @@ class Store:
     def checkpoint(self, run_id: str, fence: int, stage: str, payload: dict,
                    status: str = "running", error: str | None = None):
         with self.connection() as db:
-            db.execute("BEGIN IMMEDIATE")
+            self.begin(db)
             self._assert_lease(db, run_id, fence)
             db.execute("UPDATE runs SET stage=?,checkpoint=?,status=?,error=?,updated_at=?,lease_until=? WHERE id=?",
                        (stage, json.dumps(payload), status, error, utcnow().isoformat(),
@@ -224,7 +269,7 @@ class Store:
         caps = {"search": 4, "model": 8, "fetch": 21}
         month = utcnow().strftime("%Y-%m")
         with self.connection() as db:
-            db.execute("BEGIN IMMEDIATE")
+            self.begin(db)
             self._assert_lease(db, run_id, fence)
             if db.execute("SELECT 1 FROM attempts WHERE run_id=? AND operation_key=?", (run_id, operation_key)).fetchone():
                 raise Conflict("Operation already dispatched; recover saved outcome or stop conservatively")
@@ -232,12 +277,10 @@ class Store:
             if used >= caps[kind]:
                 raise BudgetExceeded(f"Run {kind} attempt cap reached")
             if kind == "search":
-                total = db.execute("SELECT count(*) FROM attempts WHERE provider=? AND kind='search' AND month=?",
-                                   (provider, month)).fetchone()[0]
-                if total >= global_cap:
-                    raise BudgetExceeded("Global monthly search cap reached")
+                self.reserve_global_search(db, provider, month, global_cap)
             attempt_id = new_id()
-            db.execute("INSERT INTO attempts VALUES (?,?,?,?,?,?,?,?)",
+            db.execute("INSERT INTO attempts(id,run_id,provider,kind,month,operation_key,state,created_at) "
+                       "VALUES (?,?,?,?,?,?,?,?)",
                        (attempt_id, run_id, provider, kind, month, operation_key, "outcome_unknown", utcnow().isoformat()))
             db.execute("INSERT INTO attempt_results(attempt_id,request_hash) VALUES (?,?)", (attempt_id, request_hash))
             return attempt_id
@@ -267,7 +310,7 @@ class Store:
         if state not in ("succeeded", "failed"):
             raise ValueError("Invalid provider outcome")
         with self.connection() as db:
-            db.execute("BEGIN IMMEDIATE")
+            self.begin(db)
             self._assert_lease(db, run_id, fence)
             changed = db.execute("UPDATE attempts SET state=? WHERE id=? AND run_id=? AND state='outcome_unknown'",
                                  (state, attempt_id, run_id)).rowcount
@@ -281,7 +324,7 @@ class Store:
 
     def save_record(self, run_id: str, fence: int, record: Research):
         with self.connection() as db:
-            db.execute("BEGIN IMMEDIATE")
+            self.begin(db)
             self._assert_lease(db, run_id, fence)
             # A completed record is immutable; retried checkpoints preserve review decisions.
             db.execute("INSERT INTO records(id,run_id,domain,research) VALUES (?,?,?,?) ON CONFLICT(run_id,domain) DO NOTHING",

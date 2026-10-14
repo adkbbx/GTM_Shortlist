@@ -32,6 +32,10 @@ test('saved seller → confirmation → evidence → review → export survives 
   await noOverflow(page);
   await capture(page, `.impeccable/review/${testInfo.project.name}-confirmation.png`);
   await page.getByRole('button', { name: 'Confirm target and discover' }).click();
+  await expect(page.getByRole('heading', { name: 'Building your shortlist' })).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toBeVisible();
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${testInfo.project.name}-progress.png`);
   await expect(page.getByRole('heading', { name: '2 companies researched' })).toBeVisible({ timeout: 15000 });
   const first = page.locator('.company-sheet').first();
   await first.locator('summary').first().click();
@@ -53,6 +57,9 @@ test('saved seller → confirmation → evidence → review → export survives 
   await page.reload();
   await expect(first.getByText('Saved: accepted')).toBeVisible();
   await expect(first.getByLabel('Review note')).toHaveValue('Accepted after inspecting the fixture passage');
+  await page.locator('.progress-history > summary').click();
+  await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toContainText('Checking that the evidence supports');
+  await page.locator('.progress-history > summary').click();
   await first.locator('summary').first().click();
   await first.locator('.exclusion-checks summary').first().click();
   await noOverflow(page);
@@ -80,6 +87,53 @@ test('saved seller → confirmation → evidence → review → export survives 
   expect(readFileSync(csvPath, 'utf-8')).toContain('sources_json');
   expect(readFileSync(csvPath, 'utf-8')).toContain('exclusion_findings_json');
   expect(errors).toEqual([]);
+});
+
+test('queued run explains an offline worker without pretending to research', async ({ page }, testInfo) => {
+  const response = await page.request.post('/api/sellers', { data: {
+    seller_url: 'https://eygentic.com/', request_key: `offline-${testInfo.project.name}-${Date.now()}`,
+  } });
+  const queued = await response.json();
+  const snapshot = { ...queued, status: 'queued', stage: 'seller', progress: {
+    ...queued.progress, worker_online: false, events: [],
+  } };
+  await page.route('**/api/runs', route => route.fulfill({ json: [snapshot] }));
+  await page.route(`**/api/runs/${queued.id}`, route => route.fulfill({ json: snapshot }));
+  await page.goto(`/?run=${queued.id}`);
+  await expect(page.getByRole('heading', { name: 'Research is waiting for a worker' })).toBeVisible();
+  await expect(page.getByText('The local worker is offline.', { exact: false })).toBeVisible();
+  await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toHaveCount(0);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${testInfo.project.name}-worker-offline.png`);
+});
+
+test('slow checkpoint responses stay serialized and recover into confirmation', async ({ page }, testInfo) => {
+  const response = await page.request.post('/api/sellers', { data: {
+    seller_url: 'https://eygentic.com/', request_key: `slow-${testInfo.project.name}-${Date.now()}`,
+  } });
+  const queued = await response.json();
+  const snapshot = { ...queued, status: 'running', stage: 'seller', progress: {
+    ...queued.progress, worker_online: true, events: [{
+      id: 1, phase: 'seller', label: 'Reading your company website', state: 'started', detail: null,
+      created_at: queued.created_at,
+    }],
+  } };
+  let inFlight = 0;
+  let maximum = 0;
+  let polls = 0;
+  await page.route('**/api/runs', route => route.fulfill({ json: [snapshot] }));
+  await page.route(`**/api/runs/${queued.id}`, async route => {
+    inFlight += 1; maximum = Math.max(maximum, inFlight); polls += 1;
+    const completed = polls >= 2;
+    await new Promise(resolve => setTimeout(resolve, 1800));
+    await route.fulfill({ json: completed ? { ...snapshot, status: 'awaiting_confirmation', stage: 'confirmation' } : snapshot });
+    inFlight -= 1;
+  });
+  await page.goto(`/?run=${queued.id}`);
+  await expect(page.getByRole('heading', { name: 'Understanding your company' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 10000 });
+  expect(maximum).toBe(1);
 });
 
 test('small screen, large text, keyboard and reduced motion remain usable', async ({ page }) => {

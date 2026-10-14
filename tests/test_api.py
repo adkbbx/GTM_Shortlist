@@ -38,4 +38,4 @@ def test_api_host_origin_and_input_rejections(tmp_path):
         "seller_url": "https://example.com", "request_key": "valid-key"}).status_code == 403
     assert client.post("/api/sellers", json={"seller_url": "https://127.1", "request_key": "valid-key"}).status_code == 422
     assert client.get("/api/runs/missing").status_code == 404
-    assert client.get("/api/health").json() == {"mode": "local", "search_ready": False, "gemma_ready": False}
+    assert client.get("/api/health").json() == {"mode": "local", "search_ready": False, "gemma_ready": False, "worker_online": False}
