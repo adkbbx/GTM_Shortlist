@@ -99,6 +99,7 @@ The unattended window ended on 14 October and its heartbeat is paused. Subsequen
 - [ ] Complete actual Supabase database provisioning, SMTP and successful Render startup with real accounts and persisted research.
 - [x] Apply actual Supabase schema migrations, provision restricted API/worker logins, and verify TLS, role separation and replay without credential rotation.
 - [ ] Import private runtime settings into Render and verify actual API/worker deployment, email and real account isolation.
+- [x] Verify public Render API/auth setup and responsive sign-in screen; handle temporary HTML or malformed API responses with a readable retry message. Worker, real signup and email remain unverified.
 - [x] Provide customer-readable Excel Shortlist/Evidence sheets and plain CSV columns; keep complete technical JSON, owner scoping and free accepted-only downloads.
 - [ ] Separate observable target criteria from pain-point hypotheses; improve candidate selection before detailed research.
 

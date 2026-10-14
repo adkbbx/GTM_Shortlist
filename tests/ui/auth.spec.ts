@@ -53,6 +53,26 @@ async function capture(page: Page, path: string) {
   await page.screenshot({ path, fullPage: true });
 }
 
+for (const failure of [
+  { status: 503, contentType: 'text/html', body: '<!DOCTYPE html><title>Starting up</title>' },
+  { status: 200, contentType: 'text/html', body: '<!DOCTYPE html><title>App shell</title>' },
+  { status: 200, contentType: 'application/json', body: '{broken' },
+]) {
+  test(`account setup recovers from ${failure.status} ${failure.contentType}`, async ({ page }, info) => {
+    await fixture(page);
+    await page.route('**/api/auth/setup', route => route.fulfill(failure));
+    await page.goto('/');
+    await expect(page.getByRole('alert')).toContainText('We could not connect to the app service');
+    await expect(page.getByRole('alert')).not.toContainText('Unexpected token');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+    await capture(page, `.impeccable/review/${info.project.name}-account-service-error.png`);
+    await page.unroute('**/api/auth/setup');
+    await fixture(page);
+    await page.getByRole('button', { name: 'Retry account access' }).click();
+    await expect(page.getByRole('heading', { name: 'Sign in to your shortlist' })).toBeVisible();
+  });
+}
+
 test('signup confirmation, sign-in errors and password reset remain usable', async ({ page }, info) => {
   const backend = await fixture(page);
   await page.goto('/');

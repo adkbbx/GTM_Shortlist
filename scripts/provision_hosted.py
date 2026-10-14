@@ -44,6 +44,15 @@ def private_env(path, values):
     os.replace(temporary, path)
 
 
+def worker_provider_settings(settings, previous):
+    defaults = {"SHORTLIST_SEARCH_PROVIDER": settings.search_provider,
+                "TAVILY_API_KEY": settings.tavily_key.get_secret_value(),
+                "SERPAPI_API_KEY": settings.serpapi_key.get_secret_value(),
+                "GEMMA_BASE_URL": settings.gemma_base_url, "GEMMA_MODEL": settings.gemma_model,
+                "GEMMA_API_KEY": settings.gemma_key.get_secret_value()}
+    return {key: previous.get(key, value) for key, value in defaults.items()}
+
+
 def main():
     operator = dotenv_values(PRIVATE / "migrate.env").get("SHORTLIST_MIGRATION_DATABASE_URL")
     public = dotenv_values(PRIVATE / "supabase-public.env")
@@ -86,11 +95,8 @@ def main():
     previous = dotenv_values(PRIVATE / "worker.env")
     settings = apply_local_credentials(Settings.load())
     private_env(PRIVATE / "worker.env", {**shared, "SHORTLIST_DATABASE_URL": connections["worker"],
-                "SHORTLIST_WORKER_DATABASE_URL": connections["worker"], "SHORTLIST_SEARCH_PROVIDER": settings.search_provider,
-                "TAVILY_API_KEY": settings.tavily_key.get_secret_value(), "SERPAPI_API_KEY": settings.serpapi_key.get_secret_value(),
-                **{key: previous.get(key) or value for key, value in {
-                    "GEMMA_BASE_URL": settings.gemma_base_url, "GEMMA_MODEL": settings.gemma_model,
-                    "GEMMA_API_KEY": settings.gemma_key.get_secret_value()}.items()},
+                "SHORTLIST_WORKER_DATABASE_URL": connections["worker"],
+                **worker_provider_settings(settings, previous),
                 "SHORTLIST_GLOBAL_SEARCH_CAP": str(settings.global_search_cap),
                 "SHORTLIST_SOURCE_CACHE_HOURS": str(settings.source_cache_hours)})
     print("Restricted API/worker logins authenticated with TLS; private Render environment files prepared. No deployment triggered.")

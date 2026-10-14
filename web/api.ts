@@ -49,7 +49,10 @@ async function request(path: string, body?: unknown): Promise<unknown> {
   const response = await authorizedFetch(path, body === undefined ? undefined : {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
   });
-  const data: unknown = await response.json();
+  const unavailable = 'We could not connect to the app service. It may be starting up or temporarily unavailable. Wait a moment, then try again.';
+  if (!response.headers.get('content-type')?.includes('application/json')) throw new Error(unavailable);
+  let data: unknown;
+  try { data = await response.json(); } catch { throw new Error(unavailable); }
   if (!response.ok) {
     const message = data && typeof data === 'object' && 'detail' in data && typeof data.detail === 'string'
       ? data.detail : 'The request could not be saved. Check the fields and try again.';

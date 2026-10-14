@@ -4,7 +4,17 @@ import pytest
 from dotenv import dotenv_values
 from psycopg.conninfo import conninfo_to_dict
 
-from scripts.provision_hosted import private_env, runtime_uri
+from scripts.provision_hosted import private_env, runtime_uri, worker_provider_settings
+from shortlist.config import Settings
+
+
+def test_worker_provider_edits_survive_provisioning_replay():
+    settings = Settings(search_provider="tavily", tavily_key="local-fixture", serpapi_key="local-other")
+    previous = {"SHORTLIST_SEARCH_PROVIDER": "serpapi", "SERPAPI_API_KEY": "worker-fixture", "TAVILY_API_KEY": ""}
+    result = worker_provider_settings(settings, previous)
+    assert all(result[key] == value for key, value in previous.items())
+    assert worker_provider_settings(settings, result) == result
+    assert worker_provider_settings(settings, {})["TAVILY_API_KEY"] == "local-fixture"
 
 
 def test_pooler_runtime_credentials_replace_operator_and_encode_password():
