@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, SecretStr, model_validator
 
 
 class Settings(BaseModel):
-    model_config = ConfigDict(extra="forbid", frozen=True)
+    model_config = ConfigDict(extra="forbid", frozen=True, hide_input_in_errors=True)
     db_path: Path = Path("data/shortlist.sqlite3")
     search_provider: str = "tavily"
     tavily_key: SecretStr = SecretStr("")

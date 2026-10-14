@@ -1,0 +1,40 @@
+services:
+  api:
+    image: ${SHORTLIST_IMAGE:?Set a reviewed GTM Shortlist image tag}
+    command: [api]
+    env_file: [./secrets/api.env]
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    depends_on:
+      worker:
+        condition: service_healthy
+  worker:
+    image: ${SHORTLIST_IMAGE:?Set a reviewed GTM Shortlist image tag}
+    command: [worker]
+    env_file: [./secrets/worker.env]
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    healthcheck:
+      test: [CMD, python, -m, shortlist.container_health, worker]
+  edge:
+    image: caddy:2@sha256:685ae3d7c34d9b5f8caeddc5d14051db7bbd88ff1f5a2fa0c16bd8ca328fb7af
+    environment:
+      SHORTLIST_HOST: ${SHORTLIST_HOST:?Set the public app hostname}
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - edge_certificates:/data
+      - edge_configuration:/config
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+volumes:
+  edge_certificates:
+  edge_configuration:

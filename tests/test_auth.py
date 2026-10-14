@@ -14,6 +14,15 @@ def hosted_settings(**overrides):
                     **overrides)
 
 
+def test_configuration_errors_do_not_print_raw_secret_inputs():
+    secret = "labelled-secret-must-not-appear-in-startup-logs"
+    with pytest.raises(ValidationError) as failed:
+        Settings(mode="hosted", app_url="http://invalid.example", supabase_url="https://auth.example",
+                 supabase_publishable_key="sb_publishable_fixture", database_url=secret, gemma_key=secret)
+    assert secret not in str(failed.value)
+    assert secret not in repr(failed.value)
+
+
 def test_verified_identity_comes_from_trusted_user_endpoint():
     identity = uuid4()
 
