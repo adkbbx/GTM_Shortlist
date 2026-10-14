@@ -1,12 +1,12 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-13T19:13:20.675780+00:00",
+  "generatedAt": "2026-10-14T03:25:45.570494+00:00",
   "title": "Design System: GTM Shortlist",
   "extensions": {
     "colorMeta": {
       "paper": {
         "role": "neutral",
-        "displayName": "Engineering Paper",
+        "displayName": "Warm Paper",
         "tonalRamp": [
           "oklch(15% 0.015 80)",
           "oklch(26% 0.015 80)",
@@ -100,20 +100,6 @@
           "oklch(73% 0 0)",
           "oklch(85% 0 0)",
           "oklch(95% 0 0)"
-        ]
-      },
-      "drafting-grid": {
-        "role": "neutral",
-        "displayName": "Drafting Grid",
-        "tonalRamp": [
-          "oklch(15% 0.025 60)",
-          "oklch(26% 0.025 60)",
-          "oklch(37% 0.025 60)",
-          "oklch(49% 0.025 60)",
-          "oklch(61% 0.025 60)",
-          "oklch(73% 0.025 60)",
-          "oklch(85% 0.025 60)",
-          "oklch(95% 0.025 60)"
         ]
       },
       "field": {
@@ -213,6 +199,34 @@
           "oklch(85% 0.06 55)",
           "oklch(95% 0.06 55)"
         ]
+      },
+      "sidebar": {
+        "role": "neutral",
+        "displayName": "Quiet Sidebar",
+        "tonalRamp": [
+          "oklch(15% .015 80)",
+          "oklch(26% .015 80)",
+          "oklch(37% .015 80)",
+          "oklch(49% .015 80)",
+          "oklch(61% .015 80)",
+          "oklch(73% .015 80)",
+          "oklch(85% .015 80)",
+          "oklch(95% .015 80)"
+        ]
+      },
+      "preview": {
+        "role": "neutral",
+        "displayName": "Output Guide",
+        "tonalRamp": [
+          "oklch(15% .015 80)",
+          "oklch(26% .015 80)",
+          "oklch(37% .015 80)",
+          "oklch(49% .015 80)",
+          "oklch(61% .015 80)",
+          "oklch(73% .015 80)",
+          "oklch(85% .015 80)",
+          "oklch(95% .015 80)"
+        ]
       }
     },
     "typographyMeta": {
@@ -225,33 +239,35 @@
         "purpose": "Readable quoted evidence with preserved whitespace."
       }
     },
-    "shadows": [
-      {
-        "name": "primary-button-ledge",
-        "value": "0 2px 0 #6a3417",
-        "purpose": "Approved inherited primary-button treatment only; research sheets, secondary actions and text actions remain flat."
-      }
-    ],
+    "shadows": [],
     "motion": [
       {
-        "name": "background-change",
-        "value": "background .2s",
-        "purpose": "Button state feedback."
+        "name": "control-state",
+        "value": ".18s ease",
+        "purpose": "Quiet state feedback without hover lift."
       },
       {
-        "name": "button-movement",
-        "value": "transform .15s",
-        "purpose": "Existing 1px hover/press response; disabled for reduced motion."
+        "name": "history-chevron",
+        "value": "transform .18s ease-out",
+        "purpose": "Native disclosure state; reduced motion disables transition."
       }
     ],
     "breakpoints": [
       {
-        "name": "compact-laptop",
+        "name": "start-stack",
+        "value": "1150px"
+      },
+      {
+        "name": "compact-actions",
         "value": "1050px"
       },
       {
         "name": "phone",
         "value": "700px"
+      },
+      {
+        "name": "narrow-phone",
+        "value": "360px"
       }
     ]
   },
@@ -262,7 +278,7 @@
       "refersTo": "button-primary",
       "description": "Confirm or save a user decision.",
       "html": "<button class=\"ds-primary\">Confirm target and discover</button>",
-      "css": ".ds-primary{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:52px;padding:12px 20px;border-radius:2px;font-weight:600;cursor:pointer;transition:background .2s,transform .15s;background:var(--orange,#b4501c);color:#fff;border:1px solid var(--orange,#b4501c);box-shadow:0 2px 0 #6a3417}.ds-primary:hover{background:#9b4215;transform:translateY(-1px)}.ds-primary:active{transform:translateY(1px)}.ds-primary:focus-visible{outline:2px solid var(--orange,#b4501c);outline-offset:4px}.ds-primary:disabled{opacity:.65;cursor:wait;transform:none}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}.ds-primary:hover,.ds-primary:active{transform:none}}"
+      "css": ".ds-primary{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:52px;padding:12px 20px;border-radius:8px;font-weight:600;cursor:pointer;transition:background .18s ease,color .18s ease,border-color .18s ease,transform .18s ease;background:var(--orange,#b4501c);color:#fff;border:1px solid var(--orange,#b4501c);box-shadow:none}.ds-primary:hover{background:#9b4215;transform:none}.ds-primary:active{transform:translateY(1px)}.ds-primary:focus-visible{outline:2px solid var(--orange,#b4501c);outline-offset:4px}.ds-primary:disabled{opacity:.65;cursor:wait;transform:none}@media(prefers-reduced-motion:reduce){.ds-primary{transition:none}.ds-primary:hover,.ds-primary:active{transform:none}}"
     },
     {
       "name": "Secondary action",
@@ -270,7 +286,7 @@
       "refersTo": "button-secondary",
       "description": "Review or add criteria without emphasizing a primary commitment.",
       "html": "<button class=\"ds-secondary\">Needs research</button>",
-      "css": ".ds-secondary{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:52px;padding:12px 20px;border-radius:2px;font-weight:600;cursor:pointer;transition:background .2s,transform .15s;background:var(--paper,#f7f7f5);color:var(--ink,#1b1b1b);border:1px solid var(--ink,#1b1b1b)}.ds-secondary:hover{background:#eeede9;transform:translateY(-1px)}.ds-secondary:active{transform:translateY(1px)}.ds-secondary:focus-visible{outline:2px solid var(--orange,#b4501c);outline-offset:4px}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none}.ds-secondary:hover,.ds-secondary:active{transform:none}}"
+      "css": ".ds-secondary{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:52px;padding:12px 20px;border-radius:8px;font-weight:600;cursor:pointer;transition:background .18s ease,color .18s ease,border-color .18s ease,transform .18s ease;background:var(--surface,#fff);color:var(--ink,#1b1b1b);border:1px solid #d4d1ca}.ds-secondary:hover{background:#f0eee9;border-color:#b9b5ad;transform:none}.ds-secondary:active{transform:translateY(1px)}.ds-secondary:focus-visible{outline:2px solid var(--orange,#b4501c);outline-offset:4px}@media(prefers-reduced-motion:reduce){.ds-secondary{transition:none}.ds-secondary:hover,.ds-secondary:active{transform:none}}"
     },
     {
       "name": "Text action",
@@ -278,7 +294,7 @@
       "refersTo": "button-text",
       "description": "A lighter corrective or rejection action.",
       "html": "<button class=\"ds-text\">Reject</button>",
-      "css": ".ds-text{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;min-height:44px;padding:8px 4px;background:none;color:var(--orange,#b4501c);border:0;border-radius:2px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:4px}.ds-text:hover{color:#6a3417}.ds-text:focus-visible{outline:2px solid var(--orange,#b4501c);outline-offset:4px}"
+      "css": ".ds-text{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;min-height:44px;padding:8px 4px;background:none;color:var(--orange,#b4501c);border:0;border-radius:8px;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:4px}.ds-text:hover{color:#6a3417}.ds-text:focus-visible{outline:2px solid var(--orange,#b4501c);outline-offset:4px}"
     },
     {
       "name": "Text field",
@@ -286,7 +302,7 @@
       "refersTo": "input",
       "description": "Editable seller information or research criteria.",
       "html": "<label class=\"ds-label\" for=\"ds-website\">Seller website</label><input class=\"ds-field\" id=\"ds-website\" type=\"url\" placeholder=\"https://your-company.com\" />",
-      "css": ".ds-label{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;display:block;font-size:.9375rem;font-weight:600;margin-bottom:8px;color:var(--ink,#1b1b1b)}.ds-field{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;width:100%;min-height:48px;padding:12px;background:#fff;color:var(--ink,#1b1b1b);border:1px solid #8c8881;border-radius:2px;caret-color:var(--orange,#b4501c)}.ds-field::placeholder{color:#68635c}.ds-field:focus-visible{outline:2px solid var(--orange,#b4501c);outline-offset:4px}"
+      "css": ".ds-label{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;display:block;font-size:.9375rem;font-weight:600;margin-bottom:8px;color:var(--ink,#1b1b1b)}.ds-field{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;width:100%;min-height:48px;padding:14px 16px;background:#fff;color:var(--ink,#1b1b1b);border:1px solid #c4c0b8;border-radius:8px;caret-color:var(--orange,#b4501c)}.ds-field::placeholder{color:#68635c}.ds-field:focus-visible{outline:2px solid var(--orange,#b4501c);outline-offset:4px} .ds-field:hover{border-color:#918b80}.ds-field:focus{border-color:var(--orange,#b4501c);box-shadow:0 0 0 3px #b4501c14}"
     },
     {
       "name": "Saved run navigation",
@@ -294,15 +310,15 @@
       "refersTo": "research-sheet",
       "description": "Persisted company domain, date, and research state.",
       "html": "<nav class=\"ds-nav\"><button class=\"ds-run\" aria-current=\"page\"><span>example.com</span><small>14 Oct 2026</small><small>Partial</small></button></nav>",
-      "css": ".ds-run{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;display:block;text-align:left;width:100%;min-height:86px;padding:12px 10px;background:var(--paper,#f7f7f5);color:var(--ink,#1b1b1b);border:0;border-bottom:1px solid var(--line,rgba(27,27,27,.16));cursor:pointer}.ds-run span{display:block;font-weight:600}.ds-run small{display:block;font-size:.75rem;color:var(--muted,#5c5853);margin-top:2px}.ds-run:hover,.ds-run[aria-current=page]{background:#eeede9}.ds-run[aria-current=page]{border-left:1px solid var(--orange,#b4501c)}.ds-run:focus-visible{outline:2px solid var(--orange,#b4501c);outline-offset:4px}"
+      "css": ".ds-run{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;display:block;text-align:left;width:100%;min-height:86px;padding:12px 10px;background:var(--surface,#fff);color:var(--ink,#1b1b1b);border:0;border-radius:8px;cursor:pointer}.ds-run span{display:block;font-weight:600}.ds-run small{display:block;font-size:.75rem;color:var(--muted,#64615b);margin-top:2px}.ds-run:hover,.ds-run[aria-current=page]{background:#eeede9}.ds-run[aria-current=page]{box-shadow:inset 3px 0 var(--orange,#b4501c)}.ds-run:focus-visible{outline:2px solid var(--orange,#b4501c);outline-offset:4px}"
     },
     {
       "name": "Research sheet",
       "kind": "card",
       "refersTo": "research-sheet",
-      "description": "A flat ruled container for company research.",
+      "description": "A white rounded container with quiet borders for company research.",
       "html": "<section class=\"ds-sheet\"><h2>Confirm what a good fit means</h2><p>Edit the offer and criteria before discovery.</p></section>",
-      "css": ".ds-sheet{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;padding:28px 32px;background:var(--paper,#f7f7f5);color:var(--ink,#1b1b1b);border:1px solid var(--line,rgba(27,27,27,.16));border-top:1px solid var(--ink,#1b1b1b);border-radius:0}.ds-sheet h2{margin:0;font-size:1.375rem;line-height:1.3;font-weight:700;letter-spacing:-.015em}.ds-sheet p{margin:12px 0 0;color:var(--muted,#5c5853)}"
+      "css": ".ds-sheet{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;padding:32px;background:var(--surface,#fff);color:var(--ink,#1b1b1b);border:1px solid var(--line,#e1dfd9);border-radius:14px}.ds-sheet h2{margin:0;font-size:1.375rem;line-height:1.3;font-weight:700;letter-spacing:-.015em}.ds-sheet p{margin:12px 0 0;color:var(--muted,#64615b)}"
     },
     {
       "name": "Source disclosure",
@@ -310,14 +326,14 @@
       "refersTo": "source-passage",
       "description": "An exact passage and provenance directly under its claim.",
       "html": "<details class=\"ds-evidence\"><summary>The company offers hosted software.<span>Inspect passage</span></summary><blockquote>Example passage for component preview only.</blockquote><a href=\"#source\">Source page</a><p>Publication date unknown</p></details>",
-      "css": ".ds-evidence{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;color:var(--ink,#1b1b1b)}.ds-evidence summary{cursor:pointer;min-height:44px;padding:10px 0;font-size:.9375rem;font-weight:600}.ds-evidence summary span{display:block;margin:5px 0 0 16px;font-size:.8125rem;font-weight:400;color:var(--orange,#b4501c)}.ds-evidence summary:focus-visible,.ds-evidence a:focus-visible{outline:2px solid var(--orange,#b4501c);outline-offset:4px}.ds-evidence blockquote{margin:12px 0 16px;padding:16px 20px;border:1px solid var(--line,rgba(27,27,27,.16));background:#fff;font-size:.9375rem;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}.ds-evidence a{display:inline-flex;align-items:center;min-height:44px;color:var(--orange,#b4501c);font-size:.8125rem;text-underline-offset:4px}.ds-evidence a:hover{color:#6a3417}.ds-evidence p{margin:3px 0 0;color:var(--muted,#5c5853);font-size:.8125rem}"
+      "css": ".ds-evidence{font-family:'Schibsted Grotesk',sans-serif;line-height:1.55;color:var(--ink,#1b1b1b)}.ds-evidence summary{cursor:pointer;min-height:44px;padding:10px 0;font-size:.9375rem;font-weight:600}.ds-evidence summary span{display:block;margin:5px 0 0 16px;font-size:.8125rem;font-weight:400;color:var(--orange,#b4501c)}.ds-evidence summary:focus-visible,.ds-evidence a:focus-visible{outline:2px solid var(--orange,#b4501c);outline-offset:4px}.ds-evidence blockquote{margin:12px 0 16px;padding:16px 20px;border:1px solid var(--line,#e1dfd9);background:#fff;font-size:.9375rem;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}.ds-evidence a{display:inline-flex;align-items:center;min-height:44px;color:var(--orange,#b4501c);font-size:.8125rem;text-underline-offset:4px}.ds-evidence a:hover{color:#6a3417}.ds-evidence p{margin:3px 0 0;color:var(--muted,#64615b);font-size:.8125rem}"
     }
   ],
   "narrative": {
-    "northStar": "Rocket assembly workshop and flight test lab",
-    "overview": "GTM Shortlist adopts Eygentic's existing engineering-paper identity. The implemented workspace feels like a technical research notebook: observations, criteria, source passages, and a shortlist a person can inspect before acting. Quiet paper, precise rules, restrained orange, and Schibsted Grotesk carry this world into the application.\n\nThis document records the local workspace in `web/styles.css` and `web/main.tsx`, inspected on 14 October 2026. It replaces the pre-implementation seed with observed application tokens while preserving the agreed identity. Eygentic's separate marketing website remains its own design authority; its marketing headline scale and illustrative palette are not application tokens.",
+    "northStar": "A clear research workspace",
+    "overview": "GTM Shortlist extends Eygentic's identity into the user-authorized modern product workspace. Paper, white surfaces, warm neutral rules, restrained orange, and Schibsted Grotesk create a calm setting for observations, source passages, and independent human review. Rounded controls and research sheets replace the earlier square drafting-sheet treatment.\n\nThis document records the latest CSS cascade in `web/styles.css` and the components in `web/main.tsx`, `web/ResearchProgress.tsx`, and `web/ResearchPreview.tsx`. The modern redesign is an explicitly authorized extension of the application system; it supersedes the earlier drafting grid, square sheets, and button ledge. Eygentic's separate marketing website remains its own authority.",
     "keyCharacteristics": [
-      "Engineering paper behind flat, ruled research sheets.",
+      "Warm paper behind white research surfaces with quiet borders.",
       "Orange ink identifies actions and active research states.",
       "Exact source passages remain readable beside labelled unknowns.",
       "Human review is visually distinct from model qualification."
@@ -340,7 +356,7 @@
       }
     ],
     "dos": [
-      "**Do** use paper, Schibsted Grotesk, ruled alignment, and restrained orange ink for new application surfaces.",
+      "**Do** use paper, white surfaces, Schibsted Grotesk, quiet borders, and restrained orange ink for new application surfaces.",
       "**Do** keep exact passages readable and show retrieval dates and unknown publication dates.",
       "**Do** distinguish model qualification, human acceptance, and buying intent.",
       "**Do** preserve visible keyboard focus, minimum control heights, and reduced-motion behavior.",
@@ -350,9 +366,9 @@
       "**Don't** introduce a dark sci-fi world, neon glows, glass, or glossy decorative rockets.",
       "**Don't** substitute Inter or Geist for the approved Schibsted Grotesk identity.",
       "**Don't** flood labels, rules, and backgrounds with orange.",
-      "**Don't** turn research into floating, rounded KPI cards or compress company sheets into three columns.",
+      "**Don't** replace inspectable research with decorative KPI cards or compress company sheets into three columns.",
       "**Don't** present inferred pain, unknown ownership, buying intent, or progress as observed fact.",
-      "**Don't** extend the inherited primary-button ledge into a general shadow vocabulary."
+      "**Don't** restore drafting backgrounds, offset button ledges, or ambient card shadows in this modern workspace."
     ]
   }
 }

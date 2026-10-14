@@ -1,8 +1,8 @@
 # Local research workspace direction
 
-Operate mode, code-led. The agreed Eygentic visual world is fixed. Use Schibsted Grotesk, paper, 40px drafting grid in outer space, restrained orange ink, 2px controls and ruled evidence sheets.
+Operate mode, code-led. The user authorized a modern product-workspace extension of Eygentic: keep Schibsted Grotesk, paper, restrained orange ink, truthful research and clear evidence. Use white surfaces, warm neutral borders, 8px controls and 14px sheets. Remove the drafting background and offset button ledges. DESIGN.md records the implemented cascade.
 
-First viewport: compact Eygentic header, saved runs at left on laptop, one primary seller-website form, and a short explanation of confirmation, evidence and review. On phone, saved runs become a horizontal strip above the form; the main task fills the width. The signature interaction is opening an exact cited passage directly under the criterion it supports, then recording an independent human decision.
+First viewport: compact Eygentic header, saved runs at left on laptop, one primary seller-website form beside an interactive Evidence/Unknowns guide, and a short explanation of confirmation and review. The guide is explicitly explanatory, never a company result. On phone, saved runs become a horizontal strip above the form; the main task fills the width. The signature interaction is opening an exact cited passage directly under the criterion it supports, then recording an independent human decision.
 
 The flow follows the selected experience sketch. No decorative animation or invented statistics. Confirmation edits are explicit; research status comes from the saved worker state. Failed pages/inference lead to manual confirmation or partial records. No provider is presented as configured when it is unavailable. External signup and booking remain gated on hosted implementation.
 

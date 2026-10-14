@@ -3,7 +3,11 @@ import type { Page } from '@playwright/test';
 import { mkdirSync, readFileSync } from 'node:fs';
 
 async function noOverflow(page: Page) {
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+  const layout = await page.evaluate(() => ({ width: window.innerWidth, scroll: document.documentElement.scrollWidth,
+    outside: [...document.querySelectorAll('body *')].filter(element => element.getBoundingClientRect().right > window.innerWidth + 1)
+      .map(element => `${element.tagName}.${element.className}`).slice(0, 12),
+  }));
+  expect(layout.scroll, JSON.stringify(layout)).toBeLessThanOrEqual(layout.width + 1);
 }
 
 async function capture(page: Page, path: string) {
@@ -159,4 +163,21 @@ test('unsafe seller URL shows an actionable error', async ({ page }) => {
   await page.getByRole('button', { name: 'Understand my offer' }).click();
   await expect(page.getByRole('alert')).toContainText('Check the fields');
   await expect(page.getByLabel('Seller website', { exact: true })).toHaveValue('https://127.1');
+});
+
+test('research preview explains evidence and unknowns without inventing results', async ({ page }) => {
+  await page.goto('/');
+  const preview = page.getByRole('complementary', { name: 'A closer look, before outreach.' });
+  const evidence = preview.getByRole('button', { name: 'Evidence', exact: true });
+  const unknowns = preview.getByRole('button', { name: 'Unknowns', exact: true });
+  await expect(evidence).toHaveAttribute('aria-pressed', 'true');
+  await unknowns.click();
+  await expect(unknowns).toHaveAttribute('aria-pressed', 'true');
+  await expect(preview.getByRole('heading', { name: 'Missing evidence stays visible.' })).toBeVisible();
+  await expect(preview.getByText('A guide to the output, not a company result.')).toBeVisible();
+  await expect(unknowns.evaluate(element => element.getBoundingClientRect().height)).resolves.toBeGreaterThanOrEqual(44);
+  await evidence.focus();
+  await page.keyboard.press('Enter');
+  await expect(preview.getByRole('heading', { name: 'Every assessment has a trail.' })).toBeVisible();
+  await noOverflow(page);
 });
