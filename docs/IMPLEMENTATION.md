@@ -54,6 +54,7 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 - [x] Save browser screenshots and repeatable functional checks; repair discovered defects.
 
 ## 8. Hosted product
+- [x] Implement checksummed Postgres migrations and adapter; verify private roles, two synthetic workspace isolation, concurrent claims, shared quotas and journal replay against PostgreSQL 18.6.
 - [ ] Postgres persistence and migrations, Supabase verified signup and JWT validation.
 - [ ] Workspace isolation tested with two actual accounts; private schema/role policies.
 - [ ] Atomic one-demo entitlement with shared attempt caps; account deletion/retention.

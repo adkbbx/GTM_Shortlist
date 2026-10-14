@@ -11,6 +11,7 @@ dependencies = ["fastapi>=0.115,<1", "uvicorn>=0.34,<1", "pydantic>=2.10,<3", "h
 
 [project.optional-dependencies]
 dev = ["pytest>=8,<10", "ruff>=0.11,<1"]
+hosted = ["psycopg[binary]>=3.3,<4"]
 
 [project.scripts]
 shortlist = "shortlist.cli:main"
