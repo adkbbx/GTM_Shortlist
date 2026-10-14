@@ -60,6 +60,8 @@ The local SQLite app is for one trusted operator and must bind to loopback. Do n
 
 The [Postgres setup](docs/postgres.md) documents tested migrations, runtime roles, verified-user API access and hosted worker configuration. Signup/login and recovery are implemented with the Supabase browser SDK; real accounts, email and deployment validation remain unfinished.
 
+For Render, use the reviewed [Blueprint and setup guide](docs/render.md). It defines a web service and a paid background worker; review costs before applying it. Private credentials are entered through Render, not committed to the repository.
+
 No automated outreach, personal contact database, CRM integration or Experiment Judge. Proposed managed-service pricing is an unvalidated $99 reviewed pilot, with a $49 subscription considered only after repeat demand.
 
 See [architecture](docs/planning/architecture.md), [design](DESIGN.md), and [implementation handoff](docs/planning/IMPLEMENTATION_HANDOFF.md).

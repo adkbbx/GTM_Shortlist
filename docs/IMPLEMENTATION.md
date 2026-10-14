@@ -95,6 +95,8 @@ The unattended window ended on 14 October and its heartbeat is paused. Subsequen
 
 - [x] Accept bare domains, full HTTPS URLs and company names; use durable website lookup and explicit selection for every name, with safe manual fallback and phone/laptop verification.
 - [x] Remove preferred-seller behavior: all names use the same identity lookup, and the public UI/exports use GTM Shortlist without company-specific presets or promotion.
+- [x] Prepare a reusable Render web/worker Blueprint and validate its structure against Render's published schema; identify startup configuration errors by environment variable.
+- [ ] Complete actual Supabase database provisioning, SMTP and successful Render startup with real accounts and persisted research.
 - [x] Provide customer-readable Excel Shortlist/Evidence sheets and plain CSV columns; keep complete technical JSON, owner scoping and free accepted-only downloads.
 - [ ] Separate observable target criteria from pain-point hypotheses; improve candidate selection before detailed research.
 

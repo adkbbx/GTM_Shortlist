@@ -23,6 +23,39 @@ def test_configuration_errors_do_not_print_raw_secret_inputs():
     assert secret not in repr(failed.value)
 
 
+@pytest.mark.parametrize("field,variable", [("supabase_url", "SUPABASE_URL"), ("app_url", "SHORTLIST_APP_URL")])
+@pytest.mark.parametrize("invalid", ["", "http://app.example", "https://app.example/path",
+                                    "[https://app.example](https://app.example)", "https://app.example:bad"])
+def test_hosted_origin_error_names_the_setting_without_echoing_values(field, variable, invalid):
+    values = {"mode": "hosted", "supabase_url": "https://auth.example", "app_url": "https://app.example",
+              "database_url": "private-database-value", "supabase_publishable_key": "sb_publishable_fixture"}
+    values[field] = invalid
+    with pytest.raises(ValidationError) as failure:
+        Settings(**values)
+    message = str(failure.value)
+    assert variable in message and "plain HTTPS origin" in message
+    assert "private-database-value" not in message
+    if invalid:
+        assert invalid not in message
+
+
+@pytest.mark.parametrize("variable", ["SUPABASE_URL", "SHORTLIST_APP_URL"])
+def test_actual_container_startup_reports_missing_setting_privately(variable):
+    import os
+    import subprocess
+    import sys
+
+    environment = dict(os.environ, SHORTLIST_MODE="hosted", SUPABASE_URL="https://auth.example",
+                       SHORTLIST_APP_URL="https://app.example", SUPABASE_PUBLISHABLE_KEY="sb_publishable_fixture",
+                       SHORTLIST_DATABASE_URL="private-startup-database-value")
+    environment[variable] = ""
+    process = subprocess.run([sys.executable, "-m", "shortlist.container_entrypoint", "api"],
+                             env=environment, capture_output=True, text=True, timeout=10, check=False)
+    assert process.returncode != 0
+    assert variable in process.stderr and "plain HTTPS origin" in process.stderr
+    assert "private-startup-database-value" not in process.stderr + process.stdout
+
+
 def test_verified_identity_comes_from_trusted_user_endpoint():
     identity = uuid4()
 

@@ -1,0 +1,46 @@
+{
+  "services": [
+    {
+      "type": "web",
+      "name": "gtm-shortlist",
+      "runtime": "docker",
+      "dockerfilePath": "./Dockerfile",
+      "dockerCommand": "api",
+      "plan": "free",
+      "autoDeployTrigger": "off",
+      "healthCheckPath": "/api/health",
+      "envVars": [
+        {"key": "SHORTLIST_MODE", "value": "hosted"},
+        {"key": "PORT", "value": "8000"},
+        {"key": "SUPABASE_URL", "sync": false},
+        {"key": "SUPABASE_PUBLISHABLE_KEY", "sync": false},
+        {"key": "SHORTLIST_APP_URL", "sync": false},
+        {"key": "SHORTLIST_DATABASE_URL", "sync": false}
+      ]
+    },
+    {
+      "type": "worker",
+      "name": "gtm-shortlist-worker",
+      "runtime": "docker",
+      "dockerfilePath": "./Dockerfile",
+      "dockerCommand": "worker",
+      "plan": "0.5c-512mb",
+      "autoDeployTrigger": "off",
+      "envVars": [
+        {"key": "SHORTLIST_MODE", "value": "hosted"},
+        {"key": "SUPABASE_URL", "sync": false},
+        {"key": "SUPABASE_PUBLISHABLE_KEY", "sync": false},
+        {"key": "SHORTLIST_APP_URL", "sync": false},
+        {"key": "SHORTLIST_DATABASE_URL", "sync": false},
+        {"key": "SHORTLIST_WORKER_DATABASE_URL", "sync": false},
+        {"key": "SHORTLIST_SEARCH_PROVIDER", "value": "tavily"},
+        {"key": "TAVILY_API_KEY", "sync": false},
+        {"key": "GEMMA_BASE_URL", "sync": false},
+        {"key": "GEMMA_API_KEY", "sync": false},
+        {"key": "GEMMA_MODEL", "sync": false},
+        {"key": "SHORTLIST_GLOBAL_SEARCH_CAP", "value": "200"},
+        {"key": "SHORTLIST_SOURCE_CACHE_HOURS", "value": "24"}
+      ]
+    }
+  ]
+}

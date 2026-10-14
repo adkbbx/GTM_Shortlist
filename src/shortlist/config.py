@@ -53,11 +53,15 @@ class Settings(BaseModel):
     @model_validator(mode="after")
     def hosted_configuration(self):
         if self.mode == "hosted":
-            for value in (self.supabase_url, self.app_url):
-                parsed = urlsplit(value)
-                if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password or \
-                        parsed.port not in (None, 443) or parsed.path not in ("", "/") or parsed.query or parsed.fragment:
-                    raise ValueError("Hosted auth and app URLs must be HTTPS origins")
+            for name, value in (("SUPABASE_URL", self.supabase_url), ("SHORTLIST_APP_URL", self.app_url)):
+                try:
+                    parsed = urlsplit(value)
+                    valid = parsed.scheme == "https" and bool(parsed.hostname) and not parsed.username and not parsed.password and \
+                        parsed.port in (None, 443) and parsed.path in ("", "/") and not parsed.query and not parsed.fragment
+                except ValueError:
+                    valid = False
+                if not valid:
+                    raise ValueError(f"{name} must be a plain HTTPS origin (https://hostname), without paths, credentials or Markdown")
             if not self.database_url.get_secret_value() or not self.supabase_publishable_key:
                 raise ValueError("Hosted mode requires database and Supabase public configuration")
             if not self.supabase_publishable_key.startswith("sb_publishable_"):
