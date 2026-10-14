@@ -83,6 +83,29 @@
         ]
       }
     },
+    "/api/credits": {
+      "get": {
+        "summary": "Credits",
+        "operationId": "credits_api_credits_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WalletView"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/sellers": {
       "post": {
         "summary": "Seller",
@@ -418,6 +441,13 @@
             "maxItems": 12,
             "title": "Exclusions",
             "default": []
+          },
+          "company_limit": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 1.0,
+            "title": "Company Limit",
+            "default": 3
           }
         },
         "additionalProperties": false,
@@ -1027,6 +1057,42 @@
         ],
         "title": "Review"
       },
+      "RunCredits": {
+        "properties": {
+          "maximum": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 1.0,
+            "title": "Maximum"
+          },
+          "used": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 0.0,
+            "title": "Used"
+          },
+          "reserved": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 0.0,
+            "title": "Reserved"
+          },
+          "returned": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 0.0,
+            "title": "Returned"
+          }
+        },
+        "type": "object",
+        "required": [
+          "maximum",
+          "used",
+          "reserved",
+          "returned"
+        ],
+        "title": "RunCredits"
+      },
       "RunProgress": {
         "properties": {
           "worker_online": {
@@ -1150,6 +1216,21 @@
           },
           "progress": {
             "$ref": "#/components/schemas/RunProgress"
+          },
+          "credits": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunCredits"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "legacy_credit_exempt": {
+            "type": "boolean",
+            "title": "Legacy Credit Exempt",
+            "default": false
           }
         },
         "type": "object",
@@ -1180,6 +1261,19 @@
                 "type": "null"
               }
             ]
+          },
+          "credits_used": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 1.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credits Used"
           }
         },
         "type": "object",
@@ -1387,6 +1481,41 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "WalletView": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "local",
+              "hosted"
+            ],
+            "title": "Mode"
+          },
+          "available": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Available",
+            "default": 0
+          },
+          "reserved": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Reserved",
+            "default": 0
+          },
+          "used": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Used",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode"
+        ],
+        "title": "WalletView"
       }
     },
     "securitySchemes": {

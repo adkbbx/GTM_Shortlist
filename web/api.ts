@@ -4,10 +4,12 @@ import type { components } from './generated/api';
 import runSchema from './generated/RunView.json';
 import healthSchema from './generated/Health.json';
 import authSchema from './generated/AuthSetup.json';
+import walletSchema from './generated/WalletView.json';
 
 export type Run = components['schemas']['RunView'];
 export type Health = components['schemas']['Health'];
 export type AuthSetup = components['schemas']['LocalAuth'] | components['schemas']['HostedAuth'];
+export type Wallet = components['schemas']['WalletView'];
 export type Confirmation = components['schemas']['Confirmation'];
 export type Record = Run['records'][number];
 export type Finding = Record['research']['findings'][number];
@@ -20,6 +22,7 @@ addFormats(ajv);
 const isRun = ajv.compile<Run>(runSchema);
 const isHealth = ajv.compile<Health>(healthSchema);
 const isAuthSetup = ajv.compile<AuthSetup>(authSchema);
+const isWallet = ajv.compile<Wallet>(walletSchema);
 let accessToken: (() => Promise<string | null>) | null = null;
 let sessionExpired: ((token: string | null) => void) | null = null;
 
@@ -55,6 +58,11 @@ function parseRun(data: unknown): Run {
 }
 
 export const api = {
+  async credits() {
+    const data = await request('/api/credits');
+    if (!isWallet(data)) throw new Error('Credit balance is unavailable. Please reload.');
+    return data;
+  },
   async authSetup() {
     const data = await request('/api/auth/setup');
     if (!isAuthSetup(data)) throw new Error('Account setup is unavailable. Please reload.');

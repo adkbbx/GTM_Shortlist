@@ -1,6 +1,6 @@
 # Research credits plan
 
-Status: product structure and tested accounting foundation, 14 October 2026. The private ledger, signup grants, legacy migration, holds and settlement commands are implemented. Research delivery integration, customer balance/batch controls and actual paid purchase processing remain unfinished. Existing hosted research code still enforces one demo run per workspace; foundation commands do not change that behavior yet.
+Status: integrated research credits, 14 October 2026. Hosted accounts receive three signup credits once. Confirmed batches reserve 1–3 credits; saved completed research and its debit commit together, and terminal runs return unused holds. Balance, quoted batch cost and per-sheet charges are visible. Paid checkout, activity history, cancellation and larger batches remain unfinished. Local trusted mode has no customer wallet.
 
 ## Unit and packages
 
@@ -70,14 +70,15 @@ Current worker has a three-record limit, six candidate attempts, four searches, 
 - [ ] Model grants, holds, delivery outcomes and versioned pricing separately from provider attempts.
 - [ ] Add RLS-protected ledger/reservations/purchases and unique command keys.
 - [x] Migrate unused legacy demo entitlement to one3-credit grant. Already-used demos receive a zero signup entry recording that their demo was granted; saved records remain untouched and there are no retroactive charges. Actual migration tested against pre-wallet tables.
-- [ ] Replace hosted demo_run_id enforcement with credit reservation at confirmed batch submission. Bound free profiling separately.
-- [ ] Atomically commit company delivery and one debit; return unused credits on terminal partial/failure/cancellation outcomes.
-- [ ] Add balance, batch-size/cost confirmation, activity history and insufficient-credit states; test phone/laptop, accessibility and slow responses.
-- [ ] Prove simultaneous starts cannot overspend and process death cannot double-charge or lose a committed charge.
-- [ ] Prove partial results, real unknown/non-fit outcomes, duplicate companies and provider failures settle correctly.
+- [x] Replace hosted demo_run_id enforcement with credit reservation at confirmed batch submission. Bound free profiling separately.
+- [x] Atomically commit company delivery and one debit; return unused credits on terminal ready/partial outcomes. Cancellation remains unfinished.
+- [x] Add balance, batch-size/cost confirmation and insufficient-credit states; test phone/laptop, accessibility and actual hosted API settlement.
+- [ ] Add credit activity history and explicit cancellation.
+- [x] Prove simultaneous starts cannot overspend and process death cannot double-charge or lose a committed charge.
+- [x] Prove partial results, real unknown/non-fit outcomes, duplicate companies and provider failures settle correctly.
 - [ ] Build one-time top-up checkout and verified, replay-safe purchase grants. Validate actual payment test-mode behavior before selling.
 - [ ] Expand durable batches and benchmark cost/margin before choosing pack prices.
 
-Accounting acceptance: real PostgreSQL tests prove concurrent reservations cannot overspend, repeated delivery keys debit once, privileged grants replay once and reject changed quantities, runtime logins cannot alter ledger history, another workspace cannot read its entries, failed batches release all holds, transaction rollback restores both debit and hold state, and actual process death before/after commit never double-charges. These are accounting checks, not live payments or company delivery proof.
+Accounting acceptance: real PostgreSQL tests prove concurrent reservations cannot overspend, repeated delivery keys debit once, privileged grants replay once and reject changed quantities, runtime logins cannot alter ledger history, another workspace cannot read its entries, failed batches release all holds, transaction rollback restores both debit and hold state, and actual process death before/after commit never double-charges. Actual worker tests additionally prove unknown/non-fit outcomes charge once, extraction/verifier failures are uncharged, mixed batches return unused holds, and record/debit transactions survive process death. Hosted phone/laptop tests use the real API and Postgres with explicitly labelled external-provider fixtures. These checks do not prove live payments or production accounts.
 
-This plan supersedes the long-term one-demo restriction as a product direction. It does not mark hosted billing, integrated research credits or larger batches complete.
+Confirmed batches now replace the one-demo restriction. Previously granted legacy runs remain exempt from new charges. Free seller profiling is limited to three automated drafts per account, with one active draft/batch; operator-granted paid accounts have a ten-profile daily cap. Hosted billing and larger batches remain incomplete.

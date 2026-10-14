@@ -90,8 +90,20 @@ class Store:
     def begin(self, db):
         db.execute("BEGIN IMMEDIATE")
 
-    def reserve_run(self, db, run_id: str):
+    def reserve_run(self, db, run_id: str, *, draft: bool = False):
         """Local operators have no demo restriction; hosted storage owns its grant."""
+
+    def created_run(self, db, run_id: str):
+        """Hosted confirmed runs reserve their research allowance atomically."""
+
+    def reserve_batch(self, db, run_id: str, quantity: int) -> bool:
+        return False
+
+    def delivered(self, db, run_id: str, record: Research, billable: bool):
+        """Local research does not debit a hosted wallet."""
+
+    def finished(self, db, run_id: str):
+        """Hosted terminal outcomes settle held credits."""
 
     def event(self, run_id: str, fence: int, update: ProgressUpdate):
         with self.connection() as db:
@@ -172,6 +184,7 @@ class Store:
             db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,created_at,updated_at) "
                        "VALUES (?,?,?,?,?,?,?,?)", (run_id, request_key, digest, profile.model_dump_json(),
                                                    "queued", "discovery", now, now))
+            self.created_run(db, run_id)
             return run_id
 
     def get_run(self, run_id: str) -> dict:
@@ -217,14 +230,14 @@ class Store:
                     raise Conflict("Request key was already used for a different website")
                 return row["id"]
             run_id = new_id()
-            self.reserve_run(db, run_id)
+            self.reserve_run(db, run_id, draft=True)
             now = utcnow().isoformat()
             db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,checkpoint,created_at,updated_at) "
                        "VALUES (?,?,?,?,?,?,?,?,?)", (run_id, request_key, digest, "{}", "queued", "seller",
                        json.dumps({"seller_url": seller_url}), now, now))
             return run_id
 
-    def confirm_draft(self, run_id: str, profile: Profile):
+    def confirm_draft(self, run_id: str, profile: Profile, company_limit: int = 3):
         with self.connection() as db:
             self.begin(db)
             row = db.execute("SELECT * FROM runs WHERE id=?", (run_id,)).fetchone()
@@ -234,14 +247,17 @@ class Store:
             payload = profile.model_dump(mode="json", exclude={"id", "confirmed_at"})
             if existing:
                 previous = Profile.model_validate(existing).model_dump(mode="json", exclude={"id", "confirmed_at"})
-                if previous != payload:
+                if previous != payload or json.loads(row["checkpoint"]).get("company_limit", 3) != company_limit:
                     raise Conflict("Target was already confirmed; start a new run to change it")
                 return
             checkpoint = json.loads(row["checkpoint"])
             if row["status"] != "awaiting_confirmation" or checkpoint["seller_url"] != profile.seller_url:
                 raise Conflict("Seller draft is not ready for confirmation")
-            db.execute("UPDATE runs SET profile=?,stage='discovery',status='queued',error=NULL,updated_at=? WHERE id=?",
-                       (profile.model_dump_json(), utcnow().isoformat(), run_id))
+            checkpoint["company_limit"] = company_limit
+            if self.reserve_batch(db, run_id, company_limit):
+                checkpoint["credit_policy"] = "company-v1"
+            db.execute("UPDATE runs SET profile=?,checkpoint=?,stage='discovery',status='queued',error=NULL,updated_at=? WHERE id=?",
+                       (profile.model_dump_json(), json.dumps(checkpoint), utcnow().isoformat(), run_id))
 
     def claim(self, run_id: str, lease_seconds: int = 180) -> int | None:
         with self.connection() as db:
@@ -268,6 +284,8 @@ class Store:
             db.execute("UPDATE runs SET stage=?,checkpoint=?,status=?,error=?,updated_at=?,lease_until=? WHERE id=?",
                        (stage, json.dumps(payload), status, error, utcnow().isoformat(),
                         time.time() + 180 if status == "running" else 0, run_id))
+            if status in ("ready", "partial"):
+                self.finished(db, run_id)
 
     def reserve(self, run_id: str, fence: int, provider: str, kind: str, operation_key: str,
                 global_cap: int = 200, request_hash: str = "") -> str:
@@ -327,13 +345,15 @@ class Store:
                               (json.dumps(payload) if payload is not None else None, attempt_id)).rowcount:
                 raise Conflict("Provider attempt has no result journal")
 
-    def save_record(self, run_id: str, fence: int, record: Research):
+    def save_record(self, run_id: str, fence: int, record: Research, *, billable: bool = True):
         with self.connection() as db:
             self.begin(db)
             self._assert_lease(db, run_id, fence)
             # A completed record is immutable; retried checkpoints preserve review decisions.
-            db.execute("INSERT INTO records(id,run_id,domain,research) VALUES (?,?,?,?) ON CONFLICT(run_id,domain) DO NOTHING",
-                       (record.id, run_id, record.domain, record.model_dump_json()))
+            changed = db.execute("INSERT INTO records(id,run_id,domain,research) VALUES (?,?,?,?) ON CONFLICT(run_id,domain) DO NOTHING",
+                                 (record.id, run_id, record.domain, record.model_dump_json())).rowcount
+            if changed:
+                self.delivered(db, run_id, record, billable)
 
     def review(self, run_id: str, record_id: str, decision: Review):
         with self.connection() as db:

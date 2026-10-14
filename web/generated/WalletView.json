@@ -1,0 +1,35 @@
+{
+  "properties": {
+    "mode": {
+      "enum": [
+        "local",
+        "hosted"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "available": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Available",
+      "type": "integer"
+    },
+    "reserved": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Reserved",
+      "type": "integer"
+    },
+    "used": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Used",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "mode"
+  ],
+  "title": "WalletView",
+  "type": "object"
+}

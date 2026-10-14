@@ -55,6 +55,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/credits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Credits */
+        get: operations["credits_api_credits_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/sellers": {
         parameters: {
             query?: never;
@@ -171,6 +188,11 @@ export interface components {
              * @default []
              */
             exclusions: string[];
+            /**
+             * Company Limit
+             * @default 3
+             */
+            company_limit: number;
         };
         /** Criterion */
         "Criterion-Input": {
@@ -413,6 +435,17 @@ export interface components {
              */
             reviewed_at: string;
         };
+        /** RunCredits */
+        RunCredits: {
+            /** Maximum */
+            maximum: number;
+            /** Used */
+            used: number;
+            /** Reserved */
+            reserved: number;
+            /** Returned */
+            returned: number;
+        };
         /** RunProgress */
         RunProgress: {
             /** Worker Online */
@@ -458,11 +491,19 @@ export interface components {
             /** Attempts */
             attempts: components["schemas"]["AttemptView"][];
             progress: components["schemas"]["RunProgress"];
+            credits?: components["schemas"]["RunCredits"] | null;
+            /**
+             * Legacy Credit Exempt
+             * @default false
+             */
+            legacy_credit_exempt: boolean;
         };
         /** SavedRecord */
         SavedRecord: {
             research: components["schemas"]["Research"];
             review?: components["schemas"]["Review-Output"] | null;
+            /** Credits Used */
+            credits_used?: number | null;
         };
         /** SellerDraft */
         SellerDraft: {
@@ -534,6 +575,29 @@ export interface components {
             /** Context */
             ctx?: Record<string, never>;
         };
+        /** WalletView */
+        WalletView: {
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "local" | "hosted";
+            /**
+             * Available
+             * @default 0
+             */
+            available: number;
+            /**
+             * Reserved
+             * @default 0
+             */
+            reserved: number;
+            /**
+             * Used
+             * @default 0
+             */
+            used: number;
+        };
     };
     responses: never;
     parameters: never;
@@ -599,6 +663,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunView"][];
+                };
+            };
+        };
+    };
+    credits_api_credits_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WalletView"];
                 };
             };
         };

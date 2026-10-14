@@ -69,7 +69,8 @@ Last updated 14 October 2026 JST. Check a task only after its acceptance evidenc
 ## Commercial validation, after product readiness
 - [x] Plan credit wallet, three-company signup grant, batch reservation/settlement and paid top-ups in docs/credits.md; pricing remains unvalidated.
 - [x] Implement private append-only wallet ledger, automatic signup grants, legacy grant migration and batch holds; prove isolation/concurrency/replay/rollback/process death against real Postgres.
-- [ ] Implement credit ledger, failure refunds, replay-safe paid grants and batch-cost UI; migrate legacy demo entitlement without a second signup grant.
+- [x] Integrate credit reservation, atomic research delivery/debit, technical-failure returns and batch-cost UI; preserve legacy demos without a second signup grant.
+- [ ] Implement verified paid checkout, activity history, cancellation and measured larger batches.
 - [ ] Identify 30 potential buyers and prioritize 10; prepare offer-specific samples.
 - [ ] Validate three $99 reviewed pilots and repeat demand before $49 subscription/billing.
 

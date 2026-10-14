@@ -49,7 +49,7 @@ The research view shows persisted, timestamped checkpoints, actual saved page/co
 
 ## Boundaries
 
-The local SQLite app is for one trusted operator and must bind to loopback. Do not expose it publicly. Postgres workspace isolation, verified signup, shared demo grants, external SMTP and actual deployment tests are required before hosted release.
+The local SQLite app is for one trusted operator and must bind to loopback. Do not expose it publicly. Hosted mode has verified-user API boundaries, Postgres workspace isolation, account UI and research-credit accounting (three signup credits; batches of 1–3). Real Supabase accounts, external SMTP, paid checkout and actual deployment tests remain required before hosted release.
 
 The [Postgres setup](docs/postgres.md) documents tested migrations, runtime roles, verified-user API access and hosted worker configuration. Signup/login and recovery are implemented with the Supabase browser SDK; real accounts, email and deployment validation remain unfinished.
 

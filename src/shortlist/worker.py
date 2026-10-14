@@ -129,8 +129,9 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
             candidate = Candidate.model_validate(data)
             if candidate.domain in researched or candidate.domain in checkpoint.get("candidate_failures", {}):
                 continue
-            if len(store.get_run(run_id)["records"]) >= 3:
+            if len(store.get_run(run_id)["records"]) >= checkpoint.get("company_limit", 3):
                 break
+            billable = False
             saved_sources = checkpoint.setdefault("sources", {})
             try:
                 if candidate.domain not in saved_sources:
@@ -182,6 +183,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                         diagnostics[candidate.domain]["repair_failure"] = exc.diagnostic()
                         store.checkpoint(run_id, fence, "research", checkpoint)
                         raise
+                billable = True
             except (ProviderError, FetchError) as exc:
                 sources = tuple(Source.model_validate(s) for s in saved_sources.get(candidate.domain, []))
                 if isinstance(exc, FetchError) and not sources:
@@ -209,9 +211,10 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                     record = apply_verification(profile, record, audit)
                     checkpoint.setdefault("verification", {})[candidate.domain] = audit.model_dump(mode="json")
                 except (ProviderError, BudgetExceeded) as exc:
+                    billable = False
                     record = unavailable(profile, record, str(exc))
                     checkpoint.setdefault("verification", {})[candidate.domain] = {"error": str(exc)}
-            store.save_record(run_id, fence, record)
+            store.save_record(run_id, fence, record, billable=billable)
             store.event(run_id, fence, ProgressUpdate(phase="research", label="Saved research for " + candidate.domain,
                                                        state="succeeded"))
             store.checkpoint(run_id, fence, "research", checkpoint)

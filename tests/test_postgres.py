@@ -24,7 +24,7 @@ from shortlist.domain import Candidate, Criterion, Profile, Review, Source
 from shortlist.export import export_run
 from shortlist.journal import call_step
 from shortlist.postgres import PostgresStore
-from shortlist.providers import validate_extraction
+from shortlist.providers import ProviderError, validate_extraction
 from shortlist.store import BudgetExceeded, Conflict
 from shortlist.verification import Judgment, Verification
 from shortlist.worker import execute_run
@@ -171,6 +171,9 @@ def test_real_worker_flow_review_export_cache_and_events_are_isolated(owners):
     execute_run(scoped, Settings(), run_id, search=Search(), model=Model(), fetch=lambda *args, **kwargs: source)
     saved = a.get_run(run_id)
     assert saved["status"] == "ready"
+    assert saved["credits"] == {"maximum": 3, "used": 1, "reserved": 0, "returned": 2}
+    assert saved["records"][0]["credits_used"] == 1
+    assert CreditWallet(a).balance().available == 2
     assert len(saved["attempts"]) == 5
     assert saved["events"][-1]["phase"] == "review"
     record = saved["records"][0]["research"]
@@ -210,7 +213,7 @@ def test_result_replay_and_stale_fences_preserve_budget(owners):
         a.checkpoint(run_id, fence, "research", {})
 
 
-def test_demo_grant_is_atomic_and_idempotent(owners):
+def test_free_profile_starts_are_atomic_idempotent_and_not_reset_by_deletion(owners):
     a, _, _, _ = owners
 
     def start(index):
@@ -227,8 +230,13 @@ def test_demo_grant_is_atomic_and_idempotent(owners):
     assert len(a.list_runs()) == 1
     with a.connection() as db:
         db.execute("DELETE FROM runs WHERE id=?", (ids[winner],))
+    for index in (2, 3):
+        another = a.create_draft("https://seller.example/", "after-deletion-" + str(index))
+        with a.connection() as db:
+            db.execute("DELETE FROM runs WHERE id=?", (another,))
     with pytest.raises(BudgetExceeded):
-        a.create_draft("https://seller.example/", "after-deletion")
+        a.create_draft("https://seller.example/", "fourth-profile")
+    assert CreditWallet(a).balance().available == 3
 
 
 def test_hosted_api_verifies_identity_and_scopes_every_route(owners, monkeypatch):
@@ -328,7 +336,7 @@ def test_credit_signup_reserve_delivery_refund_and_replay(owners):
 
 def test_credit_concurrent_reservations_cannot_overspend(owners):
     a, _, worker, profile = owners
-    first = a.create_run(profile, "credit-first")
+    first = a.create_draft(profile.seller_url, "credit-first")
     scoped = PostgresStore(worker, a.workspace_id, worker=True)
     # Construct a second labelled run with the worker, without resetting the legacy demo.
     second = uuid4().hex
@@ -337,6 +345,8 @@ def test_credit_concurrent_reservations_cannot_overspend(owners):
                    "SELECT ?,?,payload_hash,profile,status,stage,created_at,updated_at FROM runs WHERE id=?",
                    (second, "credit-second", first))
     wallet = CreditWallet(a)
+    assert wallet.balance().available == 3
+    assert wallet.balance().reserved == 0
 
     def reserve(identity):
         try:
@@ -435,10 +445,133 @@ def test_credit_migration_preserves_already_used_legacy_demo(database):
             for filename in ("001_hosted.sql", "002_demo.sql"):
                 db.execute((folder / filename).read_text(encoding="utf-8"))
             db.execute("INSERT INTO shortlist.workspaces(id,demo_run_id) VALUES (%s,NULL),(%s,'legacy-run')", (fresh, used))
+            db.execute("INSERT INTO shortlist.runs(id,workspace_id,request_key,payload_hash,profile,status,stage,created_at,updated_at) "
+                       "VALUES ('legacy-run',%s,'legacy','fixture','{}','awaiting_confirmation','confirmation','fixture','fixture')", (used,))
             db.execute((folder / "003_credit_wallet.sql").read_text(encoding="utf-8"))
             grants = dict(db.execute("SELECT workspace_id,amount FROM shortlist.credit_entries").fetchall())
             assert grants == {fresh: 3, used: 0}
             assert db.execute("SELECT demo_run_id FROM shortlist.workspaces WHERE id=%s", (used,)).fetchone()[0] == "legacy-run"
+            db.execute((folder / "004_credit_delivery.sql").read_text(encoding="utf-8"))
+            assert db.execute("SELECT legacy_credit_exempt FROM shortlist.runs WHERE id='legacy-run'").fetchone()[0] is True
     finally:
         with psycopg.connect(admin, autocommit=True) as db:
             db.execute(sql.SQL("DROP DATABASE {} WITH (FORCE)").format(sql.Identifier(name)))
+
+
+@pytest.mark.parametrize("outcome,expected", [("extraction-failure", 0), ("verification-failure", 0),
+                                            ("unknown", 1), ("non-fit", 1), ("mixed", 1)])
+def test_worker_bills_completed_research_and_returns_technical_failures(owners, outcome, expected):
+    a, _, worker, profile = owners
+    run_id = a.create_run(profile, "delivery-policy")
+    scoped = PostgresStore(worker, a.workspace_id, worker=True)
+    text = "We do not offer AI software." if outcome == "non-fit" else "We offer AI software for businesses."
+    snapshots = {}
+
+    def fetch(url, expected_domain=None):
+        source = Source(url=url, company_domain=expected_domain, title="Labelled credit fixture", text=text,
+                        content_hash=hashlib.sha256(text.encode()).hexdigest())
+        snapshots[expected_domain] = source
+        return source
+
+    class Search:
+        name = "labelled-credit-search"
+
+        def search(self, query, seller_url):
+            domains = ("first.example", "second.example") if outcome == "mixed" else ("first.example",)
+            return [Candidate(domain=domain, url="https://" + domain + "/", name="Fixture", query=query, provider=self.name)
+                    for domain in domains]
+
+    class Model:
+        name = "labelled-credit-model"
+
+        def research(self, profile, candidate, sources):
+            if outcome == "extraction-failure":
+                raise ProviderError("Labelled model failure")
+            finding = {"criterion_id": "ai", "status": "unknown", "reason": "Evidence does not establish the criterion"}
+            if outcome != "unknown":
+                finding = {"criterion_id": "ai", "status": "contradicted" if outcome == "non-fit" else "supported",
+                           "evidence": [{"source_id": sources[0].id, "passage": text, "claim": text}]}
+            return validate_extraction({"name": "Fixture", "findings": [finding]}, profile, candidate.domain, sources)
+
+        def verify(self, profile, record):
+            if outcome == "verification-failure" or (outcome == "mixed" and record.domain == "second.example"):
+                raise ProviderError("Labelled verifier outage")
+            return Verification(judgments=[Judgment(assessment_id="criterion:ai", verdict="entailed", reason="Explicit fixture")])
+
+    execute_run(scoped, Settings(), run_id, search=Search(), model=Model(), fetch=fetch)
+    saved = a.get_run(run_id)
+    assert saved["credits"] == {"maximum": 3, "used": expected, "reserved": 0, "returned": 3 - expected}
+    assert CreditWallet(a).balance().available == 3 - expected
+    assert sum(record["credits_used"] for record in saved["records"]) == expected
+    if outcome == "non-fit":
+        assert saved["records"][0]["research"]["qualification"] == "does_not_fit", saved["records"][0]["research"]
+    if outcome == "unknown":
+        assert saved["records"][0]["research"]["findings"][0]["status"] == "unknown"
+
+
+def test_confirmation_reserves_selected_size_and_rejects_changed_size(owners):
+    a, _, worker, profile = owners
+    run_id = a.create_draft(profile.seller_url, "one-company")
+    scoped = PostgresStore(worker, a.workspace_id, worker=True)
+    scoped.checkpoint(run_id, scoped.claim(run_id), "confirmation", {"seller_url": profile.seller_url}, "awaiting_confirmation")
+    a.confirm_draft(run_id, profile, 1)
+    a.confirm_draft(run_id, profile, 1)
+    with pytest.raises(Conflict):
+        a.confirm_draft(run_id, profile, 2)
+    assert a.get_run(run_id)["checkpoint"]["company_limit"] == 1
+    assert CreditWallet(a).balance().model_dump() == {"available": 2, "reserved": 1, "used": 0}
+
+
+def test_assigned_worker_cannot_reuse_other_workspace_cache_or_read_run(owners):
+    a, b, worker, profile = owners
+    run_id = a.create_run(profile, "worker-cache-scope")
+    scoped_a = PostgresStore(worker, a.workspace_id, worker=True)
+    scoped_b = PostgresStore(worker, b.workspace_id, worker=True)
+    source = Source(url="https://shared.example/", company_domain="shared.example", title="Owner A fixture",
+                    text="Owner A preserved observation", content_hash="labelled")
+    scoped_a.cache_source(run_id, scoped_a.claim(run_id), source.url, source)
+    assert scoped_a.cached_source(source.url, source.company_domain, 24, run_id=run_id, operation="fetch:new") == source
+    assert scoped_b.cached_source(source.url, source.company_domain, 24, run_id=uuid4().hex, operation="fetch:new") is None
+    with pytest.raises(KeyError):
+        scoped_b.get_run(run_id)
+    assert PostgresStore(worker, None, worker=True).get_run(run_id)["id"] == run_id
+
+
+@pytest.mark.parametrize("committed", [False, True])
+def test_actual_process_death_keeps_company_record_and_credit_debit_atomic(owners, committed):
+    a, _, worker, profile = owners
+    run_id = a.create_run(profile, "record-credit-crash")
+    scoped = PostgresStore(worker, a.workspace_id, worker=True)
+    fence = scoped.claim(run_id)
+    text = "We offer AI software for business teams."
+    source = Source(url="https://atomic.example/", company_domain="atomic.example", title="Labelled atomic fixture",
+                    text=text, content_hash=hashlib.sha256(text.encode()).hexdigest())
+    record = validate_extraction({"name": "Atomic fixture", "findings": [{"criterion_id": "ai", "status": "supported",
+                                  "evidence": [{"source_id": source.id, "passage": text, "claim": text}]}]},
+                                 profile, source.company_domain, (source,))
+    script = """
+import os
+from uuid import UUID
+from pydantic import SecretStr
+from shortlist.postgres import PostgresStore
+from shortlist.domain import Research
+class CrashStore(PostgresStore):
+    def delivered(self,db,run_id,record,billable):
+        super().delivered(db,run_id,record,billable)
+        if os.environ['CREDIT_TEST_COMMITTED']=='no': os._exit(23)
+store=CrashStore(SecretStr(os.environ['CREDIT_TEST_DSN']),UUID(os.environ['CREDIT_TEST_OWNER']),worker=True)
+store.save_record(os.environ['CREDIT_TEST_RUN'],int(os.environ['CREDIT_TEST_FENCE']),Research.model_validate_json(os.environ['CREDIT_TEST_RECORD']))
+os._exit(23)
+"""
+    result = subprocess.run([sys.executable, "-c", script], check=False, capture_output=True, timeout=15,
+                            env={**os.environ, "CREDIT_TEST_DSN": worker.get_secret_value(),
+                                 "CREDIT_TEST_OWNER": str(a.workspace_id), "CREDIT_TEST_RUN": run_id,
+                                 "CREDIT_TEST_FENCE": str(fence), "CREDIT_TEST_RECORD": record.model_dump_json(),
+                                 "CREDIT_TEST_COMMITTED": "yes" if committed else "no"})
+    assert result.returncode == 23
+    assert len(a.get_run(run_id)["records"]) == int(committed)
+    assert CreditWallet(a).balance().used == int(committed)
+    with scoped.connection() as db:
+        db.execute("UPDATE runs SET lease_until=0 WHERE id=?", (run_id,))
+    scoped.save_record(run_id, scoped.claim(run_id), record)
+    assert len(a.get_run(run_id)["records"]) == CreditWallet(a).balance().used == 1

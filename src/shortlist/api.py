@@ -32,12 +32,27 @@ class SellerInput(BaseModel):
 
 
 class Confirmation(Target):
-    pass
+    company_limit: int = Field(default=3, ge=1, le=3)
 
 
 class SavedRecord(BaseModel):
     research: Research
     review: Review | None = None
+    credits_used: int | None = Field(default=None, ge=0, le=1)
+
+
+class RunCredits(BaseModel):
+    maximum: int = Field(ge=1, le=3)
+    used: int = Field(ge=0, le=3)
+    reserved: int = Field(ge=0, le=3)
+    returned: int = Field(ge=0, le=3)
+
+
+class WalletView(BaseModel):
+    mode: Literal["local", "hosted"]
+    available: int = Field(default=0, ge=0)
+    reserved: int = Field(default=0, ge=0)
+    used: int = Field(default=0, ge=0)
 
 
 class AttemptView(BaseModel):
@@ -60,6 +75,8 @@ class RunView(BaseModel):
     updated_at: datetime
     attempts: list[AttemptView]
     progress: RunProgress
+    credits: RunCredits | None = None
+    legacy_credit_exempt: bool = False
 
 
 class Health(BaseModel):
@@ -142,7 +159,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return RunView(id=run_id, seller_url=profile.seller_url if profile else run["checkpoint"]["seller_url"],
                        status=run["status"], stage=run["stage"], profile=profile, draft=run["checkpoint"].get("draft"),
                        records=run["records"], error=run["error"], created_at=run["created_at"],
-                       updated_at=run["updated_at"], attempts=run["attempts"], progress=RunProgress(
+                       updated_at=run["updated_at"], attempts=run["attempts"], credits=run.get("credits"),
+                       legacy_credit_exempt=run.get("legacy_credit_exempt", False), progress=RunProgress(
                            worker_online=store.worker_online(), candidates=len(run["checkpoint"].get("candidates", [])),
                            sources=len({s["id"] for pages in run["checkpoint"].get("sources", {}).values() for s in pages}),
                            companies=len(run["records"]), events=run["events"]))
@@ -164,6 +182,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def runs(store: owned):
         return [view(store, run["id"]) for run in store.list_runs()]
 
+    @app.get("/api/credits", response_model=WalletView)
+    def credits(store: owned):
+        if settings.mode == "local":
+            return WalletView(mode="local")
+        from shortlist.credits import CreditWallet
+        return WalletView(mode="hosted", **CreditWallet(store).balance().model_dump())
+
     @app.post("/api/sellers", response_model=RunView, status_code=201)
     def seller(input: SellerInput, store: owned):
         return view(store, store.create_draft(input.seller_url, input.request_key))
@@ -176,8 +201,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def confirm(run_id: str, input: Confirmation, store: owned):
         run = store.get_run(run_id)
         seller_url = run["profile"].get("seller_url") or run["checkpoint"]["seller_url"]
-        profile = Profile(seller_url=seller_url, **input.model_dump())
-        store.confirm_draft(run_id, profile)
+        profile = Profile(seller_url=seller_url, **input.model_dump(exclude={"company_limit"}))
+        store.confirm_draft(run_id, profile, input.company_limit)
         return view(store, run_id)
 
     @app.post("/api/runs/{run_id}/records/{record_id}/review", response_model=RunView)

@@ -484,6 +484,42 @@
       "title": "Review",
       "type": "object"
     },
+    "RunCredits": {
+      "properties": {
+        "maximum": {
+          "maximum": 3,
+          "minimum": 1,
+          "title": "Maximum",
+          "type": "integer"
+        },
+        "used": {
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Used",
+          "type": "integer"
+        },
+        "reserved": {
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Reserved",
+          "type": "integer"
+        },
+        "returned": {
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Returned",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "maximum",
+        "used",
+        "reserved",
+        "returned"
+      ],
+      "title": "RunCredits",
+      "type": "object"
+    },
     "RunProgress": {
       "additionalProperties": false,
       "properties": {
@@ -540,6 +576,20 @@
             }
           ],
           "default": null
+        },
+        "credits_used": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Credits Used"
         }
       },
       "required": [
@@ -773,6 +823,22 @@
     },
     "progress": {
       "$ref": "#/$defs/RunProgress"
+    },
+    "credits": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RunCredits"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "legacy_credit_exempt": {
+      "default": false,
+      "title": "Legacy Credit Exempt",
+      "type": "boolean"
     }
   },
   "required": [
