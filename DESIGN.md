@@ -207,6 +207,12 @@ A labelled sample outcome sits beside the form. Opening the example reveals one 
 
 Playback starts on request, pauses at confirmation and evidence, and stops on the result. Manual navigation, pause, resume, and replay remain available. Hidden documents, leaving the viewport after visibility, mouse movement over the scene, and focus on scene controls pause playback until deliberate resume. Existing controls retain 180ms feedback; scenes enter over 280ms with 6px movement, rows over 240ms with 60ms stagger, and passages over 220ms. A single 900ms scan runs only in the playing sample. The OS reduced-motion preference and visible "Reduce motion" control both show the final review stage immediately, disable movement, and preserve readable manual navigation. Real research continues through the existing form, authentication, saved worker progress, and explicit target confirmation.
 
+### Live research stages
+
+`ResearchProgress` extends the same six-stage sheet and motion grammar to each saved run. Its read-only rail follows persisted stage boundaries through `research-stages.ts`. Stage labels distinguish Saved, Saved with gaps, No saved result, Not included, Stopped, and stages that need input. Review and draft ends at "Your review" without accepting a company. Counts show actual saved candidates, company pages, and researched companies. The desktop rail becomes three columns at 850px and two at 700px; existing paper, orange, typography, and control tokens continue to apply.
+
+The scene enters only when the run or actual stage changes; polling the same stage does not replay it. Latest-checkpoint entry follows the persisted event ID. The activity scan and checkpoint pulse require a running run, a latest started event, an online worker, a connected page, and a visible document. The "Reduce motion" control and OS reduced-motion CSS suppress movement while keeping saved content readable. Stages advance through saved work, without presentation timers. Saved checkpoint history exposes outcomes and timestamps, including failures and reused evidence. Website choice, target confirmation, company review, and editable draft forms remain outside the changing scene, preserving their mounted state across polling and keeping human actions explicit.
+
 ## Do's and Don'ts
 
 ### Compact shortlist review

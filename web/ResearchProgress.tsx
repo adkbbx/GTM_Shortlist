@@ -1,88 +1,68 @@
 import { useEffect, useState } from 'react';
 import type { Run } from './api';
+import { researchStage } from './research-stages';
+import './ResearchProgress.css';
 
-function ResearchActivity({ run, connected }: { run: Run; connected: boolean }) {
+const descriptions = [
+  'Read your company website and save an offer summary.',
+  'Explore potential competitors and propose campaign hypotheses.',
+  'Check the offer and edit your target before discovery begins.',
+  'Search for companies, then prioritize candidates against your confirmed target.',
+  'Read company pages, assess fit, and verify the supporting evidence.',
+  'Inspect the saved research below, make your decision, and prepare a draft.',
+];
+const time = (value: string) => new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date(value));
+const eventLabels = { started: 'Started', succeeded: 'Completed', failed: 'Failed', reused: 'Reused', waiting: 'Waiting' };
+
+function SavedMark({ state }: { state: string }) {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.3" />{state === 'succeeded' || state === 'reused' ? <path d="m7 12 3 3 7-7" stroke="currentColor" strokeWidth="1.5" /> : state === 'failed' ? <path d="m8 8 8 8m0-8-8 8" stroke="currentColor" strokeWidth="1.5" /> : <circle cx="12" cy="12" r="2" fill="currentColor" />}</svg>;
+}
+
+export function ResearchProgress({ run, connected = true }: { run: Run; connected?: boolean }) {
   const [visible, setVisible] = useState(!document.hidden);
+  const [reduced, setReduced] = useState(false);
   useEffect(() => {
     const change = () => setVisible(!document.hidden);
     document.addEventListener('visibilitychange', change);
     return () => document.removeEventListener('visibilitychange', change);
   }, []);
-  const working = connected && visible && run.status === 'running' && run.progress.worker_online;
+  const { current, states, events, latest, pending, working } = researchStage(run);
+  const moving = working && connected && visible && !reduced;
+  const currentState = run.termination ? 'Research stopped' : !connected ? 'Reconnecting'
+    : !pending ? current === 5 ? run.status === 'partial' ? 'Partial research saved' : 'Ready for your review' : run.status === 'partial' ? 'Research interrupted' : 'Waiting for you'
+      : !run.progress.worker_online ? 'Waiting for a worker' : run.status === 'queued' ? 'Queued' : working ? 'Worker active' : 'Saving progress';
+  const status = run.termination ? 'Processing has stopped. Saved sources and assessments remain available.'
+    : !connected ? 'Showing the last saved checkpoint while the connection recovers.'
+      : !pending && run.status === 'partial' && current !== 5 ? run.error ?? 'Research was interrupted. Inspect the saved checkpoints for details.'
+      : pending && !run.progress.worker_online ? 'Your run is saved. Processing will continue when a research worker connects.'
+        : run.status === 'queued' ? 'Waiting for the worker to pick up your saved run.'
+          : current === 5 ? run.records.length ? 'Open a company research sheet below to inspect sources and decide.' : 'No company records were saved. Review the checkpoints for details.'
+            : latest?.label ?? 'Your saved research is ready to continue.';
   const offer = run.profile?.offer ?? run.draft?.offer;
-  const domain = run.seller_url ? new URL(run.seller_url).hostname : run.company_name;
-  return <div className={`agent-activity ${working ? 'is-working' : ''}`}>
-    <div className="agent-paper" aria-hidden="true"><svg viewBox="0 0 80 96" fill="none"><path d="M14 4h36l16 16v72H14V4Z" stroke="currentColor" strokeWidth="1.5"/><path d="M50 4v17h16M25 34h30M25 44h25M25 54h30M25 64h19M25 74h26" stroke="currentColor" strokeWidth="1.5"/></svg><span className="agent-scan" /></div>
-    <div className="agent-observation"><p className="agent-domain">{domain ?? 'Your company research'}</p>
-      <p>{working ? run.stage === 'seller' || run.stage === 'identity' ? 'Reading your company before proposing a target.' : run.stage === 'market' ? 'Exploring companies with a similar offer.' : run.stage === 'campaigns' ? 'Turning your offer and market observations into campaign hypotheses.' : run.stage === 'discovery' ? 'Looking for companies that match your confirmed target.' : 'Reading sources and checking each assessment.' : !connected ? 'Connection interrupted. Your saved work is safe.' : !run.progress.worker_online ? 'Saved and waiting for an available worker.' : 'Your saved research is ready to continue.'}</p>
-      {offer && <details className="agent-offer"><summary>Your offer summary</summary><p>{offer}</p></details>}
-      <span className="agent-state"><i aria-hidden="true" />{working ? 'Worker active' : !connected ? 'Reconnecting' : !run.progress.worker_online ? 'Worker unavailable' : 'Saved'}</span>
+  return <section className="real-research landing-demo" data-motion={moving ? 'playing' : 'paused'} data-reduced={reduced} aria-labelledby="progress-heading">
+    <div className="demo-intro"><div><h2 id="progress-heading">Your research, step by step</h2><p>Live work · stages follow saved worker checkpoints</p></div><button className="text-button" aria-pressed={reduced} onClick={() => setReduced(value => !value)}>{reduced ? 'Motion reduced' : 'Reduce motion'}</button></div>
+    <div className="demo-workspace">
+      <div className="demo-stage-rail"><p className="demo-step-count">Stage {current + 1} of 6 · {states[current].label}</p>
+        <ol className="real-stage-list" aria-label="Research stages">{states.map((stage, index) => <li key={stage.label} aria-current={stage.current ? 'step' : undefined} className={stage.complete ? 'is-saved' : ''}>
+          <span className={`demo-stage-number ${stage.complete ? 'real-stage-saved' : ''}`} aria-hidden="true">{stage.complete ? <SavedMark state="succeeded" /> : index + 1}</span><span><strong>{stage.label}</strong><small>{stage.state}</small></span>
+        </li>)}</ol><p className="demo-rail-note">Stages advance when work is saved. Confirmation and review need your judgment.</p>
+      </div>
+      <div className="demo-scene-wrap"><div className="demo-scene-top"><span>{currentState}</span><span>Progress from saved work</span></div>
+        <div className="demo-scene real-scene" key={`${run.id}:${current}`}>
+          <h3>{states[current].label}</h3><p>{descriptions[current]}</p>
+          <div className={`agent-activity ${moving ? 'is-working' : ''}`}><div className="agent-paper" aria-hidden="true"><svg viewBox="0 0 80 96" fill="none"><path d="M14 4h36l16 16v72H14V4Z" stroke="currentColor" strokeWidth="1.5"/><path d="M50 4v17h16M25 34h30M25 44h25M25 54h30M25 64h19M25 74h26" stroke="currentColor" strokeWidth="1.5"/></svg><span className="agent-scan" /></div><div className="agent-observation"><p className="agent-domain">{run.seller_url ? new URL(run.seller_url).hostname : run.company_name ?? 'Your company'}</p><p role="status">{status}</p>{latest?.detail && <p className="checkpoint-detail">{latest.detail}</p>}</div></div>
+          {offer && <details className="real-saved-offer"><summary>Saved offer summary</summary><p>{offer}</p>{run.profile && <p>{run.profile.target}</p>}</details>}
+          {current === 1 && run.market && <div className="demo-note"><p>{run.market.competitors.length} potential competitors · {run.market.campaigns.length} campaign hypotheses saved</p><p>Market observations, not verified comparisons. Inspect them at target confirmation.</p></div>}
+          {current === 2 && <p className="demo-note">Confirm your offer and target in the form below. Research will wait for your confirmation.</p>}
+          {run.stage === 'website' && <p className="demo-note">Choose or enter the correct company website below to continue.</p>}
+          {current >= 3 && <div className="real-counts" aria-label="Saved research totals"><div><strong>{run.progress.candidates}</strong><span>Candidates saved</span></div><div><strong>{run.progress.sources}</strong><span>Company pages saved</span></div><div><strong>{run.progress.companies}</strong><span>Companies researched</span></div></div>}
+          {current === 3 && !!run.selection?.length && <div className="real-candidates">{run.selection.slice(0, 3).map(candidate => <div className="demo-stagger" key={candidate.domain}><strong>{candidate.domain}</strong><p>{candidate.explanation}</p></div>)}</div>}
+          {latest && <div className="real-latest" key={latest.id}><span className="demo-label">Latest saved checkpoint · {eventLabels[latest.state]}</span><p>{latest.label}</p><p className="checkpoint-detail">{latest.state === 'started' ? 'Awaiting a saved outcome.' : latest.state === 'failed' ? 'This step failed. See the saved detail below.' : latest.state === 'waiting' ? 'Waiting at this checkpoint.' : 'Saved to this run.'}</p></div>}
+        </div>
+      </div>
     </div>
-  </div>;
-}
-
-const time = (value: string) => new Intl.DateTimeFormat(undefined, {
-  hour: '2-digit', minute: '2-digit', second: '2-digit',
-}).format(new Date(value));
-
-function CheckpointIcon({ state, active }: { state: string; active: boolean }) {
-  return <svg className={`checkpoint-icon ${active ? 'is-active' : ''}`} width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.3" />
-    {state === 'succeeded' || state === 'reused' ? <path d="m7 12 3 3 7-7" stroke="currentColor" strokeWidth="1.5" />
-      : state === 'failed' ? <path d="m8 8 8 8m0-8-8 8" stroke="currentColor" strokeWidth="1.5" />
-        : <circle cx="12" cy="12" r="2" fill="currentColor" />}
-  </svg>;
-}
-
-export function ResearchProgress({ run, connected = true }: { run: Run; connected?: boolean }) {
-  const progress = run.progress;
-  const pending = run.status === 'queued' || run.status === 'running';
-  const latest = progress.events.at(-1);
-  // Pair a started step with its actual final observation, keeping its latest state.
-  const steps = new Map<string, typeof progress.events[number]>();
-  progress.events.forEach(event => steps.set(`${event.phase}:${event.label}`, event));
-  const checkpoints = [...steps.values()].sort((a, b) => a.id - b.id);
-  const visible = pending ? checkpoints.slice(-6) : checkpoints;
-  const phases = [
-    { label: 'Understand offer', complete: !!run.draft || !!run.profile, active: run.status === 'running' && ['seller', 'identity'].includes(run.stage) },
-    ...(run.experience_version === 2 ? [
-      { label: 'Explore market', complete: !!run.market?.competitors.length, active: run.status === 'running' && run.stage === 'market' },
-      { label: 'Propose campaigns', complete: !!run.market?.campaigns.length, active: run.status === 'running' && run.stage === 'campaigns' },
-    ] : []),
-    { label: 'Confirm target', complete: !!run.profile, active: run.status === 'awaiting_confirmation' },
-    { label: 'Discover companies', complete: progress.candidates > 0 && run.stage !== 'selection', active: run.status === 'running' && ['discovery', 'selection'].includes(run.stage) },
-    { label: 'Research evidence', complete: run.stage === 'review', active: run.status === 'running' && run.stage === 'research' },
-  ];
-  const heading = pending ? !connected ? 'Reconnecting to your research' : !progress.worker_online ? 'Research is waiting for a worker'
-    : run.status === 'queued' ? 'Your research is next in line'
-      : run.stage === 'identity' ? 'Finding your company website' : run.stage === 'seller' ? 'Understanding your company' : run.stage === 'market' ? 'Exploring your market' : run.stage === 'campaigns' ? 'Defining campaign directions' : run.stage === 'selection' ? 'Checking the strongest candidates' : 'Building your shortlist'
-    : 'Research checkpoints';
-  const content = <>
-    {pending && <ResearchActivity run={run} connected={connected} />}
-    <ol className="research-phases" aria-label="Research stages">{phases.map(phase => <li key={phase.label}
-      className={phase.complete ? 'phase-complete' : phase.active ? 'phase-current' : ''}
-      aria-current={phase.active && !phase.complete ? 'step' : undefined}>
-      <CheckpointIcon state={phase.complete ? 'succeeded' : 'waiting'} active={connected && pending && phase.active && progress.worker_online} />
-      <span className="sr-only">{phase.complete ? 'Completed: ' : phase.active && connected && progress.worker_online ? 'Current step: ' : 'Not yet completed: '}</span>
-      <span>{phase.label}</span>
-    </li>)}</ol>
-    {pending && <p className="current-checkpoint" role="status">{!connected ? 'Your research is saved. Showing the last checkpoint while the connection recovers.' : !progress.worker_online
-      ? 'Your run is saved. Processing will begin when the research worker connects.'
-      : latest?.label ?? 'Waiting for the worker to pick up your saved run.'}</p>}
-    {(progress.candidates > 0 || progress.sources > 0) && <p className="progress-counts">
-      <span>{progress.candidates} candidates discovered</span><span>{progress.sources} company pages saved</span>
-      <span>{progress.companies} of up to {run.credits?.maximum ?? 3} companies researched</span>
-    </p>}
-    {visible.length > 0 && <ol className="checkpoint-list" aria-label="Saved research checkpoints">{visible.map(event => <li key={event.id}>
-      <CheckpointIcon state={event.state} active={connected && pending && progress.worker_online && event.id === latest?.id && event.state === 'started'} />
-      <div><p><span className="sr-only">{{ started: 'Started', succeeded: 'Completed', failed: 'Failed', reused: 'Reused saved evidence', waiting: 'Waiting' }[event.state]}: </span>{event.label}</p>{event.detail && <p className="checkpoint-detail">{event.detail}</p>}
-        {event.state === 'reused' && <p className="checkpoint-detail">Saved evidence reused; no new provider request.</p>}
-      </div><time dateTime={event.created_at}>{time(event.created_at)}</time>
-    </li>)}</ol>}
-    {!pending && !checkpoints.length && <p className="hint">This older run predates the activity timeline. Its saved sources and review remain available.</p>}
-    {pending && <p className="hint">Every checkpoint is saved. You can leave this page and return.</p>}
-    {pending && !progress.worker_online && <p className="notice">The research worker is unavailable. Your run is saved and will continue when the worker reconnects.</p>}
-  </>;
-  return pending ? <section className="sheet research-progress" aria-labelledby="progress-heading"><h2 id="progress-heading">{heading}</h2>{content}</section>
-    : <details className="sheet research-progress progress-history"><summary><span>{heading}</span><span className="history-meta">{checkpoints.length} saved steps<svg className="history-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m8 4 8 8-8 8" stroke="currentColor" strokeWidth="1.5" /></svg></span></summary>{content}</details>;
+    <details className="real-history"><summary>Saved research checkpoints <span className="history-meta">{events.length} steps</span></summary>
+      {events.length ? <ol className="checkpoint-list" aria-label="Saved research checkpoints">{events.map(event => <li key={event.id}><span className={`real-event-mark ${moving && event.id === latest?.id && event.state === 'started' ? 'is-active' : ''}`} aria-hidden="true"><SavedMark state={event.state} /></span><div><p><span className="checkpoint-detail">{eventLabels[event.state]} · </span>{event.label}</p>{event.detail && <p className="checkpoint-detail">{event.detail}</p>}{event.state === 'reused' && <p className="checkpoint-detail">Saved evidence reused; no new provider request.</p>}</div><time dateTime={event.created_at}>{time(event.created_at)}</time></li>)}</ol> : <p className="hint">No worker checkpoints saved yet. Older runs may predate the activity timeline.</p>}
+    </details>
+  </section>;
 }
