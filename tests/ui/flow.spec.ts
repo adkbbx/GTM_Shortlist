@@ -25,7 +25,9 @@ test('market observations and editable campaigns persist into confirmed targetin
   await page.goto('/');
   await page.getByLabel('Company name or website', { exact: true }).fill('https://market-seller.example/');
   await page.getByRole('button', { name: 'Start research' }).click();
-  await expect(page.getByRole('heading', { name: 'Choose a campaign direction' })).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
+  await page.getByText('Explore campaign ideas and source context', { exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Choose a campaign direction' })).toBeVisible();
   await expect(page.locator('.competitor-list li')).toHaveCount(15);
   await expect(page.locator('.campaign-choice')).toHaveCount(6);
   await page.getByText('Inspect the saved company page', { exact: true }).click();
@@ -381,6 +383,9 @@ test('saved seller → confirmation → evidence → review → export survives 
   await page.getByLabel('Company name or website', { exact: true }).fill('https://eygentic.com/');
   await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('.research-recap')).not.toHaveAttribute('open');
+  await expect(page.locator('.confirmation-context')).not.toHaveAttribute('open');
+  await expect(page.locator('.real-research')).not.toBeVisible();
   await page.getByLabel('What do you sell?').fill('Test fixture edited offer: acquisition experiments for software businesses');
   await page.getByLabel('Exclude from consideration').fill('Companies headquartered in Canada\nPublicly listed companies');
   const required = page.getByRole('checkbox', { name: 'Required', exact: true }).first();
@@ -411,6 +416,8 @@ test('saved seller → confirmation → evidence → review → export survives 
   await noOverflow(page);
   await capture(page, `.impeccable/review/${testInfo.project.name}-progress.png`);
   await expect(page.getByRole('heading', { name: '2 companies researched' })).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('.research-recap')).not.toHaveAttribute('open');
+  await expect(page.locator('.real-research')).not.toBeVisible();
   const first = page.locator('.company-sheet').first();
   await openCompany(page);
   await first.locator('.findings .evidence > summary').first().click();
@@ -433,9 +440,11 @@ test('saved seller → confirmation → evidence → review → export survives 
   await openCompany(page);
   await expect(first.getByText('Saved: accepted')).toBeVisible();
   await expect(first.getByLabel('Review note')).toHaveValue('Accepted after inspecting the fixture passage');
+  await page.locator('.research-recap > summary').click();
   await page.locator('.real-history > summary').click();
   await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toContainText('Checking that the evidence supports');
   await page.locator('.real-history > summary').click();
+  await page.locator('.research-recap > summary').click();
   await first.locator('.findings .evidence > summary').first().click();
   await first.locator('.exclusion-checks summary').first().click();
   await noOverflow(page);

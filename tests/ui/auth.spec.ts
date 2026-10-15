@@ -86,10 +86,15 @@ test('signup confirmation, sign-in errors and password reset remain usable', asy
   await page.getByLabel('Password', { exact: true }).fill('labelled-fixture-password');
   await page.getByRole('button', { name: 'Create account', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('confirmation link');
-  await expect(page.getByRole('heading', { name: 'Next, check your inbox' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Check your inbox' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Create account', exact: true })).toHaveCount(0);
+  await expect(page.getByLabel('Password', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Resend confirmation email' }).click();
   await expect(page.getByRole('status')).toContainText('new confirmation link');
   await capture(page, `.impeccable/review/${info.project.name}-signup-confirmation.png`);
+  await page.getByRole('button', { name: 'Use a different email', exact: true }).click();
+  await expect(page.getByLabel('Email', { exact: true })).toHaveValue('fixture@example.test');
+  await expect(page.getByLabel('Password', { exact: true })).toHaveValue('');
   await page.getByRole('button', { name: 'Back to sign in' }).click();
   backend.reject();
   await page.getByLabel('Password', { exact: true }).fill('labelled-fixture-password');

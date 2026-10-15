@@ -45,7 +45,7 @@ export function ResearchProgress({ run, connected = true }: { run: Run; connecte
           : current === 5 ? run.records.length ? 'Open a company research sheet below to inspect sources and decide.' : 'No company records were saved. Review the checkpoints for details.'
             : latest?.label ?? 'Your saved research is ready to continue.';
   const offer = run.profile?.offer ?? run.draft?.offer;
-  return <section className="real-research landing-demo" data-motion={moving ? 'playing' : 'paused'} data-animate={animate} data-reduced={reduced} aria-labelledby="progress-heading">
+  const sheet = <section className="real-research landing-demo" data-motion={moving ? 'playing' : 'paused'} data-animate={animate} data-reduced={reduced} aria-labelledby="progress-heading">
     <div className="demo-intro"><div><h2 id="progress-heading">Your research, step by step</h2><p>Live work · stages follow saved worker checkpoints</p></div></div>
     <div className="demo-workspace">
       <div className="demo-stage-rail"><p className="demo-step-count">Stage {current + 1} of 6 · {states[current].label}</p>
@@ -75,4 +75,9 @@ export function ResearchProgress({ run, connected = true }: { run: Run; connecte
       {events.length ? <ol className="checkpoint-list" aria-label="Saved research checkpoints">{events.map(event => <li key={event.id}><span className={`real-event-mark ${moving && event.id === latest?.id && event.state === 'started' ? 'is-active' : ''}`} aria-hidden="true"><SavedMark state={event.state} /></span><div><p><span className="checkpoint-detail">{eventLabels[event.state]} · </span>{event.label}</p>{event.detail && <p className="checkpoint-detail">{event.detail}</p>}{event.state === 'reused' && <p className="checkpoint-detail">Saved evidence reused; no new provider request.</p>}</div><time dateTime={event.created_at}>{time(event.created_at)}</time></li>)}</ol> : <p className="hint">No worker checkpoints saved yet. Older runs may predate the activity timeline.</p>}
     </details>
   </section>;
+  if (pending) return sheet;
+  const handoff = run.termination ? 'Research stopped' : current === 2 ? 'Offer draft saved. Your confirmation is next.'
+    : current === 5 ? `${run.records.length} ${run.records.length === 1 ? 'company' : 'companies'} saved for your review`
+      : currentState;
+  return <details className="research-recap"><summary><span>{handoff}</span><span>View research history</span></summary>{sheet}</details>;
 }

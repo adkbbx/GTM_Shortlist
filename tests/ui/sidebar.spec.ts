@@ -8,6 +8,10 @@ test('saved research navigation collapses and expands without changing the run',
   try {
     await page.goto(`/?run=${id}`);
     const sidebar = page.getByRole('complementary', { name: 'Saved research' });
+    if (info.project.name === 'phone') {
+      await expect(sidebar.getByRole('navigation', { name: 'Research history' })).not.toBeVisible();
+      await sidebar.getByRole('button', { name: 'Expand sidebar', exact: true }).click();
+    }
     await expect(sidebar.getByRole('button', { name: 'New shortlist', exact: true })).toBeVisible();
     await expect(sidebar.locator('[aria-current=page]')).toHaveCount(1);
     const initial = await sidebar.evaluate(element => element.getBoundingClientRect());
@@ -40,7 +44,7 @@ test('saved research navigation collapses and expands without changing the run',
 });
 
 
-test('long saved history scrolls without compressing or overlapping rows', async ({ page }) => {
+test('long saved history scrolls without compressing or overlapping rows', async ({ page }, info) => {
   const fixture = await page.request.post('/__fixture_held_run');
   const { id } = await fixture.json();
   try {
@@ -48,6 +52,7 @@ test('long saved history scrolls without compressing or overlapping rows', async
     const run = await response.json();
     await page.route('**/api/runs', route => route.fulfill({ json: Array.from({ length: 25 }, (_, index) => ({ ...run, id: index === 0 ? id : `history-${index}`, company_name: `Saved company ${index + 1}` })) }));
     await page.goto(`/?run=${id}`);
+    if (info.project.name === 'phone') await page.getByRole('button', { name: 'Expand sidebar', exact: true }).click();
     const rows = page.getByRole('navigation', { name: 'Research history' }).getByRole('button');
     await expect(rows).toHaveCount(25);
     const geometry = await rows.evaluateAll(elements => elements.map(element => {

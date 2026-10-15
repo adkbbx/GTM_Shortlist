@@ -55,21 +55,21 @@ function AccountForm({ client, setup, recovery, expired, externalError, onRecove
   return <main className="account-page account-entry">
     <header className="account-header"><a className="account-brand" href="/">GTM Shortlist</a><a href="https://github.com/adkbbx/GTM_Shortlist" target="_blank" rel="noreferrer">Open-source project</a></header>
     <div className="account-layout"><aside className="account-context" aria-label="About GTM Shortlist">
-      <h2>A shortlist you can<br />check for yourself.</h2>
+      <h2>A shortlist you can <br />check for yourself.</h2>
       <p>Find potential customer companies and see the sources behind each fit assessment.</p>
       <ol><li><strong>Start with your company</strong><span>Confirm your offer and the customers you want to reach.</span></li><li><strong>Research the evidence</strong><span>Inspect source passages, unknowns and labelled hypotheses.</span></li><li><strong>Keep the useful companies</strong><span>Review your shortlist and export it to Excel.</span></li></ol>
     </aside><section className="sheet account-sheet" aria-labelledby="account-heading">
-    <h1 id="account-heading">{title}</h1>
-    <p className="intro">{mode === 'signup' ? 'Create a workspace for your company research. We will email you a confirmation link.' : mode === 'reset' ? 'Enter your account email and we will send a password reset link.' : recovery ? 'Set a new password to reopen your workspace.' : 'Welcome back. Open your saved company research.'}</p>
+    <h1 id="account-heading">{confirmationSent ? 'Check your inbox' : title}</h1>
+    <p className="intro">{confirmationSent ? 'Verify your email to finish creating your research workspace.' : mode === 'signup' ? 'Create a workspace for your company research. We will email you a confirmation link.' : mode === 'reset' ? 'Enter your account email and we will send a password reset link.' : recovery ? 'Set a new password to reopen your workspace.' : 'Welcome back. Open your saved company research.'}</p>
     {expired && <p className="notice" role="status">Your session needs verification. Sign in again to reopen your saved research.</p>}
     {externalError && <p className="notice" role="alert">{externalError}</p>}
-    <form onSubmit={submit}>
+    {error && <p className="notice" role="alert">{error}</p>}{notice && <p className="notice" role="status">{notice}</p>}
+    {!confirmationSent && <form onSubmit={submit}>
       {!recovery && <><label htmlFor="account-email">Email</label><input id="account-email" type="email" autoComplete="email" required maxLength={254} value={email} onChange={event => setEmail(event.target.value)} /></>}
       {(recovery || mode !== 'reset') && <><label htmlFor="account-password">{recovery ? 'New password' : 'Password'}</label><input id="account-password" type="password" autoComplete={recovery || mode === 'signup' ? 'new-password' : 'current-password'} required minLength={recovery || mode === 'signup' ? 12 : 1} maxLength={256} value={password} onChange={event => setPassword(event.target.value)} />{(recovery || mode === 'signup') && <p className="hint">Use at least 12 characters.</p>}</>}
-      {error && <p className="notice" role="alert">{error}</p>}{notice && <p className="notice" role="status">{notice}</p>}
       <button type="submit" disabled={saving}>{saving ? 'Please wait…' : recovery ? 'Save new password' : mode === 'signup' ? 'Create account' : mode === 'reset' ? 'Send reset link' : 'Sign in'}</button>
-    </form>
-    {confirmationSent && <div className="account-confirmation"><h2>Next, check your inbox</h2><p>Use the newest confirmation email for <strong>{email}</strong>. Open it in this browser to finish signing up.</p><button type="button" className="text-button" disabled={saving} onClick={() => { void resend(); }}>Resend confirmation email</button></div>}
+    </form>}
+    {confirmationSent && <div className="account-confirmation"><p>Use the newest confirmation email for <strong>{email}</strong>. Open it in this browser to finish signing up.</p><button type="button" className="text-button" disabled={saving} onClick={() => { void resend(); }}>Resend confirmation email</button><button type="button" className="text-button" disabled={saving} onClick={() => { setConfirmationSent(false); setNotice(''); setError(''); }}>Use a different email</button></div>}
     {!recovery && <div className="account-actions"><button type="button" className="text-button" disabled={saving} onClick={() => changeMode(mode === 'signin' ? 'signup' : 'signin')}>{mode === 'signin' ? 'Create an account' : 'Back to sign in'}</button>{mode === 'signin' && <button type="button" className="text-button" disabled={saving} onClick={() => changeMode('reset')}>Forgot password?</button>}</div>}
   </section></div><footer className="account-footer">Company fit is a research assessment. Buying intent still needs a conversation.</footer></main>;
 }

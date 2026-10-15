@@ -251,3 +251,9 @@ The user selected an engineering workshop direction after inspecting eygentic.co
 
 ### Walkthrough controls after independent review
 Playback controls sit immediately above the scene and stay available while reading. Reduced motion is manual navigation: Next advances automatic stages, confirmation and evidence retain their own explicit action, and no Resume control appears. Changing motion preferences preserves the selected stage. Initial entry with a device reduced-motion preference still opens the static review example. Automatic holds are6/8/6 seconds for offer/market/discovery, with explicit Pause available beside the scene. Explicit scene choices focus and reveal the new heading. The preview handoff is a real workspace link, not a disabled-form focus action. The preview notice is compact and the sidebar collapse target is44px square.
+
+
+### Human handoff and account confirmation
+Once automation is waiting for input or has saved results, research stages move into a compact expandable history strip. The explicit target-confirmation form or company list/export toolbar leads. Campaign ideas, company-page context and market observations remain available inside an optional disclosure. Active or queued research keeps the full honest progress presentation. Mobile history starts folded, with a44px labelled expand control; desktop retains the full navigation.
+
+Signup success replaces the credential form with Check your inbox, the retained email address and resend/correct-email/sign-in actions. It does not leave another Create account submission in front of someone who has already signed up. Correcting an email restores an empty password field. A textual space around the responsive line break preserves the account headline on phones.

@@ -5,7 +5,7 @@ import './ResearchSidebar.css';
 export function ResearchSidebar({ runs, activeId, loading, onNew, onSelect }: {
   runs: Run[]; activeId?: string; loading: boolean; onNew: () => void; onSelect: (run: Run) => void;
 }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => window.matchMedia('(max-width: 850px)').matches);
   return <aside className={`sidebar research-sidebar ${collapsed ? 'is-collapsed' : ''}`} aria-label="Saved research">
     <div className="sidebar-header"><span className="sidebar-heading">Workspace</span><button className="sidebar-toggle" type="button"
       aria-expanded={!collapsed} aria-controls="research-navigation" aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}

@@ -43,3 +43,7 @@
 .preview-notice{margin:0 0 28px}.preview-notice a{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-weight:600}.preview-notice p:last-child{font-size:.8125rem;color:var(--muted)}
 
 .preview-notice{display:flex;align-items:center;flex-wrap:wrap;gap:4px 18px;padding:10px 16px;margin-bottom:20px}.preview-notice p+p{margin:0}.preview-notice a{min-height:44px}.preview-notice p:last-child{margin:0}
+
+.research-recap{margin:0 0 24px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}.research-recap>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;min-height:52px;font-size:.875rem}.research-recap>summary>span:last-child{margin:0;color:var(--orange);font-size:.8125rem;font-weight:400}.research-recap[open]>summary{border-bottom:1px solid var(--line)}.research-recap .real-research{margin:0;border:0;border-radius:0}.research-recap .demo-intro{padding-block:20px}.confirmation-context{margin:0 0 24px;border-block:1px solid var(--line)}.confirmation-context>summary{font-size:.875rem;min-height:48px}.confirmation-context .market-overview{margin-top:20px}@media(max-width:700px){.research-recap>summary{align-items:flex-start;flex-direction:column;gap:4px}.research-recap>summary>span:last-child{font-size:.8125rem}}
+
+.research-recap>summary>span:first-child{color:var(--ink);font-size:.875rem;font-weight:500;margin:0}
