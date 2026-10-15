@@ -54,6 +54,12 @@ The research view shows persisted, timestamped checkpoints, actual saved page/co
 
 Enter a company name, bare domain or full HTTPS URL. All company names use the same bounded website lookup; confirm a suggested website or enter one manually before offer drafting. Bare domains and HTTPS URLs go directly to website profiling. Matches are suggestions and can refer to another company. Offer and target confirmation still precede prospect discovery. See [company input](docs/company-name-input.md).
 
+New browser runs also collect up to 15 potential competitor websites and propose up to six editable campaign hypotheses. Search observations do not establish competitor similarity. Confirm your offer, observable criteria, search keywords and selected campaign before discovery starts. CLI and older saved runs retain their original flow.
+
+Selection reads a bounded pool of six company primary pages and, when observed, one same-company activity page each. Dated first-party statements can affect which companies receive the three research slots. Missing dates remain unknown; an announcement does not establish buying intent. The [agent experience checklist](docs/agent-experience.md) describes current coverage and unfinished quality checks.
+
+Compare compact company rows, then open one research sheet to inspect saved passages, sourced company facts and named current team-role observations. Unknown facts and employment remain explicit. Switching sheets preserves unsaved notes and draft edits. You can create and edit a starting email template using the confirmed offer and saved evidence, then export drafts in Excel or JSON. Drafting makes no inference request and sends no email. Indexed professional-profile discovery and business-email enrichment remain unfinished.
+
 ## Boundaries
 
 The local SQLite app is for one trusted operator and must bind to loopback. Do not expose it publicly. Hosted mode has verified-user API boundaries, Postgres workspace isolation, account UI and research-credit accounting (three signup credits; batches of 1–3). Real Supabase accounts, external SMTP, paid checkout and actual deployment tests remain required before hosted release.
