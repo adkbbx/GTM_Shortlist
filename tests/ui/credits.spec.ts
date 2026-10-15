@@ -58,7 +58,7 @@ test('real hosted API and Postgres settle partial research; review/export are fr
   await activityButton.click();
   await expect(activity).toHaveCount(0);
   await page.getByLabel('Company name or website', { exact: true }).fill('https://eygentic.com/');
-  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByLabel('Companies in this batch')).toBeVisible({ timeout: 15000 });
   await expect(page.getByText('Maximum 3 credits · 3 available')).toBeVisible();
   await capture(page, `.impeccable/review/${info.project.name}-credit-confirmation.png`);
@@ -104,7 +104,7 @@ test('credit activity recovers from errors and malformed data without blocking r
   await page.getByRole('button', { name: 'Credit activity', exact: true }).click();
   const activity = page.getByRole('region', { name: 'Credit activity', exact: true });
   await expect(activity.getByRole('alert')).toHaveText('Credit activity temporarily unavailable.');
-  await expect(page.getByRole('button', { name: 'Understand my offer' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Start research' })).toBeEnabled();
   await page.unroute('https://app.example/api/credits/history');
   await page.route('https://app.example/api/credits/history', route => route.fulfill({ json: { mode: 'hosted', entries: [{ amount: 'bad' }] } }));
   await activity.getByRole('button', { name: 'Refresh activity' }).click();
@@ -156,7 +156,7 @@ test('actual owner credit history pages earlier and newer without losing tied en
 test('managed closure rejects a stale verified session and clears private browser data', async ({ page }) => {
   const identity = await hostedFixture(page);
   await page.getByLabel('Company name or website', { exact: true }).fill('https://eygentic.com/');
-  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByLabel('Companies in this batch')).toBeVisible({ timeout: 15000 });
   await page.getByLabel('Companies in this batch').selectOption('1');
   await page.getByRole('button', { name: 'Confirm target and discover' }).click();
@@ -173,7 +173,7 @@ test('managed closure rejects a stale verified session and clears private browse
 test('selected batch size sets the actual worker limit and quoted cost', async ({ page }) => {
   await hostedFixture(page);
   await page.getByLabel('Company name or website', { exact: true }).fill('https://eygentic.com/');
-  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByLabel('Companies in this batch')).toBeVisible({ timeout: 15000 });
   await page.getByLabel('Companies in this batch').selectOption('1');
   await expect(page.getByText('Maximum 1 credit · 3 available')).toBeVisible();
@@ -194,7 +194,7 @@ test('deletion has explicit confirmation, retry recovery and unchanged credits',
   const originalViewport = page.viewportSize();
   await hostedFixture(page);
   await page.getByLabel('Company name or website', { exact: true }).fill('https://eygentic.com/');
-  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByLabel('Companies in this batch')).toBeVisible({ timeout: 15000 });
   await page.getByLabel('Companies in this batch').selectOption('1');
   await page.getByRole('button', { name: 'Confirm target and discover' }).click();
@@ -228,7 +228,7 @@ test('deletion has explicit confirmation, retry recovery and unchanged credits',
   expect(new URL(page.url()).searchParams.has('run')).toBe(false);
   await expect(page.getByText('Your research will stay here after you close the browser.')).toHaveCount(1);
   await expect(page.locator('.saved-run')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Understand my offer' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Start research' })).toBeEnabled();
   await capture(page, `.impeccable/review/${info.project.name}-deleted-workspace.png`);
   await page.reload();
   await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
@@ -242,7 +242,7 @@ test('deletion has explicit confirmation, retry recovery and unchanged credits',
 test('optional setup call opens a clean external link; click is not a booked appointment', async ({ page }, info) => {
   await hostedFixture(page);
   await page.getByLabel('Company name or website', { exact: true }).fill('https://eygentic.com/');
-  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByLabel('Companies in this batch')).toBeVisible({ timeout: 15000 });
   await page.getByLabel('Companies in this batch').selectOption('1');
   await page.getByRole('button', { name: 'Confirm target and discover' }).click();
@@ -279,7 +279,7 @@ test('optional setup call opens a clean external link; click is not a booked app
 test('reuse offer skips profiling, preserves edits and quotes a separately charged batch', async ({ page }, info) => {
   await hostedFixture(page);
   await page.getByLabel('Company name or website', { exact: true }).fill('https://eygentic.com/');
-  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByLabel('Companies in this batch')).toBeVisible({ timeout: 15000 });
   await page.getByLabel('Companies in this batch').selectOption('1');
   await page.getByLabel('Exclude from consideration', { exact: false }).fill('Publicly listed companies');

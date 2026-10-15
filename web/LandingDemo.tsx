@@ -70,17 +70,10 @@ export function LandingDemo({ children, onResearch }: { children: ReactNode; onR
   const select = (id: typeof stage.id) => { dispatch({ type: 'select', stage: id }); };
 
   return <div className="landing-experience">
-    <div className="landing-entry" role="group" aria-label="Choose how to explore GTM Shortlist">
-      <div><button ref={playEntry} type="button" onClick={() => open(true)}><Arrow play />Try the demo</button><p>See the process. No research credits used.</p></div>
-      <div><button type="button" onClick={onResearch}>Research my website<Arrow /></button><p>Your company, your criteria, your shortlist.</p></div>
-    </div>
-    <div className="start-grid landing-start">
-      {children}
-      <aside className="demo-preview" aria-labelledby="sample-preview-heading">
-        <div className="demo-preview-heading"><span className="demo-paper-mark" aria-hidden="true"><svg viewBox="0 0 40 48" fill="none"><path d="M7 3h18l9 9v33H7V3Zm18 0v10h9M13 22h15M13 29h15M13 36h9" stroke="currentColor" strokeWidth="1.4" /></svg></span><div><h2 id="sample-preview-heading">A shortlist with a paper trail.</h2><p>Illustrative sample · no live research</p></div></div>
-        <div className="demo-preview-sheet"><div className="demo-company-line"><strong>{sample.company}</strong><span>{sample.companyDomain}</span></div><p>Business software for customer onboarding.</p><div className="demo-preview-finding"><span className="demo-label">Example fit</span><strong>B2B software product</strong><span>Supported in the sample passage</span></div><div className="demo-preview-unknown"><span>Still to verify</span><p>Budget ownership stays unknown.</p></div><button type="button" className="text-button" onClick={() => open(false)}>Inspect example passage<Arrow /></button></div>
-        <p className="demo-caption">From a company name to evidence you can inspect.</p>
-      </aside>
+    <div className="landing-start">{children}</div>
+    <div className="landing-entry" role="group" aria-label="Explore an example">
+      <button ref={playEntry} type="button" className="text-button" onClick={() => open(true)}><Arrow play />Try the demo</button>
+      <span>No research credits used.</span>
     </div>
     {expanded && <section className="landing-demo" ref={frame} aria-labelledby="demo-heading" data-motion={reduced ? 'reduced' : state.mode}>
       <div className="demo-intro"><div><h2 ref={heading} tabIndex={-1} id="demo-heading">See how a shortlist takes shape.</h2><p>Illustrative sample · invented companies and passages · no live research</p></div><button type="button" className="text-button" onClick={() => { dispatch({ type: 'pause' }); setExpanded(false); playEntry.current?.focus(); }}>Close example</button></div>

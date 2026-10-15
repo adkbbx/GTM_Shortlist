@@ -24,7 +24,7 @@ async function capture(page: Page, path: string) {
 test('market observations and editable campaigns persist into confirmed targeting', async ({ page }, info) => {
   await page.goto('/');
   await page.getByLabel('Company name or website', { exact: true }).fill('https://market-seller.example/');
-  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByRole('heading', { name: 'Choose a campaign direction' })).toBeVisible({ timeout: 15000 });
   await expect(page.locator('.competitor-list li')).toHaveCount(15);
   await expect(page.locator('.campaign-choice')).toHaveCount(6);
@@ -297,7 +297,7 @@ test('seller field accepts domains and full HTTPS URLs', async ({ page }, info) 
       await capture(page, `.impeccable/review/${info.project.name}-bare-domain-input.png`);
     }
     const request = page.waitForResponse(response => new URL(response.url()).pathname === '/api/sellers' && response.request().method() === 'POST');
-    await page.getByRole('button', { name: 'Understand my offer' }).click();
+    await page.getByRole('button', { name: 'Start research' }).click();
     const response = await request;
     expect(response.status()).toBe(201);
     expect((await response.json()).seller_url).toBe('https://eygentic.com/');
@@ -316,7 +316,7 @@ test(`company name ${company} waits for website choice, retries and survives rel
   await page.goto('/');
   await page.getByLabel('Company name or website', { exact: true }).fill(company);
   const created = page.waitForResponse(response => new URL(response.url()).pathname === '/api/sellers');
-  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await page.getByRole('button', { name: 'Start research' }).click();
   const run = await (await created).json();
   expect(run.seller_url).toBeNull();
   expect(run.company_name).toBe(company);
@@ -350,7 +350,7 @@ test('empty or unavailable company lookup accepts a manual website', async ({ pa
   for (const company of ['No matches fixture', 'Lookup unavailable fixture']) {
     await page.goto('/');
     await page.getByLabel('Company name or website', { exact: true }).fill(company);
-    await page.getByRole('button', { name: 'Understand my offer' }).click();
+    await page.getByRole('button', { name: 'Start research' }).click();
     await expect(page.getByRole('heading', { name: `Which website belongs to ${company}?` })).toBeVisible();
     await expect(page.getByRole('list', { name: 'Company website matches' })).toHaveCount(0);
     await expect(page.getByRole('status').filter({ hasText: "website below to continue" })).toBeVisible();
@@ -367,12 +367,12 @@ test('saved seller → confirmation → evidence → review → export survives 
   page.on('pageerror', error => errors.push(error.message));
   mkdirSync('.impeccable/review', { recursive: true });
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'What is your company?' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Understand my offer' })).toBeEnabled();
+  await expect(page.getByRole('heading', { name: 'Find companies that fit your offer.' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Start research' })).toBeEnabled();
   await noOverflow(page);
   await capture(page, `.impeccable/review/${testInfo.project.name}-start.png`);
   await page.getByLabel('Company name or website', { exact: true }).fill('https://eygentic.com/');
-  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
   await page.getByLabel('What do you sell?').fill('Test fixture edited offer: acquisition experiments for software businesses');
   await page.getByLabel('Exclude from consideration').fill('Companies headquartered in Canada\nPublicly listed companies');
@@ -398,7 +398,8 @@ test('saved seller → confirmation → evidence → review → export survives 
   await noOverflow(page);
   await capture(page, `.impeccable/review/${testInfo.project.name}-confirmation.png`);
   await page.getByRole('button', { name: 'Confirm target and discover' }).click();
-  await expect(page.getByRole('heading', { name: 'Building your shortlist' })).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole('heading', { name: 'Your research, step by step' })).toBeVisible({ timeout: 10000 });
+  await page.locator('.real-research details').filter({ hasText: 'Saved research checkpoints' }).locator('summary').click();
   await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toBeVisible();
   await noOverflow(page);
   await capture(page, `.impeccable/review/${testInfo.project.name}-progress.png`);
@@ -538,7 +539,7 @@ test('small screen, large text, keyboard and reduced motion remain usable', asyn
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Understand my offer' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Start research' })).toBeEnabled();
   await noOverflow(page);
   await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
   await noOverflow(page);
@@ -546,31 +547,29 @@ test('small screen, large text, keyboard and reduced motion remain usable', asyn
   await input.focus();
   await expect(input).toBeFocused();
   await page.keyboard.press('Tab');
-  await expect(page.getByRole('button', { name: 'Understand my offer' })).toBeFocused();
-  expect(await page.getByRole('button', { name: 'Understand my offer' }).evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
+  await expect(page.getByRole('button', { name: 'Start research' })).toBeFocused();
+  expect(await page.getByRole('button', { name: 'Start research' }).evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
 });
 
 test('unsafe seller URL shows an actionable error', async ({ page }) => {
   await page.goto('/');
   await page.getByLabel('Company name or website', { exact: true }).fill('https://127.1');
-  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByRole('alert')).toContainText('Check the fields');
   await expect(page.getByLabel('Company name or website', { exact: true })).toHaveValue('https://127.1');
 });
 
-test('research preview explains evidence and unknowns without inventing results', async ({ page }) => {
+test('optional demo explains evidence without creating research', async ({ page }) => {
   await page.goto('/');
-  const preview = page.getByRole('complementary', { name: 'A closer look, before outreach.' });
-  const evidence = preview.getByRole('button', { name: 'Evidence', exact: true });
-  const unknowns = preview.getByRole('button', { name: 'Unknowns', exact: true });
-  await expect(evidence).toHaveAttribute('aria-pressed', 'true');
-  await unknowns.click();
-  await expect(unknowns).toHaveAttribute('aria-pressed', 'true');
-  await expect(preview.getByRole('heading', { name: 'Missing evidence stays visible.' })).toBeVisible();
-  await expect(preview.getByText('A guide to the output, not a company result.')).toBeVisible();
-  await expect(unknowns.evaluate(element => element.getBoundingClientRect().height)).resolves.toBeGreaterThanOrEqual(44);
-  await evidence.focus();
-  await page.keyboard.press('Enter');
-  await expect(preview.getByRole('heading', { name: 'Every assessment has a trail.' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'See how a shortlist takes shape.' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Try the demo', exact: true }).click();
+  const demo = page.getByRole('region', { name: 'See how a shortlist takes shape.' });
+  if (await demo.locator('.demo-stage-list').getAttribute('open') === null) {
+    await demo.locator('.demo-stage-list > summary').click();
+  }
+  await demo.getByRole('button', { name: /5 Inspect evidence/ }).click();
+  await demo.getByRole('button', { name: 'Inspect example passage', exact: true }).press('Enter');
+  await expect(demo.getByText('Synthetic example passage', { exact: true })).toBeVisible();
+  await expect(demo.getByText('Illustrative sample · invented companies and passages · no live research')).toBeVisible();
   await noOverflow(page);
 });

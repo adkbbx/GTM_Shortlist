@@ -113,7 +113,7 @@ test('signed-in requests and exports carry tokens; sign-out clears the workspace
     requests.push({ url: request.url(), bearer: request.headers()['authorization'] }); });
   await signIn(page);
   await page.getByLabel('Company name or website', { exact: true }).fill('https://eygentic.com/');
-  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
   const runId = new URL(page.url()).searchParams.get('run');
   expect(runId).toBeTruthy();

@@ -6,3 +6,21 @@
 
 .landing-demo[data-motion=reduced] *{animation:none!important;transition:none!important;transform:none!important;opacity:1}.landing-demo[data-motion=reduced] .demo-scan-line{display:none!important}.demo-playback>.demo-motion-choice{display:flex;margin:0 0 12px;padding:4px 0;font-size:.8125rem;min-height:44px}
 .landing-start .local-search-setup{margin-top:20px}
+
+/* First visit: one real task, with the sample available on demand. */
+.new-research .landing-start{display:block;max-width:680px;margin:0 auto}
+.new-research .landing-entry{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 16px;margin:20px auto 0}
+.new-research .landing-entry button{width:auto;min-height:44px;padding:8px 4px;display:inline-flex;align-items:center;justify-content:center;gap:8px;background:transparent;border-color:transparent;color:var(--orange);font-size:.9375rem}
+.new-research .landing-entry>span{font-size:.8125rem;color:var(--muted)}
+.workspace.first-visit{display:block}
+.new-research .main{padding-top:clamp(40px,8vh,88px)}
+.new-research .page-heading{max-width:680px;margin:0 auto 36px;text-align:center}
+.new-research .page-heading h1{max-width:20ch;margin-inline:auto;font-size:clamp(36px,4.2vw,58px);line-height:1.12}
+.new-research .page-heading>p{max-width:47ch;margin:18px auto 0}
+.new-research .landing-start .start-sheet{padding:0;border:0;border-radius:0;background:transparent}
+.new-research .landing-start form{margin:0}
+.new-research .landing-start .website-form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:stretch}
+.new-research .landing-start .website-form input{min-width:0}
+.new-research .landing-start .hint{text-align:center;margin-top:16px}
+.new-research .workspace-footer{max-width:680px;margin:64px auto 0;text-align:center}
+@media(max-width:600px){.new-research .main{padding-top:40px}.new-research .page-heading{margin-bottom:28px}.new-research .page-heading h1{font-size:clamp(32px,8.5vw,42px)}.new-research .landing-start .website-form{grid-template-columns:1fr}.new-research .landing-start .website-form button{width:100%}.new-research .landing-entry{gap:0 12px;margin-top:16px}.new-research .workspace-footer{margin-top:40px}}

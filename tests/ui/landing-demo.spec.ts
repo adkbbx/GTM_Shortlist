@@ -2,16 +2,19 @@ import { test, expect } from '@playwright/test';
 
 test('sample is independent of real research and preserves website input', async ({ page }) => {
   await page.goto('/');
-  const entry = page.getByRole('group', { name: 'Choose how to explore GTM Shortlist' });
+  const entry = page.getByRole('group', { name: 'Explore an example' });
   await expect(page.getByRole('button', { name: 'Try the demo', exact: true })).toBeVisible();
   const mutations: string[] = [];
   page.on('request', request => { if (request.method() !== 'GET' && request.url().includes('/api/')) mutations.push(request.url()); });
   const input = page.getByLabel('Company name or website', { exact: true });
   await input.fill('https://preserved.example');
-  await page.getByRole('button', { name: 'Research my website', exact: true }).click();
-  await expect(input).toBeFocused();
-  await page.getByRole('button', { name: 'Inspect example passage', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Research my website', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Try the demo', exact: true }).click();
   const demo = page.getByRole('region', { name: 'See how a shortlist takes shape.' });
+  if (await demo.locator('.demo-stage-list').getAttribute('open') === null) {
+    await demo.locator('.demo-stage-list > summary').click();
+  }
+  await demo.getByRole('button', { name: /5 Inspect evidence/ }).click();
   await expect(demo.getByRole('heading', { name: 'Inspect evidence', exact: true })).toBeVisible();
   await demo.getByRole('button', { name: 'Inspect example passage', exact: true }).click();
   await expect(demo.getByText('Synthetic example passage', { exact: true })).toBeVisible();
@@ -55,17 +58,28 @@ test('reduced motion keeps the informative result visible and stages usable', as
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 
-test('entry actions have equal prominence and phone content does not overflow', async ({ page }) => {
+test('first visit presents one real task and keeps the sample optional', async ({ page }) => {
+  // Other scenarios create saved runs in the shared fixture server. This case
+  // explicitly represents a new account's empty history, not a returning one.
+  await page.route('**/api/runs', route => route.fulfill({ json: [] }));
   await page.goto('/');
-  const actions = page.locator('.landing-entry button');
-  const styles = await actions.evaluateAll(elements => elements.map(element => {
-    const style = getComputedStyle(element);
-    return { width: element.getBoundingClientRect().width, height: element.getBoundingClientRect().height, background: style.backgroundColor, weight: style.fontWeight };
-  }));
-  expect(styles).toHaveLength(2);
-  expect(styles[0]).toEqual(styles[1]);
-  expect(styles[0].height).toBeCloseTo(48, 0);
-  expect(styles[0].width).toBeLessThanOrEqual(321);
+  await expect(page.getByRole('button', { name: 'Start research', exact: true })).toHaveCount(1);
+  await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
+  await expect(page.getByRole('complementary', { name: 'Saved research' })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'See how a shortlist takes shape.' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'A shortlist with a paper trail.' })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'How research works' })).toHaveCount(0);
+  const primary = page.getByRole('button', { name: 'Start research', exact: true });
+  const example = page.getByRole('button', { name: 'Try the demo', exact: true });
+  await expect(primary).toBeEnabled();
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.locator('html').evaluate(element => { element.style.fontSize = '200%'; });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.getByLabel('Company name or website', { exact: true }).focus();
+  await page.keyboard.press('Tab');
+  await expect(primary).toBeFocused();
+  expect(await primary.evaluate(element => getComputedStyle(element).backgroundColor)).not.toBe(
+    await example.evaluate(element => getComputedStyle(element).backgroundColor));
   await page.getByRole('button', { name: 'Try the demo', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'See how a shortlist takes shape.' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
