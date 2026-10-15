@@ -4,9 +4,9 @@ Planning proposal, 15 October 2026. Branch: `codex/landing-demo-plan`.
 
 ## Recommendation
 
-Make the product demonstrate one useful outcome: a company moves from a discovered candidate to an inspected source passage, then to the visitor's own review decision. Keep the existing Eygentic-derived design and GTM Shortlist name. Expand the starting page's explanatory preview into one accessible six-stage player, followed by a full-width example research sheet. The primary website form continues to start the actual product flow.
+Make the product demonstrate one useful outcome: a company moves from a discovered candidate to an inspected source passage, then to the visitor's own review decision. Keep the existing Eygentic-derived design and GTM Shortlist name. Expand the starting page's explanatory preview into one accessible six-stage player, followed by a full-width example research sheet. The website form continues to start the actual product flow.
 
-**Provisional entry choice:** a clearly labelled, provider-free guided sample plays beside the real website form. The user has been asked whether the sample or live website research should lead; this choice remains open. The plan recommends the sample because visitors can understand the output before signing in or spending credits. Do not implement this assumption as settled approval.
+**Confirmed entry choice:** the user chose both equally prominent. Put “Play example” and “Research my website” together in the first viewport, with equal button size, weight and orange action treatment. Neither path is a secondary text link. Explain the choice beside the controls: the example is illustrative and uses no research credits; website research uses the actual account, confirmation and credit flow. Neither starts automatically.
 
 This branch contains a plan, a storyboard specification, a validation script, and a baseline screenshot. It changes no application code or brand tokens.
 
@@ -34,7 +34,7 @@ Borrow Explee's accumulating results and stage continuity. Do not import its gre
 | Option | What the visitor does | Trade-off |
 |---|---|---|
 | A. Six scroll-stacked cards | Scrolls through one explanatory card per stage | Attractive, but repeats the app and hides the complete result behind a long scroll. Sticky stacking is awkward on short phones. |
-| **B. One stage player and an inspectable result** | Plays or chooses a stage, then opens a passage and reviews a company | Shows the actual value in one stable location. Reuses our components and keeps controls readable. Recommended. |
+| **B. One stage player and an inspectable result** | Chooses an equally prominent example or website-research action; the example opens a passage and reviews a company | Shows the actual value in one stable location. Reuses our components and keeps controls readable. Selected composition with the user's dual-entry preference. |
 | C. Live website research immediately | Enters a website and waits for the real worker | Relevant to the visitor, but dependent on authentication, configuration, credits and latency. Keep this as the actual product CTA. |
 
 The design-taste exploration offered “quiet instrument”, “dense tiles” and “product performs”. Keep the last concept: let the research sheet demonstrate the claim. Reject the dealt photography, logo-proof row and alternate hero composition because they conflict with the requested existing layout and available evidence. No new visual world is proposed.
@@ -43,14 +43,14 @@ The design-taste exploration offered “quiet instrument”, “dense tiles” a
 
 Preserve the header, page title, website form and existing sidebar in local mode. Do not expose saved runs or local provider settings on an anonymous public landing solely to mimic the app. Public versus authenticated routing needs a separate explicit decision; the present app's `AuthGate` owns access.
 
-On laptop, keep the current input-plus-preview arrangement. The right preview opens on a readable example outcome, with a quiet “See the process” action. Expand into a full-width stage player immediately below when played, rather than compressing a complete sheet into the narrow preview. Keep the form available above it. Reserve a stable frame height to avoid page jumps, while allowing text enlargement to grow it.
+On laptop, keep the current input-plus-preview arrangement. Place two equally sized orange actions together beneath the introductory copy: “Play example” and “Research my website”. The right preview opens on a readable example outcome. Play expands the full-width stage player immediately below, rather than compressing a complete sheet into the narrow preview. Research focuses the existing company field, preserving any typed value; the form's submit remains the deliberate start of real research. Keep the form available above the player. Reserve a stable frame height to avoid page jumps, while allowing text enlargement to grow it.
 
 Proposed copy:
 
 - Keep the existing heading, “Find your next shortlist.”
 - Supporting sentence: “See which companies fit your offer, inspect the evidence, and decide who to approach.”
-- Existing primary action: “Understand my offer”.
-- Preview action: “Play example”. Persistent label: “Illustrative sample · no live research”.
+- Equal entry actions: “Play example” and “Research my website”. The field's submission action remains “Understand my offer”.
+- Persistent example label: “Illustrative sample · no live research”. Live-path helper: “Uses your account and research credits where applicable. Confirm your target before discovery.”
 - Example outcome action: “Inspect a passage”. End action: “Research my company”, which focuses the existing company field rather than silently starting a run.
 
 Page argument: the form explains the input; the player shows the transformation; the open source passage proves inspectability; the review action shows human control; the final CTA starts the visitor's own research. Replace the current short method list only after the player demonstrates those same ideas. No fabricated testimonials, pricing or conversion statistics.
@@ -90,9 +90,9 @@ Reduced motion shows the finished example immediately, disables scanning and mov
 
 ## Laptop, phone and keyboard behavior
 
-Laptop: stage list at left of a full-width demo sheet, selected content at right, completed summaries available in that list. The page retains a single dominant website action. Do not shrink screenshots or render tables as tiny images.
+Laptop: stage list at left of a full-width demo sheet, selected content at right, completed summaries available in that list. Keep the two entry actions equally prominent above the input-plus-preview arrangement. Do not shrink screenshots or render tables as tiny images.
 
-Phone: title, form, finished example preview, then the stage selector. Show the current stage title and “Step N of 6”; an “All stages” disclosure gives six normal buttons. Use one content column, natural vertical scrolling, and a persistent-in-component pause/next row. Do not pin the page or steal scroll. Long sources wrap, and optional draft/people details stay collapsed until requested.
+Phone: title, the two equal full-width entry actions stacked with the same treatment, form, finished example preview, then the stage selector. Keep both entry actions above the fold at 390×844 without shrinking text or touch targets. Show the current stage title and “Step N of 6”; an “All stages” disclosure gives six normal buttons. Use one content column, natural vertical scrolling, and a persistent-in-component pause/next row. Do not pin the page or steal scroll. Long sources wrap, and optional draft/people details stay collapsed until requested.
 
 Controls: Play, Pause/Resume, Previous, Next, Replay, and All stages. Stage controls are ordinary buttons with `aria-current="step"`, not tabs with incomplete keyboard behavior. Announce deliberate scene changes once through a polite status line. Do not announce every staggered row or synthetic scan. The active pane has a heading; focus remains on the control unless a new dialog is explicitly opened. Disabled controls explain endpoint state through their label or adjacent context. Returning from the demo to the real field preserves any website already typed.
 
@@ -126,6 +126,7 @@ Acceptance checks for implementation:
 - Reduced motion before load and toggled mid-play: final visible content, no active sweep, no delayed stage jump.
 - Background tab, leaving viewport, focus/hover pause, rapid stage changes, Replay, and unmount: no stale timers or surprise scene changes.
 - Example mode produces zero research, search, inference, enrichment, auth or billing mutations. No implicit target acceptance.
+- Both entry actions have equal visual weight on laptop and phone. Choosing the example preserves typed website input; choosing website research focuses that input and does not submit it or spend credits automatically.
 - Actual flow regression keeps saved checkpoints, offline/queued/partial/stop states, independent review, draft persistence and export.
 - No false capabilities, fabricated source links or silent research requests. A sample ending with two records must not be padded to three.
 - Run TypeScript build, relevant browser checks, Ruff and meaningful backend regression checks. Screenshots at laptop/phone must be opened and inspected, not merely generated.
@@ -139,4 +140,4 @@ Two DEV posts offer useful practitioner examples, not a consensus or formal acce
 - [Daniel Pertu's four-phase product demo](https://dev.to/daniel_pertu/a-four-phase-state-machine-88-css-rules-and-no-video-in-our-hero-55ca) shows a small React phase owner with CSS motion and a reduced-motion result state. Its comment thread raises SVG scaling sharpness; the author says that comparison was not tested. For our text-heavy research UI, readable DOM is more relevant than animated screenshots.
 - [LaWeBe's landing-page motion failure](https://dev.to/lawebe/how-an-accessibility-saas-broke-its-own-landing-and-how-we-fixed-it-5802) reports content becoming invisible with reduced motion and recommends explicit visible fallback states and browser assertions. No comments were returned. Disabling CSS transitions alone does not inherently prevent an observer from revealing content; our acceptance criterion is the actual visible outcome, rather than treating the post's broad causal claim as browser law.
 
-Open decisions: sample-first versus real-research-first, whether anonymous visitors receive a separate public landing route, and final illustrative copy. Preserve existing behavior until these are chosen. The proposed motion values are ours, not measured Explee timings or validated user-test results.
+Open decisions: whether anonymous visitors receive a separate public landing route, and final illustrative copy. Entry prominence is settled: both paths receive equal emphasis. Preserve existing routing until its scope is chosen. The proposed motion values are ours, not measured Explee timings or validated user-test results.

@@ -9,6 +9,9 @@ def main() -> None:
     folder = root / "docs" / "planning" / "landing-demo"
     storyboard = json.loads((folder / "storyboard.json").read_text(encoding="utf-8"))
     stages = storyboard["stages"]
+    assert storyboard["entry_decision"] == "equally_prominent"
+    assert storyboard["entry_actions"] == ["Play example", "Research my website"]
+    assert storyboard["entry_autostart"] is False
     identifiers = [stage["id"] for stage in stages]
     assert identifiers == ["offer", "market", "confirm", "discover", "evidence", "review"]
     assert storyboard["provider_calls"] == 0

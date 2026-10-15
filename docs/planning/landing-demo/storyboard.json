@@ -1,7 +1,9 @@
 {
   "kind": "planning_proposal",
   "mode": "illustrative_sample",
-  "entry_decision": "pending_user_preference",
+  "entry_decision": "equally_prominent",
+  "entry_actions": ["Play example", "Research my website"],
+  "entry_autostart": false,
   "brand_source": "DESIGN.md",
   "provider_calls": 0,
   "changes_production": false,
