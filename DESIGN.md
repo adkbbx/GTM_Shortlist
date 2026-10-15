@@ -247,3 +247,7 @@ The isolated preview cannot submit real research or save provider configuration.
 
 
 The user selected an engineering workshop direction after inspecting eygentic.com: restrained orange, paper, calibration grids and mechanical linework. The entry illustration is a decorative SVG calibration plate with a lightweight WebGL scan overlay, not a live work indicator. WebGL failure retains the SVG. Rendering is capped to 1.5 device pixel ratio and approximately 30fps; manual pause, device reduced motion, offscreen and hidden-tab states stop the loop. Context loss retains the static plate. No provider calls or new graphics dependencies are needed.
+
+
+### Walkthrough controls after independent review
+Playback controls sit immediately above the scene and stay available while reading. Reduced motion is manual navigation: Next advances automatic stages, confirmation and evidence retain their own explicit action, and no Resume control appears. Changing motion preferences preserves the selected stage. Initial entry with a device reduced-motion preference still opens the static review example. Automatic holds are6/8/6 seconds for offer/market/discovery, with explicit Pause available beside the scene. Explicit scene choices focus and reveal the new heading. The preview handoff is a real workspace link, not a disabled-form focus action. The preview notice is compact and the sidebar collapse target is44px square.

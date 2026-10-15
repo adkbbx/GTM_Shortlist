@@ -135,3 +135,15 @@ Direct stage jumps are a useful shortcut. The low-information source animation o
 3. Can the entry plate and the operational source diagram share one recognizable evidence-processing motif, while keeping decorative motion separate from real progress?
 
 No detector findings were received or used. These questions are supplied to the parent for synthesis; this assessment does not ask the user to approve implementation.
+
+## Correction verification addendum
+
+Scope: only the three priority issues above. This is a source verification, not a second live design review. CUA could not create the requested fresh browser 2 tab because browser 2 was unavailable; a fresh inventory returned no browsers. No tab was created, no viewport was changed, and no provider call or saved-run mutation occurred. The original live evidence remains valid for the original build only.
+
+- Reduced-motion defect: corrected in the inspected source. Manual offer and market stages render Next without Resume. Replay at review selects offer once; Next selects market, and the reduce transition preserves the current stage. The manual cue explicitly says "Click Next above." This removes the previously observed no-op and reset paths.
+- Reading and scroll issue: the inspected source moves transport controls above the scene and makes them sticky, doubles automatic holds to 6/8/6 seconds, and calls an instant centered scene-heading scroll after stage selection, confirmation and evidence-to-review choices. These changes address the identified causes. Actual sticky placement, available reading area and scroll landing have not been visually reverified in this subagent turn.
+- Preview handoff: corrected in source. `main.tsx` passes the preview marker as `researchUrl`; `LandingDemo` renders an "Open research workspace" anchor with that URL instead of focusing the disabled form. The preview launcher defaults the marker to `http://127.0.0.1:8019/`. The actual rebuilt DOM href could not be inspected here.
+
+Parent-supplied verification: the parent reports an actual CUA phone check showing manual mode retains offer without Resume, controls above the cue, and the preview handoff's actual href `http://127.0.0.1:8019/`. The parent also reports all 12 final phone/laptop demo tests passed, including reduced manual navigation. This evidence is attributed to the parent and was not independently repeated here.
+
+Disposition: ship for these reported priorities. No remaining defect identified in the inspected correction paths, and the parent supplied the live and automated verification above. This subagent does not claim an independent fresh visual sign-off.

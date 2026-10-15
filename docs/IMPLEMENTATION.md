@@ -1,6 +1,6 @@
 # Implementation checklist
 
-Last updated 15 October 2026 JST. Check a task only after its acceptance evidence is saved in PROGRESS.md. This file is the source of truth for automatic continuation.
+Last updated 16 October 2026 JST. Current authorized design work and its acceptance gates are tracked in [DESIGN_CHECKLIST.md](planning/landing-demo/DESIGN_CHECKLIST.md); the broader product gates below remain open. Check a task only after its acceptance evidence is saved in PROGRESS.md. This file is the source of truth for automatic continuation.
 
 ## 1. Project and contracts
 - [x] Clone dedicated repository and preserve planning sources.

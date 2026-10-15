@@ -4,7 +4,7 @@
 .research-sidebar button{color:inherit;border:0;box-shadow:none;background:transparent;min-width:0}
 .research-sidebar button:hover{background:#302d28}
 .research-sidebar button:focus-visible{outline:2px solid #efa779;outline-offset:2px}
-.sidebar-toggle{display:grid;place-items:center;min-height:44px;width:40px;padding:8px;flex:none}
+.sidebar-toggle{display:grid;place-items:center;min-height:44px;width:44px;padding:8px;flex:none}
 .sidebar-toggle svg,.new-run svg,.saved-run-icon{stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .research-sidebar .new-run{display:flex;align-items:center;gap:12px;justify-content:flex-start;padding:10px 12px;text-align:left;min-height:44px;width:100%;font-size:.875rem;font-weight:600;margin:0 0 12px}
 .workspace .research-sidebar h2{color:#b1aaa0;font-size:.75rem;font-weight:600;padding:0 12px;margin:0 0 8px;letter-spacing:0;text-transform:none}

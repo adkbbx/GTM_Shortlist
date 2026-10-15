@@ -1,9 +1,9 @@
 /** Presentation-only sample. These objects must never enter the research API. */
 export const demoStages = [
-  { id: 'offer', title: 'Understand offer', detail: 'Start with what you sell.', hold: 3000 },
-  { id: 'market', title: 'Explore market', detail: 'Turn observations into a direction.', hold: 4000 },
+  { id: 'offer', title: 'Understand offer', detail: 'Start with what you sell.', hold: 6000 },
+  { id: 'market', title: 'Explore market', detail: 'Turn observations into a direction.', hold: 8000 },
   { id: 'confirm', title: 'Confirm target', detail: 'You set the research criteria.', hold: null },
-  { id: 'discover', title: 'Discover companies', detail: 'Build a focused candidate list.', hold: 4000 },
+  { id: 'discover', title: 'Discover companies', detail: 'Build a focused candidate list.', hold: 6000 },
   { id: 'evidence', title: 'Inspect evidence', detail: 'Open the words behind a finding.', hold: null },
   { id: 'review', title: 'Review and draft', detail: 'Make your own decision.', hold: null },
 ] as const;
@@ -23,7 +23,7 @@ export type DemoAction =
   | { type: 'reduce' };
 
 export function demoTransition(state: DemoState, action: DemoAction): DemoState {
-  if (action.type === 'reduce') return { mode: 'finished', stage: 'review' };
+  if (action.type === 'reduce') return state.stage === 'review' ? { mode: 'finished', stage: 'review' } : { mode: 'waiting', stage: state.stage };
   if (action.type === 'confirm') return state.stage === 'confirm' ? { mode: 'playing', stage: 'discover' } : state;
   if (action.type === 'pause') return state.mode === 'playing' ? { mode: 'paused', stage: state.stage } : state;
   if (action.type === 'select') return { mode: 'waiting', stage: action.stage };

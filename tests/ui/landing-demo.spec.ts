@@ -36,7 +36,7 @@ test('playback advances then waits for example confirmation and source inspectio
   await page.goto('/');
   await page.getByRole('button', { name: 'Try the demo', exact: true }).click();
   const demo = page.getByRole('region', { name: 'See how a shortlist takes shape.' });
-  await expect(demo.getByRole('heading', { name: 'Confirm target', exact: true })).toBeVisible({ timeout: 12000 });
+  await expect(demo.getByRole('heading', { name: 'Confirm target', exact: true })).toBeVisible({ timeout: 20000 });
   await expect(demo.getByRole('button', { name: 'Confirm example target' })).toBeVisible();
   await expect(demo.locator('.demo-action-cue')).toContainText('Your turn');
   await expect(demo.locator('.demo-action-cue')).toContainText('click Confirm example target');
@@ -44,7 +44,7 @@ test('playback advances then waits for example confirmation and source inspectio
   await demo.getByRole('button', { name: 'Confirm example target' }).click();
   // Focusing an interactive control intentionally pauses playback. Resume from its dedicated control.
   if (await demo.getByRole('button', { name: 'Resume', exact: true }).isVisible()) await demo.getByRole('button', { name: 'Resume', exact: true }).click();
-  await expect(demo.getByRole('heading', { name: 'Inspect evidence', exact: true })).toBeVisible({ timeout: 8000 });
+  await expect(demo.getByRole('heading', { name: 'Inspect evidence', exact: true })).toBeVisible({ timeout: 10000 });
   await expect(demo.getByRole('button', { name: 'Inspect example passage', exact: true })).toHaveAttribute('aria-expanded', 'false');
   await expect(demo.locator('.demo-action-cue')).toContainText('Click Inspect example passage');
   await expect(demo.getByRole('button', { name: 'Next', exact: true })).toHaveCount(0);
@@ -96,8 +96,30 @@ test('motion can be disabled during playback without hiding the result', async (
   await page.getByRole('button', { name: 'Try the demo', exact: true }).click();
   const demo = page.getByRole('region', { name: 'See how a shortlist takes shape.' });
   await demo.getByRole('button', { name: 'Reduce motion', exact: true }).click();
-  await expect(demo.getByRole('heading', { name: 'Review and draft', exact: true })).toBeVisible();
+  await expect(demo.getByRole('heading', { name: 'Understand offer', exact: true })).toBeVisible();
   expect(await demo.locator('.demo-scene').evaluate(element => getComputedStyle(element).animationName)).toBe('none');
-  await demo.getByRole('button', { name: 'Previous', exact: true }).click();
+  await demo.getByRole('button', { name: 'Next', exact: true }).click();
+  await expect(demo.getByRole('heading', { name: 'Explore market', exact: true })).toBeVisible();
+});
+
+
+test('reduced motion uses consistent manual navigation without a misleading Resume', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Try the demo', exact: true }).click();
+  const demo = page.getByRole('region', { name: 'See how a shortlist takes shape.' });
+  if (await demo.locator('.demo-stage-list').getAttribute('open') === null) await demo.locator('.demo-stage-list > summary').click();
+  await demo.getByRole('button', { name: /1 Understand offer/ }).click();
+  await expect(demo.locator('.demo-action-cue')).toContainText('Manual example');
+  await expect(demo.getByRole('button', { name: 'Resume', exact: true })).toHaveCount(0);
+  await demo.getByRole('button', { name: 'Next', exact: true }).click();
+  await expect(demo.getByRole('heading', { name: 'Explore market', exact: true })).toBeVisible();
+  await expect(demo.getByRole('button', { name: 'Resume', exact: true })).toHaveCount(0);
+  await demo.getByRole('button', { name: 'Next', exact: true }).click();
+  await expect(demo.getByRole('heading', { name: 'Confirm target', exact: true })).toBeVisible();
+  await expect(demo.getByRole('button', { name: 'Next', exact: true })).toHaveCount(0);
+  await demo.getByRole('button', { name: 'Confirm example target', exact: true }).click();
+  await expect(demo.getByRole('heading', { name: 'Discover companies', exact: true })).toBeVisible();
+  await demo.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(demo.getByRole('heading', { name: 'Inspect evidence', exact: true })).toBeVisible();
 });
