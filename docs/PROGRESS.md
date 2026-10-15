@@ -697,3 +697,10 @@ GitHub Checks for implementation commit5c63dc23953da052fdb5c98fab41209f74a4ecc3 
 ### CI follow-up — hosted deletion regression expectations
 
 GitHub run38800083391 completed84/86 browser scenarios successfully, including hosted account/credit flows. Both failures were the same stale assertion that deletion should reveal the removed empty-sidebar sentence. The actual deletion, unchanged two-credit balance, cleared run URL and removal of saved rows had passed before that assertion. Updated the regression to assert the intended first-use result: no Saved research sidebar and a visible company-entry heading; retained all deletion/credit/API assertions. The dependent container job was skipped because UI failed. CI remains an open acceptance gate until the corrected branch run passes. This is a fixture expectation update, not a change to account or deletion behavior.
+
+
+### Hosted deletion readiness verification
+
+Reproduced the corrected hosted deletion test using the existing portable PostgreSQL18.6 binaries with a new uniquely named disposable cluster in this worktree, loopback55433 only. The laptop scenario passed; the first phone run exposed a fixture navigation race after the old empty-sidebar loading cue was removed. It advanced while workspace requests were still active, aborting the forwarded request. Added explicit waits for the post-deletion credit response and the enabled company-entry form/loaded balance after reload and reopening the stale URL; no error suppression or generic retry was added.
+
+Both hosted deletion scenarios then passed twice (four checks), including failed-delete recovery, confirmation, unchanged credits, removed rows, reload and stale-link reopening. TypeScript/Vite build passes. Stopped the fixture PostgreSQL process and removed only its verified UUID cluster under this worktree's data directory; retained ignored diagnostic logs. Existing databases, the main portable runtime, preview data and production Supabase were untouched. No provider, email, inference or purchase occurred. Branch CI still needs its final corrected run to finish.

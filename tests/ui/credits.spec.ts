@@ -222,7 +222,9 @@ test('deletion has explicit confirmation, retry recovery and unchanged credits',
   await expect(page.getByRole('alert')).toHaveText('Deletion unavailable. Try again.');
   await expect(page.getByRole('heading', { name: '1 company researched' })).toBeVisible();
   await page.unroute(`https://app.example/api/runs/${runId}`);
+  const balanceAfterDelete = page.waitForResponse(response => new URL(response.url()).pathname === '/api/credits' && response.ok());
   await page.getByRole('button', { name: 'Delete permanently' }).click();
+  await balanceAfterDelete;
   await expect(page.getByText('Saved research deleted. Your credit balance is unchanged.')).toBeVisible();
   await expect(page.getByText('2 credits available', { exact: true })).toBeVisible();
   expect(new URL(page.url()).searchParams.has('run')).toBe(false);
@@ -233,10 +235,14 @@ test('deletion has explicit confirmation, retry recovery and unchanged credits',
   await capture(page, `.impeccable/review/${info.project.name}-deleted-workspace.png`);
   await page.reload();
   await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Start research' })).toBeEnabled();
   await expect(page.getByText('2 credits available', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: '1 company researched' })).toHaveCount(0);
   await page.goto(`/?run=${runId}`);
   await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Start research' })).toBeEnabled();
+  await expect(page.getByText('2 credits available', { exact: true })).toBeVisible();
+  await expect(page.getByRole('alert')).toHaveCount(0);
   await expect(page.getByText('Loading saved research…')).toHaveCount(0);
 });
 
