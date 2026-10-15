@@ -17,7 +17,12 @@ parser.add_argument("--cases", type=Path, default=Path("examples/evaluation/sema
 parser.add_argument("--database", type=Path, default=Path("data/semantic-evaluation.sqlite3"))
 parser.add_argument("--output", type=Path, default=Path("data/semantic-evaluation.json"))
 parser.add_argument("--max-calls", type=int, choices=range(1, 31), default=30)
+parser.add_argument("--allow-provider-calls", action="store_true",
+                    help="Allow credit-consuming evaluation only after explicit user approval")
 args = parser.parse_args()
+if not args.allow_provider_calls:
+    parser.error("Live evaluation is disabled. Use saved evidence or fixtures; obtain user approval "
+                 "before opting in with --allow-provider-calls.")
 cases = json.loads(args.cases.read_text())
 assert len(cases) <= 30 and len({c["id"] for c in cases}) == len(cases)
 settings = Settings.load()

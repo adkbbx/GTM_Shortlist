@@ -24,7 +24,12 @@ def main():
     parser.add_argument("--output-db", type=Path, required=True)
     parser.add_argument("--provider-env", type=Path, default=Path("deploy/secrets/worker.env"))
     parser.add_argument("--request-key", default="market-live-evaluation")
+    parser.add_argument("--allow-provider-calls", action="store_true",
+                        help="Allow credit-consuming evaluation only after explicit user approval")
     args = parser.parse_args()
+    if not args.allow_provider_calls:
+        parser.error("Live evaluation is disabled. Use saved evidence or fixtures; obtain user approval "
+                     "before opting in with --allow-provider-calls.")
     if args.source_db.resolve() == args.output_db.resolve():
         raise ValueError("Source and evaluation databases must be different")
     with sqlite3.connect(args.source_db.resolve().as_uri() + "?mode=ro", uri=True) as db:

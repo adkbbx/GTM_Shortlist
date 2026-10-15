@@ -1,5 +1,9 @@
 # Progress and handoff
 
+## 15 October, development credit protection
+
+User clarified SerpApi allowance is only 250 calls/month and requested caution for all provider credits. Development now defaults to fixtures, captured responses and saved evidence. Further live development evaluations require explicit approval for that evaluation, including inference and enrichment. Both live evaluation scripts reject execution without `--allow-provider-calls`, before credentials, source reads or output state creation; passing the flag does not replace user approval. Two subprocess regression checks prove rejection before state creation, with missing source/credential paths. No provider calls were made for this change. Ordinary app-user-initiated research remains available; database-local budgets are not provider-account-wide quotas. Product goal remains unfinished.
+
 ## 14 October 2026, initial setup
 Repository was empty. Cloned separately from Before I Call; copied the agreed planning sources into docs/planning. Existing goal is active. Heartbeat `resume-gtm-shortlist-build` created for this chat every five hours, with 18:00 JST today cutoff and weekly-limit stop instruction. User authorizes continuous work while unavailable and asks for thorough validation at phone/laptop sizes.
 
