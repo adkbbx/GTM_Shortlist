@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Protocol
 
 import httpx
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
 from shortlist.config import Settings
 from shortlist.domain import (
@@ -173,6 +173,17 @@ class SellerDraft(BaseModel):
     criteria: list[Criterion] = Field(min_length=1, max_length=12)
     unknowns: list[str] = Field(default_factory=list, max_length=12)
 
+    @field_validator("criteria", mode="before")
+    @classmethod
+    def text_criteria(cls, value):
+        # Some compatible model servers flatten nested function arguments to text.
+        # Preserve each description exactly; only supply the UI's stable local ID
+        # and existing required default. Normal Criterion bounds still apply.
+        if isinstance(value, list) and value and all(isinstance(item, str) for item in value):
+            return [{"id": f"criterion-{index + 1}", "description": description, "required": True}
+                    for index, description in enumerate(value)]
+        return value
+
 
 class Extraction(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -327,10 +338,20 @@ class Gemma:
     def seller(self, source: Source, *, output_protocol: int = 2) -> SellerDraft:
         if output_protocol not in (1, 2):
             raise ProviderError("Unsupported seller output protocol")
+        schema = SellerDraft.model_json_schema()
+        if output_protocol == 2:
+            # Inline the single nested shape so compatible tool formatters do not
+            # have to resolve Pydantic's local $ref/$defs before presenting it.
+            schema["properties"]["criteria"]["items"] = schema.pop("$defs")["Criterion"]
+        instruction = ("Draft the seller's actual offer and proposed customer target from the page. "
+                       "Do not invent outcomes or customer pain. Include unknowns. "
+                       "The human will edit and confirm before discovery.")
+        if output_protocol == 2:
+            instruction += (" Criteria must describe publicly observable company characteristics, not private pain, "
+                            "budgets or buying intent. Each criterion is an object with id, description and required fields.")
         data = self.complete(
-            "Draft the seller's actual offer and proposed customer target from the page. "
-            "Do not invent outcomes or customer pain. Include unknowns. The human will edit and confirm before discovery.",
-            {"url": source.url, "text": source.text[:18000]}, SellerDraft.model_json_schema(),
+            instruction,
+            {"url": source.url, "text": source.text[:18000]}, schema,
             tool_name="submit_seller_summary" if output_protocol == 2 else None)
         try:
             return SellerDraft.model_validate(data)

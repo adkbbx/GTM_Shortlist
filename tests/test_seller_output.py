@@ -51,9 +51,32 @@ def test_seller_uses_named_function_schema_and_reads_values(tmp_path, source, mo
     request = requests[0]
     assert "response_format" not in request
     assert request["tool_choice"] == {"type": "function", "function": {"name": "submit_seller_summary"}}
-    assert request["tools"][0]["function"]["parameters"] == SellerDraft.model_json_schema()
+    parameters = request["tools"][0]["function"]["parameters"]
+    original = SellerDraft.model_json_schema()
+    assert parameters["properties"]["criteria"]["items"] == original["$defs"]["Criterion"]
+    assert "$ref" not in json.dumps(parameters) and "$defs" not in parameters
     assert json.loads(request["messages"][1]["content"])["text"] == source.text
     assert "untrusted data" in request["messages"][0]["content"]
+
+
+def test_plain_text_criteria_preserve_descriptions_and_get_stable_ids(tmp_path, source, monkeypatch):
+    descriptions = ["Sells software to businesses", "Offers a hosted payroll product"]
+    payload = {**SUMMARY, "criteria": descriptions}
+    requests = transport(monkeypatch, tool_message(json.dumps(payload)))
+    draft = Gemma(settings(tmp_path)).seller(source)
+    assert [item.description for item in draft.criteria] == descriptions
+    assert [item.id for item in draft.criteria] == ["criterion-1", "criterion-2"]
+    assert all(item.required for item in draft.criteria)
+    assert draft.offer == SUMMARY["offer"] and draft.target == SUMMARY["target"]
+    assert len(requests) == 1
+
+
+@pytest.mark.parametrize("criteria", [["x"], ["x" * 501], ["Valid description"] * 13,
+                                     ["Valid description", {"description": "Missing id"}], [123]])
+def test_text_criteria_do_not_bypass_domain_validation(criteria):
+    from pydantic import ValidationError
+    with pytest.raises(ValidationError):
+        SellerDraft.model_validate({**SUMMARY, "criteria": criteria})
 
 
 @pytest.mark.parametrize("message,finish_reason", [
