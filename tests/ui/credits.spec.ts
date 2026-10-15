@@ -226,7 +226,8 @@ test('deletion has explicit confirmation, retry recovery and unchanged credits',
   await expect(page.getByText('Saved research deleted. Your credit balance is unchanged.')).toBeVisible();
   await expect(page.getByText('2 credits available', { exact: true })).toBeVisible();
   expect(new URL(page.url()).searchParams.has('run')).toBe(false);
-  await expect(page.getByText('Your research will stay here after you close the browser.')).toHaveCount(1);
+  await expect(page.getByRole('complementary', { name: 'Saved research' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Find companies that fit your offer.' })).toBeVisible();
   await expect(page.locator('.saved-run')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Start research' })).toBeEnabled();
   await capture(page, `.impeccable/review/${info.project.name}-deleted-workspace.png`);
