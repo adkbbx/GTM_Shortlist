@@ -77,7 +77,8 @@ CREATE ROLE worker_fixture LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD 'labelled-work
         docker("exec", api, "python", "-c", "from uuid import UUID; from shortlist.config import Settings; "
                "from shortlist.postgres import PostgresStore; store=PostgresStore(Settings.load().database_url, UUID(int=0)); "
                "\nwith store.connection() as db: db.execute('SELECT deleted_at,legacy_credit_exempt FROM runs LIMIT 0'); "
-               "db.execute('SELECT requested,consumed FROM credit_reservations LIMIT 0')")
+               "db.execute('SELECT requested,consumed FROM credit_reservations LIMIT 0'); "
+               "db.execute('SELECT email_draft FROM records LIMIT 0')")
         assert json.loads(docker("inspect", "--format", "{{json .HostConfig.PortBindings}}", database)) in (None, {})
         docker("exec", api, "python", "-c", "from pathlib import Path; import shutil; "
                "assert shutil.which('node') is None; assert not Path('/app/.env').exists(); "
@@ -90,7 +91,8 @@ CREATE ROLE worker_fixture LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD 'labelled-work
                 return response.read()
 
         assert json.loads(get("/api/health")) == {"mode": "hosted", "search_ready": False,
-                                                "gemma_ready": False, "worker_online": False}
+                                                "gemma_ready": False, "worker_online": False,
+                                                "local_search_error": None}
         setup = json.loads(get("/api/auth/setup"))
         assert setup["mode"] == "hosted" and setup["publishable_key"] == "sb_publishable_container_fixture"
         try:
