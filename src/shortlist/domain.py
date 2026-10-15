@@ -104,6 +104,11 @@ class Hypothesis(Value):
     assumptions: tuple[str, ...] = Field(min_length=1)
 
 
+class CompanyFact(Value):
+    kind: Literal["description", "location", "team_size"]
+    evidence: Evidence
+
+
 class Research(Value):
     id: str = Field(default_factory=new_id)
     domain: str
@@ -116,6 +121,13 @@ class Research(Value):
     qualification: Literal["fits", "needs_verification", "does_not_fit"]
     status: Literal["complete", "partial"]
     unknowns: tuple[str, ...] = ()
+    company_facts: tuple[CompanyFact, ...] = Field(default=(), max_length=3)
+
+    @model_validator(mode="after")
+    def unique_company_facts(self):
+        if len({fact.kind for fact in self.company_facts}) != len(self.company_facts):
+            raise ValueError("Company fact kinds must be unique")
+        return self
 
 
 class Review(Value):

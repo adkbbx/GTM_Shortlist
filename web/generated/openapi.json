@@ -900,6 +900,29 @@
         ],
         "title": "Candidate"
       },
+      "CompanyFact": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "description",
+              "location",
+              "team_size"
+            ],
+            "title": "Kind"
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/Evidence"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "evidence"
+        ],
+        "title": "CompanyFact"
+      },
       "CompanySignal": {
         "properties": {
           "label": {
@@ -1816,6 +1839,15 @@
             "type": "array",
             "title": "Unknowns",
             "default": []
+          },
+          "company_facts": {
+            "items": {
+              "$ref": "#/components/schemas/CompanyFact"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "title": "Company Facts",
+            "default": []
           }
         },
         "additionalProperties": false,
@@ -1831,7 +1863,8 @@
           "sources",
           "qualification",
           "status",
-          "unknowns"
+          "unknowns",
+          "company_facts"
         ],
         "title": "Research"
       },

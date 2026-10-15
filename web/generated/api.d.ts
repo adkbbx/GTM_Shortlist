@@ -349,6 +349,15 @@ export interface components {
              */
             excerpt: string;
         };
+        /** CompanyFact */
+        CompanyFact: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "description" | "location" | "team_size";
+            evidence: components["schemas"]["Evidence"];
+        };
         /** CompanySignal */
         CompanySignal: {
             /**
@@ -707,6 +716,11 @@ export interface components {
              * @default []
              */
             unknowns: string[];
+            /**
+             * Company Facts
+             * @default []
+             */
+            company_facts: components["schemas"]["CompanyFact"][];
         };
         /** ReuseInput */
         ReuseInput: {

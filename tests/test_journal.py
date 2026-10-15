@@ -22,11 +22,14 @@ def setup(tmp_path):
     return store, run_id
 
 
-@pytest.mark.parametrize("crash", ("search", "fetch", "model", "verify"))
-def test_actual_process_death_after_outcome_replays_without_paid_dispatch(setup, crash):
+@pytest.mark.parametrize("crash,with_facts", [("search", False), ("fetch", False), ("model", False),
+                                             ("verify", False), ("model", True), ("verify", True)])
+def test_actual_process_death_after_outcome_replays_without_paid_dispatch(setup, crash, with_facts):
     store, run_id = setup
     fixture = Path(__file__).parent / "fixtures/crash_worker.py"
     command = [sys.executable, str(fixture), str(store.path), run_id]
+    if with_facts:
+        command.append("--company-facts")
     first = subprocess.run([*command, "--crash", crash], check=False, timeout=20, capture_output=True)
     assert first.returncode == 91, first.stderr.decode()
     interrupted = Store(store.path).get_run(run_id)
@@ -39,6 +42,10 @@ def test_actual_process_death_after_outcome_replays_without_paid_dispatch(setup,
     saved = Store(store.path).get_run(run_id)
     assert saved["status"] == "ready"
     assert len(saved["records"]) == 1
+    facts = saved["records"][0]["research"].get("company_facts", [])
+    assert len(facts) == int(with_facts)
+    if with_facts:
+        assert facts[0]["evidence"]["source_id"] == saved["records"][0]["research"]["sources"][0]["id"]
     calls = [json.loads(line)["kind"] for line in store.path.with_suffix(".calls.jsonl").read_text().splitlines()]
     assert calls == ["search", "search", "fetch", "model", "verify"]
     assert len(saved["attempts"]) == 5

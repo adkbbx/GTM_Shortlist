@@ -16,6 +16,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("db", type=Path)
 parser.add_argument("run_id")
 parser.add_argument("--crash", choices=("search", "fetch", "model", "verify"))
+parser.add_argument("--company-facts", action="store_true")
 args = parser.parse_args()
 settings = Settings(db_path=args.db)
 store = Store(args.db)
@@ -56,7 +57,10 @@ class Model:
         return validate_extraction({"name": "Labelled crash fixture", "findings": [
             {"status": "supported", "criterion_id": c.id, "evidence": [
                 {"source_id": sources[0].id, "passage": sources[0].text, "claim": "AI hosted software"}]}
-            for c in profile.criteria]}, profile, candidate.domain, sources)
+            for c in profile.criteria],
+            "company_facts": [{"kind": "description", "evidence": {"source_id": sources[0].id,
+                "passage": sources[0].text, "claim": "AI hosted software for businesses."}}]
+                if args.company_facts else []}, profile, candidate.domain, sources)
 
 
 original = store.outcome

@@ -147,6 +147,29 @@
       "title": "Candidate",
       "type": "object"
     },
+    "CompanyFact": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "description",
+            "location",
+            "team_size"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        }
+      },
+      "required": [
+        "kind",
+        "evidence"
+      ],
+      "title": "CompanyFact",
+      "type": "object"
+    },
     "CompanySignal": {
       "additionalProperties": false,
       "properties": {
@@ -788,6 +811,15 @@
           },
           "title": "Unknowns",
           "type": "array"
+        },
+        "company_facts": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CompanyFact"
+          },
+          "maxItems": 3,
+          "title": "Company Facts",
+          "type": "array"
         }
       },
       "required": [
@@ -801,7 +833,8 @@
         "sources",
         "qualification",
         "status",
-        "unknowns"
+        "unknowns",
+        "company_facts"
       ],
       "title": "Research",
       "type": "object"

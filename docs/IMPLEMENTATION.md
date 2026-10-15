@@ -1,6 +1,6 @@
 # Implementation checklist
 
-Last updated 14 October 2026 JST. Check a task only after its acceptance evidence is saved in PROGRESS.md. This file is the source of truth for automatic continuation.
+Last updated 15 October 2026 JST. Check a task only after its acceptance evidence is saved in PROGRESS.md. This file is the source of truth for automatic continuation.
 
 ## 1. Project and contracts
 - [x] Clone dedicated repository and preserve planning sources.
@@ -101,6 +101,7 @@ The unattended window ended on 14 October and its heartbeat is paused. Subsequen
 - [ ] Import private runtime settings into Render and verify actual API/worker deployment, email and real account isolation.
 - [x] Verify public Render API/auth setup and responsive sign-in screen; handle temporary HTML or malformed API responses with a readable retry message. Worker, real signup and email remain unverified.
 - [x] Provide customer-readable Excel Shortlist/Evidence sheets and plain CSV columns; keep complete technical JSON, owner scoping and free accepted-only downloads.
+- [x] Add sourced company descriptions, location and employee counts to existing extraction/verification, saved records, responsive research sheets and customer exports; keep live cross-seller quality validation open.
 - [ ] Separate observable target criteria from pain-point hypotheses; improve candidate selection before detailed research.
 - [x] Add versioned, bounded market discovery and editable campaign suggestions before confirmation, frozen campaign/search context, owner-scoped exports and restart/stop/phone/laptop checks. Full verified competitor comparisons, semantic intent ranking and people/email stages remain in docs/agent-experience.md.
 

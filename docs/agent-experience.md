@@ -19,6 +19,7 @@ The requested experience is a continuous, saved six-step investigation. Animated
 - [ ] Search for seller-relevant signals, verify ownership and event dates from source pages, and rank the first three using confirmed target and campaign preferences. A public event is a research lead, never proof of buying intent.
 - [x] For newly confirmed version2 runs, read up to six primary company pages before selecting the three research slots; retain exact dated first-party statements and reuse those pages without extra model/search calls.
 - [ ] Show compact company summaries, location/headcount only when sourced, and inspectable reasons for selection. No guessed growth metrics.
+- [x] Add optional description, location and employee-count assessments to existing extraction/verifier calls; require same-company exact passages and entailed judgments, preserve dated scope, save/export them and show explicit missing-source states. Offline fixtures verify mechanics; real cross-seller quality remains open.
 - [ ] Find likely decision-makers through public company pages and indexed public professional profiles, retaining source and date. Do not bypass access controls or infer a person from title alone.
 - [ ] Add optional configured business-email enrichment and verification. Compare supported providers before selection; do not guess addresses, silently spend on several providers or conflate deliverability with consent.
 - [ ] Draft editable emails from verified company/person evidence, label unverified personalization, and retain draft-only behavior.

@@ -22,7 +22,7 @@ class Judgment(BaseModel):
 
 class Verification(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    judgments: list[Judgment] = Field(max_length=24)
+    judgments: list[Judgment] = Field(max_length=27)
 
 
 def assessments(profile: Profile, record: Research) -> list[dict]:
@@ -37,6 +37,12 @@ def assessments(profile: Profile, record: Research) -> list[dict]:
         result.append({"assessment_id": ("exclusion:" if is_exclusion else "criterion:") + identity,
                        "condition": (exclusions if is_exclusion else criteria)[identity],
                        "proposed": finding.model_dump(mode="json")})
+    conditions = {"description": "This company's own offering, described accurately with no invented capability",
+                  "location": "This company's explicitly stated base or headquarters, preserving geographic scope",
+                  "team_size": "This company's explicitly stated employee count or range, preserving scope and date"}
+    for fact in record.company_facts:
+        result.append({"assessment_id": "company:" + fact.kind, "condition": conditions[fact.kind],
+                       "proposed": fact.model_dump(mode="json")})
     return result
 
 
@@ -62,7 +68,10 @@ def apply_verification(profile: Profile, record: Research, audit: Verification) 
     findings = tuple(gate(f, "criterion:", f.criterion_id, Unknown) for f in record.findings)
     exclusions = tuple(gate(f, "exclusion:", f.exclusion_id, ExclusionUnknown) for f in record.exclusion_findings)
     unknowns = tuple(f.reason for f in (*findings, *exclusions) if f.status == "unknown")
+    facts = tuple(fact for fact in record.company_facts
+                  if (judgment := judgments.get("company:" + fact.kind)) is not None and judgment.verdict == "entailed")
     return record.model_copy(update={"findings": findings, "exclusion_findings": exclusions,
+                                    "company_facts": facts,
                                     "qualification": qualify(profile, findings, exclusions),
                                     "status": "partial" if unknowns else "complete", "unknowns": unknowns})
 

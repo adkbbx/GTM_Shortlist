@@ -1,6 +1,7 @@
 """Human-readable projections of saved assessments; no new fit claims or scores."""
 HEADERS = ["Company", "Website", "Fit assessment", "Evidence supporting fit", "What needs checking",
-           "Suggested next step", "Your decision", "Review note", "Service review", "Source links"]
+           "Suggested next step", "Your decision", "Review note", "Service review", "Source links",
+           "What they do", "Location", "Team size"]
 FIT = {"fits": "Meets required criteria", "needs_verification": "Fit unverified", "does_not_fit": "Does not meet criteria"}
 DECISION = {"accepted": "Accepted", "rejected": "Rejected", "needs_research": "Needs more research"}
 
@@ -15,6 +16,14 @@ def customer_tables(run, records):
         first_detail = len(details)
         sources = {source["id"]: source for source in research["sources"]}
         positives, questions, negatives = [], [], []
+        fact_labels = {"description": "What they do", "location": "Location", "team_size": "Team size"}
+        for fact in research.get("company_facts", []):
+            evidence = fact["evidence"]
+            source = sources.get(evidence["source_id"], {})
+            details.append([research["name"], "Company overview", fact_labels[fact["kind"]],
+                            "Source-backed assessment", evidence["claim"], evidence["passage"],
+                            source.get("url", ""), source.get("retrieved_at", ""),
+                            source.get("published_at") or "Not provided"])
         for kind, findings, labels, field in [
             ("Fit criterion", research["findings"], criteria, "criterion_id"),
             ("Exclusion", research.get("exclusion_findings", []), exclusions, "exclusion_id"),
@@ -67,5 +76,8 @@ def customer_tables(run, records):
         summary.append([research["name"], "https://" + research["domain"], FIT[research["qualification"]],
                         "; ".join(positives) or "No supported fit criteria", checks, step,
                         DECISION.get(review.get("decision"), "Not reviewed"), review.get("reason", ""), service,
-                        "\n".join(source["url"] for source in sources.values())])
+                        "\n".join(source["url"] for source in sources.values()),
+                        *[next((fact["evidence"]["claim"] for fact in research.get("company_facts", [])
+                                if fact["kind"] == kind), "Not established")
+                          for kind in ("description", "location", "team_size")]])
     return summary, details

@@ -42,18 +42,31 @@ test('market observations and editable campaigns persist into confirmed targetin
   expect(before.records).toHaveLength(0);
   await page.getByRole('button', { name: 'Confirm target and discover' }).click();
   await expect(page.getByRole('heading', { name: '2 companies researched' })).toBeVisible({ timeout: 15000 });
+  const overview = page.locator('.company-sheet').first().getByRole('region', { name: 'Company overview' });
+  await expect(overview).toContainText('AI software for business operations');
+  await expect(overview).toContainText('Headquartered in Canada.');
+  await expect(overview).toContainText('24 employees, as stated on the saved page.');
+  await overview.locator('summary').filter({ hasText: '24 employees, as stated on the saved page.' }).press('Enter');
+  await expect(overview.locator('details[open] blockquote')).toHaveText('Our team has 24 employees.');
+  await expect(overview.locator('details[open] .source-meta')).toContainText('Retrieved');
+  await expect(page.locator('.company-sheet').nth(1).getByRole('region', { name: 'Company overview' }))
+    .toContainText('Not established from saved sources');
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${info.project.name}-company-overview.png`);
   await page.locator('.company-sheet').first().getByText('Why this company was researched', { exact: true }).click();
   await expect(page.locator('.selection-reason').first()).toContainText('Hiring · dated company statement');
   await expect(page.locator('.selection-reason').first()).toContainText('Matches campaign signal type');
   await noOverflow(page);
   await capture(page, `.impeccable/review/${info.project.name}-source-signals.png`);
   await page.reload();
+  await expect(page.locator('.company-overview').first()).toContainText('24 employees');
   const saved = await (await page.request.get(`/api/runs/${identity}`)).json();
   expect(saved.campaign_name).toBe('Labelled campaign 3');
   expect(saved.profile.target).toBe('Private AI B2B SaaS startups in edited test segment');
   expect(saved.discovery_terms).toBe('AI business software edited search segment');
   expect(saved.market.campaigns).toHaveLength(6);
   expect(saved.attempts.filter((a: { kind: string }) => a.kind === 'search')).toHaveLength(3);
+  expect(saved.attempts.filter((a: { kind: string }) => a.kind === 'model')).toHaveLength(6);
 });
 
 test('research activity follows the real worker and respects reduced motion', async ({ page }, info) => {
@@ -336,7 +349,7 @@ test('saved seller → confirmation → evidence → review → export survives 
   const first = page.locator('.company-sheet').first();
   await first.locator('.findings .evidence > summary').first().click();
   await expect(first.locator('.findings .evidence blockquote').first()).toContainText('artificial intelligence software');
-  await expect(first.getByText('Publication date unknown').first()).toBeVisible();
+  await expect(first.locator('.findings').getByText('Publication date unknown').first()).toBeVisible();
   const ownership = first.locator('.findings .finding').nth(1);
   await ownership.locator('summary').click();
   await expect(ownership.locator('blockquote')).toHaveText('Example Labs is a privately held startup.');
@@ -369,6 +382,7 @@ test('saved seller → confirmation → evidence → review → export survives 
   expect(exported.records).toHaveLength(1);
   expect(exported.records[0].review.decision).toBe('accepted');
   expect(exported.records[0].research.sources[0].text).toContain('TEST FIXTURE');
+  expect(exported.records[0].research.company_facts).toHaveLength(3);
   expect(exported.records[0].research.sources).toHaveLength(3);
   expect(exported.records[0].research.sources[1].url).toContain('/about');
   expect(exported.records[0].research.findings[1].evidence[0].source_id).toBe(exported.records[0].research.sources[1].id);

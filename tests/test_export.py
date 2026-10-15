@@ -38,6 +38,21 @@ def workbook_xml(content):
         return {name: ET.fromstring(archive.read(name)) for name in archive.namelist()}
 
 
+def test_company_overview_is_readable_and_source_linked_in_exports(customer_run):
+    research = customer_run["records"][0]["research"]
+    research["company_facts"] = [{"kind": "description", "evidence": {
+        "source_id": "source-one", "claim": "AI software for teams.", "passage": "We build AI software for teams."}}]
+    csv_text = export_run(customer_run, "csv")
+    assert "What they do,Location,Team size" in csv_text
+    assert "AI software for teams.,Not established,Not established" in csv_text
+    package = workbook_xml(export_run(customer_run, "xlsx"))
+    summary = " ".join(package["xl/worksheets/sheet1.xml"].itertext())
+    evidence = " ".join(package["xl/worksheets/sheet2.xml"].itertext())
+    assert "AI software for teams." in summary
+    assert "Company overview" in evidence and "Source-backed assessment" in evidence
+    assert "We build AI software for teams." in evidence and "https://example.com/about" in evidence
+
+
 def test_customer_workbook_preserves_evidence_and_separates_decisions(customer_run):
     before = deepcopy(customer_run)
     package = workbook_xml(export_run(customer_run, "xlsx"))

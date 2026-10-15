@@ -41,7 +41,7 @@ def fixture_fetch(url, expected_domain=None):
     yesterday = (datetime.now(UTC) - timedelta(days=1)).date().isoformat()
     text += f" On {yesterday}, we are hiring a sales manager."
     if expected_domain == "example-1.com":
-        text += " Example Labs is headquartered in Canada."
+        text += " Example Labs is headquartered in Canada. Our team has 24 employees."
     company_domain = expected_domain or domain_of(url)
     links = (
         (f"https://{company_domain}/about", f"https://{company_domain}/pricing")
@@ -157,6 +157,16 @@ class FixtureModel:
             {
                 "name": f"Example research company {candidate.domain} (test fixture)",
                 "findings": findings,
+                "company_facts": [
+                    {"kind": kind, "evidence": {"source_id": sources[0].id, "passage": passage, "claim": claim}}
+                    for kind, passage, claim in [
+                        ("description", "We provide artificial intelligence software for business operations as a hosted subscription.",
+                         "AI software for business operations, sold as a hosted subscription."),
+                        *([("location", "Example Labs is headquartered in Canada.", "Headquartered in Canada."),
+                           ("team_size", "Our team has 24 employees.", "24 employees, as stated on the saved page.")]
+                          if candidate.domain == "example-1.com" else []),
+                    ]
+                ],
                 "exclusion_findings": exclusion_findings,
                 "hypotheses": [
                     {
