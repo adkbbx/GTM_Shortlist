@@ -1,0 +1,46 @@
+# Scoped design acceptance — 16 October 2026
+
+This record covers the local design branch, not full product quality or a hosted release. The user selected an engineering-workshop direction and authorized unattended design work through 17 October 2026,21:00 Asia/Tokyo. Keep the research core neutral for every seller.
+
+## Reference and direction
+
+Inspected [Eygentic](https://eygentic.com/) and [Explee](https://explee.com/) in the browser. Eygentic informs paper, orange, schematic linework and controlled mechanical motion; Explee informs one clear entry action and a visible distinction between automatic work and required input. No reference signup or research was submitted. These were browser observations, not REA Evidence or conversion measurements.
+
+## Acceptance evidence
+
+| Gate | Evidence | Result |
+| --- | --- | --- |
+| Focused entry | One company input/Start research; optional labelled synthetic walkthrough; input survives sample interactions | Passed browser regressions |
+| Truthful activity | Real worker/checkpoint projection; offline stays waiting; human confirmation remains explicit | Passed fixture worker, stop and serialized-poll flows |
+| Action clarity | Automatic versus Your turn cue; near-scene controls; confirmation and evidence have one main action | Passed phone/laptop walkthrough |
+| Reduced motion | Manual Next without Resume; changing preference preserves stage; initial reduced-mode entry is a static example | Passed pure transitions and browser checks |
+| Creative motion | SVG calibration plate plus WebGL scan; static fallback, manual pause, device preference, offscreen suspension | Passed rendering/fallback/offscreen checks |
+| Readable navigation | Dark 224px rail, 64px collapse alignment, folded phone history, no 25-row compression,44px controls | Passed geometry/keyboard/history checks |
+| Contrast | Computed Workspace 13.12:1; heading/metadata 7.23:1; run names 11.16:1 | Measured in actual preview |
+| Human handoff | Saved progress collapsed; target form and company list/export lead; context stays inspectable | Passed actual API/worker fixture flows |
+| Account handoff | Signup success removes credential form; resend/correct-email/sign-in remain; no merged mobile headline | Passed 16 auth scenarios plus focused correction checks |
+| Preserved state | Unsaved draft/review edits survive switching companies; saved review/export/reload retained | Passed three-company and end-to-end checks |
+| Small screens | 390px phone, 1366px laptop, 320px/200% text and keyboard; 734x687 preview demo fits initial viewport | Passed documented checks |
+| Preview boundary | No provider setup/research submission; saved queued run preserved; real-workspace link | Passed backend guard and actual browser inspection |
+| Full CI checkpoint |3b921b6: 419 core tests, 39 Postgres tests, Windows lifecycle, 88 browser cases, container smoke | All jobs passed in run 38801770446 |
+| Final tablet correction | c48fa0e: left-aligned mobile header and compact preview spacing; four targeted browser cases pass | All jobs passed:90 browser cases, core, Postgres, Windows and container in run 38803090099 |
+
+## Review and limits
+
+The isolated Impeccable baseline scored 27/40 before correction. Its P1 manual-navigation issue and P2 control-placement/preview-handoff issues were corrected. The follow-up reviewer approved those source changes; its browser was unavailable, so live evidence is attributed to the parent and repeatable tests. The detector returned 87 advisories and no non-advisory findings; legacy overridden rules and token-frontmatter drift are documented, not 87 distinct visible defects. No mutable browser overlay is claimed.
+
+No paid search/inference/enrichment evaluation, real signup/email send, production migration, main merge or Render deployment was performed in this pass. Core-platform/database skips are not counted as passes in the core CI job. Device viewport tests are not physical-phone/all-browser or assistive-technology certification. The full research product still has separate real-provider quality and hosted rollout gates.
+
+The latest ignored visual proof is .impeccable/review/final-workshop-preview.jpg, with confirmation/results/account and near-scene-control captures alongside it. Port 8018 remains the isolated preview. Existing queued run 1618c3adbd16463a9d7557246d1dc9a2 is preserved with no provider dispatch from this task.
+
+## Final verified checkpoint
+
+Application commit: `c48fa0e`. [Full CI run38803090099](https://github.com/adkbbx/GTM_Shortlist/actions/runs/38803090099) passed every job, including90 browser scenarios. This closes the final tablet acceptance gate. The subsequent acceptance-record commit changes documentation only; it does not reopen the tested application tree.
+
+The scoped design implementation meets the recorded gates. Preserve this ready preview while the authorized work window remains open. Act on new user feedback, a demonstrated regression or a failed check; do not manufacture additional aesthetic work to fill the time. Broader product quality and rollout remain separate from this result.
+
+## Continuation
+
+Resume 09:55 JST16 October after actual 09:54:18 allowance reset. Check final CI and act on a real failure or new user feedback; do not repeatedly restyle passed surfaces. The separate 21:00 JST17 October cutoff heartbeat stops work and saves a handoff. Never buy credits, consume reset credits or run paid provider evaluations without specific approval.
+
+Community design reference: [Uriel Bitton on useful SaaS empty states](https://dev.to/urielbitton/saas-empty-states-help-a-new-user-finish-the-first-task-3fkb). Applied the one-useful-first-action and labelled-sample guidance; no conversion improvement is claimed.

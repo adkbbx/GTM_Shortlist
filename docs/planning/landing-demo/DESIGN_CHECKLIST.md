@@ -32,7 +32,9 @@ Authorization: autonomous implementation through **17 October 2026, 21:00 Asia/T
 - [x] Update DESIGN.md/PROGRESS.md and push implementation milestones6132990,39de235 and5c63dc2.
 - [x] Verify offscreen GPU suspension and unsaved sheet edits on phone/laptop.
 - [x] Complete CI checkpoint3b921b6: core419, Postgres39, Windows,88 browser cases and container smoke passed.
-- [ ] Verify the final tablet-only correction CI after push; do not restart aesthetic iteration without evidence.
-- [ ] Save final scoped acceptance/handoff and retain the authorized next-reset continuation through the cutoff.
+- [x] Final application c48fa0e: all90 browser cases and every CI job passed in run38803090099.
+- [x] Save [ACCEPTANCE.md](ACCEPTANCE.md); retain09:55 JST16 October continuation and21:00 JST17 October cutoff/handoff.
 
 The full product is not declared complete. Hosted rollout and provider quality are separate gates; no new paid provider evaluation, production migration, account change or deployment is claimed by these UI checks.
+
+Current design gates are satisfied. This does not complete the full product or authorize deployment. Further changes require new feedback or a concrete failed behavior; keep the ready preview rather than cycling through aesthetic alternatives.
