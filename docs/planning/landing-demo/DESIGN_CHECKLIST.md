@@ -31,7 +31,8 @@ Authorization: autonomous implementation through **17 October 2026, 21:00 Asia/T
 - [x] Resolve the isolated review priorities in a bounded correction batch and verify regressions.
 - [x] Update DESIGN.md/PROGRESS.md and push implementation milestones6132990,39de235 and5c63dc2.
 - [x] Verify offscreen GPU suspension and unsaved sheet edits on phone/laptop.
-- [ ] Verify complete branch CI, including hosted fixture UI and container smoke; resolve actual failures.
+- [x] Complete CI checkpoint3b921b6: core419, Postgres39, Windows,88 browser cases and container smoke passed.
+- [ ] Verify the final tablet-only correction CI after push; do not restart aesthetic iteration without evidence.
 - [ ] Save final scoped acceptance/handoff and retain the authorized next-reset continuation through the cutoff.
 
 The full product is not declared complete. Hosted rollout and provider quality are separate gates; no new paid provider evaluation, production migration, account change or deployment is claimed by these UI checks.

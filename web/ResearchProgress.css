@@ -47,3 +47,5 @@
 .research-recap{margin:0 0 24px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}.research-recap>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;min-height:52px;font-size:.875rem}.research-recap>summary>span:last-child{margin:0;color:var(--orange);font-size:.8125rem;font-weight:400}.research-recap[open]>summary{border-bottom:1px solid var(--line)}.research-recap .real-research{margin:0;border:0;border-radius:0}.research-recap .demo-intro{padding-block:20px}.confirmation-context{margin:0 0 24px;border-block:1px solid var(--line)}.confirmation-context>summary{font-size:.875rem;min-height:48px}.confirmation-context .market-overview{margin-top:20px}@media(max-width:700px){.research-recap>summary{align-items:flex-start;flex-direction:column;gap:4px}.research-recap>summary>span:last-child{font-size:.8125rem}}
 
 .research-recap>summary>span:first-child{color:var(--ink);font-size:.875rem;font-weight:500;margin:0}
+
+.new-research .main:has(.preview-notice){padding-top:16px}.new-research .main:has(.preview-notice) .page-heading{margin-bottom:12px}

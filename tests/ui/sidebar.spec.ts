@@ -31,6 +31,10 @@ test('saved research navigation collapses and expands without changing the run',
     await page.screenshot({ path: `.impeccable/review/${info.project.name}-sidebar-collapsed.png` });
     await expand.press('Enter');
     await expect(sidebar.getByRole('navigation', { name: 'Research history' })).toBeVisible();
+    if (info.project.name === 'phone') {
+      const headingLeft = await sidebar.locator('.sidebar-heading').evaluate(element => element.getBoundingClientRect().left);
+      expect(headingLeft).toBeLessThanOrEqual(24);
+    }
     await expect(sidebar.getByRole('button', { name: 'Collapse sidebar', exact: true })).toBeFocused();
     await expect(sidebar.locator('[aria-current=page]')).toHaveCount(1);
     expect(await sidebar.evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(32, 30, 27)');
@@ -61,5 +65,26 @@ test('long saved history scrolls without compressing or overlapping rows', async
     }));
     expect(geometry.every(row => row.height >= 48 && row.content <= row.box + 1)).toBe(true);
     expect(geometry.slice(1).every((row,index) => row.top >= geometry[index].bottom)).toBe(true);
+  } finally { await page.request.post(`/__fixture_release/${id}`); }
+});
+
+
+test('tablet preview keeps the available demo within the first viewport', async ({ page }) => {
+  const fixture = await page.request.post('/__fixture_held_run');
+  const { id } = await fixture.json();
+  try {
+    await page.setViewportSize({ width: 734, height: 687 });
+    await page.route('http://127.0.0.1:8015/', async route => {
+      const response = await route.fetch();
+      const source = await response.text();
+      await route.fulfill({ response, body: source.replace('</head>', '<meta name="shortlist-preview-workspace" content="http://127.0.0.1:8019/"></head>') });
+    });
+    await page.goto('/');
+    await expect(page.getByRole('button', { name: 'New shortlist', exact: true })).toBeVisible();
+    await page.evaluate(() => document.fonts.ready);
+    await expect(page.getByRole('button', { name: 'Start research', exact: true })).toBeDisabled();
+    const demo = await page.getByRole('button', { name: 'Try the demo', exact: true }).boundingBox();
+    expect(demo).not.toBeNull();
+    expect((demo?.y ?? Infinity) + (demo?.height ?? 0)).toBeLessThanOrEqual(687);
   } finally { await page.request.post(`/__fixture_release/${id}`); }
 });
