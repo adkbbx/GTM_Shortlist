@@ -180,9 +180,14 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 if "draft" in checkpoint:
                     draft = SellerDraft.model_validate(checkpoint["draft"])
                 else:
-                    draft = call("model", model.name, "seller:model", lambda: model.seller(source),
-                                 {"source": source.model_dump(mode="json"), "model": settings.gemma_model,
-                                  "endpoint": settings.gemma_base_url}, SellerDraft.model_validate)
+                    seller_inputs = {"source": source.model_dump(mode="json"), "model": settings.gemma_model,
+                                     "endpoint": settings.gemma_base_url}
+                    protocol = checkpoint.get("seller_output_protocol", 1)
+                    if protocol != 1:
+                        seller_inputs["output_protocol"] = protocol
+                    draft = call("model", model.name, "seller:model",
+                                 lambda: model.seller(source, output_protocol=protocol) if isinstance(model, Gemma)
+                                 else model.seller(source), seller_inputs, SellerDraft.model_validate)
                     checkpoint["draft"] = draft.model_dump(mode="json")
                     store.checkpoint(run_id, fence, "seller", checkpoint)
                 if checkpoint.get("experience_version", 1) == 2:

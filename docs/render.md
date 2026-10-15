@@ -37,3 +37,11 @@ Initially test on Render's assigned URL. After claiming a domain, add it in Rend
 Before public release, verify real signup/confirmation/recovery, two-account isolation, durable worker checkpoints, a real saved provider run, owner-scoped exports, restart persistence and phone/laptop email flows. A successful /auth/v1/settings response only proves that a project's public key is accepted; it does not prove table setup, restricted roles, email delivery or a deployed app. Payment and real customer validation gates remain separate.
 
 References: [Render Blueprint spec](https://render.com/docs/blueprint-spec), [Render free limitations](https://render.com/docs/free), [Supabase database connections](https://supabase.com/docs/guides/database/connecting-to-postgres), [Supabase SMTP](https://supabase.com/docs/guides/auth/auth-smtp).
+
+## Seller-summary response verification
+
+New seller runs request the `submit_seller_summary` function response through the configured model's Chat Completions `tools` and `tool_choice` parameters. This is a structured response container, not an executable tool. The endpoint must support named function calls. The adapter validates returned arguments against SellerDraft; no second inference request or JSON-mode fallback is automatic. Existing runs retain their frozen protocol and saved outcomes.
+
+After explicit approval for one inference call, an operator can run `.venv/Scripts/python.exe scripts/evaluate_seller.py --source-json deploy/secrets/evaluations/seller-source-199a9d9.json --output-db deploy/secrets/evaluations/seller-summary-v2.sqlite3 --allow-provider-calls`. This uses the saved source and private worker settings. It dispatches no search and debits no hosted account. Rerun with the same output to inspect the journal without repaying; do not change output paths to evade a failed outcome. Offline tests do not establish model support or summary quality. Inspect the saved draft before rollout, and verify new hosted runs after updating the worker. The actual source snapshot is private operator state and is not distributed with the repository.
+
+Contract references: [DigitalOcean Chat Completions tools and tool_choice](https://docs.digitalocean.com/products/inference/reference/api/serverless-inference/), [Gemma function calling](https://ai.google.dev/gemma/docs/capabilities/text/function-calling-gemma4).

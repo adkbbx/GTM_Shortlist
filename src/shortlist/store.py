@@ -394,6 +394,7 @@ class Store:
             db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,checkpoint,created_at,updated_at) "
                        "VALUES (?,?,?,?,?,?,?,?,?)", (run_id, request_key, digest, "{}", "queued", "seller" if seller_url else "identity",
                        json.dumps({"seller_url": seller_url, "experience_version": experience_version,
+                                   "seller_output_protocol": 2,
                                    **({"company_name": company_name} if company_name else {})}), now, now))
             return run_id
 
