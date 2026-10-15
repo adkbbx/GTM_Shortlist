@@ -53,6 +53,20 @@ def test_company_overview_is_readable_and_source_linked_in_exports(customer_run)
     assert "We build AI software for teams." in evidence and "https://example.com/about" in evidence
 
 
+def test_people_export_names_roles_and_evidence_without_invented_contacts(customer_run):
+    research = customer_run["records"][0]["research"]
+    research["people"] = [{"id": "a" * 32, "name": "Jane Example", "role": "CEO", "evidence": {
+        "source_id": "source-one", "claim": "Jane Example is CEO.", "passage": "Jane Example is our CEO."}}]
+    assert "Jane Example (CEO)" in export_run(customer_run, "csv")
+    package = workbook_xml(export_run(customer_run, "xlsx"))
+    evidence = " ".join(package["xl/worksheets/sheet2.xml"].itertext())
+    assert "Public team role" in evidence and "buying authority unverified" in evidence
+    assert "Jane Example is our CEO." in evidence and "https://example.com/about" in evidence
+    payload = json.loads(export_run(customer_run, "json"))
+    assert payload["records"][0]["research"]["people"] == research["people"]
+    assert "@" not in evidence
+
+
 def test_customer_workbook_preserves_evidence_and_separates_decisions(customer_run):
     before = deepcopy(customer_run)
     package = workbook_xml(export_run(customer_run, "xlsx"))

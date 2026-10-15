@@ -22,14 +22,17 @@ def setup(tmp_path):
     return store, run_id
 
 
-@pytest.mark.parametrize("crash,with_facts", [("search", False), ("fetch", False), ("model", False),
-                                             ("verify", False), ("model", True), ("verify", True)])
-def test_actual_process_death_after_outcome_replays_without_paid_dispatch(setup, crash, with_facts):
+@pytest.mark.parametrize("crash,with_facts,with_people", [("search", False, False), ("fetch", False, False),
+    ("model", False, False), ("verify", False, False), ("model", True, False), ("verify", True, False),
+    ("model", False, True), ("verify", False, True)])
+def test_actual_process_death_after_outcome_replays_without_paid_dispatch(setup, crash, with_facts, with_people):
     store, run_id = setup
     fixture = Path(__file__).parent / "fixtures/crash_worker.py"
     command = [sys.executable, str(fixture), str(store.path), run_id]
     if with_facts:
         command.append("--company-facts")
+    if with_people:
+        command.append("--people")
     first = subprocess.run([*command, "--crash", crash], check=False, timeout=20, capture_output=True)
     assert first.returncode == 91, first.stderr.decode()
     interrupted = Store(store.path).get_run(run_id)
@@ -46,6 +49,13 @@ def test_actual_process_death_after_outcome_replays_without_paid_dispatch(setup,
     assert len(facts) == int(with_facts)
     if with_facts:
         assert facts[0]["evidence"]["source_id"] == saved["records"][0]["research"]["sources"][0]["id"]
+    people = saved["records"][0]["research"].get("people", [])
+    assert len(people) == int(with_people)
+    if with_people:
+        with store.connection() as db:
+            payload = json.loads(db.execute("SELECT r.payload FROM attempt_results r JOIN attempts a ON a.id=r.attempt_id "
+                "WHERE a.run_id=? AND a.operation_key LIKE 'model:%'", (run_id,)).fetchone()[0])
+        assert people == payload["people"]
     calls = [json.loads(line)["kind"] for line in store.path.with_suffix(".calls.jsonl").read_text().splitlines()]
     assert calls == ["search", "search", "fetch", "model", "verify"]
     assert len(saved["attempts"]) == 5

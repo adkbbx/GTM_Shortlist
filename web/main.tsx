@@ -129,6 +129,12 @@ function CompanySheet({ record, run, onSaved }: { record: Record; run: Run; onSa
           <dd>{fact ? <EvidenceDetails passages={[fact.evidence]} record={record} /> : <p className="hint">Not established from saved sources</p>}</dd></div>;
       })}
     </dl></section>
+    <section className="people-research" aria-label="People to consider"><h4>People to consider</h4>
+      {research.people.length ? <><p className="hint">Roles stated on saved company pages. Confirm responsibility for your offer before contacting anyone.</p>
+        <ul>{research.people.map(person => <li key={person.id}><div className="person-identity"><h5>{person.name}</h5><p>{person.role}</p></div>
+          <EvidenceDetails passages={[person.evidence]} record={record} /></li>)}</ul></>
+        : <p className="hint">No current team roles established from the saved pages.</p>}
+    </section>
     {selection && <details className="selection-reason"><summary>Why this company was researched</summary><p>{selection.explanation}</p>
       {selection.signals.map((signal, index) => <div key={`${signal.source_id}-${signal.label}-${signal.event_date}-${index}`}><h4>{signal.label} · dated company statement</h4><blockquote>{signal.passage}</blockquote><p>Statement date: <time dateTime={signal.event_date}>{new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(signal.event_date))}</time>{signal.campaign_relevant ? ' · Matches campaign signal type' : ''}</p><a href={signal.source_url} target="_blank" rel="noopener noreferrer">Inspect company source</a><p className="hint">A dated first-party statement, not independently corroborated buying intent.</p></div>)}
       {selection.clues.map(clue => <div key={clue.label}><h4>{clue.label} · search clue</h4><blockquote>{clue.passage}</blockquote><a href={clue.source_url} target="_blank" rel="noopener noreferrer">Search result source</a><p className="hint">Observed {date(clue.observed_at)}. Event date, ownership and current relevance are unverified.</p></div>)}

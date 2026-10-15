@@ -20,12 +20,16 @@ def test_delete_erases_content_but_preserves_spend_and_request_identity(tmp_path
         store.delete_run(identity)
     fence = store.claim(identity)
     source = Source(url="https://company.example/", company_domain="company.example", title="Deletion fixture",
-                    text="Private observed software passage", content_hash=hashlib.sha256(b"fixture").hexdigest())
+                    text="Private observed software passage. Private Person is our CEO.",
+                    content_hash=hashlib.sha256(b"fixture").hexdigest())
     store.cache_source(identity, fence, source.url, source)
     attempt = store.reserve(identity, fence, "fixture", "fetch", "fetch:" + source.url)
     store.outcome(attempt, "succeeded", run_id=identity, fence=fence, payload={"private": source.text})
     record = validate_extraction({"name": "Fixture", "findings": [{"criterion_id": "software", "status": "unknown",
-                                  "reason": "Fixture has insufficient evidence"}]}, profile, source.company_domain, (source,))
+                                  "reason": "Fixture has insufficient evidence"}],
+                                  "people": [{"name": "Private Person", "role": "CEO", "evidence": {
+                                      "source_id": source.id, "passage": "Private Person is our CEO.",
+                                      "claim": "Private Person is our CEO."}}]}, profile, source.company_domain, (source,))
     store.save_record(identity, fence, record)
     store.checkpoint(identity, fence, "complete", {"sources": [source.model_dump(mode="json")]}, "partial")
     client = TestClient(create_app(Settings(db_path=store.path)))

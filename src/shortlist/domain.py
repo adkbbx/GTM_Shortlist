@@ -109,6 +109,13 @@ class CompanyFact(Value):
     evidence: Evidence
 
 
+class PersonObservation(Value):
+    id: str = Field(default_factory=new_id, pattern=r"^[a-f0-9]{32}$")
+    name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=160)]
+    role: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=200)]
+    evidence: Evidence
+
+
 class Research(Value):
     id: str = Field(default_factory=new_id)
     domain: str
@@ -122,11 +129,16 @@ class Research(Value):
     status: Literal["complete", "partial"]
     unknowns: tuple[str, ...] = ()
     company_facts: tuple[CompanyFact, ...] = Field(default=(), max_length=3)
+    people: tuple[PersonObservation, ...] = Field(default=(), max_length=3)
 
     @model_validator(mode="after")
-    def unique_company_facts(self):
+    def unique_observations(self):
         if len({fact.kind for fact in self.company_facts}) != len(self.company_facts):
             raise ValueError("Company fact kinds must be unique")
+        if len({person.id for person in self.people}) != len(self.people):
+            raise ValueError("Person IDs must be unique")
+        if len({" ".join(person.name.casefold().split()) for person in self.people}) != len(self.people):
+            raise ValueError("Person names must be unique")
         return self
 
 

@@ -630,6 +630,16 @@ export interface components {
              */
             outcome: "reviewed";
         };
+        /** PersonObservation */
+        PersonObservation: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Role */
+            role: string;
+            evidence: components["schemas"]["Evidence"];
+        };
         /** Profile */
         Profile: {
             /** Offer */
@@ -721,6 +731,11 @@ export interface components {
              * @default []
              */
             company_facts: components["schemas"]["CompanyFact"][];
+            /**
+             * People
+             * @default []
+             */
+            people: components["schemas"]["PersonObservation"][];
         };
         /** ReuseInput */
         ReuseInput: {

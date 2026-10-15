@@ -72,10 +72,10 @@ def domain_of(url: str) -> str:
 
 
 def research_links(url: str, soup: BeautifulSoup) -> tuple[str, ...]:
-    """Select two observed company/about/product/pricing links, never invented paths."""
+    """Select two observed company/team/product links, never invented paths."""
     owner = domain_of(url)
-    priorities = {"about": 0, "about-us": 0, "company": 0, "product": 1, "products": 1,
-                  "platform": 1, "pricing": 2}
+    priorities = {"about": 0, "about-us": 0, "company": 0, "team": 1, "leadership": 1,
+                  "our-team": 1, "management": 1, "product": 2, "products": 2, "platform": 2, "pricing": 3}
     selected = {}
     for anchor in soup.find_all("a", href=True):
         href = anchor.get("href")

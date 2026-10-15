@@ -1,7 +1,7 @@
 """Human-readable projections of saved assessments; no new fit claims or scores."""
 HEADERS = ["Company", "Website", "Fit assessment", "Evidence supporting fit", "What needs checking",
            "Suggested next step", "Your decision", "Review note", "Service review", "Source links",
-           "What they do", "Location", "Team size"]
+           "What they do", "Location", "Team size", "People to consider"]
 FIT = {"fits": "Meets required criteria", "needs_verification": "Fit unverified", "does_not_fit": "Does not meet criteria"}
 DECISION = {"accepted": "Accepted", "rejected": "Rejected", "needs_research": "Needs more research"}
 
@@ -16,6 +16,13 @@ def customer_tables(run, records):
         first_detail = len(details)
         sources = {source["id"]: source for source in research["sources"]}
         positives, questions, negatives = [], [], []
+        for person in research.get("people", []):
+            evidence = person["evidence"]
+            source = sources.get(evidence["source_id"], {})
+            details.append([research["name"], "Public team role", person["name"] + " · " + person["role"],
+                            "Source-backed role; buying authority unverified", evidence["claim"], evidence["passage"],
+                            source.get("url", ""), source.get("retrieved_at", ""),
+                            source.get("published_at") or "Not provided"])
         fact_labels = {"description": "What they do", "location": "Location", "team_size": "Team size"}
         for fact in research.get("company_facts", []):
             evidence = fact["evidence"]
@@ -79,5 +86,7 @@ def customer_tables(run, records):
                         "\n".join(source["url"] for source in sources.values()),
                         *[next((fact["evidence"]["claim"] for fact in research.get("company_facts", [])
                                 if fact["kind"] == kind), "Not established")
-                          for kind in ("description", "location", "team_size")]])
+                          for kind in ("description", "location", "team_size")],
+                        "; ".join(person["name"] + " (" + person["role"] + ")"
+                                  for person in research.get("people", [])) or "Not established"])
     return summary, details

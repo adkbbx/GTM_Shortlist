@@ -1610,6 +1610,39 @@
         ],
         "title": "OperatorReviewed"
       },
+      "PersonObservation": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{32}$",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 2,
+            "title": "Name"
+          },
+          "role": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Role"
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/Evidence"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "role",
+          "evidence"
+        ],
+        "title": "PersonObservation"
+      },
       "Profile": {
         "properties": {
           "offer": {
@@ -1848,6 +1881,15 @@
             "maxItems": 3,
             "title": "Company Facts",
             "default": []
+          },
+          "people": {
+            "items": {
+              "$ref": "#/components/schemas/PersonObservation"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "title": "People",
+            "default": []
           }
         },
         "additionalProperties": false,
@@ -1864,7 +1906,8 @@
           "qualification",
           "status",
           "unknowns",
-          "company_facts"
+          "company_facts",
+          "people"
         ],
         "title": "Research"
       },

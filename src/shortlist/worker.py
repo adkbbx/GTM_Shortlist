@@ -325,7 +325,8 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                     audit = call("model", model.name, f"verify:{candidate.domain}",
                                  lambda r=record: model.verify(profile, r),
                                  {"profile": profile.model_dump(mode="json"),
-                                  "research": record.model_dump(mode="json", exclude={"company_facts"} if not record.company_facts else set()),
+                                  "research": record.model_dump(mode="json", exclude={
+                                      key for key in ("company_facts", "people") if not getattr(record, key)}),
                                   "model": settings.gemma_model, "endpoint": settings.gemma_base_url,
                                   "verification_policy": 2}, decode_verification)
                     record = apply_verification(profile, record, audit)

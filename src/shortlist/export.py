@@ -29,7 +29,7 @@ def export_run(run: dict, format: str, accepted_only: bool = False) -> str | byt
         if run["checkpoint"].get("termination"):
             notes.append("Run stopped by user; completed research retained.")
         sheets = [
-            ("Shortlist", notes, HEADERS, summary, [24, 30, 25, 45, 50, 35, 22, 35, 40, 40, 45, 28, 28]),
+            ("Shortlist", notes, HEADERS, summary, [24, 30, 25, 45, 50, 35, 22, 35, 40, 40, 45, 28, 28, 36]),
             ("Evidence", ["Evidence and open questions", "Exact saved passages; hypotheses are unverified. Dates are UTC."],
              ["Company", "Type", "Criterion", "Assessment", "Explanation / claim", "Source passage / assumptions",
               "Source URL", "Retrieved (UTC)", "Published (UTC)", "Domain"], details,

@@ -53,6 +53,16 @@ test('market observations and editable campaigns persist into confirmed targetin
     .toContainText('Not established from saved sources');
   await noOverflow(page);
   await capture(page, `.impeccable/review/${info.project.name}-company-overview.png`);
+  const people = page.locator('.company-sheet').first().getByRole('region', { name: 'People to consider' });
+  await expect(people.getByRole('heading', { name: 'Alex Morgan', exact: true })).toBeVisible();
+  await expect(people.locator('.person-identity')).toContainText('CEO');
+  await people.locator('summary').press('Enter');
+  await expect(people.locator('details[open] blockquote')).toHaveText('Alex Morgan is our CEO.');
+  await expect(people.locator('.source-meta')).toContainText('Retrieved');
+  await expect(page.locator('.company-sheet').nth(1).getByRole('region', { name: 'People to consider' }))
+    .toContainText('No current team roles established');
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${info.project.name}-people.png`);
   await page.locator('.company-sheet').first().getByText('Why this company was researched', { exact: true }).click();
   await expect(page.locator('.selection-reason').first()).toContainText('Hiring · dated company statement');
   await expect(page.locator('.selection-reason').first()).toContainText('Matches campaign signal type');
@@ -60,6 +70,7 @@ test('market observations and editable campaigns persist into confirmed targetin
   await capture(page, `.impeccable/review/${info.project.name}-source-signals.png`);
   await page.reload();
   await expect(page.locator('.company-overview').first()).toContainText('24 employees');
+  await expect(page.locator('.people-research').first()).toContainText('Alex Morgan');
   const saved = await (await page.request.get(`/api/runs/${identity}`)).json();
   expect(saved.campaign_name).toBe('Labelled campaign 3');
   expect(saved.profile.target).toBe('Private AI B2B SaaS startups in edited test segment');
@@ -383,6 +394,7 @@ test('saved seller → confirmation → evidence → review → export survives 
   expect(exported.records[0].review.decision).toBe('accepted');
   expect(exported.records[0].research.sources[0].text).toContain('TEST FIXTURE');
   expect(exported.records[0].research.company_facts).toHaveLength(3);
+  expect(exported.records[0].research.people[0].name).toBe('Alex Morgan');
   expect(exported.records[0].research.sources).toHaveLength(3);
   expect(exported.records[0].research.sources[1].url).toContain('/about');
   expect(exported.records[0].research.findings[1].evidence[0].source_id).toBe(exported.records[0].research.sources[1].id);

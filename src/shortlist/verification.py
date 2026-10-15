@@ -22,7 +22,7 @@ class Judgment(BaseModel):
 
 class Verification(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    judgments: list[Judgment] = Field(max_length=27)
+    judgments: list[Judgment] = Field(max_length=30)
 
 
 def assessments(profile: Profile, record: Research) -> list[dict]:
@@ -43,6 +43,11 @@ def assessments(profile: Profile, record: Research) -> list[dict]:
     for fact in record.company_facts:
         result.append({"assessment_id": "company:" + fact.kind, "condition": conditions[fact.kind],
                        "proposed": fact.model_dump(mode="json")})
+    for person in record.people:
+        result.append({"assessment_id": "person:" + person.id,
+                       "condition": "This named person explicitly holds the stated current executive or operating role "
+                       "at this company, not a customer, testimonial author, advisor, former employee or job opening",
+                       "proposed": person.model_dump(mode="json")})
     return result
 
 
@@ -70,8 +75,11 @@ def apply_verification(profile: Profile, record: Research, audit: Verification) 
     unknowns = tuple(f.reason for f in (*findings, *exclusions) if f.status == "unknown")
     facts = tuple(fact for fact in record.company_facts
                   if (judgment := judgments.get("company:" + fact.kind)) is not None and judgment.verdict == "entailed")
+    people = tuple(person for person in record.people
+                   if (judgment := judgments.get("person:" + person.id)) is not None and judgment.verdict == "entailed")
     return record.model_copy(update={"findings": findings, "exclusion_findings": exclusions,
                                     "company_facts": facts,
+                                    "people": people,
                                     "qualification": qualify(profile, findings, exclusions),
                                     "status": "partial" if unknowns else "complete", "unknowns": unknowns})
 

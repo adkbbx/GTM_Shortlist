@@ -122,6 +122,19 @@ def test_market_stages_campaign_and_search_keywords_are_owner_scoped(owners):
         a.confirm_draft(identity, profile, 3, "Labelled campaign 1", "Different keyword targeting")
     with pytest.raises(KeyError):
         b.confirm_draft(identity, profile, 3, "Labelled campaign 1", "AI business software hiring")
+    execute_run(scoped, Settings(), identity, search=FixtureSearch(), model=FixtureModel(), fetch=fixture_fetch)
+    researched = a.get_run(identity)
+    people = [person for row in researched["records"] for person in row["research"]["people"]]
+    assert len(people) == 1 and people[0]["name"] == "Alex Morgan"
+    assert "Alex Morgan" in export_run(researched, "json")
+    assert b.list_runs() == []
+    with pytest.raises(KeyError):
+        b.get_run(identity)
+    a.delete_run(identity)
+    with pytest.raises(KeyError):
+        a.get_run(identity)
+    with scoped.connection() as db:
+        assert db.execute("SELECT COUNT(*) FROM records WHERE run_id=?", (identity,)).fetchone()[0] == 0
 
 
 def test_company_lookup_preserves_owner_profile_grant_and_no_company_debit(owners):
