@@ -67,6 +67,12 @@ function parseRun(data: unknown): Run {
 }
 
 export const api = {
+  async startEmailDraft(id: string, recordId: string, input: components['schemas']['StartEmailDraft']) {
+    return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/records/${encodeURIComponent(recordId)}/email-draft/start`, input));
+  },
+  async editEmailDraft(id: string, recordId: string, input: components['schemas']['EditEmailDraft']) {
+    return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/records/${encodeURIComponent(recordId)}/email-draft`, input));
+  },
   async chooseWebsite(id: string, website_url: string) {
     return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/website`, { website_url }));
   },

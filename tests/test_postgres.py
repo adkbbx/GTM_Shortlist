@@ -127,6 +127,19 @@ def test_market_stages_campaign_and_search_keywords_are_owner_scoped(owners):
     people = [person for row in researched["records"] for person in row["research"]["people"]]
     assert len(people) == 1 and people[0]["name"] == "Alex Morgan"
     assert "Alex Morgan" in export_run(researched, "json")
+    from shortlist.email_drafts import EditEmailDraft, StartEmailDraft
+    record = researched["records"][0]["research"]
+    draft = a.write_email_draft(identity, record["id"], StartEmailDraft(
+        request_key="hosted-email-start", person_id=people[0]["id"]))
+    assert a.write_email_draft(identity, record["id"], StartEmailDraft(
+        request_key="hosted-email-start", person_id=people[0]["id"])) == draft
+    with pytest.raises(KeyError):
+        b.write_email_draft(identity, record["id"], StartEmailDraft(request_key="foreign-email-start"))
+    updated = a.write_email_draft(identity, record["id"], EditEmailDraft(request_key="hosted-email-edit",
+        previous_id=draft.id, subject="Owner-edited draft", body="A saved draft without sending."))
+    assert updated.basis == draft.basis
+    assert a.get_run(identity)["records"][0]["email_draft"]["body"] == updated.body
+    assert CreditWallet(a).balance().used == 2  # Editing does not consume another research credit.
     assert b.list_runs() == []
     with pytest.raises(KeyError):
         b.get_run(identity)

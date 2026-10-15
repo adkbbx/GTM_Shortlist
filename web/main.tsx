@@ -12,6 +12,7 @@ import { AuthGate } from './AuthGate';
 import { CreditActivity } from './CreditActivity';
 import { ResearchStop } from './ResearchStop';
 import { MarketOverview } from './MarketOverview';
+import { EmailDraftEditor } from './EmailDraftEditor';
 import { LocalSearchSetup } from './LocalSearchSetup';
 import { WebsiteChoice } from './WebsiteChoice';
 import './styles.css';
@@ -144,6 +145,7 @@ function CompanySheet({ record, run, onSaved }: { record: Record; run: Run; onSa
     {!!research.exclusion_findings.length && <section className="hypotheses exclusion-checks"><h4>Exclusion checks</h4><p className="hint">A matched exclusion means the company does not fit. Missing evidence remains unknown.</p>{research.exclusion_findings.map(f => <ExclusionSheet key={f.exclusion_id} finding={f} record={record} run={run} />)}</section>}
     {!!research.hypotheses.length && <section className="hypotheses"><h4>Hypotheses to test</h4><p className="hint">Possible relevance, not observed buying intent.</p>{research.hypotheses.map(h => <div key={h.text}><p>{h.text}</p><p className="hint">Assumptions: {h.assumptions.join('; ')}</p></div>)}</section>}
     {!research.sources.length && <p className="notice">No readable source was saved. Verify this company before accepting it.</p>}
+    <EmailDraftEditor record={record} runId={run.id} onSaved={onSaved} />
     {record.operator_review && <section className="service-review" aria-label="Service review"><div className="review-heading"><h4>Service review</h4><span>{record.operator_review.annotation.outcome === 'reviewed' ? 'Evidence reviewed' : 'More research needed'}</span></div><p className="service-note">{record.operator_review.annotation.note}</p><p className="hint">Recorded by {record.operator_review.annotation.reviewer} · {date(record.operator_review.reviewed_at)}</p><p className="hint">This note is separate from your decision and does not establish buying intent.</p>{!!record.operator_review.annotation.source_ids.length && <div className="service-sources source-meta"><p>Inspected sources</p>{research.sources.filter(source => record.operator_review?.annotation.source_ids.includes(source.id)).map(source => <a key={source.id} href={source.url} target="_blank" rel="noopener noreferrer">{source.title}<Arrow /></a>)}</div>}</section>}
     <section className="review"><div className="review-heading"><h4>Your review</h4><span aria-live="polite">{record.review ? `Saved: ${record.review.decision.replace('_', ' ')}` : 'Not reviewed'}</span></div>
       <label htmlFor={`reason-${research.id}`}>Review note <span className="optional">Optional</span></label>

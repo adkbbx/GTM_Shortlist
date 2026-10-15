@@ -16,6 +16,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from shortlist.auth import AuthenticationError, AuthUnavailable, verify_user
 from shortlist.config import Settings
 from shortlist.domain import Candidate, OperatorReview, Profile, Research, Review, Source, Target
+from shortlist.email_drafts import EditEmailDraft, EmailDraft, StartEmailDraft
 from shortlist.export import export_run
 from shortlist.fetch import canonical_url
 from shortlist.local_credentials import (
@@ -79,6 +80,7 @@ class SavedRecord(BaseModel):
     review: Review | None = None
     operator_review: OperatorReview | None = None
     credits_used: int | None = Field(default=None, ge=0, le=1)
+    email_draft: EmailDraft | None = None
 
 
 class RunCredits(BaseModel):
@@ -408,6 +410,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                  "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
         return Response(content, media_type=types[format],
                         headers={"Content-Disposition": f'attachment; filename="shortlist-{run_id}.{format}"'})
+
+    @app.post("/api/runs/{run_id}/records/{record_id}/email-draft/start", response_model=RunView)
+    def start_email_draft(run_id: str, record_id: str, input: StartEmailDraft, store: owned):
+        store.write_email_draft(run_id, record_id, input)
+        return view(store, run_id)
+
+    @app.post("/api/runs/{run_id}/records/{record_id}/email-draft", response_model=RunView)
+    def edit_email_draft(run_id: str, record_id: str, input: EditEmailDraft, store: owned):
+        store.write_email_draft(run_id, record_id, input)
+        return view(store, run_id)
 
     dist = Path(__file__).resolve().parents[2] / "dist"
     if dist.is_dir():

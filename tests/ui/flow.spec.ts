@@ -63,6 +63,26 @@ test('market observations and editable campaigns persist into confirmed targetin
     .toContainText('No current team roles established');
   await noOverflow(page);
   await capture(page, `.impeccable/review/${info.project.name}-people.png`);
+  const editor = page.locator('.company-sheet').first().getByRole('region', { name: 'Email draft', exact: true });
+  await editor.getByRole('button', { name: 'Create starting draft' }).press('Enter');
+  await expect(editor.getByLabel('Message', { exact: true })).toHaveValue(/Alex Morgan/);
+  await editor.getByLabel('Subject', { exact: true }).fill('A focused acquisition experiment');
+  await editor.getByLabel('Message', { exact: true }).fill('Hi Alex,\n\nWould a focused acquisition experiment be useful?\n\nSam');
+  let failDraft = true;
+  await page.route('**/email-draft', async route => {
+    if (failDraft) { failDraft = false; await route.fulfill({ status: 503, json: { detail: 'Labelled draft outage; your edits are still here.' } }); }
+    else await route.continue();
+  });
+  await editor.getByRole('button', { name: 'Save draft', exact: true }).click();
+  await expect(editor.getByRole('alert')).toContainText('Labelled draft outage');
+  await expect(editor.getByLabel('Message', { exact: true })).toHaveValue(/Hi Alex/);
+  await editor.getByRole('button', { name: 'Save draft', exact: true }).press('Enter');
+  await expect(editor.getByRole('status')).toContainText('Draft saved');
+  await editor.getByText('Sources used for the starting draft', { exact: true }).click();
+  await expect(editor.locator('.draft-basis')).toContainText('Alex Morgan is our CEO.');
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${info.project.name}-email-draft.png`);
+  await editor.screenshot({ path: `.impeccable/review/${info.project.name}-email-draft-detail.png` });
   await page.locator('.company-sheet').first().getByText('Why this company was researched', { exact: true }).click();
   await expect(page.locator('.selection-reason').first()).toContainText('Hiring · dated company statement');
   await expect(page.locator('.selection-reason').first()).toContainText('Matches campaign signal type');
@@ -71,6 +91,8 @@ test('market observations and editable campaigns persist into confirmed targetin
   await page.reload();
   await expect(page.locator('.company-overview').first()).toContainText('24 employees');
   await expect(page.locator('.people-research').first()).toContainText('Alex Morgan');
+  await expect(editor.getByLabel('Subject', { exact: true })).toHaveValue('A focused acquisition experiment');
+  await expect(editor.getByLabel('Message', { exact: true })).toHaveValue(/Hi Alex/);
   const saved = await (await page.request.get(`/api/runs/${identity}`)).json();
   expect(saved.campaign_name).toBe('Labelled campaign 3');
   expect(saved.profile.target).toBe('Private AI B2B SaaS startups in edited test segment');
@@ -78,6 +100,17 @@ test('market observations and editable campaigns persist into confirmed targetin
   expect(saved.market.campaigns).toHaveLength(6);
   expect(saved.attempts.filter((a: { kind: string }) => a.kind === 'search')).toHaveLength(3);
   expect(saved.attempts.filter((a: { kind: string }) => a.kind === 'model')).toHaveLength(6);
+  const draft = saved.records[0].email_draft;
+  const elsewhere = await page.request.post(`/api/runs/${identity}/records/${saved.records[0].research.id}/email-draft`, {
+    data: { request_key: `other-tab-${info.project.name}`, previous_id: draft.id, subject: 'Saved in another tab', body: 'A newer saved message.' },
+  });
+  expect(elsewhere.ok()).toBeTruthy();
+  await editor.getByLabel('Subject', { exact: true }).fill('My stale edit');
+  await editor.getByRole('button', { name: 'Save draft', exact: true }).click();
+  await expect(editor.getByRole('alert')).toContainText('changed elsewhere');
+  await expect(editor.getByLabel('Subject', { exact: true })).toHaveValue('My stale edit');
+  await editor.getByRole('button', { name: 'Load saved draft', exact: true }).click();
+  await expect(editor.getByLabel('Subject', { exact: true })).toHaveValue('Saved in another tab');
 });
 
 test('research activity follows the real worker and respects reduced motion', async ({ page }, info) => {

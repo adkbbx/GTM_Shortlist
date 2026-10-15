@@ -36,6 +36,24 @@ def export_run(run: dict, format: str, accepted_only: bool = False) -> str | byt
              [24, 22, 45, 20, 55, 65, 45, 24, 24, 30]),
         ]
         market = run["checkpoint"].get("market")
+        drafts = []
+        for record in records:
+            draft = record.get("email_draft")
+            if draft:
+                research = record["research"]
+                person = next((p for p in research.get("people", []) if p["id"] == draft["person_id"]), None)
+                sources = {source["id"]: source for source in research["sources"]}
+                urls = list(dict.fromkeys(sources[e["source_id"]]["url"] for e in draft["basis"]
+                                          if e["source_id"] in sources))
+                drafts.append([research["name"], person["name"] + " · " + person["role"] if person else "Company team",
+                               draft["subject"], draft["body"], "User edited" if draft["edited"] else "Starting template",
+                               "; ".join(urls), draft["updated_at"]])
+        if drafts:
+            sheets.append(("Email drafts", ["Email drafts · nothing sent",
+                "Starting sources do not verify user edits. Add your signature and review before use.",
+                "No email address or deliverability claim is supplied."],
+                ["Company", "Draft for", "Subject", "Message", "Draft status", "Starting source links", "Updated (UTC)"],
+                drafts, [25, 30, 40, 75, 25, 45, 24]))
         if market:
             rows = [[c["domain"], "Potential competitor", c.get("excerpt", "")[:240],
                      "Search observation; offer similarity unverified", c["url"], c["discovered_at"]]

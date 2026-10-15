@@ -24,6 +24,7 @@ The requested experience is a continuous, saved six-step investigation. Animated
 - [x] Extract up to three named current team roles from saved company pages, require name/title in exact owned-source passages and separate employment verification, preserve IDs through crash recovery and expose roles/evidence/dates on phone/laptop and exports. Indexed professional profiles, actual buying responsibility and live quality validation remain open.
 - [ ] Add optional configured business-email enrichment and verification. Compare supported providers before selection; do not guess addresses, silently spend on several providers or conflate deliverability with consent.
 - [ ] Draft editable emails from verified company/person evidence, label unverified personalization, and retain draft-only behavior.
+- [x] Provide a zero-inference starting template using the confirmed offer and exact saved company passages, selectable saved person, editable subject/body, immutable starting-source context, revision-safe persistence and Excel/JSON draft export. This is one draft per company, not generated-email quality validation or email enrichment.
 - [ ] Carry competitor/campaign/person/email outputs through durable checkpoints, retries, stop, quotas, account isolation, export and restart.
 - [ ] Verify the whole flow in a real hosted run, plus phone/laptop, keyboard, reduced motion and failure recovery. Re-run provider quality checks across three sellers.
 

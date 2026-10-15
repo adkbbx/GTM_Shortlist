@@ -277,6 +277,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/runs/{run_id}/records/{record_id}/email-draft/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start Email Draft */
+        post: operations["start_email_draft_api_runs__run_id__records__record_id__email_draft_start_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/runs/{run_id}/records/{record_id}/email-draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Edit Email Draft */
+        post: operations["edit_email_draft_api_runs__run_id__records__record_id__email_draft_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -465,6 +499,48 @@ export interface components {
              * @default true
              */
             required: boolean;
+        };
+        /** EditEmailDraft */
+        EditEmailDraft: {
+            /** Subject */
+            subject: string;
+            /** Body */
+            body: string;
+            /** Request Key */
+            request_key: string;
+            /** Previous Id */
+            previous_id: string;
+        };
+        /** EmailDraft */
+        EmailDraft: {
+            /** Subject */
+            subject: string;
+            /** Body */
+            body: string;
+            /** Id */
+            id: string;
+            /** Person Id */
+            person_id: string | null;
+            /**
+             * Basis
+             * @default []
+             */
+            basis: components["schemas"]["Evidence"][];
+            /**
+             * Edited
+             * @default false
+             */
+            edited: boolean;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** Evidence */
         Evidence: {
@@ -875,6 +951,7 @@ export interface components {
             operator_review?: components["schemas"]["OperatorReview"] | null;
             /** Credits Used */
             credits_used?: number | null;
+            email_draft?: components["schemas"]["EmailDraft"] | null;
         };
         /** SearchClue */
         SearchClue: {
@@ -963,6 +1040,15 @@ export interface components {
              * @default []
              */
             research_links: string[];
+        };
+        /** StartEmailDraft */
+        StartEmailDraft: {
+            /** Request Key */
+            request_key: string;
+            /** Previous Id */
+            previous_id?: string | null;
+            /** Person Id */
+            person_id?: string | null;
         };
         /** StopInput */
         StopInput: {
@@ -1518,6 +1604,78 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_email_draft_api_runs__run_id__records__record_id__email_draft_start_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+                record_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StartEmailDraft"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    edit_email_draft_api_runs__run_id__records__record_id__email_draft_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+                record_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditEmailDraft"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"];
                 };
             };
             /** @description Validation Error */

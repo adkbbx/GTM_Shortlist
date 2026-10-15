@@ -60,7 +60,7 @@ def workbook_bytes(sheets):
                          '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>')
         for index, (_, notes, headers, records, widths) in enumerate(sheets, 1):
             date_columns = {i for i, header in enumerate(headers, 1)
-                            if header in {"Retrieved (UTC)", "Published (UTC)", "Observed (UTC)"}}
+                            if header in {"Retrieved (UTC)", "Published (UTC)", "Observed (UTC)", "Updated (UTC)"}}
             header_row = len(notes) + 2
             last_row = header_row + len(records)
             end = column(len(headers))

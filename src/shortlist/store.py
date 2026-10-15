@@ -18,6 +18,7 @@ from shortlist.domain import (
     read_research,
     utcnow,
 )
+from shortlist.email_drafts import EditEmailDraft, EmailDraft, StartEmailDraft, starting_draft
 from shortlist.fetch import domain_of
 from shortlist.progress import ProgressUpdate
 
@@ -89,6 +90,8 @@ class Store:
                 db.execute("ALTER TABLE run_events ADD COLUMN detail TEXT")
             if "deleted_at" not in {row["name"] for row in db.execute("PRAGMA table_info(runs)")}:
                 db.execute("ALTER TABLE runs ADD COLUMN deleted_at TEXT")
+            if "email_draft" not in {row["name"] for row in db.execute("PRAGMA table_info(records)")}:
+                db.execute("ALTER TABLE records ADD COLUMN email_draft TEXT")
 
     @contextmanager
     def connection(self):
@@ -216,8 +219,9 @@ class Store:
             result["checkpoint"] = json.loads(result["checkpoint"])
             result["records"] = [{"research": json.loads(r["research"]),
                                   "review": json.loads(r["review"]) if r["review"] else None,
+                                  "email_draft": json.loads(r["email_draft"])["draft"] if r["email_draft"] else None,
                                   "operator_review": self._latest_operator_review(db, run_id, r["id"])}
-                                 for r in db.execute(f"SELECT id,research,review FROM records WHERE run_id=? ORDER BY {self.order_key}", (run_id,))]
+                                 for r in db.execute(f"SELECT id,research,review,email_draft FROM records WHERE run_id=? ORDER BY {self.order_key}", (run_id,))]
             if result["profile"]:
                 profile = Profile.model_validate(result["profile"])
                 for item in result["records"]:
@@ -580,3 +584,34 @@ class Store:
                                  (decision.model_dump_json(), record_id, run_id)).rowcount
             if not changed:
                 raise KeyError(record_id)
+
+    def write_email_draft(self, run_id: str, record_id: str, command: StartEmailDraft | EditEmailDraft):
+        with self.connection() as db:
+            self.begin(db)
+            row = db.execute("SELECT r.research,r.email_draft,u.profile FROM records r JOIN runs u ON u.id=r.run_id "
+                             "WHERE r.id=? AND r.run_id=? AND u.deleted_at IS NULL", (record_id, run_id)).fetchone()
+            if row is None:
+                raise KeyError(record_id)
+            digest = hashlib.sha256((type(command).__name__ + command.model_dump_json()).encode()).hexdigest()
+            saved = json.loads(row["email_draft"]) if row["email_draft"] else None
+            if saved and saved["request_key"] == command.request_key:
+                if saved["command_hash"] != digest:
+                    raise Conflict("This draft request was already used with different content")
+                return EmailDraft.model_validate(saved["draft"])
+            current = EmailDraft.model_validate(saved["draft"]) if saved else None
+            if command.previous_id != (current.id if current else None):
+                raise Conflict("This draft changed elsewhere. Load the saved draft before saving again; keep a copy of your edits.")
+            if isinstance(command, StartEmailDraft):
+                profile = Profile.model_validate_json(row["profile"])
+                research = read_research(profile, json.loads(row["research"]))
+                try:
+                    draft = starting_draft(profile, research, command.person_id)
+                except ValueError as exc:
+                    raise Conflict(str(exc)) from None
+            else:
+                draft = EmailDraft(subject=command.subject, body=command.body, person_id=current.person_id,
+                                   basis=current.basis, created_at=current.created_at, edited=True)
+            envelope = {"request_key": command.request_key, "command_hash": digest, "draft": draft.model_dump(mode="json")}
+            db.execute("UPDATE records SET email_draft=? WHERE id=? AND run_id=?",
+                       (json.dumps(envelope), record_id, run_id))
+            return draft
