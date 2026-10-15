@@ -1,8 +1,8 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api } from './api';
 import type { Record, Run } from './api';
 
-export function EmailDraftEditor({ record, runId, onSaved }: { record: Record; runId: string; onSaved: (run: Run) => void }) {
+export function EmailDraftEditor({ record, runId, onSaved, onDirtyChange }: { record: Record; runId: string; onSaved: (run: Run) => void; onDirtyChange: (dirty: boolean) => void }) {
   const [base, setBase] = useState(record.email_draft ?? null);
   const [subject, setSubject] = useState(base?.subject ?? '');
   const [body, setBody] = useState(base?.body ?? '');
@@ -13,6 +13,7 @@ export function EmailDraftEditor({ record, runId, onSaved }: { record: Record; r
   const [error, setError] = useState('');
   const retry = useRef({ signature: '', key: '' });
   const dirty = subject !== (base?.subject ?? '') || body !== (base?.body ?? '');
+  useEffect(() => { onDirtyChange(dirty); }, [dirty, onDirtyChange]);
   const identify = (signature: string) => {
     if (retry.current.signature !== signature) retry.current = { signature, key: crypto.randomUUID() };
     return retry.current.key;

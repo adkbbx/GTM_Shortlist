@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { mkdirSync, readFileSync } from 'node:fs';
+import { openCompany } from './shortlist';
 
 async function noOverflow(page: Page) {
   const layout = await page.evaluate(() => ({ width: window.innerWidth, scroll: document.documentElement.scrollWidth,
@@ -42,6 +43,7 @@ test('market observations and editable campaigns persist into confirmed targetin
   expect(before.records).toHaveLength(0);
   await page.getByRole('button', { name: 'Confirm target and discover' }).click();
   await expect(page.getByRole('heading', { name: '2 companies researched' })).toBeVisible({ timeout: 15000 });
+  await openCompany(page);
   const overview = page.locator('.company-sheet').first().getByRole('region', { name: 'Company overview' });
   await expect(overview).toContainText('AI software for business operations');
   await expect(overview).toContainText('Headquartered in Canada.');
@@ -49,8 +51,12 @@ test('market observations and editable campaigns persist into confirmed targetin
   await overview.locator('summary').filter({ hasText: '24 employees, as stated on the saved page.' }).press('Enter');
   await expect(overview.locator('details[open] blockquote')).toHaveText('Our team has 24 employees.');
   await expect(overview.locator('details[open] .source-meta')).toContainText('Retrieved');
+  await openCompany(page, 1);
   await expect(page.locator('.company-sheet').nth(1).getByRole('region', { name: 'Company overview' }))
     .toContainText('Not established from saved sources');
+  await expect(page.locator('.company-sheet').nth(1).getByRole('region', { name: 'People to consider' }))
+    .toContainText('No current team roles established');
+  await openCompany(page);
   await noOverflow(page);
   await capture(page, `.impeccable/review/${info.project.name}-company-overview.png`);
   const people = page.locator('.company-sheet').first().getByRole('region', { name: 'People to consider' });
@@ -59,8 +65,6 @@ test('market observations and editable campaigns persist into confirmed targetin
   await people.locator('summary').press('Enter');
   await expect(people.locator('details[open] blockquote')).toHaveText('Alex Morgan is our CEO.');
   await expect(people.locator('.source-meta')).toContainText('Retrieved');
-  await expect(page.locator('.company-sheet').nth(1).getByRole('region', { name: 'People to consider' }))
-    .toContainText('No current team roles established');
   await noOverflow(page);
   await capture(page, `.impeccable/review/${info.project.name}-people.png`);
   const editor = page.locator('.company-sheet').first().getByRole('region', { name: 'Email draft', exact: true });
@@ -90,6 +94,7 @@ test('market observations and editable campaigns persist into confirmed targetin
   await capture(page, `.impeccable/review/${info.project.name}-source-signals.png`);
   await page.reload();
   await expect(page.locator('.company-overview').first()).toContainText('24 employees');
+  await openCompany(page);
   await expect(page.locator('.people-research').first()).toContainText('Alex Morgan');
   await expect(editor.getByLabel('Subject', { exact: true })).toHaveValue('A focused acquisition experiment');
   await expect(editor.getByLabel('Message', { exact: true })).toHaveValue(/Hi Alex/);
@@ -130,6 +135,7 @@ test('research activity follows the real worker and respects reduced motion', as
     expect(await page.locator('.agent-scan').evaluate(element => getComputedStyle(element).animationName)).toBe('none');
     await page.request.post(`/__fixture_release/${id}`);
     await expect(page.locator('.agent-activity')).toHaveCount(0, { timeout: 15000 });
+    await openCompany(page);
     await page.getByText('Why this company was researched', { exact: true }).first().click();
     await expect(page.locator('.selection-reason').first()).toContainText('do not establish fit or buying intent');
   } finally { await page.request.post(`/__fixture_release/${id}`); }
@@ -185,6 +191,7 @@ test('stopping actual held research keeps completed sheets and ignores an older 
     await page.unrouteAll({ behavior: 'wait' });
     await expect(page.getByRole('heading', { name: 'Research stopped', exact: true })).toBeVisible();
     await expect(page.locator('.company-sheet')).toHaveCount(1);
+    await openCompany(page);
     await expect(page.getByRole('button', { name: 'Stop this run', exact: true })).toHaveCount(0);
     await page.getByRole('button', { name: 'Accept company', exact: true }).click();
     await expect(page.getByText('Saved: accepted')).toBeVisible();
@@ -197,6 +204,7 @@ test('stopping actual held research keeps completed sheets and ignores an older 
     expect(exported.records).toHaveLength(1);
     await page.request.post(`/__fixture_release/${id}`);
     await page.reload();
+    await openCompany(page);
     await expect(page.getByRole('heading', { name: 'Research stopped', exact: true })).toBeVisible();
     await expect(page.getByText('Saved: accepted')).toBeVisible();
     await noOverflow(page);
@@ -391,6 +399,7 @@ test('saved seller → confirmation → evidence → review → export survives 
   await capture(page, `.impeccable/review/${testInfo.project.name}-progress.png`);
   await expect(page.getByRole('heading', { name: '2 companies researched' })).toBeVisible({ timeout: 15000 });
   const first = page.locator('.company-sheet').first();
+  await openCompany(page);
   await first.locator('.findings .evidence > summary').first().click();
   await expect(first.locator('.findings .evidence blockquote').first()).toContainText('artificial intelligence software');
   await expect(first.locator('.findings').getByText('Publication date unknown').first()).toBeVisible();
@@ -408,6 +417,7 @@ test('saved seller → confirmation → evidence → review → export survives 
   await first.getByRole('button', { name: 'Accept company' }).click();
   await expect(first.getByText('Saved: accepted')).toBeVisible();
   await page.reload();
+  await openCompany(page);
   await expect(first.getByText('Saved: accepted')).toBeVisible();
   await expect(first.getByLabel('Review note')).toHaveValue('Accepted after inspecting the fixture passage');
   await page.locator('.progress-history > summary').click();
@@ -458,6 +468,7 @@ test('saved seller → confirmation → evidence → review → export survives 
   expect(response.ok()).toBeTruthy();
   await page.reload();
   const serviceReview = first.getByRole('region', { name: 'Service review', exact: true });
+  await openCompany(page);
   await expect(serviceReview.getByText('Evidence reviewed', { exact: true })).toBeVisible();
   await expect(serviceReview.getByText('TEST FIXTURE service note.', { exact: false })).toBeVisible();
   await expect(first.getByText('Saved: accepted')).toBeVisible();

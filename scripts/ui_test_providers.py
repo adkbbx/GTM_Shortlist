@@ -27,7 +27,8 @@ class FixtureSearch:
                 query=query,
                 provider=self.name,
             )
-            for index in (range(1, 17) if 'similar companies official websites' in query else (1, 2))
+            for index in (range(1, 17) if 'similar companies official websites' in query
+                          else (1, 2, 3) if 'Three comparison companies' in query else (1, 2))
         ]
 
 

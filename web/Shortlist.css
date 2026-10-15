@@ -1,0 +1,69 @@
+.company-shortlist {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--field, white);
+}
+.shortlist-instruction { margin: 0; padding: 18px 24px; font-size: .8125rem; color: var(--muted); }
+.company-item { border-top: 1px solid var(--line); }
+.company-item > .company-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.2fr) minmax(0, 1.8fr) minmax(145px, 1fr) auto;
+  grid-template-areas: "identity description assessment action" "context context context context";
+  gap: 18px 24px;
+  align-items: start;
+  padding: 24px;
+  list-style: none;
+  font-size: .875rem;
+  font-weight: 400;
+  transition: background-color .16s;
+}
+.company-row::-webkit-details-marker { display: none; }
+.company-row::marker { content: ''; }
+.company-row > span { margin: 0; font-size: inherit; font-weight: inherit; color: inherit; }
+.company-row:hover { background: var(--paper); }
+.company-row:focus-visible { outline: 2px solid var(--orange); outline-offset: -4px; }
+.company-item[open] > .company-row { background: #efede6; }
+.company-row .shortlist-identity { grid-area: identity; display: flex; gap: 12px; min-width: 0; }
+.company-initial { display: grid; place-items: center; flex: 0 0 36px; height: 36px; border: 1px solid var(--line); font-size: 1rem; font-weight: 600; }
+.shortlist-identity > span:last-child { min-width: 0; }
+.shortlist-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-weight: 600; line-height: 1.45; overflow-wrap: anywhere; }
+.shortlist-domain { display: block; margin-top: 6px; font-size: .75rem; color: var(--muted); overflow-wrap: anywhere; }
+.company-row .shortlist-description { grid-area: description; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.65; }
+.company-row .shortlist-assessment { grid-area: assessment; display: grid; gap: 7px; font-size: .8125rem; font-weight: 500; }
+.shortlist-decision { color: var(--muted); font-size: .75rem; font-weight: 400; }
+.company-row .shortlist-action { grid-area: action; display: flex; align-items: center; gap: 8px; min-height: 36px; color: var(--orange); font-size: .75rem; font-weight: 500; }
+.row-chevron { flex: 0 0 18px; width: 18px; height: 18px; transition: transform .18s; }
+.row-close { display: none; }
+.company-item[open] > .company-row .row-inspect { display: none; }
+.company-item[open] > .company-row .row-close { display: inline; }
+.company-item[open] > .company-row .row-chevron { transform: rotate(90deg); }
+.company-row .shortlist-context { grid-area: context; display: flex; flex-wrap: wrap; gap: 7px 20px; color: var(--muted); font-size: .75rem; line-height: 1.6; }
+.shortlist-context .shortlist-signal { color: var(--ink); }
+.shortlist-context .unsaved-indicator { color: var(--orange); font-weight: 600; }
+.local-search-setup.is-compact { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 20px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.local-search-setup.is-compact .search-setup-summary p { margin: 0; font-size: .8125rem; font-weight: 400; color: var(--muted); }
+.local-search-setup.is-compact .hint { display: none; }
+.results-context { margin-top: 32px; }
+.company-panel > .company-sheet { margin: 0; border: 0; border-radius: 0; box-shadow: none; }
+.company-panel-footer { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; padding: 20px 28px; border-top: 1px solid var(--line); }
+.company-panel-footer .hint { margin: 0; max-width: 48ch; font-size: .8125rem; }
+.company-panel-footer svg { transform: rotate(-90deg); }
+.company-item[open] > .company-panel { animation: sheet-reveal .18s cubic-bezier(.16, 1, .3, 1); }
+@keyframes sheet-reveal { from { opacity: .7; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 1000px) {
+  .company-item > .company-row { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "identity action" "description description" "assessment assessment" "context context"; gap: 16px; }
+  .company-row .shortlist-description { -webkit-line-clamp: 2; }
+  .company-row .shortlist-assessment { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 20px; }
+}
+@media (max-width: 700px) {
+  .shortlist-instruction { padding: 16px 20px; line-height: 1.6; }
+  .company-item > .company-row { padding: 20px; }
+  .company-row .shortlist-action { min-height: 44px; }
+  .company-row .shortlist-context { gap: 6px 16px; }
+  .company-panel-footer { padding: 20px; }
+  .company-panel-footer button { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .company-item[open] > .company-panel { animation: none; }
+  .company-row, .row-chevron { transition: none; }
+}

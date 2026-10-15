@@ -5,7 +5,7 @@ import type { Health } from './api';
 
 type SaveState = { kind: 'idle' } | { kind: 'saving' } | { kind: 'saved' } | { kind: 'error'; message: string };
 
-export function LocalSearchSetup({ ready, onSaved, onContinue }: { ready: boolean; onSaved: (health: Health) => void; onContinue?: () => void }) {
+export function LocalSearchSetup({ ready, onSaved, onContinue, compact = false }: { ready: boolean; onSaved: (health: Health) => void; onContinue?: () => void; compact?: boolean }) {
   const [open, setOpen] = useState(false);
   const [key, setKey] = useState('');
   const [state, setState] = useState<SaveState>({ kind: 'idle' });
@@ -20,7 +20,7 @@ export function LocalSearchSetup({ ready, onSaved, onContinue }: { ready: boolea
       setKey(''); setOpen(false); setState({ kind: 'saved' }); onSaved(health);
     } catch (error) { setState({ kind: 'error', message: error instanceof Error ? error.message : 'Search setup could not be saved. Please try again.' }); }
   };
-  return <section className="local-search-setup" aria-label="Local search setup">
+  return <section className={`local-search-setup${compact && ready && !open ? ' is-compact' : ''}`} aria-label="Local search setup">
     {!open && (ready || state.kind === 'saved') && <div className="search-setup-summary">
       <p ref={status} tabIndex={-1} role="status">{state.kind === 'saved' ? 'Tavily key saved.' : 'Search key saved.'}<span className="hint">{onContinue ? 'Enter your company website to continue.' : 'Your next confirmed run will use the saved key.'}</span></p>
       {onContinue && <button className="secondary" onClick={onContinue}>Continue to your website</button>}

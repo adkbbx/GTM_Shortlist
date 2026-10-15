@@ -92,6 +92,16 @@ if __name__ == "__main__":
             held_runs[identity] = threading.Event()
         return {"id": identity}
 
+    @application.post("/__fixture_three_companies")
+    def three_companies():
+        from uuid import uuid4
+        draft = FixtureModel().seller(None)
+        profile = Profile(seller_url="https://seller.example/", offer=draft.offer,
+                          target="Three comparison companies in business software", criteria=tuple(draft.criteria))
+        with held_lock:
+            identity = store.create_run(profile, "three-companies-" + uuid4().hex)
+        return {"id": identity}
+
     @application.post("/__fixture_release/{run_id}")
     def release_run(run_id: str):
         with held_lock:

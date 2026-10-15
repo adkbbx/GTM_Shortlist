@@ -201,6 +201,10 @@ Warm neutral notices contain a written failure, limitation, or corrective action
 
 ## Do's and Don'ts
 
+### Compact shortlist review
+
+Results begin with flat company rows showing saved descriptions, separate qualification and human decisions, dated company statements when present, sourced people counts and draft state. Unknown activity remains explicit. Each native details disclosure belongs to the run's exclusive group. Its research sheet stays mounted while closed so unsaved notes and email edits survive switching companies. Back to shortlist restores focus to that row. Completed checkpoints and offer-management controls follow the list. Phone rows stack naturally; the detail reveal respects reduced motion.
+
 ### Do
 
 - **Do** use paper, white surfaces, Schibsted Grotesk, quiet borders, and restrained orange ink for new application surfaces.

@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync, readFileSync } from 'node:fs';
+import { openCompany } from './shortlist';
 
 test.afterEach(async ({ page }) => {
   await page.unrouteAll({ behavior: 'wait' });
@@ -74,6 +75,7 @@ test('real hosted API and Postgres settle partial research; review/export are fr
   await activityButton.click();
   await expect(page.getByText('1 research credit used')).toHaveCount(1);
   await expect(page.getByText('No research credit charged')).toHaveCount(1);
+  await openCompany(page);
   await page.getByRole('button', { name: 'Accept company', exact: true }).first().click();
   await expect(page.getByText('Saved: accepted')).toBeVisible();
   const download = page.waitForEvent('download');
@@ -91,6 +93,7 @@ test('real hosted API and Postgres settle partial research; review/export are fr
   await activityButton.click();
   await page.reload();
   await expect(page.getByText('2 credits available', { exact: true })).toBeVisible();
+  await openCompany(page);
   await expect(page.getByText('Saved: accepted')).toBeVisible();
   await capture(page, `.impeccable/review/${info.project.name}-credit-results.png`);
 });
