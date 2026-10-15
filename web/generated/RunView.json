@@ -147,6 +147,67 @@
       "title": "Candidate",
       "type": "object"
     },
+    "CompanySignal": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "enum": [
+            "Hiring",
+            "Funding",
+            "Product launch",
+            "Expansion"
+          ],
+          "title": "Label",
+          "type": "string"
+        },
+        "passage": {
+          "maxLength": 1500,
+          "minLength": 15,
+          "title": "Passage",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "source_url": {
+          "title": "Source Url",
+          "type": "string"
+        },
+        "event_date": {
+          "format": "date",
+          "title": "Event Date",
+          "type": "string"
+        },
+        "observed_at": {
+          "format": "date-time",
+          "title": "Observed At",
+          "type": "string"
+        },
+        "basis": {
+          "const": "Dated company statement",
+          "default": "Dated company statement",
+          "title": "Basis",
+          "type": "string"
+        },
+        "campaign_relevant": {
+          "title": "Campaign Relevant",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "label",
+        "passage",
+        "source_id",
+        "source_url",
+        "event_date",
+        "observed_at",
+        "basis",
+        "campaign_relevant"
+      ],
+      "title": "CompanySignal",
+      "type": "object"
+    },
     "Criterion": {
       "additionalProperties": false,
       "properties": {
@@ -962,6 +1023,14 @@
         "explanation": {
           "title": "Explanation",
           "type": "string"
+        },
+        "signals": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CompanySignal"
+          },
+          "title": "Signals",
+          "type": "array"
         }
       },
       "required": [
@@ -969,7 +1038,8 @@
         "position",
         "target_terms",
         "clues",
-        "explanation"
+        "explanation",
+        "signals"
       ],
       "title": "Selection",
       "type": "object"

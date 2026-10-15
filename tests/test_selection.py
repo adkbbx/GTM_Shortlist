@@ -1,5 +1,7 @@
 from datetime import UTC, datetime
 
+import pytest
+
 from shortlist.domain import Candidate, Criterion, Profile
 from shortlist.providers import candidates_from_results
 from shortlist.selection import prioritize
@@ -104,3 +106,68 @@ def test_worker_researches_ranked_candidates_and_preserves_selection(tmp_path):
     assert response.json()["selection"] == saved["checkpoint"]["selection"]
     assert not execute_run(Store(store.path), settings, identity, search=Search(), model=Model(), fetch=fetch)
     assert len(fetched) == 3
+
+
+@pytest.mark.parametrize("crash", [False, True])
+def test_primary_page_selection_reorders_before_research_and_reuses_fetches(tmp_path, monkeypatch, crash):
+    import hashlib
+
+    from shortlist.config import Settings
+    from shortlist.domain import Source
+    from shortlist.providers import validate_extraction
+    from shortlist.store import Store
+    from shortlist.worker import execute_run
+
+    profile = Profile(seller_url="https://seller.example/", offer="Growth experiments for companies",
+                      target="AI logistics software", criteria=(Criterion(id="software", description="Offers software"),),
+                      confirmed_at=datetime(2026, 10, 15, tzinfo=UTC))
+    inputs = [candidate(f"company-{i}.example", "AI logistics software. We are hiring a marketer.") for i in range(6)]
+    settings = Settings(db_path=tmp_path / "pages.sqlite3")
+    store = Store(settings.db_path)
+    identity = store.create_run(profile, "rank-by-pages")
+    fence = store.claim(identity)
+    checkpoint = store.get_run(identity)["checkpoint"]
+    checkpoint.update(candidates=[c.model_dump(mode="json") for c in inputs], selection_policy=2)
+    store.checkpoint(identity, fence, "discovery", checkpoint, "queued")
+    fetched, researched = [], []
+
+    def fetch(url, expected_domain=None):
+        fetched.append(expected_domain)
+        text = "AI logistics software."
+        if expected_domain in {c.domain for c in inputs[3:]}:
+            text += "\nOn 2026-10-01, we are hiring a marketer."
+        return Source(url=url, company_domain=expected_domain, title="Fixture", text=text,
+                      content_hash=hashlib.sha256(text.encode()).hexdigest())
+
+    class Model:
+        name = "labelled_fixture"
+
+        def research(self, profile, candidate, sources):
+            researched.append(candidate.domain)
+            return validate_extraction({"name": candidate.name, "findings": []}, profile, candidate.domain, sources)
+
+    class Crash(BaseException):
+        pass
+
+    if crash:
+        checkpoint_method = store.checkpoint
+
+        def interrupt(*args, **kwargs):
+            checkpoint_method(*args, **kwargs)
+            if args[2] == "selection" and len(args[3].get("sources", {})) == 3:
+                raise Crash()
+        monkeypatch.setattr(store, "checkpoint", interrupt)
+        with pytest.raises(Crash):
+            execute_run(store, settings, identity, model=Model(), fetch=fetch)
+        with store.connection() as db:
+            db.execute("UPDATE runs SET lease_until=0 WHERE id=?", (identity,))
+        store = Store(store.path)
+    execute_run(store, settings, identity, model=Model(), fetch=fetch)
+    saved = store.get_run(identity)
+    assert fetched == [c.domain for c in inputs]
+    assert researched == [c.domain for c in inputs[3:]]
+    assert len([a for a in saved["attempts"] if a["kind"] == "fetch"]) == 6
+    assert len([a for a in saved["attempts"] if a["kind"] == "model"]) == 3
+    signal = saved["checkpoint"]["selection"][0]["signals"][0]
+    assert signal["event_date"] == "2026-10-01"
+    assert signal["source_id"] == saved["records"][0]["research"]["sources"][0]["id"]

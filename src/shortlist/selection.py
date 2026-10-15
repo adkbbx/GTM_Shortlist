@@ -5,7 +5,9 @@ from urllib.parse import urlsplit
 
 from pydantic import Field
 
-from shortlist.domain import Candidate, Profile, Value
+from shortlist.domain import Candidate, Profile, Source, Value
+from shortlist.fetch import domain_of
+from shortlist.signals import CompanySignal, company_signals
 
 
 def discussion_page(url: str) -> bool:
@@ -39,6 +41,7 @@ class Selection(Value):
     target_terms: tuple[str, ...]
     clues: tuple[SearchClue, ...]
     explanation: str
+    signals: tuple[CompanySignal, ...] = ()
 
 
 def terms(text):
@@ -71,3 +74,22 @@ def prioritize(profile: Profile, candidates: list[Candidate]) -> tuple[list[Cand
                                          if overlap else "No direct target wording found in search text; fit needs research."))
                   for index, (_, _, c, overlap, clues) in enumerate(scored)]
     return [item[2] for item in scored], selections
+
+
+def prioritize_pages(profile: Profile, candidates: list[Candidate], sources: dict[str, tuple[Source, ...]],
+                     discovery_terms: str | None = None, preferences=()) -> tuple[list[Candidate], list[Selection]]:
+    target = terms(discovery_terms or profile.target)
+    rows = []
+    for candidate in candidates:
+        pages = tuple(page for page in sources.get(candidate.domain, ())
+                      if page.company_domain == candidate.domain and domain_of(page.url) == candidate.domain)
+        overlap = tuple(sorted(target & terms(candidate.name + " " + " ".join(page.text for page in pages))))
+        signals = company_signals(candidate.domain, pages, profile.confirmed_at.date(), preferences)
+        relevant = len({signal.label for signal in signals if signal.campaign_relevant})
+        rows.append(((bool(pages), min(len(overlap), 2), relevant, len(overlap)), candidate, overlap, signals))
+    rows.sort(key=lambda item: item[0], reverse=True)
+    selections = [Selection(domain=c.domain, position=i + 1, target_terms=overlap, clues=(), signals=signals,
+                  explanation=(f"Saved company pages mention {', '.join(overlap[:8])}. " if overlap else "Target wording needs verification. ")
+                  + f"{sum(s.campaign_relevant for s in signals)} dated company statements match the campaign signal types.")
+                  for i, (_, c, overlap, signals) in enumerate(rows)]
+    return [row[1] for row in rows], selections

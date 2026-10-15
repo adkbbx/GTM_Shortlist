@@ -115,6 +115,7 @@ def test_market_stages_campaign_and_search_keywords_are_owner_scoped(owners):
         b.get_run(identity)
     a.confirm_draft(identity, profile, 3, "Labelled campaign 1", "AI business software hiring")
     assert a.get_run(identity)["checkpoint"]["discovery_terms"] == "AI business software hiring"
+    assert a.get_run(identity)["checkpoint"]["selection_policy"] == 2
     assert CreditWallet(a).balance().reserved == 3
     assert CreditWallet(b).balance().available == 3
     with pytest.raises(Conflict):

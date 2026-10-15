@@ -42,6 +42,11 @@ test('market observations and editable campaigns persist into confirmed targetin
   expect(before.records).toHaveLength(0);
   await page.getByRole('button', { name: 'Confirm target and discover' }).click();
   await expect(page.getByRole('heading', { name: '2 companies researched' })).toBeVisible({ timeout: 15000 });
+  await page.locator('.company-sheet').first().getByText('Why this company was researched', { exact: true }).click();
+  await expect(page.locator('.selection-reason').first()).toContainText('Hiring · dated company statement');
+  await expect(page.locator('.selection-reason').first()).toContainText('Matches campaign signal type');
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${info.project.name}-source-signals.png`);
   await page.reload();
   const saved = await (await page.request.get(`/api/runs/${identity}`)).json();
   expect(saved.campaign_name).toBe('Labelled campaign 3');
@@ -330,7 +335,7 @@ test('saved seller → confirmation → evidence → review → export survives 
   await expect(page.getByRole('heading', { name: '2 companies researched' })).toBeVisible({ timeout: 15000 });
   const first = page.locator('.company-sheet').first();
   await first.locator('.findings .evidence > summary').first().click();
-  await expect(first.locator('blockquote').first()).toContainText('artificial intelligence software');
+  await expect(first.locator('.findings .evidence blockquote').first()).toContainText('artificial intelligence software');
   await expect(first.getByText('Publication date unknown').first()).toBeVisible();
   const ownership = first.locator('.findings .finding').nth(1);
   await ownership.locator('summary').click();

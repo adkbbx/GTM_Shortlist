@@ -41,6 +41,12 @@ def customer_tables(run, records):
         for source in sources.values():
             details.append([research["name"], "Source", "", "Saved page", source["title"], "", source["url"],
                             source.get("retrieved_at", ""), source.get("published_at") or "Not provided"])
+        selection = next((item for item in run["checkpoint"].get("selection", []) if item["domain"] == research["domain"]), None)
+        for signal in selection.get("signals", []) if selection else []:
+            if signal["source_id"] in sources:
+                details.append([research["name"], "Company activity", signal["label"], "Dated company statement",
+                                "Event date: " + signal["event_date"] + ". First-party claim; buying intent unverified.",
+                                signal["passage"], sources[signal["source_id"]]["url"], signal["observed_at"], ""])
         review = record.get("review") or {}
         operator = record.get("operator_review") or {}
         annotation = operator.get("annotation") or {}

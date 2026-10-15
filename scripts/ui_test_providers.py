@@ -2,6 +2,7 @@
 
 import hashlib
 import time
+from datetime import UTC, datetime, timedelta
 
 from shortlist.domain import Candidate, Criterion, Source
 from shortlist.fetch import domain_of
@@ -37,6 +38,8 @@ def fixture_fetch(url, expected_domain=None):
         "We provide artificial intelligence software for business operations as a hosted subscription. "
         "Example Labs is a privately held startup. No buying intent has been observed."
     )
+    yesterday = (datetime.now(UTC) - timedelta(days=1)).date().isoformat()
+    text += f" On {yesterday}, we are hiring a sales manager."
     if expected_domain == "example-1.com":
         text += " Example Labs is headquartered in Canada."
     company_domain = expected_domain or domain_of(url)

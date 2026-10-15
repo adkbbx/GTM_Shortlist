@@ -32,7 +32,7 @@ from shortlist.providers import (
     company_name_matches,
     queries_for,
 )
-from shortlist.selection import prioritize
+from shortlist.selection import prioritize, prioritize_pages
 from shortlist.store import BudgetExceeded, Conflict, Store
 from shortlist.verification import (
     Verification,
@@ -218,6 +218,31 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 label=f"Saved {len(checkpoint['candidates'])} unique company candidates", state="succeeded"))
             store.event(run_id, fence, ProgressUpdate(phase="discovery", label="Prioritized candidates against your target",
                 detail="Target wording first, then public event clues. Search clues still need verification.", state="succeeded"))
+        if checkpoint.get("selection_policy") == 2 and not checkpoint.get("page_selection_complete"):
+            pool = [Candidate.model_validate(c) for c in checkpoint["candidates"][:6]]
+            store.checkpoint(run_id, fence, "selection", checkpoint)
+            for candidate in pool:
+                saved_sources = checkpoint.setdefault("sources", {})
+                if candidate.domain in saved_sources or candidate.domain in checkpoint.get("candidate_failures", {}):
+                    continue
+                try:
+                    source = page(candidate.url, candidate.domain, f"fetch:{candidate.domain}")
+                    saved_sources[candidate.domain] = [source.model_dump(mode="json")]
+                except FetchError as exc:
+                    checkpoint.setdefault("candidate_failures", {})[candidate.domain] = {"url": candidate.url, "reason": str(exc)}
+                store.checkpoint(run_id, fence, "selection", checkpoint)
+            selected_campaign = next((c for c in checkpoint.get("market", {}).get("campaigns", [])
+                                      if c["name"] == checkpoint.get("campaign_name")), None)
+            preferences = selected_campaign.get("signals_to_check", []) if selected_campaign else []
+            ranked, explanations = prioritize_pages(profile, pool,
+                {domain: tuple(Source.model_validate(s) for s in pages) for domain, pages in checkpoint.get("sources", {}).items()},
+                checkpoint.get("discovery_terms"), preferences)
+            checkpoint["candidates"] = [c.model_dump(mode="json") for c in ranked] + checkpoint["candidates"][6:]
+            checkpoint["selection"] = [s.model_dump(mode="json") for s in explanations] + checkpoint.get("selection", [])[6:]
+            checkpoint["page_selection_complete"] = True
+            store.event(run_id, fence, ProgressUpdate(phase="discovery", label="Selected research candidates from saved company pages",
+                detail="Dated company statements are source claims, not buying intent. Missing dates receive no signal priority.", state="succeeded"))
+            store.checkpoint(run_id, fence, "research", checkpoint)
         researched = {r["research"]["domain"] for r in store.get_run(run_id)["records"]}
         for data in checkpoint["candidates"][:6]:
             candidate = Candidate.model_validate(data)

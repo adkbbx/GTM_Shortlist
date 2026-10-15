@@ -900,6 +900,67 @@
         ],
         "title": "Candidate"
       },
+      "CompanySignal": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "enum": [
+              "Hiring",
+              "Funding",
+              "Product launch",
+              "Expansion"
+            ],
+            "title": "Label"
+          },
+          "passage": {
+            "type": "string",
+            "maxLength": 1500,
+            "minLength": 15,
+            "title": "Passage"
+          },
+          "source_id": {
+            "type": "string",
+            "title": "Source Id"
+          },
+          "source_url": {
+            "type": "string",
+            "title": "Source Url"
+          },
+          "event_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Event Date"
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Observed At"
+          },
+          "basis": {
+            "type": "string",
+            "const": "Dated company statement",
+            "title": "Basis",
+            "default": "Dated company statement"
+          },
+          "campaign_relevant": {
+            "type": "boolean",
+            "title": "Campaign Relevant"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "label",
+          "passage",
+          "source_id",
+          "source_url",
+          "event_date",
+          "observed_at",
+          "basis",
+          "campaign_relevant"
+        ],
+        "title": "CompanySignal"
+      },
       "Confirmation": {
         "properties": {
           "offer": {
@@ -2255,6 +2316,14 @@
           "explanation": {
             "type": "string",
             "title": "Explanation"
+          },
+          "signals": {
+            "items": {
+              "$ref": "#/components/schemas/CompanySignal"
+            },
+            "type": "array",
+            "title": "Signals",
+            "default": []
           }
         },
         "additionalProperties": false,
@@ -2264,7 +2333,8 @@
           "position",
           "target_terms",
           "clues",
-          "explanation"
+          "explanation",
+          "signals"
         ],
         "title": "Selection"
       },

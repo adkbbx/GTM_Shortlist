@@ -172,3 +172,21 @@ def test_market_context_has_readable_separate_sheet_and_complete_json(customer_r
     assert observed is not None and float(observed.text) > 46000
     assert json.loads(export_run(customer_run, "json"))["market"]["competitors"][0]["excerpt"] == "x" * 400
     assert customer_run == before
+
+
+def test_dated_company_statements_keep_event_date_distinct_from_publication(customer_run):
+    passage = "On 2026-10-01, we are hiring a sales manager."
+    source = customer_run["records"][0]["research"]["sources"][0]
+    source["text"] += "\n" + passage
+    customer_run["checkpoint"]["selection"] = [{"domain": "example.com", "signals": [{
+        "label": "Hiring", "source_id": source["id"], "source_url": source["url"], "passage": passage,
+        "event_date": "2026-10-01", "observed_at": source["retrieved_at"], "campaign_relevant": True}]}]
+    package = workbook_xml(export_run(customer_run, "xlsx"))
+    ns = {"s": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
+    rows = package["xl/worksheets/sheet2.xml"].findall("s:sheetData/s:row", ns)
+    signal_row = next(row for row in rows if "Company activity" in " ".join(row.itertext()))
+    text = " ".join(signal_row.itertext())
+    assert passage in text and "Event date: 2026-10-01" in text
+    assert "buying intent unverified" in text
+    publication = signal_row.find("s:c[@r='I" + signal_row.attrib["r"] + "']", ns)
+    assert publication is not None and not publication.findall("s:v", ns)

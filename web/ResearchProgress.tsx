@@ -50,12 +50,12 @@ export function ResearchProgress({ run, connected = true }: { run: Run; connecte
       { label: 'Propose campaigns', complete: !!run.market?.campaigns.length, active: run.status === 'running' && run.stage === 'campaigns' },
     ] : []),
     { label: 'Confirm target', complete: !!run.profile, active: run.status === 'awaiting_confirmation' },
-    { label: 'Discover companies', complete: progress.candidates > 0, active: run.status === 'running' && run.stage === 'discovery' },
+    { label: 'Discover companies', complete: progress.candidates > 0 && run.stage !== 'selection', active: run.status === 'running' && ['discovery', 'selection'].includes(run.stage) },
     { label: 'Research evidence', complete: run.stage === 'review', active: run.status === 'running' && run.stage === 'research' },
   ];
   const heading = pending ? !connected ? 'Reconnecting to your research' : !progress.worker_online ? 'Research is waiting for a worker'
     : run.status === 'queued' ? 'Your research is next in line'
-      : run.stage === 'identity' ? 'Finding your company website' : run.stage === 'seller' ? 'Understanding your company' : run.stage === 'market' ? 'Exploring your market' : run.stage === 'campaigns' ? 'Defining campaign directions' : 'Building your shortlist'
+      : run.stage === 'identity' ? 'Finding your company website' : run.stage === 'seller' ? 'Understanding your company' : run.stage === 'market' ? 'Exploring your market' : run.stage === 'campaigns' ? 'Defining campaign directions' : run.stage === 'selection' ? 'Checking the strongest candidates' : 'Building your shortlist'
     : 'Research checkpoints';
   const content = <>
     {pending && <ResearchActivity run={run} connected={connected} />}

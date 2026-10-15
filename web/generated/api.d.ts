@@ -349,6 +349,38 @@ export interface components {
              */
             excerpt: string;
         };
+        /** CompanySignal */
+        CompanySignal: {
+            /**
+             * Label
+             * @enum {string}
+             */
+            label: "Hiring" | "Funding" | "Product launch" | "Expansion";
+            /** Passage */
+            passage: string;
+            /** Source Id */
+            source_id: string;
+            /** Source Url */
+            source_url: string;
+            /**
+             * Event Date
+             * Format: date
+             */
+            event_date: string;
+            /**
+             * Observed At
+             * Format: date-time
+             */
+            observed_at: string;
+            /**
+             * Basis
+             * @default Dated company statement
+             * @constant
+             */
+            basis: "Dated company statement";
+            /** Campaign Relevant */
+            campaign_relevant: boolean;
+        };
         /** Confirmation */
         Confirmation: {
             /** Offer */
@@ -841,6 +873,11 @@ export interface components {
             clues: components["schemas"]["SearchClue"][];
             /** Explanation */
             explanation: string;
+            /**
+             * Signals
+             * @default []
+             */
+            signals: components["schemas"]["CompanySignal"][];
         };
         /** SellerDraft */
         SellerDraft: {

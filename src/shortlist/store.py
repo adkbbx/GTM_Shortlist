@@ -465,6 +465,8 @@ class Store:
             if row["status"] != "awaiting_confirmation" or checkpoint["seller_url"] != profile.seller_url:
                 raise Conflict("Seller draft is not ready for confirmation")
             checkpoint["company_limit"] = company_limit
+            if checkpoint.get("experience_version") == 2:
+                checkpoint["selection_policy"] = 2
             if discovery_terms is not None:
                 checkpoint["discovery_terms"] = discovery_terms
             if campaign_name is not None:
