@@ -96,6 +96,7 @@ The unattended window ended on 14 October and its heartbeat is paused. Subsequen
 - [x] Accept bare domains, full HTTPS URLs and company names; use durable website lookup and explicit selection for every name, with safe manual fallback and phone/laptop verification.
 - [x] Remove preferred-seller behavior: all names use the same identity lookup, and the public UI/exports use GTM Shortlist without company-specific presets or promotion.
 - [x] Prepare a reusable Render web/worker Blueprint and validate its structure against Render's published schema; identify startup configuration errors by environment variable.
+- [x] Correct Render's complete Docker command override, observe the hosted worker Live and a fresh database heartbeat, and process an actual user-started seller run. Seller extraction returned invalid model output; a complete hosted research run is still unverified.
 - [ ] Complete actual Supabase database provisioning, SMTP and successful Render startup with real accounts and persisted research.
 - [x] Apply actual Supabase schema migrations, provision restricted API/worker logins, and verify TLS, role separation and replay without credential rotation.
 - [x] Back up the actual private Supabase schema, restore it into a disposable local database with matching table counts, test migration010/replay there, apply010 to production and verify both restricted runtime roles can read the nullable draft column over TLS. Render rollout remains pending.

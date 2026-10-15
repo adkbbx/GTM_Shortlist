@@ -2,7 +2,7 @@
 
 Preparation only: no Render resources have been created or paid services activated. Review compute charges in Render before applying the Blueprint. The API uses the free demo instance, which sleeps on idle; the worker uses paid 0.5c-512mb compute. Both use the repository's existing non-root Docker image. Upgrade the web instance for an always-on public service. Automatic deployments are off during setup; applying a Blueprint can still create and initially deploy services and start billing.
 
-The root render.yaml uses JSON syntax, a YAML subset. Run npm ci and node scripts/validate_render_blueprint.mjs to check it against Render's published schema. Schema validation is not proof of live service/database/email behavior. The image entrypoint takes api or worker as its CMD argument. PORT is8000, matching the image; health is /api/health. No customer project, private key, database password, calendar or domain is committed.
+The root render.yaml uses JSON syntax, a YAML subset. Run npm ci and node scripts/validate_render_blueprint.mjs to check it against Render's published schema. Schema validation is not proof of live service/database/email behavior. Render Docker Command overrides both CMD and ENTRYPOINT. Set the web command to `python -m shortlist.container_entrypoint api` and the worker command to `python -m shortlist.container_entrypoint worker`. Bare `api` or `worker` is only an argument for native Docker with the image entrypoint retained; it is not a complete Render startup command. PORT is8000, matching the image; health is /api/health. No customer project, private key, database password, calendar or domain is committed.
 
 ## Startup URL configuration failure
 

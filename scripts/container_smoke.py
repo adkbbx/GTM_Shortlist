@@ -2,6 +2,7 @@
 import json
 import os
 import re
+import shlex
 import subprocess
 import time
 from pathlib import Path
@@ -31,6 +32,10 @@ def wait_ready(name):
 
 def main():
     root = Path(__file__).resolve().parents[1]
+    # Render replaces ENTRYPOINT as well as CMD. Exercise the Blueprint's complete
+    # commands rather than accidentally relying on Docker's native CMD-only override.
+    commands = {service["type"]: shlex.split(service["dockerCommand"])
+                for service in json.loads((root / "render.yaml").read_text())["services"]}
     with TemporaryDirectory(prefix="shortlist-compose-check-") as folder:
         target = Path(folder)
         (target / "secrets").mkdir()
@@ -65,11 +70,12 @@ CREATE ROLE worker_fixture LOGIN NOSUPERUSER NOBYPASSRLS PASSWORD 'labelled-work
         worker_dsn = f"postgresql://worker_fixture:labelled-worker@{database}:5432/postgres"
         docker("run", "-d", "--name", worker, "--network", prefix, *common,
                "-e", "SHORTLIST_DATABASE_URL=" + worker_dsn, "-e", "SHORTLIST_WORKER_DATABASE_URL=" + worker_dsn,
-               "--health-cmd", "python -m shortlist.container_health worker", "shortlist-check", "worker")
+               "--health-cmd", "python -m shortlist.container_health worker",
+               "--entrypoint", commands["worker"][0], "shortlist-check", *commands["worker"][1:])
         created.append(worker)
         docker("run", "-d", "--name", api, "--network", prefix, *common,
                "-e", f"SHORTLIST_DATABASE_URL=postgresql://api_fixture:labelled-api@{database}:5432/postgres",
-               "-p", "127.0.0.1::8000", "shortlist-check", "api")
+               "-p", "127.0.0.1::8000", "--entrypoint", commands["web"][0], "shortlist-check", *commands["web"][1:])
         created.append(api)
         wait_ready(worker)
         wait_ready(api)

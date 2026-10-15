@@ -5,7 +5,7 @@
       "name": "gtm-shortlist",
       "runtime": "docker",
       "dockerfilePath": "./Dockerfile",
-      "dockerCommand": "api",
+      "dockerCommand": "python -m shortlist.container_entrypoint api",
       "plan": "free",
       "autoDeployTrigger": "off",
       "healthCheckPath": "/api/health",
@@ -23,7 +23,7 @@
       "name": "gtm-shortlist-worker",
       "runtime": "docker",
       "dockerfilePath": "./Dockerfile",
-      "dockerCommand": "worker",
+      "dockerCommand": "python -m shortlist.container_entrypoint worker",
       "plan": "0.5c-512mb",
       "autoDeployTrigger": "off",
       "envVars": [
