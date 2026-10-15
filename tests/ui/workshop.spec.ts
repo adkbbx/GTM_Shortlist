@@ -34,3 +34,16 @@ test('workshop remains usable with WebGL unavailable', async ({ page }) => {
   await expect(page.locator('.workshop-field')).toHaveAttribute('data-enhanced', 'false');
   await expect(page.getByRole('button', { name: 'Start research', exact: true })).toBeEnabled();
 });
+
+
+test('decorative GPU work stops offscreen and resumes when visible again', async ({ page }) => {
+  await page.goto('/');
+  const canvas = page.locator('.workshop-field canvas');
+  await canvas.scrollIntoViewIfNeeded();
+  await expect(canvas).toHaveAttribute('data-state', 'playing');
+  await page.getByRole('button', { name: 'Try the demo', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'See how a shortlist takes shape.' })).toBeVisible();
+  await expect(canvas).toHaveAttribute('data-state', 'static');
+  await canvas.scrollIntoViewIfNeeded();
+  await expect(canvas).toHaveAttribute('data-state', 'playing');
+});

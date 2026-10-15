@@ -29,6 +29,9 @@ Authorization: autonomous implementation through **17 October 2026, 21:00 Asia/T
 - [x] Compact progress at confirmation/completed handoff and lead with the form/company sheets.
 - [x] Review confirmation, completed sheets, export controls and account screens with fixtures; preserve sources and account-verification boundaries.
 - [x] Resolve the isolated review priorities in a bounded correction batch and verify regressions.
-- [ ] Update DESIGN.md/PROGRESS.md, commit and push the design branch.
+- [x] Update DESIGN.md/PROGRESS.md and push implementation milestones6132990,39de235 and5c63dc2.
+- [x] Verify offscreen GPU suspension and unsaved sheet edits on phone/laptop.
+- [ ] Verify complete branch CI, including hosted fixture UI and container smoke; resolve actual failures.
+- [ ] Save final scoped acceptance/handoff and retain the authorized next-reset continuation through the cutoff.
 
 The full product is not declared complete. Hosted rollout and provider quality are separate gates; no new paid provider evaluation, production migration, account change or deployment is claimed by these UI checks.
