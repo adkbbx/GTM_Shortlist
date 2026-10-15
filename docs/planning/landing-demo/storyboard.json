@@ -1,12 +1,13 @@
 {
-  "kind": "planning_proposal",
+  "kind": "implemented_local_demo",
   "mode": "illustrative_sample",
   "entry_decision": "equally_prominent",
   "entry_actions": ["Play example", "Research my website"],
   "entry_autostart": false,
   "brand_source": "DESIGN.md",
   "provider_calls": 0,
-  "changes_production": false,
+  "public_deployment": false,
+  "application_ui_implemented": true,
   "stages": [
     {"id": "offer", "title": "Understand offer", "hold_ms": 3000, "pause_for": null, "live_stages": ["identity", "seller"]},
     {"id": "market", "title": "Explore market", "hold_ms": 4000, "pause_for": null, "live_stages": ["market", "campaigns"]},

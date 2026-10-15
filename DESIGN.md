@@ -199,6 +199,14 @@ Evidence and Unknowns are explanatory, selectable views of the output structure.
 
 Warm neutral notices contain a written failure, limitation, or corrective action. They wrap long text. A notice is not a fabricated success signal or an ornamental callout.
 
+### Landing demonstration
+
+The no-active-run start page adds `LandingDemo.tsx`, `LandingDemo.css`, and `landing-demo.data.ts` to the existing paper-first workspace. It retains the normative palette, Schibsted Grotesk, flat white sheets, warm rules, and rounded controls. "Play example" and "Research my website" have equal size, weight, and orange treatment. The latter focuses the existing company field without submitting it; example use preserves the entered value.
+
+A labelled sample outcome sits beside the form. Opening the example reveals one full-width sheet with six stages: understand offer, explore market, confirm target, discover companies, inspect evidence, and review and draft. Desktop uses a left stage rail; at 850px and below, a native "All stages" disclosure and one content column replace it. At 700px and below, entry actions stack with equal prominence. Stage buttons use `aria-current="step"`; source inspection stays inline, review remains a separate human choice, and draft edits persist when revisiting stages. Invented companies, reserved `.example` domains, and synthetic passages stay explicitly labelled. The sample module has no research API imports and keeps its decisions and edits local.
+
+Playback starts on request, pauses at confirmation and evidence, and stops on the result. Manual navigation, pause, resume, and replay remain available. Hidden documents, leaving the viewport after visibility, mouse movement over the scene, and focus on scene controls pause playback until deliberate resume. Existing controls retain 180ms feedback; scenes enter over 280ms with 6px movement, rows over 240ms with 60ms stagger, and passages over 220ms. A single 900ms scan runs only in the playing sample. The OS reduced-motion preference and visible "Reduce motion" control both show the final review stage immediately, disable movement, and preserve readable manual navigation. Real research continues through the existing form, authentication, saved worker progress, and explicit target confirmation.
+
 ## Do's and Don'ts
 
 ### Compact shortlist review

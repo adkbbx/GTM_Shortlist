@@ -8,7 +8,7 @@ Make the product demonstrate one useful outcome: a company moves from a discover
 
 **Confirmed entry choice:** the user chose both equally prominent. Put “Play example” and “Research my website” together in the first viewport, with equal button size, weight and orange action treatment. Neither path is a secondary text link. Explain the choice beside the controls: the example is illustrative and uses no research credits; website research uses the actual account, confirmation and credit flow. Neither starts automatically.
 
-This branch contains a plan, a storyboard specification, a validation script, and a baseline screenshot. It changes no application code or brand tokens.
+Implemented on this branch after the user's follow-up approval. `web/LandingDemo.tsx`, `LandingDemo.css`, and `landing-demo.data.ts` extend the existing no-active-run starting page. Brand tokens and hosted authentication boundaries remain unchanged. The original proposal below documents the intended behavior; the implementation status and runtime evidence are recorded at the end.
 
 ## What exists now
 
@@ -141,3 +141,13 @@ Two DEV posts offer useful practitioner examples, not a consensus or formal acce
 - [LaWeBe's landing-page motion failure](https://dev.to/lawebe/how-an-accessibility-saas-broke-its-own-landing-and-how-we-fixed-it-5802) reports content becoming invisible with reduced motion and recommends explicit visible fallback states and browser assertions. No comments were returned. Disabling CSS transitions alone does not inherently prevent an observer from revealing content; our acceptance criterion is the actual visible outcome, rather than treating the post's broad causal claim as browser law.
 
 Open decisions: whether anonymous visitors receive a separate public landing route, and final illustrative copy. Entry prominence is settled: both paths receive equal emphasis. Preserve existing routing until its scope is chosen. The proposed motion values are ours, not measured Explee timings or validated user-test results.
+
+## Implementation status
+
+The six-stage example, equal entry actions, scene/row/source animations, confirmation and source-inspection pauses, manual stage navigation, sample review, editable draft and real-field handoff are implemented. Draft edits persist when hidden or revisited. The website field survives sample use. Closing the sample restores focus to Play example. Scene-action focus follows the newly visible heading; automatic transitions do not steal focus.
+
+The sample starts on request and stops after the result. Playback pauses when the document is hidden, when a previously visible player leaves the viewport, when the pointer moves over the scene to read, and when an interactive scene control receives focus. Merely scrolling the newly opened player into view does not pause it. Explicit resume is required after pausing. The desktop stage list becomes a native All stages disclosure on phone. The OS motion preference is respected, and a separate Reduce motion control permits manual opt-out; both reach the result without motion and retain readable manual navigation.
+
+The demonstration module has no research API imports. Its review decisions, synthetic passages and draft edits remain local to the component. Real research continues through the existing website form, API, saved worker state and explicit target confirmation. No public route, account bypass, sending, provider credential or checkout was added.
+
+Run `node --experimental-strip-types scripts/check_landing_demo.mjs` for pure playback scenarios. Browser regressions are in `tests/ui/landing-demo.spec.ts`. Build with `npm run build`; `scripts/landing_demo_preview.py` serves the built page at port8018 using a separate temporary local database, no providers and no worker. It is a UI preview; use the normal configured application for real research. Browser review screenshots are saved in `.impeccable/review/`, which is ignored. See PROGRESS.md for checks actually executed and limits.

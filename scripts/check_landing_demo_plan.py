@@ -15,7 +15,8 @@ def main() -> None:
     identifiers = [stage["id"] for stage in stages]
     assert identifiers == ["offer", "market", "confirm", "discover", "evidence", "review"]
     assert storyboard["provider_calls"] == 0
-    assert storyboard["changes_production"] is False
+    assert storyboard["public_deployment"] is False
+    assert storyboard["application_ui_implemented"] is True
     assert storyboard["real_confirmation_required"] is True
     assert storyboard["automatic_outreach"] is False
     assert storyboard["reduced_motion_stage"] == storyboard["terminal_stage"] == "review"
@@ -31,7 +32,7 @@ def main() -> None:
         assert color in text
     print("Plan verified: six stages, explicit interaction pauses, preserved brand colors,")
     print("visible reduced-motion result, existing screenshot, and zero-provider sample boundary.")
-    print("This validates the planning specification; the UI is not implemented.")
+    print("This validates the specification; browser checks establish runtime behavior.")
 
 
 if __name__ == "__main__":
