@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test('sample is independent of real research and preserves website input', async ({ page }) => {
   await page.goto('/');
   const entry = page.getByRole('group', { name: 'Choose how to explore GTM Shortlist' });
-  await expect(page.getByRole('button', { name: 'Play example', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Try the demo', exact: true })).toBeVisible();
   const mutations: string[] = [];
   page.on('request', request => { if (request.method() !== 'GET' && request.url().includes('/api/')) mutations.push(request.url()); });
   const input = page.getByLabel('Company name or website', { exact: true });
@@ -24,14 +24,14 @@ test('sample is independent of real research and preserves website input', async
   await expect(input).toBeFocused();
   await expect(input).toHaveValue('https://preserved.example');
   await demo.getByRole('button', { name: 'Close example' }).click();
-  await expect(page.getByRole('button', { name: 'Play example', exact: true })).toBeFocused();
+  await expect(page.getByRole('button', { name: 'Try the demo', exact: true })).toBeFocused();
   expect(mutations).toEqual([]);
   expect(await entry.count()).toBe(1);
 });
 
 test('playback advances then waits for example confirmation and source inspection', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Play example', exact: true }).click();
+  await page.getByRole('button', { name: 'Try the demo', exact: true }).click();
   const demo = page.getByRole('region', { name: 'See how a shortlist takes shape.' });
   await expect(demo.getByRole('heading', { name: 'Confirm target', exact: true })).toBeVisible({ timeout: 12000 });
   await expect(demo.getByRole('button', { name: 'Confirm example target' })).toBeVisible();
@@ -45,7 +45,7 @@ test('playback advances then waits for example confirmation and source inspectio
 test('reduced motion keeps the informative result visible and stages usable', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Play example', exact: true }).press('Enter');
+  await page.getByRole('button', { name: 'Try the demo', exact: true }).press('Enter');
   const demo = page.getByRole('region', { name: 'See how a shortlist takes shape.' });
   await expect(demo.getByRole('heading', { name: 'Review and draft', exact: true })).toBeVisible();
   await expect(demo.locator('.demo-playback [role=status]')).toContainText('Reduced motion');
@@ -64,7 +64,9 @@ test('entry actions have equal prominence and phone content does not overflow', 
   }));
   expect(styles).toHaveLength(2);
   expect(styles[0]).toEqual(styles[1]);
-  await page.getByRole('button', { name: 'Play example', exact: true }).click();
+  expect(styles[0].height).toBeCloseTo(48, 0);
+  expect(styles[0].width).toBeLessThanOrEqual(321);
+  await page.getByRole('button', { name: 'Try the demo', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'See how a shortlist takes shape.' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
@@ -72,7 +74,7 @@ test('entry actions have equal prominence and phone content does not overflow', 
 
 test('motion can be disabled during playback without hiding the result', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Play example', exact: true }).click();
+  await page.getByRole('button', { name: 'Try the demo', exact: true }).click();
   const demo = page.getByRole('region', { name: 'See how a shortlist takes shape.' });
   await demo.getByRole('button', { name: 'Reduce motion', exact: true }).click();
   await expect(demo.getByRole('heading', { name: 'Review and draft', exact: true })).toBeVisible();

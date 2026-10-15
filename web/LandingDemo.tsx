@@ -71,7 +71,7 @@ export function LandingDemo({ children, onResearch }: { children: ReactNode; onR
 
   return <div className="landing-experience">
     <div className="landing-entry" role="group" aria-label="Choose how to explore GTM Shortlist">
-      <div><button ref={playEntry} type="button" onClick={() => open(true)}><Arrow play />Play example</button><p>See the process. No research credits used.</p></div>
+      <div><button ref={playEntry} type="button" onClick={() => open(true)}><Arrow play />Try the demo</button><p>See the process. No research credits used.</p></div>
       <div><button type="button" onClick={onResearch}>Research my website<Arrow /></button><p>Your company, your criteria, your shortlist.</p></div>
     </div>
     <div className="start-grid landing-start">
