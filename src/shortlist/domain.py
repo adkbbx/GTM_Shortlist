@@ -61,6 +61,8 @@ class Source(Value):
     retrieved_at: datetime = Field(default_factory=utcnow)
     published_at: datetime | None = None
     research_links: tuple[str, ...] = Field(default=(), max_length=2)
+    # Omit the empty addition so historical nested journal inputs retain their hash.
+    activity_links: tuple[str, ...] = Field(default=(), max_length=1, exclude_if=lambda links: not links)
 
 
 class Evidence(Value):

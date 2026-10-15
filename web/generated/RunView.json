@@ -1298,6 +1298,15 @@
           "maxItems": 2,
           "title": "Research Links",
           "type": "array"
+        },
+        "activity_links": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 1,
+          "title": "Activity Links",
+          "type": "array"
         }
       },
       "required": [

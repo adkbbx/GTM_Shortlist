@@ -2797,6 +2797,15 @@
             "maxItems": 2,
             "title": "Research Links",
             "default": []
+          },
+          "activity_links": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 1,
+            "title": "Activity Links",
+            "default": []
           }
         },
         "additionalProperties": false,

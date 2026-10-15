@@ -42,6 +42,8 @@ def step_label(kind: str, operation: str, domain: str | None = None) -> str:
         return "Searching for companies · query " + str(int(operation.split(":")[1]) + 1)
     company = domain or operation.split(":")[1]
     if kind == "fetch":
+        if operation.endswith(":activity"):
+            return "Reading company news or careers for " + company
         return ("Reading another source page for " if ":page:" in operation else "Reading ") + company
     if operation.startswith("repair:"):
         return "Repairing a structured research response for " + company

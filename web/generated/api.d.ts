@@ -1040,6 +1040,11 @@ export interface components {
              * @default []
              */
             research_links: string[];
+            /**
+             * Activity Links
+             * @default []
+             */
+            activity_links: string[];
         };
         /** StartEmailDraft */
         StartEmailDraft: {

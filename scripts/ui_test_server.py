@@ -15,7 +15,7 @@ from ui_test_providers import FixtureModel, FixtureSearch, fixture_fetch
 
 from shortlist.api import create_app
 from shortlist.config import Settings
-from shortlist.domain import OperatorReviewCommand, Profile
+from shortlist.domain import Candidate, OperatorReviewCommand, Profile
 from shortlist.fetch import FetchError
 from shortlist.local_credentials import LocalCredentials, validate_tavily_key
 from shortlist.store import Store
@@ -100,6 +100,21 @@ if __name__ == "__main__":
                           target="Three comparison companies in business software", criteria=tuple(draft.criteria))
         with held_lock:
             identity = store.create_run(profile, "three-companies-" + uuid4().hex)
+        return {"id": identity}
+
+    @application.post("/__fixture_activity_selection")
+    def activity_selection():
+        from uuid import uuid4
+        draft = FixtureModel().seller(None)
+        profile = Profile(seller_url="https://seller.example/", offer=draft.offer,
+                          target=draft.target, criteria=tuple(draft.criteria))
+        with held_lock:
+            identity = store.create_run(profile, "activity-selection-" + uuid4().hex)
+            fence = store.claim(identity)
+            candidate = Candidate(domain="activity-fixture.example", url="https://activity-fixture.example/",
+                                  name="Labelled activity fixture", query="fixture", provider="fixture")
+            store.checkpoint(identity, fence, "discovery", {"candidates": [candidate.model_dump(mode="json")],
+                             "selection_policy": 3}, "queued")
         return {"id": identity}
 
     @application.post("/__fixture_release/{run_id}")

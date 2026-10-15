@@ -40,7 +40,8 @@ def fixture_fetch(url, expected_domain=None):
         "Example Labs is a privately held startup. No buying intent has been observed."
     )
     yesterday = (datetime.now(UTC) - timedelta(days=1)).date().isoformat()
-    text += f" On {yesterday}, we are hiring a sales manager."
+    if expected_domain != "activity-fixture.example" or url.endswith("/news"):
+        text += f" On {yesterday}, we are hiring a sales manager."
     if expected_domain == "example-1.com":
         text += " Example Labs is headquartered in Canada. Our team has 24 employees. Alex Morgan is our CEO."
     company_domain = expected_domain or domain_of(url)
@@ -56,6 +57,7 @@ def fixture_fetch(url, expected_domain=None):
         text=text,
         content_hash=hashlib.sha256(text.encode()).hexdigest(),
         research_links=links,
+        activity_links=(f"https://{company_domain}/news",) if expected_domain == "activity-fixture.example" and url.endswith("/") else (),
     )
 
 

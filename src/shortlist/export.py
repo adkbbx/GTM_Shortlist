@@ -13,6 +13,7 @@ def export_run(run: dict, format: str, accepted_only: bool = False) -> str | byt
                "records": records, "discovery": run["checkpoint"].get("candidates", []),
                "candidate_failures": run["checkpoint"].get("candidate_failures", {}),
                "page_failures": run["checkpoint"].get("page_failures", {}),
+               "activity_failures": run["checkpoint"].get("activity_failures", {}),
                "market": run["checkpoint"].get("market"), "campaign_name": run["checkpoint"].get("campaign_name"),
                "selection": run["checkpoint"].get("selection", []), "seller_source": run["checkpoint"].get("seller_source"),
                "discovery_terms": run["checkpoint"].get("discovery_terms"),

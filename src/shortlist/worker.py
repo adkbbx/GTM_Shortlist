@@ -218,7 +218,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 label=f"Saved {len(checkpoint['candidates'])} unique company candidates", state="succeeded"))
             store.event(run_id, fence, ProgressUpdate(phase="discovery", label="Prioritized candidates against your target",
                 detail="Target wording first, then public event clues. Search clues still need verification.", state="succeeded"))
-        if checkpoint.get("selection_policy") == 2 and not checkpoint.get("page_selection_complete"):
+        if checkpoint.get("selection_policy") in (2, 3) and not checkpoint.get("page_selection_complete"):
             pool = [Candidate.model_validate(c) for c in checkpoint["candidates"][:6]]
             store.checkpoint(run_id, fence, "selection", checkpoint)
             for candidate in pool:
@@ -231,6 +231,29 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 except FetchError as exc:
                     checkpoint.setdefault("candidate_failures", {})[candidate.domain] = {"url": candidate.url, "reason": str(exc)}
                 store.checkpoint(run_id, fence, "selection", checkpoint)
+            if checkpoint.get("selection_policy") == 3:
+                for candidate in pool:
+                    pages = checkpoint.get("sources", {}).get(candidate.domain, [])
+                    if not pages:
+                        continue
+                    primary = Source.model_validate(pages[0])
+                    if not primary.activity_links:
+                        continue
+                    link = primary.activity_links[0]
+                    completed = checkpoint.setdefault("completed_activity", {})
+                    failures = checkpoint.setdefault("activity_failures", {})
+                    if candidate.domain in completed or candidate.domain in failures:
+                        continue
+                    try:
+                        if domain_of(link) != candidate.domain:
+                            raise FetchError("Activity link changed company identity")
+                        activity = page(link, candidate.domain, f"fetch:{candidate.domain}:activity")
+                        if activity.url not in {s["url"] for s in pages}:
+                            pages.append(activity.model_dump(mode="json"))
+                        completed[candidate.domain] = link
+                    except FetchError as exc:
+                        failures[candidate.domain] = {"url": link, "reason": str(exc)}
+                    store.checkpoint(run_id, fence, "selection", checkpoint)
             selected_campaign = next((c for c in checkpoint.get("market", {}).get("campaigns", [])
                                       if c["name"] == checkpoint.get("campaign_name")), None)
             preferences = selected_campaign.get("signals_to_check", []) if selected_campaign else []
@@ -262,7 +285,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 completed_pages = checkpoint.setdefault("completed_pages", {}).setdefault(candidate.domain, [])
                 failures = checkpoint.setdefault("page_failures", {}).setdefault(candidate.domain, {})
                 for index, link in enumerate(sources[0].research_links):
-                    if link in completed_pages or link in failures:
+                    if link in completed_pages or link in failures or link in {s.url for s in sources}:
                         continue
                     try:
                         if domain_of(link) != candidate.domain:
@@ -340,7 +363,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                                                        state="succeeded"))
             store.checkpoint(run_id, fence, "research", checkpoint)
         records = store.get_run(run_id)["records"]
-        incomplete_pages = any(checkpoint.get("page_failures", {}).values())
+        incomplete_pages = any(checkpoint.get("page_failures", {}).values()) or bool(checkpoint.get("activity_failures"))
         partial = not records or incomplete_pages or any(r["research"]["status"] == "partial" for r in records)
         store.event(run_id, fence, ProgressUpdate(phase="review", label=f"Saved {len(records)} companies for your review",
                                                    state="waiting"))

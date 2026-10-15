@@ -71,6 +71,30 @@ def domain_of(url: str) -> str:
     return host.removeprefix("www.")
 
 
+def activity_links(url: str, soup: BeautifulSoup) -> tuple[str, ...]:
+    """One observed first-party activity page; no recursive crawl or guessed path."""
+    owner = domain_of(url)
+    priorities = {"news": 0, "newsroom": 0, "announcements": 0, "press": 1,
+                  "careers": 2, "jobs": 2, "blog": 3}
+    selected = {}
+    for anchor in soup.find_all("a", href=True):
+        href = anchor.get("href")
+        if not isinstance(href, str):
+            continue
+        try:
+            destination = canonical_url(urljoin(url, href))
+            parsed = urlsplit(destination)
+            parts = [part.casefold() for part in parsed.path.split("/") if part]
+            if domain_of(destination) != owner or parsed.query or destination == canonical_url(url):
+                continue
+            if not 1 <= len(parts) <= 3 or parts[0] not in priorities:
+                continue
+            selected[destination] = priorities[parts[0]]
+        except ValueError:
+            continue
+    return tuple(sorted(selected, key=lambda link: (selected[link], link))[:1])
+
+
 def research_links(url: str, soup: BeautifulSoup) -> tuple[str, ...]:
     """Select two observed company/team/product links, never invented paths."""
     owner = domain_of(url)
@@ -210,13 +234,14 @@ def fetch_page(url: str, expected_domain: str | None = None) -> Source:
             soup = BeautifulSoup(body, "html.parser")
             title = soup.title.get_text(" ", strip=True) if soup.title else parsed.hostname
             links = research_links(current, soup)
+            activity = activity_links(current, soup)
             for tag in soup(["script", "style", "noscript", "nav", "footer", "svg", "form"]):
                 tag.decompose()
             text = "\n".join(line.strip() for line in soup.get_text("\n").splitlines() if line.strip())[:MAX_TEXT]
             if len(text) < 30:
                 raise FetchError("Website has insufficient readable text")
             return Source(url=current, company_domain=owner, title=title[:500], text=text,
-                          content_hash=hashlib.sha256(body).hexdigest(), research_links=links)
+                          content_hash=hashlib.sha256(body).hexdigest(), research_links=links, activity_links=activity)
         except (OSError, http.client.HTTPException) as exc:
             raise FetchError("Website connection failed") from exc
         finally:

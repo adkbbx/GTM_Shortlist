@@ -65,3 +65,30 @@ test('three-company shortlist stays compact and preserves unsaved edits between 
   await rows.nth(2).getByRole('button', { name: 'Back to shortlist', exact: true }).click();
   await expect(rows.nth(2).locator('.company-row')).toBeFocused();
 });
+
+
+test('linked company activity remains inspectable in the compact shortlist', async ({ page }, info) => {
+  const { id } = await (await page.request.post('/__fixture_activity_selection')).json();
+  await page.goto(`/?run=${id}`);
+  await expect(page.getByRole('heading', { name: '1 company researched' })).toBeVisible({ timeout: 20000 });
+  await expect(page.locator('.company-row')).toContainText('Hiring');
+  await expect(page.locator('.company-row')).toContainText('Company statement');
+  await openCompany(page);
+  await page.getByText('Why this company was researched', { exact: true }).click();
+  const explanation = page.locator('.selection-reason');
+  await expect(explanation).toContainText('we are hiring a sales manager');
+  await expect(explanation.locator('a[href="https://activity-fixture.example/news"]')).toBeVisible();
+  const saved = await (await page.request.get(`/api/runs/${id}`)).json();
+  expect(saved.records[0].research.sources).toHaveLength(4);
+  const fetches = saved.attempts.filter((attempt: { kind: string }) => attempt.kind === 'fetch');
+  const reused = saved.progress.events.filter((event: { state: string; label: string }) =>
+    event.state === 'reused' && event.label.startsWith('Reusing a fresh saved page'));
+  expect(fetches.length + reused.length).toBe(4);
+  expect(saved.attempts.filter((attempt: { kind: string }) => attempt.kind === 'model')).toHaveLength(2);
+  expect(saved.attempts.filter((attempt: { kind: string }) => attempt.kind === 'search')).toHaveLength(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(page.viewportSize()?.width ?? 0);
+  mkdirSync('.impeccable/review', { recursive: true });
+  await explanation.screenshot({ path: `.impeccable/review/${info.project.name}-linked-activity.png` });
+  await page.reload();
+  await expect(page.locator('.company-row')).toContainText('Hiring');
+});
