@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Run } from './api';
 import { researchStage } from './research-stages';
+import { ResearchActivity } from './ResearchActivity';
 import './ResearchProgress.css';
 
 const descriptions = [
@@ -20,14 +21,19 @@ function SavedMark({ state }: { state: string }) {
 
 export function ResearchProgress({ run, connected = true }: { run: Run; connected?: boolean }) {
   const [visible, setVisible] = useState(!document.hidden);
+  const [onScreen, setOnScreen] = useState(true);
+  const frame = useRef<HTMLDivElement>(null);
   const [reduced, setReduced] = useState(false);
   useEffect(() => {
     const change = () => setVisible(!document.hidden);
     document.addEventListener('visibilitychange', change);
-    return () => document.removeEventListener('visibilitychange', change);
-  }, []);
+    const observer = new IntersectionObserver(entries => setOnScreen(entries.some(entry => entry.isIntersecting)));
+    if (frame.current) observer.observe(frame.current);
+    return () => { document.removeEventListener('visibilitychange', change); observer.disconnect(); };
+  }, [run.id, run.stage]);
   const { current, states, events, latest, pending, working } = researchStage(run);
-  const moving = working && connected && visible && !reduced;
+  const animate = pending && connected && visible && onScreen && !reduced;
+  const moving = working && animate;
   const currentState = run.termination ? 'Research stopped' : !connected ? 'Reconnecting'
     : !pending ? current === 5 ? run.status === 'partial' ? 'Partial research saved' : 'Ready for your review' : run.status === 'partial' ? 'Research interrupted' : 'Waiting for you'
       : !run.progress.worker_online ? 'Waiting for a worker' : run.status === 'queued' ? 'Queued' : working ? 'Worker active' : 'Saving progress';
@@ -39,8 +45,8 @@ export function ResearchProgress({ run, connected = true }: { run: Run; connecte
           : current === 5 ? run.records.length ? 'Open a company research sheet below to inspect sources and decide.' : 'No company records were saved. Review the checkpoints for details.'
             : latest?.label ?? 'Your saved research is ready to continue.';
   const offer = run.profile?.offer ?? run.draft?.offer;
-  return <section className="real-research landing-demo" data-motion={moving ? 'playing' : 'paused'} data-reduced={reduced} aria-labelledby="progress-heading">
-    <div className="demo-intro"><div><h2 id="progress-heading">Your research, step by step</h2><p>Live work · stages follow saved worker checkpoints</p></div><button className="text-button" aria-pressed={reduced} onClick={() => setReduced(value => !value)}>{reduced ? 'Motion reduced' : 'Reduce motion'}</button></div>
+  return <section className="real-research landing-demo" data-motion={moving ? 'playing' : 'paused'} data-animate={animate} data-reduced={reduced} aria-labelledby="progress-heading">
+    <div className="demo-intro"><div><h2 id="progress-heading">Your research, step by step</h2><p>Live work · stages follow saved worker checkpoints</p></div></div>
     <div className="demo-workspace">
       <div className="demo-stage-rail"><p className="demo-step-count">Stage {current + 1} of 6 · {states[current].label}</p>
         <ol className="real-stage-list" aria-label="Research stages">{states.map((stage, index) => <li key={stage.label} aria-current={stage.current ? 'step' : undefined} className={stage.complete ? 'is-saved' : ''}>
@@ -50,7 +56,11 @@ export function ResearchProgress({ run, connected = true }: { run: Run; connecte
       <div className="demo-scene-wrap"><div className="demo-scene-top"><span>{currentState}</span><span>Progress from saved work</span></div>
         <div className="demo-scene real-scene" key={`${run.id}:${current}`}>
           <h3>{states[current].label}</h3><p>{descriptions[current]}</p>
-          <div className={`agent-activity ${moving ? 'is-working' : ''}`}><div className="agent-paper" aria-hidden="true"><svg viewBox="0 0 80 96" fill="none"><path d="M14 4h36l16 16v72H14V4Z" stroke="currentColor" strokeWidth="1.5"/><path d="M50 4v17h16M25 34h30M25 44h25M25 54h30M25 64h19M25 74h26" stroke="currentColor" strokeWidth="1.5"/></svg><span className="agent-scan" /></div><div className="agent-observation"><p className="agent-domain">{run.seller_url ? new URL(run.seller_url).hostname : run.company_name ?? 'Your company'}</p><p role="status">{status}</p>{latest?.detail && <p className="checkpoint-detail">{latest.detail}</p>}</div></div>
+          <div ref={frame} className={`agent-activity ${moving ? 'is-working' : ''}`}>
+            <ResearchActivity stage={current} mode={working && connected ? 'working' : pending ? 'waiting' : 'still'} />
+            <div className="agent-observation"><p className="agent-domain">{run.seller_url ? new URL(run.seller_url).hostname : run.company_name ?? 'Your company'}</p><p role="status">{status}</p>{latest?.detail && <p className="checkpoint-detail">{latest.detail}</p>}</div>
+            {pending && <div className="research-motion-controls"><button className="text-button activity-motion-toggle" aria-pressed={reduced} onClick={() => setReduced(value => !value)}>{reduced ? 'Resume animations' : 'Pause animations'}</button><span className="activity-device-motion">Animations off per your device settings.</span></div>}
+          </div>
           {offer && <details className="real-saved-offer"><summary>Saved offer summary</summary><p>{offer}</p>{run.profile && <p>{run.profile.target}</p>}</details>}
           {current === 1 && run.market && <div className="demo-note"><p>{run.market.competitors.length} potential competitors · {run.market.campaigns.length} campaign hypotheses saved</p><p>Market observations, not verified comparisons. Inspect them at target confirmation.</p></div>}
           {current === 2 && <p className="demo-note">Confirm your offer and target in the form below. Research will wait for your confirmation.</p>}

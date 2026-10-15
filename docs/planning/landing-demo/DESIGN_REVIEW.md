@@ -1,0 +1,209 @@
+# Independent Impeccable critique — 16 October 2026
+
+Assessment A and B ran in isolated sub-agents. A completed before detector results entered synthesis. This is a pre-correction baseline for web/main.tsx and related entry/navigation/walkthrough.
+
+# Assessment A: shell, entry and walkthrough
+
+Method: isolated design review by `/root/design_assessment_a`, completed without detector output.
+
+Target: `web/main.tsx` and its shell, entry, optional sample and progress presentation. Reviewed `ResearchSidebar.tsx/css`, `WorkshopField.tsx/css`, `LandingDemo.tsx/css`, `ResearchProgress.tsx/css`, `ResearchActivity.tsx`, `landing-demo.data.ts`, `styles.css`, `DESIGN.md`, `PRODUCT.md` and `AGENTS.md`.
+
+Evidence: inspected actual screenshots at `http://127.0.0.1:8018/` in a fresh browser 2 tab. Walked automatic offer and market playback, target confirmation, discovery, evidence reveal, review, reduced motion, Replay, Next, Resume and the real-task handoff. The observed viewport was approximately 1264 by 712. Did not resize it. The tab was closed. No research worker, provider requests, saved-run changes or detector were initiated. Live research states were reviewed in source only. Mobile and assistive-technology behavior were not exercised in this assessment.
+
+## Design specificity verdict
+
+The result is recognizably a source-based company-research workspace. The evidence-before-decision sequence, explicit unknowns, human acceptance and synthetic sample all express this product's actual position. The warm paper, Schibsted Grotesk, restrained rust-orange and mechanical linework form a coherent Eygentic engineering-workshop direction.
+
+The entry is less specific than the workflow. Its calibration plate is carefully drawn but has no visible relationship to company fit or evidence. Its continuous shader sweep establishes atmosphere, while the walkthrough's source-to-analysis-to-sheet illustration explains an operation. The latter is the stronger design idea. Preserve the visual restraint and develop that shared visual vocabulary; adding a larger shader would not solve the remaining usability problems.
+
+The dark history rail and broad rounded walkthrough sheet are conventional app structures, but their use is defensible in an operational workspace. The design does not need an unfamiliar navigation pattern to be distinctive. Its best opportunity is to make the evidence journey feel authored and consistently understandable at every playback speed and scroll position.
+
+## Overall impression
+
+Professional and calm, with unusually honest product language. The normal demo now makes automatic work versus required clicks explicit. The largest weakness is the reduced-motion playback contract, followed by a presentation that advances text faster than a reader can inspect the taller scenes. The preview also invites a real-task handoff that cannot succeed in that environment.
+
+## Nielsen heuristics
+
+Scores use 0 for absent and 4 for excellent. Mode is Operate with an optional guided introduction, so all ten apply. This is a scoped design assessment, not a claim of full product validation.
+
+| # | Heuristic | Score | Evidence and limitation |
+|---|---|---:|---|
+| 1 | Visibility of system status | 3 | Inline "Demo playing" and "Your turn" cues are explicit. Current step and a second footer status are available. Scroll position can hide the top cue, and reduced mode contradicts its own Resume instruction. |
+| 2 | Match between system and real world | 3 | Company, target, evidence and review follow a natural sequence. "Campaign hypothesis" and "first value" add some specialist translation work. |
+| 3 | User control and freedom | 3 | Close, Previous, direct stage navigation, Pause and reduced motion exist. Resume in reduced mode fails to continue and can reset the selected stage. |
+| 4 | Consistency and standards | 2 | Visual controls are coherent, but the same Resume label has incompatible outcomes by motion preference. Preview handoff promises more than the local form can perform. |
+| 5 | Error prevention | 3 | Sample data is repeatedly labelled; confirmation and evidence have explicit main actions; the preview blocks research submission. The still-enabled handoff leads users toward that blocked action. |
+| 6 | Recognition rather than recall | 3 | Stage rail and retained scene context explain location well. Six sibling stages and offscreen playback controls require some scanning. |
+| 7 | Flexibility and efficiency | 2 | Experts can jump directly between stages and skip playback. No assessed accelerators beyond standard controls; reduced mode's Resume wastes actions. |
+| 8 | Aesthetic and minimalist design | 3 | Restrained typography, borders and orange give the evidence room. Large diagram spacing and repeated instructions make some scenes taller than their content needs. |
+| 9 | Error recognition and recovery | 2 | Source shows inline alerts with retained form state, but top-level failures share "Reload workspace" and pass through error messages. No failure flow was triggered, so strong recovery is unproven. |
+| 10 | Help and documentation | 3 | The sample is task-focused contextual help with explicit click instructions, synthetic-data notices and unknowns. Its reduced-motion instructions currently send the user to the wrong control. |
+| | Total | **27/40** | **Acceptable, with specific fixes needed** |
+
+## What works
+
+1. The normal walkthrough distinguishes automatic stages from human decisions. I observed "This step advances automatically. No click needed," then a persistent stop at "Confirm example target," then a stop at "Inspect example passage." Confirmation and evidence have no competing Next shortcut. This directly addresses the requested clarity.
+2. Evidence and human judgment stay separate. The opened passage calls itself synthetic; the unknown budget owner stays visible; acceptance does not become an asserted fit fact. Review feedback says the decision is separate from the assessment. This builds trust through behavior.
+3. The visual language is cohesive. Dark navigation anchors the workspace, the paper and white research areas remain readable, and thin orange traces relate the entry plate to the source-processing illustration. Motion is tied to a playing sample or saved worker state in source rather than a fabricated percentage.
+
+## Priority issues
+
+### P1: reduced-motion Resume does not mean continue
+
+Observed reproduction:
+
+1. Reach review, enable Reduce motion, then click Replay.
+2. Offer appears with "Demo paused. Click Resume below to continue, or choose another stage."
+3. Click Resume. Nothing changes.
+4. Click Next to reach market, then click Resume. The demo returns to offer.
+
+`LandingDemo.tsx:85` tells reduced-mode users to Resume. At line 95, reduced-mode Resume calls `select('offer')` for every stage. The reduced-motion policy therefore changes navigation meaning, not merely animation. A reader who follows the instruction appears stuck or loses position.
+
+Fix: make reduced mode explicitly manual. Hide Resume, label the cue "Manual example," and point to Next where an automatic stage needs manual advancement. Keep the distinct confirmation and evidence actions. Replay should return to the first stage once; it should not share logic with Resume. Retain the selected stage when changing animation preference unless the user explicitly requests a restart.
+
+Suggested command: `/impeccable harden`, then `/impeccable clarify`.
+
+### P2: automatic scenes outrun the reading area
+
+`landing-demo.data.ts` allows three seconds for offer and four seconds for market and discovery. In the observed laptop viewport, the offer's note and playback controls were below the fold; the market's second observation and campaign hypothesis also extended below it. The timer continues while a user scrolls or reads. That makes it possible to miss the material being introduced before the scene replaces it.
+
+After target confirmation, the retained page scroll position also clipped the new discovery heading and hid the top automatic-action cue. After discovery advanced, evidence's heading sat at the viewport's top edge. The footer status and the orange evidence button rescued the next action, so this was not a blocked flow, but the transition did not preserve a comfortable reading position.
+
+Fix: keep a compact scene heading, state cue and playback controls in view together. Shorten the illustrative automatic scenes to one main observation, or give them a reader-controlled continuation. If autoplay stays, increase dwell time based on the actual visible content and expose a prominent Pause near the cue. On a stage change, preserve a deliberate scene anchor rather than an arbitrary lower scroll position; honor reduced motion for any repositioning.
+
+Suggested command: `/impeccable layout` and `/impeccable animate`.
+
+### P2: the preview's final handoff leads to a disabled primary action
+
+The preview accurately explains that it cannot start research, and its link to the real workspace is useful. But the walkthrough still ends with an enabled orange "Research my website" button. I clicked it and it focused the company field beside a permanently disabled "Start research." The explanation and real-workspace link were then above the viewport. The sample's strongest closing action sent me to a task I could not finish there.
+
+This is specific to the isolated preview, not evidence that hosted or configured research is blocked. The preview notice also pushed the initial "Try the demo" below the observed first viewport while the disabled action remained prominent.
+
+Fix: pass preview context into the handoff. In the preview, make the final action "Open the research workspace" with the existing configured destination and a local explanation. Keep the form-focus handoff in an enabled workspace. Compress the preview notice or bring its "Try the demo" action into the notice so the available first action is visible immediately.
+
+Suggested command: `/impeccable clarify` and `/impeccable onboard`.
+
+## Cognitive load
+
+Overall: moderate, with three checklist failures in the expanded walkthrough. The initial company entry itself is low load when considered independently of the preview notice.
+
+| Check | Result | Observation |
+|---|---|---|
+| Single focus | Pass with caveat | One company input is primary. In the sample, the scene's main action is visually clear, although the persistent real-task handoff competes near the bottom. |
+| Chunking | Fail | Six stage choices remain visible as one sibling group on desktop. The market scene additionally introduces two companies and a campaign hypothesis while explaining the process. |
+| Grouping | Pass | Rail, scene, playback and handoff have clear boundaries. Evidence and unknowns have distinct local groups. |
+| Visual hierarchy | Pass | Strong scene heading, quiet metadata and one orange action at required stops. The entry's preview notice is disproportionately prominent. |
+| One thing at a time | Fail | Automatic scenes require reading, interpreting the illustration and managing playback before the timer advances. |
+| Minimal choices | Fail | Six stage jumps exceed four options. They are secondary navigation, which reduces the severity, but remain six choices. |
+| Working memory | Pass | Offer, target and evidence appear locally; the rail preserves sequence. No material memory bridge was required. |
+| Progressive disclosure | Pass | Sample opens on demand; passage and editable draft require deliberate disclosure. |
+
+Visible option counts: six stage buttons in the main stage group; offer/market playback has up to three transport buttons plus motion preference; review has Accept, Reject and draft disclosure as its local content actions. The interface does not present those review actions as equivalent to the six navigation choices, so their counts should not simply be added into one inflated total.
+
+## Emotional journey
+
+Arrival is calm and credible. The large headline and precise company field promise an easy start. In this preview, the disabled CTA and environment notice create the first small valley because the available path is the quiet demo below the fold.
+
+Opening the sample gives the user a convincing research sequence. The moving source illustration explains the machine's role, and the confirmation stop restores agency. The peak is opening the passage: a conclusion becomes inspectable text with a plainly stated unknown. This is the product's most persuasive moment.
+
+Review then hands judgment back to the user. Editable draft disclosure is a sensible optional next step. The normal closing handoff would be a useful end, but the preview's disabled destination weakens it. Reduced-mode Resume creates a sharper valley because the instruction fails immediately after the user asks for a more comfortable experience.
+
+## Persona red flags
+
+### Jordan, first-time user
+
+The required clicks in normal playback are now clear. Jordan can still miss market content before the four-second advance. In the preview, "Research my website" ends at a disabled form, with the explanation above the viewport. "Campaign hypothesis" is understandable for GTM professionals but receives less plain-language help than the evidence concepts.
+
+### Sam, user who needs reduced motion or keyboard navigation
+
+Reduced motion removes animation, but the cue continues to instruct Resume and that control does not continue. This is an observed defect, not a hypothetical accessibility concern. Focus restoration and button labels exist in source; stage transitions focus a heading with `preventScroll`, which can leave it clipped after lower-page actions. Actual screen-reader announcements and a full keyboard pass were not tested here.
+
+### Alex, experienced practitioner
+
+Direct stage jumps are a useful shortcut. The low-information source animation occupies much of each automatic scene while transport controls sit below the fold. Alex can bypass it via the rail, but must discover that shortcut. The sample ends at a single-company review rather than a compact multi-company shortlist comparison, so it only partially demonstrates the product outcome promised by the entry headline.
+
+## Minor observations
+
+- The entry plate is attractive but more atmospheric than explanatory. Its scan resembles inspection while no input exists. The implementation correctly marks it decorative and never calls it progress. A shared source/evidence motif would create a stronger connection without inventing activity.
+- The headline and description are separated by more vertical space than their semantic relationship needs. The illustration sets the two-row grid's height, and the centered form begins on a different left edge. A tighter text block would make the entry feel more deliberate.
+- "Pause visual," "Reduce motion" and live research's "Pause animations" each scope motion differently. Their local placement helps, but the preferences are not a single product-wide setting. Avoid implying that one stops every animation.
+- The review scene says "Your turn" at the top while its footer says "Example complete." Both can be true, but "Walkthrough complete. Try the review" would make the distinction plainer.
+- The stage rail checks all earlier positions, even when direct navigation skipped them. These are positional markers, not proof that the user completed those actions. Use a neutral visited/progress treatment or record actual sample completion if completion is intended.
+- The sidebar is readable and compact at the inspected width. A collapsed rail intentionally hides company names, so tooltips and accessible names matter for distinguishing saved runs. Mobile overflow and large saved histories require separate verification.
+- Documentation describes a mouse-movement pause, but the inspected current scene implements focus capture, hidden-document and offscreen pauses. The later refinement text correctly says pointer movement does not silently pause. Consolidate that documentation when implementation work resumes.
+
+## Questions for synthesis
+
+1. Should the sample primarily demonstrate the automation quickly, or teach the user to inspect research? A short autoplay plus an explicitly manual evidence lesson would support both more clearly.
+2. Should the final sample show a compact three-company shortlist before opening one research sheet, so the promised output is visible before asking the visitor to start?
+3. Can the entry plate and the operational source diagram share one recognizable evidence-processing motif, while keeping decorative motion separate from real progress?
+
+No detector findings were received or used. These questions are supplied to the parent for synthesis; this assessment does not ask the user to approve implementation.
+
+
+# Assessment B — detector and browser evidence
+
+Method: isolated Assessment B subagent. Target: `web/main.tsx` and imported research/sidebar/demo/workshop surfaces. Preview: `http://127.0.0.1:8018/`. Browser: fresh tab in browser 2, closed on completion. No code edits, provider calls, worker starts, configuration writes, or saved-run mutations.
+
+## Provenance and limitations
+
+Read the bundled critique Assessment B instructions. Ran `impeccable.cmd detect --json web` once; the tool envelope truncated that output. The parent expressly authorized one recovery run, captured below in full. Recovery run exited 0 and returned 87 advisory findings. Exit 0 means no non-advisory violations; it does not mean no advisories.
+
+Browser evaluate is explicitly read-only. Mutable title/script preflight, detector injection, live server and overlay presentation were skipped. No user-visible detector overlay exists. Fallback evidence is the CLI scan plus real DOM, screenshots and computed styles. No console detector results are claimed. Browser warning/error log inspection returned no entries.
+
+I inspected desktop at the existing 1280 × 720 viewport without changing browser-wide viewport settings. Mobile/responsive review remains with the parent. I did not select or change the existing queued saved run. ResearchProgress has source inspection only; its live worker states are not independently browser-tested here.
+
+## Deterministic result
+
+All 87 findings are advisory:
+
+| Rule | Count |
+|---|---:|
+| design-system-font-size | 64 |
+| design-system-color | 19 |
+| design-system-radius | 3 |
+| codex-grid-background | 1 |
+
+| File | Count |
+|---|---:|
+| web/styles.css | 50 |
+| web/ResearchSidebar.css | 16 |
+| web/LandingDemo.css | 9 |
+| web/ResearchProgress.css | 5 |
+| web/Shortlist.css | 4 |
+| web/WorkshopField.css | 3 |
+
+The raw JSON below preserves all rule names, snippets, values and line locations. CSS is densely minified by line, so a single line can contain many declarations.
+
+## False positives and interpretation
+
+- `codex-grid-background` at `web/styles.css:2` is a rendered-state false positive. Legacy CSS still contains the two-axis gradient, but computed `background-image` on body, workspace and main is `none`, and the screenshots show plain paper. Do not claim the main page has an actual decorative grid. The workshop's small calibration plate is a separate, explicitly selected product illustration.
+- Many type-ramp warnings are documentation/parser mismatch rather than evidence of poor typography. DESIGN.md prose explicitly documents `.875rem` hints, `.75rem` saved-run metadata, the large entry heading, phone 38/34px headings, and the 17px wordmark is from the later implemented navigation direction. Its frontmatter lists fewer sizes. Treat these as design-system synchronization, then decide whether each missing step is intentional.
+- Sidebar colors in `ResearchSidebar.css` create a coherent dark navigation family, but several are absent from frontmatter. This is genuine documentation/token drift, not automatically a contrast defect. The cue colors `#62432c`, `#8d3b14` and 6px radius at `LandingDemo.css:28` are further undocumented additions.
+- The detector scans legacy declarations even when later cascade rules win. The raw count therefore overstates the number of independent visible inconsistencies. It does not report 87 user-facing defects.
+
+## Browser observations and measured evidence
+
+1. **[P2] The useful demo entry starts below the initial laptop viewport.** Initial `Try the demo` button top was 723.79px in a 720px-tall viewport. The form input/submit were at 611.76px and 53.94px high. The preview-only warning occupied the top of the main area, the hero and workshop followed, and the optional demo was out of view. This is observed specifically in the isolated preview with existing history and its mandatory warning; do not generalize that the hosted first visit has the same fold. The actionable correction is to test a shorter first-screen composition or make the preview demo action available within the limitation notice.
+
+2. **[P2] Playback controls are detached from the animation at laptop height.** Immediately after opening the demo, its heading was at 48.37px, status cue at 216.39px, and the market-stage animation was visible. Pause/Next were at 976.63px and Reduce motion at 1064.78px, well below the 720px viewport. The rail's six choices consume roughly 530px vertically and the scene is tall. Users can read “Pause whenever you like” only near controls farther down. Move the transport controls beside the scene status or use a compact persistent row inside the walkthrough. This is a control discoverability issue, not a claim that pause is absent.
+
+3. **[P3] Sidebar collapse control is 40px wide.** DOM measurement: 40 × 44px at x171.43/y80, despite other controls meeting at least 44px height. Enlarge the horizontal hit target to 44px if applying the skill's 44 × 44 touch recommendation. This is not an assertion of a WCAG 2.2 minimum-target failure (that threshold is different).
+
+4. **Six stage choices are simultaneously visible on desktop.** These are clearly ordered and grouped under an explicit current-step label. This is a manageable but above-four decision cluster; shorten descriptions or progressively disclose the rail if the main task becomes crowded. Do not count the six stages as six equal primary CTAs: the active scene has one explicit main action at confirmation/evidence.
+
+5. **The primary walkthrough feedback works.** Opening the demo focused `#demo-heading`. Confirmation displays “Your turn” and the exact requested action, and has no competing Next button. Evidence inspection updates `aria-expanded` and reveals a clearly labelled synthetic passage inline; then “Review this example” moves focus to the review heading. “Accept example” updates its pressed state and the live status to “Example accepted. Your decision is separate from the fit assessment.” Closing returns focus to “Try the demo.” These interactions were synthetic and local only.
+
+6. **The product-specific visual is restrained.** The real screenshot showed a small calibration diagram alongside the entry heading and source-to-research-sheet linework inside the demo. The page uses Schibsted Grotesk (confirmed computed font) and plain paper. Do not let the static gradient warning override this evidence.
+
+7. **No horizontal overflow was observed at 1280px.** `document.documentElement.scrollWidth > innerWidth` was false. Stage rail descriptions computed to 13px, normal muted `rgb(100,97,91)`; common demo buttons were at least 44px high. Confirmation primary action measured 250.87 × 52px. I did not run a contrast checker or a full keyboard/assistive technology audit, so no blanket accessibility pass is claimed.
+
+## Recommended synthesis weight
+
+Prioritize the verified below-fold playback controls over raw style-advisory counts. Explain the warning's preview-specific impact. Fold the undocumented sizes/colors into one low-priority design-system synchronization item unless Assessment A independently observed an actual visual inconsistency. Preserve the positive evidence around user-controlled confirmation, synthetic-source disclosure and separate human review.
+
+
+
+## Resolution plan
+
+Fix the reduced-motion navigation contract first, move transport controls beside the scene status, correct preview handoff, widen collapse target, and then verify with fixtures. Preserve explicit synthetic labels, evidence provenance and the selected workshop direction. Questions skipped: user authorized autonomous work while unavailable.

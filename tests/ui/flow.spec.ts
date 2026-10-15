@@ -126,7 +126,14 @@ test('research activity follows the real worker and respects reduced motion', as
     await expect(page.locator('.real-latest')).toContainText('Reading example-2.com', { timeout: 15000 });
     await page.locator('.real-history > summary').click();
     await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toContainText('Saved research for example-1.com');
+    await page.locator('.agent-activity').scrollIntoViewIfNeeded();
     await expect(page.locator('.agent-activity')).toHaveClass(/is-working/);
+    await expect(page.locator('.research-visual')).toHaveAttribute('data-mode', 'working');
+    await expect.poll(() => page.locator('.research-flow').evaluate(element => getComputedStyle(element).animationName)).toBe('research-flow');
+    await page.getByRole('button', { name: 'Pause animations', exact: true }).click();
+    await expect(page.locator('.real-research')).toHaveAttribute('data-reduced', 'true');
+    expect(await page.locator('.research-flow').evaluate(element => getComputedStyle(element).animationName)).toBe('none');
+    await page.getByRole('button', { name: 'Resume animations', exact: true }).click();
     await expect(page.locator('.demo-scene-top > span').first()).toHaveText('Worker active');
     await page.getByText('Saved offer summary', { exact: true }).click();
     await expect(page.locator('.real-saved-offer')).toContainText('customer acquisition');
@@ -134,7 +141,7 @@ test('research activity follows the real worker and respects reduced motion', as
     await noOverflow(page);
     await capture(page, `.impeccable/review/${info.project.name}-agent-activity.png`);
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    expect(await page.locator('.agent-scan').evaluate(element => getComputedStyle(element).animationName)).toBe('none');
+    expect(await page.locator('.research-flow').evaluate(element => getComputedStyle(element).animationName)).toBe('none');
     await page.request.post(`/__fixture_release/${id}`);
     await expect(page.locator('.real-stage-list [aria-current=step]')).toContainText('Review and draft', { timeout: 15000 });
     await expect(page.locator('.agent-activity')).not.toHaveClass(/is-working/);
@@ -529,7 +536,7 @@ test('slow checkpoint responses stay serialized and recover into confirmation', 
     inFlight -= 1;
   });
   await page.goto(`/?run=${queued.id}`);
-  await expect(page.getByRole('heading', { name: 'Understanding your company' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Understand offer', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 10000 });
   expect(maximum).toBe(1);
 });

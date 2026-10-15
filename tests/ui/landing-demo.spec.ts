@@ -38,11 +38,16 @@ test('playback advances then waits for example confirmation and source inspectio
   const demo = page.getByRole('region', { name: 'See how a shortlist takes shape.' });
   await expect(demo.getByRole('heading', { name: 'Confirm target', exact: true })).toBeVisible({ timeout: 12000 });
   await expect(demo.getByRole('button', { name: 'Confirm example target' })).toBeVisible();
+  await expect(demo.locator('.demo-action-cue')).toContainText('Your turn');
+  await expect(demo.locator('.demo-action-cue')).toContainText('click Confirm example target');
+  await expect(demo.getByRole('button', { name: 'Next', exact: true })).toHaveCount(0);
   await demo.getByRole('button', { name: 'Confirm example target' }).click();
-  // Focus/hover intentionally pauses playback. Resume from its dedicated control.
+  // Focusing an interactive control intentionally pauses playback. Resume from its dedicated control.
   if (await demo.getByRole('button', { name: 'Resume', exact: true }).isVisible()) await demo.getByRole('button', { name: 'Resume', exact: true }).click();
   await expect(demo.getByRole('heading', { name: 'Inspect evidence', exact: true })).toBeVisible({ timeout: 8000 });
   await expect(demo.getByRole('button', { name: 'Inspect example passage', exact: true })).toHaveAttribute('aria-expanded', 'false');
+  await expect(demo.locator('.demo-action-cue')).toContainText('Click Inspect example passage');
+  await expect(demo.getByRole('button', { name: 'Next', exact: true })).toHaveCount(0);
 });
 
 test('reduced motion keeps the informative result visible and stages usable', async ({ page }) => {

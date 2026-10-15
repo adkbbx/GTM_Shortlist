@@ -9,7 +9,7 @@ colors:
   orange-hover: "#9b4215"
   rust: "#6a3417"
   rule: "#e1dfd9"
-  sidebar: "#f1f0eb"
+  sidebar: "#201e1b"
   preview: "#efede6"
   field: "#ffffff"
   field-border: "#c4c0b8"
@@ -235,3 +235,15 @@ Results begin with flat company rows showing saved descriptions, separate qualif
 - **Don't** replace inspectable research with decorative KPI cards or compress company sheets into three columns.
 - **Don't** present inferred pain, unknown ownership, buying intent, or progress as observed fact.
 - **Don't** restore drafting backgrounds, offset button ledges, or ambient card shadows in this modern workspace.
+
+
+## Research workspace refinement, 16 October
+
+Mode: Operate. The wordmark is plain type aligned with a dark navigation column; no decorative triangle or redundant company-research subtitle. Navigation uses warm off-white primary text and legible muted text, compact history rows, keyboard-accessible collapse controls, and a desktop icon rail. Phone navigation folds above the content.
+
+The walkthrough always distinguishes automatic playback from user input beside the scene. Confirmation and evidence inspection have one explicit main action, with no competing Next shortcut. Pointer movement never silently pauses playback. Source-to-sheet SVG motion illustrates automatic stages; live research selects motion from worker state and saved checkpoints, never timers or made-up completion percentages. Manual, device, hidden-tab and offscreen motion controls remain supported.
+
+The isolated preview cannot submit real research or save provider configuration. It preserves existing runs, explains its lack of a worker and links to the configured local research workspace. This preview guard is not part of hosted authentication or billing.
+
+
+The user selected an engineering workshop direction after inspecting eygentic.com: restrained orange, paper, calibration grids and mechanical linework. The entry illustration is a decorative SVG calibration plate with a lightweight WebGL scan overlay, not a live work indicator. WebGL failure retains the SVG. Rendering is capped to 1.5 device pixel ratio and approximately 30fps; manual pause, device reduced motion, offscreen and hidden-tab states stop the loop. Context loss retains the static plate. No provider calls or new graphics dependencies are needed.
