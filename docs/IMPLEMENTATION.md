@@ -98,6 +98,7 @@ The unattended window ended on 14 October and its heartbeat is paused. Subsequen
 - [x] Prepare a reusable Render web/worker Blueprint and validate its structure against Render's published schema; identify startup configuration errors by environment variable.
 - [ ] Complete actual Supabase database provisioning, SMTP and successful Render startup with real accounts and persisted research.
 - [x] Apply actual Supabase schema migrations, provision restricted API/worker logins, and verify TLS, role separation and replay without credential rotation.
+- [x] Back up the actual private Supabase schema, restore it into a disposable local database with matching table counts, test migration010/replay there, apply010 to production and verify both restricted runtime roles can read the nullable draft column over TLS. Render rollout remains pending.
 - [ ] Import private runtime settings into Render and verify actual API/worker deployment, email and real account isolation.
 - [x] Verify public Render API/auth setup and responsive sign-in screen; handle temporary HTML or malformed API responses with a readable retry message. Worker, real signup and email remain unverified.
 - [x] Provide customer-readable Excel Shortlist/Evidence sheets and plain CSV columns; keep complete technical JSON, owner scoping and free accepted-only downloads.

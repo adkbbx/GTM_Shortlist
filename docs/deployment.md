@@ -20,7 +20,7 @@ Provision a persistent PostgreSQL database, then use a dedicated operator creden
 
 Run migrations before services using a temporary server-only environment file containing SHORTLIST_MIGRATION_DATABASE_URL:
 
-Email drafting requires migration `010_email_drafts.sql` before deploying the updated API/worker. It adds a nullable artifact column to records; existing research JSON and old services remain compatible. The hosted production database has not been migrated as part of the offline draft implementation. Keep the operator credential out of runtime services.
+Email drafting requires migration `010_email_drafts.sql` before deploying the updated API/worker. It adds a nullable artifact column to records; existing research JSON and old services remain compatible. On15October2026 the configured Supabase database received migration010 after a private schema backup, disposable restore with matching table counts, and local migration/replay checks. Restricted API/worker TLS reads of the new column passed. Render web/worker rollout remains unverified; see PROGRESS.md. Keep the operator credential out of runtime services.
 
 ```sh
 docker run --rm --env-file deploy/secrets/migrate.env gtm-shortlist:COMMIT migrate
