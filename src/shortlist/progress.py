@@ -8,7 +8,7 @@ from shortlist.domain import Value
 
 
 class ProgressUpdate(Value):
-    phase: Literal["seller", "confirmation", "discovery", "research", "review"]
+    phase: Literal["seller", "market", "campaigns", "confirmation", "discovery", "research", "review"]
     label: str = Field(min_length=3, max_length=400)
     state: Literal["started", "succeeded", "failed", "reused", "waiting"]
     detail: str | None = Field(default=None, max_length=400)
@@ -28,6 +28,10 @@ class RunProgress(Value):
 
 
 def step_label(kind: str, operation: str, domain: str | None = None) -> str:
+    if operation == "market:search":
+        return "Exploring potential competitors"
+    if operation == "market:campaigns":
+        return "Proposing customer campaigns from your offer"
     if operation == "seller:identity":
         return "Looking up your company's website"
     if operation == "seller:fetch":

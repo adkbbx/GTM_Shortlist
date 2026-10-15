@@ -13,6 +13,9 @@ def export_run(run: dict, format: str, accepted_only: bool = False) -> str | byt
                "records": records, "discovery": run["checkpoint"].get("candidates", []),
                "candidate_failures": run["checkpoint"].get("candidate_failures", {}),
                "page_failures": run["checkpoint"].get("page_failures", {}),
+               "market": run["checkpoint"].get("market"), "campaign_name": run["checkpoint"].get("campaign_name"),
+               "selection": run["checkpoint"].get("selection", []), "seller_source": run["checkpoint"].get("seller_source"),
+               "discovery_terms": run["checkpoint"].get("discovery_terms"),
                "note": "Human acceptance is not buying intent. Findings are model assessments requiring review."}
     if format == "json":
         return json.dumps(payload, ensure_ascii=False, indent=2)
@@ -24,13 +27,27 @@ def export_run(run: dict, format: str, accepted_only: bool = False) -> str | byt
                  "Human acceptance is not buying intent. Unknown means unverified, not a failed criterion."]
         if run["checkpoint"].get("termination"):
             notes.append("Run stopped by user; completed research retained.")
-        return workbook_bytes([
+        sheets = [
             ("Shortlist", notes, HEADERS, summary, [24, 30, 25, 45, 50, 35, 22, 35, 40, 40]),
             ("Evidence", ["Evidence and open questions", "Exact saved passages; hypotheses are unverified. Dates are UTC."],
              ["Company", "Type", "Criterion", "Assessment", "Explanation / claim", "Source passage / assumptions",
               "Source URL", "Retrieved (UTC)", "Published (UTC)", "Domain"], details,
              [24, 22, 45, 20, 55, 65, 45, 24, 24, 30]),
-        ])
+        ]
+        market = run["checkpoint"].get("market")
+        if market:
+            rows = [[c["domain"], "Potential competitor", c.get("excerpt", "")[:240],
+                     "Search observation; offer similarity unverified", c["url"], c["discovered_at"]]
+                    for c in market["competitors"]]
+            rows.extend([c["name"], "Campaign hypothesis", c["target"][:240], c["rationale"][:240], "", ""]
+                        for c in market["campaigns"])
+            sheets.append(("Market research", ["Market observations and campaign hypotheses",
+                "Search clues are unverified; campaign suggestions need your judgment.",
+                "Excerpts shortened for readability. Complete passages and suggestions are in JSON.",
+                "Selected direction: " + (run["checkpoint"].get("campaign_name") or "Custom target")],
+                ["Company / campaign", "Type", "Excerpt / target", "Context / rationale", "Source URL", "Observed (UTC)"],
+                rows, [28, 25, 55, 55, 45, 24]))
+        return workbook_bytes(sheets)
     if format != "csv":
         raise ValueError("Choose Excel, CSV or JSON")
     buffer = io.StringIO(newline="")

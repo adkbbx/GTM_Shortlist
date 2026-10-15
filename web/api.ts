@@ -137,7 +137,7 @@ export const api = {
   },
   async run(id: string) { return parseRun(await request(`/api/runs/${encodeURIComponent(id)}`)); },
   async start(seller_url: string, request_key: string) {
-    return parseRun(await request('/api/sellers', { seller_url, request_key }));
+    return parseRun(await request('/api/sellers', { seller_url, request_key, experience_version: 2 }));
   },
   async confirm(id: string, input: Confirmation) {
     return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/confirm`, input));

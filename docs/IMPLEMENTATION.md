@@ -102,6 +102,7 @@ The unattended window ended on 14 October and its heartbeat is paused. Subsequen
 - [x] Verify public Render API/auth setup and responsive sign-in screen; handle temporary HTML or malformed API responses with a readable retry message. Worker, real signup and email remain unverified.
 - [x] Provide customer-readable Excel Shortlist/Evidence sheets and plain CSV columns; keep complete technical JSON, owner scoping and free accepted-only downloads.
 - [ ] Separate observable target criteria from pain-point hypotheses; improve candidate selection before detailed research.
+- [x] Add versioned, bounded market discovery and editable campaign suggestions before confirmation, frozen campaign/search context, owner-scoped exports and restart/stop/phone/laptop checks. Full verified competitor comparisons, semantic intent ranking and people/email stages remain in docs/agent-experience.md.
 
 The user manually requested Continue after the 18:00 cutoff and then explicitly extended work until 21:30 JST on 14 October 2026. Continue small verified steps until that cutoff or weekly exhaustion, checking ordinary usage between steps. The same heartbeat now has a single 21:30 cutoff/handoff check; no rolling five-hour retry is scheduled. Preserve unfinished acceptance gates. The original scheduled window below is historical.
 

@@ -47,6 +47,13 @@ def test_both_search_adapters_retain_bounded_exact_excerpts():
     assert [c.excerpt for c in candidates] == ["Exact Tavily passage.", "Exact SerpApi passage.", "x" * 3000]
 
 
+def test_discussion_posts_are_not_mistaken_for_companies_but_company_homepage_is_allowed():
+    hits = [{"url": "https://www.reddit.com/r/ProductMarketing/comments/example/", "title": "An ICP discussion"},
+            {"url": "https://www.reddit.com/", "title": "Reddit company homepage"}]
+    results = candidates_from_results(hits, "fixture", "fixture", "https://seller.example/")
+    assert [c.url for c in results] == ["https://www.reddit.com/"]
+
+
 def test_worker_researches_ranked_candidates_and_preserves_selection(tmp_path):
     import hashlib
 

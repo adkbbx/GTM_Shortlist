@@ -1,10 +1,17 @@
 """Auditable discovery prioritization. Search clues never establish buying intent."""
 import re
 from datetime import datetime
+from urllib.parse import urlsplit
 
 from pydantic import Field
 
 from shortlist.domain import Candidate, Profile, Value
+
+
+def discussion_page(url: str) -> bool:
+    parsed = urlsplit(url)
+    host = parsed.hostname or ""
+    return (host == "reddit.com" or host.endswith(".reddit.com")) and parsed.path.startswith(("/r/", "/comments/", "/user/"))
 
 STOP = frozenset({
     "a", "an", "and", "are", "as", "at", "be", "business", "businesses", "by", "company", "companies",

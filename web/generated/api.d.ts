@@ -300,6 +300,32 @@ export interface components {
             /** Request Key */
             request_key: string;
         };
+        /** Campaign */
+        Campaign: {
+            /** Name */
+            name: string;
+            /** Target */
+            target: string;
+            /** Rationale */
+            rationale: string;
+            /** Criteria */
+            criteria: components["schemas"]["Criterion-Output"][];
+            /**
+             * Search Terms
+             * @default
+             */
+            search_terms: string;
+            /**
+             * Hypotheses
+             * @default []
+             */
+            hypotheses: string[];
+            /**
+             * Signals To Check
+             * @default []
+             */
+            signals_to_check: string[];
+        };
         /** Candidate */
         Candidate: {
             /** Domain */
@@ -336,6 +362,10 @@ export interface components {
              * @default []
              */
             exclusions: string[];
+            /** Campaign Name */
+            campaign_name?: string | null;
+            /** Discovery Terms */
+            discovery_terms?: string | null;
             /**
              * Company Limit
              * @default 3
@@ -479,6 +509,29 @@ export interface components {
              */
             mode: "local";
         };
+        /** MarketResearch */
+        MarketResearch: {
+            /**
+             * Competitors
+             * @default []
+             */
+            competitors: components["schemas"]["Candidate"][];
+            /**
+             * Campaigns
+             * @default []
+             */
+            campaigns: components["schemas"]["Campaign"][];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "saved" | "partial";
+            /**
+             * Issues
+             * @default []
+             */
+            issues: string[];
+        };
         /** Observed */
         Observed: {
             /**
@@ -565,7 +618,7 @@ export interface components {
              * Phase
              * @enum {string}
              */
-            phase: "seller" | "confirmation" | "discovery" | "research" | "review";
+            phase: "seller" | "market" | "campaigns" | "confirmation" | "discovery" | "research" | "review";
             /** Label */
             label: string;
             /**
@@ -739,6 +792,18 @@ export interface components {
             draft_exclusions?: string[];
             /** Selection */
             selection?: components["schemas"]["Selection"][];
+            market?: components["schemas"]["MarketResearch"] | null;
+            /** Campaign Name */
+            campaign_name?: string | null;
+            /** Discovery Terms */
+            discovery_terms?: string | null;
+            seller_source?: components["schemas"]["Source"] | null;
+            /**
+             * Experience Version
+             * @default 1
+             * @enum {integer}
+             */
+            experience_version: 1 | 2;
             /** Termination */
             termination?: "user_stopped" | null;
         };
@@ -794,6 +859,12 @@ export interface components {
             seller_url: string;
             /** Request Key */
             request_key: string;
+            /**
+             * Experience Version
+             * @default 1
+             * @enum {integer}
+             */
+            experience_version: 1 | 2;
         };
         /** ServiceView */
         ServiceView: {

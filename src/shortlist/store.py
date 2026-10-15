@@ -366,10 +366,15 @@ class Store:
                 "SELECT id FROM runs WHERE status IN ('queued','running') AND lease_until<=? "
                 f"ORDER BY created_at,{self.order_key} LIMIT 50", (time.time(),))]
 
-    def create_draft(self, seller_url: str | None, request_key: str, *, company_name: str | None = None) -> str:
+    def create_draft(self, seller_url: str | None, request_key: str, *, company_name: str | None = None,
+                     experience_version: int = 1) -> str:
+        if experience_version not in (1, 2):
+            raise ValueError("Unsupported research experience")
         if bool(seller_url) == bool(company_name):
             raise ValueError("Provide either a website or a company name")
         digest = hashlib.sha256((seller_url if seller_url else "company:" + company_name.casefold()).encode()).hexdigest()
+        if experience_version == 2:
+            digest = hashlib.sha256((digest + ":experience-2").encode()).hexdigest()
         with self.connection() as db:
             self.begin(db)
             row = db.execute("SELECT id,payload_hash,deleted_at FROM runs WHERE request_key=?", (request_key,)).fetchone()
@@ -384,7 +389,8 @@ class Store:
             now = utcnow().isoformat()
             db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,checkpoint,created_at,updated_at) "
                        "VALUES (?,?,?,?,?,?,?,?,?)", (run_id, request_key, digest, "{}", "queued", "seller" if seller_url else "identity",
-                       json.dumps({"seller_url": seller_url, **({"company_name": company_name} if company_name else {})}), now, now))
+                       json.dumps({"seller_url": seller_url, "experience_version": experience_version,
+                                   **({"company_name": company_name} if company_name else {})}), now, now))
             return run_id
 
     def confirm_website(self, run_id: str, website_url: str):
@@ -439,7 +445,8 @@ class Store:
                        (identity, "confirmation", "Saved offer copied; review before starting a new batch", "waiting", now))
             return identity
 
-    def confirm_draft(self, run_id: str, profile: Profile, company_limit: int = 3):
+    def confirm_draft(self, run_id: str, profile: Profile, company_limit: int = 3, campaign_name: str | None = None,
+                      discovery_terms: str | None = None):
         with self.connection() as db:
             self.begin(db)
             row = db.execute("SELECT * FROM runs WHERE id=? AND deleted_at IS NULL", (run_id,)).fetchone()
@@ -449,13 +456,21 @@ class Store:
             payload = profile.model_dump(mode="json", exclude={"id", "confirmed_at"})
             if existing:
                 previous = Profile.model_validate(existing).model_dump(mode="json", exclude={"id", "confirmed_at"})
-                if previous != payload or json.loads(row["checkpoint"]).get("company_limit", 3) != company_limit:
+                saved_checkpoint = json.loads(row["checkpoint"])
+                if previous != payload or saved_checkpoint.get("company_limit", 3) != company_limit or \
+                        saved_checkpoint.get("campaign_name") != campaign_name or saved_checkpoint.get("discovery_terms") != discovery_terms:
                     raise Conflict("Target was already confirmed; start a new run to change it")
                 return
             checkpoint = json.loads(row["checkpoint"])
             if row["status"] != "awaiting_confirmation" or checkpoint["seller_url"] != profile.seller_url:
                 raise Conflict("Seller draft is not ready for confirmation")
             checkpoint["company_limit"] = company_limit
+            if discovery_terms is not None:
+                checkpoint["discovery_terms"] = discovery_terms
+            if campaign_name is not None:
+                if campaign_name not in {c["name"] for c in checkpoint.get("market", {}).get("campaigns", [])}:
+                    raise Conflict("Choose a campaign from this run or define a custom target")
+                checkpoint["campaign_name"] = campaign_name
             if self.reserve_batch(db, run_id, company_limit):
                 checkpoint["credit_policy"] = "company-v1"
             db.execute("UPDATE runs SET profile=?,checkpoint=?,stage='discovery',status='queued',error=NULL,updated_at=? WHERE id=?",

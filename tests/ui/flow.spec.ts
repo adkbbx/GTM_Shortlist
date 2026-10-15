@@ -20,6 +20,37 @@ async function capture(page: Page, path: string) {
   await page.screenshot({ path, fullPage: true });
 }
 
+test('market observations and editable campaigns persist into confirmed targeting', async ({ page }, info) => {
+  await page.goto('/');
+  await page.getByLabel('Company name or website', { exact: true }).fill('https://market-seller.example/');
+  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await expect(page.getByRole('heading', { name: 'Choose a campaign direction' })).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('.competitor-list li')).toHaveCount(15);
+  await expect(page.locator('.campaign-choice')).toHaveCount(6);
+  await page.getByText('Inspect the saved company page', { exact: true }).click();
+  await expect(page.locator('.seller-source blockquote')).toContainText('TEST FIXTURE');
+  await page.getByRole('button', { name: 'Apply Labelled campaign 3', exact: true }).press('Enter');
+  await expect(page.getByLabel('Who should we look for?')).toHaveValue('Private AI B2B SaaS startups in test segment 3');
+  await expect(page.getByLabel('Search keywords', { exact: true })).toHaveValue('AI business software test segment 3');
+  await page.getByLabel('Search keywords', { exact: true }).fill('AI business software edited search segment');
+  await page.getByLabel('Who should we look for?').fill('Private AI B2B SaaS startups in edited test segment');
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${info.project.name}-market-campaigns.png`);
+  const identity = new URL(page.url()).searchParams.get('run');
+  const before = await (await page.request.get(`/api/runs/${identity}`)).json();
+  expect(before.profile).toBeNull();
+  expect(before.records).toHaveLength(0);
+  await page.getByRole('button', { name: 'Confirm target and discover' }).click();
+  await expect(page.getByRole('heading', { name: '2 companies researched' })).toBeVisible({ timeout: 15000 });
+  await page.reload();
+  const saved = await (await page.request.get(`/api/runs/${identity}`)).json();
+  expect(saved.campaign_name).toBe('Labelled campaign 3');
+  expect(saved.profile.target).toBe('Private AI B2B SaaS startups in edited test segment');
+  expect(saved.discovery_terms).toBe('AI business software edited search segment');
+  expect(saved.market.campaigns).toHaveLength(6);
+  expect(saved.attempts.filter((a: { kind: string }) => a.kind === 'search')).toHaveLength(3);
+});
+
 test('research activity follows the real worker and respects reduced motion', async ({ page }, info) => {
   const fixture = await page.request.post('/__fixture_held_run');
   const { id } = await fixture.json();
@@ -230,7 +261,7 @@ test(`company name ${company} waits for website choice, retries and survives rel
   await expect(page.getByLabel('What do you sell?')).not.toHaveValue('');
   const saved = await (await page.request.get(`/api/runs/${run.id}`)).json();
   expect(saved.seller_url).toBe('https://example-1.com/');
-  expect(saved.attempts.filter((attempt: { kind: string }) => attempt.kind === 'search')).toHaveLength(1);
+  expect(saved.attempts.filter((attempt: { kind: string }) => attempt.kind === 'search')).toHaveLength(2);
   expect(saved.profile).toBeNull();
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible();

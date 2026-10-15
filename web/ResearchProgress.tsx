@@ -14,7 +14,7 @@ function ResearchActivity({ run, connected }: { run: Run; connected: boolean }) 
   return <div className={`agent-activity ${working ? 'is-working' : ''}`}>
     <div className="agent-paper" aria-hidden="true"><svg viewBox="0 0 80 96" fill="none"><path d="M14 4h36l16 16v72H14V4Z" stroke="currentColor" strokeWidth="1.5"/><path d="M50 4v17h16M25 34h30M25 44h25M25 54h30M25 64h19M25 74h26" stroke="currentColor" strokeWidth="1.5"/></svg><span className="agent-scan" /></div>
     <div className="agent-observation"><p className="agent-domain">{domain ?? 'Your company research'}</p>
-      <p>{working ? run.stage === 'seller' || run.stage === 'identity' ? 'Reading your company before proposing a target.' : run.stage === 'discovery' ? 'Looking for companies that match your confirmed target.' : 'Reading sources and checking each assessment.' : !connected ? 'Connection interrupted. Your saved work is safe.' : !run.progress.worker_online ? 'Saved and waiting for an available worker.' : 'Your saved research is ready to continue.'}</p>
+      <p>{working ? run.stage === 'seller' || run.stage === 'identity' ? 'Reading your company before proposing a target.' : run.stage === 'market' ? 'Exploring companies with a similar offer.' : run.stage === 'campaigns' ? 'Turning your offer and market observations into campaign hypotheses.' : run.stage === 'discovery' ? 'Looking for companies that match your confirmed target.' : 'Reading sources and checking each assessment.' : !connected ? 'Connection interrupted. Your saved work is safe.' : !run.progress.worker_online ? 'Saved and waiting for an available worker.' : 'Your saved research is ready to continue.'}</p>
       {offer && <details className="agent-offer"><summary>Your offer summary</summary><p>{offer}</p></details>}
       <span className="agent-state"><i aria-hidden="true" />{working ? 'Worker active' : !connected ? 'Reconnecting' : !run.progress.worker_online ? 'Worker unavailable' : 'Saved'}</span>
     </div>
@@ -45,13 +45,17 @@ export function ResearchProgress({ run, connected = true }: { run: Run; connecte
   const visible = pending ? checkpoints.slice(-6) : checkpoints;
   const phases = [
     { label: 'Understand offer', complete: !!run.draft || !!run.profile, active: run.status === 'running' && ['seller', 'identity'].includes(run.stage) },
+    ...(run.experience_version === 2 ? [
+      { label: 'Explore market', complete: !!run.market?.competitors.length, active: run.status === 'running' && run.stage === 'market' },
+      { label: 'Propose campaigns', complete: !!run.market?.campaigns.length, active: run.status === 'running' && run.stage === 'campaigns' },
+    ] : []),
     { label: 'Confirm target', complete: !!run.profile, active: run.status === 'awaiting_confirmation' },
     { label: 'Discover companies', complete: progress.candidates > 0, active: run.status === 'running' && run.stage === 'discovery' },
     { label: 'Research evidence', complete: run.stage === 'review', active: run.status === 'running' && run.stage === 'research' },
   ];
   const heading = pending ? !connected ? 'Reconnecting to your research' : !progress.worker_online ? 'Research is waiting for a worker'
     : run.status === 'queued' ? 'Your research is next in line'
-      : run.stage === 'identity' ? 'Finding your company website' : run.stage === 'seller' ? 'Understanding your company' : 'Building your shortlist'
+      : run.stage === 'identity' ? 'Finding your company website' : run.stage === 'seller' ? 'Understanding your company' : run.stage === 'market' ? 'Exploring your market' : run.stage === 'campaigns' ? 'Defining campaign directions' : 'Building your shortlist'
     : 'Research checkpoints';
   const content = <>
     {pending && <ResearchActivity run={run} connected={connected} />}

@@ -11,6 +11,7 @@ import { ResearchPreview } from './ResearchPreview';
 import { AuthGate } from './AuthGate';
 import { CreditActivity } from './CreditActivity';
 import { ResearchStop } from './ResearchStop';
+import { MarketOverview } from './MarketOverview';
 import { LocalSearchSetup } from './LocalSearchSetup';
 import { WebsiteChoice } from './WebsiteChoice';
 import './styles.css';
@@ -31,16 +32,23 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [companyLimit, setCompanyLimit] = useState(3);
+  const [campaignName, setCampaignName] = useState<string | null>(run.campaign_name ?? null);
+  const [discoveryTerms, setDiscoveryTerms] = useState(run.discovery_terms ?? run.draft?.target.slice(0, 300) ?? '');
   const available = run.legacy_credit_exempt ? 3 : wallet?.available ?? 3;
   useEffect(() => { if (wallet?.mode === 'hosted' && available > 0) setCompanyLimit(old => Math.min(old, available)); }, [available, wallet?.mode]);
   const submit = async (event: FormEvent) => {
     event.preventDefault(); setSaving(true); setError('');
     try {
       onSaved(await api.confirm(run.id, { offer, target, criteria, company_limit: companyLimit,
-        exclusions: exclusions.split('\n').map(s => s.trim()).filter(Boolean) }));
+        exclusions: exclusions.split('\n').map(s => s.trim()).filter(Boolean), campaign_name: campaignName,
+        discovery_terms: campaignName ? discoveryTerms : null }));
     } catch (e) { setError(describeError(e)); } finally { setSaving(false); }
   };
   return <section className="sheet confirmation" aria-labelledby="confirm-heading">
+    <MarketOverview run={run} selected={campaignName} onChoose={campaign => {
+      setCampaignName(campaign.name); setTarget(campaign.target); setCriteria(campaign.criteria);
+      setDiscoveryTerms(campaign.search_terms || run.draft?.target.slice(0, 300) || '');
+    }} />
     <div className="sheet-heading"><h2 id="confirm-heading">Confirm what a good fit means</h2><span className="step-label">Your target</span></div>
     <p className="intro">Edit the offer and criteria before discovery. This version stays attached to the research it produces.</p>
     {run.reused_offer && <p className="notice">Copied from your saved offer. Review it and choose the maximum cost before starting. New research may return companies from earlier batches.</p>}
@@ -51,6 +59,7 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
       <textarea id="offer" required minLength={10} maxLength={4000} rows={4} value={offer} onChange={e => setOffer(e.target.value)} />
       <label htmlFor="target">Who should we look for?</label>
       <textarea id="target" required minLength={5} maxLength={2000} rows={2} value={target} onChange={e => setTarget(e.target.value)} />
+      {campaignName && <><label htmlFor="discovery-terms">Search keywords</label><input id="discovery-terms" required minLength={5} maxLength={300} value={discoveryTerms} onChange={e => setDiscoveryTerms(e.target.value)} aria-describedby="discovery-help" /><p id="discovery-help" className="hint">Observable company terms, such as industry, product and public announcements. Private performance assumptions belong in hypotheses.</p></>}
       <fieldset><legend>Fit criteria</legend><p className="hint">Required criteria must have evidence. An unknown stays visible as a question to verify.</p>
         {criteria.map((criterion, index) => <div className="criterion-input" key={criterion.id}>
           <label htmlFor={`criterion-${index}`}>Criterion {index + 1}</label>

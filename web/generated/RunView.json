@@ -29,6 +29,77 @@
       "title": "AttemptView",
       "type": "object"
     },
+    "Campaign": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 100,
+          "minLength": 3,
+          "title": "Name",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 1000,
+          "minLength": 5,
+          "title": "Target",
+          "type": "string"
+        },
+        "rationale": {
+          "maxLength": 1000,
+          "minLength": 10,
+          "title": "Rationale",
+          "type": "string"
+        },
+        "criteria": {
+          "items": {
+            "$ref": "#/$defs/Criterion"
+          },
+          "maxItems": 6,
+          "minItems": 1,
+          "title": "Criteria",
+          "type": "array"
+        },
+        "search_terms": {
+          "default": "",
+          "maxLength": 300,
+          "title": "Search Terms",
+          "type": "string"
+        },
+        "hypotheses": {
+          "default": [],
+          "items": {
+            "maxLength": 500,
+            "minLength": 3,
+            "type": "string"
+          },
+          "maxItems": 6,
+          "title": "Hypotheses",
+          "type": "array"
+        },
+        "signals_to_check": {
+          "default": [],
+          "items": {
+            "maxLength": 200,
+            "minLength": 3,
+            "type": "string"
+          },
+          "maxItems": 4,
+          "title": "Signals To Check",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "target",
+        "rationale",
+        "criteria",
+        "search_terms",
+        "hypotheses",
+        "signals_to_check"
+      ],
+      "title": "Campaign",
+      "type": "object"
+    },
     "Candidate": {
       "additionalProperties": false,
       "properties": {
@@ -217,6 +288,54 @@
         "assumptions"
       ],
       "title": "Hypothesis",
+      "type": "object"
+    },
+    "MarketResearch": {
+      "additionalProperties": false,
+      "properties": {
+        "competitors": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Candidate"
+          },
+          "maxItems": 15,
+          "title": "Competitors",
+          "type": "array"
+        },
+        "campaigns": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Campaign"
+          },
+          "maxItems": 6,
+          "title": "Campaigns",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "saved",
+            "partial"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "issues": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 8,
+          "title": "Issues",
+          "type": "array"
+        }
+      },
+      "required": [
+        "competitors",
+        "campaigns",
+        "status",
+        "issues"
+      ],
+      "title": "MarketResearch",
       "type": "object"
     },
     "Observed": {
@@ -444,6 +563,8 @@
         "phase": {
           "enum": [
             "seller",
+            "market",
+            "campaigns",
             "confirmation",
             "discovery",
             "research",
@@ -1141,6 +1262,61 @@
       "maxItems": 12,
       "title": "Selection",
       "type": "array"
+    },
+    "market": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MarketResearch"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "campaign_name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Campaign Name"
+    },
+    "discovery_terms": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Discovery Terms"
+    },
+    "seller_source": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Source"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "experience_version": {
+      "default": 1,
+      "enum": [
+        1,
+        2
+      ],
+      "title": "Experience Version",
+      "type": "integer"
     },
     "termination": {
       "anyOf": [

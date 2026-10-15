@@ -782,6 +782,77 @@
         ],
         "title": "BookingInput"
       },
+      "Campaign": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 3,
+            "title": "Name"
+          },
+          "target": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 5,
+            "title": "Target"
+          },
+          "rationale": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 10,
+            "title": "Rationale"
+          },
+          "criteria": {
+            "items": {
+              "$ref": "#/components/schemas/Criterion-Output"
+            },
+            "type": "array",
+            "maxItems": 6,
+            "minItems": 1,
+            "title": "Criteria"
+          },
+          "search_terms": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Search Terms",
+            "default": ""
+          },
+          "hypotheses": {
+            "items": {
+              "type": "string",
+              "maxLength": 500,
+              "minLength": 3
+            },
+            "type": "array",
+            "maxItems": 6,
+            "title": "Hypotheses",
+            "default": []
+          },
+          "signals_to_check": {
+            "items": {
+              "type": "string",
+              "maxLength": 200,
+              "minLength": 3
+            },
+            "type": "array",
+            "maxItems": 4,
+            "title": "Signals To Check",
+            "default": []
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "target",
+          "rationale",
+          "criteria",
+          "search_terms",
+          "hypotheses",
+          "signals_to_check"
+        ],
+        "title": "Campaign"
+      },
       "Candidate": {
         "properties": {
           "domain": {
@@ -862,6 +933,32 @@
             "maxItems": 12,
             "title": "Exclusions",
             "default": []
+          },
+          "campaign_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "minLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campaign Name"
+          },
+          "discovery_terms": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300,
+                "minLength": 5
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discovery Terms"
           },
           "company_limit": {
             "type": "integer",
@@ -1223,6 +1320,54 @@
         "type": "object",
         "title": "LocalAuth"
       },
+      "MarketResearch": {
+        "properties": {
+          "competitors": {
+            "items": {
+              "$ref": "#/components/schemas/Candidate"
+            },
+            "type": "array",
+            "maxItems": 15,
+            "title": "Competitors",
+            "default": []
+          },
+          "campaigns": {
+            "items": {
+              "$ref": "#/components/schemas/Campaign"
+            },
+            "type": "array",
+            "maxItems": 6,
+            "title": "Campaigns",
+            "default": []
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "saved",
+              "partial"
+            ],
+            "title": "Status"
+          },
+          "issues": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Issues",
+            "default": []
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "competitors",
+          "campaigns",
+          "status",
+          "issues"
+        ],
+        "title": "MarketResearch"
+      },
       "Observed": {
         "properties": {
           "status": {
@@ -1448,6 +1593,8 @@
             "type": "string",
             "enum": [
               "seller",
+              "market",
+              "campaigns",
               "confirmation",
               "discovery",
               "research",
@@ -1926,6 +2073,57 @@
             "maxItems": 12,
             "title": "Selection"
           },
+          "market": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MarketResearch"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "campaign_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Campaign Name"
+          },
+          "discovery_terms": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Discovery Terms"
+          },
+          "seller_source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Source"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "experience_version": {
+            "type": "integer",
+            "enum": [
+              1,
+              2
+            ],
+            "title": "Experience Version",
+            "default": 1
+          },
           "termination": {
             "anyOf": [
               {
@@ -2123,6 +2321,15 @@
             "maxLength": 100,
             "minLength": 8,
             "title": "Request Key"
+          },
+          "experience_version": {
+            "type": "integer",
+            "enum": [
+              1,
+              2
+            ],
+            "title": "Experience Version",
+            "default": 1
           }
         },
         "additionalProperties": false,

@@ -151,3 +151,24 @@ def test_csv_formula_cells_are_escaped(name):
         "review": None}]}
     rows = list(csv.reader(io.StringIO(export_run(run, "csv"))))
     assert rows[1][0].startswith("'")
+
+
+def test_market_context_has_readable_separate_sheet_and_complete_json(customer_run):
+    customer_run["checkpoint"].update(market={"competitors": [{"domain": "competitor.example",
+        "url": "https://competitor.example/", "excerpt": "x" * 400, "discovered_at": "2026-10-15T00:00:00+00:00"}],
+        "campaigns": [{"name": '=HYPERLINK("fixture")', "target": "Software companies",
+                       "rationale": "Unverified campaign hypothesis."}]}, campaign_name="Software founders")
+    before = deepcopy(customer_run)
+    package = workbook_xml(export_run(customer_run, "xlsx", accepted_only=True))
+    ns = {"s": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
+    assert [s.attrib["name"] for s in package["xl/workbook.xml"].findall("s:sheets/s:sheet", ns)] == ["Shortlist", "Evidence", "Market research"]
+    sheet = package["xl/worksheets/sheet3.xml"]
+    content = " ".join(sheet.itertext())
+    assert "Potential competitor" in content and "Campaign hypothesis" in content
+    assert "x" * 240 in content and "x" * 241 not in content
+    assert "Software founders" in content
+    assert not sheet.findall(".//s:f", ns)
+    observed = sheet.find(".//s:c[@r='F7']/s:v", ns)
+    assert observed is not None and float(observed.text) > 46000
+    assert json.loads(export_run(customer_run, "json"))["market"]["competitors"][0]["excerpt"] == "x" * 400
+    assert customer_run == before

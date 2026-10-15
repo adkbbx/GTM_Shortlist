@@ -26,7 +26,7 @@ class FixtureSearch:
                 query=query,
                 provider=self.name,
             )
-            for index in (1, 2)
+            for index in (range(1, 17) if 'similar companies official websites' in query else (1, 2))
         ]
 
 
@@ -39,14 +39,15 @@ def fixture_fetch(url, expected_domain=None):
     )
     if expected_domain == "example-1.com":
         text += " Example Labs is headquartered in Canada."
+    company_domain = expected_domain or domain_of(url)
     links = (
-        (f"https://{expected_domain}/about", f"https://{expected_domain}/pricing")
-        if expected_domain and url.endswith("/")
+        (f"https://{company_domain}/about", f"https://{company_domain}/pricing")
+        if url.endswith("/")
         else ()
     )
     return Source(
         url=url,
-        company_domain=expected_domain or domain_of(url),
+        company_domain=company_domain,
         title="Labelled test source",
         text=text,
         content_hash=hashlib.sha256(text.encode()).hexdigest(),
@@ -67,6 +68,14 @@ class FixtureModel:
             ],
             unknowns=[],
         )
+
+    def market(self, draft, candidates):
+        from shortlist.market import Campaign, CampaignPlan
+        return CampaignPlan(campaigns=tuple(Campaign(name=f"Labelled campaign {i}",
+            target=f"Private AI B2B SaaS startups in test segment {i}",
+            rationale="TEST FIXTURE campaign hypothesis, not an observed market fact.",
+            criteria=tuple(draft.criteria), search_terms=f"AI business software test segment {i}",
+            signals_to_check=("Hiring a sales team",)) for i in range(1, 7)))
 
     def verify(self, profile, record):
         time.sleep(0.2)

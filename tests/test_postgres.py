@@ -98,6 +98,31 @@ def test_isolation_idempotency_and_no_ownerless_access(owners):
         assert db.execute("SELECT current_setting('shortlist.workspace_id')").fetchone()[0] == str(b.workspace_id)
 
 
+def test_market_stages_campaign_and_search_keywords_are_owner_scoped(owners):
+    from scripts.ui_test_providers import FixtureModel, FixtureSearch, fixture_fetch
+    from shortlist.credits import CreditWallet
+
+    a, b, worker, profile = owners
+    identity = a.create_draft(profile.seller_url, "hosted-market-v2", experience_version=2)
+    scoped = PostgresStore(worker, a.workspace_id, worker=True)
+    execute_run(scoped, Settings(), identity, search=FixtureSearch(), model=FixtureModel(), fetch=fixture_fetch)
+    saved = a.get_run(identity)
+    assert saved["status"] == "awaiting_confirmation"
+    assert len(saved["checkpoint"]["market"]["competitors"]) == 15
+    assert len(saved["checkpoint"]["market"]["campaigns"]) == 6
+    assert CreditWallet(a).balance().available == 3
+    with pytest.raises(KeyError):
+        b.get_run(identity)
+    a.confirm_draft(identity, profile, 3, "Labelled campaign 1", "AI business software hiring")
+    assert a.get_run(identity)["checkpoint"]["discovery_terms"] == "AI business software hiring"
+    assert CreditWallet(a).balance().reserved == 3
+    assert CreditWallet(b).balance().available == 3
+    with pytest.raises(Conflict):
+        a.confirm_draft(identity, profile, 3, "Labelled campaign 1", "Different keyword targeting")
+    with pytest.raises(KeyError):
+        b.confirm_draft(identity, profile, 3, "Labelled campaign 1", "AI business software hiring")
+
+
 def test_company_lookup_preserves_owner_profile_grant_and_no_company_debit(owners):
     a, b, worker, _ = owners
     scoped = PostgresStore(worker, a.workspace_id, worker=True)

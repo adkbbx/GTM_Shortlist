@@ -15,6 +15,12 @@ from shortlist.domain import (
 from shortlist.fetch import FetchError, canonical_url, domain_of, fetch_page
 from shortlist.journal import call_step
 from shortlist.local_credentials import CredentialUnavailable, apply_local_credentials
+from shortlist.market import (
+    MarketResearch,
+    competitor_query,
+    market_candidates,
+    read_campaign_plan,
+)
 from shortlist.progress import ProgressUpdate, step_label
 from shortlist.providers import (
     Gemma,
@@ -47,7 +53,8 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
     model = model or Gemma(settings)
 
     def call(kind: str, provider: str, operation: str, function, inputs: dict, decode):
-        phase = "seller" if operation.startswith("seller:") else "discovery" if kind == "search" else "research"
+        phase = ("market" if operation == "market:search" else "campaigns" if operation == "market:campaigns"
+                 else "seller" if operation.startswith("seller:") else "discovery" if kind == "search" else "research")
         label = step_label(kind, operation)
         dispatched = False
 
@@ -85,8 +92,55 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
         store.cache_source(run_id, fence, url, source)
         return source
 
+    def explore_market(draft):
+        if "market" in checkpoint:
+            return
+        store.checkpoint(run_id, fence, "campaigns" if "market_candidates" in checkpoint else "market", checkpoint)
+        if "market_candidates" not in checkpoint:
+            query = competitor_query(draft.offer, checkpoint["seller_url"])
+
+            def decode_market(values):
+                try:
+                    return market_candidates(values, checkpoint["seller_url"])
+                except ValueError as exc:
+                    raise ProviderError("Competitor search returned invalid website identities") from exc
+            try:
+                candidates = call("search", search.name, "market:search",
+                                  lambda: decode_market(search.search(query, checkpoint["seller_url"])),
+                                  {"query": query, "seller_url": checkpoint["seller_url"], "market_policy": 1}, decode_market)
+                checkpoint["market_candidates"] = [c.model_dump(mode="json") for c in candidates]
+            except (ProviderError, BudgetExceeded):
+                checkpoint["market_candidates"] = []
+                checkpoint["market_search_issue"] = "Competitor search could not finish. You can still confirm your target."
+            store.checkpoint(run_id, fence, "market", checkpoint)
+        candidates = [Candidate.model_validate(c) for c in checkpoint["market_candidates"]]
+        if "market_plan" not in checkpoint and "market_plan_issue" not in checkpoint:
+            store.checkpoint(run_id, fence, "campaigns", checkpoint)
+            try:
+                plan = call("model", model.name, "market:campaigns", lambda: model.market(draft, candidates),
+                            {"draft": draft.model_dump(mode="json"), "candidates": checkpoint["market_candidates"],
+                             "model": settings.gemma_model, "endpoint": settings.gemma_base_url, "campaign_policy": 2},
+                            read_campaign_plan)
+                checkpoint["market_plan"] = plan.model_dump(mode="json")
+            except (ProviderError, BudgetExceeded) as exc:
+                checkpoint["market_plan_issue"] = "Campaign suggestions are unavailable. Define your target below to continue."
+                if isinstance(exc, ModelOutputError):
+                    checkpoint["market_model_output"] = exc.diagnostic()
+            store.checkpoint(run_id, fence, "campaigns", checkpoint)
+        plan = read_campaign_plan(checkpoint.get("market_plan", {"campaigns": []}))
+        campaigns = plan.campaigns
+        issues = [checkpoint[key] for key in ("market_search_issue", "market_plan_issue") if key in checkpoint]
+        issues.extend(plan.issues)
+        if not candidates and "market_search_issue" not in checkpoint:
+            issues.append("No potential competitors were found in this search.")
+        if not campaigns and "market_plan_issue" not in checkpoint:
+            issues.append("No distinct campaigns were proposed. Define your target below.")
+        checkpoint["market"] = MarketResearch(competitors=tuple(candidates), campaigns=campaigns,
+            status="partial" if issues else "saved", issues=tuple(issues)).model_dump(mode="json")
+        store.checkpoint(run_id, fence, "campaigns", checkpoint)
+
     try:
-        store.event(run_id, fence, ProgressUpdate(phase="seller" if run["stage"] in ("seller", "identity") else "discovery",
+        store.event(run_id, fence, ProgressUpdate(phase={"seller": "seller", "identity": "seller", "market": "market", "campaigns": "campaigns"}.get(run["stage"], "discovery"),
                                                    label="Research worker picked up your saved run", state="succeeded"))
         if run["stage"] == "identity":
             error = None
@@ -115,7 +169,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
             store.event(run_id, fence, ProgressUpdate(phase="seller", label="Choose the website for your company", state="waiting"))
             store.checkpoint(run_id, fence, "website", checkpoint, "awaiting_confirmation", error)
             return True
-        if run["stage"] == "seller":
+        if run["stage"] in ("seller", "market", "campaigns"):
             error = None
             try:
                 if "seller_source" not in checkpoint:
@@ -123,10 +177,16 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                     checkpoint["seller_source"] = source.model_dump(mode="json")
                     store.checkpoint(run_id, fence, "seller", checkpoint)
                 source = Source.model_validate(checkpoint["seller_source"])
-                draft = call("model", model.name, "seller:model", lambda: model.seller(source),
-                             {"source": source.model_dump(mode="json"), "model": settings.gemma_model,
-                              "endpoint": settings.gemma_base_url}, SellerDraft.model_validate)
-                checkpoint["draft"] = draft.model_dump(mode="json")
+                if "draft" in checkpoint:
+                    draft = SellerDraft.model_validate(checkpoint["draft"])
+                else:
+                    draft = call("model", model.name, "seller:model", lambda: model.seller(source),
+                                 {"source": source.model_dump(mode="json"), "model": settings.gemma_model,
+                                  "endpoint": settings.gemma_base_url}, SellerDraft.model_validate)
+                    checkpoint["draft"] = draft.model_dump(mode="json")
+                    store.checkpoint(run_id, fence, "seller", checkpoint)
+                if checkpoint.get("experience_version", 1) == 2:
+                    explore_market(draft)
             except (FetchError, ProviderError) as exc:
                 if isinstance(exc, ModelOutputError):
                     checkpoint["seller_model_output"] = exc.diagnostic()
@@ -139,7 +199,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
         if "candidates" not in checkpoint:
             discovered = checkpoint.get("discovered", [])
             completed_queries = checkpoint.get("completed_queries", [])
-            for index, query in enumerate(queries_for(profile)):
+            for index, query in enumerate(queries_for(profile, checkpoint.get("discovery_terms"))):
                 if index in completed_queries:
                     continue
                 candidates = call("search", search.name, f"search:{index}", lambda q=query: search.search(q, profile.seller_url),

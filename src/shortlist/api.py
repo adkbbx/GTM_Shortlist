@@ -15,7 +15,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from shortlist.auth import AuthenticationError, AuthUnavailable, verify_user
 from shortlist.config import Settings
-from shortlist.domain import Candidate, OperatorReview, Profile, Research, Review, Target
+from shortlist.domain import Candidate, OperatorReview, Profile, Research, Review, Source, Target
 from shortlist.export import export_run
 from shortlist.fetch import canonical_url
 from shortlist.local_credentials import (
@@ -24,6 +24,7 @@ from shortlist.local_credentials import (
     apply_local_credentials,
     validate_tavily_key,
 )
+from shortlist.market import MarketResearch
 from shortlist.progress import RunProgress
 from shortlist.providers import SellerDraft, company_name_matches
 from shortlist.selection import Selection
@@ -34,6 +35,7 @@ class SellerInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
     seller_url: str
     request_key: str = Field(min_length=8, max_length=100)
+    experience_version: Literal[1, 2] = 1
 
     @field_validator("seller_url")
     @classmethod
@@ -67,6 +69,8 @@ class LocalKeyInput(BaseModel):
 
 
 class Confirmation(Target):
+    campaign_name: str | None = Field(default=None, min_length=3, max_length=100)
+    discovery_terms: str | None = Field(default=None, min_length=5, max_length=300)
     company_limit: int = Field(default=3, ge=1, le=3)
 
 
@@ -150,6 +154,11 @@ class RunView(BaseModel):
     reused_offer: bool = False
     draft_exclusions: list[str] = Field(default_factory=list)
     selection: list[Selection] = Field(default_factory=list, max_length=12)
+    market: MarketResearch | None = None
+    campaign_name: str | None = None
+    discovery_terms: str | None = None
+    seller_source: Source | None = None
+    experience_version: Literal[1, 2] = 1
     termination: Literal["user_stopped"] | None = None
 
 
@@ -238,6 +247,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         error = run["error"]
         matches = [Candidate.model_validate(value) for value in run["checkpoint"].get("website_matches", [])]
         company_name = run["checkpoint"].get("company_name")
+        market = run["checkpoint"].get("market")
+        if market is None and "market_candidates" in run["checkpoint"]:
+            market = MarketResearch(competitors=tuple(Candidate.model_validate(c) for c in run["checkpoint"]["market_candidates"]),
+                                    status="partial")
         if company_name:
             matches = [match for match in matches if company_name_matches(match, company_name)]
             if run["stage"] == "website" and not matches and not error:
@@ -254,6 +267,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                        legacy_credit_exempt=run.get("legacy_credit_exempt", False),
                        reused_offer=run["checkpoint"].get("reused_offer", False),
                        selection=run["checkpoint"].get("selection", []),
+                       market=market, experience_version=run["checkpoint"].get("experience_version", 1),
+                       campaign_name=run["checkpoint"].get("campaign_name"),
+                       discovery_terms=run["checkpoint"].get("discovery_terms"),
+                       seller_source=run["checkpoint"].get("seller_source"),
                        termination=run["checkpoint"].get("termination"),
                        draft_exclusions=run["checkpoint"].get("draft_exclusions", []), progress=RunProgress(
                            worker_online=store.worker_online(), candidates=len(run["checkpoint"].get("candidates", [])),
@@ -336,7 +353,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.post("/api/sellers", response_model=RunView, status_code=201)
     def seller(input: SellerInput, store: owned):
         website = input.seller_url if input.seller_url.startswith("https://") else None
-        return view(store, store.create_draft(website, input.request_key, company_name=None if website else input.seller_url))
+        return view(store, store.create_draft(website, input.request_key, company_name=None if website else input.seller_url,
+                                            experience_version=input.experience_version))
 
     @app.post("/api/runs/{run_id}/website", response_model=RunView)
     def choose_website(run_id: str, input: WebsiteInput, store: owned):
@@ -369,8 +387,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         seller_url = run["profile"].get("seller_url") or run["checkpoint"]["seller_url"]
         if seller_url is None:
             raise Conflict("Choose your company website before confirming its offer")
-        profile = Profile(seller_url=seller_url, **input.model_dump(exclude={"company_limit"}))
-        store.confirm_draft(run_id, profile, input.company_limit)
+        profile = Profile(seller_url=seller_url, **input.model_dump(exclude={"company_limit", "campaign_name", "discovery_terms"}))
+        store.confirm_draft(run_id, profile, input.company_limit, input.campaign_name, input.discovery_terms)
         return view(store, run_id)
 
     @app.post("/api/runs/{run_id}/stop", response_model=RunView)

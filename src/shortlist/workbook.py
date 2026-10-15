@@ -59,6 +59,8 @@ def workbook_bytes(sheets):
                          '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"><alignment vertical="top"/></xf></cellXfs>'
                          '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>')
         for index, (_, notes, headers, records, widths) in enumerate(sheets, 1):
+            date_columns = {i for i, header in enumerate(headers, 1)
+                            if header in {"Retrieved (UTC)", "Published (UTC)", "Observed (UTC)"}}
             header_row = len(notes) + 2
             last_row = header_row + len(records)
             end = column(len(headers))
@@ -79,7 +81,7 @@ def workbook_bytes(sheets):
                         except ValueError:
                             pass
                     date = None
-                    if index == 2 and number > header_row and i in (8, 9) and value:
+                    if number > header_row and i in date_columns and value:
                         try:
                             date = datetime.fromisoformat(value)
                         except ValueError:
