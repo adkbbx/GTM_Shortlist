@@ -65,5 +65,7 @@ Current design gates are satisfied. This does not complete the full product or a
 ## Draft integration check, 17 October
 - [x] Fetch main, recheck PR#2 feedback and verify all five application CI jobs succeeded.
 - [x] Resolve the progress-log conflict with main on the design branch while preserving both histories and unchanged application files; preview-isolation tests and Ruff pass.
+- [x] Reproduce the later documentation-head CI failure and correct the phone branding test's hidden-banner locator; both domain-input browser cases and build pass.
+- [ ] Confirm all jobs pass for the corrected test commit; earlier application CI is distinct from current-head CI.
 
 This branch update does not merge into main or authorize deployment. Reconcile the separate hosted-journey branch before any combined release; its later product fixes are not included here.

@@ -300,7 +300,8 @@ test('seller field accepts domains and full HTTPS URLs', async ({ page }, info) 
     await page.goto('/');
     await page.getByLabel('Company name or website', { exact: true }).fill(value);
     await expect(page).toHaveTitle('GTM Shortlist');
-    await expect(page.getByRole('banner')).not.toContainText(/eygentic/i);
+    // Compact local navigation hides the desktop banner from the accessibility tree.
+    await expect(page.getByRole('banner', { includeHidden: true })).not.toContainText(/eygentic/i);
     if (value === 'eygentic.com') {
       await noOverflow(page);
       await capture(page, `.impeccable/review/${info.project.name}-bare-domain-input.png`);
