@@ -20,9 +20,10 @@ Started 16 October 2026 JST. Working branch: `codex/hosted-journey`, based on te
 ## 3. Release build and rollout
 
 - [x] Reconcile main's evidence-only commit with the design branch without losing either history. Merge3881fce retains both progress records; production main is unchanged. TypeScript/Vite production build passes.
-- [ ] Verify branch CI/build and prepare exact web/worker revision and rollback revision.
-- [ ] Roll out the reviewed revision to both existing Render services and observe Live state.
-- [ ] Check served assets, HTTPS, authenticated database access and worker freshness after rollout.
+- [x] Verify branch CI/build and prepare exact web/worker revision and rollback revision. All5 jobs passed for b5cec88 in [run38845013675](https://github.com/adkbbx/GTM_Shortlist/actions/runs/38845013675), including92 browser cases and container startup/restart smoke. Rollback48a7cdc.
+- [x] Roll out the reviewed revision to both existing Render services and observe Live state. On16October12:28JST, web dep-db8pjfmq1p3s738ul500 became Live in32.5s; worker dep-db8pjeui0phs738ih3k0 in26.7s. Both source b5cec88. Exact-commit deploy disables auto-deployment on each service; main remains unchanged.
+- [x] Check HTTPS, authenticated database access and worker freshness after rollout. At03:28:58UTC, read-only preflight passes. Browser reload serves the workshop UI, preserves the existing signed-in account/run and3 credits. Asset fingerprint comparison remains below.
+- [ ] Verify the small progress-label correction in production. Live inspection found the failed historical seller run incorrectly labelled "Offer draft saved". Recap now checks the saved offer rather than confirmation stage alone. Four targeted phone/laptop success/failure/reload checks pass, screenshots inspected, build/Ruff and5 preview/audit checks pass. The correction still needs commit/rollout verification.
 
 ## 4. Real accounts
 
@@ -63,5 +64,7 @@ Re-run preflight with `.venv/Scripts/python.exe scripts/audit_hosted.py`. It per
 ## Rollout plan
 
 Use the tested release-branch application tree for both existing Render services. Rollback revision is the currently Live `48a7cdc3b6263a184e58bba8e94d2ed7d6b785fc`. No new service, compute upgrade, provider change or migration is required by the design changes. Render currently follows main with automatic deployment enabled. Do not push a main merge casually: it is a production action. Observe full release-branch CI before rollout, then check actual deployed revisions, asset paths, fresh worker heartbeat and preserved account/run/credits. An existing session does not establish a fresh signup or recovery flow.
+
+After the12:28JST exact-commit rollout, both services remain configured for main but auto-deployment is disabled by Render. Future pushes do not deploy automatically until an operator deliberately reenables that setting. The rollback target48a7cdc remains available; the currently Live release is b5cec88 pending the narrow progress-label correction above.
 
 Community review: [Oyinkansola Yahaya's Supabase confirmation debugging report](https://dev.to/kansoldev/fixing-an-email-confirmation-problem-in-supabase-4560) describes a missing UPDATE policy that made saved email status misleading. The article has no comments. We use this as a reminder to inspect each real account operation; its permissive waitlist policy is unsuitable for this app and is not applied.

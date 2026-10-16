@@ -26,6 +26,7 @@ test('market observations and editable campaigns persist into confirmed targetin
   await page.getByLabel('Company name or website', { exact: true }).fill('https://market-seller.example/');
   await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('.research-recap > summary')).toContainText('Offer draft saved. Your confirmation is next.');
   await page.getByText('Explore campaign ideas and source context', { exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Choose a campaign direction' })).toBeVisible();
   await expect(page.locator('.competitor-list li')).toHaveCount(15);
@@ -285,12 +286,16 @@ test('failed offer summary explains next steps on saved runs', async ({ page }, 
   const notice = page.getByRole('status').filter({ hasText: "We couldn't create a usable offer summary" });
   await expect(notice).toContainText("Company search hasn't started");
   await expect(notice).toContainText('product or services page');
+  const recap = page.locator('.research-recap > summary');
+  await expect(recap).toContainText('Offer summary unavailable. Enter your offer and target.');
+  await expect(recap).not.toContainText('Offer draft saved');
   await expect(page.getByLabel('What do you sell?')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Confirm target and discover' })).toBeVisible();
   await noOverflow(page);
   await capture(page, `.impeccable/review/${info.project.name}-failed-offer-guidance.png`);
   await page.reload();
   await expect(notice).toBeVisible();
+  await expect(recap).toContainText('Offer summary unavailable. Enter your offer and target.');
   await page.getByRole('button', { name: 'New shortlist', exact: true }).press('Enter');
   await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
 });
