@@ -27,6 +27,7 @@ Started 16 October 2026 JST. Working branch: `codex/hosted-journey`, based on te
 
 ## 4. Real accounts
 
+- [x] Fix reported password-focus overlap before continuing signup. Release1f1da13 is Live on the web service with all5 CI jobs green. Actual phone/laptop signup verifies12px hint spacing, visible keyboard focus and no horizontal overflow. Signup/recovery fixture checks pass; no credential submission or email delivery is implied.
 - [x] Configure the existing sender through custom SMTP. User completed credential entry/save. Dashboard reload verifies enabled SMTP, sender Eygentic, smtp.gmail.com, port465, and the stored-password indicator, with Save disabled. Sender hello@eygentic.com is a Google Workspace alias of primary account akshay@eygentic.com. No credential was read. This proves saved configuration, not Gmail authentication or inbox delivery. Alias sending authorization and actual message From address remain unverified. Supabase flags Gmail deliverability as a concern.
 - [x] Prepare fresh signup for the user-confirmed second mailbox. User corrected gmai.com to gmail.com. Signed out the existing test session, retained its saved data, and filled the fresh signup email. User must enter a new password of at least12 characters and submit; no account creation or email send is claimed yet.
 - [ ] Verify signup and actual confirmation email arriving at a user-controlled test mailbox.

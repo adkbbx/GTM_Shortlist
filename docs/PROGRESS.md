@@ -1,5 +1,11 @@
 # Progress and handoff
 
+## 17 October03:03JST, hosted password spacing fix verified
+
+All five jobs passed for1f1da13124e074188e007fe52d88f58af1466d39 in [CI38917595074](https://github.com/adkbbx/GTM_Shortlist/actions/runs/38917595074). Deployed that exact commit to the existing web service, deployment dep-db96dp0n74is73ej5a5g, observed Deploy succeeded|Live in34.7s. Main and automatic deployment remain unchanged. Worker stays at7f46cc1; the only product difference is the account hint CSS margin, with no backend/worker code change.
+
+Actual refreshed hosted signup shows12px between password input and hint, with2px outline plus4px offset and keyboard focus visible. Phone390x844 and laptop1366x900 screenshots inspected, no horizontal overflow. Captures are ignored .impeccable/review/hosted-signup-focus-phone.png and hosted-signup-focus-laptop.png. Restored normal viewport and left the confirmed second email in Create your account, empty password focused for user entry/submission. No signup request or email has been sent by this verification. Continue confirmation-delivery, alias From, session/account isolation and recovery gates after user signup.
+
 ## 16 October, password focus outline spacing
 
 User screenshot exposed the signup password outline touching the minimum-length hint. Root cause: the global focus outline extends6px beyond the input while its following hint had zero top margin. Added12px above account input hints, preserving visible keyboard focus and limiting scope to account forms. This also fixes the shared password recovery form.
