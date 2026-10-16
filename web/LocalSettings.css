@@ -8,7 +8,7 @@
 .provider-status dt{font-weight:600}.provider-status dd{margin:0;color:var(--muted)}
 .provider-status dd button{min-height:44px;padding:8px 0;text-decoration:underline;text-underline-offset:3px}
 .provider-status>div{align-items:center}
-.worker-help{font-size:.875rem;margin:16px 0}.worker-help p{margin:12px 0}.worker-help summary{cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:8px 0}.worker-help code{display:block;overflow-wrap:anywhere;white-space:normal}
+.worker-help{font-size:.875rem;margin:16px 0}.worker-help p{margin:12px 0}.worker-help summary{cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:8px 0}.worker-help ol{padding-left:24px}.worker-help li{margin:12px 0}.worker-help .command-label{font-size:.75rem;font-weight:600;margin:12px 0 6px}.worker-help pre{max-width:100%;margin:0;padding:12px;background:var(--paper);border:1px solid var(--line);border-radius:4px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.8125rem;line-height:1.6}.worker-help pre code{white-space:inherit;overflow-wrap:inherit}
 .local-settings form label{display:block;margin-top:16px}
 .local-settings>button{margin:16px 0 0}.local-settings form{margin-top:20px;padding-top:20px;border-top:1px solid var(--line)}
 .local-settings form p{font-size:.875rem;margin:12px 0 20px}.local-settings form .hint{margin-top:12px}

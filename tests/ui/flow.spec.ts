@@ -31,7 +31,12 @@ test('local model status opens setup and explains the offline worker without dis
   await expect(modelStatus).toHaveText('Not configured');
   await expect(page.getByText('No research worker is connected.', { exact: false })).toBeVisible();
   await page.getByText('How to start local research', { exact: true }).click();
-  await expect(page.locator('.worker-help code').last()).toContainText('shortlist.cli serve --port 8019');
+  expect(await page.locator('.worker-help pre code').textContent()).toBe('$env:PYTHONPATH = \"$PWD/src\"\n.venv/Scripts/python.exe -m shortlist.cli serve --port 8019');
+  await expect(page.locator('.worker-help pre')).toHaveCSS('white-space', 'pre-wrap');
+  await expect(page.locator('.worker-help ol > li')).toHaveCount(4);
+  await expect(page.locator('.worker-help ol > li').first()).toContainText('Ctrl+C');
+  await page.locator('.worker-help pre').scrollIntoViewIfNeeded();
+  await noOverflow(page);
   await capture(page, `.impeccable/review/${info.project.name}-model-readiness.png`);
   await modelStatus.press('Enter');
   await expect(page.getByLabel('Endpoint URL', { exact: true })).toBeFocused();

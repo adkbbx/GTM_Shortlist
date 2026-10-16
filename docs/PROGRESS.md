@@ -1,5 +1,11 @@
 # Progress and handoff
 
+## 17 October, readable PowerShell startup instructions
+
+Replaced adjacent inline command elements with one labelled pre/code block containing a real newline, preserving whitespace when copied and wrapping safely on narrow screens. Added four ordered steps and clarified port8019 ownership: a manually started PowerShell server can be stopped with Ctrl+C; a Codex-managed preview should be switched by Codex. Provider setup itself needs no restart. Replaced “start the app with its worker” with “start background research.” No service was stopped or worker started for this copy/layout change.
+
+Build and Ruff passed;10 relevant backend tests passed. Phone/laptop browser checks cover the exact two-line command text, preserved whitespace, ordered instructions, keyboard setup flow and narrow/enlarged layouts. Screenshots inspected; the8019 preview serves the new frontend. No provider calls, merge or deployment.
+
 ## 17 October, model setup and consistent Settings actions
 
 Added local Research model configuration through the private provider store, independently of the saved Tavily key. Click the status itself in either provider row to open its form; removed the duplicate setup/manage buttons. Model setup accepts an OpenAI-compatible Gemma endpoint, exact model ID and optional masked token. Saving makes no provider request or research job. Both local API routes share loopback/origin, bounded JSON and secret-safe validation. Hosted mode and the design preview reject changes. DPAPI encrypts model settings on Windows; environment configuration remains the fallback until model settings are saved. The next worker run loads the saved replacement without rewriting search settings.
