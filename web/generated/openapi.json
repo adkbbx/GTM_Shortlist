@@ -81,13 +81,6 @@
                     "minLength": 1,
                     "title": "Base Url"
                   },
-                  "model": {
-                    "type": "string",
-                    "maxLength": 200,
-                    "minLength": 1,
-                    "pattern": "^[A-Za-z0-9_./:@+-]+$",
-                    "title": "Model"
-                  },
                   "key": {
                     "type": "string",
                     "maxLength": 512,
@@ -95,6 +88,13 @@
                     "title": "Key",
                     "default": "",
                     "writeOnly": true
+                  },
+                  "model": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "pattern": "^[A-Za-z0-9_./:@+-]+$",
+                    "title": "Model"
                   }
                 },
                 "additionalProperties": false,
@@ -116,6 +116,55 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/local/model/models": {
+      "post": {
+        "summary": "Discover Models",
+        "operationId": "discover_models_api_local_model_models_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "base_url": {
+                    "type": "string",
+                    "maxLength": 1024,
+                    "minLength": 1,
+                    "title": "Base Url"
+                  },
+                  "key": {
+                    "type": "string",
+                    "maxLength": 512,
+                    "format": "password",
+                    "title": "Key",
+                    "default": "",
+                    "writeOnly": true
+                  }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "base_url"
+                ],
+                "title": "LocalModelConnection"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalModels"
                 }
               }
             }
@@ -1855,6 +1904,23 @@
         },
         "type": "object",
         "title": "LocalAuth"
+      },
+      "LocalModels": {
+        "properties": {
+          "models": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "title": "Models"
+          }
+        },
+        "type": "object",
+        "required": [
+          "models"
+        ],
+        "title": "LocalModels"
       },
       "MarketResearch": {
         "properties": {

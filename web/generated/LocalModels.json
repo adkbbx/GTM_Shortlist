@@ -1,0 +1,17 @@
+{
+  "properties": {
+    "models": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 200,
+      "title": "Models",
+      "type": "array"
+    }
+  },
+  "required": [
+    "models"
+  ],
+  "title": "LocalModels",
+  "type": "object"
+}

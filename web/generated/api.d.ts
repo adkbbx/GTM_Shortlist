@@ -55,6 +55,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/local/model/models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Discover Models */
+        post: operations["discover_models_api_local_model_models_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/local/service/start": {
         parameters: {
             query?: never;
@@ -702,6 +719,11 @@ export interface components {
              */
             mode: "local";
         };
+        /** LocalModels */
+        LocalModels: {
+            /** Models */
+            models: string[];
+        };
         /** MarketResearch */
         MarketResearch: {
             /**
@@ -1281,8 +1303,41 @@ export interface operations {
                 "application/json": {
                     /** Base Url */
                     base_url: string;
+                    /**
+                     * Key
+                     * Format: password
+                     * @default
+                     */
+                    key?: string;
                     /** Model */
                     model: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
+    discover_models_api_local_model_models_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Base Url */
+                    base_url: string;
                     /**
                      * Key
                      * Format: password
@@ -1299,7 +1354,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Health"];
+                    "application/json": components["schemas"]["LocalModels"];
                 };
             };
         };

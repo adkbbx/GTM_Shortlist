@@ -9,6 +9,15 @@
 .provider-status dd button{min-height:44px;padding:8px 0;text-decoration:underline;text-underline-offset:3px}
 .provider-status>div{align-items:center}
 .local-settings form label{display:block;margin-top:16px}
+.model-setup .model-location{min-width:0;margin:20px 0;padding:0;border:0}
+.model-setup{overflow-wrap:anywhere}
+.model-setup .model-location legend{margin-bottom:8px;max-width:100%;overflow-wrap:anywhere}
+.model-setup .model-location label{display:flex;align-items:center;gap:12px;min-height:48px;margin:0;cursor:pointer}
+.model-location input[type=radio]{width:20px;height:20px;min-height:20px;flex:0 0 20px;padding:0;accent-color:var(--orange)}
+.model-setup select{width:100%;max-width:100%;min-width:0;min-height:48px;padding:10px;font:inherit;color:var(--ink);border:1px solid var(--line);border-radius:var(--radius-control);background:var(--surface)}
+.model-steps{padding-left:24px;font-size:.875rem}.model-steps li{margin:12px 0;overflow-wrap:anywhere}
+.model-discovery{margin:16px 0}.model-discovery button{max-width:100%}
+.model-advanced{margin:16px 0;border-top:1px solid var(--line)}
 .local-settings>button{margin:16px 0 0}.local-settings form{margin-top:20px;padding-top:20px;border-top:1px solid var(--line)}
 .local-settings form p{font-size:.875rem;margin:12px 0 20px}.local-settings form .hint{margin-top:12px}
 .local-settings p[role=status]{margin-top:16px}.local-settings .review-actions{flex-wrap:wrap}

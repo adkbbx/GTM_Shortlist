@@ -19,10 +19,9 @@ class CredentialUnavailable(RuntimeError):
         super().__init__("Local provider settings could not be read or saved")
 
 
-class LocalModelInput(BaseModel):
+class LocalModelConnection(BaseModel):
     model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
     base_url: str = Field(min_length=1, max_length=1024)
-    model: str = Field(min_length=1, max_length=200, pattern=r"^[A-Za-z0-9_./:@+-]+$")
     key: SecretStr = Field(default=SecretStr(""), max_length=512)
 
     @field_validator("key")
@@ -43,6 +42,10 @@ class LocalModelInput(BaseModel):
         # Accessing port validates malformed/out-of-range ports without making a request.
         _ = parsed.port
         return value.rstrip("/")
+
+
+class LocalModelInput(LocalModelConnection):
+    model: str = Field(min_length=1, max_length=200, pattern=r"^[A-Za-z0-9_./:@+-]+$")
 
 
 def validate_tavily_key(key: str) -> SecretStr:

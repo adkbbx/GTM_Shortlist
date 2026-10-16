@@ -23,6 +23,7 @@ from shortlist.fetch import canonical_url
 from shortlist.local_credentials import (
     CredentialUnavailable,
     LocalCredentials,
+    LocalModelConnection,
     LocalModelCredentials,
     LocalModelInput,
     apply_local_credentials,
@@ -30,6 +31,7 @@ from shortlist.local_credentials import (
 )
 from shortlist.local_service import LocalResearchService, ServiceUnavailable
 from shortlist.market import MarketResearch
+from shortlist.model_setup import LocalModels, ModelSetupError, available_models
 from shortlist.progress import RunProgress
 from shortlist.providers import SellerDraft, company_name_matches
 from shortlist.selection import Selection
@@ -368,6 +370,21 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             body.clear()
         await run_in_threadpool(LocalModelCredentials(settings.db_path).save, command)
         return await run_in_threadpool(health)
+
+    @app.post("/api/local/model/models", response_model=LocalModels, openapi_extra={
+        "requestBody": {"required": True, "content": {"application/json": {"schema": LocalModelConnection.model_json_schema()}}}})
+    async def discover_models(request: Request):
+        body = await local_provider_body(request)
+        try:
+            connection = LocalModelConnection.model_validate_json(body)
+        except ValueError:
+            raise HTTPException(422, "Use HTTPS for a hosted provider, or HTTP on localhost for a local model server") from None
+        finally:
+            body.clear()
+        try:
+            return await run_in_threadpool(available_models, connection)
+        except ModelSetupError as exc:
+            raise HTTPException(409, str(exc)) from None
 
     @app.post("/api/local/service/start", response_model=Health, openapi_extra={
         "requestBody": {"required": True, "content": {"application/json": {"schema": LocalServiceStart.model_json_schema()}}}})

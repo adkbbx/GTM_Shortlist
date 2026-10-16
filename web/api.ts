@@ -1,12 +1,13 @@
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import type { components } from './generated/api';
+import type { components, paths } from './generated/api';
 import runSchema from './generated/RunView.json';
 import healthSchema from './generated/Health.json';
 import authSchema from './generated/AuthSetup.json';
 import walletSchema from './generated/WalletView.json';
 import serviceSchema from './generated/ServiceView.json';
 import creditHistorySchema from './generated/CreditHistory.json';
+import modelsSchema from './generated/LocalModels.json';
 
 export type Run = components['schemas']['RunView'];
 export type Health = components['schemas']['Health'];
@@ -25,6 +26,7 @@ const ajv = new Ajv({ strict: false });
 addFormats(ajv);
 const isRun = ajv.compile<Run>(runSchema);
 const isHealth = ajv.compile<Health>(healthSchema);
+const isModels = ajv.compile<components['schemas']['LocalModels']>(modelsSchema);
 const isAuthSetup = ajv.compile<AuthSetup>(authSchema);
 const isWallet = ajv.compile<Wallet>(walletSchema);
 const isService = ajv.compile<Service>(serviceSchema);
@@ -92,6 +94,11 @@ async function researchCommand(path: string, input: unknown): Promise<Run> {
 }
 
 export const api = {
+  async availableModels(input: paths['/api/local/model/models']['post']['requestBody']['content']['application/json']) {
+    const data = await request('/api/local/model/models', input);
+    if (!isModels(data)) throw new Error('The server returned an unreadable model list. Use advanced setup or try again.');
+    return data.models;
+  },
   async resumeResearch(id: string) {
     const run = parseRun(await request(`/api/runs/${encodeURIComponent(id)}`));
     if (!['queued', 'running'].includes(run.status) || run.termination) throw new Error('This run is no longer waiting to resume. Reload the saved research.');

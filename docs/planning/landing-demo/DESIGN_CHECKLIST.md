@@ -105,3 +105,9 @@ This reconciliation supersedes the preceding note that hosted fixes are absent. 
 - [x] Keep Settings informational; do not expose a separate worker/service start button.
 - [x] Offer Resume research on paused local runs and retain saved commands after startup failure.
 - [x] Verify concurrent startup, real worker synthetic execution, shutdown, hosted/preview rejection and secret-safe failure handling.
+
+## Guided model setup, 17 October
+- [x] Offer local or hosted setup before technical fields, with preset addresses and official setup/key links.
+- [x] Request a model list and select a returned ID; retain advanced custom/manual fallback.
+- [x] Verify rejected access, empty catalogs, no auto-probing, secret clearing and enlarged phone layouts with fixtures.
+- [x] Keep lookup separate from saving, inference qualification and worker startup; block hosted/preview requests.
