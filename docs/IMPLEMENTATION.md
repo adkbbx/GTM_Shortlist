@@ -1,5 +1,7 @@
 # Implementation checklist
 
+The hosted signup-to-export release checks requested on16October are tracked in [HOSTED_JOURNEY.md](HOSTED_JOURNEY.md). Use its observed evidence and pending live gates when resuming release work.
+
 Last updated 16 October 2026 JST. Current authorized design work and its acceptance gates are tracked in [DESIGN_CHECKLIST.md](planning/landing-demo/DESIGN_CHECKLIST.md); the broader product gates below remain open. Check a task only after its acceptance evidence is saved in PROGRESS.md. This file is the source of truth for automatic continuation.
 
 ## 1. Project and contracts
