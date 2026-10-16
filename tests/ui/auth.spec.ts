@@ -134,6 +134,7 @@ test('signed-in requests and exports carry tokens; sign-out clears the workspace
   expect(requests.some(request => request.url.includes('/export?format=xlsx'))).toBe(true);
   expect(requests.length).toBeGreaterThan(2);
   expect(requests.every(request => request.bearer?.startsWith('Bearer '))).toBe(true);
+  await page.getByRole('button', { name: 'Open account tray', exact: true }).click();
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Sign in to your shortlist' })).toBeVisible();
   await expect(page.getByRole('complementary', { name: 'Saved research' })).toHaveCount(0);
@@ -188,4 +189,40 @@ test('unconfirmed account can retry failed sign-out without entering research', 
   await expect(page.getByRole('heading', { name: 'Confirm your email' })).toBeVisible();
   await page.getByRole('button', { name: 'Back to sign in' }).click();
   await expect(page.getByRole('heading', { name: 'Sign in to your shortlist' })).toBeVisible();
+});
+
+
+test('account tray hides details and stays stable while credits load', async ({ page }, info) => {
+  await fixture(page);
+  let releaseCredits: () => void = () => {};
+  const creditsGate = new Promise<void>(resolve => { releaseCredits = resolve; });
+  await page.route('**/api/credits', async route => {
+    await creditsGate;
+    await route.fulfill({ json: { mode: 'hosted', available: 3, reserved: 0, used: 0 } });
+  });
+  await page.goto('/');
+  await signIn(page);
+  const trigger = page.getByRole('button', { name: 'Open account tray', exact: true });
+  const before = await trigger.boundingBox();
+  await expect(page.getByText('fixture@example.test', { exact: true })).not.toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sign out', exact: true })).not.toBeVisible();
+  await trigger.click();
+  const tray = page.getByRole('dialog', { name: 'Your account', exact: true });
+  await expect(tray).toBeVisible();
+  await expect(tray.getByText('Loading credit balance…')).toBeVisible();
+  releaseCredits();
+  await expect(tray.getByText('3 credits available', { exact: true })).toBeVisible();
+  await expect(tray.getByText('fixture@example.test', { exact: true })).toBeVisible();
+  expect(await trigger.boundingBox()).toEqual(before);
+  await capture(page, `.impeccable/review/${info.project.name}-account-tray.png`);
+  await page.keyboard.press('Escape');
+  await expect(tray).not.toBeVisible();
+  await expect(trigger).toBeFocused();
+  await trigger.click();
+  await tray.getByRole('button', { name: 'Close account tray', exact: true }).click();
+  await expect(tray).not.toBeVisible();
+  await trigger.click();
+  await page.getByRole('heading', { name: 'Find companies that fit your offer.', exact: true }).click();
+  await expect(tray).not.toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

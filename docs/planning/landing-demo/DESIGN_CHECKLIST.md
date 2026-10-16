@@ -53,3 +53,11 @@ Current design gates are satisfied. This does not complete the full product or a
 - [x] Reduce preview warning to a status line.
 - [x] Exercise drawer selection, close, focus restoration and viewport transitions in actual browser.
 - [x] Confirm final keyboard cycling and open-drawer resize cleanup regression: eight final cases passed.
+
+## Connected frame and account tray —16 October
+- [x] Remove stale header subtraction; confirm sidebar reaches viewport bottom and footer uses short-page space.
+- [x] Connect desktop header/sidebar surfaces and invert the closed chevron.
+- [x] Move account details, balance, credit history and sign-out into one tray.
+- [x] Hold credits loading and verify trigger geometry stays unchanged on phone/laptop.
+- [x] Verify Escape, close button, outside click, focus return and sign-out.
+- [x] Finish all16 migrated hosted Postgres credit-history checks and stop the disposable database. Automatic review blocked file removal; stopped fixture cluster is retained in ignored data with the path in PROGRESS.md.

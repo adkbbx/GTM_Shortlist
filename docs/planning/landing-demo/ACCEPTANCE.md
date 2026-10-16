@@ -20,6 +20,14 @@ Further user screenshots rejected the stacked dark mobile bars and full-width ex
 
 Verification includes actual790px tablet/390px phone/1366px laptop browser inspection,26 sidebar/demo/workshop cases, then eight final sidebar cases after adding explicit keyboard wrapping. Final tests cover Escape/Close/selection dismissal, focus return, background scroll restoration, drawer open during viewport change,11 viewport transitions, preserved company input, long history and no content displacement. Build, Ruff and40 backend checks passed. Full hosted CI for this new implementation remains pending after push; no deployment or live research is claimed.
 
+## Connected frame and account tray —16 October
+
+User feedback added three corrections: remove the20px bottom strip, make the chevron indicate the opening direction, and connect header/sidebar visually. A flex shell now allocates actual header height, keeps the footer at the bottom of short pages, and stretches desktop navigation to the same edge. Desktop chrome shares one dark surface before and after history loads.
+
+The user then requested that email, balance, credit activity and sign-out move into a tray. They now live in one native Account popover, with history inside the tray. Delayed-wallet tests caught and corrected a separate mobile trigger shift when history appeared. The trigger geometry now stays unchanged while credits resolve; email wraps inside the panel. Escape, Close, outside click, focus return and sign-out are covered.
+
+58 phone/laptop auth/sidebar/research-flow cases passed, plus build, Ruff and40 backend checks. Hosted credit-history coverage uses an isolated local Postgres and labelled transports; no real account/provider call is involved. Screenshot evidence includes laptop-account-tray.png, phone-account-tray.png and hosted credit-history cases under ignored `.impeccable/review/`. Local preview was restarted with its preserved database; live Render is unchanged. All16 hosted cases passed across the main14-case pass and two corrected navigation reruns. The disposable database is stopped; automatic review blocked file removal, so only its ignored fixture files remain. Details are recorded in PROGRESS.md.
+
 ## Reference and direction
 
 Inspected [Eygentic](https://eygentic.com/) and [Explee](https://explee.com/) in the browser. Eygentic informs paper, orange, schematic linework and controlled mechanical motion; Explee informs one clear entry action and a visible distinction between automatic work and required input. No reference signup or research was submitted. These were browser observations, not REA Evidence or conversion measurements.

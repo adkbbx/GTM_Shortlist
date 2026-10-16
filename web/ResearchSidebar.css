@@ -22,14 +22,21 @@
 .is-collapsed .sidebar-header{padding:0}
 .is-collapsed .sidebar-heading,.is-collapsed .nav-label,.is-collapsed .research-navigation h2,.is-collapsed .run-copy,.is-collapsed .sidebar-loading{display:none}
 .research-sidebar.is-collapsed .new-run,.research-sidebar.is-collapsed .saved-run{width:44px;justify-content:center;padding:12px;min-height:44px}
-.is-collapsed .sidebar-toggle svg{transform:rotate(180deg)}
-@media(prefers-reduced-motion:no-preference){.research-sidebar .saved-run,.research-sidebar .new-run{transition:background-color 140ms ease-out}.sidebar-toggle svg{transition:transform 180ms ease-out}}
+
+@media(prefers-reduced-motion:no-preference){.research-sidebar .saved-run,.research-sidebar .new-run{transition:background-color 140ms ease-out}}
 
 /* One product header; mobile history lives in a modal drawer, never a second row. */
 header.topbar{height:56px;padding:0 24px;max-width:1680px;margin:auto;border-bottom:1px solid var(--line);background:var(--paper)}
 header.topbar .brand{height:56px;width:auto;flex:none;padding:0;color:var(--ink);font-size:17px;letter-spacing:-.025em;font-weight:600}
 header.topbar .workspace-account{min-width:0}
-.workspace{min-height:calc(100dvh - 56px)}
+/* Let the shell allocate its actual header height instead of subtracting stale constants. */
+#root{display:flex;flex-direction:column;min-height:100dvh}
+#root>header.topbar{flex:none;width:100%}
+#root>.workspace{flex:1;width:100%;min-height:0}
+.workspace>.main{display:flex;flex-direction:column;flex:1;width:100%}
+.workspace>.main>*{flex-shrink:0}
+.workspace>.main>.workspace-footer{margin-top:auto;width:100%}
+#root>.workspace.first-visit{display:flex;flex-direction:column}
 .mobile-brand{display:none}
 .research-drawer{position:fixed;inset:0 auto 0 0;margin:0;border:0;border-right:1px solid #37332e;padding:20px 16px;width:min(320px,calc(100vw - 32px));max-width:none;height:100dvh;max-height:100dvh;background:#201e1b;color:#e8e4dd}
 .research-drawer::backdrop{background:rgb(15 14 12 / .45)}
@@ -41,10 +48,10 @@ header.topbar .workspace-account{min-width:0}
   body:has(.research-sidebar) header.topbar:has(.local-label){display:none}
   body:has(.research-sidebar) header.topbar .brand{display:none}
   body:has(.research-sidebar) header.topbar{height:auto;min-height:0;padding:8px 16px}
-  .workspace:has(>.research-sidebar){display:block}
+  .workspace:has(>.research-sidebar){display:flex;flex-direction:column}
   .workspace>.research-sidebar,.workspace>.research-sidebar.is-collapsed{
     display:flex;flex-direction:row;align-items:center;justify-content:space-between;
-    gap:8px;padding:6px 12px;height:56px;min-height:56px;border-right:0;border-bottom:1px solid var(--line);background:var(--paper);color:var(--ink);
+    gap:8px;padding:6px 12px;flex:none;height:56px;min-height:56px;border-right:0;border-bottom:1px solid var(--line);background:var(--paper);color:var(--ink);
   }
   .research-sidebar .sidebar-header{padding:0;flex-direction:row;justify-content:flex-start;min-width:0;gap:8px}
   .research-sidebar .sidebar-heading{display:none}
@@ -62,3 +69,15 @@ header.topbar .workspace-account{min-width:0}
   .research-sidebar .research-drawer .research-navigation h2,.research-sidebar .research-drawer .run-copy{display:block}
   .research-sidebar .research-drawer button:hover{background:#302d28}
 }
+
+/* Desktop navigation is one continuous frame around the paper workspace. */
+@media(min-width:851px){
+ header.topbar{background:#201e1b;border-bottom-color:#37332e}
+ header.topbar .brand{color:#fff9f0}
+ header.topbar .workspace-account{color:#e8e4dd}
+ header.topbar .local-label,
+ header.topbar .wallet-balance>span{color:#b1aaa0}
+ header.topbar .text-button{color:#efa779}
+}
+
+@media(min-width:851px){header.topbar .account-trigger{background:#2a2723;color:#e8e4dd;border-color:#494239}}

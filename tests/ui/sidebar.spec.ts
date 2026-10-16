@@ -1,6 +1,33 @@
 import { expect, test } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 
+test('shell reaches the viewport bottom and footer uses the remaining space', async ({ page }) => {
+  const fixture = await page.request.post('/__fixture_held_run');
+  const { id } = await fixture.json();
+  try {
+    for (const viewport of [{ width: 1542, height: 1290 }, { width: 1366, height: 1000 }, { width: 390, height: 1100 }]) {
+      await page.setViewportSize(viewport);
+      await page.goto('/');
+      await expect(page.getByRole('button', { name: 'New shortlist', exact: true })).toBeVisible();
+      await page.evaluate(() => document.fonts.ready);
+      const geometry = await page.evaluate(() => {
+        const rect = (selector: string) => document.querySelector(selector)!.getBoundingClientRect().toJSON();
+        return { shell: rect('#root'), header: rect('.topbar'), sidebar: rect('.research-sidebar'), main: rect('.main'), footer: rect('.workspace-footer') };
+      });
+      expect(geometry.shell.bottom).toBeGreaterThanOrEqual(viewport.height - 1);
+      expect(geometry.footer.bottom).toBeGreaterThanOrEqual(viewport.height - 50);
+      expect(geometry.footer.width).toBeGreaterThan(Math.min(600, viewport.width - 48));
+      if (viewport.width > 850) {
+        expect(geometry.sidebar.bottom).toBe(geometry.shell.bottom);
+        expect(geometry.header.width).toBe(viewport.width);
+        expect(geometry.header.x).toBe(geometry.sidebar.x);
+        const colors = await page.evaluate(() => ['.topbar', '.research-sidebar'].map(selector => getComputedStyle(document.querySelector(selector)!).backgroundColor));
+        expect(colors[0]).toBe(colors[1]);
+      }
+    }
+  } finally { await page.request.post(`/__fixture_release/${id}`); }
+});
+
 test('navigation remains compact through resize and drawer transitions', async ({ page }) => {
   const fixture = await page.request.post('/__fixture_held_run');
   const { id } = await fixture.json();

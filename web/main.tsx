@@ -11,7 +11,7 @@ import { LandingDemo } from './LandingDemo';
 import { WorkshopField } from './WorkshopField';
 import { ResearchSidebar } from './ResearchSidebar';
 import { AuthGate } from './AuthGate';
-import { CreditActivity } from './CreditActivity';
+import { AccountTray } from './AccountTray';
 import { ResearchStop } from './ResearchStop';
 import { MarketOverview } from './MarketOverview';
 import { EmailDraftEditor } from './EmailDraftEditor';
@@ -316,10 +316,9 @@ function App({ account }: { account: ReactNode }) {
   const showSidebar = Boolean(active || runs.length);
   return <>
     <a className="skip-link" href="#main">Skip to research</a>
-    <header className="topbar"><a className="brand" href="/" onClick={e => { e.preventDefault(); select(null); }}><span>GTM Shortlist</span></a><div className="workspace-account">{wallet?.mode === 'hosted' && <div className="wallet-access"><p className="wallet-balance" aria-live="polite">{wallet.available} {wallet.available === 1 ? 'credit' : 'credits'} available{wallet.reserved > 0 && <span>{wallet.reserved} reserved</span>}</p><button className="text-button" aria-expanded={showActivity} aria-controls="credit-activity" onClick={() => setShowActivity(value => !value)}>Credit activity</button></div>}{account ?? <span className="local-label">Local research workspace</span>}</div></header>
+    <header className="topbar"><a className="brand" href="/" onClick={e => { e.preventDefault(); select(null); }}><span>GTM Shortlist</span></a><div className="workspace-account">{account ? <AccountTray account={account} wallet={wallet} showActivity={showActivity} onActivity={() => setShowActivity(value => !value)} /> : <span className="local-label">Local research workspace</span>}</div></header>
     <div className={`workspace ${active ? 'has-research' : 'new-research'}${showSidebar ? '' : ' first-visit'}`}>{showSidebar && <ResearchSidebar runs={runs} activeId={active?.id} loading={loading} onNew={() => { select(null); requestKey.current = crypto.randomUUID(); }} onSelect={run => select(run)} />}
     <main id="main" className="main" tabIndex={-1}>{previewWorkspace && <aside className="notice preview-notice" role="note"><p>Design preview · no live research</p><a href={previewWorkspace}>Open the research workspace<Arrow /></a></aside>}<div className="page-heading">{!active && <WorkshopField />}<h1 ref={headingRef} tabIndex={-1}>{active?.termination === 'user_stopped' ? 'Research stopped' : pending ? active?.status === 'queued' && !active.progress.worker_online ? 'Research is waiting' : 'Researching your shortlist' : active ? active.status === 'awaiting_confirmation' ? 'Confirm your target' : active.profile ? 'Review your shortlist' : 'Define your shortlist' : 'Find companies that fit your offer.'}</h1><p>{active?.status === 'awaiting_confirmation' ? 'Review your offer and target below. Discovery starts after you confirm.' : active ? 'Saved research. Trace every assessment back to its source.' : 'Start with your company. We’ll help you build a shortlist backed by sources.'}</p></div>
-      {wallet?.mode === 'hosted' && <div id="credit-activity" hidden={!showActivity}>{showActivity && <CreditActivity wallet={wallet} />}</div>}
       {!previewWorkspace && health?.mode === 'local' && active && <LocalSearchSetup compact={Boolean(results)} ready={health.search_ready} onSaved={setHealth} onContinue={!active ? () => document.getElementById('website')?.focus() : undefined} />}
       {health?.local_search_error && <p className="notice" role="alert">Local search settings could not be read. Open Connect Tavily to save a replacement key.</p>}
       {error && <div className="notice" role="alert">{error}<button className="text-button" onClick={() => window.location.reload()}>Reload workspace</button></div>}

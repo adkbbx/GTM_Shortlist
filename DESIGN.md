@@ -261,3 +261,9 @@ Signup success replaces the credential form with Check your inbox, the retained 
 ## Navigation on small screens
 
 At850 CSS pixels and below, show one56px light toolbar with the product name, saved-research opener and New shortlist action. Saved runs use a native modal drawer, not an expanding full-width strip. Keep the underlying content stationary; trap keyboard focus, close with Escape/Close/backdrop, restore opener focus and unlock page scrolling on close or resize. Crossing the layout boundary closes navigation. Desktop keeps a224px sidebar or64px icon rail beneath a full product wordmark; never replace the brand with GS. The isolated preview uses a quiet status line rather than a large warning panel.
+
+## Shared application frame and account tray
+
+The desktop header shares the sidebar's dark surface and border, including the initial load before saved runs arrive. Keep the full product name and a quiet Account control. Email, credit balance, activity and sign-out live inside the Account tray, using native popover light-dismiss and Escape behavior. The account trigger has a fixed phone position while data loads; show the complete, wrapping email inside the tray. Keep account and new-shortlist controls separate in the single56px mobile toolbar. Credit history opens within the tray and scrolls there.
+
+The shell uses flex allocation from a100dvh root rather than subtracting a duplicated header-height constant. A short page places the footer near the bottom with the normal content padding; desktop navigation stretches to the same bottom edge. The sidebar chevron points right when closed and left when open without rotating the panel divider.
