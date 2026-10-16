@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Run } from './api';
+import { SiteIcon } from './SiteIcon';
 import './ResearchSidebar.css';
 
 export function ResearchSidebar({ runs, activeId, loading, onNew, onSelect }: {
@@ -32,7 +33,7 @@ export function ResearchSidebar({ runs, activeId, loading, onNew, onSelect }: {
         return <button key={run.id} type="button" className={`saved-run ${activeId === run.id ? 'selected' : ''}`}
           onClick={() => { onSelect(run); if (narrow) setCollapsed(true); }} aria-current={activeId === run.id ? 'page' : undefined}
           aria-label={`${name}, ${status}, ${savedDate}`} title={`${name} · ${status} · ${savedDate}`}>
-          <span className="saved-run-identity" aria-hidden="true">{initials}</span>
+          <SiteIcon domain={run.seller_url ? new URL(run.seller_url).hostname : undefined} fallback={initials} className="saved-run-identity" />
           <span className="run-copy"><span className="run-name">{name}</span><span className="run-meta"><time dateTime={run.created_at}>{savedDate}</time><span>{status}</span></span></span>
         </button>;
       })}</nav> : <p className="sidebar-loading">Your saved runs will appear here.</p>}

@@ -10,6 +10,7 @@ import { ResearchProgress } from './ResearchProgress';
 import { DemoPage, LandingDemo } from './LandingDemo';
 import { WorkshopField } from './WorkshopField';
 import { ResearchSidebar } from './ResearchSidebar';
+import { SiteIcon } from './SiteIcon';
 import { AuthGate } from './AuthGate';
 import { AccountTray } from './AccountTray';
 import { ResearchStop } from './ResearchStop';
@@ -131,7 +132,7 @@ function CompanyReview({ record, run, onSaved }: { record: Record; run: Run; onS
   };
   return <details className="company-item" name={`shortlist-${run.id}`} ref={disclosure}>
     <summary className="company-row" ref={summary}>
-      <span className="shortlist-identity"><span className="company-initial" aria-hidden="true">{research.name.trim().slice(0, 1).toUpperCase()}</span>
+      <span className="shortlist-identity"><SiteIcon domain={research.domain} fallback={research.name.trim().slice(0, 1).toUpperCase()} className="company-initial" />
         <span><span className="shortlist-name">{research.name}</span><span className="shortlist-domain">{research.domain}</span></span></span>
       <span className="shortlist-description">{description?.evidence.claim ?? 'Company description not established from saved sources.'}</span>
       <span className="shortlist-assessment"><span>{qualification[research.qualification]}</span><span className="shortlist-decision">{decision}</span></span>

@@ -111,3 +111,11 @@ This reconciliation supersedes the preceding note that hosted fixes are absent. 
 - [x] Request a model list and select a returned ID; retain advanced custom/manual fallback.
 - [x] Verify rejected access, empty catalogs, no auto-probing, secret clearing and enlarged phone layouts with fixtures.
 - [x] Keep lookup separate from saving, inference qualification and worker startup; block hosted/preview requests.
+
+## Saved-stage review and favicons, 17 October
+- [x] Remove the live-research illustration/pause control and expose newest-first saved checkpoints.
+- [x] Make all six stages read-only review actions, independent of actual progress and provider work.
+- [x] Show saved content and honest missing-result states, including confirmed target immutability.
+- [x] Share site-owned favicon rendering with initials fallback across result rows and saved history.
+- [ ] Live research quality: campaign/company structured-output failures remain unresolved; no evaluation approved.
+- [x] Use the same surface, border, radius and height for every stage button; distinguish selection from actual stage without competing containers. Verify keyboard focus and phone/laptop widths.

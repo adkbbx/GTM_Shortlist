@@ -3,6 +3,10 @@ import type { Page } from '@playwright/test';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { openCompany } from './shortlist';
 
+test.beforeEach(async ({ page }) => {
+  await page.route('**/favicon.ico', route => route.abort());
+});
+
 async function noOverflow(page: Page) {
   const layout = await page.evaluate(() => ({ width: window.innerWidth, scroll: document.documentElement.scrollWidth,
     outside: [...document.querySelectorAll('body *')].filter(element => element.getBoundingClientRect().right > window.innerWidth + 1)
@@ -216,36 +220,103 @@ test('market observations and editable campaigns persist into confirmed targetin
   await expect(editor.getByLabel('Subject', { exact: true })).toHaveValue('Saved in another tab');
 });
 
-test('research activity follows the real worker and respects reduced motion', async ({ page }, info) => {
+test('research stages and latest checkpoints stay visible without animation controls', async ({ page }, info) => {
   const fixture = await page.request.post('/__fixture_held_run');
   const { id } = await fixture.json();
   try {
     await page.goto(`/?run=${id}`);
-    await expect(page.locator('.real-latest')).toContainText('Reading example-2.com', { timeout: 15000 });
-    await page.locator('.real-history > summary').click();
+    await expect(page.locator('.checkpoint-list li').first()).toContainText('Reading example-2.com', { timeout: 15000 });
     await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toContainText('Saved research for example-1.com');
-    await page.locator('.agent-activity').scrollIntoViewIfNeeded();
-    await expect(page.locator('.agent-activity')).toHaveClass(/is-working/);
-    await expect(page.locator('.research-visual')).toHaveAttribute('data-mode', 'working');
-    await expect.poll(() => page.locator('.research-flow').evaluate(element => getComputedStyle(element).animationName)).toBe('research-flow');
-    await page.getByRole('button', { name: 'Pause animations', exact: true }).click();
-    await expect(page.locator('.real-research')).toHaveAttribute('data-reduced', 'true');
-    expect(await page.locator('.research-flow').evaluate(element => getComputedStyle(element).animationName)).toBe('none');
-    await page.getByRole('button', { name: 'Resume animations', exact: true }).click();
+    await expect(page.getByRole('button', { name: /Pause animations|Resume animations/ })).toHaveCount(0);
+    await expect(page.locator('.research-visual')).toHaveCount(0);
+    await expect(page.locator('.real-history > summary')).toHaveCount(0);
+    for (const width of [1366, 851, 850, 731, 390, 320]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(page.getByRole('list', { name: 'Research stages', exact: true })).toBeVisible();
+      await expect(page.locator('.real-stage-list > li')).toHaveCount(6);
+      const buttonStyles = await page.locator('.stage-review').evaluateAll(buttons => buttons.map(button => {
+        const style = getComputedStyle(button);
+        return [style.borderRadius, style.borderWidth, style.backgroundColor, style.boxShadow].join('|');
+      }));
+      expect(new Set(buttonStyles).size).toBe(1);
+      await expect(page.getByRole('list', { name: 'Saved research checkpoints', exact: true })).toBeVisible();
+      await noOverflow(page);
+    }
+    await page.setViewportSize(info.project.name === 'phone' ? { width: 390, height: 844 } : { width: 1366, height: 900 });
     await expect(page.locator('.demo-scene-top > span').first()).toHaveText('Research active');
+    const currentStage = await page.locator('.real-stage-list [aria-current=step]').textContent();
+    const mutations: string[] = [];
+    const recordMutation = (request: import('@playwright/test').Request) => { if (request.method() === 'POST' && request.url().includes('/api/')) mutations.push(request.url()); };
+    page.on('request', recordMutation);
+    for (const label of ['Understand offer', 'Explore market', 'Confirm target', 'Discover companies', 'Inspect evidence', 'Review and draft']) {
+      const button = page.locator('.real-stage-list').getByRole('button', { name: new RegExp(label) });
+      await button.focus();
+      await page.keyboard.press('Enter');
+      await expect(button).toHaveAttribute('aria-pressed', 'true');
+      await expect(page.getByRole('region', { name: `${label} saved information`, exact: true })).toBeVisible();
+      await expect(page.locator('.real-stage-list [aria-current=step]')).toHaveText(currentStage ?? '');
+      await noOverflow(page);
+    }
+    await capture(page, `.impeccable/review/${info.project.name}-stage-review.png`);
+    expect(mutations).toEqual([]);
+    page.off('request', recordMutation);
+    await page.getByRole('button', { name: 'Follow current progress' }).click();
     await page.getByText('Saved offer summary', { exact: true }).click();
     await expect(page.locator('.real-saved-offer')).toContainText('customer acquisition');
     await expect(page.getByRole('progressbar')).toHaveCount(0);
     await noOverflow(page);
     await capture(page, `.impeccable/review/${info.project.name}-agent-activity.png`);
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    expect(await page.locator('.research-flow').evaluate(element => getComputedStyle(element).animationName)).toBe('none');
+    expect(await page.locator('.real-research').evaluate(element => element.getAnimations({ subtree: true }).some(animation => animation.effect?.getTiming().iterations === Infinity))).toBe(false);
     await page.request.post(`/__fixture_release/${id}`);
     await expect(page.locator('.real-stage-list [aria-current=step]')).toContainText('Review and draft', { timeout: 15000 });
     await expect(page.locator('.agent-activity')).not.toHaveClass(/is-working/);
     await openCompany(page);
     await page.getByText('Why this company was researched', { exact: true }).first().click();
     await expect(page.locator('.selection-reason').first()).toContainText('do not establish fit or buying intent');
+  } finally { await page.request.post(`/__fixture_release/${id}`); }
+});
+
+test('company icons use the site favicon and fall back when unavailable', async ({ page }, info) => {
+  // Substitute synthetic image bytes before loading; never contact company sites in tests.
+  await page.addInitScript(() => {
+    const iconValue = (image: HTMLImageElement, value: string) => {
+      if (!value.startsWith('https://')) return value;
+      image.dataset.requestedIcon = value;
+      return new URL(value).hostname === 'example-2.com' ? 'data:image/png;base64,invalid'
+        : 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect width="24" height="24" fill="#b34d19"/></svg>');
+    };
+    const original = Element.prototype.setAttribute;
+    Element.prototype.setAttribute = function (name: string, value: string) {
+      original.call(this, name, this instanceof HTMLImageElement && name === 'src' ? iconValue(this, value) : value);
+    };
+    const descriptor = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src')!;
+    Object.defineProperty(HTMLImageElement.prototype, 'src', { ...descriptor, set(value: string) {
+      descriptor.set!.call(this, iconValue(this, value));
+    } });
+  });
+  const response = await page.request.post('/__fixture_held_run');
+  const { id } = await response.json();
+  try {
+    await page.request.post(`/__fixture_release/${id}`);
+    await page.goto(`/?run=${id}`);
+    await expect(page.locator('.company-item')).toHaveCount(2, { timeout: 15000 });
+    const icon = page.locator('.company-initial img').first();
+    await icon.scrollIntoViewIfNeeded();
+    await expect(icon).toHaveAttribute('referrerpolicy', 'no-referrer');
+    await expect(icon).toHaveAttribute('data-requested-icon', 'https://example-1.com/favicon.ico');
+    await expect.poll(() => icon.evaluate(image => (image as HTMLImageElement).naturalWidth)).toBe(24);
+    await page.locator('.company-initial').nth(1).scrollIntoViewIfNeeded();
+    await expect(page.locator('.company-initial').nth(1)).toHaveText(/\S/);
+    await expect(page.locator('.company-initial').nth(1).locator('img')).toHaveCount(0);
+    await noOverflow(page);
+    if (info.project.name === 'phone') await page.getByRole('button', { name: 'Saved runs', exact: true }).click();
+    else if (await page.getByRole('button', { name: 'Expand sidebar' }).count()) await page.getByRole('button', { name: 'Expand sidebar' }).click();
+    const savedIcon = page.locator('.saved-run-identity img').first();
+    await expect(savedIcon).toHaveAttribute('data-requested-icon', 'https://eygentic.com/favicon.ico');
+    await expect.poll(() => savedIcon.evaluate(image => (image as HTMLImageElement).naturalWidth)).toBe(24);
+    await noOverflow(page);
+    await capture(page, `.impeccable/review/${info.project.name}-favicons.png`);
   } finally { await page.request.post(`/__fixture_release/${id}`); }
 });
 
@@ -256,8 +327,7 @@ test('stopping actual held research keeps completed sheets and ignores an older 
   let releaseOld: (() => void) | undefined;
   try {
     await page.goto(`/?run=${id}`);
-    await expect(page.locator('.real-latest')).toContainText('Reading example-2.com', { timeout: 15000 });
-    await page.locator('.real-history > summary').click();
+    await expect(page.locator('.checkpoint-list li').first()).toContainText('Reading example-2.com', { timeout: 15000 });
     await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toContainText('Saved research for example-1.com');
     let oldRequested: (() => void) | undefined;
     let oldFulfilled: (() => void) | undefined;
@@ -531,9 +601,9 @@ test('saved seller → confirmation → evidence → review → export survives 
   await page.getByLabel('Company name or website', { exact: true }).fill('https://eygentic.com/');
   await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
-  await expect(page.locator('.research-recap')).not.toHaveAttribute('open');
+  await expect(page.locator('.research-recap')).toHaveAttribute('open');
   await expect(page.locator('.confirmation-context')).not.toHaveAttribute('open');
-  await expect(page.locator('.real-research')).not.toBeVisible();
+  await expect(page.locator('.real-research')).toBeVisible();
   await page.getByLabel('What do you sell?').fill('Test fixture edited offer: acquisition experiments for software businesses');
   await page.getByLabel('Exclude from consideration').fill('Companies headquartered in Canada\nPublicly listed companies');
   const required = page.getByRole('checkbox', { name: 'Required', exact: true }).first();
@@ -559,13 +629,13 @@ test('saved seller → confirmation → evidence → review → export survives 
   await capture(page, `.impeccable/review/${testInfo.project.name}-confirmation.png`);
   await page.getByRole('button', { name: 'Confirm target and discover' }).click();
   await expect(page.getByRole('heading', { name: 'Your research, step by step' })).toBeVisible({ timeout: 10000 });
-  await page.locator('.real-research details').filter({ hasText: 'Saved research checkpoints' }).locator('summary').click();
   await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toBeVisible();
   await noOverflow(page);
   await capture(page, `.impeccable/review/${testInfo.project.name}-progress.png`);
   await expect(page.getByRole('heading', { name: '2 companies researched' })).toBeVisible({ timeout: 15000 });
-  await expect(page.locator('.research-recap')).not.toHaveAttribute('open');
-  await expect(page.locator('.real-research')).not.toBeVisible();
+  await expect(page.locator('.research-recap')).toHaveAttribute('open');
+  await expect(page.locator('.real-research')).toBeVisible();
+  await page.locator('.research-recap > summary').click();
   const first = page.locator('.company-sheet').first();
   await openCompany(page);
   await first.locator('.findings .evidence > summary').first().click();
@@ -588,10 +658,8 @@ test('saved seller → confirmation → evidence → review → export survives 
   await openCompany(page);
   await expect(first.getByText('Saved: accepted')).toBeVisible();
   await expect(first.getByLabel('Review note')).toHaveValue('Accepted after inspecting the fixture passage');
-  await page.locator('.research-recap > summary').click();
-  await page.locator('.real-history > summary').click();
+  if (!await page.locator('.research-recap').getAttribute('open').then(value => value !== null)) await page.locator('.research-recap > summary').click();
   await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toContainText('Checking that the evidence supports');
-  await page.locator('.real-history > summary').click();
   await page.locator('.research-recap > summary').click();
   await first.locator('.findings .evidence > summary').first().click();
   await first.locator('.exclusion-checks summary').first().click();

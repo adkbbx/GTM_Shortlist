@@ -4,6 +4,7 @@ export const researchStages = [
   'Understand offer', 'Explore market', 'Confirm target',
   'Discover companies', 'Inspect evidence', 'Review and draft',
 ] as const;
+export const stagePhases = [['seller'], ['market', 'campaigns'], ['confirmation'], ['discovery'], ['research'], ['review']];
 
 /** Project persisted boundaries, never elapsed time or optimistic item counts. */
 export function researchStage(run: Run) {
@@ -20,7 +21,7 @@ export function researchStage(run: Run) {
   const pending = run.status === 'queued' || run.status === 'running';
   const latest = run.progress.events.at(-1);
   const working = run.status === 'running' && run.progress.worker_online && latest?.state === 'started';
-  const phases = [['seller'], ['market', 'campaigns'], ['confirmation'], ['discovery'], ['research'], ['review']];
+  const phases = stagePhases;
   const states = researchStages.map((label, index) => {
     const failures = events.some(event => phases[index].includes(event.phase) && event.state === 'failed');
     const saved = index === 0 ? Boolean(run.draft || run.profile)

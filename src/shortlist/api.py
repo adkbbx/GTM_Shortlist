@@ -32,7 +32,7 @@ from shortlist.local_credentials import (
 from shortlist.local_service import LocalResearchService, ServiceUnavailable
 from shortlist.market import MarketResearch
 from shortlist.model_setup import LocalModels, ModelSetupError, available_models
-from shortlist.progress import RunProgress
+from shortlist.progress import RunProgress, public_events
 from shortlist.providers import SellerDraft, company_name_matches
 from shortlist.selection import Selection
 from shortlist.store import BudgetExceeded, Conflict, Store, saved_discovery_available, seller_retry_available
@@ -312,7 +312,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                        can_continue_discovery=saved_discovery_available(run), progress=RunProgress(
                            worker_online=store.worker_online(), candidates=len(run["checkpoint"].get("candidates", [])),
                            sources=len({s["id"] for pages in run["checkpoint"].get("sources", {}).values() for s in pages}),
-                           companies=len(run["records"]), events=run["events"]))
+                           companies=len(run["records"]), events=public_events(run)))
 
     @app.get("/api/health", response_model=Health)
     def health():

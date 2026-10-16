@@ -50,3 +50,27 @@ def step_label(kind: str, operation: str, domain: str | None = None) -> str:
     if operation.startswith("verify:"):
         return "Checking that the evidence supports each finding for " + company
     return "Assessing company fit for " + company
+
+
+def public_events(run: dict) -> tuple[dict, ...]:
+    """Explain saved schema failures without exposing model output or changing history."""
+    checkpoint = run["checkpoint"]
+    diagnostics = {
+        step_label("model", "seller:model"): checkpoint.get("seller_model_output"),
+        step_label("model", "market:campaigns"): checkpoint.get("market_model_output"),
+    }
+    for domain, output in checkpoint.get("model_outputs", {}).items():
+        diagnostics[step_label("model", "model:" + domain)] = output
+        diagnostics[step_label("model", "repair:" + domain)] = output.get("repair_failure")
+    result = []
+    for event in run["events"]:
+        projected = dict(event)
+        diagnostic = diagnostics.get(event["label"])
+        if event["state"] == "failed" and event["detail"] == "Gemma output failed validation" and diagnostic:
+            issues = diagnostic.get("issues", [])
+            if not diagnostic.get("content") and any(issue.get("type") == "json_object_required" for issue in issues):
+                projected["detail"] = "The model returned an empty response instead of the required structured output."
+            elif any(issue.get("type") == "missing" for issue in issues):
+                projected["detail"] = "The model response was missing required research fields. This assessment was not completed."
+        result.append(projected)
+    return tuple(result)
