@@ -54,6 +54,24 @@ The research view shows persisted, timestamped checkpoints, actual saved page/co
 
 Enter a company name, bare domain or full HTTPS URL. All company names use the same bounded website lookup; confirm a suggested website or enter one manually before offer drafting. Bare domains and HTTPS URLs go directly to website profiling. Matches are suggestions and can refer to another company. Offer and target confirmation still precede prospect discovery. See [company input](docs/company-name-input.md).
 
+### Enable optional company autocomplete
+
+Each self-hosting operator supplies a [Brandfetch public client ID](https://developers.brandfetch.com/register) once for their installation. People using that installation do not need separate IDs. Without this configuration, manual company-name and website entry still work.
+
+1. Create a free Brandfetch developer account and copy its **public client ID**.
+2. Create `.env.local` in the repository root and add:
+
+   ```dotenv
+   VITE_BRANDFETCH_CLIENT_ID=your_public_client_id
+   ```
+
+3. Run `npm run build`, then refresh the app. If you use `npm run dev`, restart the frontend dev server after changing this file.
+4. Type at least two characters into **Company name or website**. Choose a suggestion to fill its domain, then click **Start research** when you are ready.
+
+The public client ID is included in browser assets. Use a public client ID, never a secret API key. `.env.local` is ignored by Git; `.env.example` contains only the empty setting. The repository ships no shared developer ID.
+
+Autocomplete calls the [Brand Search API](https://docs.brandfetch.com/brand-search-api/overview) directly from the browser after a short typing delay. This API has a free request allowance and rate limits separate from Brandfetch's paid enrichment API. Review its current usage guidelines and monitor the installation's allowance in the Brandfetch dashboard. Queries and icon requests go to Brandfetch; results are transient UI suggestions. Selecting a suggestion does not start research or call Tavily, SerpApi, or the research model. The design-only preview on port8018 disables directory requests.
+
 New browser runs also collect up to 15 potential competitor websites and propose up to six editable campaign hypotheses. Search observations do not establish competitor similarity. Confirm your offer, observable criteria, search keywords and selected campaign before discovery starts. CLI and older saved runs retain their original flow.
 
 Selection reads a bounded pool of six company primary pages and, when observed, one same-company activity page each. Dated first-party statements can affect which companies receive the three research slots. Missing dates remain unknown; an announcement does not establish buying intent. The [agent experience checklist](docs/agent-experience.md) describes current coverage and unfinished quality checks.

@@ -1,5 +1,9 @@
 # Progress and handoff
 
+## 17 October, open-source autocomplete setup
+
+Documented optional autocomplete setup in README: each installation owner obtains a free public Brandfetch client ID, sets VITE_BRANDFETCH_CLIENT_ID in ignored .env.local and rebuilds the UI. End users of the installation share its directory configuration; forks do not receive this developer's ID. Manual company-name/domain input works without autocomplete. Documented browser-visible configuration, separate service terms/quotas, transient directory results and the explicit research submit boundary. Documentation-only follow-up; preceding build,21 backend tests and22 browser checks remain the relevant verification. No service restart, provider request, merge or deployment.
+
 ## 17 October, company autocomplete
 
 Added React Aria Components1.22.1 ComboBox for new-company suggestions with names, domains and icons. Brandfetch Brand Search is the separate directory source; no Tavily/model/research dispatch occurs on typing or selection. The user supplied a public client ID, configured only in ignored .env.local for the local build. Hosted operators can provide VITE_BRANDFETCH_CLIENT_ID or a public shortlist-company-suggestions-client-id meta tag. No secret Brand API key is used. Brandfetch documents free Brand Search quotas separate from paid Brand API fetches; quota/rate failures retain manual entry. After fixture verification, performed one bounded free Brandfetch lookup for clay in a separate local8019 browser tab using the user-supplied public client ID. Five real matches appeared with rendered icons, including clay.com. No result was selected and no research action was issued; the temporary tab was closed. This used one free Brand Search allowance, with no paid research/provider credits. No inference or enrichment call was made.
