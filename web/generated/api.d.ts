@@ -38,6 +38,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/local/model": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Configure Model */
+        post: operations["configure_model_api_local_model_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/setup": {
         parameters: {
             query?: never;
@@ -1220,6 +1237,41 @@ export interface operations {
                      * Format: password
                      */
                     key: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
+    configure_model_api_local_model_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Base Url */
+                    base_url: string;
+                    /** Model */
+                    model: string;
+                    /**
+                     * Key
+                     * Format: password
+                     * @default
+                     */
+                    key?: string;
                 };
             };
         };

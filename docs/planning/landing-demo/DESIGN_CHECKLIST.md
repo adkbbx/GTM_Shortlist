@@ -93,3 +93,9 @@ This reconciliation supersedes the preceding note that hosted fixes are absent. 
 - [x] Keep a single synthetic label, collapsed stage navigation and one main step action; provide an explicit return after completion.
 - [x] Bound decorative motion to four seconds; retain reduced-motion, offscreen and static fallback handling.
 - [x] Build/Ruff,17 backend passes with2 skips and14 final focused browser cases; inspect current phone/laptop captures.
+
+## Model setup and provider status actions, 17 October
+- [x] Make provider statuses clickable and remove duplicate setup/manage labels.
+- [x] Configure the local research model without returning saved secrets or contacting providers.
+- [x] Explain the durable worker, missing requirements and supervised startup; keep the review worker stopped.
+- [x] Verify model/search coexistence, next-run loading, secret-safe rejection, hosted/preview boundaries and phone/laptop forms.

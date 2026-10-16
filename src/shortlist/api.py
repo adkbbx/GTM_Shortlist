@@ -22,6 +22,8 @@ from shortlist.fetch import canonical_url
 from shortlist.local_credentials import (
     CredentialUnavailable,
     LocalCredentials,
+    LocalModelCredentials,
+    LocalModelInput,
     apply_local_credentials,
     validate_tavily_key,
 )
@@ -299,14 +301,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         try:
             readiness = apply_local_credentials(settings).readiness()
         except CredentialUnavailable:
-            readiness = {**settings.readiness(), "search": False}
+            readiness = {"search": False, "gemma": False}
             error = "unavailable"
         return Health(mode=settings.mode, search_ready=readiness["search"], gemma_ready=readiness["gemma"],
                       worker_online=local_store.worker_online() if local_store else False, local_search_error=error)
 
-    @app.post("/api/local/tavily", response_model=Health, openapi_extra={
-        "requestBody": {"required": True, "content": {"application/json": {"schema": LocalKeyInput.model_json_schema()}}}})
-    async def configure_tavily(request: Request):
+    async def local_provider_body(request: Request) -> bytearray:
         if settings.mode != "local":
             raise HTTPException(404, "Local provider setup is unavailable")
         if request.headers.get("origin") != str(request.base_url).rstrip("/") or \
@@ -319,6 +319,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             body.extend(chunk)
             if len(body) > 2048:
                 raise HTTPException(413, "Provider setup request is too large")
+        return body
+
+    @app.post("/api/local/tavily", response_model=Health, openapi_extra={
+        "requestBody": {"required": True, "content": {"application/json": {"schema": LocalKeyInput.model_json_schema()}}}})
+    async def configure_tavily(request: Request):
+        body = await local_provider_body(request)
         try:
             command = LocalKeyInput.model_validate_json(body)
             key = validate_tavily_key(command.key.get_secret_value())
@@ -331,6 +337,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         # Short local I/O; native protection and the committed private database
         # are shared by this API and the separately running worker.
         await run_in_threadpool(LocalCredentials(settings.db_path).save, key)
+        return await run_in_threadpool(health)
+
+    @app.post("/api/local/model", response_model=Health, openapi_extra={
+        "requestBody": {"required": True, "content": {"application/json": {"schema": LocalModelInput.model_json_schema()}}}})
+    async def configure_model(request: Request):
+        body = await local_provider_body(request)
+        try:
+            command = LocalModelInput.model_validate_json(body)
+        except ValueError:
+            raise HTTPException(422, "Enter a valid model name and HTTPS endpoint, or HTTP endpoint on localhost") from None
+        finally:
+            body.clear()
+        await run_in_threadpool(LocalModelCredentials(settings.db_path).save, command)
         return await run_in_threadpool(health)
 
     @app.get("/api/auth/setup", response_model=AuthSetup)

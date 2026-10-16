@@ -1,5 +1,13 @@
 # Progress and handoff
 
+## 17 October, model setup and consistent Settings actions
+
+Added local Research model configuration through the private provider store, independently of the saved Tavily key. Click the status itself in either provider row to open its form; removed the duplicate setup/manage buttons. Model setup accepts an OpenAI-compatible Gemma endpoint, exact model ID and optional masked token. Saving makes no provider request or research job. Both local API routes share loopback/origin, bounded JSON and secret-safe validation. Hosted mode and the design preview reject changes. DPAPI encrypts model settings on Windows; environment configuration remains the fallback until model settings are saved. The next worker run loads the saved replacement without rewriting search settings.
+
+Retained the durable local worker and explained its role, missing requirements and supervised startup in Settings. Instructions pin this checkout with PYTHONPATH and explain that starting a worker can resume queued provider work. Refreshed the8019 API-only review service; health still reports search configured, model absent and worker offline. No provider call, real model setup, merge, deployment or database cleanup occurred. The8018 preview data and queued run remain untouched.
+
+Verification: build and Ruff passed;42 relevant backend/API tests passed with2 explicit POSIX skips. Four final Playwright cases passed on phone and laptop, covering clickable provider states, model persistence, retry, keyboard focus, cleared secrets and320px/200% overflow. Fresh screenshots inspected. Initial new test failures were incorrect expectations about existing host/origin middleware ordering; corrected tests exercise the intended boundaries. Actual provider connectivity and research quality remain unverified.
+
 ## 17 October03:03JST, hosted password spacing fix verified
 
 All five jobs passed for1f1da13124e074188e007fe52d88f58af1466d39 in [CI38917595074](https://github.com/adkbbx/GTM_Shortlist/actions/runs/38917595074). Deployed that exact commit to the existing web service, deployment dep-db96dp0n74is73ej5a5g, observed Deploy succeeded|Live in34.7s. Main and automatic deployment remain unchanged. Worker stays at7f46cc1; the only product difference is the account hint CSS margin, with no backend/worker code change.

@@ -81,6 +81,11 @@ export const api = {
     if (!isHealth(data)) throw new Error('Search setup could not be confirmed. Please reload.');
     return data;
   },
+  async configureModel(input: { base_url: string; model: string; key: string }) {
+    const data = await request('/api/local/model', input);
+    if (!isHealth(data)) throw new Error('Research model setup could not be confirmed. Please reload.');
+    return data;
+  },
   async stop(id: string) {
     return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/stop`, { confirmation: 'stop' }));
   },

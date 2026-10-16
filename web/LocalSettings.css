@@ -6,6 +6,10 @@
 .provider-status{margin:24px 0 16px}
 .provider-status>div{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .provider-status dt{font-weight:600}.provider-status dd{margin:0;color:var(--muted)}
+.provider-status dd button{min-height:44px;padding:8px 0;text-decoration:underline;text-underline-offset:3px}
+.provider-status>div{align-items:center}
+.worker-help{font-size:.875rem;margin:16px 0}.worker-help p{margin:12px 0}.worker-help summary{cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:8px 0}.worker-help code{display:block;overflow-wrap:anywhere;white-space:normal}
+.local-settings form label{display:block;margin-top:16px}
 .local-settings>button{margin:16px 0 0}.local-settings form{margin-top:20px;padding-top:20px;border-top:1px solid var(--line)}
 .local-settings form p{font-size:.875rem;margin:12px 0 20px}.local-settings form .hint{margin-top:12px}
 .local-settings p[role=status]{margin-top:16px}.local-settings .review-actions{flex-wrap:wrap}

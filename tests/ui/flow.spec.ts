@@ -21,6 +21,51 @@ async function capture(page: Page, path: string) {
   await page.screenshot({ path, fullPage: true });
 }
 
+test('local model status opens setup and explains the offline worker without dispatch', async ({ page }, info) => {
+  await page.route('**/api/health', route => route.fulfill({ json: {
+    mode: 'local', search_ready: true, gemma_ready: false, worker_online: false, local_search_error: null,
+  } }));
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  const modelStatus = page.getByRole('button', { name: 'Research model: Not configured', exact: true });
+  await expect(modelStatus).toHaveText('Not configured');
+  await expect(page.getByText('No research worker is connected.', { exact: false })).toBeVisible();
+  await page.getByText('How to start local research', { exact: true }).click();
+  await expect(page.locator('.worker-help code').last()).toContainText('shortlist.cli serve --port 8019');
+  await capture(page, `.impeccable/review/${info.project.name}-model-readiness.png`);
+  await modelStatus.press('Enter');
+  await expect(page.getByLabel('Endpoint URL', { exact: true })).toBeFocused();
+  await page.getByLabel('Endpoint URL', { exact: true }).fill('http://localhost:8000/v1');
+  await page.getByLabel('Model name', { exact: true }).fill('labelled-fixture-gemma');
+  const key = page.getByLabel('Model API key (optional)', { exact: true });
+  await expect(key).toHaveAttribute('type', 'password');
+  await key.fill('labelled-browser-model-fixture');
+  await page.route('**/api/local/model', route => route.fulfill({ status: 503, json: { detail: 'Labelled model save failure' } }), { times: 1 });
+  await page.getByRole('button', { name: 'Save research model', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('Labelled model save failure');
+  await expect(key).toHaveValue('labelled-browser-model-fixture');
+  await capture(page, `.impeccable/review/${info.project.name}-model-form.png`);
+  const saved = page.waitForResponse(response => new URL(response.url()).pathname === '/api/local/model');
+  await page.getByRole('button', { name: 'Save research model', exact: true }).click();
+  expect((await saved).status()).toBe(200);
+  await expect(page.getByRole('button', { name: 'Research model: Configured', exact: true })).toBeFocused();
+  await expect(key).toHaveCount(0);
+  expect(await page.evaluate(() => JSON.stringify([localStorage, sessionStorage]))).not.toContain('labelled-browser-model-fixture');
+  await page.unroute('**/api/health');
+  await page.reload();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.getByRole('button', { name: 'Research model: Configured', exact: true }).click();
+  await expect(key).toHaveValue('');
+  await expect(page.getByLabel('Endpoint URL', { exact: true })).toHaveValue('');
+  await page.getByRole('button', { name: 'Cancel model change' }).click();
+  await page.getByRole('button', { name: 'Research model: Configured', exact: true }).click();
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+  await noOverflow(page);
+  await page.getByRole('button', { name: 'Save research model', exact: true }).scrollIntoViewIfNeeded();
+  await expect(page.getByRole('button', { name: 'Save research model', exact: true })).toBeInViewport();
+});
+
 test('market observations and editable campaigns persist into confirmed targeting', async ({ page }, info) => {
   await page.goto('/');
   await page.getByLabel('Company name or website', { exact: true }).fill('https://market-seller.example/');
@@ -235,8 +280,8 @@ test('local masked Tavily setup saves privately, recovers and clears browser inp
   expect((await page.request.post('/__fixture_corrupt_provider')).ok()).toBeTruthy();
   await page.goto('/');
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
-  await expect(page.getByRole('alert')).toContainText('Saved search settings could not be read');
-  const trigger = page.getByRole('button', { name: 'Set up company search', exact: true });
+  await expect(page.getByRole('alert')).toContainText('Saved provider settings could not be read');
+  const trigger = page.getByRole('button', { name: 'Company search: Settings unavailable', exact: true });
   await trigger.press('Enter');
   const keyInput = page.getByLabel('Tavily API key', { exact: true });
   await expect(keyInput).toHaveAttribute('type', 'password');
@@ -255,7 +300,7 @@ test('local masked Tavily setup saves privately, recovers and clears browser inp
   expect(await response.text()).not.toContain(key);
   await expect(keyInput).toHaveCount(0);
   await expect(page.getByRole('status').filter({ hasText: 'Search key saved' })).toBeVisible();
-  const update = page.getByRole('button', { name: 'Manage search key', exact: true });
+  const update = page.getByRole('button', { name: 'Company search: Configured', exact: true });
   await expect(update).toBeFocused();
   await expect(update).toHaveAttribute('aria-expanded', 'false');
   await expect(page.getByRole('button', { name: 'Continue to your website' })).toHaveCount(0);

@@ -66,6 +66,63 @@
         }
       }
     },
+    "/api/local/model": {
+      "post": {
+        "summary": "Configure Model",
+        "operationId": "configure_model_api_local_model_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "base_url": {
+                    "type": "string",
+                    "maxLength": 1024,
+                    "minLength": 1,
+                    "title": "Base Url"
+                  },
+                  "model": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "pattern": "^[A-Za-z0-9_./:@+-]+$",
+                    "title": "Model"
+                  },
+                  "key": {
+                    "type": "string",
+                    "maxLength": 512,
+                    "format": "password",
+                    "title": "Key",
+                    "default": "",
+                    "writeOnly": true
+                  }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "base_url",
+                  "model"
+                ],
+                "title": "LocalModelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/setup": {
       "get": {
         "summary": "Auth Setup",
