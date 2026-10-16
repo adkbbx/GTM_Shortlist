@@ -604,6 +604,60 @@
         }
       }
     },
+    "/api/runs/{run_id}/retry-seller": {
+      "post": {
+        "summary": "Retry Seller",
+        "operationId": "retry_seller_api_runs__run_id__retry_seller_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetrySellerInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/runs/{run_id}/records/{record_id}/review": {
       "post": {
         "summary": "Review",
@@ -2143,6 +2197,21 @@
         ],
         "title": "Research"
       },
+      "RetrySellerInput": {
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "const": "retry_unstarted_seller",
+            "title": "Confirmation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "confirmation"
+        ],
+        "title": "RetrySellerInput"
+      },
       "ReuseInput": {
         "properties": {
           "request_key": {
@@ -2504,6 +2573,11 @@
               }
             ],
             "title": "Termination"
+          },
+          "can_retry_seller": {
+            "type": "boolean",
+            "title": "Can Retry Seller",
+            "default": false
           }
         },
         "type": "object",

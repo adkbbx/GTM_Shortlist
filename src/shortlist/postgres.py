@@ -60,7 +60,9 @@ class PostgresStore(Store):
             db.execute("SET LOCAL statement_timeout TO '10s'")
             db.execute("SET LOCAL lock_timeout TO '5s'")
             db.execute(
-                "SELECT set_config('shortlist.workspace_id',%s,true)",
+                # Preserve exact float8 timestamps when session defaults round text output.
+                "SELECT set_config('shortlist.workspace_id',%s,true) AS workspace,"
+                "set_config('extra_float_digits','3',true) AS float_digits",
                 (str(self.workspace_id) if self.workspace_id else "",),
             )
             connection = Connection(db)

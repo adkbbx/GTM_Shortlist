@@ -1567,6 +1567,11 @@
       ],
       "default": null,
       "title": "Termination"
+    },
+    "can_retry_seller": {
+      "default": false,
+      "title": "Can Retry Seller",
+      "type": "boolean"
     }
   },
   "required": [

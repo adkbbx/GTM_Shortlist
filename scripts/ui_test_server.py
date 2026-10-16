@@ -73,6 +73,16 @@ if __name__ == "__main__":
                             "Gemma output failed validation. Enter and confirm your offer and target manually to continue.")
         return {"id": identity}
 
+    @application.post("/__fixture_unstarted_seller")
+    def unstarted_seller():
+        from uuid import uuid4
+        with held_lock:
+            identity = store.create_draft("https://seller.example/", "unstarted-seller-" + uuid4().hex)
+            fence = store.claim(identity)
+            checkpoint = store.get_run(identity)["checkpoint"]
+            store.checkpoint(identity, fence, "seller", checkpoint, "partial", "Labelled pre-dispatch setup failure")
+        return {"id": identity}
+
     @application.post("/__fixture_corrupt_provider")
     def corrupt_provider():
         credentials = LocalCredentials(settings.db_path)

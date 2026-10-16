@@ -243,6 +243,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/runs/{run_id}/retry-seller": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Retry Seller */
+        post: operations["retry_seller_api_runs__run_id__retry_seller_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/runs/{run_id}/records/{record_id}/review": {
         parameters: {
             query?: never;
@@ -813,6 +830,14 @@ export interface components {
              */
             people: components["schemas"]["PersonObservation"][];
         };
+        /** RetrySellerInput */
+        RetrySellerInput: {
+            /**
+             * Confirmation
+             * @constant
+             */
+            confirmation: "retry_unstarted_seller";
+        };
         /** ReuseInput */
         ReuseInput: {
             /** Request Key */
@@ -943,6 +968,11 @@ export interface components {
             experience_version: 1 | 2;
             /** Termination */
             termination?: "user_stopped" | null;
+            /**
+             * Can Retry Seller
+             * @default false
+             */
+            can_retry_seller: boolean;
         };
         /** SavedRecord */
         SavedRecord: {
@@ -1529,6 +1559,41 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["StopInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    retry_seller_api_runs__run_id__retry_seller_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RetrySellerInput"];
             };
         };
         responses: {

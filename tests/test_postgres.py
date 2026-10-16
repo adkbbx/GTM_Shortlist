@@ -6,6 +6,7 @@ import os
 import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor
+from datetime import timedelta
 from pathlib import Path
 from threading import Event
 from uuid import uuid4
@@ -18,13 +19,14 @@ from psycopg import sql
 from psycopg.conninfo import conninfo_to_dict, make_conninfo
 from pydantic import SecretStr
 from test_company_lookup import assert_lookup_lifecycle
+from test_retry_seller import failed_setup
 from test_stop import assert_held_worker_stops
 
 from shortlist.api import create_app
 from shortlist.auth import verify_user
 from shortlist.config import Settings
 from shortlist.credits import CreditWallet
-from shortlist.domain import Candidate, Criterion, Profile, Review, Source
+from shortlist.domain import Candidate, Criterion, Profile, Review, Source, utcnow
 from shortlist.export import export_run
 from shortlist.journal import call_step
 from shortlist.postgres import PostgresStore
@@ -75,6 +77,59 @@ def owners(database):
     profile = Profile(seller_url="https://seller.example/", offer="Labelled acquisition research service",
                       target="AI business software", criteria=(Criterion(id="ai", description="AI software"),))
     return a, b, worker, profile
+
+
+def test_cache_timestamp_survives_low_precision_postgres_float_output(owners):
+    a, _, worker, profile = owners
+    low_precision = SecretStr(make_conninfo(worker.get_secret_value(), options="-c extra_float_digits=0"))
+    scoped = PostgresStore(low_precision, a.workspace_id, worker=True)
+    run_id = a.create_run(profile, "float-cache")
+    source = Source(url="https://precision.example/", company_domain="precision.example", title="Fixture",
+                    text="Labelled precision fixture", content_hash="labelled",
+                    retrieved_at=(utcnow() - timedelta(seconds=2)).replace(microsecond=718494))
+    scoped.cache_source(run_id, scoped.claim(run_id), source.url, source)
+    with psycopg.connect(low_precision.get_secret_value()) as raw:
+        raw.execute("SET LOCAL ROLE shortlist_worker")
+        raw.execute("SELECT set_config('shortlist.workspace_id',%s,true)", (str(a.workspace_id),))
+        rounded = raw.execute("SELECT retrieved_epoch FROM shortlist.source_cache WHERE source_id=%s",
+                              (source.id,)).fetchone()[0]
+        assert rounded != source.retrieved_at.timestamp()  # Reproduce the hosted wire-format rounding.
+    assert scoped.cached_source(source.url, source.company_domain, 24,
+                                run_id=run_id, operation="fetch:precision") == source
+    with scoped.connection() as db:
+        assert db.execute("SHOW extra_float_digits").fetchone()[0] == "3"
+    with psycopg.connect(low_precision.get_secret_value()) as raw:
+        assert raw.execute("SHOW extra_float_digits").fetchone()[0] == "0"  # No role/server setting mutation.
+    with scoped.connection() as db:
+        db.execute("UPDATE source_cache SET retrieved_epoch=retrieved_epoch+0.01 WHERE source_id=?", (source.id,))
+    with pytest.raises(Conflict, match="corrupt"):
+        scoped.cached_source(source.url, source.company_domain, 24, run_id=run_id, operation="fetch:changed")
+
+
+def test_predispatch_seller_retry_keeps_quotas_and_owner_scope_under_concurrent_calls(owners):
+    a, b, _, _ = owners
+    identity, _, _ = failed_setup(a)
+    with pytest.raises(KeyError):
+        b.retry_seller(identity)
+    another = a.create_draft("https://other-seller.example/", "another-active-seller")
+    saved = a.get_run(identity)
+    with pytest.raises(BudgetExceeded):
+        a.retry_seller(identity)
+    assert a.get_run(identity) == saved
+    with a.connection() as db:
+        quota = dict(db.execute("SELECT free_profiles,daily_profiles FROM workspaces WHERE id=?",
+                               (a.workspace_id,)).fetchone())
+    a.stop_run(another)
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        assert list(pool.map(lambda _: a.retry_seller(identity), range(2))) == [None, None]
+    retried = a.get_run(identity)
+    assert retried["status"] == "queued" and retried["attempts"] == []
+    assert retried["checkpoint"]["seller_retry_requested"] is True
+    assert len(retried["events"]) == len(saved["events"]) + 1
+    with a.connection() as db:
+        assert dict(db.execute("SELECT free_profiles,daily_profiles FROM workspaces WHERE id=?",
+                               (a.workspace_id,)).fetchone()) == quota
+    assert CreditWallet(a).balance().available == 3
 
 
 def test_isolation_idempotency_and_no_ownerless_access(owners):
@@ -344,6 +399,11 @@ def test_hosted_api_verifies_identity_and_scopes_every_route(owners, monkeypatch
     second = client.post("/api/sellers", headers=second_headers, json=body)
     assert first.status_code == second.status_code == 201
     first_id, second_id = first.json()["id"], second.json()["id"]
+    retry_path = f"/api/runs/{first_id}/retry-seller"
+    retry_command = {"confirmation": "retry_unstarted_seller"}
+    assert client.post(retry_path, json=retry_command).status_code == 401
+    assert client.post(retry_path, headers=second_headers, json=retry_command).status_code == 404
+    assert client.post(retry_path, headers=first_headers, json=retry_command).status_code == 409
     assert first_id != second_id
     assert client.post("/api/sellers", headers=first_headers, json=body).json()["id"] == first_id
     assert client.post("/api/sellers", headers=first_headers, json={**body, "request_key": "another-run"}).status_code == 403

@@ -31,6 +31,13 @@ class BudgetExceeded(ValueError):
     pass
 
 
+def seller_retry_available(run: dict) -> bool:
+    checkpoint = run["checkpoint"]
+    return (run["status"] == "partial" and run["stage"] == "seller" and not run["profile"]
+            and not run["attempts"] and not checkpoint.get("draft") and bool(checkpoint.get("seller_url"))
+            and not checkpoint.get("termination") and not checkpoint.get("seller_retry_requested"))
+
+
 class Store:
     order_key = "rowid"
     operator_access = True
@@ -326,6 +333,28 @@ class Store:
                        "status='partial',deleted_at=?,updated_at=?,lease_until=0,fence=fence+1 WHERE id=?",
                        (now, now, run_id))
             return True
+
+    def retry_seller(self, run_id: str):
+        """One explicit recovery before dispatch; never replay failed/uncertain provider requests."""
+        with self.connection() as db:
+            self.begin(db)
+            row = db.execute("SELECT * FROM runs WHERE id=? AND deleted_at IS NULL", (run_id,)).fetchone()
+            if row is None:
+                raise KeyError(run_id)
+            checkpoint = json.loads(row["checkpoint"])
+            if checkpoint.get("seller_retry_requested"):
+                return
+            run = {**dict(row), "profile": json.loads(row["profile"]), "checkpoint": checkpoint,
+                   "attempts": db.execute("SELECT 1 FROM attempts WHERE run_id=? LIMIT 1", (run_id,)).fetchall()}
+            if not seller_retry_available(run):
+                raise Conflict("Only company setup that failed before any provider request can be retried here")
+            self.reserve_run(db, run_id)
+            checkpoint["seller_retry_requested"] = True
+            now = utcnow().isoformat()
+            db.execute("UPDATE runs SET status='queued',error=NULL,checkpoint=?,lease_until=0,fence=fence+1,updated_at=? "
+                       "WHERE id=?", (json.dumps(checkpoint), now, run_id))
+            db.execute("INSERT INTO run_events(run_id,phase,label,state,created_at) VALUES (?,?,?,?,?)",
+                       (run_id, "seller", "Retrying saved company setup before any provider dispatch", "waiting", now))
 
     def stop_run(self, run_id: str):
         with self.connection() as db:

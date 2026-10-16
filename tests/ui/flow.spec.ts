@@ -315,6 +315,37 @@ test('failed offer summary explains next steps on saved runs', async ({ page }, 
   await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
 });
 
+test('unstarted seller setup recovers once under the same saved run', async ({ page }, info) => {
+  const fixture = await page.request.post('/__fixture_unstarted_seller');
+  const { id } = await fixture.json();
+  await page.goto(`/?run=${id}`);
+  const recovery = page.getByRole('region', { name: 'Retry company setup', exact: true });
+  await expect(recovery).toContainText('before any provider request');
+  let fail = true;
+  await page.route(`**/api/runs/${id}/retry-seller`, async route => {
+    if (fail) { fail = false; await route.fulfill({ status: 503, json: { detail: 'Labelled temporary recovery failure' } }); }
+    else await route.continue();
+  });
+  await recovery.getByRole('button', { name: 'Retry company setup', exact: true }).press('Enter');
+  await expect(recovery.getByRole('alert')).toContainText('Labelled temporary recovery failure');
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${info.project.name}-seller-recovery.png`);
+  await recovery.getByRole('button', { name: 'Retry company setup', exact: true }).press('Enter');
+  await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
+  expect(new URL(page.url()).searchParams.get('run')).toBe(id);
+  await expect(recovery).toHaveCount(0);
+  const saved = await (await page.request.get(`/api/runs/${id}`)).json();
+  expect(saved.can_retry_seller).toBe(false);
+  expect(saved.attempts.length).toBeGreaterThan(0);
+  const duplicate = await page.request.post(`/api/runs/${id}/retry-seller`, { data: { confirmation: 'retry_unstarted_seller' } });
+  expect(duplicate.ok()).toBe(true);
+  expect((await duplicate.json()).attempts).toEqual(saved.attempts);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible();
+  await expect(recovery).toHaveCount(0);
+  await noOverflow(page);
+});
+
 test('seller field accepts domains and full HTTPS URLs', async ({ page }, info) => {
   for (const value of ['eygentic.com', 'https://eygentic.com']) {
     await page.goto('/');
