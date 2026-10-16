@@ -220,6 +220,7 @@ test('account tray hides details and stays stable while credits load', async ({ 
   });
   await page.goto('/');
   await signIn(page);
+  await expect(page.getByRole('button', { name: 'Settings', exact: true })).toHaveCount(0);
   const trigger = page.getByRole('button', { name: 'Open account tray', exact: true });
   const before = await trigger.boundingBox();
   await expect(page.getByText('fixture@example.test', { exact: true })).not.toBeVisible();

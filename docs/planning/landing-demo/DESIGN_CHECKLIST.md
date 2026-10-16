@@ -77,3 +77,11 @@ This branch update does not merge into main or authorize deployment. Reconcile t
 - [x] Verify all five CI jobs for reconciliation commita546d3f in run38947565998; stop the unique local test cluster and preserve preview data.
 
 This reconciliation supersedes the preceding note that hosted fixes are absent. Full product/live quality acceptance remains separate.
+
+## Local setup and phone navigation feedback, 17 October
+- [x] Move provider configuration into local Settings; distinguish presence from tested connectivity and preserve masked-key privacy.
+- [x] Remove redundant setup continuation; retain a compact missing-search prompt and read-only preview settings.
+- [x] Use saved company initials and retain full expanded history labels.
+- [x] Replace the pen with a plus-in-square, separate phone history controls from branding, and use labelled bottom actions.
+- [x] Unify charcoal phone/desktop navigation colors and reserve enlarged-text bottom-bar space.
+- [x] Record66 combined browser passes, six final Settings/Account passes, build/Ruff,34 backend passes with2 skips and current synthetic captures.

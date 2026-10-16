@@ -234,8 +234,9 @@ test('stopping actual held research keeps completed sheets and ignores an older 
 test('local masked Tavily setup saves privately, recovers and clears browser input', async ({ page }, info) => {
   expect((await page.request.post('/__fixture_corrupt_provider')).ok()).toBeTruthy();
   await page.goto('/');
-  await expect(page.getByRole('alert')).toContainText('Local search settings could not be read');
-  const trigger = page.getByRole('button', { name: 'Connect Tavily', exact: true });
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('Saved search settings could not be read');
+  const trigger = page.getByRole('button', { name: 'Set up company search', exact: true });
   await trigger.press('Enter');
   const keyInput = page.getByLabel('Tavily API key', { exact: true });
   await expect(keyInput).toHaveAttribute('type', 'password');
@@ -253,12 +254,11 @@ test('local masked Tavily setup saves privately, recovers and clears browser inp
   await expect(page.getByRole('alert')).toHaveCount(0);
   expect(await response.text()).not.toContain(key);
   await expect(keyInput).toHaveCount(0);
-  const saved = page.getByRole('status').filter({ hasText: 'Tavily key saved' });
-  await expect(saved).toBeFocused();
-  const update = page.getByRole('button', { name: 'Update search key', exact: true });
+  await expect(page.getByRole('status').filter({ hasText: 'Search key saved' })).toBeVisible();
+  const update = page.getByRole('button', { name: 'Manage search key', exact: true });
+  await expect(update).toBeFocused();
   await expect(update).toHaveAttribute('aria-expanded', 'false');
-  await page.getByRole('button', { name: 'Continue to your website' }).press('Enter');
-  await expect(page.getByLabel('Company name or website', { exact: true })).toBeFocused();
+  await expect(page.getByRole('button', { name: 'Continue to your website' })).toHaveCount(0);
   expect(await page.evaluate(() => JSON.stringify([localStorage, sessionStorage]))).not.toContain(key);
   expect(await page.locator('body').textContent()).not.toContain(key);
   await noOverflow(page);
@@ -269,11 +269,12 @@ test('local masked Tavily setup saves privately, recovers and clears browser inp
   await capture(page, `.impeccable/review/${info.project.name}-tavily-large-text.png`);
   await update.press('Enter');
   await expect(keyInput).toHaveValue('');
-  await page.getByRole('button', { name: 'Close setup' }).press('Enter');
+  await page.getByRole('button', { name: 'Cancel key change' }).press('Enter');
   await expect(update).toBeFocused();
   await page.reload();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Settings', exact: true }).locator('.provider-status').getByText('Configured', { exact: true }).first()).toBeVisible();
   await expect(update).toHaveAttribute('aria-expanded', 'false');
-  await expect(page.getByRole('status').filter({ hasText: 'Search key saved' })).toBeVisible();
   await update.click();
   await expect(keyInput).toHaveValue('');
 });

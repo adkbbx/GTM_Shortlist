@@ -15,7 +15,7 @@ test('shell reaches the viewport bottom and footer uses the remaining space', as
         return { shell: rect('#root'), header: rect('.topbar'), sidebar: rect('.research-sidebar'), main: rect('.main'), footer: rect('.workspace-footer') };
       });
       expect(geometry.shell.bottom).toBeGreaterThanOrEqual(viewport.height - 1);
-      expect(geometry.footer.bottom).toBeGreaterThanOrEqual(viewport.height - 50);
+      expect(geometry.footer.bottom).toBeGreaterThanOrEqual(viewport.height - (viewport.width <= 850 ? 130 : 50));
       expect(geometry.footer.width).toBeGreaterThan(Math.min(600, viewport.width - 48));
       if (viewport.width > 850) {
         expect(geometry.sidebar.bottom).toBe(geometry.shell.bottom);
@@ -38,7 +38,7 @@ test('navigation remains compact through resize and drawer transitions', async (
     await page.getByRole('button', { name: 'Collapse sidebar', exact: true }).click();
     for (const width of [1366, 1024, 851, 850, 731, 701, 700, 390, 320, 851, 1366]) {
       await page.setViewportSize({ width, height: 800 });
-      const expand = page.getByRole('button', { name: 'Expand sidebar', exact: true });
+      const expand = page.getByRole('button', { name: /^(Expand sidebar|Saved runs)$/ });
       await expect(expand).toBeVisible();
       const before = await page.locator('.main').boundingBox();
       await expand.click();
@@ -74,13 +74,13 @@ test('navigation remains compact through resize and drawer transitions', async (
       expect(geometry.heading).toBeGreaterThan(Math.min(280, width - 48));
     }
     await page.setViewportSize({ width: 790, height: 800 });
-    await page.getByRole('button', { name: 'Expand sidebar', exact: true }).click();
+    await page.getByRole('button', { name: /^(Expand sidebar|Saved runs)$/ }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
     await page.setViewportSize({ width: 1366, height: 800 });
     await expect(page.getByRole('dialog')).toHaveCount(0);
     expect(await page.evaluate(() => document.body.style.overflow)).not.toBe('hidden');
     await page.getByLabel('Company name or website', { exact: true }).fill('Preserved company');
-    await page.getByRole('button', { name: 'Expand sidebar', exact: true }).click();
+    await page.getByRole('button', { name: /^(Expand sidebar|Saved runs)$/ }).click();
     await expect(page.getByLabel('Company name or website', { exact: true })).toHaveValue('Preserved company');
   } finally { await page.request.post(`/__fixture_release/${id}`); }
 });
@@ -92,12 +92,12 @@ test('saved research navigation collapses and expands without changing the run',
     await page.goto(`/?run=${id}`);
     const sidebar = page.locator('.research-sidebar');
     if (info.project.name === 'phone') {
-      await page.getByRole('button', { name: 'Expand sidebar', exact: true }).click();
+      await page.getByRole('button', { name: /^(Expand sidebar|Saved runs)$/ }).click();
       await expect(page.getByRole('dialog', { name: 'Your workspace' })).toBeVisible();
     }
     await expect(sidebar.locator('[aria-current=page]')).toHaveCount(1);
     await page.getByRole('button', { name: info.project.name === 'phone' ? 'Close saved runs' : 'Collapse sidebar', exact: true }).click();
-    const expand = page.getByRole('button', { name: 'Expand sidebar', exact: true });
+    const expand = page.getByRole('button', { name: /^(Expand sidebar|Saved runs)$/ });
     await expect(expand).toHaveAttribute('aria-expanded', 'false');
     await expect(page).toHaveURL(new RegExp(id));
     if (info.project.name === 'phone') await expect(page.getByRole('dialog')).not.toBeVisible();
@@ -125,7 +125,7 @@ test('long saved history scrolls without compressing or overlapping rows', async
     const run = await response.json();
     await page.route('**/api/runs', route => route.fulfill({ json: Array.from({ length: 25 }, (_, index) => ({ ...run, id: index === 0 ? id : `history-${index}`, company_name: `Saved company ${index + 1}` })) }));
     await page.goto(`/?run=${id}`);
-    if (info.project.name === 'phone') await page.getByRole('button', { name: 'Expand sidebar', exact: true }).click();
+    if (info.project.name === 'phone') await page.getByRole('button', { name: /^(Expand sidebar|Saved runs)$/ }).click();
     const rows = page.getByRole('navigation', { name: 'Research history' }).getByRole('button');
     await expect(rows).toHaveCount(25);
     const geometry = await rows.evaluateAll(elements => elements.map(element => {

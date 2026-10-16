@@ -99,14 +99,6 @@ input[type=checkbox]:focus { box-shadow: none; }
 .activity-pagination button:disabled { cursor: default; }
 .stop-research { margin: -8px 0 24px; }
 .stop-research > p { max-width: 65ch; color: var(--muted); margin-top: 10px; }
-.local-search-setup { margin: -8px 0 24px; }
-.local-search-setup > div { max-width: 640px; margin-top: 20px; padding: 24px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-.local-search-setup p { color: var(--muted); }
-.local-search-setup input { width: 100%; }
-.search-setup-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
-.local-search-setup > .search-setup-summary { max-width: none; padding: 0; border: 0; margin-top: 0; }
-.search-setup-summary p { color: var(--ink); font-weight: 600; }
-.search-setup-summary .hint { display: block; font-weight: 400; margin-top: 4px; }
 .website-choice h2 { overflow-wrap: anywhere; }
 .website-choice ul { list-style: none; padding: 0; margin: 0 0 28px; }
 .website-choice li { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; padding: 20px 0; border-top: 1px solid var(--line); }

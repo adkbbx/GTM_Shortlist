@@ -27,22 +27,25 @@ export function ResearchSidebar({ runs, activeId, loading, onNew, onSelect }: {
         const name = run.company_name ?? (run.seller_url ? new URL(run.seller_url).hostname : 'Website not selected');
         const status = run.status.replaceAll('_', ' ');
         const savedDate = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(new Date(run.created_at));
+        const identity = name.replace(/^www\./, '').split(/[\s.-]+/).filter(Boolean);
+        const initials = (run.company_name && identity.length > 1 ? identity.map(part => part[0]).slice(0, 2).join('') : (identity[0] ?? '?').slice(0, 2)).toUpperCase();
         return <button key={run.id} type="button" className={`saved-run ${activeId === run.id ? 'selected' : ''}`}
           onClick={() => { onSelect(run); if (narrow) setCollapsed(true); }} aria-current={activeId === run.id ? 'page' : undefined}
           aria-label={`${name}, ${status}, ${savedDate}`} title={`${name} · ${status} · ${savedDate}`}>
-          <svg className="saved-run-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3h8l4 4v14H6V3Zm8 0v5h4M9 12h6m-6 4h4"/></svg>
+          <span className="saved-run-identity" aria-hidden="true">{initials}</span>
           <span className="run-copy"><span className="run-name">{name}</span><span className="run-meta"><time dateTime={run.created_at}>{savedDate}</time><span>{status}</span></span></span>
         </button>;
       })}</nav> : <p className="sidebar-loading">Your saved runs will appear here.</p>}
     </div>;
   return <aside className={`sidebar research-sidebar ${collapsed ? 'is-collapsed' : ''}`} aria-label="Saved research">
     <div className="sidebar-header"><span className="sidebar-heading">Workspace</span><span className="mobile-brand">GTM Shortlist</span><button className="sidebar-toggle" type="button"
-      aria-expanded={!collapsed} aria-controls={narrow ? 'research-drawer' : 'research-navigation'} aria-haspopup={narrow ? 'dialog' : undefined} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+      aria-expanded={!collapsed} aria-controls={narrow ? 'research-drawer' : 'research-navigation'} aria-haspopup={narrow ? 'dialog' : undefined} aria-label={narrow ? 'Saved runs' : collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} onClick={() => setCollapsed(value => !value)}>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d={collapsed ? "M9 4v16m3-11 3 3-3 3" : "M9 4v16m6-11-3 3 3 3"}/></svg>
+      <span className="phone-nav-label">Saved runs</span>
     </button></div>
     <button className="new-run" type="button" onClick={() => { onNew(); if (narrow) setCollapsed(true); }} aria-label="New shortlist" title="New shortlist">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 5 4 4M5 19l4-1L20 7a2.8 2.8 0 0 0-4-4L5 14l-1 6 6-1M4 8v-2a2 2 0 0 1 2-2h3"/></svg><span className="nav-label">New shortlist</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8m-4-4h8"/></svg><span className="nav-label">New shortlist</span>
     </button>
     {narrow ? <dialog id="research-drawer" ref={drawer} className="research-drawer" aria-labelledby="drawer-title" onCancel={() => setCollapsed(true)} onKeyDown={event => {
       if (event.key !== 'Tab') return;
