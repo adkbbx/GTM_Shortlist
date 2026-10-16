@@ -23,6 +23,7 @@ export function ResearchProgress({ run, connected = true, localResearch = false 
   const [resuming, setResuming] = useState(false);
   const [resumeError, setResumeError] = useState('');
   const [viewedStage, setViewedStage] = useState<number | null>(null);
+  const [showOlderSteps, setShowOlderSteps] = useState(false);
   const resume = async () => {
     setResuming(true); setResumeError('');
     try { await api.resumeResearch(run.id); }
@@ -32,9 +33,12 @@ export function ResearchProgress({ run, connected = true, localResearch = false 
   const { current, states, events, latest, pending, working } = researchStage(run);
   const displayed = viewedStage ?? current;
   const visibleEvents = viewedStage === null ? events : events.filter(event => stagePhases[displayed].includes(event.phase));
+  const newestFirst = [...visibleEvents].reverse();
+  const shownEvents = showOlderSteps ? newestFirst : newestFirst.slice(0, 3);
   const checkpointTimeline = <section className="real-history" aria-labelledby="checkpoints-heading">
-    <header><h4 id="checkpoints-heading">Saved research checkpoints</h4><span className="history-meta">{visibleEvents.length} steps · latest first</span></header>
-    {visibleEvents.length ? <ol className="checkpoint-list" aria-label="Saved research checkpoints">{[...visibleEvents].reverse().map(event => <li key={event.id} className={event.id === latest?.id ? 'latest-checkpoint' : undefined}><span className="real-event-mark" aria-hidden="true"><SavedMark state={event.state} /></span><div><p><span className="checkpoint-detail">{eventLabels[event.state]} · </span>{event.label}</p>{event.detail && <p className="checkpoint-detail">{event.detail}</p>}{event.state === 'reused' && <p className="checkpoint-detail">Saved evidence reused; no new provider request.</p>}</div><time dateTime={event.created_at}>{time(event.created_at)}</time></li>)}</ol> : <p className="hint">No checkpoints saved for this stage. Older runs may predate the activity timeline.</p>}
+    <header><h4 id="checkpoints-heading">Saved research checkpoints</h4><span className="history-meta">{shownEvents.length < visibleEvents.length ? `Showing ${shownEvents.length} of ${visibleEvents.length}` : visibleEvents.length} steps · latest first</span></header>
+    {visibleEvents.length ? <ol id="saved-checkpoint-list" className="checkpoint-list" aria-label="Saved research checkpoints">{shownEvents.map(event => <li key={event.id} className={event.id === latest?.id ? 'latest-checkpoint' : undefined}><span className="real-event-mark" aria-hidden="true"><SavedMark state={event.state} /></span><div><p><span className="checkpoint-detail">{eventLabels[event.state]} · </span>{event.label}</p>{event.detail && <p className="checkpoint-detail">{event.detail}</p>}{event.state === 'reused' && <p className="checkpoint-detail">Saved evidence reused; no new provider request.</p>}</div><time dateTime={event.created_at}>{time(event.created_at)}</time></li>)}</ol> : <p className="hint">No checkpoints saved for this stage. Older runs may predate the activity timeline.</p>}
+    {visibleEvents.length > 3 && <button type="button" className="text-button" aria-expanded={showOlderSteps} aria-controls="saved-checkpoint-list" onClick={() => setShowOlderSteps(value => !value)}>{showOlderSteps ? 'Hide older steps' : `Show ${visibleEvents.length - 3} older steps`}</button>}
   </section>;
   const currentState = run.termination ? 'Research stopped' : !connected ? 'Reconnecting'
     : !pending ? current === 5 ? run.status === 'partial' ? 'Partial research saved' : 'Ready for your review' : run.status === 'partial' ? 'Research interrupted' : 'Waiting for you'
@@ -53,13 +57,13 @@ export function ResearchProgress({ run, connected = true, localResearch = false 
     <div className="demo-workspace">
       <div className="demo-stage-rail"><p className="demo-step-count">Stage {current + 1} of 6 · {states[current].label}</p>
         <ol className="real-stage-list" aria-label="Research stages">{states.map((stage, index) => <li key={stage.label} aria-current={stage.current ? 'step' : undefined} className={stage.complete ? 'is-saved' : ''}>
-          <button type="button" className="stage-review" aria-pressed={displayed === index} aria-controls="research-stage-panel" onClick={() => setViewedStage(index)}><span className={`demo-stage-number ${stage.complete ? 'real-stage-saved' : ''}`} aria-hidden="true">{stage.complete ? <SavedMark state="succeeded" /> : index + 1}</span><span><strong>{stage.label}</strong><small>{stage.state}</small></span></button>
+          <button type="button" className="stage-review" aria-pressed={displayed === index} aria-controls="research-stage-panel" onClick={() => { setViewedStage(index); setShowOlderSteps(false); }}><span className={`demo-stage-number ${stage.complete ? 'real-stage-saved' : ''}`} aria-hidden="true">{stage.complete ? <SavedMark state="succeeded" /> : index + 1}</span><span><strong>{stage.label}</strong><small>{stage.state}</small></span></button>
         </li>)}</ol><p className="demo-rail-note">Stages advance when work is saved. Confirmation and review need your judgment.</p>
       </div>
       <div className="demo-scene-wrap"><div className="demo-scene-top"><span>{currentState}</span><span>Progress from saved work</span></div>
         <div className="demo-scene real-scene" id="research-stage-panel" key={`${run.id}:${displayed}`} role="region" aria-label={`${states[displayed].label} saved information`}>
           <h3>{states[displayed].label}</h3><p>{descriptions[displayed]}</p>
-          {viewedStage !== null && <p className="hint">Reviewing saved information · {states[displayed].state}. <button className="text-button" onClick={() => setViewedStage(null)}>Follow current progress</button></p>}
+          {viewedStage !== null && <p className="hint">Reviewing saved information · {states[displayed].state}. <button className="text-button" onClick={() => { setViewedStage(null); setShowOlderSteps(false); }}>Follow current progress</button></p>}
           <div className="agent-activity"><div className="agent-observation"><p className="agent-domain">{run.seller_url ? new URL(run.seller_url).hostname : run.company_name ?? 'Your company'}</p><p role="status">{status}</p>{latest?.detail && <p className="checkpoint-detail">{latest.detail}</p>}</div></div>
           {checkpointTimeline}
           {offer && (viewedStage === null || displayed === 0) && <details className="real-saved-offer" open={viewedStage === 0}><summary>Saved offer summary</summary><p>{offer}</p>{run.seller_source && <details><summary>Inspect saved company page</summary><blockquote>{run.seller_source.text}</blockquote><a href={run.seller_source.url} target="_blank" rel="noopener noreferrer">Open saved source website</a></details>}</details>}

@@ -119,3 +119,5 @@ This reconciliation supersedes the preceding note that hosted fixes are absent. 
 - [x] Share site-owned favicon rendering with initials fallback across result rows and saved history.
 - [ ] Live research quality: campaign/company structured-output failures remain unresolved; no evaluation approved.
 - [x] Use the same surface, border, radius and height for every stage button; distinguish selection from actual stage without competing containers. Verify keyboard focus and phone/laptop widths.
+
+- [x] Latest feedback: show only three newest checkpoints by default; reveal older steps on demand, with keyboard-operable expand/collapse and stage-change reset.

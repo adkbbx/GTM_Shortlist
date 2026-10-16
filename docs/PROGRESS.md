@@ -1,5 +1,10 @@
 # Progress and handoff
 
+## 17 October, compact checkpoint history
+
+User feedback now limits each checkpoint view to its latest three saved steps. Show older steps reveals the remaining history; Hide older steps returns to three. The control includes the hidden count, exposes expanded state and is omitted when there are no older checkpoints. Switching stages or following current progress resets the collapsed view. Verification: build/Ruff, four backend progress tests and six phone/laptop browser cases passed, including keyboard expansion/collapse, stage review, stop/reload and review/export. Screenshots inspected. This supersedes the earlier always-expanded timeline requirement. No history is deleted and no provider/worker action is involved.
+
+
 ## 17 October, saved-stage review and site icons
 
 Replaced the live-research illustration and pause control with a visible responsive six-stage plan and newest-first saved checkpoints. Every stage is a native keyboard-operable review button. Its selected view is separate from the authoritative current-stage marker, shows saved offer/source, market, confirmed target, discovery, evidence or reviews, and never restarts research. Empty stages remain explicit. Confirmation and partial research history open by default. Company results and saved-run history share a site favicon component, request only the site's own /favicon.ico with no referrer, and retain initials when unavailable. No third-party favicon service.

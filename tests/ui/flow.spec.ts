@@ -226,6 +226,15 @@ test('research stages and latest checkpoints stay visible without animation cont
   try {
     await page.goto(`/?run=${id}`);
     await expect(page.locator('.checkpoint-list li').first()).toContainText('Reading example-2.com', { timeout: 15000 });
+    await expect(page.locator('.checkpoint-list > li')).toHaveCount(3);
+    const showOlder = page.getByRole('button', { name: /Show \d+ older steps/ });
+    await expect(showOlder).toHaveAttribute('aria-expanded', 'false');
+    await showOlder.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('button', { name: 'Hide older steps' })).toHaveAttribute('aria-expanded', 'true');
+    expect(await page.locator('.checkpoint-list > li').count()).toBeGreaterThan(3);
+    await page.getByRole('button', { name: 'Hide older steps' }).press('Enter');
+    await expect(page.locator('.checkpoint-list > li')).toHaveCount(3);
     await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toContainText('Saved research for example-1.com');
     await expect(page.getByRole('button', { name: /Pause animations|Resume animations/ })).toHaveCount(0);
     await expect(page.locator('.research-visual')).toHaveCount(0);
@@ -258,6 +267,7 @@ test('research stages and latest checkpoints stay visible without animation cont
       await noOverflow(page);
     }
     await capture(page, `.impeccable/review/${info.project.name}-stage-review.png`);
+    await expect(page.locator('.real-history button')).toHaveCount(0);
     expect(mutations).toEqual([]);
     page.off('request', recordMutation);
     await page.getByRole('button', { name: 'Follow current progress' }).click();

@@ -279,3 +279,5 @@ This feedback supersedes the earlier light phone toolbar direction. Phone and de
 ## Saved-stage review and site icons, 17 October
 
 User feedback replaces the large live-research animation with a visible six-stage plan and an expanded newest-first checkpoint timeline. Each stage is a keyboard-operable read-only review action; viewing an earlier stage never moves the actual progress marker or starts provider work. Missing saved results stay explicit. Keep partial/confirmation history open. Use each site's own favicon in company results and saved history, with existing initials as fallback and no third-party icon lookup.
+
+Checkpoint history refinement: show the latest three saved steps, newest first. Older steps are revealed only through Show older steps and can be hidden again. Reset this disclosure when selecting another stage.
