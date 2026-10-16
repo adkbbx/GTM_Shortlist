@@ -14,7 +14,7 @@ Started 16 October 2026 JST. Working branch: `codex/hosted-journey`, based on te
 
 - [x] Recover previous live evaluation evidence. Main commit48a7cdc records one approved model request, named-function output and readable offer/target, with criteria strings corrected offline. This is a single-seller format check, not semantic targeting acceptance. The one-call approval was consumed.
 - [x] Replay captured seller response against this branch and run relevant offline regressions. The actual saved response validates and exactly matches the previously saved derived draft, including3 criteria. No new provider call or journal mutation. Seller/auth/market/repair checks:73 passed. Audit failure/redaction checks:3 passed. Ruff passes across src/tests/scripts.
-- [ ] Verify a new hosted seller summary, editable target and campaign. Requires approval for the specific bounded provider evaluation.
+- [x] Verify a new hosted seller summary, editable target and campaign. Approved run6bec75a7 saved a readable Eygentic summary and4 campaign hypotheses. Competitor search failed; no competitor observations are claimed.
 - [ ] Review observable target criteria and separate unsupported pain-point hypotheses.
 
 ## 3. Release build and rollout
@@ -68,6 +68,12 @@ Recovery design: set extra_float_digits=3 transaction-locally alongside workspac
 Local proof: reproduced the exact cache conflict with low-precision Postgres output, then passed after the boundary fix. All41 real Postgres tests pass, including genuine changed-timestamp rejection, two-owner isolation, concurrent retries, unchanged profiling counters/balance and authenticated-route protections.15 recovery/cache backend checks and6 phone/laptop flows pass. Build, generated API contracts and Ruff pass. Actual Supabase read-only diagnosis confirms full-precision output equals the original source. The isolated cluster runner saves logs under data and stops its own server. Release/actual same-run recovery still pending.
 
 Re-run preflight with `.venv/Scripts/python.exe scripts/audit_hosted.py`. It performs read-only HTTP requests and TLS database queries, and never dispatches research, sends email or mutates account/billing state. Its output does not prove real signup, email delivery, provider quality, account isolation or successful research.
+
+## Same-run recovery and search readiness
+
+Recovery release87cee7b passed all5 CI jobs in [run38882709600](https://github.com/adkbbx/GTM_Shortlist/actions/runs/38882709600), including94 browser cases. Both Render services became Live at that exact revision on16October18:53JST. The owner UI recovered the same zero-dispatch run once; saved seller profiling and campaign generation now succeed. At confirmation the journal contains1 succeeded fetch,2 succeeded models and1 failed search; balance3, no holds/records. No second run or additional grant was created. Actual390×844 and1366×900 recovery views have no horizontal overflow; screenshots are saved under ignored .impeccable/review/hosted-recovery-*.
+
+The saved failed market request took about29 seconds, near the25-second client timeout. Its generic saved error cannot establish the cause. Both local and actual worker free Account API probes returned200/Active with236 searches remaining, proving configured credentials/allowance at observation time, not search success. Before distinct discovery steps, improve safe transport diagnostics and use a60-second SerpApi read timeout, matching the [official JavaScript client default](https://serpapi.com/integrations/javascript). Keep25-second connect/write limits and no automatic retry. Offline checks cover timeout, connection, HTTP429, invalid JSON and invalid shape without leaking key/body;69 search/provider/journal/market tests pass. Failed market operation remains immutable. This change still requires CI and rollout.
 
 ## Rollout plan
 

@@ -109,7 +109,10 @@ class SearchProvider:
         if not key.get_secret_value():
             raise ProviderError(f"{self.name.title()} search credentials are not configured")
         try:
-            with httpx.Client(timeout=25, trust_env=False) as client:
+            # SerpApi's synchronous search can outlast a short interactive request.
+            # Keep connect/write bounded and never retry an uncertain paid request.
+            timeout = httpx.Timeout(25, read=60) if self.name == "serpapi" else httpx.Timeout(25)
+            with httpx.Client(timeout=timeout, trust_env=False) as client:
                 if self.name == "tavily":
                     response = client.post("https://api.tavily.com/search", headers={
                         "Authorization": "Bearer " + key.get_secret_value()}, json={
@@ -121,13 +124,23 @@ class SearchProvider:
                         "api_key": key.get_secret_value(), "engine": "google", "q": query})
                 response.raise_for_status()
                 data = response.json()
+                if not isinstance(data, dict):
+                    raise ProviderError("Search provider returned malformed results")
                 if "error" in data:
                     raise ProviderError("Search provider returned an error")
                 results = data.get("results" if self.name == "tavily" else "organic_results")
                 if not isinstance(results, list):
                     raise ProviderError("Search provider returned malformed results")
                 return candidates_from_results([r for r in results if isinstance(r, dict)], query, self.name, seller_url)
-        except (httpx.HTTPError, ValueError) as exc:
+        except httpx.TimeoutException as exc:
+            raise ProviderError("Search request timed out; it may still count toward provider allowance. "
+                                "The request will not be retried automatically") from exc
+        except httpx.HTTPStatusError as exc:
+            raise ProviderError(f"Search provider returned HTTP {exc.response.status_code}; "
+                                "check provider configuration or allowance") from exc
+        except httpx.RequestError as exc:
+            raise ProviderError("Search provider connection failed; check worker network access") from exc
+        except ValueError as exc:
             if isinstance(exc, ProviderError):
                 raise
             raise ProviderError("Search request failed; check provider configuration or allowance") from exc
