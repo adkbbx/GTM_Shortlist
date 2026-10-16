@@ -70,3 +70,7 @@ The earlier scoped design implementation met the then-recorded fixed-viewport ga
 Resume 09:55 JST16 October after actual 09:54:18 allowance reset. Check final CI and act on a real failure or new user feedback; do not repeatedly restyle passed surfaces. The separate 21:00 JST17 October cutoff heartbeat stops work and saves a handoff. Never buy credits, consume reset credits or run paid provider evaluations without specific approval.
 
 Community design reference: [Uriel Bitton on useful SaaS empty states](https://dev.to/urielbitton/saas-empty-states-help-a-new-user-finish-the-first-task-3fkb). Applied the one-useful-first-action and labelled-sample guidance; no conversion improvement is claimed.
+
+## Final CI and draft review —17 October
+
+Application commit3ba1649 passed all jobs in [run38907429539](https://github.com/adkbbx/GTM_Shortlist/actions/runs/38907429539), including96 browser scenarios, core/Ruff, Postgres, Windows lifecycle and container smoke. [DraftPR#2](https://github.com/adkbbx/GTM_Shortlist/pull/2) contains the design branch for review. This is scoped UI acceptance, not product completion, deployment or proof of live provider research quality.
