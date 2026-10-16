@@ -87,6 +87,9 @@ export const api = {
   async retrySeller(id: string) {
     return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/retry-seller`, { confirmation: 'retry_unstarted_seller' }));
   },
+  async continueDiscovery(id: string) {
+    return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/continue-discovery`, { confirmation: 'use_saved_candidates_without_search' }));
+  },
   async creditHistory(before: string | null = null) {
     const data = await request(`/api/credits/history${before ? `?before=${encodeURIComponent(before)}` : ''}`);
     if (!isCreditHistory(data)) throw new Error('Credit activity is unavailable. Please try again.');

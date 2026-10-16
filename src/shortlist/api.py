@@ -29,7 +29,7 @@ from shortlist.market import MarketResearch
 from shortlist.progress import RunProgress
 from shortlist.providers import SellerDraft, company_name_matches
 from shortlist.selection import Selection
-from shortlist.store import BudgetExceeded, Conflict, Store, seller_retry_available
+from shortlist.store import BudgetExceeded, Conflict, Store, saved_discovery_available, seller_retry_available
 
 
 class SellerInput(BaseModel):
@@ -134,6 +134,11 @@ class RetrySellerInput(BaseModel):
     confirmation: Literal["retry_unstarted_seller"]
 
 
+class ContinueDiscoveryInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    confirmation: Literal["use_saved_candidates_without_search"]
+
+
 class AttemptView(BaseModel):
     provider: str
     kind: str
@@ -168,6 +173,7 @@ class RunView(BaseModel):
     experience_version: Literal[1, 2] = 1
     termination: Literal["user_stopped"] | None = None
     can_retry_seller: bool = False
+    can_continue_discovery: bool = False
 
 
 class Health(BaseModel):
@@ -281,7 +287,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                        seller_source=run["checkpoint"].get("seller_source"),
                        termination=run["checkpoint"].get("termination"),
                        draft_exclusions=run["checkpoint"].get("draft_exclusions", []),
-                       can_retry_seller=seller_retry_available(run), progress=RunProgress(
+                       can_retry_seller=seller_retry_available(run),
+                       can_continue_discovery=saved_discovery_available(run), progress=RunProgress(
                            worker_online=store.worker_online(), candidates=len(run["checkpoint"].get("candidates", [])),
                            sources=len({s["id"] for pages in run["checkpoint"].get("sources", {}).values() for s in pages}),
                            companies=len(run["records"]), events=run["events"]))
@@ -408,6 +415,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.post("/api/runs/{run_id}/retry-seller", response_model=RunView)
     def retry_seller(run_id: str, input: RetrySellerInput, store: owned):
         store.retry_seller(run_id)
+        return view(store, run_id)
+
+    @app.post("/api/runs/{run_id}/continue-discovery", response_model=RunView)
+    def continue_discovery(run_id: str, input: ContinueDiscoveryInput, store: owned):
+        store.continue_discovery(run_id)
         return view(store, run_id)
 
     @app.post("/api/runs/{run_id}/records/{record_id}/review", response_model=RunView)

@@ -618,6 +618,25 @@ test('small screen, large text, keyboard and reduced motion remain usable', asyn
   expect(await page.getByRole('button', { name: 'Start research' }).evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
 });
 
+test('saved candidates continue by keyboard without another search and survive reload', async ({ page }, info) => {
+  const { id } = await (await page.request.post('/__fixture_saved_discovery')).json();
+  await page.goto(`/?run=${id}`);
+  const recovery = page.getByRole('region', { name: 'Continue saved discovery' });
+  await expect(recovery).toContainText('No search is repeated.');
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${info.project.name}-saved-discovery.png`);
+  const before = await (await page.request.get(`/api/runs/${id}`)).json();
+  await recovery.getByRole('button', { name: 'Continue with saved candidates', exact: true }).press('Enter');
+  await expect(page.getByRole('heading', { name: '1 company researched' })).toBeVisible({ timeout: 15000 });
+  await page.reload();
+  await expect(page.getByRole('heading', { name: '1 company researched' })).toBeVisible();
+  await expect(recovery).toHaveCount(0);
+  const after = await (await page.request.get(`/api/runs/${id}`)).json();
+  expect(after.profile).toEqual(before.profile);
+  expect(after.attempts.filter((a: { kind: string }) => a.kind === 'search')).toEqual(before.attempts);
+  await noOverflow(page);
+});
+
 test('unsafe seller URL shows an actionable error', async ({ page }) => {
   await page.goto('/');
   await page.getByLabel('Company name or website', { exact: true }).fill('https://127.1');

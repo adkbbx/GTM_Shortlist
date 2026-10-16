@@ -658,6 +658,60 @@
         }
       }
     },
+    "/api/runs/{run_id}/continue-discovery": {
+      "post": {
+        "summary": "Continue Discovery",
+        "operationId": "continue_discovery_api_runs__run_id__continue_discovery_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContinueDiscoveryInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/runs/{run_id}/records/{record_id}/review": {
       "post": {
         "summary": "Review",
@@ -1240,6 +1294,21 @@
           "criteria"
         ],
         "title": "Confirmation"
+      },
+      "ContinueDiscoveryInput": {
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "const": "use_saved_candidates_without_search",
+            "title": "Confirmation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "confirmation"
+        ],
+        "title": "ContinueDiscoveryInput"
       },
       "CreditEntry": {
         "properties": {
@@ -2577,6 +2646,11 @@
           "can_retry_seller": {
             "type": "boolean",
             "title": "Can Retry Seller",
+            "default": false
+          },
+          "can_continue_discovery": {
+            "type": "boolean",
+            "title": "Can Continue Discovery",
             "default": false
           }
         },

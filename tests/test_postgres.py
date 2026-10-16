@@ -132,6 +132,47 @@ def test_predispatch_seller_retry_keeps_quotas_and_owner_scope_under_concurrent_
     assert CreditWallet(a).balance().available == 3
 
 
+def test_saved_discovery_continuation_reholds_only_unused_credits_once_for_its_owner(owners):
+    from test_continue_discovery import interrupted_discovery
+
+    a, b, worker, profile = owners
+    identity, _ = interrupted_discovery(a)
+    with pytest.raises(KeyError):
+        b.continue_discovery(identity)
+    before = a.get_run(identity)
+    another = a.create_run(profile, "other-credit-use")
+    with pytest.raises(BudgetExceeded):
+        a.continue_discovery(identity)
+    assert a.get_run(identity) == before
+    scoped = PostgresStore(worker, a.workspace_id, worker=True)
+    CreditWallet(scoped).consume(another, "credit-check.example")
+    a.stop_run(another)
+    assert CreditWallet(a).balance().available == 2
+    with pytest.raises(BudgetExceeded, match="Not enough"):
+        a.continue_discovery(identity)
+    assert a.get_run(identity) == before
+    CreditWallet(scoped).grant(1, "labelled-test-credit", "Labelled test purchase")
+    with a.connection() as db:
+        quota = dict(db.execute("SELECT free_profiles,daily_profiles FROM workspaces WHERE id=?",
+                               (a.workspace_id,)).fetchone())
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        assert list(pool.map(lambda _: a.continue_discovery(identity), range(2))) == [None, None]
+    after = a.get_run(identity)
+    assert after["status"] == "queued" and after["profile"] == before["profile"]
+    assert after["attempts"] == before["attempts"]
+    assert after["checkpoint"]["use_saved_discovery"] is True
+    assert len(after["events"]) == len(before["events"]) + 1
+    assert CreditWallet(a).balance().reserved == 3 and CreditWallet(a).balance().available == 0
+    with a.connection() as db:
+        assert dict(db.execute("SELECT free_profiles,daily_profiles FROM workspaces WHERE id=?",
+                               (a.workspace_id,)).fetchone()) == quota
+    a.stop_run(identity)
+    stopped = a.get_run(identity)
+    a.continue_discovery(identity)
+    assert a.get_run(identity) == stopped
+    assert CreditWallet(a).balance().reserved == 0 and CreditWallet(a).balance().available == 3
+
+
 def test_isolation_idempotency_and_no_ownerless_access(owners):
     a, b, worker, profile = owners
     first = a.create_run(profile, "same-request-key")
@@ -404,6 +445,11 @@ def test_hosted_api_verifies_identity_and_scopes_every_route(owners, monkeypatch
     assert client.post(retry_path, json=retry_command).status_code == 401
     assert client.post(retry_path, headers=second_headers, json=retry_command).status_code == 404
     assert client.post(retry_path, headers=first_headers, json=retry_command).status_code == 409
+    continue_path = f"/api/runs/{first_id}/continue-discovery"
+    continue_command = {"confirmation": "use_saved_candidates_without_search"}
+    assert client.post(continue_path, json=continue_command).status_code == 401
+    assert client.post(continue_path, headers=second_headers, json=continue_command).status_code == 404
+    assert client.post(continue_path, headers=first_headers, json=continue_command).status_code == 409
     assert first_id != second_id
     assert client.post("/api/sellers", headers=first_headers, json=body).json()["id"] == first_id
     assert client.post("/api/sellers", headers=first_headers, json={**body, "request_key": "another-run"}).status_code == 403

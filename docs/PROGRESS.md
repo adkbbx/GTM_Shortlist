@@ -740,6 +740,14 @@ Release87cee7b passed all5 jobs in CI38882709600, including94 browser cases, and
 
 Search failure lasted about29 seconds with a25-second HTTP timeout; the old generic error cannot establish its cause. Free Account API probes locally and from the actual worker returned200/Active and236 remaining. Added safe distinct timeout/connection/status diagnostics and60-second SerpApi read window, retaining25-second connect/write limits and no retry. This follows the official client default, not proof that the historical failure was a timeout.69 offline search/provider/journal/market tests and repository Ruff pass. Failed market operation stays failed; only remaining distinct discovery steps are authorized within the original caps. CI/rollout for this narrow transport change remain pending.
 
+## 16 October, incomplete discovery preserves candidates and returned credits
+
+All5 CI jobs passed for604f68f in38893807599. Both services Live at20:33:53JST, web28.9s and worker25.1s; preflight passes and actual worker source has the released timeout/diagnostic logic. Confirmed B2B AI SaaS target in the same approved run. Query0 saved8 candidates; query1 failed with generic saved transport text, cause not established. Total3 searches/2 models/1 fetch,0 records. All3 reserved credits returned, ledger unchanged. Reload preserved same run/target/query0 outcome without duplicate dispatch. No extra run or provider allowance is authorized.
+
+The discovery loop stopped before using any candidates when a later query failed. Now save query-specific failures, use available evidence and mark output partial. Added a once-only owner continuation for existing interrupted discovery with saved candidates, no records and no uncertain requests. It skips every search, preserves the immutable target/journal/limits and atomically re-holds only unused returned credits after balance/active-run checks. No grants or profile increments. Late/concurrent duplicates cannot start another recovery.
+
+33 offline discovery/market/journal tests pass;2 phone/laptop keyboard/reload flows pass and screenshots inspected. Actual Postgres ownership, insufficient-balance rollback, one-active-run, concurrent re-hold and unchanged profiling counters pass. Build and repository Ruff pass. Final authenticated-route checks and CI/rollout remain pending. The approved live run is paused; no search is retried.
+
 ## 16 October, hosted journey checklist and infrastructure preflight
 
 User authorized maintaining and working through the seven hosted release tasks. Created docs/HOSTED_JOURNEY.md and branch codex/hosted-journey from55a4ec7. Merged main's evidence-only48a7cdc into this branch as3881fce, retaining both progress records. Main/production was not merged or pushed by this step.

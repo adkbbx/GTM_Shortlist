@@ -260,6 +260,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/runs/{run_id}/continue-discovery": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Continue Discovery */
+        post: operations["continue_discovery_api_runs__run_id__continue_discovery_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/runs/{run_id}/records/{record_id}/review": {
         parameters: {
             query?: never;
@@ -463,6 +480,14 @@ export interface components {
              * @default 3
              */
             company_limit: number;
+        };
+        /** ContinueDiscoveryInput */
+        ContinueDiscoveryInput: {
+            /**
+             * Confirmation
+             * @constant
+             */
+            confirmation: "use_saved_candidates_without_search";
         };
         /** CreditEntry */
         CreditEntry: {
@@ -973,6 +998,11 @@ export interface components {
              * @default false
              */
             can_retry_seller: boolean;
+            /**
+             * Can Continue Discovery
+             * @default false
+             */
+            can_continue_discovery: boolean;
         };
         /** SavedRecord */
         SavedRecord: {
@@ -1594,6 +1624,41 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["RetrySellerInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    continue_discovery_api_runs__run_id__continue_discovery_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContinueDiscoveryInput"];
             };
         };
         responses: {

@@ -205,11 +205,16 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
             discovered = checkpoint.get("discovered", [])
             completed_queries = checkpoint.get("completed_queries", [])
             for index, query in enumerate(queries_for(profile, checkpoint.get("discovery_terms"))):
-                if index in completed_queries:
+                if checkpoint.get("use_saved_discovery") or index in completed_queries or str(index) in checkpoint.get("discovery_failures", {}):
                     continue
-                candidates = call("search", search.name, f"search:{index}", lambda q=query: search.search(q, profile.seller_url),
-                                  {"query": query, "seller_url": profile.seller_url},
-                                  lambda results: [Candidate.model_validate(c) for c in results])
+                try:
+                    candidates = call("search", search.name, f"search:{index}", lambda q=query: search.search(q, profile.seller_url),
+                                      {"query": query, "seller_url": profile.seller_url},
+                                      lambda results: [Candidate.model_validate(c) for c in results])
+                except (ProviderError, BudgetExceeded) as exc:
+                    checkpoint.setdefault("discovery_failures", {})[str(index)] = str(exc)
+                    store.checkpoint(run_id, fence, "discovery", checkpoint)
+                    continue
                 discovered.extend(c.model_dump(mode="json") for c in candidates)
                 completed_queries.append(index)
                 checkpoint.update(discovered=discovered, completed_queries=completed_queries)
@@ -369,13 +374,16 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
             store.checkpoint(run_id, fence, "research", checkpoint)
         records = store.get_run(run_id)["records"]
         incomplete_pages = any(checkpoint.get("page_failures", {}).values()) or bool(checkpoint.get("activity_failures"))
-        partial = not records or incomplete_pages or any(r["research"]["status"] == "partial" for r in records)
+        incomplete_discovery = bool(checkpoint.get("discovery_failures")) or bool(checkpoint.get("use_saved_discovery"))
+        partial = (not records or incomplete_pages or incomplete_discovery
+                   or any(r["research"]["status"] == "partial" for r in records))
         store.event(run_id, fence, ProgressUpdate(phase="review", label=f"Saved {len(records)} companies for your review",
                                                    state="waiting"))
         store.checkpoint(run_id, fence, "review", checkpoint, "partial" if partial else "ready",
                          ("No readable company evidence could be collected" if checkpoint.get("candidate_failures")
                           else "No candidate companies found") if not records else
-                         "Some linked company pages could not be fetched; review the saved sources." if incomplete_pages else None)
+                         "Some linked company pages could not be fetched; review the saved sources." if incomplete_pages else
+                         "Discovery was incomplete; these records use the candidates that were saved." if incomplete_discovery else None)
     except (ProviderError, FetchError, BudgetExceeded, Conflict) as exc:
         # Lost lease cannot write; the replacement worker owns the current state.
         try:
