@@ -395,7 +395,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
     return True
 
 
-def work(settings: Settings, once: bool = False):
+def work(settings: Settings, once: bool = False, *, stopped: Event | None = None, started: Event | None = None):
     if settings.mode == "hosted":
         from shortlist.postgres import PostgresStore
         if not settings.worker_database_url.get_secret_value():
@@ -404,7 +404,7 @@ def work(settings: Settings, once: bool = False):
     else:
         store = Store(settings.db_path)
     worker_id = new_id()
-    stopped = Event()
+    stopped = stopped if stopped is not None else Event()
     store.worker_heartbeat(worker_id)
 
     def heartbeat():
@@ -413,9 +413,13 @@ def work(settings: Settings, once: bool = False):
 
     thread = Thread(target=heartbeat, name="shortlist-worker-heartbeat", daemon=True)
     thread.start()
+    if started is not None:
+        started.set()
     try:
-        while True:
+        while not stopped.is_set():
             for run_id in store.pending_runs():
+                if stopped.is_set():
+                    break
                 try:
                     configuration = apply_local_credentials(settings)
                 except CredentialUnavailable:

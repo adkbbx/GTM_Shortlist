@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { api } from './api';
 import type { Run } from './api';
 import { researchStage } from './research-stages';
 import { ResearchActivity } from './ResearchActivity';
@@ -19,7 +20,15 @@ function SavedMark({ state }: { state: string }) {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.3" />{state === 'succeeded' || state === 'reused' ? <path d="m7 12 3 3 7-7" stroke="currentColor" strokeWidth="1.5" /> : state === 'failed' ? <path d="m8 8 8 8m0-8-8 8" stroke="currentColor" strokeWidth="1.5" /> : <circle cx="12" cy="12" r="2" fill="currentColor" />}</svg>;
 }
 
-export function ResearchProgress({ run, connected = true }: { run: Run; connected?: boolean }) {
+export function ResearchProgress({ run, connected = true, localResearch = false }: { run: Run; connected?: boolean; localResearch?: boolean }) {
+  const [resuming, setResuming] = useState(false);
+  const [resumeError, setResumeError] = useState('');
+  const resume = async () => {
+    setResuming(true); setResumeError('');
+    try { await api.resumeResearch(run.id); }
+    catch (error) { setResumeError(error instanceof Error ? error.message : 'Research could not resume. Try again.'); }
+    finally { setResuming(false); }
+  };
   const [visible, setVisible] = useState(!document.hidden);
   const [onScreen, setOnScreen] = useState(true);
   const frame = useRef<HTMLDivElement>(null);
@@ -36,17 +45,18 @@ export function ResearchProgress({ run, connected = true }: { run: Run; connecte
   const moving = working && animate;
   const currentState = run.termination ? 'Research stopped' : !connected ? 'Reconnecting'
     : !pending ? current === 5 ? run.status === 'partial' ? 'Partial research saved' : 'Ready for your review' : run.status === 'partial' ? 'Research interrupted' : 'Waiting for you'
-      : !run.progress.worker_online ? 'Waiting for a worker' : run.status === 'queued' ? 'Queued' : working ? 'Worker active' : 'Saving progress';
+      : !run.progress.worker_online ? 'Research paused' : run.status === 'queued' ? 'Queued' : working ? 'Research active' : 'Saving progress';
   const status = run.termination ? 'Processing has stopped. Saved sources and assessments remain available.'
     : !connected ? 'Showing the last saved checkpoint while the connection recovers.'
       : !pending && run.status === 'partial' && current !== 5 ? run.error ?? 'Research was interrupted. Inspect the saved checkpoints for details.'
-      : pending && !run.progress.worker_online ? 'Your run is saved. Processing will continue when a research worker connects.'
+      : pending && !run.progress.worker_online ? localResearch ? 'Your run is saved. Resume research to continue from its saved progress.' : 'Your run is saved. Processing will continue when the research service reconnects.'
         : run.status === 'queued' ? 'Waiting for the worker to pick up your saved run.'
           : current === 5 ? run.records.length ? 'Open a company research sheet below to inspect sources and decide.' : 'No company records were saved. Review the checkpoints for details.'
             : latest?.label ?? 'Your saved research is ready to continue.';
   const offer = run.profile?.offer ?? run.draft?.offer;
   const sheet = <section className="real-research landing-demo" data-motion={moving ? 'playing' : 'paused'} data-animate={animate} data-reduced={reduced} aria-labelledby="progress-heading">
     <div className="demo-intro"><div><h2 id="progress-heading">Your research, step by step</h2><p>Live work · stages follow saved worker checkpoints</p></div></div>
+    {localResearch && pending && !run.progress.worker_online && <div className="notice"><p>Resuming research may use your provider credits.</p><button type="button" disabled={resuming} onClick={resume}>{resuming ? 'Resuming research…' : 'Resume research'}</button>{resumeError && <p role="alert">{resumeError}</p>}</div>}
     <div className="demo-workspace">
       <div className="demo-stage-rail"><p className="demo-step-count">Stage {current + 1} of 6 · {states[current].label}</p>
         <ol className="real-stage-list" aria-label="Research stages">{states.map((stage, index) => <li key={stage.label} aria-current={stage.current ? 'step' : undefined} className={stage.complete ? 'is-saved' : ''}>

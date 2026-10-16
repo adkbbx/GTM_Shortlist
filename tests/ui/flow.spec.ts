@@ -29,13 +29,9 @@ test('local model status opens setup and explains the offline worker without dis
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   const modelStatus = page.getByRole('button', { name: 'Research model: Not configured', exact: true });
   await expect(modelStatus).toHaveText('Not configured');
-  await expect(page.getByText('No research worker is connected.', { exact: false })).toBeVisible();
-  await page.getByText('How to start local research', { exact: true }).click();
-  expect(await page.locator('.worker-help pre code').textContent()).toBe('$env:PYTHONPATH = \"$PWD/src\"\n.venv/Scripts/python.exe -m shortlist.cli serve --port 8019');
-  await expect(page.locator('.worker-help pre')).toHaveCSS('white-space', 'pre-wrap');
-  await expect(page.locator('.worker-help ol > li')).toHaveCount(4);
-  await expect(page.locator('.worker-help ol > li').first()).toContainText('Ctrl+C');
-  await page.locator('.worker-help pre').scrollIntoViewIfNeeded();
+  await expect(page.getByRole('button', { name: 'Start research service', exact: true })).toHaveCount(0);
+  await expect(page.getByText('Background research starts automatically when you start or resume research. Saving settings does not start research.', { exact: true })).toBeVisible();
+  await expect(page.locator('.worker-help pre')).toHaveCount(0);
   await noOverflow(page);
   await capture(page, `.impeccable/review/${info.project.name}-model-readiness.png`);
   await modelStatus.press('Enter');
@@ -69,6 +65,47 @@ test('local model status opens setup and explains the offline worker without dis
   await noOverflow(page);
   await page.getByRole('button', { name: 'Save research model', exact: true }).scrollIntoViewIfNeeded();
   await expect(page.getByRole('button', { name: 'Save research model', exact: true })).toBeInViewport();
+});
+
+test('starting research automatically starts processing after saving the command', async ({ page }, info) => {
+  let running = false;
+  let starts = 0;
+  const ids: string[] = [];
+  const health = () => ({ mode: 'local', search_ready: true, gemma_ready: true, worker_online: running, local_search_error: null });
+  await page.route('**/api/health', route => route.fulfill({ json: health() }));
+  await page.route('**/api/sellers', async route => {
+    const response = await route.fetch();
+    const run = await response.json(); ids.push(run.id);
+    // Hold the transport checkpoint at queued while exercising a startup retry.
+    await route.fulfill({ response, json: { ...run, status: 'queued' } });
+  });
+  await page.route('**/api/local/service/start', async route => {
+    starts += 1;
+    expect(ids.length).toBe(starts);
+    expect(route.request().postDataJSON()).toEqual({ confirmation: 'start_research_service' });
+    if (starts === 1) { await route.fulfill({ status: 409, json: { detail: 'Labelled service startup failure' } }); return; }
+    await new Promise(resolve => setTimeout(resolve, 200));
+    running = true;
+    await route.fulfill({ json: health() });
+  });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Start research service', exact: true })).toHaveCount(0);
+  await capture(page, `.impeccable/review/${info.project.name}-service-stopped.png`);
+  await page.getByRole('button', { name: 'Close settings' }).click();
+  await page.getByLabel('Company name or website', { exact: true }).fill('https://service-fixture.example/');
+  await page.getByRole('button', { name: 'Start research', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('Research was saved');
+  await page.getByRole('button', { name: 'Start research', exact: true }).click();
+  await expect(page).toHaveURL(/run=/);
+  expect(ids[0]).toBe(ids[1]);
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await expect(page.locator('.provider-status').getByText('Running', { exact: true })).toBeVisible();
+  expect(starts).toBe(2);
+  await capture(page, `.impeccable/review/${info.project.name}-service-running.png`);
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+  await noOverflow(page);
 });
 
 test('market observations and editable campaigns persist into confirmed targeting', async ({ page }, info) => {
@@ -187,7 +224,7 @@ test('research activity follows the real worker and respects reduced motion', as
     await expect(page.locator('.real-research')).toHaveAttribute('data-reduced', 'true');
     expect(await page.locator('.research-flow').evaluate(element => getComputedStyle(element).animationName)).toBe('none');
     await page.getByRole('button', { name: 'Resume animations', exact: true }).click();
-    await expect(page.locator('.demo-scene-top > span').first()).toHaveText('Worker active');
+    await expect(page.locator('.demo-scene-top > span').first()).toHaveText('Research active');
     await page.getByText('Saved offer summary', { exact: true }).click();
     await expect(page.locator('.real-saved-offer')).toContainText('customer acquisition');
     await expect(page.getByRole('progressbar')).toHaveCount(0);
@@ -605,7 +642,7 @@ test('saved seller → confirmation → evidence → review → export survives 
   expect(errors).toEqual([]);
 });
 
-test('queued run explains an offline worker without pretending to research', async ({ page }, testInfo) => {
+test('queued local research can resume without exposing worker controls', async ({ page }, testInfo) => {
   const response = await page.request.post('/api/sellers', { data: {
     seller_url: 'https://eygentic.com/', request_key: `offline-${testInfo.project.name}-${Date.now()}`,
   } });
@@ -613,16 +650,26 @@ test('queued run explains an offline worker without pretending to research', asy
   const snapshot = { ...queued, status: 'queued', stage: 'seller', progress: {
     ...queued.progress, worker_online: false, events: [],
   } };
+  let starts = 0;
+  await page.route('**/api/health', route => route.fulfill({ json: { mode: 'local', search_ready: true, gemma_ready: true, worker_online: false, local_search_error: null } }));
+  await page.route('**/api/local/service/start', route => {
+    starts += 1;
+    snapshot.progress.worker_online = true;
+    return route.fulfill({ json: { mode: 'local', search_ready: true, gemma_ready: true, worker_online: true, local_search_error: null } });
+  });
   await page.route('**/api/runs', route => route.fulfill({ json: [snapshot] }));
   await page.route(`**/api/runs/${queued.id}`, route => route.fulfill({ json: snapshot }));
   await page.goto(`/?run=${queued.id}`);
-  await expect(page.getByText('Waiting for a worker', { exact: true })).toBeVisible();
-  await expect(page.getByText('Your run is saved. Processing will continue when a research worker connects.', { exact: true })).toBeVisible();
+  await expect(page.getByText('Research paused', { exact: true })).toBeVisible();
+  await expect(page.getByText('Your run is saved. Resume research to continue from its saved progress.', { exact: true })).toBeVisible();
   await expect(page.locator('.agent-activity')).not.toHaveClass(/is-working/);
   await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toHaveCount(0);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await noOverflow(page);
   await capture(page, `.impeccable/review/${testInfo.project.name}-worker-offline.png`);
+  await page.getByRole('button', { name: 'Resume research', exact: true }).press('Enter');
+  await expect.poll(() => starts).toBe(1);
+  await expect(page.getByRole('button', { name: /Resum.*research/ })).toHaveCount(0);
 });
 
 test('slow checkpoint responses stay serialized and recover into confirmation', async ({ page }, testInfo) => {

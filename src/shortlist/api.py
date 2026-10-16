@@ -1,4 +1,5 @@
 import re
+from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Literal
@@ -27,6 +28,7 @@ from shortlist.local_credentials import (
     apply_local_credentials,
     validate_tavily_key,
 )
+from shortlist.local_service import LocalResearchService, ServiceUnavailable
 from shortlist.market import MarketResearch
 from shortlist.progress import RunProgress
 from shortlist.providers import SellerDraft, company_name_matches
@@ -69,6 +71,11 @@ class WebsiteInput(BaseModel):
 class LocalKeyInput(BaseModel):
     model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
     key: SecretStr = Field(min_length=13, max_length=256)
+
+
+class LocalServiceStart(BaseModel):
+    model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
+    confirmation: Literal["start_research_service"]
 
 
 class Confirmation(Target):
@@ -203,7 +210,17 @@ AuthSetup = Annotated[LocalAuth | HostedAuth, Field(discriminator="mode")]
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings.load()
     local_store = Store(settings.db_path) if settings.mode == "local" else None
-    app = FastAPI(title="GTM Shortlist", version="0.1.0")
+    research_service = LocalResearchService(settings) if local_store is not None else None
+
+    @asynccontextmanager
+    async def lifespan(app):
+        try:
+            yield
+        finally:
+            if research_service is not None:
+                await run_in_threadpool(research_service.close)
+
+    app = FastAPI(title="GTM Shortlist", version="0.1.0", lifespan=lifespan)
     hosts = ["localhost", "127.0.0.1", "testserver"] if settings.mode == "local" else [urlsplit(settings.app_url).hostname]
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=hosts)
     bearer = HTTPBearer(auto_error=False)
@@ -350,6 +367,22 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         finally:
             body.clear()
         await run_in_threadpool(LocalModelCredentials(settings.db_path).save, command)
+        return await run_in_threadpool(health)
+
+    @app.post("/api/local/service/start", response_model=Health, openapi_extra={
+        "requestBody": {"required": True, "content": {"application/json": {"schema": LocalServiceStart.model_json_schema()}}}})
+    async def start_research_service(request: Request):
+        body = await local_provider_body(request)
+        try:
+            LocalServiceStart.model_validate_json(body)
+        except (ValueError, UnicodeError):
+            raise HTTPException(422, "Confirm starting the research service") from None
+        finally:
+            body.clear()
+        try:
+            await run_in_threadpool(research_service.start)
+        except ServiceUnavailable as exc:
+            raise HTTPException(409, str(exc)) from None
         return await run_in_threadpool(health)
 
     @app.get("/api/auth/setup", response_model=AuthSetup)

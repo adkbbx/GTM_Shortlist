@@ -123,6 +123,46 @@
         }
       }
     },
+    "/api/local/service/start": {
+      "post": {
+        "summary": "Start Research Service",
+        "operationId": "start_research_service_api_local_service_start_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "confirmation": {
+                    "type": "string",
+                    "const": "start_research_service",
+                    "title": "Confirmation"
+                  }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "confirmation"
+                ],
+                "title": "LocalServiceStart"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/setup": {
       "get": {
         "summary": "Auth Setup",

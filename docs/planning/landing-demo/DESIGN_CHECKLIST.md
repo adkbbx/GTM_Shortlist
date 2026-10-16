@@ -99,3 +99,9 @@ This reconciliation supersedes the preceding note that hosted fixes are absent. 
 - [x] Configure the local research model without returning saved secrets or contacting providers.
 - [x] Explain the durable worker, missing requirements and supervised startup; keep the review worker stopped.
 - [x] Verify model/search coexistence, next-run loading, secret-safe rejection, hosted/preview boundaries and phone/laptop forms.
+
+## Research startup without service controls, 17 October
+- [x] Replace terminal startup instructions with automatic local service startup on accepted research actions.
+- [x] Keep Settings informational; do not expose a separate worker/service start button.
+- [x] Offer Resume research on paused local runs and retain saved commands after startup failure.
+- [x] Verify concurrent startup, real worker synthetic execution, shutdown, hosted/preview rejection and secret-safe failure handling.

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { api } from './api';
 import type { Health } from './api';
@@ -9,6 +9,8 @@ type SaveState = { kind: 'idle' } | { kind: 'saving' } | { kind: 'saved' } | { k
 export function LocalSearchSetup({ health, onSaved, readOnly = false }: {
   health: Health; onSaved: (health: Health) => void; readOnly?: boolean;
 }) {
+  const [open, setOpen] = useState(false);
+  const [statusError, setStatusError] = useState('');
   const [editing, setEditing] = useState(false);
   const [editingModel, setEditingModel] = useState(false);
   const [modelSaved, setModelSaved] = useState(false);
@@ -16,6 +18,18 @@ export function LocalSearchSetup({ health, onSaved, readOnly = false }: {
   const [state, setState] = useState<SaveState>({ kind: 'idle' });
   const editTrigger = useRef<HTMLButtonElement>(null);
   const modelTrigger = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!open || readOnly) return;
+    let disposed = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const refresh = async () => {
+      try { const updated = await api.health(); if (!disposed) { onSaved(updated); setStatusError(''); } }
+      catch { if (!disposed) setStatusError('Settings could not refresh. Showing the last known status; check that the local app is running.'); }
+      if (!disposed) timer = setTimeout(refresh, 3000);
+    };
+    void refresh();
+    return () => { disposed = true; clearTimeout(timer); };
+  }, [open, readOnly, onSaved]);
   const searchStatus = health.local_search_error ? 'Settings unavailable' : health.search_ready ? 'Configured' : 'Not configured';
   const modelStatus = health.local_search_error ? 'Settings unavailable' : health.gemma_ready ? 'Configured' : 'Not configured';
   const closeEditor = () => { setEditing(false); setKey(''); setState({ kind: 'idle' }); editTrigger.current?.focus(); };
@@ -29,16 +43,18 @@ export function LocalSearchSetup({ health, onSaved, readOnly = false }: {
   return <>
     <button className="local-settings-trigger secondary" type="button" popoverTarget="local-settings" aria-label="Settings" title="Settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg></button>
     <section id="local-settings" className="local-settings" popover="auto" role="dialog" aria-labelledby="local-settings-heading"
-      onToggle={event => { if (event.newState === 'closed') { setEditing(false); setEditingModel(false); setModelSaved(false); setKey(''); setState({ kind: 'idle' }); } }}>
+      onToggle={event => { setOpen(event.newState === 'open'); if (event.newState === 'closed') { setEditing(false); setEditingModel(false); setModelSaved(false); setKey(''); setState({ kind: 'idle' }); } }}>
       <header className="local-settings-heading"><h2 id="local-settings-heading">Settings</h2><button type="button" popoverTarget="local-settings" popoverTargetAction="hide" aria-label="Close settings">×</button></header>
       <p className="hint">Local workspace · configuration on this computer</p>
       <dl className="provider-status">
         <div><dt>Company search</dt><dd>{readOnly ? searchStatus : <button className="text-button" ref={editTrigger} type="button" aria-label={`Company search: ${searchStatus}`} aria-expanded={editing} aria-controls="local-search-form" onClick={() => { setEditingModel(false); setModelSaved(false); if (editing) closeEditor(); else setEditing(true); }}>{searchStatus}</button>}</dd></div>
         <div><dt>Research model</dt><dd>{readOnly ? modelStatus : <button className="text-button" ref={modelTrigger} type="button" aria-label={`Research model: ${modelStatus}`} aria-expanded={editingModel} aria-controls="local-model-form" onClick={() => { setEditing(false); setKey(''); setState({ kind: 'idle' }); setModelSaved(false); setEditingModel(!editingModel); }}>{modelStatus}</button>}</dd></div>
-        <div><dt>Research worker</dt><dd>{health.worker_online ? 'Online' : 'Offline'}</dd></div>
+        <div><dt>Research service</dt><dd>{health.worker_online ? 'Running' : 'Stopped'}</dd></div>
       </dl>
       <p className="hint">Configured means credentials or an endpoint are present. No provider connection has been tested here.</p>
-      {!health.worker_online && <div className="worker-help"><p>No research worker is connected. It runs research in the background and saves progress while you browse.</p><p>{!health.search_ready || !health.gemma_ready ? 'Configure both providers, then start background research.' : 'Both providers are configured. Start background research to continue.'}</p><details><summary>How to start local research</summary><ol><li>Free port 8019 first. If you started the app in PowerShell, press Ctrl+C in that window. If Codex started your preview, ask Codex to switch it to research mode instead.</li><li>Open PowerShell in this GTM Shortlist checkout, where the <code>.venv</code> and <code>src</code> folders are.</li><li>Run these two commands, one line at a time:<p className="command-label">PowerShell</p><pre aria-label="PowerShell startup commands"><code>{'$env:PYTHONPATH = "$PWD/src"\n.venv/Scripts/python.exe -m shortlist.cli serve --port 8019'}</code></pre></li><li>Wait for the server to start, then reload the workspace at <a href="http://127.0.0.1:8019/">127.0.0.1:8019</a>.</li></ol><p>This starts the API and worker together. A worker can resume queued research and contact providers. The design preview on port 8018 stays separate.</p></details></div>}
+      {statusError && <p role="alert">{statusError}</p>}
+      {!health.worker_online && <p className="hint">Background research starts automatically when you start or resume research. Saving settings does not start research.</p>}
+
       {health.local_search_error && <p role="alert">Saved provider settings could not be read. Check this computer’s provider configuration.</p>}
       {readOnly ? <p className="notice">Provider changes are disabled in this design preview. Open the local research workspace to configure providers.</p> : <>
         {editing && <form id="local-search-form" onSubmit={save}>
@@ -70,14 +86,16 @@ function ModelSetup({ onSaved, onCancel }: { onSaved: (health: Health) => void; 
   };
   return <form id="local-model-form" onSubmit={save}>
     <h3>Research model</h3>
-    <p>Use a trusted OpenAI-compatible Gemma endpoint. Saved settings apply to the next run. Saving does not contact the model.</p>
+    <p>Copy these settings from your OpenAI-compatible Gemma server or inference provider. Your Tavily key is for company search only. Saving does not contact the model.</p>
     <label htmlFor="model-endpoint">Endpoint URL</label>
     <input id="model-endpoint" type="url" autoFocus required maxLength={1024} placeholder="http://localhost:8000/v1" value={endpoint} disabled={state.kind === 'saving'} onChange={event => setEndpoint(event.target.value)} />
+    <p className="hint">Use your server’s API base URL, usually ending in /v1. The localhost example needs a model server running on this computer.</p>
     <label htmlFor="model-name">Model name</label>
     <input id="model-name" required maxLength={200} placeholder="Exact model ID from your server" value={model} disabled={state.kind === 'saving'} onChange={event => setModel(event.target.value)} />
+    <p className="hint">Use the exact deployed Gemma model ID shown by your server or provider.</p>
     <label htmlFor="model-key">Model API key (optional)</label>
     <input id="model-key" type="password" autoComplete="off" autoCapitalize="none" spellCheck={false} maxLength={512} value={key} disabled={state.kind === 'saving'} onChange={event => setKey(event.target.value)} />
-    <p className="hint">Enter all replacement settings. Existing values and keys are never loaded into this form. Leave the key blank only for a server that needs no authentication.</p>
+    <p className="hint">Get this key from the same model provider. Leave it blank only if your server requires no authentication. Saving replaces all model settings; previous values are never loaded here.</p>
     <div className="review-actions"><button disabled={state.kind === 'saving'} type="submit">{state.kind === 'saving' ? 'Saving model…' : 'Save research model'}</button><button className="secondary" type="button" disabled={state.kind === 'saving'} onClick={onCancel}>Cancel model change</button></div>
     {state.kind === 'error' && <p role="alert">{state.message}</p>}
   </form>;
