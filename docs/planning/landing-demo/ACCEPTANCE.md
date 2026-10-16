@@ -12,6 +12,8 @@ Verification: the new regression keeps the same mounted page, resizes through136
 
 The first local test invocation accidentally resolved an editable installation from the main checkout through the shared virtualenv. It was discarded, then all eight cases passed with the correct source path. Playwright now pins both fixture servers to this checkout in configuration so this does not depend on shell environment.
 
+Full CI for correction5b1d735: [run38830476549](https://github.com/adkbbx/GTM_Shortlist/actions/runs/38830476549) passed core, Postgres, Windows lifecycle, UI and container. The09:55 JST16 October scheduled check confirmed the ordinary reset and disabled its fired one-time continuation; the17 October21:00 cutoff remains active. No additional aesthetic changes were warranted by that check.
+
 ## Reference and direction
 
 Inspected [Eygentic](https://eygentic.com/) and [Explee](https://explee.com/) in the browser. Eygentic informs paper, orange, schematic linework and controlled mechanical motion; Explee informs one clear entry action and a visible distinction between automatic work and required input. No reference signup or research was submitted. These were browser observations, not REA Evidence or conversion measurements.
