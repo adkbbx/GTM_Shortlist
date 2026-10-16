@@ -14,6 +14,12 @@ The first local test invocation accidentally resolved an editable installation f
 
 Full CI for correction5b1d735: [run38830476549](https://github.com/adkbbx/GTM_Shortlist/actions/runs/38830476549) passed core, Postgres, Windows lifecycle, UI and container. The09:55 JST16 October scheduled check confirmed the ordinary reset and disabled its fired one-time continuation; the17 October21:00 cutoff remains active. No additional aesthetic changes were warranted by that check.
 
+## Navigation interaction supersedes earlier chrome —16 October
+
+Further user screenshots rejected the stacked dark mobile bars and full-width expanding history even after overlap was corrected. The current interaction replaces that layout: one56px light toolbar, native modal saved-run drawer at850px and below, complete desktop wordmark, and a quiet preview status line. Earlier screenshot acceptance does not apply to this replacement.
+
+Verification includes actual790px tablet/390px phone/1366px laptop browser inspection,26 sidebar/demo/workshop cases, then eight final sidebar cases after adding explicit keyboard wrapping. Final tests cover Escape/Close/selection dismissal, focus return, background scroll restoration, drawer open during viewport change,11 viewport transitions, preserved company input, long history and no content displacement. Build, Ruff and40 backend checks passed. Full hosted CI for this new implementation remains pending after push; no deployment or live research is claimed.
+
 ## Reference and direction
 
 Inspected [Eygentic](https://eygentic.com/) and [Explee](https://explee.com/) in the browser. Eygentic informs paper, orange, schematic linework and controlled mechanical motion; Explee informs one clear entry action and a visible distinction between automatic work and required input. No reference signup or research was submitted. These were browser observations, not REA Evidence or conversion measurements.

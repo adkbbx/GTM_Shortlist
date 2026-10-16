@@ -25,29 +25,40 @@
 .is-collapsed .sidebar-toggle svg{transform:rotate(180deg)}
 @media(prefers-reduced-motion:no-preference){.research-sidebar .saved-run,.research-sidebar .new-run{transition:background-color 140ms ease-out}.sidebar-toggle svg{transition:transform 180ms ease-out}}
 
-/* Align the wordmark with the navigation rather than a separate logo lockup. */
-header.topbar{height:64px;padding:0;max-width:1680px;margin:auto;border-bottom:1px solid var(--line)}
-header.topbar .brand{height:64px;width:224px;flex:none;padding:0 24px;background:#201e1b;color:#fff9f0;font-size:17px;letter-spacing:-.025em;font-weight:600}
-header.topbar .workspace-account{padding:0 28px;min-width:0}
-.workspace{min-height:calc(100dvh - 64px)}
-@media(max-width:850px){header.topbar{height:auto;min-height:60px;flex-wrap:wrap;background:#201e1b}header.topbar .brand{height:60px;width:auto;padding:0 20px}header.topbar .workspace-account{color:#e8e4dd;padding:0 20px}header.topbar .local-label{display:none}.workspace:has(>.research-sidebar.is-collapsed){display:block}.workspace>.research-sidebar{border-top:1px solid #37332e}header.topbar .account-nav>button{color:#efa779}}
-
-@media(min-width:851px){body:has(.research-sidebar.is-collapsed) header.topbar .brand{width:64px;padding:0;justify-content:center}body:has(.research-sidebar.is-collapsed) header.topbar .brand>span{display:none}body:has(.research-sidebar.is-collapsed) header.topbar .brand::after{content:"GS";font-size:16px;letter-spacing:-.04em}}
-
-/* The workspace and its navigation switch modes at the same boundary. */
+/* One product header; mobile history lives in a modal drawer, never a second row. */
+header.topbar{height:56px;padding:0 24px;max-width:1680px;margin:auto;border-bottom:1px solid var(--line);background:var(--paper)}
+header.topbar .brand{height:56px;width:auto;flex:none;padding:0;color:var(--ink);font-size:17px;letter-spacing:-.025em;font-weight:600}
+header.topbar .workspace-account{min-width:0}
+.workspace{min-height:calc(100dvh - 56px)}
+.mobile-brand{display:none}
+.research-drawer{position:fixed;inset:0 auto 0 0;margin:0;border:0;border-right:1px solid #37332e;padding:20px 16px;width:min(320px,calc(100vw - 32px));max-width:none;height:100dvh;max-height:100dvh;background:#201e1b;color:#e8e4dd}
+.research-drawer::backdrop{background:rgb(15 14 12 / .45)}
+.drawer-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}
+.workspace .research-sidebar .drawer-heading h2{color:#fff9f0;padding:0;margin:0;font-size:1rem}
+.drawer-heading button{min-height:44px;padding:8px;font-size:.8125rem;gap:12px}
+.drawer-heading button span{font-size:22px;font-weight:400}
 @media(max-width:850px){
+  body:has(.research-sidebar) header.topbar:has(.local-label){display:none}
+  body:has(.research-sidebar) header.topbar .brand{display:none}
+  body:has(.research-sidebar) header.topbar{height:auto;min-height:0;padding:8px 16px}
   .workspace:has(>.research-sidebar){display:block}
   .workspace>.research-sidebar,.workspace>.research-sidebar.is-collapsed{
-    display:grid;grid-template-columns:minmax(0,1fr) auto;
-    align-items:center;align-content:start;gap:8px 12px;padding:8px 16px;
-    border-right:0;border-bottom:1px solid #37332e;
+    display:flex;flex-direction:row;align-items:center;justify-content:space-between;
+    gap:8px;padding:6px 12px;height:56px;min-height:56px;border-right:0;border-bottom:1px solid var(--line);background:var(--paper);color:var(--ink);
   }
-  .research-sidebar .sidebar-header{padding:0;flex-direction:row;justify-content:flex-start;min-width:0}
-  .research-sidebar .new-run,.research-sidebar.is-collapsed .new-run{width:auto;margin:0;padding:8px 10px;gap:8px}
-  .research-sidebar .research-navigation{grid-column:1/-1;min-width:0}
-  .research-sidebar nav{max-height:200px}
+  .research-sidebar .sidebar-header{padding:0;flex-direction:row;justify-content:flex-start;min-width:0;gap:8px}
+  .research-sidebar .sidebar-heading{display:none}
+  .research-sidebar .mobile-brand{display:block;order:1;font-size:.9375rem;font-weight:600;white-space:nowrap}
+  .research-sidebar .sidebar-toggle{order:0}
+  .research-sidebar .sidebar-toggle svg,.research-sidebar.is-collapsed .sidebar-toggle svg{transform:none}
+  .research-sidebar .new-run,.research-sidebar.is-collapsed .new-run{width:44px;margin:0;padding:10px;gap:0}
+  .research-sidebar .nav-label,.research-sidebar.is-collapsed .nav-label{display:none}
+  .research-sidebar button:hover{background:#eeede9}
+  .research-sidebar button:focus-visible{outline:2px solid var(--orange);outline-offset:0}
+  .research-sidebar .research-navigation{min-width:0}
+  .research-sidebar nav{max-height:calc(100dvh - 140px)}
   .research-sidebar .saved-run{min-width:0}
-  .research-sidebar.is-collapsed .research-navigation{display:none}
-  .research-sidebar.is-collapsed .sidebar-heading,.research-sidebar.is-collapsed .nav-label{display:inline}
-  .research-sidebar.is-collapsed .sidebar-toggle svg{transform:none}
+  .research-sidebar.is-collapsed .sidebar-heading{display:none}
+  .research-sidebar .research-drawer .research-navigation h2,.research-sidebar .research-drawer .run-copy{display:block}
+  .research-sidebar .research-drawer button:hover{background:#302d28}
 }

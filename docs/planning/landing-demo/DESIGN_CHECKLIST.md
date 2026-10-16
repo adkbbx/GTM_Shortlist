@@ -46,3 +46,10 @@ Current design gates are satisfied. This does not complete the full product or a
 - [x] Keep a mounted page through resize and collapse/expand sequences across11 widths; verify geometry rather than overflow alone.
 - [x] Inspect actual preview phone, laptop and boundary layouts; preserve saved run and zero provider spending.
 - [x] Pin browser fixture imports to this checkout, preventing shared-venv source drift.
+
+## Compact navigation interaction — user feedback16 October
+- [x] Replace stacked mobile chrome/history with one56px toolbar and a saved-run drawer.
+- [x] Keep the full product name on desktop collapse; remove GS abbreviation.
+- [x] Reduce preview warning to a status line.
+- [x] Exercise drawer selection, close, focus restoration and viewport transitions in actual browser.
+- [x] Confirm final keyboard cycling and open-drawer resize cleanup regression: eight final cases passed.

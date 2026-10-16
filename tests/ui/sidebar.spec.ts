@@ -1,88 +1,94 @@
 import { expect, test } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 
-test('navigation stays usable while resizing across both layout boundaries', async ({ page }) => {
+test('navigation remains compact through resize and drawer transitions', async ({ page }) => {
   const fixture = await page.request.post('/__fixture_held_run');
   const { id } = await fixture.json();
   try {
     await page.setViewportSize({ width: 1366, height: 800 });
     await page.goto('/');
-    const sidebar = page.getByRole('complementary', { name: 'Saved research' });
-    await expect(sidebar.getByRole('button', { name: 'New shortlist', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Collapse sidebar', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Collapse sidebar', exact: true }).click();
     for (const width of [1366, 1024, 851, 850, 731, 701, 700, 390, 320, 851, 1366]) {
       await page.setViewportSize({ width, height: 800 });
-      // Keep the same mounted component and toggle each mode at every boundary.
-      for (const collapsed of [true, false]) {
-        await sidebar.getByRole('button', { name: collapsed ? 'Collapse sidebar' : 'Expand sidebar', exact: true }).click();
-        const layout = await page.evaluate(() => {
-          const rect = (selector: string) => document.querySelector(selector)!.getBoundingClientRect().toJSON();
-          return { sidebar: rect('.research-sidebar'), header: rect('.sidebar-header'), action: rect('.new-run'),
-            main: rect('.main'), heading: rect('.page-heading h1'), input: rect('#website'),
-            navigation: rect('.research-navigation'), overflow: document.documentElement.scrollWidth > innerWidth };
-        });
-        expect(layout.overflow, `overflow at ${width}/${collapsed}`).toBe(false);
-        expect(layout.header.y - layout.sidebar.y, `navigation top at ${width}/${collapsed}`).toBeLessThan(24);
-        expect(layout.input.width, `usable input at ${width}/${collapsed}`).toBeGreaterThan(200);
-        expect(layout.heading.width, `readable heading at ${width}/${collapsed}`).toBeGreaterThan(Math.min(280, width - 48));
-        if (width <= 850) {
-          expect(layout.main.y).toBeGreaterThanOrEqual(layout.sidebar.bottom - 1);
-          expect(layout.header.right).toBeLessThanOrEqual(layout.action.x + 1);
-        } else {
-          expect(layout.main.x).toBeGreaterThanOrEqual(layout.sidebar.right - 1);
-          expect(layout.action.y).toBeGreaterThanOrEqual(layout.header.bottom);
-        }
-        if (!collapsed) expect(layout.navigation.y).toBeGreaterThanOrEqual(layout.action.bottom);
+      const expand = page.getByRole('button', { name: 'Expand sidebar', exact: true });
+      await expect(expand).toBeVisible();
+      const before = await page.locator('.main').boundingBox();
+      await expand.click();
+      if (width <= 850) {
+        const dialog = page.getByRole('dialog', { name: 'Your workspace' });
+        await expect(dialog).toBeVisible();
+        await expect(dialog.getByRole('button', { name: 'Close saved runs', exact: true })).toBeFocused();
+        const box = await dialog.boundingBox();
+        expect(box!.width).toBeLessThanOrEqual(width - 32);
+        expect((await page.locator('.main').boundingBox())!.y).toBe(before!.y);
+        expect(before!.y).toBe(56);
+        expect((await page.locator('.research-sidebar').boundingBox())!.height).toBe(56);
+        await page.keyboard.press('Shift+Tab');
+        await expect(dialog.getByRole('navigation').getByRole('button').last()).toBeFocused();
+        await page.keyboard.press('Tab');
+        await expect(dialog.getByRole('button', { name: 'Close saved runs', exact: true })).toBeFocused();
+        await page.keyboard.press('Escape');
+        await expect(dialog).not.toBeVisible();
+        await expect(expand).toBeFocused();
+      } else {
+        const sidebar = await page.locator('.research-sidebar').boundingBox();
+        const header = await page.locator('.sidebar-header').boundingBox();
+        expect(header!.y - sidebar!.y).toBeLessThan(24);
+        await page.getByRole('button', { name: 'Collapse sidebar', exact: true }).click();
       }
+      const geometry = await page.evaluate(() => ({
+        overflow: document.documentElement.scrollWidth > innerWidth,
+        input: document.querySelector('#website')!.getBoundingClientRect().width,
+        heading: document.querySelector('h1')!.getBoundingClientRect().width,
+      }));
+      expect(geometry.overflow).toBe(false);
+      expect(geometry.input).toBeGreaterThan(200);
+      expect(geometry.heading).toBeGreaterThan(Math.min(280, width - 48));
     }
+    await page.setViewportSize({ width: 790, height: 800 });
+    await page.getByRole('button', { name: 'Expand sidebar', exact: true }).click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.setViewportSize({ width: 1366, height: 800 });
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    expect(await page.evaluate(() => document.body.style.overflow)).not.toBe('hidden');
+    await page.getByLabel('Company name or website', { exact: true }).fill('Preserved company');
+    await page.getByRole('button', { name: 'Expand sidebar', exact: true }).click();
+    await expect(page.getByLabel('Company name or website', { exact: true })).toHaveValue('Preserved company');
   } finally { await page.request.post(`/__fixture_release/${id}`); }
 });
 
 test('saved research navigation collapses and expands without changing the run', async ({ page }, info) => {
   const fixture = await page.request.post('/__fixture_held_run');
-  expect(fixture.ok()).toBeTruthy();
   const { id } = await fixture.json();
   try {
     await page.goto(`/?run=${id}`);
-    const sidebar = page.getByRole('complementary', { name: 'Saved research' });
+    const sidebar = page.locator('.research-sidebar');
     if (info.project.name === 'phone') {
-      await expect(sidebar.getByRole('navigation', { name: 'Research history' })).not.toBeVisible();
-      await sidebar.getByRole('button', { name: 'Expand sidebar', exact: true }).click();
+      await page.getByRole('button', { name: 'Expand sidebar', exact: true }).click();
+      await expect(page.getByRole('dialog', { name: 'Your workspace' })).toBeVisible();
     }
-    await expect(sidebar.getByRole('button', { name: 'New shortlist', exact: true })).toBeVisible();
     await expect(sidebar.locator('[aria-current=page]')).toHaveCount(1);
-    const initial = await sidebar.evaluate(element => element.getBoundingClientRect());
-    if (info.project.name === 'laptop') expect(await page.locator('.brand').evaluate(element => element.getBoundingClientRect().width)).toBe(initial.width);
-    await sidebar.getByRole('button', { name: 'Collapse sidebar', exact: true }).click();
-    const expand = sidebar.getByRole('button', { name: 'Expand sidebar', exact: true });
+    await page.getByRole('button', { name: info.project.name === 'phone' ? 'Close saved runs' : 'Collapse sidebar', exact: true }).click();
+    const expand = page.getByRole('button', { name: 'Expand sidebar', exact: true });
     await expect(expand).toHaveAttribute('aria-expanded', 'false');
     await expect(page).toHaveURL(new RegExp(id));
-    if (info.project.name === 'phone') {
-      await expect(sidebar.getByRole('navigation', { name: 'Research history' })).not.toBeVisible();
-    } else {
-      const collapsedWidth = await sidebar.evaluate(element => element.getBoundingClientRect().width);
-      expect(collapsedWidth).toBeLessThan(initial.width);
-      expect(await page.locator('.brand').evaluate(element => element.getBoundingClientRect().width)).toBe(collapsedWidth);
-    }
+    if (info.project.name === 'phone') await expect(page.getByRole('dialog')).not.toBeVisible();
+    else expect((await sidebar.boundingBox())!.width).toBe(64);
     mkdirSync('.impeccable/review', { recursive: true });
     await page.screenshot({ path: `.impeccable/review/${info.project.name}-sidebar-collapsed.png` });
     await expand.press('Enter');
     await expect(sidebar.getByRole('navigation', { name: 'Research history' })).toBeVisible();
-    if (info.project.name === 'phone') {
-      const headingLeft = await sidebar.locator('.sidebar-heading').evaluate(element => element.getBoundingClientRect().left);
-      expect(headingLeft).toBeLessThanOrEqual(24);
-    }
-    await expect(sidebar.getByRole('button', { name: 'Collapse sidebar', exact: true })).toBeFocused();
-    await expect(sidebar.locator('[aria-current=page]')).toHaveCount(1);
-    expect(await sidebar.evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(32, 30, 27)');
-    expect(await sidebar.locator('.selected').evaluate(element => getComputedStyle(element).boxShadow)).toBe('none');
-    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
-      await page.evaluate(() => window.innerWidth));
+    await expect(page.getByRole('button', { name: info.project.name === 'phone' ? 'Close saved runs' : 'Collapse sidebar', exact: true })).toBeFocused();
     await page.screenshot({ path: `.impeccable/review/${info.project.name}-sidebar-expanded.png` });
-  } finally {
-    await page.request.post(`/__fixture_release/${id}`);
-  }
+    if (info.project.name === 'phone') {
+      // Selecting a saved run dismisses the drawer and restores the workspace.
+      await sidebar.locator('[aria-current=page]').click();
+      await expect(page.getByRole('dialog')).not.toBeVisible();
+      await expect(page).toHaveURL(new RegExp(id));
+    }
+  } finally { await page.request.post(`/__fixture_release/${id}`); }
 });
-
 
 test('long saved history scrolls without compressing or overlapping rows', async ({ page }, info) => {
   const fixture = await page.request.post('/__fixture_held_run');

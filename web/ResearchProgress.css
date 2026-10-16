@@ -49,3 +49,8 @@
 .research-recap>summary>span:first-child{color:var(--ink);font-size:.875rem;font-weight:500;margin:0}
 
 .new-research .main:has(.preview-notice){padding-top:16px}.new-research .main:has(.preview-notice) .page-heading{margin-bottom:12px}
+
+/* Preview status should not compete with the actual entry task. */
+.main .preview-notice{border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;padding:0 0 8px;gap:0 16px;margin-bottom:20px}
+.main .preview-notice p{font-size:.75rem;color:var(--muted)}
+.main .preview-notice a{font-size:.75rem;font-weight:400;margin-left:auto}
