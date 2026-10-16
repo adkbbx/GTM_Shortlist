@@ -1,125 +1,44 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
+import { mkdirSync } from 'node:fs';
 
-test('sample is independent of real research and preserves website input', async ({ page }) => {
+test('standalone demo completes without research requests and returns to preserved input', async ({ page }, info) => {
   await page.goto('/');
-  const entry = page.getByRole('group', { name: 'Explore an example' });
-  await expect(page.getByRole('button', { name: 'Try the demo', exact: true })).toBeVisible();
-  const mutations: string[] = [];
-  page.on('request', request => { if (request.method() !== 'GET' && request.url().includes('/api/')) mutations.push(request.url()); });
-  const input = page.getByLabel('Company name or website', { exact: true });
-  await input.fill('https://preserved.example');
-  await expect(page.getByRole('button', { name: 'Research my website', exact: true })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Try the demo', exact: true }).click();
-  const demo = page.getByRole('region', { name: 'See how a shortlist takes shape.' });
-  if (await demo.locator('.demo-stage-list').getAttribute('open') === null) {
-    await demo.locator('.demo-stage-list > summary').click();
-  }
-  await demo.getByRole('button', { name: /5 Inspect evidence/ }).click();
-  await expect(demo.getByRole('heading', { name: 'Inspect evidence', exact: true })).toBeVisible();
-  await demo.getByRole('button', { name: 'Inspect example passage', exact: true }).click();
-  await expect(demo.getByText('Synthetic example passage', { exact: true })).toBeVisible();
-  await demo.getByRole('button', { name: 'Review this example' }).click();
-  await demo.getByRole('button', { name: 'Accept example', exact: true }).click();
-  await expect(demo.getByRole('button', { name: 'Accept example' })).toHaveAttribute('aria-pressed', 'true');
-  await demo.getByRole('button', { name: 'Explore an example draft' }).click();
-  await demo.getByLabel('Example subject', { exact: true }).fill('My sample edit');
-  await demo.getByRole('button', { name: 'Research my website', exact: true }).click();
-  await expect(input).toBeFocused();
-  await expect(input).toHaveValue('https://preserved.example');
-  await demo.getByRole('button', { name: 'Close example' }).click();
-  await expect(page.getByRole('button', { name: 'Try the demo', exact: true })).toBeFocused();
-  expect(mutations).toEqual([]);
-  expect(await entry.count()).toBe(1);
-});
-
-test('playback advances then waits for example confirmation and source inspection', async ({ page }) => {
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Try the demo', exact: true }).click();
-  const demo = page.getByRole('region', { name: 'See how a shortlist takes shape.' });
-  await expect(demo.getByRole('heading', { name: 'Confirm target', exact: true })).toBeVisible({ timeout: 20000 });
-  await expect(demo.getByRole('button', { name: 'Confirm example target' })).toBeVisible();
-  await expect(demo.locator('.demo-action-cue')).toContainText('Your turn');
-  await expect(demo.locator('.demo-action-cue')).toContainText('click Confirm example target');
-  await expect(demo.getByRole('button', { name: 'Next', exact: true })).toHaveCount(0);
-  await demo.getByRole('button', { name: 'Confirm example target' }).click();
-  // Focusing an interactive control intentionally pauses playback. Resume from its dedicated control.
-  if (await demo.getByRole('button', { name: 'Resume', exact: true }).isVisible()) await demo.getByRole('button', { name: 'Resume', exact: true }).click();
-  await expect(demo.getByRole('heading', { name: 'Inspect evidence', exact: true })).toBeVisible({ timeout: 10000 });
-  await expect(demo.getByRole('button', { name: 'Inspect example passage', exact: true })).toHaveAttribute('aria-expanded', 'false');
-  await expect(demo.locator('.demo-action-cue')).toContainText('Click Inspect example passage');
-  await expect(demo.getByRole('button', { name: 'Next', exact: true })).toHaveCount(0);
-});
-
-test('reduced motion keeps the informative result visible and stages usable', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Try the demo', exact: true }).press('Enter');
-  const demo = page.getByRole('region', { name: 'See how a shortlist takes shape.' });
-  await expect(demo.getByRole('heading', { name: 'Review and draft', exact: true })).toBeVisible();
-  await expect(demo.locator('.demo-playback [role=status]')).toContainText('Reduced motion');
-  await demo.getByRole('button', { name: 'Previous', exact: true }).press('Enter');
-  await expect(demo.getByRole('heading', { name: 'Inspect evidence', exact: true })).toBeVisible();
-  expect(await demo.locator('.demo-scene').evaluate(element => getComputedStyle(element).animationName)).toBe('none');
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-});
-
-test('first visit presents one real task and keeps the sample optional', async ({ page }) => {
-  // Other scenarios create saved runs in the shared fixture server. This case
-  // explicitly represents a new account's empty history, not a returning one.
-  await page.route('**/api/runs', route => route.fulfill({ json: [] }));
-  await page.goto('/');
-  await expect(page.getByRole('button', { name: 'Start research', exact: true })).toHaveCount(1);
-  await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
-  await expect(page.getByRole('complementary', { name: 'Saved research' })).toHaveCount(0);
+  await page.getByLabel('Company name or website', { exact: true }).fill('https://preserved.example');
   await expect(page.getByRole('region', { name: 'See how a shortlist takes shape.' })).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'A shortlist with a paper trail.' })).toHaveCount(0);
-  await expect(page.getByRole('region', { name: 'How research works' })).toHaveCount(0);
-  const primary = page.getByRole('button', { name: 'Start research', exact: true });
-  const example = page.getByRole('button', { name: 'Try the demo', exact: true });
-  await expect(primary).toBeEnabled();
+  const requests: string[] = [];
+  page.on('request', request => { if (new URL(request.url()).pathname.startsWith('/api/')) requests.push(request.url()); });
+  await page.getByRole('link', { name: 'Try the demo', exact: true }).click();
+  await expect(page).toHaveURL(/demo=1/);
+  await expect(page.getByRole('button', { name: 'Start research', exact: true })).toHaveCount(0);
+  await expect(page.getByText('Synthetic example · invented companies and passages')).toBeVisible();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByRole('button', { name: 'Confirm example target', exact: true }).click();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
+  await page.getByRole('button', { name: 'Inspect example passage', exact: true }).click();
+  await page.getByRole('button', { name: 'Review this example', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Demo complete', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Accept example', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Accept example', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  expect(requests).toEqual([]);
+  mkdirSync('.impeccable/review', { recursive: true });
+  await page.screenshot({ path: `.impeccable/review/${info.project.name}-standalone-demo.png`, fullPage: true });
+  await page.getByRole('link', { name: 'Return to workspace', exact: true }).click();
+  await expect(page.getByLabel('Company name or website', { exact: true })).toHaveValue('https://preserved.example');
+});
+
+test('demo remains readable with reduced motion and enlarged phone text', async ({ page }, info) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/?demo=1');
+  await expect(page.getByRole('button', { name: /^(Previous|Pause|Next|Reduce motion|Close example)$/ })).toHaveCount(0);
   await page.setViewportSize({ width: 320, height: 844 });
   await page.locator('html').evaluate(element => { element.style.fontSize = '200%'; });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-  await page.getByLabel('Company name or website', { exact: true }).focus();
-  await page.keyboard.press('Tab');
-  await expect(primary).toBeFocused();
-  expect(await primary.evaluate(element => getComputedStyle(element).backgroundColor)).not.toBe(
-    await example.evaluate(element => getComputedStyle(element).backgroundColor));
-  await page.getByRole('button', { name: 'Try the demo', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'See how a shortlist takes shape.' })).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-});
-
-
-test('motion can be disabled during playback without hiding the result', async ({ page }) => {
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Try the demo', exact: true }).click();
-  const demo = page.getByRole('region', { name: 'See how a shortlist takes shape.' });
-  await demo.getByRole('button', { name: 'Reduce motion', exact: true }).click();
-  await expect(demo.getByRole('heading', { name: 'Understand offer', exact: true })).toBeVisible();
-  expect(await demo.locator('.demo-scene').evaluate(element => getComputedStyle(element).animationName)).toBe('none');
-  await demo.getByRole('button', { name: 'Next', exact: true }).click();
-  await expect(demo.getByRole('heading', { name: 'Explore market', exact: true })).toBeVisible();
-});
-
-
-test('reduced motion uses consistent manual navigation without a misleading Resume', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Try the demo', exact: true }).click();
-  const demo = page.getByRole('region', { name: 'See how a shortlist takes shape.' });
-  if (await demo.locator('.demo-stage-list').getAttribute('open') === null) await demo.locator('.demo-stage-list > summary').click();
-  await demo.getByRole('button', { name: /1 Understand offer/ }).click();
-  await expect(demo.locator('.demo-action-cue')).toContainText('Manual example');
-  await expect(demo.getByRole('button', { name: 'Resume', exact: true })).toHaveCount(0);
-  await demo.getByRole('button', { name: 'Next', exact: true }).click();
-  await expect(demo.getByRole('heading', { name: 'Explore market', exact: true })).toBeVisible();
-  await expect(demo.getByRole('button', { name: 'Resume', exact: true })).toHaveCount(0);
-  await demo.getByRole('button', { name: 'Next', exact: true }).click();
-  await expect(demo.getByRole('heading', { name: 'Confirm target', exact: true })).toBeVisible();
-  await expect(demo.getByRole('button', { name: 'Next', exact: true })).toHaveCount(0);
-  await demo.getByRole('button', { name: 'Confirm example target', exact: true }).click();
-  await expect(demo.getByRole('heading', { name: 'Discover companies', exact: true })).toBeVisible();
-  await demo.getByRole('button', { name: 'Next', exact: true }).click();
-  await expect(demo.getByRole('heading', { name: 'Inspect evidence', exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByRole('link', { name: 'Back to workspace', exact: true }).press('Enter');
+  await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  mkdirSync('.impeccable/review', { recursive: true });
+  await page.setViewportSize(info.project.use.viewport ?? { width: 390, height: 844 });
+  await page.locator('html').evaluate(element => { element.style.fontSize = ''; });
+  await page.screenshot({ path: `.impeccable/review/${info.project.name}-simplified-entry.png` });
 });

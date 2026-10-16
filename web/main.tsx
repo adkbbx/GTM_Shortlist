@@ -7,7 +7,7 @@ import '@fontsource/schibsted-grotesk/700.css';
 import { api } from './api';
 import type { Confirmation, Evidence, ExclusionFinding, Finding, Health, Record, Review, Run, Service, Wallet } from './api';
 import { ResearchProgress } from './ResearchProgress';
-import { LandingDemo } from './LandingDemo';
+import { DemoPage, LandingDemo } from './LandingDemo';
 import { WorkshopField } from './WorkshopField';
 import { ResearchSidebar } from './ResearchSidebar';
 import { AuthGate } from './AuthGate';
@@ -222,14 +222,15 @@ function DeleteResearch({ run, onDeleted }: { run: Run; onDeleted: () => void })
   </section>;
 }
 
-function App({ account }: { account: ReactNode }) {
+function App({ account, identity }: { account: ReactNode; identity: string }) {
   const [health, setHealth] = useState<Health | null>(null);
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [showActivity, setShowActivity] = useState(false);
   const [service, setService] = useState<Service | null>(null);
   const [runs, setRuns] = useState<Run[]>([]);
   const [active, setActive] = useState<Run | null>(null);
-  const [website, setWebsite] = useState('');
+  const [website, setWebsite] = useState(() => { try { return sessionStorage.getItem('shortlist-company-entry:' + identity) ?? ''; } catch { return ''; } });
+  useEffect(() => { try { sessionStorage.setItem('shortlist-company-entry:' + identity, website); } catch { /* Optional tab-local input recovery. */ } }, [website, identity]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -324,7 +325,7 @@ function App({ account }: { account: ReactNode }) {
       {error && <div className="notice" role="alert">{error}<button className="text-button" onClick={() => window.location.reload()}>Reload workspace</button></div>}
       {active?.can_retry_seller && <RetrySeller key={`retry-${active.id}`} run={active} onSaved={websiteChosen} />}
       {active?.can_continue_discovery && <ContinueDiscovery key={`continue-${active.id}`} run={active} onSaved={websiteChosen} />}
-      {!active && <LandingDemo researchUrl={previewWorkspace} onResearch={() => document.getElementById('website')?.focus()}><section className="sheet start-sheet" aria-labelledby="start-heading"><h2 id="start-heading" className="sr-only">Start your company research</h2><form onSubmit={start}><label htmlFor="website">Company name or website</label><div className="website-form"><input id="website" type="text" inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="Company name or example.com" required maxLength={2048} value={website} onChange={e => { setWebsite(e.target.value); requestKey.current = crypto.randomUUID(); }} /><button disabled={saving || loading || Boolean(previewWorkspace)} aria-busy={saving} type="submit">{saving ? 'Starting research…' : 'Start research'}<Arrow /></button></div></form><p className="hint">Up to three companies. You confirm the target before discovery.</p>{!previewWorkspace && health?.mode === 'local' && !health.search_ready && <p className="local-setup-prompt">Local company search needs setup. <button type="button" className="text-button" popoverTarget="local-settings">Open Settings</button></p>}</section></LandingDemo>}
+      {!active && <LandingDemo><section className="sheet start-sheet" aria-labelledby="start-heading"><h2 id="start-heading" className="sr-only">Start your company research</h2><form onSubmit={start}><label htmlFor="website">Company name or website</label><div className="website-form"><input id="website" type="text" inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="Company name or example.com" required maxLength={2048} value={website} onChange={e => { setWebsite(e.target.value); requestKey.current = crypto.randomUUID(); }} /><button disabled={saving || loading || Boolean(previewWorkspace)} aria-busy={saving} type="submit">{saving ? 'Starting research…' : 'Start research'}<Arrow /></button></div></form><p className="hint">Up to three companies. You confirm the target before discovery.</p>{!previewWorkspace && health?.mode === 'local' && !health.search_ready && <p className="local-setup-prompt">Local company search needs setup. <button type="button" className="text-button" popoverTarget="local-settings">Open Settings</button></p>}</section></LandingDemo>}
       {active && <ResearchProgress key={active.id} run={active} connected={!error} />}{active && ['queued', 'running', 'awaiting_confirmation'].includes(active.status) && <ResearchStop key={`stop-${active.id}`} run={active} onStopped={stopped} />}{active?.credits && <p className="batch-credit-summary" role="status">{active.credits.used} {active.credits.used === 1 ? 'credit' : 'credits'} used · {active.credits.reserved} reserved · {active.credits.returned} returned</p>}
       {active && !pending && !active.termination && !active.seller_url && <WebsiteChoice key={`website-${active.id}`} run={active} onSaved={websiteChosen} />}{active?.status === 'awaiting_confirmation' && active.seller_url && <>{health && !health.search_ready && <p className="notice">Company search is not configured. Your target can be saved; configure search before discovery.</p>}<ConfirmationForm key={`offer-${active.id}`} run={{ ...active, seller_url: active.seller_url }} wallet={wallet} hostedAccount={account != null} onSaved={saved} /></>}
       {results && <><div className="results-toolbar"><div><h2>{active.records.length} {active.records.length === 1 ? 'company' : 'companies'} researched</h2><p>{active.status === 'partial' ? 'Some questions remain open. Review the unknowns before using these records.' : 'Model assessments are ready for your review.'}</p></div>{!!active.records.length && <div className="export-controls"><label className="checkbox-label"><input type="checkbox" checked={acceptedOnly} onChange={e => setAcceptedOnly(e.target.checked)} />Accepted only</label><div className="export-links">{(['xlsx', 'csv', 'json'] as const).map(format => <a className="secondary button-link" key={format} href={`/api/runs/${active.id}/export?format=${format}&accepted_only=${acceptedOnly}`} onClick={event => { event.preventDefault(); void api.download(active.id, format, acceptedOnly).catch(reason => setError(describeError(reason))); }}>Export {format === 'xlsx' ? 'Excel' : format.toUpperCase()}</a>)}</div></div>}</div>
@@ -338,11 +339,11 @@ function App({ account }: { account: ReactNode }) {
       {results && active.profile && active.records.length > 0 && service?.booking_url && <section className="setup-call" aria-labelledby="setup-heading"><div><h2 id="setup-heading">Discuss your shortlist</h2><p>Get help with your target, evidence and next steps. The setup call is optional.</p></div><a className="secondary button-link" href={service.booking_url} target="_blank" rel="noopener noreferrer" onClick={() => { if (navigator.doNotTrack !== '1') void api.bookingClick(active.id).catch(() => undefined); }}>Book an optional setup call<Arrow /></a></section>}
       {active && !pending && <DeleteResearch key={`delete-${active.id}`} run={active} onDeleted={deleted} />}
       {message && <p className="notice" role="status">{message}</p>}
-      <footer className="workspace-footer"><p>GTM Shortlist · Open-source company research</p><p>Research supports judgment. It does not establish buying intent.</p>{health && <p className="hint">{health.search_ready && health.gemma_ready ? 'Research providers configured' : 'Research providers still need configuration'}</p>}</footer>
+      <footer className="workspace-footer"><p>GTM Shortlist</p></footer>
     </main></div>
   </>;
 }
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Application root is missing');
-createRoot(root).render(<StrictMode><AuthGate workspace={(identity, account) => <App key={identity} account={account} />} /></StrictMode>);
+createRoot(root).render(<StrictMode>{new URLSearchParams(window.location.search).get('demo') === '1' ? <DemoPage /> : <AuthGate workspace={(identity, account) => <App key={identity} identity={identity} account={account} />} />}</StrictMode>);

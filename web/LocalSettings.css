@@ -12,6 +12,7 @@
 .topbar .workspace-account .local-settings .text-button{color:var(--orange)}
 .local-setup-prompt{font-size:.875rem;color:var(--muted);margin:8px 0 20px}.local-setup-prompt button{font-size:inherit}
 .topbar .local-settings-trigger{background:#2a2723;color:#e8e4dd;border-color:#494239}
+.topbar .local-settings-trigger{width:44px;padding:10px;background:transparent;border-color:transparent}
 .topbar .local-settings-trigger:hover{background:#35312b;color:#fff9f0}
 @media(max-width:850px){
  .topbar:has(.local-settings-trigger) .local-label{display:none}

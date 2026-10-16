@@ -24,7 +24,6 @@ void main(){
 /** Decorative calibration plate. It never represents actual research progress. */
 export function WorkshopField() {
   const canvas = useRef<HTMLCanvasElement>(null);
-  const [paused, setPaused] = useState(false);
   const [ready, setReady] = useState(false);
   useEffect(() => {
     const surface = canvas.current;
@@ -51,7 +50,7 @@ export function WorkshopField() {
     gl.enableVertexAttribArray(position); gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
     const size = gl.getUniformLocation(program, 'resolution'), clock = gl.getUniformLocation(program, 'time');
     const preference = matchMedia('(prefers-reduced-motion: reduce)');
-    let frame = 0, last = 0, elapsed = 0, inView = true, lost = false;
+    let frame = 0, last = 0, elapsed = 0, inView = true, lost = false, finished = false;
     const draw = () => {
       const rect = surface.getBoundingClientRect(), ratio = Math.min(devicePixelRatio || 1, 1.5);
       const width = Math.max(1, Math.round(rect.width*ratio)), height = Math.max(1, Math.round(rect.height*ratio));
@@ -64,7 +63,7 @@ export function WorkshopField() {
     };
     const sync = () => {
       cancelAnimationFrame(frame); last=0;
-      const playing = !paused && !preference.matches && !document.hidden && inView && !lost;
+      const playing = !finished && !preference.matches && !document.hidden && inView && !lost;
       surface.dataset.state=playing ? 'playing' : 'static';
       if (!lost) { draw(); if (playing) frame=requestAnimationFrame(tick); }
     };
@@ -75,13 +74,13 @@ export function WorkshopField() {
     document.addEventListener('visibilitychange', sync); preference.addEventListener('change',sync);
     surface.addEventListener('webglcontextlost',contextLost);
     setReady(true); sync();
-    return () => { cancelAnimationFrame(frame); observer.disconnect(); resize.disconnect(); document.removeEventListener('visibilitychange',sync); preference.removeEventListener('change',sync); surface.removeEventListener('webglcontextlost',contextLost); gl.deleteBuffer(buffer); gl.deleteProgram(program); gl.deleteShader(vs); gl.deleteShader(fs); };
-  }, [paused]);
+    const finish = window.setTimeout(() => { finished = true; sync(); }, 4000);
+    return () => { window.clearTimeout(finish); cancelAnimationFrame(frame); observer.disconnect(); resize.disconnect(); document.removeEventListener('visibilitychange',sync); preference.removeEventListener('change',sync); surface.removeEventListener('webglcontextlost',contextLost); gl.deleteBuffer(buffer); gl.deleteProgram(program); gl.deleteShader(vs); gl.deleteShader(fs); };
+  }, []);
   return <div className="workshop-field" data-enhanced={ready}>
     <div className="workshop-plate" aria-hidden="true">
       <svg viewBox="0 0 320 250" fill="none"><path className="plate-grid" d="M0 50h320M0 100h320M0 150h320M0 200h320M60 0v250M110 0v250M160 0v250M210 0v250M260 0v250"/><path className="plate-frame" d="M20 35V20h15m250 0h15v15M20 215v15h15m250 0h15v-15M160 35v180M60 125h200"/><circle cx="160" cy="125" r="72"/><circle cx="160" cy="125" r="58" strokeDasharray="3 6"/><path d="M113 72 92 51H40m167 127 21 21h52M216 81h56M104 169H48"/><rect x="141" y="100" width="38" height="50" rx="2"/><path className="plate-accent" d="M150 112h20m-20 10h14m-14 10h20M160 48v10m0 134v10M83 125h10m134 0h10"/><circle className="plate-accent" cx="92" cy="51" r="3"/><circle className="plate-accent" cx="228" cy="199" r="3"/></svg>
       <canvas ref={canvas}/>
     </div>
-    {ready && <button type="button" className="workshop-motion" aria-pressed={paused} onClick={()=>setPaused(value=>!value)}>{paused ? 'Play visual' : 'Pause visual'}</button>}
   </div>;
 }

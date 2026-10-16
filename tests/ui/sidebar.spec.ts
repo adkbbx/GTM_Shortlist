@@ -152,7 +152,7 @@ test('tablet preview keeps the available demo within the first viewport', async 
     await expect(page.getByRole('button', { name: 'New shortlist', exact: true })).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
     await expect(page.getByRole('button', { name: 'Start research', exact: true })).toBeDisabled();
-    const demo = await page.getByRole('button', { name: 'Try the demo', exact: true }).boundingBox();
+    const demo = await page.getByRole('link', { name: 'Try the demo', exact: true }).boundingBox();
     expect(demo).not.toBeNull();
     expect((demo?.y ?? Infinity) + (demo?.height ?? 0)).toBeLessThanOrEqual(687);
   } finally { await page.request.post(`/__fixture_release/${id}`); }

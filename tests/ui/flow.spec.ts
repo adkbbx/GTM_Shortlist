@@ -650,7 +650,7 @@ test('unsafe seller URL shows an actionable error', async ({ page }) => {
 test('optional demo explains evidence without creating research', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('region', { name: 'See how a shortlist takes shape.' })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Try the demo', exact: true }).click();
+  await page.getByRole('link', { name: 'Try the demo', exact: true }).click();
   const demo = page.getByRole('region', { name: 'See how a shortlist takes shape.' });
   if (await demo.locator('.demo-stage-list').getAttribute('open') === null) {
     await demo.locator('.demo-stage-list > summary').click();
@@ -658,6 +658,6 @@ test('optional demo explains evidence without creating research', async ({ page 
   await demo.getByRole('button', { name: /5 Inspect evidence/ }).click();
   await demo.getByRole('button', { name: 'Inspect example passage', exact: true }).press('Enter');
   await expect(demo.getByText('Synthetic example passage', { exact: true })).toBeVisible();
-  await expect(demo.getByText('Illustrative sample · invented companies and passages · no live research')).toBeVisible();
+  await expect(demo.getByText('Synthetic example · invented companies and passages')).toBeVisible();
   await noOverflow(page);
 });

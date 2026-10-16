@@ -85,3 +85,11 @@ This reconciliation supersedes the preceding note that hosted fixes are absent. 
 - [x] Replace the pen with a plus-in-square, separate phone history controls from branding, and use labelled bottom actions.
 - [x] Unify charcoal phone/desktop navigation colors and reserve enlarged-text bottom-bar space.
 - [x] Record66 combined browser passes, six final Settings/Account passes, build/Ruff,34 backend passes with2 skips and current synthetic captures.
+
+## Entry simplification and separate demo, 17 October
+- [x] Replace the Settings text trigger with an accessible hamburger; keep configuration inside the menu.
+- [x] Remove redundant footer/sample copy and transport/motion controls.
+- [x] Open the demo as its own page, without auth/research API requests, and restore account-scoped company input when returning.
+- [x] Keep a single synthetic label, collapsed stage navigation and one main step action; provide an explicit return after completion.
+- [x] Bound decorative motion to four seconds; retain reduced-motion, offscreen and static fallback handling.
+- [x] Build/Ruff,17 backend passes with2 skips and14 final focused browser cases; inspect current phone/laptop captures.

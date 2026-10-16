@@ -241,7 +241,8 @@ test('account tray hides details and stays stable while credits load', async ({ 
   await tray.getByRole('button', { name: 'Close account tray', exact: true }).click();
   await expect(tray).not.toBeVisible();
   await trigger.click();
-  await page.getByRole('heading', { name: 'Find companies that fit your offer.', exact: true }).click();
+  // The phone popover covers the heading; dismiss through an exposed page gutter.
+  await page.mouse.click(1, (page.viewportSize()?.height ?? 844) / 2);
   await expect(tray).not.toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

@@ -9,10 +9,8 @@ test('workshop shader pauses, respects reduced motion and retains a static fallb
   await expect.poll(async () => field.getAttribute('data-enhanced')).toBe('true');
   await canvas.scrollIntoViewIfNeeded();
   await expect(canvas).toHaveAttribute('data-state', 'playing');
-  await field.getByRole('button', { name: 'Pause visual', exact: true }).click();
-  await expect(canvas).toHaveAttribute('data-state', 'static');
-  await field.getByRole('button', { name: 'Play visual', exact: true }).click();
-  await expect(canvas).toHaveAttribute('data-state', 'playing');
+  await expect(field.getByRole('button')).toHaveCount(0);
+  await expect(canvas).toHaveAttribute('data-state', 'static', { timeout: 6000 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(canvas).toHaveAttribute('data-state', 'static');
   await expect(field.locator('svg')).toBeVisible();
@@ -41,8 +39,7 @@ test('decorative GPU work stops offscreen and resumes when visible again', async
   const canvas = page.locator('.workshop-field canvas');
   await canvas.scrollIntoViewIfNeeded();
   await expect(canvas).toHaveAttribute('data-state', 'playing');
-  await page.getByRole('button', { name: 'Try the demo', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'See how a shortlist takes shape.' })).toBeVisible();
+  await page.evaluate(() => { document.body.style.minHeight = '3000px'; window.scrollTo(0, 2500); });
   await expect(canvas).toHaveAttribute('data-state', 'static');
   await canvas.scrollIntoViewIfNeeded();
   await expect(canvas).toHaveAttribute('data-state', 'playing');

@@ -22,7 +22,7 @@ export function LocalSearchSetup({ health, onSaved, readOnly = false }: {
     } catch (error) { setState({ kind: 'error', message: error instanceof Error ? error.message : 'Search setup could not be saved. Please try again.' }); }
   };
   return <>
-    <button className="local-settings-trigger secondary" type="button" popoverTarget="local-settings" aria-label="Settings">Settings</button>
+    <button className="local-settings-trigger secondary" type="button" popoverTarget="local-settings" aria-label="Settings" title="Settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg></button>
     <section id="local-settings" className="local-settings" popover="auto" role="dialog" aria-labelledby="local-settings-heading"
       onToggle={event => { if (event.newState === 'closed') { setEditing(false); setKey(''); setState({ kind: 'idle' }); } }}>
       <header className="local-settings-heading"><h2 id="local-settings-heading">Settings</h2><button type="button" popoverTarget="local-settings" popoverTargetAction="hide" aria-label="Close settings">×</button></header>
