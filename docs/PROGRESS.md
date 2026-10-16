@@ -1,5 +1,21 @@
 # Progress and handoff
 
+## 16 October, password focus outline spacing
+
+User screenshot exposed the signup password outline touching the minimum-length hint. Root cause: the global focus outline extends6px beyond the input while its following hint had zero top margin. Added12px above account input hints, preserving visible keyboard focus and limiting scope to account forms. This also fixes the shared password recovery form.
+
+Four phone/laptop signup/recovery browser checks pass with focused screenshots inspected and no horizontal overflow. Extended existing flows to verify keyboard focus and at least4px clearance beyond the computed outline. TypeScript/Vite build,40 auth/preview backend checks and Ruff pass. Impeccable detector reports existing stylesheet advisories unrelated to the added margin. Hosted rollout and actual refreshed signup verification pending; no signup email or provider research call was dispatched.
+
+## 16 October23:31JST, saved SMTP verified and fresh signup prepared
+
+User completed SMTP credential setup and chose Eygentic as sender name. Dashboard reload verifies enabled custom SMTP, smtp.gmail.com:465, sender Eygentic and stored-password indicator; Save is disabled. The credential was not read. This verifies saved configuration only; actual SMTP authentication, alias From behavior and inbox delivery remain open. Read-only hosted preflight at14:31:42UTC passes, one fresh worker heartbeat, all10 migration checksums and email confirmations still enabled.
+
+User confirmed the corrected second mailbox after a gmai.com typo. Signed out the existing test account without deleting data, opened Create your account and populated the confirmed email. User handoff for new password entry/submission is required by browser credential rules. No signup request/email send or research provider call occurred. Continue with actual confirmation delivery/redirect, account isolation and password recovery after user submission. Prepared form screenshot is ignored .impeccable/review/hosted-signup-prepared.png.
+
+## 16 October, Gmail SMTP preparation awaiting user credential
+
+User identified hello@eygentic.com as an alias under Google Workspace sign-in akshay@eygentic.com. Prepared the existing Supabase custom SMTP form with GTM Shortlist sender name, hello sender, smtp.gmail.com, port465 and the primary account username. The password is empty and changes remain UNSAVED. Google App passwords opens the correct primary account but requires user reauthentication. Hand off credential creation/entry/submission to the user; no password was collected, generated or stored by the agent. Gmail Send mail as authorization for the alias is still unverified. Supabase warns Gmail may have transactional delivery limitations. No auth email has been sent and signup/recovery gates remain open. No provider research calls or product changes occurred.
+
 ## 15 October, editable source-based email drafts
 
 Previous goal turn was progress in bf455d0. Continued without paid/live provider calls. Added one optional email draft per researched company, separate from immutable research JSON. User chooses a saved named person or the company team, explicitly creates a starting template, edits subject/body and saves it. The template uses the confirmed seller offer and an exact saved company passage; it does not present a paraphrased model claim as a verbatim quote. Missing company evidence produces a generic offer-based draft, without invented personalization. No guessed address, enrichment, model generation or sending exists in this feature. Add your signature and review remains necessary; starting-source provenance does not validate subsequent user edits.
