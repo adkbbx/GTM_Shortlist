@@ -76,7 +76,8 @@ export function ResearchProgress({ run, connected = true }: { run: Run; connecte
     </details>
   </section>;
   if (pending) return sheet;
-  const handoff = run.termination ? 'Research stopped' : current === 2 ? 'Offer draft saved. Your confirmation is next.'
+  const handoff = run.termination ? 'Research stopped' : current === 2
+    ? offer ? 'Offer draft saved. Your confirmation is next.' : 'Offer summary unavailable. Enter your offer and target.'
     : current === 5 ? `${run.records.length} ${run.records.length === 1 ? 'company' : 'companies'} saved for your review`
       : currentState;
   return <details className="research-recap"><summary><span>{handoff}</span><span>View research history</span></summary>{sheet}</details>;

@@ -8,7 +8,7 @@ import psycopg
 from pydantic import SecretStr
 
 from shortlist.auth import AuthenticationError
-from shortlist.store import BudgetExceeded, Store
+from shortlist.store import BudgetExceeded, Conflict, Store
 
 
 class Row(dict):
@@ -60,7 +60,9 @@ class PostgresStore(Store):
             db.execute("SET LOCAL statement_timeout TO '10s'")
             db.execute("SET LOCAL lock_timeout TO '5s'")
             db.execute(
-                "SELECT set_config('shortlist.workspace_id',%s,true)",
+                # Preserve exact float8 timestamps when session defaults round text output.
+                "SELECT set_config('shortlist.workspace_id',%s,true) AS workspace,"
+                "set_config('extra_float_digits','3',true) AS float_digits",
                 (str(self.workspace_id) if self.workspace_id else "",),
             )
             connection = Connection(db)
@@ -126,6 +128,17 @@ class PostgresStore(Store):
                 raise BudgetExceeded(
                     "Seller profiling allowance reached. Reuse your saved offer or try later"
                 )
+
+    def resume_batch(self, db, run_id: str, quantity: int):
+        from shortlist.credits import CreditWallet
+
+        if CreditWallet(self)._balance(db).available < quantity:
+            raise BudgetExceeded("Not enough research credits to continue this batch")
+        row = db.execute("UPDATE credit_reservations SET state='held' WHERE run_id=? AND workspace_id=? "
+                         "AND state='released' AND consumed=0 AND requested=? RETURNING run_id",
+                         (run_id, self.workspace_id, quantity)).fetchone()
+        if row is None:
+            raise Conflict("Only an unused, released batch reservation can be continued")
 
     def created_run(self, db, run_id: str):
         self.reserve_batch(db, run_id, 3)

@@ -17,6 +17,8 @@ def export_run(run: dict, format: str, accepted_only: bool = False) -> str | byt
                "market": run["checkpoint"].get("market"), "campaign_name": run["checkpoint"].get("campaign_name"),
                "selection": run["checkpoint"].get("selection", []), "seller_source": run["checkpoint"].get("seller_source"),
                "discovery_terms": run["checkpoint"].get("discovery_terms"),
+               "discovery_failures": run["checkpoint"].get("discovery_failures", {}),
+               "used_saved_discovery": run["checkpoint"].get("use_saved_discovery", False),
                "candidate_sources": run["checkpoint"].get("sources", {}),
                "note": "Human acceptance is not buying intent. Findings are model assessments requiring review."}
     if format == "json":

@@ -73,6 +73,34 @@ if __name__ == "__main__":
                             "Gemma output failed validation. Enter and confirm your offer and target manually to continue.")
         return {"id": identity}
 
+    @application.post("/__fixture_unstarted_seller")
+    def unstarted_seller():
+        from uuid import uuid4
+        with held_lock:
+            identity = store.create_draft("https://seller.example/", "unstarted-seller-" + uuid4().hex)
+            fence = store.claim(identity)
+            checkpoint = store.get_run(identity)["checkpoint"]
+            store.checkpoint(identity, fence, "seller", checkpoint, "partial", "Labelled pre-dispatch setup failure")
+        return {"id": identity}
+
+    @application.post("/__fixture_saved_discovery")
+    def saved_discovery():
+        from uuid import uuid4
+        draft = FixtureModel().seller(None)
+        profile = Profile(seller_url="https://seller.example/", offer=draft.offer, target=draft.target,
+                          criteria=tuple(draft.criteria))
+        with held_lock:
+            identity = store.create_run(profile, "saved-discovery-" + uuid4().hex)
+            fence = store.claim(identity)
+            checkpoint = store.get_run(identity)["checkpoint"]
+            candidate = FixtureSearch().search("labelled saved search", profile.seller_url)[0]
+            checkpoint.update(discovered=[candidate.model_dump(mode="json")], completed_queries=[0])
+            attempt = store.reserve(identity, fence, FixtureSearch.name, "search", "search:1")
+            store.outcome(attempt, "failed", run_id=identity, fence=fence,
+                          payload={"type": "provider", "message": "Labelled interrupted discovery"})
+            store.checkpoint(identity, fence, "discovery", checkpoint, "partial", "Labelled interrupted discovery")
+        return {"id": identity}
+
     @application.post("/__fixture_corrupt_provider")
     def corrupt_provider():
         credentials = LocalCredentials(settings.db_path)

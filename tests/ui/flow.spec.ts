@@ -26,6 +26,7 @@ test('market observations and editable campaigns persist into confirmed targetin
   await page.getByLabel('Company name or website', { exact: true }).fill('https://market-seller.example/');
   await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('.research-recap > summary')).toContainText('Offer draft saved. Your confirmation is next.');
   await page.getByText('Explore campaign ideas and source context', { exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Choose a campaign direction' })).toBeVisible();
   await expect(page.locator('.competitor-list li')).toHaveCount(15);
@@ -285,14 +286,64 @@ test('failed offer summary explains next steps on saved runs', async ({ page }, 
   const notice = page.getByRole('status').filter({ hasText: "We couldn't create a usable offer summary" });
   await expect(notice).toContainText("Company search hasn't started");
   await expect(notice).toContainText('product or services page');
+  const recap = page.locator('.research-recap > summary');
+  await expect(recap).toContainText('Offer summary unavailable. Enter your offer and target.');
+  await expect(recap).not.toContainText('Offer draft saved');
   await expect(page.getByLabel('What do you sell?')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Confirm target and discover' })).toBeVisible();
   await noOverflow(page);
   await capture(page, `.impeccable/review/${info.project.name}-failed-offer-guidance.png`);
   await page.reload();
   await expect(notice).toBeVisible();
+  await expect(recap).toContainText('Offer summary unavailable. Enter your offer and target.');
+  const beforeStop = await (await page.request.get(`/api/runs/${id}`)).json();
+  await page.getByRole('button', { name: 'Stop this run', exact: true }).press('Enter');
+  await expect(page.getByRole('button', { name: 'Keep researching', exact: true })).toBeFocused();
+  await page.getByRole('button', { name: 'Keep researching', exact: true }).press('Enter');
+  await expect(page.getByRole('button', { name: 'Stop this run', exact: true })).toBeFocused();
+  await page.getByRole('button', { name: 'Stop this run', exact: true }).press('Enter');
+  await page.getByRole('button', { name: 'Stop research', exact: true }).press('Enter');
+  await expect(page.getByRole('heading', { name: 'Research stopped', exact: true })).toBeFocused();
+  const afterStop = await (await page.request.get(`/api/runs/${id}`)).json();
+  expect(afterStop.termination).toBe('user_stopped');
+  expect(afterStop.seller_url).toBe(beforeStop.seller_url);
+  expect(afterStop.attempts).toEqual(beforeStop.attempts);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Research stopped', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Stop this run', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'New shortlist', exact: true }).press('Enter');
   await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
+});
+
+test('unstarted seller setup recovers once under the same saved run', async ({ page }, info) => {
+  const fixture = await page.request.post('/__fixture_unstarted_seller');
+  const { id } = await fixture.json();
+  await page.goto(`/?run=${id}`);
+  const recovery = page.getByRole('region', { name: 'Retry company setup', exact: true });
+  await expect(recovery).toContainText('before any provider request');
+  let fail = true;
+  await page.route(`**/api/runs/${id}/retry-seller`, async route => {
+    if (fail) { fail = false; await route.fulfill({ status: 503, json: { detail: 'Labelled temporary recovery failure' } }); }
+    else await route.continue();
+  });
+  await recovery.getByRole('button', { name: 'Retry company setup', exact: true }).press('Enter');
+  await expect(recovery.getByRole('alert')).toContainText('Labelled temporary recovery failure');
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${info.project.name}-seller-recovery.png`);
+  await recovery.getByRole('button', { name: 'Retry company setup', exact: true }).press('Enter');
+  await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
+  expect(new URL(page.url()).searchParams.get('run')).toBe(id);
+  await expect(recovery).toHaveCount(0);
+  const saved = await (await page.request.get(`/api/runs/${id}`)).json();
+  expect(saved.can_retry_seller).toBe(false);
+  expect(saved.attempts.length).toBeGreaterThan(0);
+  const duplicate = await page.request.post(`/api/runs/${id}/retry-seller`, { data: { confirmation: 'retry_unstarted_seller' } });
+  expect(duplicate.ok()).toBe(true);
+  expect((await duplicate.json()).attempts).toEqual(saved.attempts);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible();
+  await expect(recovery).toHaveCount(0);
+  await noOverflow(page);
 });
 
 test('seller field accepts domains and full HTTPS URLs', async ({ page }, info) => {
@@ -566,6 +617,25 @@ test('small screen, large text, keyboard and reduced motion remain usable', asyn
   await page.keyboard.press('Tab');
   await expect(page.getByRole('button', { name: 'Start research' })).toBeFocused();
   expect(await page.getByRole('button', { name: 'Start research' }).evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
+});
+
+test('saved candidates continue by keyboard without another search and survive reload', async ({ page }, info) => {
+  const { id } = await (await page.request.post('/__fixture_saved_discovery')).json();
+  await page.goto(`/?run=${id}`);
+  const recovery = page.getByRole('region', { name: 'Continue saved discovery' });
+  await expect(recovery).toContainText('No search is repeated.');
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${info.project.name}-saved-discovery.png`);
+  const before = await (await page.request.get(`/api/runs/${id}`)).json();
+  await recovery.getByRole('button', { name: 'Continue with saved candidates', exact: true }).press('Enter');
+  await expect(page.getByRole('heading', { name: '1 company researched' })).toBeVisible({ timeout: 15000 });
+  await page.reload();
+  await expect(page.getByRole('heading', { name: '1 company researched' })).toBeVisible();
+  await expect(recovery).toHaveCount(0);
+  const after = await (await page.request.get(`/api/runs/${id}`)).json();
+  expect(after.profile).toEqual(before.profile);
+  expect(after.attempts.filter((a: { kind: string }) => a.kind === 'search')).toEqual(before.attempts);
+  await noOverflow(page);
 });
 
 test('unsafe seller URL shows an actionable error', async ({ page }) => {

@@ -55,6 +55,20 @@ async function capture(page: Page, path: string) {
   await page.screenshot({ path, fullPage: true });
 }
 
+async function checkPasswordHintFocus(page: Page, label: string, screenshot: string) {
+  await page.getByLabel(label, { exact: true }).focus();
+  const clearance = await page.getByLabel(label, { exact: true }).evaluate(input => {
+    const hint = input.nextElementSibling;
+    if (!(hint instanceof HTMLElement)) throw new Error('Password hint is missing');
+    const style = getComputedStyle(input);
+    return hint.getBoundingClientRect().top - input.getBoundingClientRect().bottom
+      - parseFloat(style.outlineWidth) - parseFloat(style.outlineOffset);
+  });
+  expect(clearance).toBeGreaterThanOrEqual(4);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await capture(page, screenshot);
+}
+
 for (const failure of [
   { status: 503, contentType: 'text/html', body: '<!DOCTYPE html><title>Starting up</title>' },
   { status: 200, contentType: 'text/html', body: '<!DOCTYPE html><title>App shell</title>' },
@@ -81,6 +95,9 @@ test('signup confirmation, sign-in errors and password reset remain usable', asy
   await expect(page.getByRole('heading', { name: 'Sign in to your shortlist' })).toBeVisible();
   await capture(page, `.impeccable/review/${info.project.name}-signin.png`);
   await page.getByRole('button', { name: 'Create an account' }).click();
+  await page.getByLabel('Email', { exact: true }).press('Tab');
+  await expect(page.getByLabel('Password', { exact: true })).toBeFocused();
+  await checkPasswordHintFocus(page, 'Password', `.impeccable/review/${info.project.name}-signup-focus.png`);
   await capture(page, `.impeccable/review/${info.project.name}-signup.png`);
   await page.getByLabel('Email', { exact: true }).fill('fixture@example.test');
   await page.getByLabel('Password', { exact: true }).fill('labelled-fixture-password');
@@ -161,6 +178,7 @@ test('PKCE recovery opens a new-password form and updates the account', async ({
   await page.addInitScript(() => localStorage.setItem('sb-shortlist-auth-auth-token-code-verifier', JSON.stringify('labelled-verifier/recovery')));
   await page.goto('/?code=labelled-recovery-code');
   await expect(page.getByRole('heading', { name: 'Choose a new password' })).toBeVisible();
+  await checkPasswordHintFocus(page, 'New password', `.impeccable/review/${info.project.name}-recovery-focus.png`);
   await capture(page, `.impeccable/review/${info.project.name}-new-password.png`);
   await page.getByLabel('New password', { exact: true }).fill('updated-fixture-password');
   await page.getByRole('button', { name: 'Save new password' }).click();

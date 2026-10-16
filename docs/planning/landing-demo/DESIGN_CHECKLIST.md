@@ -69,3 +69,10 @@ Current design gates are satisfied. This does not complete the full product or a
 - [x] Confirm all jobs pass for corrected test commit1e559db in run38946099854, including96 browser cases and container smoke.
 
 This branch update does not merge into main or authorize deployment. Reconcile the separate hosted-journey branch before any combined release; its later product fixes are not included here.
+
+## Hosted reconciliation, 17 October
+- [x] Integrate hosted tip5eda740 into PR#2 while preserving both histories and design fixes; no main merge or deployment.
+- [x] Review automatic UI merges, regenerate unchanged contracts, build, run Ruff and complete439 backend checks with44 explicit skips.
+- [ ] Verify the combined real-Postgres and full phone/laptop browser suites; inspect recovery, password-focus and tray screenshots.
+
+This reconciliation supersedes the preceding note that hosted fixes are absent. Full product/live quality acceptance remains separate.
