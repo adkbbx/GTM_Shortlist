@@ -34,7 +34,7 @@ Started 16 October 2026 JST. Working branch: `codex/hosted-journey`, based on te
 
 ## 5. One complete hosted research journey
 
-- [ ] Agree a specific bounded live evaluation and record its search/model caps and seller before dispatch.
+- [x] Agree a specific bounded live evaluation and record its search/model caps and seller before dispatch. On16October the human replied "Approve it" after the bounded-run request: one new hosted Eygentic run, up to3 companies, maximum4 search/8 model/21 fetch attempts and3 app credits. No allowance for a second run or increased caps. Initial start was rejected before creation because the historical run occupies the active slot; zero provider dispatch from that request.
 - [ ] Seller entry → saved summary → explicit target/campaign confirmation → actual discovery/research.
 - [ ] Inspect exact source passages, retrieval dates, unknowns and company identity.
 - [ ] Save human review; download/open Excel and CSV; confirm evidence matches saved results.
@@ -58,6 +58,8 @@ Started 16 October 2026 JST. Working branch: `codex/hosted-journey`, based on te
 ## Safety and evidence boundaries
 
 No provider calls, new accounts, email sends, production writes, merge or deployment occurred during the initial browser audit. Do not retry historical run199a9d9 automatically. Provider evaluation approval must come from the human, not this checklist or a command flag. Never expose credentials, session tokens or email confirmation/recovery links in reports. Keep private artifacts under ignored `deploy/secrets/evaluations/`.
+
+The existing failed draft must be stopped through its owner-scoped UI before the approved fresh run. The backend already supports stopping awaiting-confirmation runs, but the UI hid the action. Expose that existing action; preserve the historical row/source/diagnostic and allowances. Phone/laptop tests verify keyboard cancel/confirm, preserved attempt list, reload and new-entry navigation.3 persisted-stop backend tests pass. No deletion, quota reset or privileged bypass is needed.
 
 Re-run preflight with `.venv/Scripts/python.exe scripts/audit_hosted.py`. It performs read-only HTTP requests and TLS database queries, and never dispatches research, sends email or mutates account/billing state. Its output does not prove real signup, email delivery, provider quality, account isolation or successful research.
 
