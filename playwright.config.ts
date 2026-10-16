@@ -1,7 +1,11 @@
 import { defineConfig } from '@playwright/test';
+import { resolve } from 'node:path';
 
 const python = process.platform === 'win32' ? '.venv\\Scripts\\python.exe' : '.venv/bin/python';
 const hosted = Boolean(process.env.SHORTLIST_UI_TEST_PG_URL);
+// A shared virtualenv may have another checkout installed in editable mode.
+// Always exercise this worktree's API and assets together.
+const fixtureEnvironment = { PYTHONPATH: `${resolve('src')}${process.platform === 'win32' ? ';' : ':'}${resolve('.')}` };
 export default defineConfig({
   testDir: './tests/ui', timeout: 45000, fullyParallel: false, workers: 1,
   use: { baseURL: 'http://127.0.0.1:8015', trace: 'retain-on-failure' },
@@ -14,7 +18,7 @@ export default defineConfig({
     ] : []),
   ],
   webServer: [
-    { command: `${python} scripts/ui_test_server.py`, url: 'http://127.0.0.1:8015/api/health', reuseExistingServer: false },
-    ...(hosted ? [{ command: `${python} scripts/hosted_ui_test_server.py`, url: 'http://127.0.0.1:8016/__fixture_ready', reuseExistingServer: false }] : []),
+    { command: `${python} scripts/ui_test_server.py`, env: fixtureEnvironment, url: 'http://127.0.0.1:8015/api/health', reuseExistingServer: false },
+    ...(hosted ? [{ command: `${python} scripts/hosted_ui_test_server.py`, env: fixtureEnvironment, url: 'http://127.0.0.1:8016/__fixture_ready', reuseExistingServer: false }] : []),
   ],
 });

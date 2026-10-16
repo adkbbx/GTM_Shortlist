@@ -1,6 +1,42 @@
 import { expect, test } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 
+test('navigation stays usable while resizing across both layout boundaries', async ({ page }) => {
+  const fixture = await page.request.post('/__fixture_held_run');
+  const { id } = await fixture.json();
+  try {
+    await page.setViewportSize({ width: 1366, height: 800 });
+    await page.goto('/');
+    const sidebar = page.getByRole('complementary', { name: 'Saved research' });
+    await expect(sidebar.getByRole('button', { name: 'New shortlist', exact: true })).toBeVisible();
+    for (const width of [1366, 1024, 851, 850, 731, 701, 700, 390, 320, 851, 1366]) {
+      await page.setViewportSize({ width, height: 800 });
+      // Keep the same mounted component and toggle each mode at every boundary.
+      for (const collapsed of [true, false]) {
+        await sidebar.getByRole('button', { name: collapsed ? 'Collapse sidebar' : 'Expand sidebar', exact: true }).click();
+        const layout = await page.evaluate(() => {
+          const rect = (selector: string) => document.querySelector(selector)!.getBoundingClientRect().toJSON();
+          return { sidebar: rect('.research-sidebar'), header: rect('.sidebar-header'), action: rect('.new-run'),
+            main: rect('.main'), heading: rect('.page-heading h1'), input: rect('#website'),
+            navigation: rect('.research-navigation'), overflow: document.documentElement.scrollWidth > innerWidth };
+        });
+        expect(layout.overflow, `overflow at ${width}/${collapsed}`).toBe(false);
+        expect(layout.header.y - layout.sidebar.y, `navigation top at ${width}/${collapsed}`).toBeLessThan(24);
+        expect(layout.input.width, `usable input at ${width}/${collapsed}`).toBeGreaterThan(200);
+        expect(layout.heading.width, `readable heading at ${width}/${collapsed}`).toBeGreaterThan(Math.min(280, width - 48));
+        if (width <= 850) {
+          expect(layout.main.y).toBeGreaterThanOrEqual(layout.sidebar.bottom - 1);
+          expect(layout.header.right).toBeLessThanOrEqual(layout.action.x + 1);
+        } else {
+          expect(layout.main.x).toBeGreaterThanOrEqual(layout.sidebar.right - 1);
+          expect(layout.action.y).toBeGreaterThanOrEqual(layout.header.bottom);
+        }
+        if (!collapsed) expect(layout.navigation.y).toBeGreaterThanOrEqual(layout.action.bottom);
+      }
+    }
+  } finally { await page.request.post(`/__fixture_release/${id}`); }
+});
+
 test('saved research navigation collapses and expands without changing the run', async ({ page }, info) => {
   const fixture = await page.request.post('/__fixture_held_run');
   expect(fixture.ok()).toBeTruthy();

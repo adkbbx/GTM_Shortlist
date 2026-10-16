@@ -2,6 +2,16 @@
 
 This record covers the local design branch, not full product quality or a hosted release. The user selected an engineering-workshop direction and authorized unattended design work through 17 October 2026,21:00 Asia/Tokyo. Keep the research core neutral for every seller.
 
+## Reopened responsive defect — 16 October
+
+The user supplied a concrete failure after the earlier acceptance: at731 CSS pixels, expanded navigation used mobile flex wrapping inside a224px desktop grid column. Workspace/New shortlist overlapped and wrapped flex lines distributed down the tall sidebar. Earlier fixed-viewport checks did not establish resize usability. The earlier acceptance is limited accordingly.
+
+Correction: the workspace and sidebar now share the850px mode boundary. Desktop navigation explicitly owns column alignment; mobile navigation owns a two-column header grid and full-width history. The hero responds to its main content container instead of viewport width, stacking when sidebar space would squeeze the headline.
+
+Verification: the new regression keeps the same mounted page, resizes through1366/1024/851/850/731/701/700/390/320 and back, and toggles both states at every width. It asserts top alignment, disjoint controls, history placement, usable input/heading width and page overflow. All eight sidebar cases passed across phone/laptop projects; the broader26 sidebar/workshop/demo cases also passed. Build, Ruff and40 focused backend checks passed. Actual preview inspection reproduced the original731px failure and checked corrected expanded731px,1024px,851px and390px states, plus phone collapse. Screenshots saved under `.impeccable/review/resize-fix-*`.
+
+The first local test invocation accidentally resolved an editable installation from the main checkout through the shared virtualenv. It was discarded, then all eight cases passed with the correct source path. Playwright now pins both fixture servers to this checkout in configuration so this does not depend on shell environment.
+
 ## Reference and direction
 
 Inspected [Eygentic](https://eygentic.com/) and [Explee](https://explee.com/) in the browser. Eygentic informs paper, orange, schematic linework and controlled mechanical motion; Explee informs one clear entry action and a visible distinction between automatic work and required input. No reference signup or research was submitted. These were browser observations, not REA Evidence or conversion measurements.
@@ -37,7 +47,7 @@ The latest ignored visual proof is .impeccable/review/final-workshop-preview.jpg
 
 Application commit: `c48fa0e`. [Full CI run38803090099](https://github.com/adkbbx/GTM_Shortlist/actions/runs/38803090099) passed every job, including90 browser scenarios. This closes the final tablet acceptance gate. The subsequent acceptance-record commit changes documentation only; it does not reopen the tested application tree.
 
-The scoped design implementation meets the recorded gates. Preserve this ready preview while the authorized work window remains open. Act on new user feedback, a demonstrated regression or a failed check; do not manufacture additional aesthetic work to fill the time. Broader product quality and rollout remain separate from this result.
+The earlier scoped design implementation met the then-recorded fixed-viewport gates; the responsive defect and correction above supersede that usability conclusion. Preserve this ready preview while the authorized work window remains open. Act on new user feedback, a demonstrated regression or a failed check; do not manufacture additional aesthetic work to fill the time. Broader product quality and rollout remain separate from this result.
 
 ## Continuation
 

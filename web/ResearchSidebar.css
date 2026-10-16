@@ -1,4 +1,4 @@
-.workspace>.research-sidebar{background:#201e1b;color:#e8e4dd;padding:16px 12px;gap:12px;border-right:1px solid #37332e;min-width:0}
+.workspace>.research-sidebar{background:#201e1b;color:#e8e4dd;padding:16px 12px;display:flex;flex-direction:column;align-items:stretch;align-content:start;justify-content:flex-start;gap:12px;border-right:1px solid #37332e;min-width:0}
 .sidebar-header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-left:10px}
 .sidebar-heading{font-size:.875rem;font-weight:600}
 .research-sidebar button{color:inherit;border:0;box-shadow:none;background:transparent;min-width:0}
@@ -23,7 +23,6 @@
 .is-collapsed .sidebar-heading,.is-collapsed .nav-label,.is-collapsed .research-navigation h2,.is-collapsed .run-copy,.is-collapsed .sidebar-loading{display:none}
 .research-sidebar.is-collapsed .new-run,.research-sidebar.is-collapsed .saved-run{width:44px;justify-content:center;padding:12px;min-height:44px}
 .is-collapsed .sidebar-toggle svg{transform:rotate(180deg)}
-@media(max-width:850px){.workspace>.research-sidebar{padding:8px 16px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;border-right:0;border-bottom:1px solid #37332e}.sidebar-header{padding:0;justify-content:flex-start;flex-direction:row-reverse}.research-sidebar .new-run{width:auto;margin:0;padding:8px 10px}.research-navigation{grid-column:1/-1}.research-sidebar h2{padding:8px 10px 0}.research-sidebar nav{max-height:200px}.workspace>.research-sidebar.is-collapsed{display:grid;padding:8px 16px}.research-sidebar.is-collapsed .research-navigation{display:none}.research-sidebar.is-collapsed .sidebar-heading,.research-sidebar.is-collapsed .nav-label{display:inline}.research-sidebar.is-collapsed .new-run{width:auto;padding:8px 10px;gap:8px}.research-sidebar.is-collapsed .sidebar-toggle svg{transform:none}}
 @media(prefers-reduced-motion:no-preference){.research-sidebar .saved-run,.research-sidebar .new-run{transition:background-color 140ms ease-out}.sidebar-toggle svg{transition:transform 180ms ease-out}}
 
 /* Align the wordmark with the navigation rather than a separate logo lockup. */
@@ -35,6 +34,20 @@ header.topbar .workspace-account{padding:0 28px;min-width:0}
 
 @media(min-width:851px){body:has(.research-sidebar.is-collapsed) header.topbar .brand{width:64px;padding:0;justify-content:center}body:has(.research-sidebar.is-collapsed) header.topbar .brand>span{display:none}body:has(.research-sidebar.is-collapsed) header.topbar .brand::after{content:"GS";font-size:16px;letter-spacing:-.04em}}
 
-@media(max-width:850px){.workspace>.research-sidebar,.workspace>.research-sidebar.is-collapsed{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center}.research-sidebar .sidebar-header{flex:1;min-width:0}.research-sidebar .research-navigation{flex-basis:100%;min-width:0}.research-sidebar .new-run{max-width:100%;white-space:normal}.research-sidebar .nav-label{min-width:0;overflow-wrap:anywhere}}
-
-@media(max-width:850px){.research-sidebar .sidebar-header{flex-direction:row;justify-content:flex-start}}
+/* The workspace and its navigation switch modes at the same boundary. */
+@media(max-width:850px){
+  .workspace:has(>.research-sidebar){display:block}
+  .workspace>.research-sidebar,.workspace>.research-sidebar.is-collapsed{
+    display:grid;grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;align-content:start;gap:8px 12px;padding:8px 16px;
+    border-right:0;border-bottom:1px solid #37332e;
+  }
+  .research-sidebar .sidebar-header{padding:0;flex-direction:row;justify-content:flex-start;min-width:0}
+  .research-sidebar .new-run,.research-sidebar.is-collapsed .new-run{width:auto;margin:0;padding:8px 10px;gap:8px}
+  .research-sidebar .research-navigation{grid-column:1/-1;min-width:0}
+  .research-sidebar nav{max-height:200px}
+  .research-sidebar .saved-run{min-width:0}
+  .research-sidebar.is-collapsed .research-navigation{display:none}
+  .research-sidebar.is-collapsed .sidebar-heading,.research-sidebar.is-collapsed .nav-label{display:inline}
+  .research-sidebar.is-collapsed .sidebar-toggle svg{transform:none}
+}

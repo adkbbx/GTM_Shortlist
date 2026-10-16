@@ -38,3 +38,11 @@ Authorization: autonomous implementation through **17 October 2026, 21:00 Asia/T
 The full product is not declared complete. Hosted rollout and provider quality are separate gates; no new paid provider evaluation, production migration, account change or deployment is claimed by these UI checks.
 
 Current design gates are satisfied. This does not complete the full product or authorize deployment. Further changes require new feedback or a concrete failed behavior; keep the ready preview rather than cycling through aesthetic alternatives.
+
+## User-reported resize regression — reopened and corrected16 October
+- [x] Reproduce the731px expanded sidebar collision; retract broad usability implication of fixed viewport passes.
+- [x] Unify workspace/navigation breakpoints and explicitly own sidebar alignment.
+- [x] Make the hero responsive to available content width.
+- [x] Keep a mounted page through resize and collapse/expand sequences across11 widths; verify geometry rather than overflow alone.
+- [x] Inspect actual preview phone, laptop and boundary layouts; preserve saved run and zero provider spending.
+- [x] Pin browser fixture imports to this checkout, preventing shared-venv source drift.
