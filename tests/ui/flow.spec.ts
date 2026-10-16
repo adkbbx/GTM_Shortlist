@@ -2,9 +2,11 @@ import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { openCompany } from './shortlist';
+import { installIconFixtures, syntheticIcon } from './site-icons';
 
 test.beforeEach(async ({ page }) => {
   await page.route('**/favicon.ico', route => route.abort());
+  await page.route('https://api.brandfetch.io/**', route => route.abort());
 });
 
 async function noOverflow(page: Page) {
@@ -288,22 +290,10 @@ test('research stages and latest checkpoints stay visible without animation cont
 });
 
 test('company icons use the site favicon and fall back when unavailable', async ({ page }, info) => {
-  // Substitute synthetic image bytes before loading; never contact company sites in tests.
-  await page.addInitScript(() => {
-    const iconValue = (image: HTMLImageElement, value: string) => {
-      if (!value.startsWith('https://')) return value;
-      image.dataset.requestedIcon = value;
-      return new URL(value).hostname === 'example-2.com' ? 'data:image/png;base64,invalid'
-        : 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect width="24" height="24" fill="#b34d19"/></svg>');
-    };
-    const original = Element.prototype.setAttribute;
-    Element.prototype.setAttribute = function (name: string, value: string) {
-      original.call(this, name, this instanceof HTMLImageElement && name === 'src' ? iconValue(this, value) : value);
-    };
-    const descriptor = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src')!;
-    Object.defineProperty(HTMLImageElement.prototype, 'src', { ...descriptor, set(value: string) {
-      descriptor.set!.call(this, iconValue(this, value));
-    } });
+  await installIconFixtures(page, {
+    'https://example-1.com/favicon.ico': syntheticIcon('#b4501c'),
+    'https://example-2.com/favicon.ico': null,
+    'https://eygentic.com/favicon.ico': syntheticIcon('#b4501c'),
   });
   const response = await page.request.post('/__fixture_held_run');
   const { id } = await response.json();
@@ -528,7 +518,7 @@ test('seller field accepts domains and full HTTPS URLs', async ({ page }, info) 
     await page.getByLabel('Company name or website', { exact: true }).fill(value);
     await expect(page).toHaveTitle('GTM Shortlist');
     // Compact local navigation hides the desktop banner from the accessibility tree.
-    await expect(page.getByRole('banner', { includeHidden: true })).not.toContainText(/eygentic/i);
+    await expect(page.locator('header.topbar')).not.toContainText(/eygentic/i);
     if (value === 'eygentic.com') {
       await noOverflow(page);
       await capture(page, `.impeccable/review/${info.project.name}-bare-domain-input.png`);

@@ -121,3 +121,10 @@ This reconciliation supersedes the preceding note that hosted fixes are absent. 
 - [x] Use the same surface, border, radius and height for every stage button; distinguish selection from actual stage without competing containers. Verify keyboard focus and phone/laptop widths.
 
 - [x] Latest feedback: show only three newest checkpoints by default; reveal older steps on demand, with keyboard-operable expand/collapse and stage-change reset.
+
+## Company suggestions
+- [x] Use a maintained accessible combobox library with new-company directory suggestions, keyboard/touch selection and manual entry.
+- [x] Keep suggestions separate from paid research and preserve cancellation, response bounds, safe domains and explicit submit.
+- [x] Configure the user-supplied public client ID locally without committing it; keep design-only8018 lookup disabled.
+- [x] Include synthetic icons and fallback states in phone/laptop review screens.
+- [x] Verify one free real directory lookup with the supplied public ID: five matches and visible icons; no selection or research dispatch.

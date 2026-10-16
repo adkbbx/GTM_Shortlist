@@ -1,0 +1,13 @@
+.company-search{position:relative;min-width:0;width:100%}
+.company-search input{height:100%}
+.company-suggestions{width:var(--trigger-width);max-width:calc(100vw - 32px);background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px #1b1b1b1a;overflow:hidden;color:var(--ink);font:inherit;z-index:20}
+.company-suggestions-source{font-size:.75rem;color:var(--muted);padding:12px 16px 6px}
+.company-suggestions-list{max-height:min(360px,45dvh);overflow-y:auto;padding:4px;outline:none}
+.company-suggestion{display:flex;align-items:center;gap:12px;padding:12px;min-height:56px;border-radius:4px;cursor:pointer;outline:none}
+.company-suggestion[data-focused]{background:var(--paper);outline:1px solid var(--orange);outline-offset:-1px}
+.suggestion-icon{display:grid;place-items:center;flex:none;width:24px;height:24px;font-size:.75rem;color:var(--muted)}
+.suggestion-copy{min-width:0;flex:1;display:flex;align-items:baseline;gap:8px;font-size:.875rem}
+.suggestion-copy [slot=label]{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.suggestion-domain{max-width:45%;font-size:.8125rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.suggestions-empty{font-size:.875rem;color:var(--muted);padding:12px}
+@media(max-width:600px){.company-suggestion{gap:10px}.suggestion-copy{display:block}.suggestion-copy [slot=label]{display:block}.suggestion-domain{font-size:.75rem;max-width:42%}}

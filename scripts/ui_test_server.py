@@ -11,6 +11,7 @@ from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from ui_test_providers import FixtureModel, FixtureSearch, fixture_fetch
 
 from shortlist.api import create_app
@@ -60,6 +61,12 @@ if __name__ == "__main__":
     thread = threading.Thread(target=loop, daemon=True)
     thread.start()
     application = FastAPI()
+
+    @application.get("/", response_class=HTMLResponse)
+    def fixture_home():
+        # Never inherit an operator's live directory ID from built frontend assets.
+        html = (Path(__file__).resolve().parents[1] / "dist" / "index.html").read_text(encoding="utf-8")
+        return html.replace("<head>", '<head><meta name="shortlist-company-suggestions-client-id" content="">')
 
     @application.post("/__fixture_failed_offer")
     def failed_offer():

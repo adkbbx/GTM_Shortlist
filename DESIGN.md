@@ -281,3 +281,7 @@ This feedback supersedes the earlier light phone toolbar direction. Phone and de
 User feedback replaces the large live-research animation with a visible six-stage plan and an expanded newest-first checkpoint timeline. Each stage is a keyboard-operable read-only review action; viewing an earlier stage never moves the actual progress marker or starts provider work. Missing saved results stay explicit. Keep partial/confirmation history open. Use each site's own favicon in company results and saved history, with existing initials as fallback and no third-party icon lookup.
 
 Checkpoint history refinement: show the latest three saved steps, newest first. Older steps are revealed only through Show older steps and can be hidden again. Reset this disclosure when selecting another stage.
+
+## Company suggestions, 17 October
+
+Use an editable combobox beneath company entry with compact rows of icon, company name and right-aligned domain. Preserve the existing Start research action and workshop styling. Choosing a suggestion fills its domain; it never starts research. Display directory loading/empty/error states without blocking manual entry. Without directory configuration, retain manual entry without presenting synthetic or saved companies as live directory results. Use directory icons when supplied, with initials only for missing/failed images; synthetic review screens must include both successful icon fixtures and a broken-image fallback.
