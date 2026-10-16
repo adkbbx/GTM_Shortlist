@@ -61,3 +61,9 @@ Current design gates are satisfied. This does not complete the full product or a
 - [x] Hold credits loading and verify trigger geometry stays unchanged on phone/laptop.
 - [x] Verify Escape, close button, outside click, focus return and sign-out.
 - [x] Finish all16 migrated hosted Postgres credit-history checks and stop the disposable database. Automatic review blocked file removal; stopped fixture cluster is retained in ignored data with the path in PROGRESS.md.
+
+## Draft integration check, 17 October
+- [x] Fetch main, recheck PR#2 feedback and verify all five application CI jobs succeeded.
+- [x] Resolve the progress-log conflict with main on the design branch while preserving both histories and unchanged application files; preview-isolation tests and Ruff pass.
+
+This branch update does not merge into main or authorize deployment. Reconcile the separate hosted-journey branch before any combined release; its later product fixes are not included here.

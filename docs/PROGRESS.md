@@ -591,6 +591,8 @@ Corrected this observed boundary mismatch. SellerDraft accepts an all-text crite
 
 Fifty-two focused seller/API/market/model-repair tests and Ruff passed, including six new string-criteria and boundary-limit cases. CI for the prior structured-response commit is separate from the pending deployment of this correction. The one-call allowance is consumed; further live evaluation requires new specific approval. Do not start a new provider run or delete the testing account.
 
+Observed actual auto-deployment of6f2b679 on both Render services: web dep-db8ca2142hec73c5puo0 Live in44.8 seconds, worker dep-db8ca2142hec73c5pv1g Live in37.2 seconds. Auto-deployment is enabled on the actual services despite the preparation Blueprint defaulting it off. Public /api/health returned200; read-only production TLS found fresh worker heartbeats during the rolling transition. No new research was initiated. Existing run199a9d9 remains a saved historical failure and must not be automatically retried. Current code CI core, actual Postgres and Windows lifecycle passed; UI/container jobs were still pending at this entry. Prior56c0827 CI completed successfully. Testing account remains intact and no hosted balance mutation was made.
+
 ## 15 October, landing demonstration planning branch
 
 Created codex/landing-demo-plan in an isolated worktree from 6f2b679 while the main checkout continued separate seller-output work. No application code, configuration, provider credentials or live run was changed. Preserved the GTM Shortlist name and Eygentic-derived paper/orange/Schibsted design. Read current start, preview and saved worker-progress code; inspected the existing start page through the isolated labelled fixture server because local8014 was unavailable.
@@ -754,3 +756,11 @@ Temporary Postgres was stopped successfully with pg_ctl. Automatic command revie
 ###17 October03:03 JST — green design CI and review handoff
 
 Application commit3ba1649 passed every job in GitHub Checks run38907429539: core/Ruff, Postgres, Windows lifecycle, all96 browser scenarios and container build/start. No further code changes or repeated tests were needed at this checkpoint. Opened draftPR#2 (https://github.com/adkbbx/GTM_Shortlist/pull/2) against main and attached it to the chat, making the complete workshop/navigation/account-tray change reviewable. Main remains48a7cdc; no merge or Render deployment occurred. Working tree was clean before this evidence-only update.
+
+### 17 October, continuation inspection and draft conflict resolution
+
+Fetched origin and confirmed main remains48a7cdc. The main checkout is clean on the separate codex/hosted-journey branch at5eda740; its later hosted work is not incorporated into this design branch. PR#2 remains draft with no review comments. Rechecked actual run38907429539: all five jobs succeeded for3ba1649. The later d0c7dd0 changes only documentation.
+
+GitHub reported PR#2 could not merge. A read-only three-way comparison traced this to competing append-only additions in docs/PROGRESS.md. Merged origin/main into the design branch and retained both complete histories, placing main's historical deployment observation before the design entries. No application files changed. Two preview-isolation backend tests and repository Ruff pass with PYTHONPATH pinned to this worktree; staged diff has no whitespace errors. Existing browser acceptance still applies to the unchanged application files.
+
+At03:13 JST, ordinary usage was allowed, with12% of the session and85% of the weekly allowance used. The fired continuation remains PAUSED; the21:00 JST17 October cutoff remains ACTIVE. No schedule changes, main merge, deployment, provider request, credit reset or database cleanup occurred. Preserve the design freeze and preview database/run. Broader hosted acceptance and live research quality remain open; the separate hosted branch records newer evidence and must be reconciled deliberately before a combined release.
