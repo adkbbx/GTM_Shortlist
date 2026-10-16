@@ -38,6 +38,12 @@ Database checks cover two synthetic workspaces, cross-workspace read/write rejec
 
 ## Hosted runtime configuration
 
+### Disposable local verification
+
+Run `.venv/Scripts/python.exe scripts/check_hosted_postgres.py --bin <installed-Postgres-bin> --ui` from the checkout to verify PostgreSQL behavior and the full browser suite together. Omit `--ui` for database tests alone. The runner pins this checkout's Python imports, creates a unique loopback-only cluster, supplies its URL to the hosted browser fixtures and stops that cluster in its cleanup path. It retains logs under ignored `data/hosted-pg-check-<uuid>/`. It does not connect to an existing database or dispatch real provider requests. Browser checks require installed Node, npm dependencies, a built frontend and Playwright Chromium.
+
+### Server configuration
+
 Keep `SHORTLIST_MODE=local` for the existing trusted loopback service. To exercise the hosted API after provisioning the database and credentials, set these server environment variables:
 
 | Variable | Value |

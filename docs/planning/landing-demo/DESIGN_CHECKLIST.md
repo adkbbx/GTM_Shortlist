@@ -73,6 +73,7 @@ This branch update does not merge into main or authorize deployment. Reconcile t
 ## Hosted reconciliation, 17 October
 - [x] Integrate hosted tip5eda740 into PR#2 while preserving both histories and design fixes; no main merge or deployment.
 - [x] Review automatic UI merges, regenerate unchanged contracts, build, run Ruff and complete439 backend checks with44 explicit skips.
-- [ ] Verify the combined real-Postgres and full phone/laptop browser suites; inspect recovery, password-focus and tray screenshots.
+- [x] Verify42 real-Postgres tests and all100 phone/laptop browser cases, including16 hosted credit flows; inspect recovery, password-focus and tray screenshots.
+- [x] Verify all five CI jobs for reconciliation commita546d3f in run38947565998; stop the unique local test cluster and preserve preview data.
 
 This reconciliation supersedes the preceding note that hosted fixes are absent. Full product/live quality acceptance remains separate.
