@@ -19,6 +19,7 @@ Last updated 16 October 2026 JST. Current authorized design work and its accepta
 - [x] Implement SerpApi and Tavily adapters, bounded query planner and saved search provenance.
 - [x] Add private local masked Tavily key setup and dynamic next-run configuration; verify native encryption/transactions and responsive UI without claiming a live key.
 - [ ] Verify unattended discovery with actual search-provider credentials.
+- [x] Reject recognized article/list/reference pages as primary company candidates, including saved candidates and redirects; verify offline with recorded Eygentic/Clay URLs. Buyer-focused seller protocol3 and campaign guards are implemented; live cross-seller targeting quality remains open.
 - [x] Canonicalize domains, deduplicate and exclude directories/seller domains.
 - [x] Preserve unreadable candidate failures and try replacements within six candidates without consuming the three review slots.
 - [ ] Compare providers on identical queries and actual measured cost/coverage.

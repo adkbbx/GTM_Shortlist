@@ -32,6 +32,7 @@ from shortlist.providers import (
     company_name_matches,
     queries_for,
 )
+from shortlist.relevance import candidate_issue, company_page_issue
 from shortlist.selection import prioritize, prioritize_pages
 from shortlist.store import BudgetExceeded, Conflict, Store
 from shortlist.verification import (
@@ -95,6 +96,12 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
             raise FetchError("Fetched source changed company identity")
         store.cache_source(run_id, fence, url, source)
         return source
+
+    def reject_candidate(candidate, reason, stage):
+        checkpoint.setdefault("candidate_failures", {})[candidate.domain] = {"url": candidate.url, "reason": reason}
+        store.event(run_id, fence, ProgressUpdate(phase="discovery", label="Skipped non-company page: " + candidate.domain,
+                                                detail=reason, state="failed"))
+        store.checkpoint(run_id, fence, stage, checkpoint)
 
     def explore_market(draft):
         if "market" in checkpoint:
@@ -238,16 +245,28 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
             store.checkpoint(run_id, fence, "selection", checkpoint)
             for candidate in pool:
                 saved_sources = checkpoint.setdefault("sources", {})
-                if candidate.domain in saved_sources or candidate.domain in checkpoint.get("candidate_failures", {}):
+                if candidate.domain in checkpoint.get("candidate_failures", {}):
+                    continue
+                if issue := candidate_issue(candidate):
+                    reject_candidate(candidate, issue, "selection")
+                    continue
+                if candidate.domain in saved_sources:
+                    primary = Source.model_validate(saved_sources[candidate.domain][0])
+                    if issue := company_page_issue(primary.url, primary.title):
+                        reject_candidate(candidate, issue, "selection")
                     continue
                 try:
                     source = page(candidate.url, candidate.domain, f"fetch:{candidate.domain}")
                     saved_sources[candidate.domain] = [source.model_dump(mode="json")]
+                    if issue := company_page_issue(source.url, source.title):
+                        reject_candidate(candidate, issue, "selection")
                 except FetchError as exc:
                     checkpoint.setdefault("candidate_failures", {})[candidate.domain] = {"url": candidate.url, "reason": str(exc)}
                 store.checkpoint(run_id, fence, "selection", checkpoint)
             if checkpoint.get("selection_policy") == 3:
                 for candidate in pool:
+                    if candidate.domain in checkpoint.get("candidate_failures", {}):
+                        continue
                     pages = checkpoint.get("sources", {}).get(candidate.domain, [])
                     if not pages:
                         continue
@@ -272,10 +291,12 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
             selected_campaign = next((c for c in checkpoint.get("market", {}).get("campaigns", [])
                                       if c["name"] == checkpoint.get("campaign_name")), None)
             preferences = selected_campaign.get("signals_to_check", []) if selected_campaign else []
-            ranked, explanations = prioritize_pages(profile, pool,
+            eligible = [c for c in pool if c.domain not in checkpoint.get("candidate_failures", {})]
+            ranked, explanations = prioritize_pages(profile, eligible,
                 {domain: tuple(Source.model_validate(s) for s in pages) for domain, pages in checkpoint.get("sources", {}).items()},
                 checkpoint.get("discovery_terms"), preferences)
-            checkpoint["candidates"] = [c.model_dump(mode="json") for c in ranked] + checkpoint["candidates"][6:]
+            rejected = [c.model_dump(mode="json") for c in pool if c not in eligible]
+            checkpoint["candidates"] = [c.model_dump(mode="json") for c in ranked] + rejected + checkpoint["candidates"][6:]
             checkpoint["selection"] = [s.model_dump(mode="json") for s in explanations] + checkpoint.get("selection", [])[6:]
             checkpoint["page_selection_complete"] = True
             store.event(run_id, fence, ProgressUpdate(phase="discovery", label="Selected research candidates from saved company pages",
@@ -288,6 +309,9 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 continue
             if len(store.get_run(run_id)["records"]) >= checkpoint.get("company_limit", 3):
                 break
+            if issue := candidate_issue(candidate):
+                reject_candidate(candidate, issue, "research")
+                continue
             billable = False
             saved_sources = checkpoint.setdefault("sources", {})
             try:
@@ -296,6 +320,9 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                     saved_sources[candidate.domain] = [source.model_dump(mode="json")]
                     store.checkpoint(run_id, fence, "research", checkpoint)
                 sources = tuple(Source.model_validate(s) for s in saved_sources[candidate.domain])
+                if issue := company_page_issue(sources[0].url, sources[0].title):
+                    reject_candidate(candidate, issue, "research")
+                    continue
                 # Initial-page links define the entire follow-up frontier. Never recurse.
                 completed_pages = checkpoint.setdefault("completed_pages", {}).setdefault(candidate.domain, [])
                 failures = checkpoint.setdefault("page_failures", {}).setdefault(candidate.domain, {})

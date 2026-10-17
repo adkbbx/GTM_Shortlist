@@ -35,7 +35,7 @@ def main(argv=None):
     identity = store.create_draft(source.url, "seller-output-evaluation")
     run = store.get_run(identity)
     context = {"source": source.model_dump(mode="json"), "model": settings.gemma_model,
-               "endpoint": settings.gemma_base_url, "output_protocol": 2}
+               "endpoint": settings.gemma_base_url, "output_protocol": run["checkpoint"].get("seller_output_protocol", 1)}
     if run["checkpoint"].get("evaluation", context) != context:
         raise ValueError("Saved evaluation context changed; no provider call was made")
     if "evaluation" not in run["checkpoint"]:

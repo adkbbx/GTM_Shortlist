@@ -6,6 +6,7 @@ from pydantic import Field, StringConstraints, model_validator
 
 from shortlist.domain import Candidate, Criterion, Value
 from shortlist.fetch import canonical_url, domain_of
+from shortlist.relevance import candidate_issue, seller_marketing_criterion
 from shortlist.selection import discussion_page
 
 Trimmed = Annotated[str, StringConstraints(strip_whitespace=True)]
@@ -54,11 +55,14 @@ def read_campaign_plan(data) -> CampaignPlan:
     plan = data if isinstance(data, CampaignPlan) else CampaignPlan.model_validate(data)
     campaigns = []
     adjusted = False
+    seller_claims = False
     for campaign in plan.campaigns:
         private = [c.description for c in campaign.criteria if PRIVATE_CONDITION.search(c.description)]
-        criteria = tuple(c for c in campaign.criteria if not PRIVATE_CONDITION.search(c.description))
+        seller_claims = seller_claims or any(seller_marketing_criterion(c.description) for c in campaign.criteria)
+        criteria = tuple(c for c in campaign.criteria if not PRIVATE_CONDITION.search(c.description)
+                         and not seller_marketing_criterion(c.description))
         if not criteria:
-            adjusted = True
+            adjusted = adjusted or bool(private)
             continue
         search_terms = campaign.search_terms
         if PRIVATE_CONDITION.search(search_terms):
@@ -72,6 +76,9 @@ def read_campaign_plan(data) -> CampaignPlan:
     message = "Conditions involving private performance were kept as hypotheses; campaigns without public criteria were omitted."
     if adjusted and message not in issues:
         issues.append(message)
+    seller_message = "Seller marketing claims were omitted from customer criteria; review the proposed buyer segment."
+    if seller_claims and seller_message not in issues:
+        issues.append(seller_message)
     return CampaignPlan(campaigns=tuple(campaigns), issues=tuple(issues[:4]))
 
 
@@ -82,7 +89,7 @@ def market_candidates(values, seller_url):
         candidate = value if isinstance(value, Candidate) else Candidate.model_validate(value)
         if canonical_url(candidate.url) != candidate.url or domain_of(candidate.url) != candidate.domain:
             raise ValueError("Competitor search returned a mismatched website identity")
-        if candidate.domain != seller and not discussion_page(candidate.url):
+        if candidate.domain != seller and not discussion_page(candidate.url) and not candidate_issue(candidate):
             unique.setdefault(candidate.domain, candidate)
     return list(unique.values())[:15]
 

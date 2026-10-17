@@ -36,6 +36,14 @@ Find available models explicitly calls local-only POST /api/local/model/models, 
 
 Listing a catalog does not establish inference access, credential validity for inference, structured-output compatibility or research quality. Some providers expose catalogs publicly. Those gates require separately authorized evaluation; none was performed for this change. Hosted GTM Shortlist accounts still use operator-managed providers and do not see local setup.
 
+## Company relevance and buyer criteria
+
+New seller drafts use output protocol3: the model separately returns seller_offer, target_customer and customer_criteria with an explicit target_customer subject. The adapter saves the existing offer/target/criteria shape, so confirmation and immutable profiles are unchanged. Obvious seller voice, platform marketing, customer-count claims and private-performance criteria are rejected. Campaigns omit the same seller-marketing criteria instead of reintroducing them. Protocols1/2 and their saved paid-step outcomes remain readable; existing confirmed targets are not rewritten.
+
+Discovery and competitor results skip recognized editorial, guide, list, dictionary and reference pages before company deduplication. A later official homepage from the same business remains eligible. The worker also checks saved candidates and the primary fetched URL/title, preserving skip reasons and avoiding model calls or follow-up fetches for rejected pages. Official company/product/service pages remain candidates; secondary news/blog pages can still support dated company statements. This is a conservative page-type gate, not proof of fit or a universal classifier for unmarked articles. It can return fewer companies without issuing extra searches. Model judgment and human review still need to establish that evidence is about the candidate's own business.
+
+Run `python scripts/audit_saved_relevance.py --run <exact-run-id>` for a read-only audit of saved candidate URLs and primary pages. It makes no provider calls and changes no saved data. Historical article-based records remain historical; use a new user-initiated research run to exercise new drafting/discovery, subject to the installation's normal provider budget. A new live quality evaluation requires separate approval.
+
 ## Prompt profiles
 
 The worker chooses a prompt profile from the model connection, not from local or hosted deployment. Automatic selection reads Ollama metadata once per run (GET /api/version, POST /api/show) only for loopback addresses or port 11434; it performs no inference and never probes hosted endpoints. Ollama models under 10B parameters and other on-device servers use the compact profile. Larger Ollama models and hosted endpoints use the full profile. Hosted deployments always use full. SHORTLIST_PROMPT_PROFILE=compact or full overrides the automatic choice.

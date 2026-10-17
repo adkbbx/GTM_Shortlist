@@ -129,6 +129,20 @@ def test_compact_research_uses_native_window_schema_and_excerpts(monkeypatch):
     assert "Footer link 399" not in payload["sources"][0]["text"]
 
 
+def test_compact_seller_customer_format_fits_native_context(monkeypatch):
+    reply = {"seller_offer": "Equipment maintenance for manufacturing businesses",
+             "target_customer": "Manufacturing companies",
+             "customer_criteria": [{"id": "factory", "subject": "target_customer",
+                                    "customer_characteristic": "Operates manufacturing facilities", "required": True}],
+             "unknowns": ["Buying plans are not known"]}
+    requests = fake_ollama(monkeypatch, [(reply, "stop")])
+    draft = Gemma(Settings(gemma_base_url=LOCAL, gemma_model="labelled-fixture")).seller(source())
+    assert draft.criteria[0].description == "Operates manufacturing facilities"
+    body = chats(requests)[0]
+    assert body["options"]["num_ctx"] == 8192 and body["options"]["num_predict"] == 1500
+    assert "customer_criteria" in body["format"]["properties"]
+
+
 def test_compact_worker_run_saves_research_and_verification(tmp_path, monkeypatch):
     settings = Settings(db_path=tmp_path / "compact.sqlite3", gemma_base_url=LOCAL, gemma_model="labelled-fixture")
     store = Store(settings.db_path)
