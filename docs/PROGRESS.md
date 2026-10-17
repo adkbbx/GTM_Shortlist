@@ -1,5 +1,15 @@
 # Progress and handoff
 
+## 17 October, alive landing, live research and large-screen brief
+
+Planning only, no application code changed. Branch claude/alive-landing-brief from codex/landing-demo-plan 589fccd. Added docs/planning/landing-demo/ALIVE_BRIEF.md and a self-contained prototype in docs/planning/landing-demo/prototype/ (index.html public landing, research.html research in progress, shared.css/js, vendored lenis 1.3.26 under MIT). DESIGN.md gains a scoped "Public pages, live research and large screens" section.
+
+The brief records the user's 17 October requests. The public hosted landing page and demo use the full Eygentic language with real motion. Lenis smooth scrolling applies to the landing page only. Anonymous hosted visitors see the landing page instead of the sign-in form, and a typed company survives signup. Live research shows an agent console and a colour-coded checkpoint feed. Large screens are fixed. Measured reference values come from instrumented captures of eygentic.com, explee.com and usealia.com. Explee's research flow could not be relaunched because its launch is protected by hCaptcha for automated browsers; it was not bypassed, and the earlier 15 October capture was used.
+
+Large-screen root cause, measured on the synthetic fixture server: header.topbar and .workspace are capped at 1680px and centred, so at 1920/2560/3840px the dark header and sidebar start at x=120/440/1080 with paper gaps beside them, and content stays a 1320px column of 16px text. Live-progress observations: frames 1s and 10s apart were identical during a held run, checkpoint marks were monochrome currentColor, and the checkpoint list sat below the fold at 1440x900.
+
+Verification of the prototype only: Chrome at 390x844, 1440x900, 1920x1080, 2560x1440 and 3840x2160 shows no console errors and no horizontal overflow. Computed root sizes are 16/16.7/18.7/22.4px. All six story stages were inspected on laptop and phone, the simulated research run completes, and reduced-motion variants render final states. Status colour contrast was computed: state words at least 4.77:1 on white or paper; working on peach 4.02:1 and idle grey 3.66:1 are limited to non-text marks. The isolated landing preview (port 8031) and the synthetic fixture server (port 8015) were started from Codex's worktree build and stopped after capture. No provider requests, database mutation, deployment or main merge. Implementation, CI and user acceptance remain open.
+
 ## 17 October, searchable grouped history and run-only header action
 
 Moved desktop New shortlist from the panel into the header next to Settings/Account, with a plus and visible label only while viewing a run. Start screen has no header action. Phone retains its run-only header plus and the previously requested labelled drawer action. Closing desktop history now hides it entirely, including every run icon, and main content uses the full workspace width; removed the64px rail rules and bypassed the existing1320px content cap specifically for this state. The stationary header toggle still reopens history.
