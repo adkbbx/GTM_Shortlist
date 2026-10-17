@@ -7,12 +7,14 @@ import base64
 import json
 import os
 import threading
+from pathlib import Path
 from uuid import UUID, uuid4
 
 import httpx
 import psycopg
 import uvicorn
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from migrate_postgres import migrate
 from psycopg import sql
 from psycopg.conninfo import conninfo_to_dict, make_conninfo
@@ -114,6 +116,12 @@ def run():
         thread = threading.Thread(target=loop, daemon=True)
         thread.start()
         application = FastAPI()
+
+        @application.get("/", response_class=HTMLResponse)
+        def fixture_home():
+            # Hosted tests must also override any directory ID compiled from .env.local.
+            html = (Path(__file__).resolve().parents[1] / "dist" / "index.html").read_text(encoding="utf-8")
+            return html.replace("<head>", '<head><meta name="shortlist-company-suggestions-client-id" content="">')
 
         @application.get("/api/runs/{run_id}/site-icon/{domain}")
         def fixture_site_icon(run_id: str, domain: str):

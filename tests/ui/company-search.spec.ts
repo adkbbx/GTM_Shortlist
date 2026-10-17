@@ -79,6 +79,29 @@ test('new company suggestions support keyboard selection and responsive layouts 
   expect(mutations).toEqual([]);
 });
 
+test('website entry closes suggestions and does not query the company directory', async ({ page }) => {
+  const lookups: string[] = [];
+  await page.route('https://api.brandfetch.io/**', route => {
+    lookups.push(route.request().url());
+    return route.fulfill({ json: companies });
+  });
+  await page.goto('/');
+  const input = page.getByRole('combobox', { name: 'Company name or website' });
+  await input.fill('clay');
+  await expect(page.getByRole('option')).toHaveCount(3);
+  await page.clock.install();
+  for (const website of ['https://clay.example/', 'clay.example', 'www.clay.example', 'http://clay.example/path']) {
+    await input.fill(website);
+    await page.clock.runFor(400);
+    await expect(input).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.getByRole('button', { name: 'Start research', exact: true })).toBeVisible();
+    await input.press('Tab');
+    await expect(page.getByRole('button', { name: 'Start research', exact: true })).toBeFocused();
+    await input.focus();
+  }
+  expect(lookups).toHaveLength(1);
+});
+
 test('without directory configuration, manual company entry stays available', async ({ page }) => {
   await page.route('http://127.0.0.1:8015/', async route => {
     const response = await route.fetch();

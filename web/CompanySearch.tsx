@@ -14,8 +14,10 @@ export function CompanySearch({ value, onChange, clientId, disabled }: {
   const [picked, setPicked] = useState<string | null>(null);
   const [lookup, setLookup] = useState<Lookup>({ kind: 'idle' });
   const query = value.trim().slice(0, 120);
+  const website = /^(?:https?:|www\.)/i.test(query) || /^[^\s/]+\.[a-z]{2,}(?:[/:?#]|$)/i.test(query);
+  const directory = Boolean(clientId && query.length >= 2 && !website);
   useEffect(() => {
-    if (!focused || !clientId || query.length < 2 || query === picked) return;
+    if (!focused || !directory || query === picked) return;
     let disposed = false;
     const controller = new AbortController();
     const timer = setTimeout(() => {
@@ -26,8 +28,7 @@ export function CompanySearch({ value, onChange, clientId, disabled }: {
     }, 300);
     const timeout = setTimeout(() => controller.abort(), 5300);
     return () => { disposed = true; clearTimeout(timer); clearTimeout(timeout); controller.abort(); };
-  }, [query, focused, clientId, picked]);
-  const directory = clientId && query.length >= 2;
+  }, [query, focused, clientId, picked, directory]);
   const current = lookup.kind !== 'idle' && lookup.query === query ? lookup : null;
   const items = directory && current?.kind === 'loaded' ? current.items : [];
   const message = directory ? current?.kind === 'error' ? current.message : current?.kind === 'loaded' ? 'No matching companies. Enter a website to continue.' : 'Finding companies…' : 'Enter a company name or website.';

@@ -18,6 +18,7 @@ def main():
     parser.add_argument("tests", nargs="*", default=["tests/test_postgres.py"])
     parser.add_argument("-k", default="")
     parser.add_argument("--ui", action="store_true", help="Also run all browser flows against this disposable cluster")
+    parser.add_argument("--ui-grep", help="Run matching browser cases with --ui; omit for the full suite")
     args = parser.parse_args()
     suffix = ".exe" if os.name == "nt" else ""
     binaries = {name: args.bin.resolve() / (name + suffix) for name in ("initdb", "pg_ctl")}
@@ -58,7 +59,10 @@ def main():
             environment["SHORTLIST_UI_TEST_PG_URL"] = database_url
             browser_log = directory / "playwright.log"
             with browser_log.open("w", encoding="utf-8") as output:
-                result = subprocess.run(["node", str(ROOT / "node_modules/playwright/cli.js"), "test"],
+                browser_command = ["node", str(ROOT / "node_modules/playwright/cli.js"), "test"]
+                if args.ui_grep:
+                    browser_command.extend(["--grep", args.ui_grep])
+                result = subprocess.run(browser_command,
                                         cwd=ROOT, env=environment, stdout=output, stderr=subprocess.STDOUT,
                                         stdin=subprocess.DEVNULL, close_fds=True, creationflags=flags, check=False)
             print(browser_log.read_text(encoding="utf-8", errors="replace"))

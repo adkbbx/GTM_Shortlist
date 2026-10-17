@@ -241,7 +241,15 @@ function App({ account, identity }: { account: ReactNode; identity: string }) {
   }, []);
   const historyTrigger = useRef<HTMLButtonElement>(null);
   const closeMobileHistory = useCallback(() => setMobileHistoryOpen(false), []);
-  const restoreMobileMenuFocus = () => { if (window.matchMedia('(max-width: 850px)').matches) historyTrigger.current?.focus(); };
+  const restoreMobileMenuFocus = () => {
+    if (!window.matchMedia('(max-width: 850px)').matches) return;
+    const focused = document.activeElement;
+    // A delayed native close event must not steal focus from a newly chosen page control.
+    if (!(focused instanceof HTMLElement) || focused === document.body ||
+        !focused.getClientRects().length || focused.closest('#local-settings, #account-tray, #research-drawer')) {
+      historyTrigger.current?.focus();
+    }
+  };
   const [brandfetchOverride, setBrandfetchOverride] = useState(savedBrandfetchId);
   const brandfetchClientId = previewWorkspace ? '' : health?.mode === 'local' ? brandfetchOverride ?? configuredDirectoryId() : health ? configuredDirectoryId() : '';
   const [wallet, setWallet] = useState<Wallet | null>(null);

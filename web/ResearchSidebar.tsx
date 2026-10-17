@@ -52,7 +52,7 @@ export function ResearchSidebar({ runs, activeId, loading, onNew, onSelect, mobi
       {!groups.length && <p className="sidebar-loading" role="status">No saved runs match your search.</p>}
     </nav> : <p className="sidebar-loading">Your saved runs will appear here.</p>}
   </div>;
-  return <aside className={`sidebar research-sidebar ${collapsed ? 'is-collapsed' : ''}${visibleDesktop ? '' : 'is-empty'}`} aria-label="Saved research">
+  return <aside className={`sidebar research-sidebar ${collapsed ? 'is-collapsed' : ''}${visibleDesktop ? '' : ' is-empty'}`} aria-label="Saved research">
     {narrow ? <dialog id="research-drawer" ref={drawer} className="research-drawer" aria-labelledby="drawer-title" onCancel={onMobileClose} onKeyDown={event => {
       if (event.key !== 'Tab') return;
       const buttons = event.currentTarget.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled])');
