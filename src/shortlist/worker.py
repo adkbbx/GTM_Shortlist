@@ -244,11 +244,17 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
         if "candidates" not in checkpoint:
             discovered = checkpoint.get("discovered", [])
             completed_queries = checkpoint.get("completed_queries", [])
+            # Policy 2 sets aside companies already saved in this workspace's other shortlists for the same seller:
+            # repeat runs kept paying to research the same companies. Saved once so a resumed run decides the same way.
+            if discovery_policy >= 2 and "earlier_shortlists" not in checkpoint:
+                checkpoint["earlier_shortlists"] = sorted(store.researched_elsewhere(run_id, profile.seller_url))
+                store.checkpoint(run_id, fence, "discovery", checkpoint)
+            earlier = set(checkpoint.get("earlier_shortlists", []))
             for index, query in enumerate(queries_for(profile, checkpoint.get("discovery_terms"), policy=discovery_policy)):
                 if checkpoint.get("use_saved_discovery") or index in completed_queries or str(index) in checkpoint.get("discovery_failures", {}):
                     continue
                 # The extra query is spent only when the first two left too few companies, and never past the run's cap.
-                if index >= 2 and (len({c["domain"] for c in discovered}) >= LOW_YIELD or not room("search", 1)):
+                if index >= 2 and (len({c["domain"] for c in discovered} - earlier) >= LOW_YIELD or not room("search", 1)):
                     continue
                 try:
                     candidates = call("search", search.name, f"search:{index}", lambda q=query: search.search(q, profile.seller_url),
@@ -263,10 +269,18 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 checkpoint.update(discovered=discovered, completed_queries=completed_queries)
                 store.checkpoint(run_id, fence, "discovery", checkpoint)
             unique = {c["domain"]: c for c in reversed(discovered)}
-            candidates, selection = prioritize(profile, [Candidate.model_validate(c) for c in reversed(list(unique.values()))][:12])
+            set_aside = sorted(domain for domain in unique if domain in earlier)
+            candidates, selection = prioritize(profile, [Candidate.model_validate(c) for c in reversed(list(unique.values()))
+                                                         if c["domain"] not in earlier][:12])
             checkpoint["candidates"] = [c.model_dump(mode="json") for c in candidates]
             checkpoint["selection"] = [item.model_dump(mode="json") for item in selection]
+            if set_aside:
+                checkpoint["previously_researched"] = set_aside
             store.checkpoint(run_id, fence, "research", checkpoint)
+            if set_aside:
+                store.event(run_id, fence, ProgressUpdate(phase="discovery", state="reused",
+                    label=f"Set aside {len(set_aside)} {'company' if len(set_aside) == 1 else 'companies'} already in your earlier shortlists for this offer",
+                    detail=", ".join(set_aside[:6])))
             store.event(run_id, fence, ProgressUpdate(phase="discovery",
                 label=f"Saved {len(checkpoint['candidates'])} unique company candidates", state="succeeded"))
             store.event(run_id, fence, ProgressUpdate(phase="discovery", label="Prioritized candidates against your target",
@@ -469,6 +483,8 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                                                    state="waiting"))
         store.checkpoint(run_id, fence, "review", checkpoint, "partial" if partial else "ready",
                          ("No readable company evidence could be collected" if checkpoint.get("candidate_failures")
+                          else "Every company found is already in an earlier shortlist for this offer. Try another target or campaign."
+                          if checkpoint.get("previously_researched") and not checkpoint.get("candidates")
                           else "No candidate companies found") if not records else
                          "Some linked company pages could not be fetched; review the saved sources." if incomplete_pages else
                          "Discovery was incomplete; these records use the candidates that were saved." if incomplete_discovery else

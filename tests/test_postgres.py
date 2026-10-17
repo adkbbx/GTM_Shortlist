@@ -1193,6 +1193,24 @@ close_account(settings,identity,identity,transport=httpx.MockTransport(provider)
     assert resumed.state == "closed" and resumed.erased_in_batch == 0
 
 
+def test_earlier_shortlists_are_read_only_inside_the_owners_workspace(owners):
+    a, b, worker, profile = owners
+    run_id = a.create_run(profile, "earlier-shortlist")
+    scoped = PostgresStore(worker, a.workspace_id, worker=True)
+    fence = scoped.claim(run_id)
+    text = "Labelled fixture: We offer AI business software."
+    source = Source(url="https://earlier.example/", company_domain="earlier.example", title="Labelled fixture",
+                    text=text, content_hash=hashlib.sha256(text.encode()).hexdigest())
+    saved_profile = Profile.model_validate(a.get_run(run_id)["profile"])
+    scoped.save_record(run_id, fence, validate_extraction({"name": "Earlier", "findings": []}, saved_profile,
+                                                          "earlier.example", (source,)), billable=False)
+    assert scoped.researched_elsewhere("another-run", profile.seller_url) == {"earlier.example"}
+    # The worker credential can read every workspace; another account's research never shapes this one's discovery.
+    assert PostgresStore(worker, b.workspace_id, worker=True).researched_elsewhere("another-run", profile.seller_url) == set()
+    with pytest.raises(ValueError, match="assigned workspace"):
+        PostgresStore(worker, None, worker=True).researched_elsewhere("another-run", profile.seller_url)
+
+
 def test_anonymous_drafts_are_claim_scoped_limited_and_claimed_once(owners, database):
     from shortlist.postgres import ANONYMOUS_INTERRUPTED
     from shortlist.providers import SellerDraft

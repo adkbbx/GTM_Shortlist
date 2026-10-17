@@ -22,6 +22,9 @@ from shortlist.local_credentials import LocalCredentials, validate_tavily_key
 from shortlist.store import Store
 from shortlist.worker import execute_run
 
+# Browser journeys share one fixture database but are independent; one journey's companies are not set aside in the
+# next. tests/test_discovery_policy.py covers setting aside companies from earlier shortlists.
+Store.researched_elsewhere = lambda self, run_id, seller_url: set()
 test_directory = tempfile.TemporaryDirectory(prefix="gtm-shortlist-ui-")
 settings = Settings(
     db_path=Path(os.environ.get("SHORTLIST_UI_TEST_DB", str(Path(test_directory.name) / "research.sqlite3"))),

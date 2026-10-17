@@ -28,6 +28,10 @@ from shortlist.postgres import PostgresStore
 from shortlist.providers import ProviderError
 from shortlist.worker import execute_run
 
+# Browser journeys share one fixture database but are independent; one journey's companies are not set aside in the
+# next. tests/test_discovery_policy.py covers setting aside companies from earlier shortlists.
+PostgresStore.researched_elsewhere = lambda self, run_id, seller_url: set()
+
 
 def run():
     admin = os.environ["SHORTLIST_UI_TEST_PG_URL"]

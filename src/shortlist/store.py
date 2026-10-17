@@ -326,6 +326,26 @@ class Store:
                 f"ORDER BY updated_at,{self.order_key} LIMIT 100",
                 (cutoff.astimezone(UTC).isoformat(),))]
 
+    def workspace_scope(self, table: str) -> tuple[str, tuple]:
+        """Extra filter keeping a query inside the caller's workspace; a local database belongs to one operator."""
+        return "", ()
+
+    def researched_elsewhere(self, run_id: str, seller_url: str) -> set[str]:
+        """Companies already saved in this workspace's other live shortlists for the same seller. Deleted shortlists
+        have no records left, so their companies can be researched again."""
+        from shortlist.fetch import domain_of
+        scope, parameters = self.workspace_scope("u")
+        with self.connection() as db:
+            rows = db.execute("SELECT r.domain, u.profile FROM records r JOIN runs u ON u.id=r.run_id "
+                              "WHERE u.id<>? AND u.deleted_at IS NULL" + scope, (run_id, *parameters)).fetchall()
+        seller = domain_of(seller_url)
+        found = set()
+        for row in rows:
+            earlier = json.loads(row["profile"] or "{}").get("seller_url")
+            if earlier and domain_of(earlier) == seller:
+                found.add(row["domain"])
+        return found
+
     def delete_run(self, run_id: str) -> bool:
         """Erase research content; retain minimal command/spending identities."""
         with self.connection() as db:

@@ -87,7 +87,7 @@ Confirmed batches now replace the one-demo restriction. Previously granted legac
 
 ## Reuse a confirmed offer
 
-A completed or partial confirmed run now offers Reuse this offer. It copies only the saved offer, target, criteria and exclusions into a new editable draft; no website/model profiling, source research or customer review is copied. The draft requires a fresh explicit confirmation and an upfront batch-cost quote. Balance and one-active-run guards still apply; there is no signup grant or research credit bypass. Automated profiling limits do not block this path because it makes no profiling call. Prior run inputs remain immutable. New research may return companies from earlier batches, which the confirmation screen states before charging.
+A completed or partial confirmed run now offers Reuse this offer. It copies only the saved offer, target, criteria and exclusions into a new editable draft; no website/model profiling, source research or customer review is copied. The draft requires a fresh explicit confirmation and an upfront batch-cost quote. Balance and one-active-run guards still apply; there is no signup grant or research credit bypass. Automated profiling limits do not block this path because it makes no profiling call. Prior run inputs remain immutable. Discovery sets aside companies already saved in the account's other live shortlists for the same seller, so a reused offer looks for new companies; the confirmation screen says so before charging. Deleting a shortlist releases its companies.
 
 ## Test plans before payments
 

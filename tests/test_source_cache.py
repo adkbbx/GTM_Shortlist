@@ -101,8 +101,11 @@ def test_two_worker_runs_reuse_fresh_page_without_new_fetch_attempt(cached):
         fetches.append(args[0])
         return source
 
-    for key in ("cache", "second-run"):
-        identity = store.create_run(profile, key)
+    # A second seller: the same seller's later shortlists set aside companies it already has, but a fresh saved page
+    # is reused across shortlists whoever asks.
+    other_seller = profile.model_copy(update={"seller_url": "https://other-seller.example/"})
+    for key, owner in (("cache", profile), ("second-run", other_seller)):
+        identity = store.create_run(owner, key)
         execute_run(store, Settings(db_path=store.path), identity, search=Search(), model=Model(), fetch=fetch)
     assert len(fetches) == 1
     second = store.get_run(identity)

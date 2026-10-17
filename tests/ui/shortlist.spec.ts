@@ -56,7 +56,8 @@ test('three-company shortlist stays compact and preserves unsaved edits between 
   await openCompany(page);
   await expect(editor.getByLabel('Subject', { exact: true })).toHaveValue('An unsaved message worth keeping');
   const saved = await (await page.request.get(`/api/runs/${id}`)).json();
-  expect(saved.attempts.filter((attempt: { kind: string }) => attempt.kind === 'search')).toHaveLength(2);
+  // Two discovery searches plus the low-yield one: three fixture companies are fewer than one selection pool.
+  expect(saved.attempts.filter((attempt: { kind: string }) => attempt.kind === 'search')).toHaveLength(3);
   expect(saved.attempts.filter((attempt: { kind: string }) => attempt.kind === 'model')).toHaveLength(6);
   await page.setViewportSize({ width: 320, height: 844 });
   await page.addStyleTag({ content: 'html { font-size: 200%; }' });

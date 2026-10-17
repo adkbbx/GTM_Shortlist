@@ -211,6 +211,12 @@ class PostgresStore(Store):
                     )
         return run
 
+    def workspace_scope(self, table: str) -> tuple[str, tuple]:
+        # The worker role can read every workspace; another account's research must never shape this run.
+        if self.workspace_id is None:
+            raise ValueError("Workspace-scoped reads need an assigned workspace")
+        return f" AND {table}.workspace_id=?", (self.workspace_id,)
+
     def clear_source_cache(self, db):
         if self.workspace_id is None:
             raise ValueError("Research deletion requires an assigned workspace")

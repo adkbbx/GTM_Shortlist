@@ -166,6 +166,46 @@ def test_research_continues_past_six_rejected_candidates_and_starts_from_entry_p
     assert "company-8.example" not in {domain_of(url) for url in fetched}  # Stops once the batch is complete.
 
 
+class Found:
+    """Search returning the given company numbers for every query."""
+    name = "labelled_fixture"
+
+    def __init__(self, numbers):
+        self.numbers, self.queries = numbers, []
+
+    def search(self, query, seller_url):
+        self.queries.append(query)
+        return [Candidate(domain=f"company-{i}.example", url=f"https://company-{i}.example/", name=f"Labelled fixture {i}",
+                          query=query, provider=self.name) for i in self.numbers]
+
+
+def shortlist(store, seller, key, numbers):
+    profile = Profile(seller_url=seller, offer="Customer acquisition research", target="Business software companies",
+                      criteria=(Criterion(id="software", description="Offers software"),))
+    run_id = store.create_run(profile, key)
+    search = Found(numbers)
+    execute_run(store, Settings(db_path=store.path), run_id, search=search, model=Model(), fetch=readable([]))
+    return run_id, store.get_run(run_id), search
+
+
+def test_companies_already_in_an_earlier_shortlist_for_the_seller_are_set_aside(tmp_path):
+    store = Store(tmp_path / "earlier.sqlite3")
+    first, saved, _ = shortlist(store, "https://seller.example/", "first", range(1, 4))
+    assert {r["research"]["domain"] for r in saved["records"]} == {f"company-{i}.example" for i in range(1, 4)}
+    _, saved, search = shortlist(store, "https://www.seller.example/", "second", range(1, 6))
+    assert {r["research"]["domain"] for r in saved["records"]} == {"company-4.example", "company-5.example"}
+    assert saved["checkpoint"]["previously_researched"] == ["company-1.example", "company-2.example", "company-3.example"]
+    assert any(e["label"].startswith("Set aside 3 companies already in your earlier shortlists") for e in saved["events"])
+    assert len(search.queries) == 3  # Two new companies are too few, so the low-yield search ran.
+    _, saved, _ = shortlist(store, "https://other-seller.example/", "other", range(1, 3))
+    assert len(saved["records"]) == 2  # Another seller's shortlist does not count.
+    _, saved, _ = shortlist(store, "https://seller.example/", "nothing-new", range(1, 4))
+    assert not saved["records"] and saved["error"].startswith("Every company found is already in an earlier shortlist")
+    store.delete_run(first)
+    _, saved, _ = shortlist(store, "https://seller.example/", "after-deletion", range(1, 4))
+    assert {r["research"]["domain"] for r in saved["records"]} == {f"company-{i}.example" for i in range(1, 4)}
+
+
 def test_research_stops_cleanly_at_the_runs_model_limit(tmp_path, monkeypatch):
     monkeypatch.setitem(RUN_CAPS, "model", 3)
     store, run_id = research_run(tmp_path, companies(5))

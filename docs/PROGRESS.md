@@ -15,6 +15,7 @@ Changes:
 - **Ranking.** The shortlist and every export list fits first, then unverified companies by how many required checks are supported, then mismatches (`shortlist/ranking.py`). Each row says "3 of 4 required checks supported" or "1 check against your target". Fit labels are unchanged.
 - **Fit-check advice.** Confirmation flags required checks a company site rarely states (ownership, funding stage, revenue thresholds and budgets, internal pains and intent), with one-click "Make it nice to have".
 - **Drafted defaults.** Drafted (not user-typed) ownership, funding-stage and financial-threshold checks start as nice to have (`shortlist/criteria.py`, mirrored in `web/criteria.ts`). They still order the shortlist when a page states them. Drafted internal-pain checks were already removed.
+- **No paying twice for the same lead.** Five saved runs researched largely the same companies again (Smeron, Prismatic, b2bhub). Policy 2 now sets aside companies already saved in the same workspace's other live shortlists for the same seller before they take a slot or a fetch. The run records which and says so. Deleting a shortlist releases its companies. Hosted reads are scoped by workspace because the worker role can see every workspace. Browser fixture servers turn this off so each journey stays independent.
 - **Low-yield search.** Policy 2 has a third, differently anchored discovery query. It runs only when the first two left fewer than six unique companies, and never past the run's four-search cap; a company-name run, which spends one search on the lookup, never gets it.
 
 Measured on `examples/evaluation/discovery-admission.json` (104 real saved search results, labelled by hand; `scripts/evaluate_discovery.py`):
@@ -28,8 +29,8 @@ Measured on `examples/evaluation/discovery-admission.json` (104 real saved searc
 The fit-check classifier separates 12 rarely-public from 15 observable checks with no errors (`scripts/check_fit_checks.mjs`).
 
 Verification:
-- Backend: 638 passed, 47 skipped (Postgres-only), and Ruff is clean. New tests: `tests/test_discovery_policy.py`, `tests/test_ranking.py` and `tests/test_criteria.py`. Journal and worker tests now expect the low-yield search where a fixture returns one company.
-- Browser: flow, relevance and sample specs on laptop and phone, after updating the main flow test to find companies by name now that the order follows evidence. I inspected the confirmation and results screenshots.
+- Backend: 639 passed, 48 skipped (Postgres-only, including the new workspace-scope check), and Ruff is clean. New tests: `tests/test_discovery_policy.py`, `tests/test_ranking.py` and `tests/test_criteria.py`. Journal and worker tests now expect the low-yield search where a fixture returns one company.
+- Browser: the full suite on laptop and phone, 151 passed and 3 skipped (hosted credit specs run in CI). Tests now find companies by name, since the order follows evidence, and count the low-yield search where fixtures return fewer than six companies. I inspected the confirmation and results screenshots.
 
 Not verified, and needing your approval: the yield of the new queries on live search. The evidence is the saved natural experiment above, not a new run. A bounded check would be 2 searches for each of 3 saved targets (6 searches, 2.4% of the monthly SerpApi allowance), compared against the saved results.
 

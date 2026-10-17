@@ -86,7 +86,7 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
   return <section className="sheet confirmation" aria-labelledby="confirm-heading">
     <div className="sheet-heading"><h2 id="confirm-heading">Confirm what a good fit means</h2><span className="step-label">Your target</span></div>
     <p className="intro">{run.sample ? 'Drafted from the sample company page' : <>Drafted from <a href={run.seller_url} target="_blank" rel="noopener noreferrer">{new URL(run.seller_url).hostname}</a></>}. Check it, edit anything that is off, then start discovery.</p>
-    {run.reused_offer && <p className="notice">Copied from your saved offer. Review it and choose the maximum cost before starting. New research may return companies from earlier batches.</p>}
+    {run.reused_offer && <p className="notice">Copied from your saved offer. Review it and choose the maximum cost before starting. Companies already in your earlier shortlists for this offer are set aside, so each batch looks for new ones.</p>}
     {run.error && <div className="notice" role="status">{run.error}</div>}
     <form onSubmit={submit}>
       <TargetPartView title="What you sell" editLabel="Edit what you sell" editing={editing.offer} onEdit={() => edit('offer')} review={<p className="target-text">{offer}</p>}>
