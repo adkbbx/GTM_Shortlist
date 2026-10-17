@@ -135,3 +135,4 @@ This reconciliation supersedes the preceding note that hosted fixes are absent. 
 
 - [x] Replace phone bottom actions with a top-left hamburger for saved runs and drawer Settings/Account, plus a top-right new-research action only while viewing a run. Keep one56px charcoal header through same-mounted-page resizing, empty history, keyboard use and saved-run selection.
 - [x] Keep desktop Settings visible before the first run as a gear-plus-label chip matching Account. Share gear/person icons with phone drawer entries; remove the local workspace divider and obsolete mobile header overlays.
+- [x] Keep phone Settings a centered, content-sized modal with visible margins and backdrop; preserve setup forms across resize and keyboard/scroll handling. Add drawer New shortlist and a same-position animated menu/close toggle with reduced-motion support. Verification is in PROGRESS.md.

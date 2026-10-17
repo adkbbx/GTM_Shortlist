@@ -1,4 +1,7 @@
 import { PersonIcon, SettingsIcon } from './NavigationIcons';
+import { MenuToggleIcon, PlusIcon } from './NavigationIcons';
+import { openWorkspacePanel } from './workspace-panels';
+import { usePageScrollLock } from './usePageScrollLock';
 import { useEffect, useRef, useState } from 'react';
 import type { Run } from './api';
 import { SiteIcon } from './SiteIcon';
@@ -11,6 +14,7 @@ export function ResearchSidebar({ runs, activeId, loading, onNew, onSelect, mobi
   const [collapsed, setCollapsed] = useState(() => window.matchMedia('(max-width: 850px)').matches);
   const [narrow, setNarrow] = useState(() => window.matchMedia('(max-width: 850px)').matches);
   const drawer = useRef<HTMLDialogElement>(null);
+  usePageScrollLock(narrow && mobileOpen);
   useEffect(() => {
     const query = window.matchMedia('(max-width: 850px)');
     const changed = () => { setNarrow(query.matches); setCollapsed(true); onMobileClose(); };
@@ -21,9 +25,7 @@ export function ResearchSidebar({ runs, activeId, loading, onNew, onSelect, mobi
     const dialog = drawer.current;
     if (!narrow || !mobileOpen || !dialog) return;
     dialog.showModal();
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { dialog.close(); document.body.style.overflow = previous; };
+    return () => { dialog.close(); };
   }, [narrow, mobileOpen]);
   const navigation = <div id="research-navigation" className="research-navigation"><h2>Saved runs</h2>
       {loading ? <p className="sidebar-loading">Loading saved research…</p> : runs.length ? <nav aria-label="Research history">{runs.map(run => {
@@ -61,11 +63,12 @@ export function ResearchSidebar({ runs, activeId, loading, onNew, onSelect, mobi
       const box = event.currentTarget.getBoundingClientRect();
       if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) onMobileClose();
     }}>
-      <div className="drawer-heading"><h2 id="drawer-title">Your workspace</h2><button type="button" aria-label="Close saved runs" onClick={onMobileClose}>Close <span aria-hidden="true">×</span></button></div>
+      <div className="drawer-heading"><h2 id="drawer-title">Your workspace</h2><button type="button" aria-label="Close saved runs" onClick={onMobileClose}><MenuToggleIcon open={mobileOpen} /></button></div>
+      <button className="drawer-new" type="button" onClick={() => { drawer.current?.close(); onMobileClose(); onNew(); }}><PlusIcon /><span>New shortlist</span></button>
       {navigation}
       {settingsTarget && <button className="drawer-settings" type="button" aria-haspopup="dialog" aria-controls={settingsTarget} onClick={() => {
         drawer.current?.close(); onMobileClose();
-        document.getElementById(settingsTarget)?.showPopover();
+        openWorkspacePanel(settingsTarget);
       }}>{settingsTarget === 'local-settings' ? <SettingsIcon /> : <PersonIcon />}<span>{settingsTarget === 'local-settings' ? 'Settings' : 'Account'}</span></button>}
     </dialog> : navigation}
   </aside>;

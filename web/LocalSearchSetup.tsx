@@ -1,11 +1,13 @@
 import { SettingsIcon } from './NavigationIcons';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { api } from './api';
 import type { Health } from './api';
 import './LocalSettings.css';
 import { ModelSetup } from './ModelSetup';
 import { BrandfetchSetup } from './BrandfetchSettings';
+import { closeWorkspacePanel, openWorkspacePanel, trapPanelTab, workspacePanelOpen } from './workspace-panels';
+import { usePageScrollLock } from './usePageScrollLock';
 
 type SaveState = { kind: 'idle' } | { kind: 'saving' } | { kind: 'saved' } | { kind: 'error'; message: string };
 
@@ -13,6 +15,10 @@ export function LocalSearchSetup({ health, onSaved, readOnly = false, brandfetch
   health: Health; onSaved: (health: Health) => void; readOnly?: boolean; brandfetchClientId: string; onBrandfetchSaved: (id: string) => void; onClosed?: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [narrow, setNarrow] = useState(() => window.matchMedia('(max-width: 850px)').matches);
+  const changingLayout = useRef(false);
+  const focusedControl = useRef<HTMLElement | null>(null);
+  usePageScrollLock(open && narrow);
   const [statusError, setStatusError] = useState('');
   const [editing, setEditing] = useState(false);
   const [editingModel, setEditingModel] = useState(false);
@@ -48,11 +54,33 @@ export function LocalSearchSetup({ health, onSaved, readOnly = false, brandfetch
       setKey(''); setEditing(false); setState({ kind: 'saved' }); onSaved(updated); editTrigger.current?.focus();
     } catch (error) { setState({ kind: 'error', message: error instanceof Error ? error.message : 'Search setup could not be saved. Please try again.' }); }
   };
+  const reset = () => { setOpen(false); setEditing(false); setEditingModel(false); setEditingBrandfetch(false); setBrandfetchSaved(false); setModelSaved(false); setKey(''); setState({ kind: 'idle' }); onClosed?.(); };
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 850px)');
+    const changed = () => {
+      if (workspacePanelOpen('local-settings')) {
+        changingLayout.current = true;
+        const panel = document.getElementById('local-settings');
+        focusedControl.current = panel?.contains(document.activeElement) && document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        closeWorkspacePanel('local-settings');
+      }
+      setNarrow(query.matches);
+    };
+    query.addEventListener('change', changed);
+    return () => query.removeEventListener('change', changed);
+  }, []);
+  useLayoutEffect(() => {
+    if (!changingLayout.current) return;
+    openWorkspacePanel('local-settings');
+    changingLayout.current = false;
+    if (focusedControl.current?.getClientRects().length) focusedControl.current.focus();
+  }, [narrow]);
+  const closed = () => { if (!changingLayout.current && !workspacePanelOpen('local-settings')) reset(); };
   return <>
-    <button className="local-settings-trigger secondary" type="button" popoverTarget="local-settings" aria-label="Settings" title="Settings"><SettingsIcon /><span>Settings</span></button>
-    <section id="local-settings" className="local-settings" popover="auto" role="dialog" aria-labelledby="local-settings-heading"
-      onToggle={event => { setOpen(event.newState === 'open'); if (event.newState === 'closed') { setEditing(false); setEditingModel(false); setEditingBrandfetch(false); setBrandfetchSaved(false); setModelSaved(false); setKey(''); setState({ kind: 'idle' }); onClosed?.(); } }}>
-      <header className="local-settings-heading"><h2 id="local-settings-heading">Settings</h2><button type="button" popoverTarget="local-settings" popoverTargetAction="hide" aria-label="Close settings">×</button></header>
+    <button className="local-settings-trigger secondary" type="button" popoverTarget={narrow ? undefined : 'local-settings'} onClick={() => { if (narrow) openWorkspacePanel('local-settings'); }} aria-label="Settings" title="Settings"><SettingsIcon /><span>Settings</span></button>
+    <dialog id="local-settings" className="local-settings" popover={narrow ? undefined : 'auto'} aria-modal={narrow ? true : undefined} aria-labelledby="local-settings-heading"
+      onToggle={event => { if (event.newState === 'open') setOpen(true); else closed(); }} onClose={closed} onKeyDown={narrow ? trapPanelTab : undefined}>
+      <header className="local-settings-heading"><h2 id="local-settings-heading">Settings</h2><button type="button" onClick={() => closeWorkspacePanel('local-settings')} aria-label="Close settings">×</button></header>
       <p className="hint">Local workspace · configuration on this computer</p>
       {!editingModel && !editingBrandfetch && <><dl className="provider-status">
         <div><dt>Company search</dt><dd>{readOnly ? searchStatus : <button className="text-button" ref={editTrigger} type="button" aria-label={`Company search: ${searchStatus}`} aria-expanded={editing} aria-controls="local-search-form" onClick={() => { setEditingModel(false); setModelSaved(false); if (editing) closeEditor(); else setEditing(true); }}>{searchStatus}</button>}</dd></div>
@@ -81,6 +109,6 @@ export function LocalSearchSetup({ health, onSaved, readOnly = false, brandfetch
         {brandfetchSaved && <p role="status">Brandfetch setting saved in this browser. No research was started.</p>}
         {modelSaved && <p role="status">Research model settings saved. No research was started.</p>}
       </>}
-    </section>
+    </dialog>
   </>;
 }

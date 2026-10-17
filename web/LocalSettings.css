@@ -25,4 +25,8 @@
 .local-setup-prompt{font-size:.875rem;color:var(--muted);margin:8px 0 20px}.local-setup-prompt button{font-size:inherit}
 .topbar .local-settings-trigger{background:#2a2723;color:#e8e4dd;border-color:#494239}
 .topbar .local-settings-trigger:hover{background:#35312b;color:#fff9f0}
-@media(max-width:850px){.local-settings{padding:20px}}
+@media(max-width:850px){
+ .local-settings{inset:0;margin:auto;width:min(480px,calc(100vw - 32px));max-width:calc(100vw - 32px);height:fit-content;max-height:calc(100dvh - 32px);padding:0 20px 24px;overscroll-behavior:contain}
+ .local-settings-heading{position:sticky;top:0;z-index:1;min-height:56px;padding:6px 0;margin-bottom:20px;background:var(--surface);border-bottom:1px solid var(--line)}
+ .local-settings::backdrop{background:rgb(15 14 12 / .45)}
+}

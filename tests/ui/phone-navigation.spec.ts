@@ -42,7 +42,10 @@ test('phone header has saved runs and Settings, with new research only inside a 
         const drawer = page.getByRole('dialog', { name: 'Your workspace', exact: true });
         await expect(drawer.getByRole('button', { name: 'Settings', exact: true })).toBeVisible();
         await expect(drawer.getByRole('button', { name: 'Settings', exact: true }).locator('svg')).toHaveCount(1);
-        if (width === 390 && info.project.name === 'phone') await page.screenshot({ path: '.impeccable/review/phone-navigation-drawer.png' });
+        if (width === 390 && info.project.name === 'phone') {
+          await expect.poll(async () => (await drawer.boundingBox())?.x).toBe(0);
+          await page.screenshot({ path: '.impeccable/review/phone-navigation-drawer.png' });
+        }
         await drawer.getByRole('button', { name: 'Settings', exact: true }).click();
         await expect(drawer).not.toBeVisible();
         await expect(page.getByRole('dialog', { name: 'Settings', exact: true })).toBeVisible();
@@ -71,7 +74,7 @@ test('phone header has saved runs and Settings, with new research only inside a 
   } finally { await page.request.post(`/__fixture_release/${id}`); }
 });
 
-test('empty history still exposes Settings and has no phone new-research action', async ({ page }, info) => {
+test('empty history exposes Settings and drawer New shortlist without a header plus', async ({ page }, info) => {
   await page.route('**/api/runs', route => route.fulfill({ json: [] }));
   if (info.project.name === 'laptop') {
     await page.goto('/');
@@ -87,5 +90,8 @@ test('empty history still exposes Settings and has no phone new-research action'
   await page.getByRole('button', { name: 'Saved runs', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'Your workspace', exact: true })).toContainText('Your saved runs will appear here.');
   await expect(page.getByRole('button', { name: 'Settings', exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'New shortlist', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'New shortlist', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'New shortlist', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Your workspace', exact: true })).not.toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toBeFocused();
 });

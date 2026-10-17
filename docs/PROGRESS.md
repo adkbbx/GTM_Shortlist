@@ -1,5 +1,15 @@
 # Progress and handoff
 
+## 17 October, phone Settings modal and drawer follow-up
+
+Corrected phone Settings from desktop corner placement to a centered native modal. The intermediate full-screen treatment was rejected by the user and is superseded: the final panel has12px corners, at least16px margins, a dimmed backdrop and content-sized height capped to the viewport. Long forms scroll inside with a sticky close control. Desktop keeps its existing header popover. The same dialog element preserves setup selections and drafts through850/851px transitions; keyboard focus remains within the phone modal and returns to the menu on dismissal. Shared scroll-lock ownership prevents drawer-to-Settings handoff from leaving the page locked or prematurely unlocking it.
+
+The phone drawer now always includes a labelled New shortlist action above saved runs, including on the entry page; the header plus remains limited to viewing a run. Hamburger and close share a44px position and animated SVG lines. Drawer/backdrop motion is180ms, line opacity120ms, with no authored motion under reduced-motion preference. The semantic test helper checks the menu's actual expanded state so the closing animation cannot masquerade as an open drawer.
+
+Verification: TypeScript/Vite build, Ruff and21 backend API/progress checks pass. All24 Settings/model/Brandfetch/navigation browser checks passed; after correcting the screenshot-detected vertical stretch,12 focused phone/laptop modal/model/navigation cases passed again. Same-mounted-page checks cover1366/851/850/731/390/320px, centered geometry and non-stretched summary height, long-form close visibility, focus wrapping, Escape, input/setup preservation, scroll-lock handoff, New shortlist and reduced motion. Inspected final phone-settings-modal.png, laptop-settings-placement.png and phone-navigation-drawer.png in ignored .impeccable/review. Existing Vite bundle-size advisory remains. User acceptance and current-commit CI remain pending.
+
+Assets are available on refresh of8018/8019. No API or worker restart, saved-preview-data mutation, research dispatch, provider spend, main merge or deployment. Port8018 remains design-only with the preserved queued run.
+
 ## 17 October, phone navigation and labelled desktop Settings
 
 Replaced the phone bottom actions with a single56px charcoal header. The top-left hamburger opens saved runs, the product name stays centered, and a plain plus appears at top right only while viewing a run. Empty history still exposes the drawer and Settings before first research. Settings and hosted Account live at the bottom of the drawer with shared gear/person icons. Opening either closes the modal drawer before showing its existing popover, avoiding an inert nested surface; closing the popover restores phone menu focus. Escape, backdrop, focus trapping, history selection, input preservation, scroll unlocking and resize transitions remain covered. Desktop keeps its existing sidebar/rail behavior.
