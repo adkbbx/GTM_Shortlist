@@ -1,5 +1,11 @@
 # Progress and handoff
 
+## 17 October, integrated local API restarted
+
+At the user's request, restarted only the verified uvicorn API on127.0.0.1:8019 using this worktree's PYTHONPATH, local mode and existing data/shortlist.sqlite3. The integrated compact-model code is now loaded by the new process. Root returns200; health reports search/model configuration present and worker_online=false. No inference/readiness evaluation or research dispatch was requested. Port8018 kept the same listener and was not restarted. All table hashes and run states in both existing databases match the pre-restart snapshot; ignored proof is data/restart-8019-proof.json. The proof's initial comparison falsely differed because JSON arrays were compared with Python tuples; normalized comparison confirmed unchanged data.
+
+Actual pre-restart inspection found the preserved preview ID1618c3adbd16463a9d7557246d1dc9a2 already partial/deleted, superseding the older queued-state handoff. Reported this discrepancy to the user and did not alter or restore it. Both8019 runs remain partial/review. Automatic approval review rejected the combined restart command without a specific reason; separate narrowly scoped stop of the verified8019 process and hidden API launch succeeded. No worker was started, provider credits spent, main merged or deployment performed.
+
 ## 17 October, compact-model branch integrated into design branch
 
 On the user's explicit integrate request, fetched and fast-forwarded codex/landing-demo-plan from589fccd to origin/claude/compact-model-profiles at5915da9, bringing in604e2b3 (compact/native Ollama support) and5915da9 (read-only saved-run replay script). All preceding design/history/settings fixes are ancestors and remain intact; no frontend source changed in this integration. Confirmed with branch PYTHONPATH that shortlist imports from this worktree's src/shortlist/__init__.py rather than the main checkout's editable install.
