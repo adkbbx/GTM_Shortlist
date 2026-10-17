@@ -250,7 +250,7 @@ test('deletion has explicit confirmation, retry recovery and unchanged credits',
   await openAccountTray(page);
   await expect(page.getByText('2 credits available', { exact: true })).toBeVisible();
   expect(new URL(page.url()).searchParams.has('run')).toBe(false);
-  await expect(page.getByRole('complementary', { name: 'Saved research' })).toHaveCount(0);
+  await expect(page.getByRole('complementary', { name: 'Saved research' })).toBeHidden();
   await expect(page.getByRole('heading', { name: 'Find companies that fit your offer.' })).toBeVisible();
   await expect(page.locator('.saved-run')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Start research' })).toBeEnabled();

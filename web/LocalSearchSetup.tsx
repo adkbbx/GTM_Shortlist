@@ -75,7 +75,7 @@ export function LocalSearchSetup({ health, onSaved, readOnly = false, brandfetch
     changingLayout.current = false;
     if (focusedControl.current?.getClientRects().length) focusedControl.current.focus();
   }, [narrow]);
-  const closed = () => { if (!changingLayout.current && !workspacePanelOpen('local-settings')) reset(); };
+  const closed = () => { if (open && !changingLayout.current && !workspacePanelOpen('local-settings')) reset(); };
   return <>
     <button className="local-settings-trigger secondary" type="button" popoverTarget={narrow ? undefined : 'local-settings'} onClick={() => { if (narrow) openWorkspacePanel('local-settings'); }} aria-label="Settings" title="Settings"><SettingsIcon /><span>Settings</span></button>
     <dialog id="local-settings" className="local-settings" popover={narrow ? undefined : 'auto'} aria-modal={narrow ? true : undefined} aria-labelledby="local-settings-heading"

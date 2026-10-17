@@ -91,7 +91,7 @@ export function ModelSetup({ onSaved, onCancel }: { onSaved: (health: Health) =>
           <p className="hint">{lookup.models.some(id => id.toLowerCase().includes('gemma')) ? 'Gemma-labelled models appear first. Availability does not establish research quality.' : 'No Gemma-labelled model was found. Install or deploy Gemma first, or select its custom alias if you assigned one.'}</p>
         </> : <p role="status">No models were returned. Install or deploy a Gemma model, keep its server running, then try again.</p>}
       </>}
-      <details className="model-advanced" open={manual} onToggle={event => { const next = event.currentTarget.open; if (next !== manual) { setManual(next); setModel(''); } }}><summary>Enter a model ID manually</summary>
+      <details className="model-advanced" open={manual} onToggle={event => { const next = event.currentTarget.open; if (next !== manual) { setManual(next); if (!next) setModel(''); } }}><summary>Enter a model ID manually</summary>
         <p>Use this if your server cannot list models. Copy the exact deployed model ID from its model screen or connection guide.</p>
         <label htmlFor="model-name">Model ID</label><input id="model-name" required={manual} maxLength={200} value={manual ? model : ''} disabled={busy} onChange={event => setModel(event.target.value)} />
       </details>

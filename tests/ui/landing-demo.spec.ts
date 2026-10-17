@@ -2,6 +2,8 @@ import { expect, test } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 
 test('standalone demo completes without research requests and returns to preserved input', async ({ page }, info) => {
+  // Entry history belongs to other fixture tests; keep this isolation check deterministic.
+  await page.route('**/api/runs', route => route.fulfill({ json: [] }));
   await page.goto('/');
   await page.getByLabel('Company name or website', { exact: true }).fill('https://preserved.example');
   await expect(page.getByRole('region', { name: 'See how a shortlist takes shape.' })).toHaveCount(0);
