@@ -83,18 +83,27 @@ Follow the prototype's order, copy and behaviour.
 2. **Hero.** Two columns, the left about 1.08fr.
    - **Text and form.** Label "Company research for B2B sellers", then the headline "Find who fits. / Check why." with a word reveal on load. Body copy and the company form follow, reusing the existing `CompanySearch` combobox restyled to sharp panels.
    - **Flow lines** (canvas behind the hero):
-     - nine grey S-curves rise from the bottom edge into the field's lower edge;
-     - five orange curves run from the field's right edge up into the machine's hopper.
+     - **Two-column layout (wider than 1000 px):** nine grey S-curves rise from the bottom edge into the field's lower edge, and five orange "fuel lines" run from the field's right edge into the rocket's launch tower arm (tower point x 92, y 500 in the drawing).
+     - **Stacked layout (1000 px and narrower):** only the fuel lines are drawn, seven of them dropping from the field's lower edge to the tower. Nothing may cross the drawing; the earlier grey bundle did, which the user reported as broken on narrow screens.
    - **Dots.** About 3 per curve, 3–3.5 px squares. 22% are orange. Each fades over the first 1/8 and last 1/6 of its curve.
    - **Speed.** Ease toward the target with `1 − e^(−3.2·dt)`. Base `0.045` curve-lengths per second. Hovering or focusing the field sets 12×; each keystroke sets 24× for 1.2 s.
    - **Line draw-in.** Over 1.4 s with an ease-out cubic.
    - **Performance and fallback.** Cap the device-pixel ratio at 1.5. Pause when offscreen or the tab is hidden. Under reduced motion, draw one static frame.
-   - **Shortlist machine** (inline SVG, right column; see the prototype for geometry): hopper "Your website" → OFFER sheet → TARGET dial → EVIDENCE sheet with a magnifier → output tray.
-     - The tray holds three status cards: "Fits · supported", "Needs a call", "Not a fit".
-     - Labels sit on leader lines with orange pins. A dashed apricot centreline and a rotated "One research run" dimension complete the blueprint.
-     - The drawing draws in on first view: strokes over .9 s with eygentic's ease, staggered about 0–2 s; pins pop; modules fade.
-     - The dial's ticks rotate with the flow speed.
-     - A hand note reads "Site → offer → target → evidence → you".
+   - **Launch vehicle** (user's choice on 17 October: reuse the eygentic.com rocket). Use the same artwork as the eygentic.com hero vehicle (rocket viewBox 340×620, leaders viewBox 580×620; the user's own asset in the Eygentic site repository), relabelled bottom to top as one research run:
+
+     | Part | Label | Meaning line |
+     |---|---|---|
+     | Launchpad | Your website | Launchpad · read once, saved |
+     | Engine | Offer | Engine · drafted from your site |
+     | Fuel tanks | Target | Fuel · you confirm it |
+     | Guidance band | Evidence | Guidance · exact source words |
+     | Payload bay | Your shortlist (orange) | Payload · up to three companies |
+
+     - **Labels.** HTML text, not SVG text, so they stay readable at every size (minimum about 14.7 px). On the right of the rocket on screens wider than 600 px. At 600 px and narrower, use eygentic's mobile layout: a 7 rem rocket beside a vertical list of the five labels, with no leader lines or hand note.
+     - **Draw-in, bottom up like an assembly:** launchpad 0–0.5 s, engine and fins 0.6–0.8 s, body and tanks 0.8–1.1 s, nose and payload 1.15–1.35 s. Leaders and labels follow bottom to top from 1.5 s, 0.25 s apart. Strokes take 0.9 s with eygentic's ease; pins pop; dashed parts fade in.
+     - **Plume.** eygentic's `plumeIgnite` (1.8 s, after a 2.2 s delay) and `plumeFlicker` (2 s outer, 1.4 s inner, reversed). Its vertical scale follows the flow speed: about 1.28 while hovering or focused, up to 1.6 while typing. Start research also lifts the craft 10 px for 0.9 s with a 2.4 s thrust boost.
+     - **Hand note.** Stacked "Site / Offer / Target / Evidence / You", with "You" in orange-ink.
+     - **Static content.** No result cards on the rocket; outcomes are shown only in the scroll story with labelled synthetic data.
 3. **"How a shortlist gets made".** A pinned scroll story.
    - **Pin.** The section is 680 vh tall on desktop and 760 vh on phones. A sticky frame below the header holds the title, the trace line, the stage content and a six-part progress bar.
    - **Stage weights.** Offer 1, Market 1.1, Target 1.1, Companies 1.3, Evidence 2, Decision 1.3. Evidence gets the most scroll.
@@ -121,7 +130,7 @@ Follow the prototype's order, copy and behaviour.
 
 - No invented counters, testimonials, logos, customer outcomes, live activity or prices.
 - Example companies use reserved `.example` domains and every example surface says "Synthetic example".
-- The machine's three output cards are illustrations of states, not results. They carry no company names.
+- The rocket and its labels illustrate the steps of a run, not results. They carry no company names, counts or claims.
 - "Fit" is never described as buying intent.
 
 ## 5. Live research progress ("agent at work")
@@ -239,7 +248,11 @@ This is a small, additive API change.
    - Remove both `max-width: 1680px` caps.
    - The header spans the viewport and the sidebar sits at x = 0.
    - Cap only the reading content inside `main`: `width: min(100%, 82rem)` for forms and sheets. On wide screens the research view may use up to `92rem` for its two columns.
-2. **Fluid root size.** Set `html { font-size: clamp(100%, calc(.3125vw + 10.7px), 140%) }`. That gives 16 px up to about 1,700 px wide, 16.7 px at 1920, 18.7 px at 2560 and 22.4 px at 3840.
+2. **Fluid root size.** Set `html { font-size: clamp(100%, min(.8vw, 1.45vh), 200%) }`.
+   - It gives 16 px on every phone, tablet and laptop up to about 2,000 px wide, then grows in proportion with the screen: 20.5 px at 2560×1440, 30.7 px at 3840×2160.
+   - The height term caps ultrawide 21:9 screens (20.9 px at 3440×1440).
+   - A 4K monitor at 100% scaling therefore shows text at about the same physical size as a 1080p monitor.
+   - An earlier gentler curve (22.4 px at 4K) still looked small at 4K and was replaced.
 3. **Convert fixed px to rem.** Covers the header height, sidebar width (224 px → 14 rem), control heights, gaps and type sizes, so the whole UI scales with the root.
    - Keep hairlines at 1 px.
    - Leave the existing small-screen breakpoints as they are, or switch them to `em` media queries so they track the user's font size.
@@ -286,7 +299,7 @@ Specifically:
 
 - [ ] An anonymous hosted visit to `/` shows the landing page. Sign-in works from the header. A typed company survives signup, confirmation and the redirect, and research does not start automatically.
 - [ ] Lenis is active only on the landing page, absent under reduced motion, and destroyed on entering the workspace. Drawers and modals still lock scrolling.
-- [ ] The hero lines speed up on hover, focus and typing and pause offscreen. The machine draws in once. With reduced motion everything is static and fully visible.
+- [ ] The hero lines speed up on hover, focus and typing and pause offscreen, and the rocket plume grows with them. The rocket draws in once. In the stacked layout no line crosses the drawing. With reduced motion everything is static and fully visible.
 - [ ] The pinned story works forward and backward, its progress buttons jump to stages, it fits at 390×844 without clipped cards, and it becomes a static list under reduced motion.
 - [ ] The live research view shows the console visual for each activity, colour-coded marks with words, a feed with filters, entrance animation only for new events, and ambient motion only under the worker and visibility conditions above. The tab title and notifications work.
 - [ ] At 1920, 2560 and 3840 the frame is edge to edge, there is no horizontal overflow and type scales, verified by `large-screens.spec.ts` and inspected screenshots.
@@ -298,7 +311,9 @@ Specifically:
 The prototype was checked in Chrome at 390×844, 1440×900, 1920×1080, 2560×1440 and 3840×2160:
 
 - no console errors and no horizontal overflow;
-- the root font size computed to 16, 16.7, 18.7 and 22.4 px;
+- the root font size computed to 16 px (390–1920), 20.5 px (2560), 20.9 px (3440×1440) and 30.7 px (3840);
+- the rocket hero was checked at 390, 460×1205, 600, 768, 808, 1024, 1440, 1920, 2560, 3440 and 3840 px wide, with no overlapping labels and labels at least 14.7 px;
+- hover thrust rose from 1.0 to 1.28;
 - all six story stages render at desktop and phone sizes;
 - the simulated research run completes;
 - reduced-motion versions render their final states.

@@ -34,8 +34,9 @@
   --gutter: max(1rem, env(safe-area-inset-left, 0px));
 }
 
-/* Large-screen scaling: 16px up to ~1700px wide, 16.7px at 1920, 18.7px at 2560, 22.4px at 4K (3840 CSS px). */
-html { font-size: clamp(100%, calc(.3125vw + 10.7px), 140%); }
+/* Large-screen scaling: 16px up to ~2000px wide, then proportional to the screen (20.5px at 2560, 30.7px at 3840),
+   capped by height so ultrawide 21:9 screens are not oversized. Phones and laptops always get 16px. */
+html { font-size: clamp(100%, min(.8vw, 1.45vh), 200%); }
 html, body { margin: 0; }
 body {
   min-width: 320px;
@@ -85,9 +86,11 @@ a { color: inherit; }
 [data-reveal="hidden"] .w { opacity: 0; filter: blur(.1em); transform: translateY(.19em); transition-delay: 0s; }
 
 /* Blueprint draw-in (Eygentic drawLine / pinIn / moduleIn) */
-.draw :is(path, line, polyline, polygon, circle.ln, rect):not(.cons):not(.fillonly) { stroke-dasharray: var(--len, 600); stroke-dashoffset: 0; }
-.draw.pending :is(path, line, polyline, polygon, circle.ln, rect):not(.cons):not(.fillonly) { stroke-dashoffset: var(--len, 600); }
-.draw.drawn :is(path, line, polyline, polygon, circle.ln, rect):not(.cons):not(.fillonly) { transition: stroke-dashoffset .9s var(--ease); transition-delay: calc(var(--d, 0) * 1ms); }
+.draw :is(path, line, polyline, polygon, circle.ln, rect):not(.cons):not(.fillonly):not(.dashed) { stroke-dasharray: var(--len, 600); stroke-dashoffset: 0; }
+.draw.pending :is(path, line, polyline, polygon, circle.ln, rect):not(.cons):not(.fillonly):not(.dashed) { stroke-dashoffset: var(--len, 600); }
+.draw.drawn :is(path, line, polyline, polygon, circle.ln, rect):not(.cons):not(.fillonly):not(.dashed) { transition: stroke-dashoffset .9s var(--ease); transition-delay: calc(var(--d, 0) * 1ms); }
+.draw .dashed { transition: opacity .4s var(--ease); transition-delay: calc(var(--d, 0) * 1ms); }
+.draw.pending .dashed { opacity: 0; }
 .draw .cons { stroke: var(--apricot); stroke-width: .8; stroke-dasharray: 10 4 2 4; }
 .draw.pending .cons { opacity: 0; }
 .draw.drawn .cons { transition: opacity .6s var(--ease) .2s; }
