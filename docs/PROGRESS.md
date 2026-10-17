@@ -1,5 +1,13 @@
 # Progress and handoff
 
+## 17 October, authorized Clay replay against the local model
+
+The user explicitly authorized replaying saved Clay run d12829920b03424c991e1b47a4d4d3e6 against the on-device model. Ran scripts/replay_local_model.py with the full run ID, worktree PYTHONPATH and existing local database. Preflight verified the endpoint host was localhost, all saved model-stage inputs and three company source sets existed, and the code loaded from this worktree. Runtime was gemma4:e2b-it-qat, compact profile, native Ollama, context8192, thinking capability detected (native requests disable hidden reasoning).
+
+All eight expected checks printed OK: Understand offer20s; Explore market18s; highspot.com research10s/verification6s; growintandem.com12s/6s; battery.com11s/7s. Parsed the log for all eight checks and zero FAILED lines rather than relying on the script's exit status. Two criterion findings were downgraded to unknown because quoted passages were absent from the saved source. These are successful structured-output/grounding-path checks, not proof that all companies fit the target: the small model still accepted article-derived assessments, and seller criteria still described the seller's features. Confirmation and search/discovery inputs were reused; this was not a new full research run or email-draft evaluation.
+
+Ollama prompt-truncation entries stayed13 before/after. All table counts/hashes in shortlist.sqlite3 stayed identical; the saved run and its old outcomes were not overwritten. No search, enrichment, hosted inference, app-credit debit, service restart, main merge or deployment. Evidence is ignored data/clay-replay-local-model.log, data/clay-replay-before.json and data/clay-replay-proof.json. No automatic repeat was dispatched.
+
 ## 17 October, integrated local API restarted
 
 At the user's request, restarted only the verified uvicorn API on127.0.0.1:8019 using this worktree's PYTHONPATH, local mode and existing data/shortlist.sqlite3. The integrated compact-model code is now loaded by the new process. Root returns200; health reports search/model configuration present and worker_online=false. No inference/readiness evaluation or research dispatch was requested. Port8018 kept the same listener and was not restarted. All table hashes and run states in both existing databases match the pre-restart snapshot; ignored proof is data/restart-8019-proof.json. The proof's initial comparison falsely differed because JSON arrays were compared with Python tuples; normalized comparison confirmed unchanged data.
