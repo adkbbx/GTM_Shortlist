@@ -226,6 +226,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/runs/{run_id}/site-icon/{domain}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read Site Icon */
+        get: operations["read_site_icon_api_runs__run_id__site_icon__domain__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/runs/{run_id}/reuse": {
         parameters: {
             query?: never;
@@ -1130,6 +1147,11 @@ export interface components {
             /** Booking Url */
             booking_url?: string | null;
         };
+        /** SiteIconInfo */
+        SiteIconInfo: {
+            /** Url */
+            url?: string | null;
+        };
         /** Source */
         Source: {
             /** Id */
@@ -1616,6 +1638,38 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_site_icon_api_runs__run_id__site_icon__domain__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+                domain: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteIconInfo"];
+                };
             };
             /** @description Validation Error */
             422: {

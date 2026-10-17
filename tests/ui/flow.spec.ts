@@ -302,7 +302,7 @@ test('company icons use the site favicon and fall back when unavailable', async 
     await page.goto(`/?run=${id}`);
     await expect(page.locator('.company-item')).toHaveCount(2, { timeout: 15000 });
     const icon = page.locator('.company-initial img').first();
-    await icon.scrollIntoViewIfNeeded();
+    await page.locator('.company-initial').first().scrollIntoViewIfNeeded();
     await expect(icon).toHaveAttribute('referrerpolicy', 'no-referrer');
     await expect(icon).toHaveAttribute('data-requested-icon', 'https://example-1.com/favicon.ico');
     await expect.poll(() => icon.evaluate(image => (image as HTMLImageElement).naturalWidth)).toBe(24);

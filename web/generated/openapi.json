@@ -541,6 +541,59 @@
         }
       }
     },
+    "/api/runs/{run_id}/site-icon/{domain}": {
+      "get": {
+        "summary": "Read Site Icon",
+        "operationId": "read_site_icon_api_runs__run_id__site_icon__domain__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteIconInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/runs/{run_id}/reuse": {
       "post": {
         "summary": "Reuse Offer",
@@ -3055,6 +3108,23 @@
         },
         "type": "object",
         "title": "ServiceView"
+      },
+      "SiteIconInfo": {
+        "properties": {
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          }
+        },
+        "type": "object",
+        "title": "SiteIconInfo"
       },
       "Source": {
         "properties": {

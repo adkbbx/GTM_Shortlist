@@ -32,6 +32,7 @@ class Settings(BaseModel):
     supabase_publishable_key: str = ""
     app_url: str = ""
     booking_url: str = ""
+    brandfetch_client_id: str = Field(default="", max_length=200, pattern=r"^[A-Za-z0-9_-]*$")
     supabase_admin_key: SecretStr = SecretStr("")
 
     @field_validator("supabase_admin_key")
@@ -90,6 +91,7 @@ class Settings(BaseModel):
             supabase_publishable_key=os.getenv("SUPABASE_PUBLISHABLE_KEY", ""),
             app_url=os.getenv("SHORTLIST_APP_URL", ""),
             booking_url=os.getenv("SHORTLIST_BOOKING_URL", ""),
+            brandfetch_client_id=os.getenv("SHORTLIST_BRANDFETCH_CLIENT_ID", ""),
             supabase_admin_key=os.getenv("SUPABASE_ADMIN_SECRET_KEY", ""),
         )
         return settings

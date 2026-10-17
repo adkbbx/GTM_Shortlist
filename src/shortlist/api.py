@@ -7,7 +7,7 @@ from urllib.parse import urlsplit
 from uuid import UUID
 
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, ValidationError, field_validator
@@ -19,7 +19,7 @@ from shortlist.config import Settings
 from shortlist.domain import Candidate, OperatorReview, Profile, Research, Review, Source, Target
 from shortlist.email_drafts import EditEmailDraft, EmailDraft, StartEmailDraft
 from shortlist.export import export_run
-from shortlist.fetch import canonical_url
+from shortlist.fetch import canonical_url, domain_of
 from shortlist.local_credentials import (
     CredentialUnavailable,
     LocalCredentials,
@@ -35,6 +35,7 @@ from shortlist.model_setup import LocalModels, ModelSetupError, available_models
 from shortlist.progress import RunProgress, public_events
 from shortlist.providers import SellerDraft, company_name_matches
 from shortlist.selection import Selection
+from shortlist.site_icons import SiteIcons
 from shortlist.store import BudgetExceeded, Conflict, Store, saved_discovery_available, seller_retry_available
 
 
@@ -187,6 +188,10 @@ class RunView(BaseModel):
     can_continue_discovery: bool = False
 
 
+class SiteIconInfo(BaseModel):
+    url: str | None = None
+
+
 class Health(BaseModel):
     local_search_error: Literal["unavailable"] | None = None
     mode: Literal["local", "hosted"] = "local"
@@ -211,6 +216,7 @@ AuthSetup = Annotated[LocalAuth | HostedAuth, Field(discriminator="mode")]
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings.load()
+    site_icons = SiteIcons()
     local_store = Store(settings.db_path) if settings.mode == "local" else None
     research_service = LocalResearchService(settings) if local_store is not None else None
 
@@ -450,6 +456,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def read_run(run_id: str, store: owned):
         return view(store, run_id)
 
+    @app.get("/api/runs/{run_id}/site-icon/{domain}", response_model=SiteIconInfo)
+    def read_site_icon(run_id: str, domain: str, store: owned):
+        run = store.get_run(run_id)
+        seller_url = run["checkpoint"].get("seller_url")
+        allowed = {domain_of(seller_url)} if seller_url else set()
+        allowed.update(record["research"]["domain"] for record in run["records"])
+        try:
+            normalized = domain_of(f"https://{domain}/")
+        except ValueError:
+            raise HTTPException(404, "Website is not part of this saved run") from None
+        if normalized not in allowed or urlsplit(canonical_url(f"https://{domain}/")).hostname != domain:
+            raise HTTPException(404, "Website is not part of this saved run")
+        return SiteIconInfo(url=site_icons.get(domain))
+
     @app.delete("/api/runs/{run_id}", status_code=204)
     def delete_run(run_id: str, store: owned):
         store.delete_run(run_id)
@@ -516,6 +536,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     dist = Path(__file__).resolve().parents[2] / "dist"
     if dist.is_dir():
+        @app.get("/", response_class=HTMLResponse, include_in_schema=False)
+        @app.get("/index.html", response_class=HTMLResponse, include_in_schema=False)
+        def ui_index():
+            html = (dist / "index.html").read_text(encoding="utf-8")
+            # Public ID only. Settings validates it before HTML construction.
+            if settings.brandfetch_client_id:
+                meta = '<meta name="shortlist-company-suggestions-client-id" content="' + settings.brandfetch_client_id + '">'
+                html = html.replace("<head>", "<head>" + meta, 1)
+            return HTMLResponse(html)
+
         app.mount("/", StaticFiles(directory=dist, html=True), name="ui")
     return app
 

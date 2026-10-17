@@ -128,3 +128,7 @@ This reconciliation supersedes the preceding note that hosted fixes are absent. 
 - [x] Configure the user-supplied public client ID locally without committing it; keep design-only8018 lookup disabled.
 - [x] Include synthetic icons and fallback states in phone/laptop review screens.
 - [x] Verify one free real directory lookup with the supplied public ID: five matches and visible icons; no selection or research dispatch.
+
+- [x] User-requested rounded favicon containers across company results, suggestions and saved history, including initials fallback. Local Brandfetch setup saves immediately in Settings; hosted configuration stays operator-owned. Verification recorded in PROGRESS.md.
+
+- [x] Read declared site favicons for saved runs and company results without provider configuration. Eygentic's real assets/eygentic_logo.png verified in the local browser; rounded containers retained. Bounded requests, owner-scoped endpoint, safe fallback and phone/laptop checks recorded in PROGRESS.md.

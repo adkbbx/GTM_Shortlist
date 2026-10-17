@@ -8,6 +8,7 @@ import walletSchema from './generated/WalletView.json';
 import serviceSchema from './generated/ServiceView.json';
 import creditHistorySchema from './generated/CreditHistory.json';
 import modelsSchema from './generated/LocalModels.json';
+import iconSchema from './generated/SiteIconInfo.json';
 
 export type Run = components['schemas']['RunView'];
 export type Health = components['schemas']['Health'];
@@ -27,6 +28,7 @@ addFormats(ajv);
 const isRun = ajv.compile<Run>(runSchema);
 const isHealth = ajv.compile<Health>(healthSchema);
 const isModels = ajv.compile<components['schemas']['LocalModels']>(modelsSchema);
+const isSiteIcon = ajv.compile<components['schemas']['SiteIconInfo']>(iconSchema);
 const isAuthSetup = ajv.compile<AuthSetup>(authSchema);
 const isWallet = ajv.compile<Wallet>(walletSchema);
 const isService = ajv.compile<Service>(serviceSchema);
@@ -94,6 +96,14 @@ async function researchCommand(path: string, input: unknown): Promise<Run> {
 }
 
 export const api = {
+  async siteIcon(runId: string, domain: string) {
+    const data = await request(`/api/runs/${encodeURIComponent(runId)}/site-icon/${encodeURIComponent(domain)}`);
+    if (!isSiteIcon(data)) throw new Error('The site icon response was unreadable.');
+    if (!data.url) return null;
+    const url = new URL(data.url);
+    if (url.protocol !== 'https:' || url.username || url.password || (url.port && url.port !== '443')) return null;
+    return url.href;
+  },
   async availableModels(input: paths['/api/local/model/models']['post']['requestBody']['content']['application/json']) {
     const data = await request('/api/local/model/models', input);
     if (!isModels(data)) throw new Error('The server returned an unreadable model list. Use advanced setup or try again.');

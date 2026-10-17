@@ -1,2 +1,6 @@
+.site-icon{border-radius:8px;overflow:hidden}
 .site-icon img{width:24px;height:24px;object-fit:contain}
+.suggestion-icon.site-icon{border:1px solid var(--line);background:var(--paper,#fff)}
+.suggestion-icon.site-icon img{width:18px;height:18px}
+.research-sidebar .saved-run .saved-run-identity.site-icon{border-radius:6px}
 .saved-run-identity.site-icon img{width:16px;height:16px}

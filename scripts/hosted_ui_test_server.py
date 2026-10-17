@@ -115,6 +115,10 @@ def run():
         thread.start()
         application = FastAPI()
 
+        @application.get("/api/runs/{run_id}/site-icon/{domain}")
+        def fixture_site_icon(run_id: str, domain: str):
+            return {"url": None}
+
         @application.get("/__fixture_ready")
         def ready():
             return {"fixture": True}

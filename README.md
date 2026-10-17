@@ -56,21 +56,13 @@ Enter a company name, bare domain or full HTTPS URL. All company names use the s
 
 ### Enable optional company autocomplete
 
-Each self-hosting operator supplies a [Brandfetch public client ID](https://developers.brandfetch.com/register) once for their installation. People using that installation do not need separate IDs. Without this configuration, manual company-name and website entry still work.
+Local users can configure a [Brandfetch public client ID](https://developers.brandfetch.com/register) in **Settings → Brandfetch**. Click **Not configured** or **Configured**, paste the public ID and save. It takes effect immediately without editing files, rebuilding or restarting the app. This preference stays in this browser for the local workspace. **Turn off Brandfetch** disables suggestions and its icon fallback, including an installation default. Other browsers need their own preference or the installation setting below. Manual company-name and website entry always remain available.
 
-1. Create a free Brandfetch developer account and copy its **public client ID**.
-2. Create `.env.local` in the repository root and add:
+Installation operators can set `SHORTLIST_BRANDFETCH_CLIENT_ID=your_public_client_id` in the web server's environment. The server places this public value in the page at runtime; no frontend rebuild is needed. It applies after a normal server restart. Hosted users share this installation setting and do not configure individual IDs. For Render instructions, see [optional Brandfetch configuration](docs/render.md#optional-brandfetch-configuration).
 
-   ```dotenv
-   VITE_BRANDFETCH_CLIENT_ID=your_public_client_id
-   ```
+The older `VITE_BRANDFETCH_CLIENT_ID` build setting remains available for frontend-only development. Runtime configuration takes precedence, followed by the build setting. A local browser preference overrides both. Use a public client ID, never a secret API key. The repository ships no shared developer ID.
 
-3. Run `npm run build`, then refresh the app. If you use `npm run dev`, restart the frontend dev server after changing this file.
-4. Type at least two characters into **Company name or website**. Choose a suggestion to fill its domain, then click **Start research** when you are ready.
-
-The public client ID is included in browser assets. Use a public client ID, never a secret API key. `.env.local` is ignored by Git; `.env.example` contains only the empty setting. The repository ships no shared developer ID.
-
-Autocomplete calls the [Brand Search API](https://docs.brandfetch.com/brand-search-api/overview) directly from the browser after a short typing delay. This API has a free request allowance and rate limits separate from Brandfetch's paid enrichment API. Review its current usage guidelines and monitor the installation's allowance in the Brandfetch dashboard. Queries and icon requests go to Brandfetch; results are transient UI suggestions. Selecting a suggestion does not start research or call Tavily, SerpApi, or the research model. The design-only preview on port8018 disables directory requests.
+Autocomplete calls the [Brand Search API](https://docs.brandfetch.com/brand-search-api/overview) directly from the browser after a short typing delay. Saved-run and result icons read the site's declared favicon from its homepage, then try `/favicon.ico` and the configured [Logo API](https://docs.brandfetch.com/logo-api/overview). Relative favicon paths and public HTTPS CDN icons are supported. Homepage lookups are bounded, cached and restricted to sites in an accessible saved run. No research provider is used to read these declarations. Brandfetch receives the domain and browser origin for logo requests, without the page's run/query URL. Missing icons retain initials inside the same rounded container. Directory and logo APIs have free allowances and rate limits separate from paid enrichment. Review current guidelines and monitor usage in the Brandfetch dashboard. Suggestions are transient UI metadata, not research evidence. Saving the ID or selecting a suggestion starts no research and calls no Tavily, SerpApi or inference provider. The design-only preview on port8018 disables Brandfetch search and logo fallback.
 
 New browser runs also collect up to 15 potential competitor websites and propose up to six editable campaign hypotheses. Search observations do not establish competitor similarity. Confirm your offer, observable criteria, search keywords and selected campaign before discovery starts. CLI and older saved runs retain their original flow.
 

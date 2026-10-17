@@ -62,6 +62,11 @@ if __name__ == "__main__":
     thread.start()
     application = FastAPI()
 
+    @application.get("/api/runs/{run_id}/site-icon/{domain}")
+    def fixture_site_icon(run_id: str, domain: str):
+        # Browser tests explicitly substitute declared icons. Never fetch live sites.
+        return {"url": None}
+
     @application.get("/", response_class=HTMLResponse)
     def fixture_home():
         # Never inherit an operator's live directory ID from built frontend assets.

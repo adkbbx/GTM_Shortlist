@@ -13,6 +13,7 @@ import { ResearchSidebar } from './ResearchSidebar';
 import { SiteIcon } from './SiteIcon';
 import { CompanySearch } from './CompanySearch';
 import { configuredDirectoryId } from './company-suggestions';
+import { BrandfetchContext, savedBrandfetchId } from './BrandfetchSettings';
 import { AuthGate } from './AuthGate';
 import { AccountTray } from './AccountTray';
 import { ResearchStop } from './ResearchStop';
@@ -134,7 +135,7 @@ function CompanyReview({ record, run, onSaved }: { record: Record; run: Run; onS
   };
   return <details className="company-item" name={`shortlist-${run.id}`} ref={disclosure}>
     <summary className="company-row" ref={summary}>
-      <span className="shortlist-identity"><SiteIcon domain={research.domain} fallback={research.name.trim().slice(0, 1).toUpperCase()} className="company-initial" />
+      <span className="shortlist-identity"><SiteIcon runId={run.id} domain={research.domain} fallback={research.name.trim().slice(0, 1).toUpperCase()} className="company-initial" />
         <span><span className="shortlist-name">{research.name}</span><span className="shortlist-domain">{research.domain}</span></span></span>
       <span className="shortlist-description">{description?.evidence.claim ?? 'Company description not established from saved sources.'}</span>
       <span className="shortlist-assessment"><span>{qualification[research.qualification]}</span><span className="shortlist-decision">{decision}</span></span>
@@ -227,6 +228,8 @@ function DeleteResearch({ run, onDeleted }: { run: Run; onDeleted: () => void })
 
 function App({ account, identity }: { account: ReactNode; identity: string }) {
   const [health, setHealth] = useState<Health | null>(null);
+  const [brandfetchOverride, setBrandfetchOverride] = useState(savedBrandfetchId);
+  const brandfetchClientId = previewWorkspace ? '' : health?.mode === 'local' ? brandfetchOverride ?? configuredDirectoryId() : health ? configuredDirectoryId() : '';
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [showActivity, setShowActivity] = useState(false);
   const [service, setService] = useState<Service | null>(null);
@@ -320,15 +323,15 @@ function App({ account, identity }: { account: ReactNode; identity: string }) {
   const pending = active && ['queued', 'running'].includes(active.status);
   const results = active && active.seller_url && ['ready', 'partial'].includes(active.status);
   const showSidebar = Boolean(active || runs.length);
-  return <>
+  return <BrandfetchContext value={brandfetchClientId}>
     <a className="skip-link" href="#main">Skip to research</a>
-    <header className="topbar"><a className="brand" href="/" onClick={e => { e.preventDefault(); select(null); }}><span>GTM Shortlist</span></a><div className="workspace-account">{account ? <AccountTray account={account} wallet={wallet} showActivity={showActivity} onActivity={() => setShowActivity(value => !value)} /> : <><span className="local-label">Local research workspace</span>{health?.mode === 'local' && <LocalSearchSetup health={health} onSaved={setHealth} readOnly={Boolean(previewWorkspace)} />}</>}</div></header>
+    <header className="topbar"><a className="brand" href="/" onClick={e => { e.preventDefault(); select(null); }}><span>GTM Shortlist</span></a><div className="workspace-account">{account ? <AccountTray account={account} wallet={wallet} showActivity={showActivity} onActivity={() => setShowActivity(value => !value)} /> : <><span className="local-label">Local research workspace</span>{health?.mode === 'local' && <LocalSearchSetup health={health} onSaved={setHealth} readOnly={Boolean(previewWorkspace)} brandfetchClientId={brandfetchClientId} onBrandfetchSaved={setBrandfetchOverride} />}</>}</div></header>
     <div className={`workspace ${active ? 'has-research' : 'new-research'}${showSidebar ? '' : ' first-visit'}`}>{showSidebar && <ResearchSidebar runs={runs} activeId={active?.id} loading={loading} onNew={() => { select(null); requestKey.current = crypto.randomUUID(); }} onSelect={run => select(run)} />}
     <main id="main" className="main" tabIndex={-1}>{previewWorkspace && <aside className="notice preview-notice" role="note"><p>Design preview · no live research</p><a href={previewWorkspace}>Open the research workspace<Arrow /></a></aside>}<div className="page-heading">{!active && <WorkshopField />}<h1 ref={headingRef} tabIndex={-1}>{active?.termination === 'user_stopped' ? 'Research stopped' : pending ? active?.status === 'queued' && !active.progress.worker_online ? 'Research is waiting' : 'Researching your shortlist' : active ? active.status === 'awaiting_confirmation' ? 'Confirm your target' : active.profile ? 'Review your shortlist' : 'Define your shortlist' : 'Find companies that fit your offer.'}</h1><p>{active?.status === 'awaiting_confirmation' ? 'Review your offer and target below. Discovery starts after you confirm.' : active ? 'Saved research. Trace every assessment back to its source.' : 'Start with your company. We’ll help you build a shortlist backed by sources.'}</p></div>
       {error && <div className="notice" role="alert">{error}<button className="text-button" onClick={() => window.location.reload()}>Reload workspace</button></div>}
       {active?.can_retry_seller && <RetrySeller key={`retry-${active.id}`} run={active} onSaved={websiteChosen} />}
       {active?.can_continue_discovery && <ContinueDiscovery key={`continue-${active.id}`} run={active} onSaved={websiteChosen} />}
-      {!active && <LandingDemo><section className="sheet start-sheet" aria-labelledby="start-heading"><h2 id="start-heading" className="sr-only">Start your company research</h2><form onSubmit={start}><label htmlFor="website">Company name or website</label><div className="website-form"><CompanySearch value={website} onChange={value => { setWebsite(value); requestKey.current = crypto.randomUUID(); }} clientId={previewWorkspace ? '' : configuredDirectoryId()} disabled={saving} /><button disabled={saving || loading || Boolean(previewWorkspace)} aria-busy={saving} type="submit">{saving ? 'Starting research…' : 'Start research'}<Arrow /></button></div></form><p className="hint">Up to three companies. You confirm the target before discovery.</p>{!previewWorkspace && health?.mode === 'local' && !health.search_ready && <p className="local-setup-prompt">Local company search needs setup. <button type="button" className="text-button" popoverTarget="local-settings">Open Settings</button></p>}</section></LandingDemo>}
+      {!active && <LandingDemo><section className="sheet start-sheet" aria-labelledby="start-heading"><h2 id="start-heading" className="sr-only">Start your company research</h2><form onSubmit={start}><label htmlFor="website">Company name or website</label><div className="website-form"><CompanySearch value={website} onChange={value => { setWebsite(value); requestKey.current = crypto.randomUUID(); }} clientId={brandfetchClientId} disabled={saving} /><button disabled={saving || loading || Boolean(previewWorkspace)} aria-busy={saving} type="submit">{saving ? 'Starting research…' : 'Start research'}<Arrow /></button></div></form><p className="hint">Up to three companies. You confirm the target before discovery.</p>{!previewWorkspace && health?.mode === 'local' && !health.search_ready && <p className="local-setup-prompt">Local company search needs setup. <button type="button" className="text-button" popoverTarget="local-settings">Open Settings</button></p>}</section></LandingDemo>}
       {active && <ResearchProgress key={active.id} run={active} connected={!error} localResearch={health?.mode === 'local' && !previewWorkspace} />}{active && ['queued', 'running', 'awaiting_confirmation'].includes(active.status) && <ResearchStop key={`stop-${active.id}`} run={active} onStopped={stopped} />}{active?.credits && <p className="batch-credit-summary" role="status">{active.credits.used} {active.credits.used === 1 ? 'credit' : 'credits'} used · {active.credits.reserved} reserved · {active.credits.returned} returned</p>}
       {active && !pending && !active.termination && !active.seller_url && <WebsiteChoice key={`website-${active.id}`} run={active} onSaved={websiteChosen} />}{active?.status === 'awaiting_confirmation' && active.seller_url && <>{health && !health.search_ready && <p className="notice">Company search is not configured. Your target can be saved; configure search before discovery.</p>}<ConfirmationForm key={`offer-${active.id}`} run={{ ...active, seller_url: active.seller_url }} wallet={wallet} hostedAccount={account != null} onSaved={saved} /></>}
       {results && <><div className="results-toolbar"><div><h2>{active.records.length} {active.records.length === 1 ? 'company' : 'companies'} researched</h2><p>{active.status === 'partial' ? 'Some questions remain open. Review the unknowns before using these records.' : 'Model assessments are ready for your review.'}</p></div>{!!active.records.length && <div className="export-controls"><label className="checkbox-label"><input type="checkbox" checked={acceptedOnly} onChange={e => setAcceptedOnly(e.target.checked)} />Accepted only</label><div className="export-links">{(['xlsx', 'csv', 'json'] as const).map(format => <a className="secondary button-link" key={format} href={`/api/runs/${active.id}/export?format=${format}&accepted_only=${acceptedOnly}`} onClick={event => { event.preventDefault(); void api.download(active.id, format, acceptedOnly).catch(reason => setError(describeError(reason))); }}>Export {format === 'xlsx' ? 'Excel' : format.toUpperCase()}</a>)}</div></div>}</div>
@@ -344,7 +347,7 @@ function App({ account, identity }: { account: ReactNode; identity: string }) {
       {message && <p className="notice" role="status">{message}</p>}
       <footer className="workspace-footer"><p>GTM Shortlist</p></footer>
     </main></div>
-  </>;
+  </BrandfetchContext>;
 }
 
 const root = document.getElementById('root');

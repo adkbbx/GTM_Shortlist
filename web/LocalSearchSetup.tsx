@@ -4,16 +4,21 @@ import { api } from './api';
 import type { Health } from './api';
 import './LocalSettings.css';
 import { ModelSetup } from './ModelSetup';
+import { BrandfetchSetup } from './BrandfetchSettings';
 
 type SaveState = { kind: 'idle' } | { kind: 'saving' } | { kind: 'saved' } | { kind: 'error'; message: string };
 
-export function LocalSearchSetup({ health, onSaved, readOnly = false }: {
-  health: Health; onSaved: (health: Health) => void; readOnly?: boolean;
+export function LocalSearchSetup({ health, onSaved, readOnly = false, brandfetchClientId, onBrandfetchSaved }: {
+  health: Health; onSaved: (health: Health) => void; readOnly?: boolean; brandfetchClientId: string; onBrandfetchSaved: (id: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [statusError, setStatusError] = useState('');
   const [editing, setEditing] = useState(false);
   const [editingModel, setEditingModel] = useState(false);
+  const [editingBrandfetch, setEditingBrandfetch] = useState(false);
+  const [brandfetchSaved, setBrandfetchSaved] = useState(false);
+  const brandfetchTrigger = useRef<HTMLButtonElement>(null);
+  const closeBrandfetch = () => { setEditingBrandfetch(false); requestAnimationFrame(() => brandfetchTrigger.current?.focus()); };
   const [modelSaved, setModelSaved] = useState(false);
   const [key, setKey] = useState('');
   const [state, setState] = useState<SaveState>({ kind: 'idle' });
@@ -45,13 +50,14 @@ export function LocalSearchSetup({ health, onSaved, readOnly = false }: {
   return <>
     <button className="local-settings-trigger secondary" type="button" popoverTarget="local-settings" aria-label="Settings" title="Settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg></button>
     <section id="local-settings" className="local-settings" popover="auto" role="dialog" aria-labelledby="local-settings-heading"
-      onToggle={event => { setOpen(event.newState === 'open'); if (event.newState === 'closed') { setEditing(false); setEditingModel(false); setModelSaved(false); setKey(''); setState({ kind: 'idle' }); } }}>
+      onToggle={event => { setOpen(event.newState === 'open'); if (event.newState === 'closed') { setEditing(false); setEditingModel(false); setEditingBrandfetch(false); setBrandfetchSaved(false); setModelSaved(false); setKey(''); setState({ kind: 'idle' }); } }}>
       <header className="local-settings-heading"><h2 id="local-settings-heading">Settings</h2><button type="button" popoverTarget="local-settings" popoverTargetAction="hide" aria-label="Close settings">×</button></header>
       <p className="hint">Local workspace · configuration on this computer</p>
-      {!editingModel && <><dl className="provider-status">
+      {!editingModel && !editingBrandfetch && <><dl className="provider-status">
         <div><dt>Company search</dt><dd>{readOnly ? searchStatus : <button className="text-button" ref={editTrigger} type="button" aria-label={`Company search: ${searchStatus}`} aria-expanded={editing} aria-controls="local-search-form" onClick={() => { setEditingModel(false); setModelSaved(false); if (editing) closeEditor(); else setEditing(true); }}>{searchStatus}</button>}</dd></div>
         <div><dt>Research model</dt><dd>{readOnly ? modelStatus : <button className="text-button" ref={modelTrigger} type="button" aria-label={`Research model: ${modelStatus}`} aria-expanded={editingModel} aria-controls="local-model-form" onClick={() => { setEditing(false); setKey(''); setState({ kind: 'idle' }); setModelSaved(false); setEditingModel(!editingModel); }}>{modelStatus}</button>}</dd></div>
         <div><dt>Research service</dt><dd>{health.worker_online ? 'Running' : 'Stopped'}</dd></div>
+        <div><dt>Brandfetch</dt><dd>{readOnly ? 'Disabled in preview' : <button className="text-button" ref={brandfetchTrigger} type="button" aria-label={`Brandfetch: ${brandfetchClientId ? 'Configured' : 'Not configured'}`} aria-expanded={editingBrandfetch} aria-controls="local-brandfetch-form" onClick={() => { setEditing(false); setEditingModel(false); setKey(''); setState({ kind: 'idle' }); setModelSaved(false); setBrandfetchSaved(false); setEditingBrandfetch(true); }}>{brandfetchClientId ? 'Configured' : 'Not configured'}</button>}</dd></div>
       </dl>
       <p className="hint">Configured means settings are saved. Research quality has not been tested.</p>
       {statusError && <p role="alert">{statusError}</p>}
@@ -70,6 +76,8 @@ export function LocalSearchSetup({ health, onSaved, readOnly = false }: {
         {state.kind === 'saved' && <p role="status">Search key saved. Company search is configured.</p>}
         {state.kind === 'error' && <p className="notice" role="alert">{state.message}</p>}
         {editingModel && <ModelSetup onSaved={updated => { onSaved(updated); closeModel(); setModelSaved(true); }} onCancel={closeModel} />}
+        {editingBrandfetch && <BrandfetchSetup clientId={brandfetchClientId} onSaved={id => { onBrandfetchSaved(id); closeBrandfetch(); setBrandfetchSaved(true); }} onCancel={closeBrandfetch} />}
+        {brandfetchSaved && <p role="status">Brandfetch setting saved in this browser. No research was started.</p>}
         {modelSaved && <p role="status">Research model settings saved. No research was started.</p>}
       </>}
     </section>
