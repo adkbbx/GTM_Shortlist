@@ -19,6 +19,8 @@ Verification:
 
 CI run 39030017288 on `cb45fa7` failed in the hosted browser tests. A reload of `/?run=...` after account closure reached the landing page instead of sign-in. Saved-run links and auth callbacks (`run`, `code`, `error`) without a session now open sign-in, covered by a new test. CI run 39030708933 on `a635765` then passed every job: core, Postgres, Windows lifecycle, container, and the browser suite including the hosted Postgres credits specs.
 
+After the landing field moved to the company search (`2004057`), CI run 39032149864 failed in the browser job. Raw logs need admin access, so the failing test is unknown. Locally the full suite passed 138 tests, apart from one intermittent focus assertion in `flow.spec.ts` (local model status) that then passed 8 of 8 repeats. CI now also uses Playwright's GitHub reporter, so failures appear as run annotations. The next run, 39041949547 on `0141caf` with the same application code, passed every job.
+
 Not verified: a real Supabase signup email round trip, and physical devices.
 
 Still open from the brief: the agent console, filterable checkpoint feed, tab title and notifications (sections 5.2 to 5.5), and the `activity`/`subject` progress-event fields they need. `prototype/index.html` is superseded by `prototype/signal.html`.
