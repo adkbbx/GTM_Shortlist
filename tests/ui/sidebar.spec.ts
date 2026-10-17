@@ -86,7 +86,8 @@ test('navigation remains compact through resize and drawer transitions', async (
     await expect(page.getByRole('dialog')).toBeVisible();
     await page.setViewportSize({ width: 1366, height: 800 });
     await expect(page.getByRole('dialog')).toHaveCount(0);
-    expect(await page.evaluate(() => document.body.style.overflow)).not.toBe('hidden');
+    // The scroll lock is released by an effect after the width change; wait for it rather than sampling once.
+    await expect.poll(() => page.evaluate(() => document.body.style.overflow)).not.toBe('hidden');
     await page.getByLabel('Company name or website', { exact: true }).fill('Preserved company');
     await page.getByRole('button', { name: /^(Show saved runs|Saved runs)$/ }).click();
     await expect(page.getByLabel('Company name or website', { exact: true })).toHaveValue('Preserved company');

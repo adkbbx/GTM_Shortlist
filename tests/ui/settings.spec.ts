@@ -38,6 +38,8 @@ test('local settings expose configuration and history identities without provide
     await page.keyboard.press('Escape');
     await setup.getByRole('button', { name: 'Set up model', exact: true }).click();
     await expect(page.locator('#local-model-form')).toBeVisible();
+    // Escape belongs to the open panel; press it once focus has moved there, as a keyboard user would.
+    await expect.poll(() => page.evaluate(() => Boolean(document.activeElement?.closest('#local-settings')))).toBe(true);
     await page.keyboard.press('Escape');
     await expect(page.locator('#local-model-form')).toHaveCount(0);
     await openSettings(page);
