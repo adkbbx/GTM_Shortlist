@@ -150,4 +150,19 @@ def test_public_auth_setup_exposes_only_public_configuration(tmp_path):
     assert hosted.get("/api/auth/setup").json() == {
         "mode": "hosted", "supabase_url": "https://auth.example",
         "publishable_key": "sb_publishable_fixture", "redirect_url": "https://app.example/",
+        "email_code": False, "google": False,
     }
+
+
+def test_optional_sign_in_methods_are_offered_only_when_switched_on(tmp_path, monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from shortlist.api import create_app
+    for name, value in (("SHORTLIST_MODE", "hosted"), ("SUPABASE_URL", "https://auth.example"),
+                        ("SUPABASE_PUBLISHABLE_KEY", "sb_publishable_fixture"), ("SHORTLIST_APP_URL", "https://app.example"),
+                        ("SHORTLIST_DATABASE_URL", "fixture"), ("SHORTLIST_AUTH_EMAIL_CODE", "on"), ("SHORTLIST_AUTH_GOOGLE", "ON ")):
+        monkeypatch.setenv(name, value)
+    setup = TestClient(create_app(Settings.load()), base_url="https://app.example").get("/api/auth/setup").json()
+    assert (setup["email_code"], setup["google"]) == (True, True)
+    monkeypatch.setenv("SHORTLIST_AUTH_GOOGLE", "yes")
+    assert Settings.load().auth_google is False  # Only the explicit "on" switches a method on.

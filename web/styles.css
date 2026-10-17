@@ -163,6 +163,12 @@ header.topbar .brand>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .confirmation :is(input,textarea,select,summary){scroll-margin-bottom:7rem}
 @media(max-width:700px){.confirmation .form-footer{gap:.5rem;padding:.75rem 0}.confirmation .form-footer p{font-size:.8125rem}.confirmation :is(input,textarea,select,summary){scroll-margin-bottom:9rem}}
 
+/* Account sign-in options: Google above an "or" divider, then the email code or password form. */
+.account-google>button{width:100%;gap:.625rem}
+.account-divider{display:flex;align-items:center;gap:.75rem;margin:1rem 0 .25rem;font-size:.8125rem;color:var(--muted)}
+.account-divider::before,.account-divider::after{content:"";flex:1;height:1px;background:var(--line)}
+#account-code{letter-spacing:.3em;font-variant-numeric:tabular-nums}
+
 /* First-run local setup: two steps, each opening the matching Settings section. */
 .local-setup-card{margin-top:1.5rem;padding:1.25rem;border:1px solid var(--line);border-radius:var(--radius-sheet,.875rem);background:var(--surface,#fff);text-align:left}
 .local-setup-card h3{font-size:1rem;line-height:1.4}

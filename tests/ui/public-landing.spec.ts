@@ -53,6 +53,46 @@ test('anonymous hosted visitors get the landing page, and the research they star
   expect(research.filter(call => call === 'POST /api/sellers')).toHaveLength(1);
 });
 
+test('an email code signs a landing visitor in on the same tab and their research starts once', async ({ page }, info) => {
+  await hosted(page);
+  // Both optional methods switched on, as the operator would after configuring Supabase.
+  await page.route('**/api/auth/setup', route => route.fulfill({ json: { mode: 'hosted', supabase_url: authOrigin, publishable_key: 'sb_publishable_fixture', redirect_url: 'http://127.0.0.1:8015/', email_code: true, google: true } }));
+  const auth: string[] = [];
+  page.on('request', request => { const url = new URL(request.url()); if (url.origin === authOrigin) auth.push(url.pathname + url.search); });
+  const starts: string[] = [];
+  page.on('request', request => { if (request.method() === 'POST' && new URL(request.url()).pathname === '/api/sellers') starts.push(request.url()); });
+  await page.goto('/');
+  await page.getByRole('combobox', { name: 'Start with your company' }).fill('https://eygentic.com/');
+  await page.getByRole('combobox', { name: 'Start with your company' }).press('Enter');
+  await expect(page.getByRole('heading', { name: 'Create your account' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Continue with Google' })).toBeVisible();
+  await expect(page.getByLabel('Password', { exact: true })).toHaveCount(0);
+  await page.getByLabel('Email', { exact: true }).fill('landing@example.test');
+  await page.getByRole('button', { name: 'Email me a sign-in code' }).click();
+  await expect(page.getByLabel('6-digit code')).toBeFocused();
+  expect(auth.some(call => call.startsWith('/auth/v1/otp'))).toBe(true);
+  await capture(page, `.impeccable/review/${info.project.name}-email-code.png`);
+  await page.getByLabel('6-digit code').fill('12a34 56');
+  await expect(page.getByLabel('6-digit code')).toHaveValue('123456');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await expect(page).toHaveURL(/\?run=/);
+  expect(auth.some(call => call.startsWith('/auth/v1/verify'))).toBe(true);
+  expect(starts).toHaveLength(1);
+});
+
+test('Google sign-in goes to the provider, and a password stays available', async ({ page }) => {
+  await hosted(page);
+  await page.route('**/api/auth/setup', route => route.fulfill({ json: { mode: 'hosted', supabase_url: authOrigin, publishable_key: 'sb_publishable_fixture', redirect_url: 'http://127.0.0.1:8015/', email_code: true, google: true } }));
+  await page.goto('/?auth=signin');
+  await page.getByRole('button', { name: 'Use a password instead' }).click();
+  await expect(page.getByLabel('Password', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Email me a code instead' }).click();
+  await expect(page.getByLabel('Password', { exact: true })).toHaveCount(0);
+  const authorize = page.waitForRequest(request => request.url().startsWith(`${authOrigin}/auth/v1/authorize`));
+  await page.getByRole('button', { name: 'Continue with Google' }).click();
+  expect(new URL((await authorize).url()).searchParams.get('provider')).toBe('google');
+});
+
 test('the local landing preview starts research in one press and opens the run', async ({ page }) => {
   await page.route('**/api/runs', route => route.request().method() === 'GET' ? route.fulfill({ json: [] }) : route.fallback());
   const starts: string[] = [];

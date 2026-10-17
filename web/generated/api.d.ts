@@ -758,6 +758,16 @@ export interface components {
             publishable_key: string;
             /** Redirect Url */
             redirect_url: string;
+            /**
+             * Email Code
+             * @default false
+             */
+            email_code: boolean;
+            /**
+             * Google
+             * @default false
+             */
+            google: boolean;
         };
         /** Hypothesis */
         Hypothesis: {

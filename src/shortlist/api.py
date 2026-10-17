@@ -215,6 +215,9 @@ class HostedAuth(BaseModel):
     supabase_url: str
     publishable_key: str
     redirect_url: str
+    # Optional sign-in methods, offered only when the operator has configured them in Supabase.
+    email_code: bool = False
+    google: bool = False
 
 
 AuthSetup = Annotated[LocalAuth | HostedAuth, Field(discriminator="mode")]
@@ -435,7 +438,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if settings.mode == "local":
             return LocalAuth()
         return HostedAuth(supabase_url=settings.supabase_url, publishable_key=settings.supabase_publishable_key,
-                          redirect_url=settings.app_url.rstrip("/") + "/")
+                          redirect_url=settings.app_url.rstrip("/") + "/", email_code=settings.auth_email_code,
+                          google=settings.auth_google)
 
     @app.get("/api/service", response_model=ServiceView)
     def service():

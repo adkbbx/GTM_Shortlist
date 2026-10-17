@@ -36,6 +36,9 @@ class Settings(BaseModel):
     booking_url: str = ""
     brandfetch_client_id: str = Field(default="", max_length=200, pattern=r"^[A-Za-z0-9_-]*$")
     supabase_admin_key: SecretStr = SecretStr("")
+    # Sign-in methods beyond email and password; each needs matching Supabase configuration first.
+    auth_email_code: bool = False
+    auth_google: bool = False
 
     @field_validator("supabase_admin_key")
     @classmethod
@@ -96,6 +99,8 @@ class Settings(BaseModel):
             booking_url=os.getenv("SHORTLIST_BOOKING_URL", ""),
             brandfetch_client_id=os.getenv("SHORTLIST_BRANDFETCH_CLIENT_ID", ""),
             supabase_admin_key=os.getenv("SUPABASE_ADMIN_SECRET_KEY", ""),
+            auth_email_code=os.getenv("SHORTLIST_AUTH_EMAIL_CODE", "off").strip().lower() == "on",
+            auth_google=os.getenv("SHORTLIST_AUTH_GOOGLE", "off").strip().lower() == "on",
         )
         return settings
 

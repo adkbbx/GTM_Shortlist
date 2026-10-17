@@ -19,6 +19,16 @@
         "redirect_url": {
           "title": "Redirect Url",
           "type": "string"
+        },
+        "email_code": {
+          "default": false,
+          "title": "Email Code",
+          "type": "boolean"
+        },
+        "google": {
+          "default": false,
+          "title": "Google",
+          "type": "boolean"
         }
       },
       "required": [

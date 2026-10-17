@@ -90,8 +90,8 @@ Ticked items are built, tested and pushed on `claude/signal-landing`; items mark
 - [x] Local first-run setup card: "Research model" and "Company search" steps with status marks; each button opens Settings at its section. Replaces the "Open Settings" prompt.
 
 **Phase 2** (medium)
-- [ ] Email code sign-in (6 digits, same tab) on the account form. *You:* add `{{ .Token }}` to the Supabase magic-link email template.
-- [ ] Google sign-in button, shown only when configured. *You:* create a Google OAuth client and enable the provider in Supabase.
+- [x] Email code sign-in (6 digits, same tab) on the account form, behind `SHORTLIST_AUTH_EMAIL_CODE=on`; pasted codes keep only digits. *You:* add `{{ .Token }}` to the Supabase Magic Link and Confirm signup templates (docs/sign-in.md).
+- [x] Google sign-in button behind `SHORTLIST_AUTH_GOOGLE=on`, using Supabase OAuth with the existing PKCE return. *You:* create a Google OAuth client and enable the provider in Supabase (docs/sign-in.md).
 - [ ] Local "Try with sample data": a run that uses the labelled synthetic providers, labelled on every screen and export.
 
 **Phase 3** (medium to large)

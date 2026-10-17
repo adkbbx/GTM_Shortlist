@@ -2012,6 +2012,16 @@
           "redirect_url": {
             "type": "string",
             "title": "Redirect Url"
+          },
+          "email_code": {
+            "type": "boolean",
+            "title": "Email Code",
+            "default": false
+          },
+          "google": {
+            "type": "boolean",
+            "title": "Google",
+            "default": false
           }
         },
         "type": "object",
