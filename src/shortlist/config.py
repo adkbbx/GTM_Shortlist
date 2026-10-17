@@ -23,6 +23,8 @@ class Settings(BaseModel):
     gemma_key: SecretStr = SecretStr("")
     gemma_base_url: str = ""
     gemma_model: str = ""
+    # auto: compact prompts for small or on-device models, full prompts for hosted models.
+    prompt_profile: Literal["auto", "compact", "full"] = "auto"
     global_search_cap: int = Field(default=200, ge=1, le=250)
     source_cache_hours: int = Field(default=24, ge=0, le=168)
     mode: Literal["local", "hosted"] = "local"
@@ -32,6 +34,7 @@ class Settings(BaseModel):
     supabase_publishable_key: str = ""
     app_url: str = ""
     booking_url: str = ""
+    brandfetch_client_id: str = Field(default="", max_length=200, pattern=r"^[A-Za-z0-9_-]*$")
     supabase_admin_key: SecretStr = SecretStr("")
 
     @field_validator("supabase_admin_key")
@@ -81,6 +84,7 @@ class Settings(BaseModel):
             gemma_key=os.getenv("GEMMA_API_KEY", ""),
             gemma_base_url=os.getenv("GEMMA_BASE_URL", ""),
             gemma_model=os.getenv("GEMMA_MODEL", ""),
+            prompt_profile=os.getenv("SHORTLIST_PROMPT_PROFILE", "auto"),
             global_search_cap=os.getenv("SHORTLIST_GLOBAL_SEARCH_CAP", "200"),
             source_cache_hours=os.getenv("SHORTLIST_SOURCE_CACHE_HOURS", "24"),
             mode=os.getenv("SHORTLIST_MODE", "local"),
@@ -90,6 +94,7 @@ class Settings(BaseModel):
             supabase_publishable_key=os.getenv("SUPABASE_PUBLISHABLE_KEY", ""),
             app_url=os.getenv("SHORTLIST_APP_URL", ""),
             booking_url=os.getenv("SHORTLIST_BOOKING_URL", ""),
+            brandfetch_client_id=os.getenv("SHORTLIST_BRANDFETCH_CLIENT_ID", ""),
             supabase_admin_key=os.getenv("SUPABASE_ADMIN_SECRET_KEY", ""),
         )
         return settings

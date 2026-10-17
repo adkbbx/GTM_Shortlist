@@ -21,6 +21,7 @@ from shortlist.domain import (
 from shortlist.email_drafts import EditEmailDraft, EmailDraft, StartEmailDraft, starting_draft
 from shortlist.fetch import domain_of
 from shortlist.progress import ProgressUpdate
+from shortlist.relevance import record_issue
 
 
 class Conflict(ValueError):
@@ -29,6 +30,22 @@ class Conflict(ValueError):
 
 class BudgetExceeded(ValueError):
     pass
+
+
+def seller_retry_available(run: dict) -> bool:
+    checkpoint = run["checkpoint"]
+    return (run["status"] == "partial" and run["stage"] == "seller" and not run["profile"]
+            and not run["attempts"] and not checkpoint.get("draft") and bool(checkpoint.get("seller_url"))
+            and not checkpoint.get("termination") and not checkpoint.get("seller_retry_requested"))
+
+
+def saved_discovery_available(run: dict) -> bool:
+    checkpoint = run["checkpoint"]
+    return (run["status"] == "partial" and run["stage"] == "discovery" and bool(run["profile"])
+            and bool(checkpoint.get("discovered")) and not checkpoint.get("candidates") and not run["records"]
+            and not checkpoint.get("termination") and not checkpoint.get("use_saved_discovery")
+            and all(a["state"] in ("succeeded", "failed") for a in run["attempts"])
+            and any(a["kind"] == "search" and a["state"] == "failed" for a in run["attempts"]))
 
 
 class Store:
@@ -203,9 +220,9 @@ class Store:
             run_id = new_id()
             self.reserve_run(db, run_id)
             now = utcnow().isoformat()
-            db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,created_at,updated_at) "
-                       "VALUES (?,?,?,?,?,?,?,?)", (run_id, request_key, digest, profile.model_dump_json(),
-                                                   "queued", "discovery", now, now))
+            db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,checkpoint,created_at,updated_at) "
+                       "VALUES (?,?,?,?,?,?,?,?,?)", (run_id, request_key, digest, profile.model_dump_json(),
+                                                   "queued", "discovery", json.dumps({"company_identity_policy": 1}), now, now))
             self.created_run(db, run_id)
             return run_id
 
@@ -327,6 +344,55 @@ class Store:
                        (now, now, run_id))
             return True
 
+    def retry_seller(self, run_id: str):
+        """One explicit recovery before dispatch; never replay failed/uncertain provider requests."""
+        with self.connection() as db:
+            self.begin(db)
+            row = db.execute("SELECT * FROM runs WHERE id=? AND deleted_at IS NULL", (run_id,)).fetchone()
+            if row is None:
+                raise KeyError(run_id)
+            checkpoint = json.loads(row["checkpoint"])
+            if checkpoint.get("seller_retry_requested"):
+                return
+            run = {**dict(row), "profile": json.loads(row["profile"]), "checkpoint": checkpoint,
+                   "attempts": db.execute("SELECT 1 FROM attempts WHERE run_id=? LIMIT 1", (run_id,)).fetchall()}
+            if not seller_retry_available(run):
+                raise Conflict("Only company setup that failed before any provider request can be retried here")
+            self.reserve_run(db, run_id)
+            checkpoint["seller_retry_requested"] = True
+            now = utcnow().isoformat()
+            db.execute("UPDATE runs SET status='queued',error=NULL,checkpoint=?,lease_until=0,fence=fence+1,updated_at=? "
+                       "WHERE id=?", (json.dumps(checkpoint), now, run_id))
+            db.execute("INSERT INTO run_events(run_id,phase,label,state,created_at) VALUES (?,?,?,?,?)",
+                       (run_id, "seller", "Retrying saved company setup before any provider dispatch", "waiting", now))
+
+    def resume_batch(self, db, run_id: str, quantity: int):
+        """Local mode has no hosted credit reservation."""
+
+    def continue_discovery(self, run_id: str):
+        """Continue once from saved candidates without dispatching another search."""
+        with self.connection() as db:
+            self.begin(db)
+            row = db.execute("SELECT * FROM runs WHERE id=? AND deleted_at IS NULL", (run_id,)).fetchone()
+            if row is None:
+                raise KeyError(run_id)
+            checkpoint = json.loads(row["checkpoint"])
+            if checkpoint.get("use_saved_discovery"):
+                return
+            run = {**dict(row), "profile": json.loads(row["profile"]), "checkpoint": checkpoint,
+                   "attempts": [dict(a) for a in db.execute("SELECT kind,state FROM attempts WHERE run_id=?", (run_id,))],
+                   "records": db.execute("SELECT 1 FROM records WHERE run_id=? LIMIT 1", (run_id,)).fetchall()}
+            if not saved_discovery_available(run):
+                raise Conflict("Only interrupted discovery with saved candidates and no uncertain requests can continue")
+            self.reserve_run(db, run_id)
+            self.resume_batch(db, run_id, checkpoint.get("company_limit", 3))
+            checkpoint["use_saved_discovery"] = True
+            now = utcnow().isoformat()
+            db.execute("UPDATE runs SET status='queued',error=NULL,checkpoint=?,lease_until=0,fence=fence+1,updated_at=? "
+                       "WHERE id=?", (json.dumps(checkpoint), now, run_id))
+            db.execute("INSERT INTO run_events(run_id,phase,label,state,created_at) VALUES (?,?,?,?,?)",
+                       (run_id, "discovery", "Continuing from saved candidates without another search", "waiting", now))
+
     def stop_run(self, run_id: str):
         with self.connection() as db:
             self.begin(db)
@@ -394,7 +460,7 @@ class Store:
             db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,checkpoint,created_at,updated_at) "
                        "VALUES (?,?,?,?,?,?,?,?,?)", (run_id, request_key, digest, "{}", "queued", "seller" if seller_url else "identity",
                        json.dumps({"seller_url": seller_url, "experience_version": experience_version,
-                                   "seller_output_protocol": 2,
+                                   "seller_output_protocol": 3, "company_identity_policy": 1, "market_policy": 2,
                                    **({"company_name": company_name} if company_name else {})}), now, now))
             return run_id
 
@@ -570,6 +636,8 @@ class Store:
                 raise Conflict("Provider attempt has no result journal")
 
     def save_record(self, run_id: str, fence: int, record: Research, *, billable: bool = True):
+        if issue := record_issue(record, strict=True):
+            raise Conflict("Company record withheld: " + issue)
         with self.connection() as db:
             self.begin(db)
             self._assert_lease(db, run_id, fence)

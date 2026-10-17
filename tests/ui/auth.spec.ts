@@ -1,3 +1,4 @@
+import { openAccount } from './navigation';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
@@ -55,6 +56,20 @@ async function capture(page: Page, path: string) {
   await page.screenshot({ path, fullPage: true });
 }
 
+async function checkPasswordHintFocus(page: Page, label: string, screenshot: string) {
+  await page.getByLabel(label, { exact: true }).focus();
+  const clearance = await page.getByLabel(label, { exact: true }).evaluate(input => {
+    const hint = input.nextElementSibling;
+    if (!(hint instanceof HTMLElement)) throw new Error('Password hint is missing');
+    const style = getComputedStyle(input);
+    return hint.getBoundingClientRect().top - input.getBoundingClientRect().bottom
+      - parseFloat(style.outlineWidth) - parseFloat(style.outlineOffset);
+  });
+  expect(clearance).toBeGreaterThanOrEqual(4);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await capture(page, screenshot);
+}
+
 for (const failure of [
   { status: 503, contentType: 'text/html', body: '<!DOCTYPE html><title>Starting up</title>' },
   { status: 200, contentType: 'text/html', body: '<!DOCTYPE html><title>App shell</title>' },
@@ -81,15 +96,23 @@ test('signup confirmation, sign-in errors and password reset remain usable', asy
   await expect(page.getByRole('heading', { name: 'Sign in to your shortlist' })).toBeVisible();
   await capture(page, `.impeccable/review/${info.project.name}-signin.png`);
   await page.getByRole('button', { name: 'Create an account' }).click();
+  await page.getByLabel('Email', { exact: true }).press('Tab');
+  await expect(page.getByLabel('Password', { exact: true })).toBeFocused();
+  await checkPasswordHintFocus(page, 'Password', `.impeccable/review/${info.project.name}-signup-focus.png`);
   await capture(page, `.impeccable/review/${info.project.name}-signup.png`);
   await page.getByLabel('Email', { exact: true }).fill('fixture@example.test');
   await page.getByLabel('Password', { exact: true }).fill('labelled-fixture-password');
   await page.getByRole('button', { name: 'Create account', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('confirmation link');
-  await expect(page.getByRole('heading', { name: 'Next, check your inbox' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Check your inbox' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Create account', exact: true })).toHaveCount(0);
+  await expect(page.getByLabel('Password', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Resend confirmation email' }).click();
   await expect(page.getByRole('status')).toContainText('new confirmation link');
   await capture(page, `.impeccable/review/${info.project.name}-signup-confirmation.png`);
+  await page.getByRole('button', { name: 'Use a different email', exact: true }).click();
+  await expect(page.getByLabel('Email', { exact: true })).toHaveValue('fixture@example.test');
+  await expect(page.getByLabel('Password', { exact: true })).toHaveValue('');
   await page.getByRole('button', { name: 'Back to sign in' }).click();
   backend.reject();
   await page.getByLabel('Password', { exact: true }).fill('labelled-fixture-password');
@@ -113,7 +136,7 @@ test('signed-in requests and exports carry tokens; sign-out clears the workspace
     requests.push({ url: request.url(), bearer: request.headers()['authorization'] }); });
   await signIn(page);
   await page.getByLabel('Company name or website', { exact: true }).fill('https://eygentic.com/');
-  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
   const runId = new URL(page.url()).searchParams.get('run');
   expect(runId).toBeTruthy();
@@ -129,6 +152,7 @@ test('signed-in requests and exports carry tokens; sign-out clears the workspace
   expect(requests.some(request => request.url.includes('/export?format=xlsx'))).toBe(true);
   expect(requests.length).toBeGreaterThan(2);
   expect(requests.every(request => request.bearer?.startsWith('Bearer '))).toBe(true);
+  await openAccount(page);
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Sign in to your shortlist' })).toBeVisible();
   await expect(page.getByRole('complementary', { name: 'Saved research' })).toHaveCount(0);
@@ -155,6 +179,7 @@ test('PKCE recovery opens a new-password form and updates the account', async ({
   await page.addInitScript(() => localStorage.setItem('sb-shortlist-auth-auth-token-code-verifier', JSON.stringify('labelled-verifier/recovery')));
   await page.goto('/?code=labelled-recovery-code');
   await expect(page.getByRole('heading', { name: 'Choose a new password' })).toBeVisible();
+  await checkPasswordHintFocus(page, 'New password', `.impeccable/review/${info.project.name}-recovery-focus.png`);
   await capture(page, `.impeccable/review/${info.project.name}-new-password.png`);
   await page.getByLabel('New password', { exact: true }).fill('updated-fixture-password');
   await page.getByRole('button', { name: 'Save new password' }).click();
@@ -183,4 +208,42 @@ test('unconfirmed account can retry failed sign-out without entering research', 
   await expect(page.getByRole('heading', { name: 'Confirm your email' })).toBeVisible();
   await page.getByRole('button', { name: 'Back to sign in' }).click();
   await expect(page.getByRole('heading', { name: 'Sign in to your shortlist' })).toBeVisible();
+});
+
+
+test('account tray hides details and stays stable while credits load', async ({ page }, info) => {
+  await fixture(page);
+  let releaseCredits: () => void = () => {};
+  const creditsGate = new Promise<void>(resolve => { releaseCredits = resolve; });
+  await page.route('**/api/credits', async route => {
+    await creditsGate;
+    await route.fulfill({ json: { mode: 'hosted', available: 3, reserved: 0, used: 0 } });
+  });
+  await page.goto('/');
+  await signIn(page);
+  await expect(page.getByRole('button', { name: 'Settings', exact: true })).toHaveCount(0);
+  const trigger = page.getByRole('button', { name: info.project.name === 'phone' ? 'Saved runs' : 'Open account tray', exact: true });
+  const before = await trigger.boundingBox();
+  await expect(page.getByText('fixture@example.test', { exact: true })).not.toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sign out', exact: true })).not.toBeVisible();
+  await openAccount(page);
+  const tray = page.getByRole('dialog', { name: 'Your account', exact: true });
+  await expect(tray).toBeVisible();
+  await expect(tray.getByText('Loading credit balance…')).toBeVisible();
+  releaseCredits();
+  await expect(tray.getByText('3 credits available', { exact: true })).toBeVisible();
+  await expect(tray.getByText('fixture@example.test', { exact: true })).toBeVisible();
+  expect(await trigger.boundingBox()).toEqual(before);
+  await capture(page, `.impeccable/review/${info.project.name}-account-tray.png`);
+  await page.keyboard.press('Escape');
+  await expect(tray).not.toBeVisible();
+  await expect(trigger).toBeFocused();
+  await openAccount(page);
+  await tray.getByRole('button', { name: 'Close account tray', exact: true }).click();
+  await expect(tray).not.toBeVisible();
+  await openAccount(page);
+  // The phone popover covers the heading; dismiss through an exposed page gutter.
+  await page.mouse.click(1, (page.viewportSize()?.height ?? 844) / 2);
+  await expect(tray).not.toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

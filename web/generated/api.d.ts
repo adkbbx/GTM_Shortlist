@@ -38,6 +38,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/local/model": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Configure Model */
+        post: operations["configure_model_api_local_model_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/local/model/models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Discover Models */
+        post: operations["discover_models_api_local_model_models_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/local/service/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start Research Service */
+        post: operations["start_research_service_api_local_service_start_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/setup": {
         parameters: {
             query?: never;
@@ -175,6 +226,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/runs/{run_id}/site-icon/{domain}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read Site Icon */
+        get: operations["read_site_icon_api_runs__run_id__site_icon__domain__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/runs/{run_id}/reuse": {
         parameters: {
             query?: never;
@@ -237,6 +305,40 @@ export interface paths {
         put?: never;
         /** Stop */
         post: operations["stop_api_runs__run_id__stop_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/runs/{run_id}/retry-seller": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Retry Seller */
+        post: operations["retry_seller_api_runs__run_id__retry_seller_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/runs/{run_id}/continue-discovery": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Continue Discovery */
+        post: operations["continue_discovery_api_runs__run_id__continue_discovery_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -392,6 +494,20 @@ export interface components {
             kind: "description" | "location" | "team_size";
             evidence: components["schemas"]["Evidence"];
         };
+        /**
+         * CompanyIdentity
+         * @description A saved first-party identity passage, distinct from ICP qualification.
+         */
+        CompanyIdentity: {
+            /** Name */
+            name: string;
+            /** Domain */
+            domain: string;
+            /** Source Id */
+            source_id: string;
+            /** Passage */
+            passage: string;
+        };
         /** CompanySignal */
         CompanySignal: {
             /**
@@ -447,6 +563,14 @@ export interface components {
              */
             company_limit: number;
         };
+        /** ContinueDiscoveryInput */
+        ContinueDiscoveryInput: {
+            /**
+             * Confirmation
+             * @constant
+             */
+            confirmation: "use_saved_candidates_without_search";
+        };
         /** CreditEntry */
         CreditEntry: {
             /** Id */
@@ -499,6 +623,13 @@ export interface components {
              * @default true
              */
             required: boolean;
+        };
+        /** DraftCriterionIssue */
+        DraftCriterionIssue: {
+            /** Description */
+            description: string;
+            /** Reason */
+            reason: string;
         };
         /** EditEmailDraft */
         EditEmailDraft: {
@@ -625,6 +756,11 @@ export interface components {
              * @enum {string}
              */
             mode: "local";
+        };
+        /** LocalModels */
+        LocalModels: {
+            /** Models */
+            models: string[];
         };
         /** MarketResearch */
         MarketResearch: {
@@ -812,6 +948,15 @@ export interface components {
              * @default []
              */
             people: components["schemas"]["PersonObservation"][];
+            company_identity?: components["schemas"]["CompanyIdentity"] | null;
+        };
+        /** RetrySellerInput */
+        RetrySellerInput: {
+            /**
+             * Confirmation
+             * @constant
+             */
+            confirmation: "retry_unstarted_seller";
         };
         /** ReuseInput */
         ReuseInput: {
@@ -943,9 +1088,21 @@ export interface components {
             experience_version: 1 | 2;
             /** Termination */
             termination?: "user_stopped" | null;
+            /**
+             * Can Retry Seller
+             * @default false
+             */
+            can_retry_seller: boolean;
+            /**
+             * Can Continue Discovery
+             * @default false
+             */
+            can_continue_discovery: boolean;
         };
         /** SavedRecord */
         SavedRecord: {
+            /** Source Issue */
+            source_issue?: string | null;
             research: components["schemas"]["Research"];
             review?: components["schemas"]["Review-Output"] | null;
             operator_review?: components["schemas"]["OperatorReview"] | null;
@@ -995,6 +1152,8 @@ export interface components {
             criteria: components["schemas"]["Criterion-Output"][];
             /** Unknowns */
             unknowns: string[];
+            /** Criteria Issues */
+            criteria_issues?: components["schemas"]["DraftCriterionIssue"][];
         };
         /** SellerInput */
         SellerInput: {
@@ -1013,6 +1172,11 @@ export interface components {
         ServiceView: {
             /** Booking Url */
             booking_url?: string | null;
+        };
+        /** SiteIconInfo */
+        SiteIconInfo: {
+            /** Url */
+            url?: string | null;
         };
         /** Source */
         Source: {
@@ -1160,6 +1324,104 @@ export interface operations {
                      * Format: password
                      */
                     key: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
+    configure_model_api_local_model_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Base Url */
+                    base_url: string;
+                    /**
+                     * Key
+                     * Format: password
+                     * @default
+                     */
+                    key?: string;
+                    /** Model */
+                    model: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
+    discover_models_api_local_model_models_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Base Url */
+                    base_url: string;
+                    /**
+                     * Key
+                     * Format: password
+                     * @default
+                     */
+                    key?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LocalModels"];
+                };
+            };
+        };
+    };
+    start_research_service_api_local_service_start_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * Confirmation
+                     * @constant
+                     */
+                    confirmation: "start_research_service";
                 };
             };
         };
@@ -1414,6 +1676,38 @@ export interface operations {
             };
         };
     };
+    read_site_icon_api_runs__run_id__site_icon__domain__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+                domain: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteIconInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     reuse_offer_api_runs__run_id__reuse_post: {
         parameters: {
             query?: never;
@@ -1529,6 +1823,76 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["StopInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    retry_seller_api_runs__run_id__retry_seller_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RetrySellerInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    continue_discovery_api_runs__run_id__continue_discovery_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContinueDiscoveryInput"];
             };
         };
         responses: {

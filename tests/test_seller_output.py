@@ -11,6 +11,11 @@ from shortlist.providers import Gemma, ModelOutputError, SellerDraft
 from shortlist.store import Store
 from shortlist.worker import execute_run
 
+BUYER_SUMMARY = {"seller_offer": "Labelled fixture payroll software", "target_customer": "Business payroll teams",
+                 "customer_criteria": [{"id": "business", "subject": "target_customer",
+                                        "customer_characteristic": "Sells to businesses", "required": True}],
+                 "unknowns": ["Private ownership is not established by this page"]}
+
 SUMMARY = {"offer": "Labelled fixture payroll software", "target": "Business payroll teams",
            "criteria": [{"id": "business", "description": "Sells to businesses", "required": True}],
            "unknowns": ["Private ownership is not established by this page"]}
@@ -45,7 +50,7 @@ def settings(tmp_path):
 
 def test_seller_uses_named_function_schema_and_reads_values(tmp_path, source, monkeypatch):
     requests = transport(monkeypatch, tool_message())
-    draft = Gemma(settings(tmp_path)).seller(source)
+    draft = Gemma(settings(tmp_path)).seller(source, output_protocol=2)
     assert draft.model_dump() == SUMMARY
     assert len(requests) == 1
     request = requests[0]
@@ -63,7 +68,7 @@ def test_plain_text_criteria_preserve_descriptions_and_get_stable_ids(tmp_path, 
     descriptions = ["Sells software to businesses", "Offers a hosted payroll product"]
     payload = {**SUMMARY, "criteria": descriptions}
     requests = transport(monkeypatch, tool_message(json.dumps(payload)))
-    draft = Gemma(settings(tmp_path)).seller(source)
+    draft = Gemma(settings(tmp_path)).seller(source, output_protocol=2)
     assert [item.description for item in draft.criteria] == descriptions
     assert [item.id for item in draft.criteria] == ["criterion-1", "criterion-2"]
     assert all(item.required for item in draft.criteria)
@@ -93,7 +98,7 @@ def test_text_criteria_do_not_bypass_domain_validation(criteria):
 def test_invalid_response_fails_once_without_fallback_or_retry(tmp_path, source, monkeypatch, message, finish_reason):
     requests = transport(monkeypatch, message, finish_reason=finish_reason)
     with pytest.raises(ModelOutputError) as caught:
-        Gemma(settings(tmp_path)).seller(source)
+        Gemma(settings(tmp_path)).seller(source, output_protocol=2)
     assert len(requests) == 1
     assert caught.value.issues
     assert "Labelled fixture payroll" not in str(caught.value)
@@ -106,19 +111,22 @@ def test_legacy_seller_protocol_retains_original_request(tmp_path, source, monke
     assert "tools" not in requests[0]
 
 
-@pytest.mark.parametrize("legacy", [False, True])
-def test_worker_restores_saved_seller_outcome_after_crash_without_second_call(tmp_path, source, monkeypatch, legacy):
+@pytest.mark.parametrize("protocol", [1, 2, 3])
+def test_worker_restores_saved_seller_outcome_after_crash_without_second_call(tmp_path, source, monkeypatch, protocol):
     config = settings(tmp_path)
     store = Store(config.db_path)
     identity = store.create_draft(source.url, "labelled-seller")
     fence = store.claim(identity)
     checkpoint = store.get_run(identity)["checkpoint"]
-    assert checkpoint["seller_output_protocol"] == 2
+    assert checkpoint["seller_output_protocol"] == 3
+    legacy = protocol == 1
     if legacy:
         checkpoint.pop("seller_output_protocol")
+    else:
+        checkpoint["seller_output_protocol"] = protocol
     checkpoint["seller_source"] = source.model_dump(mode="json")
     store.checkpoint(identity, fence, "seller", checkpoint, "queued")
-    requests = transport(monkeypatch, {"content": json.dumps(SUMMARY)} if legacy else tool_message())
+    requests = transport(monkeypatch, {"content": json.dumps(SUMMARY)} if legacy else tool_message(json.dumps(BUYER_SUMMARY if protocol == 3 else SUMMARY)))
     original = store.checkpoint
     class Crash(BaseException):
         pass
@@ -167,7 +175,7 @@ def test_evaluation_uses_one_model_call_and_refuses_context_drift(tmp_path, sour
     output = tmp_path / "evaluation.sqlite3"
     args = ["--source-json", str(source_file), "--output-db", str(output),
             "--provider-env", str(private), "--allow-provider-calls"]
-    requests = transport(monkeypatch, tool_message())
+    requests = transport(monkeypatch, tool_message(json.dumps(BUYER_SUMMARY)))
     main(args)
     first = json.loads(capsys.readouterr().out)
     main(args)

@@ -1,7 +1,14 @@
+import { openSettings } from './navigation';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { openCompany } from './shortlist';
+import { installIconFixtures, syntheticIcon } from './site-icons';
+
+test.beforeEach(async ({ page }) => {
+  await page.route('**/favicon.ico', route => route.abort());
+  await page.route('https://api.brandfetch.io/**', route => route.abort());
+});
 
 async function noOverflow(page: Page) {
   const layout = await page.evaluate(() => ({ width: window.innerWidth, scroll: document.documentElement.scrollWidth,
@@ -21,11 +28,109 @@ async function capture(page: Page, path: string) {
   await page.screenshot({ path, fullPage: true });
 }
 
+test('local model status opens setup and explains the offline worker without dispatch', async ({ page }, info) => {
+  await page.route('**/api/health', route => route.fulfill({ json: {
+    mode: 'local', search_ready: true, gemma_ready: false, worker_online: false, local_search_error: null,
+  } }));
+  await page.goto('/');
+  await openSettings(page);
+  const modelStatus = page.getByRole('button', { name: 'Research model: Not configured', exact: true });
+  await expect(modelStatus).toHaveText('Not configured');
+  await expect(page.getByRole('button', { name: 'Start research service', exact: true })).toHaveCount(0);
+  await expect(page.getByText('Background research starts automatically when you start or resume research. Saving settings does not start research.', { exact: true })).toBeVisible();
+  await expect(page.locator('.worker-help pre')).toHaveCount(0);
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${info.project.name}-model-readiness.png`);
+  await modelStatus.press('Enter');
+  await expect(page.getByRole('radio', { name: 'On this computer', exact: true })).toBeFocused();
+  await capture(page, `.impeccable/review/${info.project.name}-model-location.png`);
+  await page.getByRole('radio', { name: 'On this computer', exact: true }).check();
+  await page.getByText('Change server address or authentication', { exact: true }).click();
+  await expect(page.getByLabel('Server address', { exact: true })).toHaveValue('http://localhost:1234/v1');
+  const key = page.getByLabel('Model API key (optional)', { exact: true });
+  await expect(key).toHaveAttribute('type', 'password');
+  await key.fill('labelled-browser-model-fixture');
+  await page.route('**/api/local/model/models', route => route.fulfill({ json: { models: ['labelled-fixture-gemma'] } }));
+  await page.getByRole('button', { name: 'Find available models', exact: true }).click();
+  await page.getByLabel('Choose your Gemma model', { exact: true }).selectOption('labelled-fixture-gemma');
+  await page.route('**/api/local/model', route => route.fulfill({ status: 503, json: { detail: 'Labelled model save failure' } }), { times: 1 });
+  await page.getByRole('button', { name: 'Save research model', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('Labelled model save failure');
+  await expect(key).toHaveValue('labelled-browser-model-fixture');
+  await capture(page, `.impeccable/review/${info.project.name}-model-form.png`);
+  const saved = page.waitForResponse(response => new URL(response.url()).pathname === '/api/local/model');
+  await page.getByRole('button', { name: 'Save research model', exact: true }).click();
+  expect((await saved).status()).toBe(200);
+  await expect(page.getByRole('button', { name: 'Research model: Configured', exact: true })).toBeFocused();
+  await expect(key).toHaveCount(0);
+  expect(await page.evaluate(() => JSON.stringify([localStorage, sessionStorage]))).not.toContain('labelled-browser-model-fixture');
+  await page.unroute('**/api/health');
+  await page.reload();
+  await openSettings(page);
+  await page.getByRole('button', { name: 'Research model: Configured', exact: true }).click();
+  await page.getByRole('radio', { name: 'On this computer', exact: true }).check();
+  await page.getByText('Change server address or authentication', { exact: true }).click();
+  await expect(key).toHaveValue('');
+  await expect(page.getByLabel('Server address', { exact: true })).toHaveValue('http://localhost:1234/v1');
+  await page.getByRole('button', { name: 'Cancel model change' }).click();
+  await page.getByRole('button', { name: 'Research model: Configured', exact: true }).click();
+  await page.getByRole('radio', { name: 'On this computer', exact: true }).check();
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+  await noOverflow(page);
+  await page.getByRole('button', { name: 'Save research model', exact: true }).scrollIntoViewIfNeeded();
+  await expect(page.getByRole('button', { name: 'Save research model', exact: true })).toBeInViewport();
+});
+
+test('starting research automatically starts processing after saving the command', async ({ page }, info) => {
+  let running = false;
+  let starts = 0;
+  const ids: string[] = [];
+  const health = () => ({ mode: 'local', search_ready: true, gemma_ready: true, worker_online: running, local_search_error: null });
+  await page.route('**/api/health', route => route.fulfill({ json: health() }));
+  await page.route('**/api/sellers', async route => {
+    const response = await route.fetch();
+    const run = await response.json(); ids.push(run.id);
+    // Hold the transport checkpoint at queued while exercising a startup retry.
+    await route.fulfill({ response, json: { ...run, status: 'queued' } });
+  });
+  await page.route('**/api/local/service/start', async route => {
+    starts += 1;
+    expect(ids.length).toBe(starts);
+    expect(route.request().postDataJSON()).toEqual({ confirmation: 'start_research_service' });
+    if (starts === 1) { await route.fulfill({ status: 409, json: { detail: 'Labelled service startup failure' } }); return; }
+    await new Promise(resolve => setTimeout(resolve, 200));
+    running = true;
+    await route.fulfill({ json: health() });
+  });
+  await page.goto('/');
+  await openSettings(page);
+  await expect(page.getByRole('button', { name: 'Start research service', exact: true })).toHaveCount(0);
+  await capture(page, `.impeccable/review/${info.project.name}-service-stopped.png`);
+  await page.getByRole('button', { name: 'Close settings' }).click();
+  await page.getByLabel('Company name or website', { exact: true }).fill('https://service-fixture.example/');
+  await page.getByRole('button', { name: 'Start research', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('Research was saved');
+  await page.getByRole('button', { name: 'Start research', exact: true }).click();
+  await expect(page).toHaveURL(/run=/);
+  expect(ids[0]).toBe(ids[1]);
+  await openSettings(page);
+  await expect(page.locator('.provider-status').getByText('Running', { exact: true })).toBeVisible();
+  expect(starts).toBe(2);
+  await capture(page, `.impeccable/review/${info.project.name}-service-running.png`);
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+  await noOverflow(page);
+});
+
 test('market observations and editable campaigns persist into confirmed targeting', async ({ page }, info) => {
   await page.goto('/');
   await page.getByLabel('Company name or website', { exact: true }).fill('https://market-seller.example/');
-  await page.getByRole('button', { name: 'Understand my offer' }).click();
-  await expect(page.getByRole('heading', { name: 'Choose a campaign direction' })).toBeVisible({ timeout: 15000 });
+  await page.getByRole('button', { name: 'Start research' }).click();
+  await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('.research-recap > summary')).toContainText('Offer draft saved. Your confirmation is next.');
+  await page.getByText('Explore campaign ideas and source context', { exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Choose a campaign direction' })).toBeVisible();
   await expect(page.locator('.competitor-list li')).toHaveCount(15);
   await expect(page.locator('.campaign-choice')).toHaveCount(6);
   await page.getByText('Inspect the saved company page', { exact: true }).click();
@@ -118,26 +223,101 @@ test('market observations and editable campaigns persist into confirmed targetin
   await expect(editor.getByLabel('Subject', { exact: true })).toHaveValue('Saved in another tab');
 });
 
-test('research activity follows the real worker and respects reduced motion', async ({ page }, info) => {
+test('research stages and latest checkpoints stay visible without animation controls', async ({ page }, info) => {
   const fixture = await page.request.post('/__fixture_held_run');
   const { id } = await fixture.json();
   try {
     await page.goto(`/?run=${id}`);
-    await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toContainText('Saved research for example-1.com', { timeout: 15000 });
-    await expect(page.locator('.agent-activity')).toHaveClass(/is-working/);
-    await expect(page.locator('.agent-state')).toHaveText('Worker active');
-    await page.getByText('Your offer summary', { exact: true }).click();
-    await expect(page.locator('.agent-offer')).toContainText('customer acquisition');
+    await expect(page.locator('.checkpoint-list li').first()).toContainText('Reading example-2.com', { timeout: 15000 });
+    await expect(page.locator('.checkpoint-list > li')).toHaveCount(3);
+    const showOlder = page.getByRole('button', { name: /Show \d+ older steps/ });
+    await expect(showOlder).toHaveAttribute('aria-expanded', 'false');
+    await showOlder.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('button', { name: 'Hide older steps' })).toHaveAttribute('aria-expanded', 'true');
+    expect(await page.locator('.checkpoint-list > li').count()).toBeGreaterThan(3);
+    await page.getByRole('button', { name: 'Hide older steps' }).press('Enter');
+    await expect(page.locator('.checkpoint-list > li')).toHaveCount(3);
+    await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toContainText('Saved research for example-1.com');
+    await expect(page.getByRole('button', { name: /Pause animations|Resume animations/ })).toHaveCount(0);
+    await expect(page.locator('.research-visual')).toHaveCount(0);
+    await expect(page.locator('.real-history > summary')).toHaveCount(0);
+    for (const width of [1366, 851, 850, 731, 390, 320]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(page.getByRole('list', { name: 'Research stages', exact: true })).toBeVisible();
+      await expect(page.locator('.real-stage-list > li')).toHaveCount(6);
+      const buttonStyles = await page.locator('.stage-review').evaluateAll(buttons => buttons.map(button => {
+        const style = getComputedStyle(button);
+        return [style.borderRadius, style.borderWidth, style.backgroundColor, style.boxShadow].join('|');
+      }));
+      expect(new Set(buttonStyles).size).toBe(1);
+      await expect(page.getByRole('list', { name: 'Saved research checkpoints', exact: true })).toBeVisible();
+      await noOverflow(page);
+    }
+    await page.setViewportSize(info.project.name === 'phone' ? { width: 390, height: 844 } : { width: 1366, height: 900 });
+    await expect(page.locator('.demo-scene-top > span').first()).toHaveText('Research active');
+    const currentStage = await page.locator('.real-stage-list [aria-current=step]').textContent();
+    const mutations: string[] = [];
+    const recordMutation = (request: import('@playwright/test').Request) => { if (request.method() === 'POST' && request.url().includes('/api/')) mutations.push(request.url()); };
+    page.on('request', recordMutation);
+    for (const label of ['Understand offer', 'Explore market', 'Confirm target', 'Discover companies', 'Inspect evidence', 'Review and draft']) {
+      const button = page.locator('.real-stage-list').getByRole('button', { name: new RegExp(label) });
+      await button.focus();
+      await page.keyboard.press('Enter');
+      await expect(button).toHaveAttribute('aria-pressed', 'true');
+      await expect(page.getByRole('region', { name: `${label} saved information`, exact: true })).toBeVisible();
+      await expect(page.locator('.real-stage-list [aria-current=step]')).toHaveText(currentStage ?? '');
+      await noOverflow(page);
+    }
+    await capture(page, `.impeccable/review/${info.project.name}-stage-review.png`);
+    await expect(page.locator('.real-history button')).toHaveCount(0);
+    expect(mutations).toEqual([]);
+    page.off('request', recordMutation);
+    await page.getByRole('button', { name: 'Follow current progress' }).click();
+    await page.getByText('Saved offer summary', { exact: true }).click();
+    await expect(page.locator('.real-saved-offer')).toContainText('customer acquisition');
     await expect(page.getByRole('progressbar')).toHaveCount(0);
     await noOverflow(page);
     await capture(page, `.impeccable/review/${info.project.name}-agent-activity.png`);
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    expect(await page.locator('.agent-scan').evaluate(element => getComputedStyle(element).animationName)).toBe('none');
+    expect(await page.locator('.real-research').evaluate(element => element.getAnimations({ subtree: true }).some(animation => animation.effect?.getTiming().iterations === Infinity))).toBe(false);
     await page.request.post(`/__fixture_release/${id}`);
-    await expect(page.locator('.agent-activity')).toHaveCount(0, { timeout: 15000 });
+    await expect(page.locator('.real-stage-list [aria-current=step]')).toContainText('Review and draft', { timeout: 15000 });
+    await expect(page.locator('.agent-activity')).not.toHaveClass(/is-working/);
     await openCompany(page);
     await page.getByText('Why this company was researched', { exact: true }).first().click();
     await expect(page.locator('.selection-reason').first()).toContainText('do not establish fit or buying intent');
+  } finally { await page.request.post(`/__fixture_release/${id}`); }
+});
+
+test('company icons use the site favicon and fall back when unavailable', async ({ page }, info) => {
+  await installIconFixtures(page, {
+    'https://example-1.com/favicon.ico': syntheticIcon('#b4501c'),
+    'https://example-2.com/favicon.ico': null,
+    'https://eygentic.com/favicon.ico': syntheticIcon('#b4501c'),
+  });
+  const response = await page.request.post('/__fixture_held_run');
+  const { id } = await response.json();
+  try {
+    await page.request.post(`/__fixture_release/${id}`);
+    await page.goto(`/?run=${id}`);
+    await expect(page.locator('.company-item')).toHaveCount(2, { timeout: 15000 });
+    const icon = page.locator('.company-initial img').first();
+    await page.locator('.company-initial').first().scrollIntoViewIfNeeded();
+    await expect(icon).toHaveAttribute('referrerpolicy', 'no-referrer');
+    await expect(icon).toHaveAttribute('data-requested-icon', 'https://example-1.com/favicon.ico');
+    await expect.poll(() => icon.evaluate(image => (image as HTMLImageElement).naturalWidth)).toBe(24);
+    await page.locator('.company-initial').nth(1).scrollIntoViewIfNeeded();
+    await expect(page.locator('.company-initial').nth(1)).toHaveText(/\S/);
+    await expect(page.locator('.company-initial').nth(1).locator('img')).toHaveCount(0);
+    await noOverflow(page);
+    if (info.project.name === 'phone') await page.getByRole('button', { name: 'Saved runs', exact: true }).click();
+    else if (await page.getByRole('button', { name: 'Show saved runs' }).count()) await page.getByRole('button', { name: 'Show saved runs' }).click();
+    const savedIcon = page.locator('.saved-run-identity img').first();
+    await expect(savedIcon).toHaveAttribute('data-requested-icon', 'https://eygentic.com/favicon.ico');
+    await expect.poll(() => savedIcon.evaluate(image => (image as HTMLImageElement).naturalWidth)).toBe(24);
+    await noOverflow(page);
+    await capture(page, `.impeccable/review/${info.project.name}-favicons.png`);
   } finally { await page.request.post(`/__fixture_release/${id}`); }
 });
 
@@ -148,7 +328,8 @@ test('stopping actual held research keeps completed sheets and ignores an older 
   let releaseOld: (() => void) | undefined;
   try {
     await page.goto(`/?run=${id}`);
-    await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toContainText('Saved research for example-1.com', { timeout: 15000 });
+    await expect(page.locator('.checkpoint-list li').first()).toContainText('Reading example-2.com', { timeout: 15000 });
+    await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toContainText('Saved research for example-1.com');
     let oldRequested: (() => void) | undefined;
     let oldFulfilled: (() => void) | undefined;
     const oldRequest = new Promise<void>(resolve => { oldRequested = resolve; });
@@ -219,8 +400,9 @@ test('stopping actual held research keeps completed sheets and ignores an older 
 test('local masked Tavily setup saves privately, recovers and clears browser input', async ({ page }, info) => {
   expect((await page.request.post('/__fixture_corrupt_provider')).ok()).toBeTruthy();
   await page.goto('/');
-  await expect(page.getByRole('alert')).toContainText('Local search settings could not be read');
-  const trigger = page.getByRole('button', { name: 'Connect Tavily', exact: true });
+  await openSettings(page);
+  await expect(page.getByRole('alert')).toContainText('Saved provider settings could not be read');
+  const trigger = page.getByRole('button', { name: 'Company search: Settings unavailable', exact: true });
   await trigger.press('Enter');
   const keyInput = page.getByLabel('Tavily API key', { exact: true });
   await expect(keyInput).toHaveAttribute('type', 'password');
@@ -238,12 +420,11 @@ test('local masked Tavily setup saves privately, recovers and clears browser inp
   await expect(page.getByRole('alert')).toHaveCount(0);
   expect(await response.text()).not.toContain(key);
   await expect(keyInput).toHaveCount(0);
-  const saved = page.getByRole('status').filter({ hasText: 'Tavily key saved' });
-  await expect(saved).toBeFocused();
-  const update = page.getByRole('button', { name: 'Update search key', exact: true });
+  await expect(page.getByRole('status').filter({ hasText: 'Search key saved' })).toBeVisible();
+  const update = page.getByRole('button', { name: 'Company search: Configured', exact: true });
+  await expect(update).toBeFocused();
   await expect(update).toHaveAttribute('aria-expanded', 'false');
-  await page.getByRole('button', { name: 'Continue to your website' }).press('Enter');
-  await expect(page.getByLabel('Company name or website', { exact: true })).toBeFocused();
+  await expect(page.getByRole('button', { name: 'Continue to your website' })).toHaveCount(0);
   expect(await page.evaluate(() => JSON.stringify([localStorage, sessionStorage]))).not.toContain(key);
   expect(await page.locator('body').textContent()).not.toContain(key);
   await noOverflow(page);
@@ -254,11 +435,12 @@ test('local masked Tavily setup saves privately, recovers and clears browser inp
   await capture(page, `.impeccable/review/${info.project.name}-tavily-large-text.png`);
   await update.press('Enter');
   await expect(keyInput).toHaveValue('');
-  await page.getByRole('button', { name: 'Close setup' }).press('Enter');
+  await page.getByRole('button', { name: 'Cancel key change' }).press('Enter');
   await expect(update).toBeFocused();
   await page.reload();
+  await openSettings(page);
+  await expect(page.getByRole('dialog', { name: 'Settings', exact: true }).locator('.provider-status').getByText('Configured', { exact: true }).first()).toBeVisible();
   await expect(update).toHaveAttribute('aria-expanded', 'false');
-  await expect(page.getByRole('status').filter({ hasText: 'Search key saved' })).toBeVisible();
   await update.click();
   await expect(keyInput).toHaveValue('');
 });
@@ -271,14 +453,64 @@ test('failed offer summary explains next steps on saved runs', async ({ page }, 
   const notice = page.getByRole('status').filter({ hasText: "We couldn't create a usable offer summary" });
   await expect(notice).toContainText("Company search hasn't started");
   await expect(notice).toContainText('product or services page');
+  const recap = page.locator('.research-recap > summary');
+  await expect(recap).toContainText('Offer summary unavailable. Enter your offer and target.');
+  await expect(recap).not.toContainText('Offer draft saved');
   await expect(page.getByLabel('What do you sell?')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Confirm target and discover' })).toBeVisible();
   await noOverflow(page);
   await capture(page, `.impeccable/review/${info.project.name}-failed-offer-guidance.png`);
   await page.reload();
   await expect(notice).toBeVisible();
+  await expect(recap).toContainText('Offer summary unavailable. Enter your offer and target.');
+  const beforeStop = await (await page.request.get(`/api/runs/${id}`)).json();
+  await page.getByRole('button', { name: 'Stop this run', exact: true }).press('Enter');
+  await expect(page.getByRole('button', { name: 'Keep researching', exact: true })).toBeFocused();
+  await page.getByRole('button', { name: 'Keep researching', exact: true }).press('Enter');
+  await expect(page.getByRole('button', { name: 'Stop this run', exact: true })).toBeFocused();
+  await page.getByRole('button', { name: 'Stop this run', exact: true }).press('Enter');
+  await page.getByRole('button', { name: 'Stop research', exact: true }).press('Enter');
+  await expect(page.getByRole('heading', { name: 'Research stopped', exact: true })).toBeFocused();
+  const afterStop = await (await page.request.get(`/api/runs/${id}`)).json();
+  expect(afterStop.termination).toBe('user_stopped');
+  expect(afterStop.seller_url).toBe(beforeStop.seller_url);
+  expect(afterStop.attempts).toEqual(beforeStop.attempts);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Research stopped', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Stop this run', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'New shortlist', exact: true }).press('Enter');
   await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
+});
+
+test('unstarted seller setup recovers once under the same saved run', async ({ page }, info) => {
+  const fixture = await page.request.post('/__fixture_unstarted_seller');
+  const { id } = await fixture.json();
+  await page.goto(`/?run=${id}`);
+  const recovery = page.getByRole('region', { name: 'Retry company setup', exact: true });
+  await expect(recovery).toContainText('before any provider request');
+  let fail = true;
+  await page.route(`**/api/runs/${id}/retry-seller`, async route => {
+    if (fail) { fail = false; await route.fulfill({ status: 503, json: { detail: 'Labelled temporary recovery failure' } }); }
+    else await route.continue();
+  });
+  await recovery.getByRole('button', { name: 'Retry company setup', exact: true }).press('Enter');
+  await expect(recovery.getByRole('alert')).toContainText('Labelled temporary recovery failure');
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${info.project.name}-seller-recovery.png`);
+  await recovery.getByRole('button', { name: 'Retry company setup', exact: true }).press('Enter');
+  await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
+  expect(new URL(page.url()).searchParams.get('run')).toBe(id);
+  await expect(recovery).toHaveCount(0);
+  const saved = await (await page.request.get(`/api/runs/${id}`)).json();
+  expect(saved.can_retry_seller).toBe(false);
+  expect(saved.attempts.length).toBeGreaterThan(0);
+  const duplicate = await page.request.post(`/api/runs/${id}/retry-seller`, { data: { confirmation: 'retry_unstarted_seller' } });
+  expect(duplicate.ok()).toBe(true);
+  expect((await duplicate.json()).attempts).toEqual(saved.attempts);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible();
+  await expect(recovery).toHaveCount(0);
+  await noOverflow(page);
 });
 
 test('seller field accepts domains and full HTTPS URLs', async ({ page }, info) => {
@@ -286,13 +518,14 @@ test('seller field accepts domains and full HTTPS URLs', async ({ page }, info) 
     await page.goto('/');
     await page.getByLabel('Company name or website', { exact: true }).fill(value);
     await expect(page).toHaveTitle('GTM Shortlist');
-    await expect(page.getByRole('banner')).not.toContainText(/eygentic/i);
+    // Compact local navigation hides the desktop banner from the accessibility tree.
+    await expect(page.locator('header.topbar')).not.toContainText(/eygentic/i);
     if (value === 'eygentic.com') {
       await noOverflow(page);
       await capture(page, `.impeccable/review/${info.project.name}-bare-domain-input.png`);
     }
     const request = page.waitForResponse(response => new URL(response.url()).pathname === '/api/sellers' && response.request().method() === 'POST');
-    await page.getByRole('button', { name: 'Understand my offer' }).click();
+    await page.getByRole('button', { name: 'Start research' }).click();
     const response = await request;
     expect(response.status()).toBe(201);
     expect((await response.json()).seller_url).toBe('https://eygentic.com/');
@@ -311,7 +544,7 @@ test(`company name ${company} waits for website choice, retries and survives rel
   await page.goto('/');
   await page.getByLabel('Company name or website', { exact: true }).fill(company);
   const created = page.waitForResponse(response => new URL(response.url()).pathname === '/api/sellers');
-  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await page.getByRole('button', { name: 'Start research' }).click();
   const run = await (await created).json();
   expect(run.seller_url).toBeNull();
   expect(run.company_name).toBe(company);
@@ -345,7 +578,7 @@ test('empty or unavailable company lookup accepts a manual website', async ({ pa
   for (const company of ['No matches fixture', 'Lookup unavailable fixture']) {
     await page.goto('/');
     await page.getByLabel('Company name or website', { exact: true }).fill(company);
-    await page.getByRole('button', { name: 'Understand my offer' }).click();
+    await page.getByRole('button', { name: 'Start research' }).click();
     await expect(page.getByRole('heading', { name: `Which website belongs to ${company}?` })).toBeVisible();
     await expect(page.getByRole('list', { name: 'Company website matches' })).toHaveCount(0);
     await expect(page.getByRole('status').filter({ hasText: "website below to continue" })).toBeVisible();
@@ -362,13 +595,16 @@ test('saved seller → confirmation → evidence → review → export survives 
   page.on('pageerror', error => errors.push(error.message));
   mkdirSync('.impeccable/review', { recursive: true });
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'What is your company?' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Understand my offer' })).toBeEnabled();
+  await expect(page.getByRole('heading', { name: 'Find companies that fit your offer.' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Start research' })).toBeEnabled();
   await noOverflow(page);
   await capture(page, `.impeccable/review/${testInfo.project.name}-start.png`);
   await page.getByLabel('Company name or website', { exact: true }).fill('https://eygentic.com/');
-  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('.research-recap')).toHaveAttribute('open');
+  await expect(page.locator('.confirmation-context')).not.toHaveAttribute('open');
+  await expect(page.locator('.real-research')).toBeVisible();
   await page.getByLabel('What do you sell?').fill('Test fixture edited offer: acquisition experiments for software businesses');
   await page.getByLabel('Exclude from consideration').fill('Companies headquartered in Canada\nPublicly listed companies');
   const required = page.getByRole('checkbox', { name: 'Required', exact: true }).first();
@@ -393,11 +629,14 @@ test('saved seller → confirmation → evidence → review → export survives 
   await noOverflow(page);
   await capture(page, `.impeccable/review/${testInfo.project.name}-confirmation.png`);
   await page.getByRole('button', { name: 'Confirm target and discover' }).click();
-  await expect(page.getByRole('heading', { name: 'Building your shortlist' })).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole('heading', { name: 'Your research, step by step' })).toBeVisible({ timeout: 10000 });
   await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toBeVisible();
   await noOverflow(page);
   await capture(page, `.impeccable/review/${testInfo.project.name}-progress.png`);
   await expect(page.getByRole('heading', { name: '2 companies researched' })).toBeVisible({ timeout: 15000 });
+  await expect(page.locator('.research-recap')).toHaveAttribute('open');
+  await expect(page.locator('.real-research')).toBeVisible();
+  await page.locator('.research-recap > summary').click();
   const first = page.locator('.company-sheet').first();
   await openCompany(page);
   await first.locator('.findings .evidence > summary').first().click();
@@ -420,9 +659,9 @@ test('saved seller → confirmation → evidence → review → export survives 
   await openCompany(page);
   await expect(first.getByText('Saved: accepted')).toBeVisible();
   await expect(first.getByLabel('Review note')).toHaveValue('Accepted after inspecting the fixture passage');
-  await page.locator('.progress-history > summary').click();
+  if (!await page.locator('.research-recap').getAttribute('open').then(value => value !== null)) await page.locator('.research-recap > summary').click();
   await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toContainText('Checking that the evidence supports');
-  await page.locator('.progress-history > summary').click();
+  await page.locator('.research-recap > summary').click();
   await first.locator('.findings .evidence > summary').first().click();
   await first.locator('.exclusion-checks summary').first().click();
   await noOverflow(page);
@@ -480,7 +719,7 @@ test('saved seller → confirmation → evidence → review → export survives 
   expect(errors).toEqual([]);
 });
 
-test('queued run explains an offline worker without pretending to research', async ({ page }, testInfo) => {
+test('queued local research can resume without exposing worker controls', async ({ page }, testInfo) => {
   const response = await page.request.post('/api/sellers', { data: {
     seller_url: 'https://eygentic.com/', request_key: `offline-${testInfo.project.name}-${Date.now()}`,
   } });
@@ -488,16 +727,26 @@ test('queued run explains an offline worker without pretending to research', asy
   const snapshot = { ...queued, status: 'queued', stage: 'seller', progress: {
     ...queued.progress, worker_online: false, events: [],
   } };
+  let starts = 0;
+  await page.route('**/api/health', route => route.fulfill({ json: { mode: 'local', search_ready: true, gemma_ready: true, worker_online: false, local_search_error: null } }));
+  await page.route('**/api/local/service/start', route => {
+    starts += 1;
+    snapshot.progress.worker_online = true;
+    return route.fulfill({ json: { mode: 'local', search_ready: true, gemma_ready: true, worker_online: true, local_search_error: null } });
+  });
   await page.route('**/api/runs', route => route.fulfill({ json: [snapshot] }));
   await page.route(`**/api/runs/${queued.id}`, route => route.fulfill({ json: snapshot }));
   await page.goto(`/?run=${queued.id}`);
-  await expect(page.getByRole('heading', { name: 'Research is waiting for a worker' })).toBeVisible();
-  await expect(page.getByText('The research worker is unavailable.', { exact: false })).toBeVisible();
+  await expect(page.getByText('Research paused', { exact: true })).toBeVisible();
+  await expect(page.getByText('Your run is saved. Resume research to continue from its saved progress.', { exact: true })).toBeVisible();
   await expect(page.locator('.agent-activity')).not.toHaveClass(/is-working/);
   await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toHaveCount(0);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await noOverflow(page);
   await capture(page, `.impeccable/review/${testInfo.project.name}-worker-offline.png`);
+  await page.getByRole('button', { name: 'Resume research', exact: true }).press('Enter');
+  await expect.poll(() => starts).toBe(1);
+  await expect(page.getByRole('button', { name: /Resum.*research/ })).toHaveCount(0);
 });
 
 test('slow checkpoint responses stay serialized and recover into confirmation', async ({ page }, testInfo) => {
@@ -523,7 +772,7 @@ test('slow checkpoint responses stay serialized and recover into confirmation', 
     inFlight -= 1;
   });
   await page.goto(`/?run=${queued.id}`);
-  await expect(page.getByRole('heading', { name: 'Understanding your company' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Understand offer', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 10000 });
   expect(maximum).toBe(1);
 });
@@ -533,7 +782,7 @@ test('small screen, large text, keyboard and reduced motion remain usable', asyn
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Understand my offer' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Start research' })).toBeEnabled();
   await noOverflow(page);
   await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
   await noOverflow(page);
@@ -541,31 +790,48 @@ test('small screen, large text, keyboard and reduced motion remain usable', asyn
   await input.focus();
   await expect(input).toBeFocused();
   await page.keyboard.press('Tab');
-  await expect(page.getByRole('button', { name: 'Understand my offer' })).toBeFocused();
-  expect(await page.getByRole('button', { name: 'Understand my offer' }).evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
+  await expect(page.getByRole('button', { name: 'Start research' })).toBeFocused();
+  expect(await page.getByRole('button', { name: 'Start research' }).evaluate(el => el.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
+});
+
+test('saved candidates continue by keyboard without another search and survive reload', async ({ page }, info) => {
+  const { id } = await (await page.request.post('/__fixture_saved_discovery')).json();
+  await page.goto(`/?run=${id}`);
+  const recovery = page.getByRole('region', { name: 'Continue saved discovery' });
+  await expect(recovery).toContainText('No search is repeated.');
+  await noOverflow(page);
+  await capture(page, `.impeccable/review/${info.project.name}-saved-discovery.png`);
+  const before = await (await page.request.get(`/api/runs/${id}`)).json();
+  await recovery.getByRole('button', { name: 'Continue with saved candidates', exact: true }).press('Enter');
+  await expect(page.getByRole('heading', { name: '1 company researched' })).toBeVisible({ timeout: 15000 });
+  await page.reload();
+  await expect(page.getByRole('heading', { name: '1 company researched' })).toBeVisible();
+  await expect(recovery).toHaveCount(0);
+  const after = await (await page.request.get(`/api/runs/${id}`)).json();
+  expect(after.profile).toEqual(before.profile);
+  expect(after.attempts.filter((a: { kind: string }) => a.kind === 'search')).toEqual(before.attempts);
+  await noOverflow(page);
 });
 
 test('unsafe seller URL shows an actionable error', async ({ page }) => {
   await page.goto('/');
   await page.getByLabel('Company name or website', { exact: true }).fill('https://127.1');
-  await page.getByRole('button', { name: 'Understand my offer' }).click();
+  await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByRole('alert')).toContainText('Check the fields');
   await expect(page.getByLabel('Company name or website', { exact: true })).toHaveValue('https://127.1');
 });
 
-test('research preview explains evidence and unknowns without inventing results', async ({ page }) => {
+test('optional demo explains evidence without creating research', async ({ page }) => {
   await page.goto('/');
-  const preview = page.getByRole('complementary', { name: 'A closer look, before outreach.' });
-  const evidence = preview.getByRole('button', { name: 'Evidence', exact: true });
-  const unknowns = preview.getByRole('button', { name: 'Unknowns', exact: true });
-  await expect(evidence).toHaveAttribute('aria-pressed', 'true');
-  await unknowns.click();
-  await expect(unknowns).toHaveAttribute('aria-pressed', 'true');
-  await expect(preview.getByRole('heading', { name: 'Missing evidence stays visible.' })).toBeVisible();
-  await expect(preview.getByText('A guide to the output, not a company result.')).toBeVisible();
-  await expect(unknowns.evaluate(element => element.getBoundingClientRect().height)).resolves.toBeGreaterThanOrEqual(44);
-  await evidence.focus();
-  await page.keyboard.press('Enter');
-  await expect(preview.getByRole('heading', { name: 'Every assessment has a trail.' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'See how a shortlist takes shape.' })).toHaveCount(0);
+  await page.getByRole('link', { name: 'Try the demo', exact: true }).click();
+  const demo = page.getByRole('region', { name: 'See how a shortlist takes shape.' });
+  if (await demo.locator('.demo-stage-list').getAttribute('open') === null) {
+    await demo.locator('.demo-stage-list > summary').click();
+  }
+  await demo.getByRole('button', { name: /5 Inspect evidence/ }).click();
+  await demo.getByRole('button', { name: 'Inspect example passage', exact: true }).press('Enter');
+  await expect(demo.getByText('Synthetic example passage', { exact: true })).toBeVisible();
+  await expect(demo.getByText('Synthetic example · invented companies and passages')).toBeVisible();
   await noOverflow(page);
 });

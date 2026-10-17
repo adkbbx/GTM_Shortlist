@@ -1,6 +1,14 @@
 # PostgreSQL foundation
 
-The adapter, migrations, verified-user API access, hosted worker selection and browser account flows are implemented. PostgreSQL 18.6 tests use restricted database roles; browser tests use the actual Supabase SDK with explicitly labelled transport fixtures. The existing local service remains in SQLite mode. Actual Supabase accounts/email delivery and deployment remain unverified.
+The adapter, migrations, verified-user API access, hosted worker selection and browser account flows are implemented. PostgreSQL 18.6 tests use restricted database roles; browser tests use the actual Supabase SDK with explicitly labelled transport fixtures. The existing local service remains in SQLite mode. Actual Supabase migrations/runtime roles and Render rollout are verified in [HOSTED_JOURNEY.md](HOSTED_JOURNEY.md). Fresh accounts, email delivery and complete hosted research remain separate acceptance gates.
+
+## Exact cached timestamps and setup recovery
+
+The adapter sets extra_float_digits=3 within every transaction alongside its workspace setting. This preserves exact float8 wire values even when a database session defaults to rounded output. A real hosted cache failure returned1792058005.71849 for a stored1792058005.718494 timestamp. The source was intact; text rounding caused strict identity comparison to fail. The setting does not change server/role defaults or relax source validation. The real Postgres regression forces extra_float_digits=0, proves the conflict before the fix, verifies exact recovery and still rejects a changed cache timestamp.
+
+An owner can retry a partial seller setup once through POST /api/runs/{run_id}/retry-seller with confirmation=retry_unstarted_seller. Only a run with no provider attempts, confirmed profile, saved draft or stop marker is eligible. The same run ID and saved checkpoint are retained, the old worker is fenced, and existing credit/active-run checks apply without consuming another profile allowance. The persisted seller_retry_requested marker makes repeated commands harmless after processing advances. Failed or uncertain provider requests are never redispatched by this action. No new migration is required.
+
+Run real local database checks with `.venv/Scripts/python.exe scripts/check_hosted_postgres.py --bin PATH_TO_POSTGRES_BIN`. The runner creates a unique loopback-only test cluster, retains command/test logs under data and stops that cluster afterward. It never uses the production connection files or the existing local cluster.
 
 Install the `hosted` extra or use the pinned repository requirements. Apply migrations with a dedicated operator credential:
 
@@ -29,6 +37,12 @@ The fixture creates a uniquely named database, applies migrations twice, provisi
 Database checks cover two synthetic workspaces, cross-workspace read/write rejection, role escalation rejection, operator credential rejection, concurrent claims and shared quota reservations, worker research/review/export with labelled providers, isolated source caching, saved progress events, replay without duplicate dispatch and stale lease fencing. They also exercise verified-user API scoping, worker-loop workspace selection, concurrent wallet reservations, atomic delivery debits and process-death recovery. Scheduler workers can enumerate workspaces; once assigned a workspace, their row policies restrict reads/writes and source reuse to that owner. Supabase responses are explicitly stubbed in these tests. They do not prove actual Supabase account signup, SMTP, hosted deployment or live payment processing. Those remain release checks.
 
 ## Hosted runtime configuration
+
+### Disposable local verification
+
+Run `.venv/Scripts/python.exe scripts/check_hosted_postgres.py --bin <installed-Postgres-bin> --ui` from the checkout to verify PostgreSQL behavior and the full browser suite together. Omit `--ui` for database tests alone. The runner pins this checkout's Python imports, creates a unique loopback-only cluster, supplies its URL to the hosted browser fixtures and stops that cluster in its cleanup path. It retains logs under ignored `data/hosted-pg-check-<uuid>/`. It does not connect to an existing database or dispatch real provider requests. Browser checks require installed Node, npm dependencies, a built frontend and Playwright Chromium.
+
+### Server configuration
 
 Keep `SHORTLIST_MODE=local` for the existing trusted loopback service. To exercise the hosted API after provisioning the database and credentials, set these server environment variables:
 

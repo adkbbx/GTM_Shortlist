@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, ValidationError
 
 from shortlist.fetch import FetchError
 from shortlist.providers import ModelOutputError, ProviderError
+from shortlist.relevance import CompanyPageError
 from shortlist.store import Conflict, Store
 
 T = TypeVar("T")
@@ -27,7 +28,7 @@ class ModelFailure(BaseModel):
 
 class TransportFailure(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    type: Literal["fetch", "provider"]
+    type: Literal["fetch", "provider", "company_page"]
     message: str
 
 
@@ -50,7 +51,7 @@ def call_step(store: Store, run_id: str, fence: int, global_cap: int, *, kind: s
                 raise Conflict("Saved provider failure is corrupt; inspect or start a new run") from exc
             if isinstance(failure, ModelFailure):
                 raise ModelOutputError(failure.diagnostic.content, failure.diagnostic.issues)
-            error_type = FetchError if failure.type == "fetch" else ProviderError
+            error_type = CompanyPageError if failure.type == "company_page" else FetchError if failure.type == "fetch" else ProviderError
             raise error_type(failure.message)
         try:
             return decode(payload)
@@ -59,8 +60,8 @@ def call_step(store: Store, run_id: str, fence: int, global_cap: int, *, kind: s
     attempt = store.reserve(run_id, fence, provider, kind, operation, global_cap, request_hash=digest)
     try:
         result = function()
-    except (ProviderError, FetchError) as exc:
-        payload = {"type": "fetch" if isinstance(exc, FetchError) else "provider", "message": str(exc)}
+    except (ProviderError, FetchError, CompanyPageError) as exc:
+        payload = {"type": "company_page" if isinstance(exc, CompanyPageError) else "fetch" if isinstance(exc, FetchError) else "provider", "message": str(exc)}
         if isinstance(exc, ModelOutputError):
             payload = {"type": "model_output", "diagnostic": exc.diagnostic()}
         store.outcome(attempt, "failed", run_id=run_id, fence=fence, payload=payload)

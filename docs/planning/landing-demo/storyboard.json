@@ -1,0 +1,86 @@
+{
+  "kind": "implemented_local_demo",
+  "mode": "illustrative_sample",
+  "entry_decision": "primary_research_optional_demo",
+  "entry_actions": [
+    "Start research",
+    "Try the demo"
+  ],
+  "entry_autostart": false,
+  "brand_source": "DESIGN.md",
+  "provider_calls": 0,
+  "public_deployment": false,
+  "application_ui_implemented": true,
+  "stages": [
+    {
+      "id": "offer",
+      "title": "Understand offer",
+      "hold_ms": 6000,
+      "pause_for": null,
+      "live_stages": [
+        "identity",
+        "seller"
+      ]
+    },
+    {
+      "id": "market",
+      "title": "Explore market",
+      "hold_ms": 8000,
+      "pause_for": null,
+      "live_stages": [
+        "market",
+        "campaigns"
+      ]
+    },
+    {
+      "id": "confirm",
+      "title": "Confirm target",
+      "hold_ms": null,
+      "pause_for": "confirm_example_target",
+      "live_status": "awaiting_confirmation"
+    },
+    {
+      "id": "discover",
+      "title": "Discover companies",
+      "hold_ms": 6000,
+      "pause_for": null,
+      "live_stages": [
+        "discovery",
+        "selection"
+      ]
+    },
+    {
+      "id": "evidence",
+      "title": "Inspect evidence",
+      "hold_ms": null,
+      "pause_for": "inspect_example_passage",
+      "live_stages": [
+        "research"
+      ]
+    },
+    {
+      "id": "review",
+      "title": "Review and draft",
+      "hold_ms": null,
+      "pause_for": "record_example_review",
+      "live_stages": [
+        "review"
+      ]
+    }
+  ],
+  "sample_label": "Illustrative sample \u00b7 no live research",
+  "terminal_stage": "review",
+  "reduced_motion_stage": "review",
+  "motion_ms": {
+    "control": 180,
+    "scene": 280,
+    "row": 240,
+    "stagger": 60,
+    "source": 220,
+    "scan": 900,
+    "summary": 300
+  },
+  "real_confirmation_required": true,
+  "automatic_outreach": false,
+  "reduced_motion_change": "preserve_stage"
+}

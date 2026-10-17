@@ -175,10 +175,10 @@ class PinnedHTTPSConnection(http.client.HTTPSConnection):
             raise
 
 
-def fetch_page(url: str, expected_domain: str | None = None) -> Source:
+def fetch_html(url: str, expected_domain: str | None = None, *, timeout: float = 35, max_bytes: int = MAX_BYTES) -> tuple[str, bytes]:
     current = canonical_url(url)
     owner = expected_domain or domain_of(current)
-    deadline = time.monotonic() + 35
+    deadline = time.monotonic() + timeout
     for _ in range(4):
         if domain_of(current) != owner:
             raise FetchError("Redirect changed company identity; manual verification required")
@@ -223,27 +223,33 @@ def fetch_page(url: str, expected_domain: str | None = None) -> Source:
                 if remaining <= 0:
                     raise FetchError("Website fetch deadline exceeded")
                 connection.stream_socket.settimeout(min(10, remaining))
-                chunk = response.read1(min(65536, MAX_BYTES + 1 - size))
+                chunk = response.read1(min(65536, max_bytes + 1 - size))
                 if not chunk:
                     break
                 chunks.append(chunk)
                 size += len(chunk)
-                if size > MAX_BYTES:
+                if size > max_bytes:
                     raise FetchError("Website page exceeds byte limit")
-            body = b"".join(chunks)
-            soup = BeautifulSoup(body, "html.parser")
-            title = soup.title.get_text(" ", strip=True) if soup.title else parsed.hostname
-            links = research_links(current, soup)
-            activity = activity_links(current, soup)
-            for tag in soup(["script", "style", "noscript", "nav", "footer", "svg", "form"]):
-                tag.decompose()
-            text = "\n".join(line.strip() for line in soup.get_text("\n").splitlines() if line.strip())[:MAX_TEXT]
-            if len(text) < 30:
-                raise FetchError("Website has insufficient readable text")
-            return Source(url=current, company_domain=owner, title=title[:500], text=text,
-                          content_hash=hashlib.sha256(body).hexdigest(), research_links=links, activity_links=activity)
+            return current, b"".join(chunks)
         except (OSError, http.client.HTTPException) as exc:
             raise FetchError("Website connection failed") from exc
         finally:
             connection.close()
     raise FetchError("Website exceeded redirect limit")
+
+
+def fetch_page(url: str, expected_domain: str | None = None) -> Source:
+    current, body = fetch_html(url, expected_domain)
+    owner = expected_domain or domain_of(current)
+    parsed = urlsplit(current)
+    soup = BeautifulSoup(body, "html.parser")
+    title = soup.title.get_text(" ", strip=True) if soup.title else parsed.hostname
+    links = research_links(current, soup)
+    activity = activity_links(current, soup)
+    for tag in soup(["script", "style", "noscript", "nav", "footer", "svg", "form"]):
+        tag.decompose()
+    text = "\n".join(line.strip() for line in soup.get_text("\n").splitlines() if line.strip())[:MAX_TEXT]
+    if len(text) < 30:
+        raise FetchError("Website has insufficient readable text")
+    return Source(url=current, company_domain=owner, title=title[:500], text=text,
+                  content_hash=hashlib.sha256(body).hexdigest(), research_links=links, activity_links=activity)

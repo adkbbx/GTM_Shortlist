@@ -1,4 +1,6 @@
-import { StrictMode, useEffect, useRef, useState } from 'react';
+import { openWorkspacePanel } from './workspace-panels';
+import { MenuToggleIcon, PlusIcon } from './NavigationIcons';
+import { StrictMode, useCallback, useEffect, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '@fontsource/schibsted-grotesk/400.css';
@@ -7,16 +9,26 @@ import '@fontsource/schibsted-grotesk/700.css';
 import { api } from './api';
 import type { Confirmation, Evidence, ExclusionFinding, Finding, Health, Record, Review, Run, Service, Wallet } from './api';
 import { ResearchProgress } from './ResearchProgress';
-import { ResearchPreview } from './ResearchPreview';
+import { DemoPage, LandingDemo } from './LandingDemo';
+import { WorkshopField } from './WorkshopField';
+import { ResearchSidebar } from './ResearchSidebar';
+import { SiteIcon } from './SiteIcon';
+import { CompanySearch } from './CompanySearch';
+import { configuredDirectoryId } from './company-suggestions';
+import { BrandfetchContext, savedBrandfetchId } from './BrandfetchSettings';
 import { AuthGate } from './AuthGate';
-import { CreditActivity } from './CreditActivity';
+import { AccountTray } from './AccountTray';
 import { ResearchStop } from './ResearchStop';
+import { RetrySeller } from './RetrySeller';
+import { ContinueDiscovery } from './ContinueDiscovery';
 import { MarketOverview } from './MarketOverview';
 import { EmailDraftEditor } from './EmailDraftEditor';
 import { LocalSearchSetup } from './LocalSearchSetup';
 import { WebsiteChoice } from './WebsiteChoice';
 import './styles.css';
 import './Shortlist.css';
+
+const previewWorkspace = document.querySelector<HTMLMetaElement>('meta[name="shortlist-preview-workspace"]')?.content;
 
 const describeError = (error: unknown) => error instanceof Error ? error.message : 'Something went wrong. Please try again.';
 const date = (value: string) => new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
@@ -29,7 +41,7 @@ function Arrow() {
 function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & { seller_url: string }; wallet: Wallet | null; hostedAccount: boolean; onSaved: (run: Run) => void }) {
   const [offer, setOffer] = useState(run.draft?.offer ?? '');
   const [target, setTarget] = useState(run.draft?.target ?? '');
-  const [criteria, setCriteria] = useState<Confirmation['criteria']>(run.draft?.criteria ?? [{ id: 'criterion-1', description: '', required: true }]);
+  const [criteria, setCriteria] = useState<Confirmation['criteria']>(run.draft?.criteria.length ? run.draft.criteria : [{ id: 'criterion-1', description: '', required: true }]);
   const [exclusions, setExclusions] = useState((run.draft_exclusions ?? []).join('\n'));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -47,12 +59,12 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
     } catch (e) { setError(describeError(e)); } finally { setSaving(false); }
   };
   return <section className="sheet confirmation" aria-labelledby="confirm-heading">
-    <MarketOverview run={run} selected={campaignName} onChoose={campaign => {
-      setCampaignName(campaign.name); setTarget(campaign.target); setCriteria(campaign.criteria);
-      setDiscoveryTerms(campaign.search_terms || run.draft?.target.slice(0, 300) || '');
-    }} />
     <div className="sheet-heading"><h2 id="confirm-heading">Confirm what a good fit means</h2><span className="step-label">Your target</span></div>
     <p className="intro">Edit the offer and criteria before discovery. This version stays attached to the research it produces.</p>
+    {run.market && <details className="confirmation-context"><summary>Explore campaign ideas and source context</summary><MarketOverview run={run} selected={campaignName} onChoose={campaign => {
+      setCampaignName(campaign.name); setTarget(campaign.target); setCriteria(campaign.criteria);
+      setDiscoveryTerms(campaign.search_terms || run.draft?.target.slice(0, 300) || '');
+    }} /></details>}
     {run.reused_offer && <p className="notice">Copied from your saved offer. Review it and choose the maximum cost before starting. New research may return companies from earlier batches.</p>}
     {run.error && <div className="notice" role="status">{run.error}</div>}
     <p className="website">Seller website <a href={run.seller_url} target="_blank" rel="noopener noreferrer">{run.seller_url}</a></p>
@@ -62,7 +74,8 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
       <label htmlFor="target">Who should we look for?</label>
       <textarea id="target" required minLength={5} maxLength={2000} rows={2} value={target} onChange={e => setTarget(e.target.value)} />
       {campaignName && <><label htmlFor="discovery-terms">Search keywords</label><input id="discovery-terms" required minLength={5} maxLength={300} value={discoveryTerms} onChange={e => setDiscoveryTerms(e.target.value)} aria-describedby="discovery-help" /><p id="discovery-help" className="hint">Observable company terms, such as industry, product and public announcements. Private performance assumptions belong in hypotheses.</p></>}
-      <fieldset><legend>Fit criteria</legend><p className="hint">Required criteria must have evidence. An unknown stays visible as a question to verify.</p>
+      <fieldset><legend>Fit criteria</legend><p className="hint">These checks guide company research and determine fit with your target customer. Use observable characteristics, such as industry or customers served. Required checks need supporting evidence; missing evidence stays unknown.</p>
+        {!!run.draft?.criteria_issues?.length && <div className="notice" role="status"><p>Unsupported suggestions were removed. {run.draft.criteria.length ? 'Review the remaining criteria before confirming.' : 'Add at least one observable customer characteristic before confirming.'} Your offer summary is kept for editing.</p><details><summary>Review {run.draft.criteria_issues.length} removed {run.draft.criteria_issues.length === 1 ? 'suggestion' : 'suggestions'}</summary><ul>{run.draft.criteria_issues.map((issue, index) => <li key={index}><p>{issue.description}</p><p className="hint">{issue.reason}</p></li>)}</ul></details></div>}
         {criteria.map((criterion, index) => <div className="criterion-input" key={criterion.id}>
           <label htmlFor={`criterion-${index}`}>Criterion {index + 1}</label>
           <input id={`criterion-${index}`} value={criterion.description} required minLength={3} maxLength={500}
@@ -76,7 +89,7 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
       <label htmlFor="exclusions">Exclude from consideration <span className="optional">Optional, one per line</span></label>
       <textarea id="exclusions" value={exclusions} rows={2} maxLength={6012} onChange={e => setExclusions(e.target.value)} aria-describedby="exclusions-help" />
       <p id="exclusions-help" className="hint">Up to 12 conditions, 3–500 characters each. Each needs evidence; an unverified exclusion stays unknown.</p>
-      {run.draft?.unknowns.length ? <div className="unknowns"><h3>Still unknown about your offer</h3><ul>{run.draft.unknowns.map(u => <li key={u}>{u}</li>)}</ul></div> : null}
+      {run.draft?.unknowns.length ? <div className="unknowns"><h3>Still needs review</h3><ul>{run.draft.unknowns.map(u => <li key={u}>{u}</li>)}</ul></div> : null}
       {hostedAccount && wallet === null && <p className="notice" role="status">Your credit balance must load before you can confirm the batch cost. Reload the workspace to retry.</p>}
       {wallet?.mode === 'hosted' && <section className="batch-choice"><label htmlFor="company-limit">Companies in this batch</label><select id="company-limit" value={companyLimit} onChange={event => setCompanyLimit(Number(event.target.value))}>{[1, 2, 3].map(quantity => <option key={quantity} value={quantity} disabled={quantity > available}>{quantity} {quantity === 1 ? 'company' : 'companies'}</option>)}</select><p>{run.legacy_credit_exempt ? 'Your original demo allowance is preserved.' : `Maximum ${companyLimit} ${companyLimit === 1 ? 'credit' : 'credits'} · ${wallet.available} available`}</p><p className="hint">Completed unknown or non-fit research counts. Credits for technical failures are returned. Review and export are free.</p>{available === 0 && <p className="notice">No research credits available. Saved research stays accessible. Credit purchases are not available yet.</p>}</section>}
       {error && <p className="notice" role="alert">{error}</p>}
@@ -125,7 +138,7 @@ function CompanyReview({ record, run, onSaved }: { record: Record; run: Run; onS
   };
   return <details className="company-item" name={`shortlist-${run.id}`} ref={disclosure}>
     <summary className="company-row" ref={summary}>
-      <span className="shortlist-identity"><span className="company-initial" aria-hidden="true">{research.name.trim().slice(0, 1).toUpperCase()}</span>
+      <span className="shortlist-identity"><SiteIcon runId={run.id} domain={research.domain} fallback={research.name.trim().slice(0, 1).toUpperCase()} className="company-initial" />
         <span><span className="shortlist-name">{research.name}</span><span className="shortlist-domain">{research.domain}</span></span></span>
       <span className="shortlist-description">{description?.evidence.claim ?? 'Company description not established from saved sources.'}</span>
       <span className="shortlist-assessment"><span>{qualification[research.qualification]}</span><span className="shortlist-decision">{decision}</span></span>
@@ -216,14 +229,36 @@ function DeleteResearch({ run, onDeleted }: { run: Run; onDeleted: () => void })
   </section>;
 }
 
-function App({ account }: { account: ReactNode }) {
+function App({ account, identity }: { account: ReactNode; identity: string }) {
   const [health, setHealth] = useState<Health | null>(null);
+  const [mobileHistoryOpen, setMobileHistoryOpen] = useState(false);
+  const [historyCollapsed, setHistoryCollapsed] = useState(() => window.matchMedia('(max-width: 850px)').matches);
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 850px)');
+    const changed = () => setHistoryCollapsed(true);
+    query.addEventListener('change', changed);
+    return () => query.removeEventListener('change', changed);
+  }, []);
+  const historyTrigger = useRef<HTMLButtonElement>(null);
+  const closeMobileHistory = useCallback(() => setMobileHistoryOpen(false), []);
+  const restoreMobileMenuFocus = () => {
+    if (!window.matchMedia('(max-width: 850px)').matches) return;
+    const focused = document.activeElement;
+    // A delayed native close event must not steal focus from a newly chosen page control.
+    if (!(focused instanceof HTMLElement) || focused === document.body ||
+        !focused.getClientRects().length || focused.closest('#local-settings, #account-tray, #research-drawer')) {
+      historyTrigger.current?.focus();
+    }
+  };
+  const [brandfetchOverride, setBrandfetchOverride] = useState(savedBrandfetchId);
+  const brandfetchClientId = previewWorkspace ? '' : health?.mode === 'local' ? brandfetchOverride ?? configuredDirectoryId() : health ? configuredDirectoryId() : '';
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [showActivity, setShowActivity] = useState(false);
   const [service, setService] = useState<Service | null>(null);
   const [runs, setRuns] = useState<Run[]>([]);
   const [active, setActive] = useState<Run | null>(null);
-  const [website, setWebsite] = useState('');
+  const [website, setWebsite] = useState(() => { try { return sessionStorage.getItem('shortlist-company-entry:' + identity) ?? ''; } catch { return ''; } });
+  useEffect(() => { try { sessionStorage.setItem('shortlist-company-entry:' + identity, website); } catch { /* Optional tab-local input recovery. */ } }, [website, identity]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -279,6 +314,8 @@ function App({ account }: { account: ReactNode }) {
     window.history.replaceState(null, '', run ? `?run=${run.id}` : window.location.pathname);
     if (focus) window.setTimeout(() => headingRef.current?.focus(), 0);
   };
+  const eligibleRecords = active?.records.filter(record => !record.source_issue) ?? [];
+  const withheldRecords = active?.records.filter(record => record.source_issue) ?? [];
   const saved = (run: Run) => { setActive(run); setRuns(old => [run, ...old.filter(r => r.id !== run.id)]); };
   const websiteChosen = (run: Run) => {
     setRuns(old => old.map(value => value.id === run.id ? run : value));
@@ -309,38 +346,35 @@ function App({ account }: { account: ReactNode }) {
   };
   const pending = active && ['queued', 'running'].includes(active.status);
   const results = active && active.seller_url && ['ready', 'partial'].includes(active.status);
-  return <>
+  const showSidebar = Boolean(active || runs.length);
+  return <BrandfetchContext value={brandfetchClientId}>
     <a className="skip-link" href="#main">Skip to research</a>
-    <header className="topbar"><a className="brand" href="/" onClick={e => { e.preventDefault(); select(null); }}><span className="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M5 25 16 5l11 20H5Zm6-7h10M16 5v22M8 28h16" stroke="currentColor" strokeWidth="1.2" /></svg></span><span>GTM Shortlist<span className="brand-product">Company research</span></span></a><div className="workspace-account">{wallet?.mode === 'hosted' && <div className="wallet-access"><p className="wallet-balance" aria-live="polite">{wallet.available} {wallet.available === 1 ? 'credit' : 'credits'} available{wallet.reserved > 0 && <span>{wallet.reserved} reserved</span>}</p><button className="text-button" aria-expanded={showActivity} aria-controls="credit-activity" onClick={() => setShowActivity(value => !value)}>Credit activity</button></div>}{account ?? <span className="local-label">Local research workspace</span>}</div></header>
-    <div className={`workspace ${active ? 'has-research' : 'new-research'}`}><aside className="sidebar" aria-label="Saved research"><button className="new-run secondary" onClick={() => { select(null); requestKey.current = crypto.randomUUID(); }}>New shortlist<Arrow /></button><h2>Saved runs</h2>
-      {loading ? <p>Loading saved research…</p> : runs.length ? <nav>{runs.map(run => <button key={run.id} className={`saved-run ${active?.id === run.id ? 'selected' : ''}`} onClick={() => select(run)} aria-current={active?.id === run.id ? 'page' : undefined}><span>{run.company_name ?? (run.seller_url ? new URL(run.seller_url).hostname : "Website not selected")}</span><small>{date(run.created_at)}</small><small>{run.status.replaceAll('_', ' ')}</small></button>)}</nav> : <p className="hint">Your research will stay here after you close the browser.</p>}
-      <div className="sidebar-note"><p>Evidence before outreach.</p><p className="hint">Company fit, your acceptance, and buying intent are separate things.</p></div>
-    </aside>
-    <main id="main" className="main" tabIndex={-1}><div className="page-heading"><h1 ref={headingRef} tabIndex={-1}>{active?.termination === 'user_stopped' ? 'Research stopped' : pending ? 'Researching your shortlist' : active ? active.profile ? 'Review your shortlist' : 'Define your shortlist' : 'Find your next shortlist.'}</h1><p>{active ? 'Saved research. Trace every assessment back to its source.' : 'Turn your offer into a focused list of companies. Understand the fit, inspect the sources, and make the call.'}</p></div>
-      {wallet?.mode === 'hosted' && <div id="credit-activity" hidden={!showActivity}>{showActivity && <CreditActivity wallet={wallet} />}</div>}
-      {health?.mode === 'local' && <LocalSearchSetup compact={Boolean(results)} ready={health.search_ready} onSaved={setHealth} onContinue={!active ? () => document.getElementById('website')?.focus() : undefined} />}
-      {health?.local_search_error && <p className="notice" role="alert">Local search settings could not be read. Open Connect Tavily to save a replacement key.</p>}
+    <header className="topbar"><button ref={historyTrigger} className="mobile-history-trigger" type="button" aria-label="Saved runs" aria-controls="research-drawer" aria-expanded={mobileHistoryOpen} aria-haspopup="dialog" onClick={() => setMobileHistoryOpen(true)}><MenuToggleIcon open={mobileHistoryOpen} /></button><a className="brand" href="/" onClick={e => { e.preventDefault(); select(null); }}><span>GTM Shortlist</span></a>{showSidebar && <button className="desktop-history-toggle" type="button" aria-controls="research-navigation" aria-expanded={!historyCollapsed} aria-label={historyCollapsed ? 'Show saved runs' : 'Hide saved runs'} title={historyCollapsed ? 'Show saved runs' : 'Hide saved runs'} onClick={() => setHistoryCollapsed(value => !value)}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d={historyCollapsed ? 'm9 6 6 6-6 6' : 'm15 6-6 6 6 6'} /></svg></button>}{active && <button className="mobile-new-trigger" type="button" aria-label="New shortlist" title="New shortlist" onClick={() => { select(null); requestKey.current = crypto.randomUUID(); }}><PlusIcon /></button>}<div className="workspace-account">{!account && <span className="local-label">Local research workspace</span>}{active && <button className="desktop-new-trigger" type="button" aria-label="New shortlist" onClick={() => { select(null); requestKey.current = crypto.randomUUID(); }}><PlusIcon /><span>New shortlist</span></button>}{account ? <AccountTray onClosed={restoreMobileMenuFocus} account={account} wallet={wallet} showActivity={showActivity} onActivity={() => setShowActivity(value => !value)} /> : health?.mode === 'local' && <LocalSearchSetup onClosed={restoreMobileMenuFocus} health={health} onSaved={setHealth} readOnly={Boolean(previewWorkspace)} brandfetchClientId={brandfetchClientId} onBrandfetchSaved={setBrandfetchOverride} /> }</div></header>
+    <div className={`workspace ${active ? 'has-research' : 'new-research'}${showSidebar ? '' : ' first-visit'}`}><ResearchSidebar collapsed={historyCollapsed} visibleDesktop={showSidebar} mobileOpen={mobileHistoryOpen} onMobileClose={closeMobileHistory} settingsTarget={account ? 'account-tray' : health?.mode === 'local' ? 'local-settings' : undefined} runs={runs} activeId={active?.id} loading={loading} onNew={() => { select(null); requestKey.current = crypto.randomUUID(); }} onSelect={run => select(run)} />
+    <main id="main" className="main" tabIndex={-1}>{previewWorkspace && <aside className="notice preview-notice" role="note"><p>Design preview · no live research</p><a href={previewWorkspace}>Open the research workspace<Arrow /></a></aside>}<div className="page-heading">{!active && <WorkshopField />}<h1 ref={headingRef} tabIndex={-1}>{active?.termination === 'user_stopped' ? 'Research stopped' : pending ? active?.status === 'queued' && !active.progress.worker_online ? 'Research is waiting' : 'Researching your shortlist' : active ? active.status === 'awaiting_confirmation' ? 'Confirm your target' : active.profile ? 'Review your shortlist' : 'Define your shortlist' : 'Find companies that fit your offer.'}</h1><p>{active?.status === 'awaiting_confirmation' ? 'Review your offer and target below. Discovery starts after you confirm.' : active ? 'Saved research. Trace every assessment back to its source.' : 'Start with your company. We’ll help you build a shortlist backed by sources.'}</p></div>
       {error && <div className="notice" role="alert">{error}<button className="text-button" onClick={() => window.location.reload()}>Reload workspace</button></div>}
-      {!active && <><div className="start-grid"><section className="sheet start-sheet" aria-labelledby="start-heading"><h2 id="start-heading">What is your company?</h2><p>Enter the business you’re selling for. We’ll find its website if needed, then draft your offer and target for you to confirm.</p><form onSubmit={start}><label htmlFor="website">Company name or website</label><div className="website-form"><input id="website" type="text" inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="Company name, example.com or https://example.com" required maxLength={2048} value={website} onChange={e => { setWebsite(e.target.value); requestKey.current = crypto.randomUUID(); }} /><button disabled={saving || loading} aria-busy={saving} type="submit">{saving ? 'Starting research…' : 'Understand my offer'}<Arrow /></button></div></form><p className="hint">Up to three research sheets. Saved sources. Excel, CSV and JSON export.</p></section><ResearchPreview /></div><section className="method" aria-label="How research works"><h2>A shortlist you can inspect</h2><ol><li><span>Confirm your offer</span><p>Edit who you serve and what counts as a fit.</p></li><li><span>Trace the evidence</span><p>Read source passages and see what remains unknown.</p></li><li><span>Review and export</span><p>Accept or reject each company using your own judgment.</p></li></ol></section></>}
-      {active && !results && <ResearchProgress run={active} connected={!error} />}{pending && active && <ResearchStop key={`stop-${active.id}`} run={active} onStopped={stopped} />}{active?.credits && <p className="batch-credit-summary" role="status">{active.credits.used} {active.credits.used === 1 ? 'credit' : 'credits'} used · {active.credits.reserved} reserved · {active.credits.returned} returned</p>}
-      {active && !pending && !active.termination && !active.seller_url && <WebsiteChoice key={`website-${active.id}`} run={active} onSaved={websiteChosen} />}{active?.status === 'awaiting_confirmation' && active.seller_url && <>{health && !health.search_ready && <p className="notice">Live company search is not configured yet. Your target can be saved, but discovery needs Tavily or SerpApi connected.</p>}<ConfirmationForm key={`offer-${active.id}`} run={{ ...active, seller_url: active.seller_url }} wallet={wallet} hostedAccount={account != null} onSaved={saved} /></>}
-      {results && <><div className="results-toolbar"><div><h2>{active.records.length} {active.records.length === 1 ? 'company' : 'companies'} researched</h2><p>{active.status === 'partial' ? 'Some questions remain open. Review the unknowns before using these records.' : 'Model assessments are ready for your review.'}</p></div>{!!active.records.length && <div className="export-controls"><label className="checkbox-label"><input type="checkbox" checked={acceptedOnly} onChange={e => setAcceptedOnly(e.target.checked)} />Accepted only</label><div className="export-links">{(['xlsx', 'csv', 'json'] as const).map(format => <a className="secondary button-link" key={format} href={`/api/runs/${active.id}/export?format=${format}&accepted_only=${acceptedOnly}`} onClick={event => { event.preventDefault(); void api.download(active.id, format, acceptedOnly).catch(reason => setError(describeError(reason))); }}>Export {format === 'xlsx' ? 'Excel' : format.toUpperCase()}</a>)}</div></div>}</div>
+      {active?.can_retry_seller && <RetrySeller key={`retry-${active.id}`} run={active} onSaved={websiteChosen} />}
+      {active?.can_continue_discovery && <ContinueDiscovery key={`continue-${active.id}`} run={active} onSaved={websiteChosen} />}
+      {!active && <LandingDemo><section className="sheet start-sheet" aria-labelledby="start-heading"><h2 id="start-heading" className="sr-only">Start your company research</h2><form onSubmit={start}><label htmlFor="website">Company name or website</label><div className="website-form"><CompanySearch value={website} onChange={value => { setWebsite(value); requestKey.current = crypto.randomUUID(); }} clientId={brandfetchClientId} disabled={saving} /><button disabled={saving || loading || Boolean(previewWorkspace)} aria-busy={saving} type="submit">{saving ? 'Starting research…' : 'Start research'}<Arrow /></button></div></form><p className="hint">Up to three companies. You confirm the target before discovery.</p>{!previewWorkspace && health?.mode === 'local' && !health.search_ready && <p className="local-setup-prompt">Local company search needs setup. <button type="button" className="text-button" onClick={() => openWorkspacePanel('local-settings')}>Open Settings</button></p>}</section></LandingDemo>}
+      {active && <ResearchProgress key={active.id} run={active} connected={!error} localResearch={health?.mode === 'local' && !previewWorkspace} />}{active && ['queued', 'running', 'awaiting_confirmation'].includes(active.status) && <ResearchStop key={`stop-${active.id}`} run={active} onStopped={stopped} />}{active?.credits && <p className="batch-credit-summary" role="status">{active.credits.used} {active.credits.used === 1 ? 'credit' : 'credits'} used · {active.credits.reserved} reserved · {active.credits.returned} returned</p>}
+      {active && !pending && !active.termination && !active.seller_url && <WebsiteChoice key={`website-${active.id}`} run={active} onSaved={websiteChosen} />}{active?.status === 'awaiting_confirmation' && active.seller_url && <>{health && !health.search_ready && <p className="notice">Company search is not configured. Your target can be saved; configure search before discovery.</p>}<ConfirmationForm key={`offer-${active.id}`} run={{ ...active, seller_url: active.seller_url }} wallet={wallet} hostedAccount={account != null} onSaved={saved} /></>}
+      {results && <><div className="results-toolbar"><div><h2>{eligibleRecords.length} {eligibleRecords.length === 1 ? 'company' : 'companies'} researched</h2><p>{active.status === 'partial' ? 'Some questions remain open. Review the unknowns before using these records.' : 'Model assessments are ready for your review.'}</p></div>{!!active.records.length && <div className="export-controls"><label className="checkbox-label"><input type="checkbox" checked={acceptedOnly} onChange={e => setAcceptedOnly(e.target.checked)} />Accepted only</label><div className="export-links">{(['xlsx', 'csv', 'json'] as const).map(format => <a className="secondary button-link" key={format} href={`/api/runs/${active.id}/export?format=${format}&accepted_only=${acceptedOnly}`} onClick={event => { event.preventDefault(); void api.download(active.id, format, acceptedOnly).catch(reason => setError(describeError(reason))); }}>Export {format === 'xlsx' ? 'Excel' : format.toUpperCase()}</a>)}</div></div>}</div>
         {active.error && <p className="notice" role="status">{active.error}</p>}
-        {active.records.length ? <section className="company-shortlist" aria-label="Researched companies"><p className="shortlist-instruction">Compare the companies, then open a research sheet to inspect evidence and decide.</p>{active.records.map(record => <CompanyReview key={record.research.id} record={record} run={active} onSaved={saved} />)}</section> : <section className="sheet"><h3>No company records yet</h3><p>The run stopped before usable research could be saved. {active.profile ? 'Your confirmed target is preserved.' : 'Your saved seller inputs remain available.'}</p><button className="secondary" onClick={() => select(null)}>Start another shortlist</button></section>}
+        {!!withheldRecords.length && <section className="notice" aria-label="Excluded saved sources"><h3>{withheldRecords.length} saved {withheldRecords.length === 1 ? "source" : "sources"} excluded from the shortlist</h3><p>These historical entries do not establish an official company. Original evidence is preserved in research history and JSON export.</p><ul>{withheldRecords.map(record => <li key={record.research.id}>{record.research.domain}: {record.source_issue}</li>)}</ul></section>}
+        {eligibleRecords.length ? <section className="company-shortlist" aria-label="Researched companies"><p className="shortlist-instruction">Compare the companies, then open a research sheet to inspect evidence and decide.</p>{eligibleRecords.map(record => <CompanyReview key={record.research.id} record={record} run={active} onSaved={saved} />)}</section> : <section className="sheet"><h3>{withheldRecords.length ? "No eligible company records" : "No company records yet"}</h3><p>{withheldRecords.length ? "The saved sources did not establish official company identities." : "The run stopped before usable research could be saved."} {active.profile ? 'Your confirmed target is preserved.' : 'Your saved seller inputs remain available.'}</p><button className="secondary" onClick={() => select(null)}>Start another shortlist</button></section>}
         <section className="results-context" aria-label="Research context">
         {active.profile && <details className="target-summary"><summary>Confirmed target and offer</summary><p>{active.profile.offer}</p><p>{active.profile.target}</p>{!!active.profile.exclusions.length && <p>Exclusions: {active.profile.exclusions.join('; ')}</p>}<p className="hint">Confirmed {date(active.profile.confirmed_at)}. Start a new run to change this target.</p></details>}
         {active.profile && <ReuseOffer key={active.id} run={active} onSaved={run => { saved(run); select(run); }} />}
-          <ResearchProgress run={active} connected={!error} />
         </section>
       </>}
-      {results && active.profile && active.records.length > 0 && service?.booking_url && <section className="setup-call" aria-labelledby="setup-heading"><div><h2 id="setup-heading">Discuss your shortlist</h2><p>Get help with your target, evidence and next steps. The setup call is optional.</p></div><a className="secondary button-link" href={service.booking_url} target="_blank" rel="noopener noreferrer" onClick={() => { if (navigator.doNotTrack !== '1') void api.bookingClick(active.id).catch(() => undefined); }}>Book an optional setup call<Arrow /></a></section>}
+      {results && active.profile && eligibleRecords.length > 0 && service?.booking_url && <section className="setup-call" aria-labelledby="setup-heading"><div><h2 id="setup-heading">Discuss your shortlist</h2><p>Get help with your target, evidence and next steps. The setup call is optional.</p></div><a className="secondary button-link" href={service.booking_url} target="_blank" rel="noopener noreferrer" onClick={() => { if (navigator.doNotTrack !== '1') void api.bookingClick(active.id).catch(() => undefined); }}>Book an optional setup call<Arrow /></a></section>}
       {active && !pending && <DeleteResearch key={`delete-${active.id}`} run={active} onDeleted={deleted} />}
       {message && <p className="notice" role="status">{message}</p>}
-      <footer className="workspace-footer"><p>GTM Shortlist · Open-source company research</p><p>Research supports judgment. It does not establish buying intent.</p>{health && <p className="hint">{health.search_ready && health.gemma_ready ? 'Research providers configured' : 'Research providers still need configuration'}</p>}</footer>
+      <footer className="workspace-footer"><p>GTM Shortlist</p></footer>
     </main></div>
-  </>;
+  </BrandfetchContext>;
 }
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Application root is missing');
-createRoot(root).render(<StrictMode><AuthGate workspace={(identity, account) => <App key={identity} account={account} />} /></StrictMode>);
+createRoot(root).render(<StrictMode>{new URLSearchParams(window.location.search).get('demo') === '1' ? <DemoPage /> : <AuthGate workspace={(identity, account) => <App key={identity} identity={identity} account={account} />} />}</StrictMode>);

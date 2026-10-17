@@ -1,6 +1,8 @@
 # Implementation checklist
 
-Last updated 15 October 2026 JST. Check a task only after its acceptance evidence is saved in PROGRESS.md. This file is the source of truth for automatic continuation.
+The hosted signup-to-export release checks requested on16October are tracked in [HOSTED_JOURNEY.md](HOSTED_JOURNEY.md). Use its observed evidence and pending live gates when resuming release work.
+
+Last updated 16 October 2026 JST. Current authorized design work and its acceptance gates are tracked in [DESIGN_CHECKLIST.md](planning/landing-demo/DESIGN_CHECKLIST.md); the broader product gates below remain open. Check a task only after its acceptance evidence is saved in PROGRESS.md. This file is the source of truth for automatic continuation.
 
 ## 1. Project and contracts
 - [x] Clone dedicated repository and preserve planning sources.
@@ -11,12 +13,15 @@ Last updated 15 October 2026 JST. Check a task only after its acceptance evidenc
 ## 2. Seller and confirmation
 - [ ] Fetch seller pages with provenance and draft offer/target using Gemma.
 - [x] Persist editable draft and explicit immutable confirmation before discovery.
+- [x] Preserve usable seller summaries when individual customer criteria are invalid; remove those suggestions with editing reasons, recover saved protocol3 failures without inference, and require a valid criterion before confirmation. Verified with recorded/offline and phone/laptop fixtures.
 - [ ] Validate Eygentic offer and configurable targets for other sellers.
 
 ## 3. Discovery and identity
 - [x] Implement SerpApi and Tavily adapters, bounded query planner and saved search provenance.
 - [x] Add private local masked Tavily key setup and dynamic next-run configuration; verify native encryption/transactions and responsive UI without claiming a live key.
 - [ ] Verify unattended discovery with actual search-provider credentials.
+- [x] Reject recognized article/list/reference pages as primary company candidates, including saved candidates and redirects; verify offline with recorded Eygentic/Clay URLs. Buyer-focused seller protocol3 and campaign guards are implemented; live cross-seller targeting quality remains open.
+- [x] Add positive first-party owner proof and independent identity verification for new runs; reject job/article/suspended primary sources before delivery, quarantine historical entries in UI/exports, and use offer-aware market observations and distinct buyer cohorts. Verified with offline fixtures; live relevance remains unqualified.
 - [x] Canonicalize domains, deduplicate and exclude directories/seller domains.
 - [x] Preserve unreadable candidate failures and try replacements within six candidates without consuming the three review slots.
 - [ ] Compare providers on identical queries and actual measured cost/coverage.

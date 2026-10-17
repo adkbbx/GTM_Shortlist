@@ -1,4 +1,6 @@
+import json
 import re
+from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Literal
@@ -6,7 +8,7 @@ from urllib.parse import urlsplit
 from uuid import UUID
 
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, SecretStr, ValidationError, field_validator
@@ -18,18 +20,25 @@ from shortlist.config import Settings
 from shortlist.domain import Candidate, OperatorReview, Profile, Research, Review, Source, Target
 from shortlist.email_drafts import EditEmailDraft, EmailDraft, StartEmailDraft
 from shortlist.export import export_run
-from shortlist.fetch import canonical_url
+from shortlist.fetch import canonical_url, domain_of
 from shortlist.local_credentials import (
     CredentialUnavailable,
     LocalCredentials,
+    LocalModelConnection,
+    LocalModelCredentials,
+    LocalModelInput,
     apply_local_credentials,
     validate_tavily_key,
 )
-from shortlist.market import MarketResearch
-from shortlist.progress import RunProgress
-from shortlist.providers import SellerDraft, company_name_matches
+from shortlist.local_service import LocalResearchService, ServiceUnavailable
+from shortlist.market import MarketResearch, reviewed_market
+from shortlist.model_setup import LocalModels, ModelSetupError, available_models
+from shortlist.progress import RunProgress, public_events
+from shortlist.providers import SellerDraft, company_name_matches, recover_customer_draft
+from shortlist.relevance import record_issue
 from shortlist.selection import Selection
-from shortlist.store import BudgetExceeded, Conflict, Store
+from shortlist.site_icons import SiteIcons
+from shortlist.store import BudgetExceeded, Conflict, Store, saved_discovery_available, seller_retry_available
 
 
 class SellerInput(BaseModel):
@@ -69,6 +78,11 @@ class LocalKeyInput(BaseModel):
     key: SecretStr = Field(min_length=13, max_length=256)
 
 
+class LocalServiceStart(BaseModel):
+    model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
+    confirmation: Literal["start_research_service"]
+
+
 class Confirmation(Target):
     campaign_name: str | None = Field(default=None, min_length=3, max_length=100)
     discovery_terms: str | None = Field(default=None, min_length=5, max_length=300)
@@ -76,6 +90,7 @@ class Confirmation(Target):
 
 
 class SavedRecord(BaseModel):
+    source_issue: str | None = None
     research: Research
     review: Review | None = None
     operator_review: OperatorReview | None = None
@@ -129,6 +144,16 @@ class StopInput(BaseModel):
     confirmation: Literal["stop"]
 
 
+class RetrySellerInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    confirmation: Literal["retry_unstarted_seller"]
+
+
+class ContinueDiscoveryInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    confirmation: Literal["use_saved_candidates_without_search"]
+
+
 class AttemptView(BaseModel):
     provider: str
     kind: str
@@ -162,6 +187,12 @@ class RunView(BaseModel):
     seller_source: Source | None = None
     experience_version: Literal[1, 2] = 1
     termination: Literal["user_stopped"] | None = None
+    can_retry_seller: bool = False
+    can_continue_discovery: bool = False
+
+
+class SiteIconInfo(BaseModel):
+    url: str | None = None
 
 
 class Health(BaseModel):
@@ -188,8 +219,19 @@ AuthSetup = Annotated[LocalAuth | HostedAuth, Field(discriminator="mode")]
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings.load()
+    site_icons = SiteIcons()
     local_store = Store(settings.db_path) if settings.mode == "local" else None
-    app = FastAPI(title="GTM Shortlist", version="0.1.0")
+    research_service = LocalResearchService(settings) if local_store is not None else None
+
+    @asynccontextmanager
+    async def lifespan(app):
+        try:
+            yield
+        finally:
+            if research_service is not None:
+                await run_in_threadpool(research_service.close)
+
+    app = FastAPI(title="GTM Shortlist", version="0.1.0", lifespan=lifespan)
     hosts = ["localhost", "127.0.0.1", "testserver"] if settings.mode == "local" else [urlsplit(settings.app_url).hostname]
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=hosts)
     bearer = HTTPBearer(auto_error=False)
@@ -247,24 +289,40 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         run = store.get_run(run_id)
         profile = Profile.model_validate(run["profile"]) if run["profile"] else None
         error = run["error"]
+        draft = run["checkpoint"].get("draft")
+        if profile is None and not draft and run["status"] == "awaiting_confirmation" and \
+                run["checkpoint"].get("seller_output_protocol") == 3:
+            diagnostic = run["checkpoint"].get("seller_model_output", {})
+            try:
+                data = json.loads(diagnostic.get("content", ""))
+                if isinstance(data, dict):
+                    draft = recover_customer_draft(data).model_dump(mode="json")
+            except (ValueError, TypeError):
+                pass  # Malformed summaries still need manual entry; never invent replacement text.
         matches = [Candidate.model_validate(value) for value in run["checkpoint"].get("website_matches", [])]
         company_name = run["checkpoint"].get("company_name")
         market = run["checkpoint"].get("market")
         if market is None and "market_candidates" in run["checkpoint"]:
             market = MarketResearch(competitors=tuple(Candidate.model_validate(c) for c in run["checkpoint"]["market_candidates"]),
                                     status="partial")
+        offer = (run["profile"] or run["checkpoint"].get("draft") or {}).get("offer", "")
+        market = reviewed_market(market, profile.seller_url if profile else run["checkpoint"]["seller_url"], offer)
+        records = [{**record, "source_issue": record_issue(Research.model_validate(record["research"]), strict=True)}
+                   for record in run["records"]]
         if company_name:
             matches = [match for match in matches if company_name_matches(match, company_name)]
             if run["stage"] == "website" and not matches and not error:
                 error = "No clear website match was found. Enter your company's website below to continue."
         if profile is None and run["status"] == "awaiting_confirmation" and "seller_model_output" in run["checkpoint"]:
-            error = ("We couldn't create a usable offer summary from this page. Company search hasn't started. "
+            error = ("Your offer summary was recovered from the saved response. Review the proposed target and fit criteria below. "
+                     "No new model call was made." if draft else
+                     "We couldn't create a usable offer summary from this page. Company search hasn't started. "
                      "Enter what you sell and who you want to reach below, or choose New shortlist "
                      "and use a product or services page.")
         return RunView(id=run_id, seller_url=profile.seller_url if profile else run["checkpoint"]["seller_url"],
                        company_name=company_name, website_matches=matches,
-                       status=run["status"], stage=run["stage"], profile=profile, draft=run["checkpoint"].get("draft"),
-                       records=run["records"], error=error, created_at=run["created_at"],
+                       status=run["status"], stage=run["stage"], profile=profile, draft=draft,
+                       records=records, error=error, created_at=run["created_at"],
                        updated_at=run["updated_at"], attempts=run["attempts"], credits=run.get("credits"),
                        legacy_credit_exempt=run.get("legacy_credit_exempt", False),
                        reused_offer=run["checkpoint"].get("reused_offer", False),
@@ -274,10 +332,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                        discovery_terms=run["checkpoint"].get("discovery_terms"),
                        seller_source=run["checkpoint"].get("seller_source"),
                        termination=run["checkpoint"].get("termination"),
-                       draft_exclusions=run["checkpoint"].get("draft_exclusions", []), progress=RunProgress(
+                       draft_exclusions=run["checkpoint"].get("draft_exclusions", []),
+                       can_retry_seller=seller_retry_available(run),
+                       can_continue_discovery=saved_discovery_available(run), progress=RunProgress(
                            worker_online=store.worker_online(), candidates=len(run["checkpoint"].get("candidates", [])),
                            sources=len({s["id"] for pages in run["checkpoint"].get("sources", {}).values() for s in pages}),
-                           companies=len(run["records"]), events=run["events"]))
+                           companies=sum(not record["source_issue"] for record in records), events=public_events(run)))
 
     @app.get("/api/health", response_model=Health)
     def health():
@@ -285,14 +345,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         try:
             readiness = apply_local_credentials(settings).readiness()
         except CredentialUnavailable:
-            readiness = {**settings.readiness(), "search": False}
+            readiness = {"search": False, "gemma": False}
             error = "unavailable"
         return Health(mode=settings.mode, search_ready=readiness["search"], gemma_ready=readiness["gemma"],
                       worker_online=local_store.worker_online() if local_store else False, local_search_error=error)
 
-    @app.post("/api/local/tavily", response_model=Health, openapi_extra={
-        "requestBody": {"required": True, "content": {"application/json": {"schema": LocalKeyInput.model_json_schema()}}}})
-    async def configure_tavily(request: Request):
+    async def local_provider_body(request: Request) -> bytearray:
         if settings.mode != "local":
             raise HTTPException(404, "Local provider setup is unavailable")
         if request.headers.get("origin") != str(request.base_url).rstrip("/") or \
@@ -305,6 +363,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             body.extend(chunk)
             if len(body) > 2048:
                 raise HTTPException(413, "Provider setup request is too large")
+        return body
+
+    @app.post("/api/local/tavily", response_model=Health, openapi_extra={
+        "requestBody": {"required": True, "content": {"application/json": {"schema": LocalKeyInput.model_json_schema()}}}})
+    async def configure_tavily(request: Request):
+        body = await local_provider_body(request)
         try:
             command = LocalKeyInput.model_validate_json(body)
             key = validate_tavily_key(command.key.get_secret_value())
@@ -317,6 +381,50 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         # Short local I/O; native protection and the committed private database
         # are shared by this API and the separately running worker.
         await run_in_threadpool(LocalCredentials(settings.db_path).save, key)
+        return await run_in_threadpool(health)
+
+    @app.post("/api/local/model", response_model=Health, openapi_extra={
+        "requestBody": {"required": True, "content": {"application/json": {"schema": LocalModelInput.model_json_schema()}}}})
+    async def configure_model(request: Request):
+        body = await local_provider_body(request)
+        try:
+            command = LocalModelInput.model_validate_json(body)
+        except ValueError:
+            raise HTTPException(422, "Enter a valid model name and HTTPS endpoint, or HTTP endpoint on localhost") from None
+        finally:
+            body.clear()
+        await run_in_threadpool(LocalModelCredentials(settings.db_path).save, command)
+        return await run_in_threadpool(health)
+
+    @app.post("/api/local/model/models", response_model=LocalModels, openapi_extra={
+        "requestBody": {"required": True, "content": {"application/json": {"schema": LocalModelConnection.model_json_schema()}}}})
+    async def discover_models(request: Request):
+        body = await local_provider_body(request)
+        try:
+            connection = LocalModelConnection.model_validate_json(body)
+        except ValueError:
+            raise HTTPException(422, "Use HTTPS for a hosted provider, or HTTP on localhost for a local model server") from None
+        finally:
+            body.clear()
+        try:
+            return await run_in_threadpool(available_models, connection)
+        except ModelSetupError as exc:
+            raise HTTPException(409, str(exc)) from None
+
+    @app.post("/api/local/service/start", response_model=Health, openapi_extra={
+        "requestBody": {"required": True, "content": {"application/json": {"schema": LocalServiceStart.model_json_schema()}}}})
+    async def start_research_service(request: Request):
+        body = await local_provider_body(request)
+        try:
+            LocalServiceStart.model_validate_json(body)
+        except (ValueError, UnicodeError):
+            raise HTTPException(422, "Confirm starting the research service") from None
+        finally:
+            body.clear()
+        try:
+            await run_in_threadpool(research_service.start)
+        except ServiceUnavailable as exc:
+            raise HTTPException(409, str(exc)) from None
         return await run_in_threadpool(health)
 
     @app.get("/api/auth/setup", response_model=AuthSetup)
@@ -367,6 +475,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def read_run(run_id: str, store: owned):
         return view(store, run_id)
 
+    @app.get("/api/runs/{run_id}/site-icon/{domain}", response_model=SiteIconInfo)
+    def read_site_icon(run_id: str, domain: str, store: owned):
+        run = store.get_run(run_id)
+        seller_url = run["checkpoint"].get("seller_url")
+        allowed = {domain_of(seller_url)} if seller_url else set()
+        allowed.update(record["research"]["domain"] for record in run["records"])
+        try:
+            normalized = domain_of(f"https://{domain}/")
+        except ValueError:
+            raise HTTPException(404, "Website is not part of this saved run") from None
+        if normalized not in allowed or urlsplit(canonical_url(f"https://{domain}/")).hostname != domain:
+            raise HTTPException(404, "Website is not part of this saved run")
+        return SiteIconInfo(url=site_icons.get(domain))
+
     @app.delete("/api/runs/{run_id}", status_code=204)
     def delete_run(run_id: str, store: owned):
         store.delete_run(run_id)
@@ -398,6 +520,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         store.stop_run(run_id)
         return view(store, run_id)
 
+    @app.post("/api/runs/{run_id}/retry-seller", response_model=RunView)
+    def retry_seller(run_id: str, input: RetrySellerInput, store: owned):
+        store.retry_seller(run_id)
+        return view(store, run_id)
+
+    @app.post("/api/runs/{run_id}/continue-discovery", response_model=RunView)
+    def continue_discovery(run_id: str, input: ContinueDiscoveryInput, store: owned):
+        store.continue_discovery(run_id)
+        return view(store, run_id)
+
     @app.post("/api/runs/{run_id}/records/{record_id}/review", response_model=RunView)
     def review(run_id: str, record_id: str, input: Review, store: owned):
         store.review(run_id, record_id, input)
@@ -423,6 +555,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     dist = Path(__file__).resolve().parents[2] / "dist"
     if dist.is_dir():
+        @app.get("/", response_class=HTMLResponse, include_in_schema=False)
+        @app.get("/index.html", response_class=HTMLResponse, include_in_schema=False)
+        def ui_index():
+            html = (dist / "index.html").read_text(encoding="utf-8")
+            # Public ID only. Settings validates it before HTML construction.
+            if settings.brandfetch_client_id:
+                meta = '<meta name="shortlist-company-suggestions-client-id" content="' + settings.brandfetch_client_id + '">'
+                html = html.replace("<head>", "<head>" + meta, 1)
+            return HTMLResponse(html)
+
         app.mount("/", StaticFiles(directory=dist, html=True), name="ui")
     return app
 

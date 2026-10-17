@@ -26,6 +26,7 @@ class FixtureSearch:
                 url=f"https://example-{index}.com/",
                 query=query,
                 provider=self.name,
+                excerpt="TEST FIXTURE. Customer acquisition experiments and growth services for AI business software startups.",
             )
             for index in (range(1, 17) if 'similar companies official websites' in query
                           else (1, 2, 3) if 'Three comparison companies' in query else (1, 2))

@@ -45,3 +45,12 @@ New seller runs request the `submit_seller_summary` function response through th
 After explicit approval for one inference call, an operator can run `.venv/Scripts/python.exe scripts/evaluate_seller.py --source-json deploy/secrets/evaluations/seller-source-199a9d9.json --output-db deploy/secrets/evaluations/seller-summary-v2.sqlite3 --allow-provider-calls`. This uses the saved source and private worker settings. It dispatches no search and debits no hosted account. Rerun with the same output to inspect the journal without repaying; do not change output paths to evade a failed outcome. Offline tests do not establish model support or summary quality. Inspect the saved draft before rollout, and verify new hosted runs after updating the worker. The actual source snapshot is private operator state and is not distributed with the repository.
 
 Contract references: [DigitalOcean Chat Completions tools and tool_choice](https://docs.digitalocean.com/products/inference/reference/api/serverless-inference/), [Gemma function calling](https://ai.google.dev/gemma/docs/capabilities/text/function-calling-gemma4).
+
+
+## Optional Brandfetch configuration
+
+After this branch is released, the web service accepts `SHORTLIST_BRANDFETCH_CLIENT_ID` at runtime for company suggestions and logo fallback. Add the public client ID to the **gtm-shortlist web service**, not the worker. Never use a Brandfetch secret API key here. End users do not need their own IDs. This setting is optional; manual company entry and research remain available without it.
+
+To stage the value without deploying, use **Environment → Add Environment Variable**, enter the name above and the public ID, then choose **Save only**. Render applies it at the next separately approved deployment. The currently deployed code does not gain this feature simply by saving the variable. This work does not authorize a deployment. See [Render's environment-variable save options](https://render.com/docs/configure-environment-variables).
+
+The Dockerfile builds the UI before the Python server starts, so setting only `VITE_BRANDFETCH_CLIENT_ID` in Render's runtime environment does not configure the compiled UI. The server's runtime public meta setting avoids that rebuild dependency. Local Settings preferences stay in the local browser and are not copied to Render.

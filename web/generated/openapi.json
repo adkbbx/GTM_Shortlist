@@ -66,6 +66,152 @@
         }
       }
     },
+    "/api/local/model": {
+      "post": {
+        "summary": "Configure Model",
+        "operationId": "configure_model_api_local_model_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "base_url": {
+                    "type": "string",
+                    "maxLength": 1024,
+                    "minLength": 1,
+                    "title": "Base Url"
+                  },
+                  "key": {
+                    "type": "string",
+                    "maxLength": 512,
+                    "format": "password",
+                    "title": "Key",
+                    "default": "",
+                    "writeOnly": true
+                  },
+                  "model": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "pattern": "^[A-Za-z0-9_./:@+-]+$",
+                    "title": "Model"
+                  }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "base_url",
+                  "model"
+                ],
+                "title": "LocalModelInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/local/model/models": {
+      "post": {
+        "summary": "Discover Models",
+        "operationId": "discover_models_api_local_model_models_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "base_url": {
+                    "type": "string",
+                    "maxLength": 1024,
+                    "minLength": 1,
+                    "title": "Base Url"
+                  },
+                  "key": {
+                    "type": "string",
+                    "maxLength": 512,
+                    "format": "password",
+                    "title": "Key",
+                    "default": "",
+                    "writeOnly": true
+                  }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "base_url"
+                ],
+                "title": "LocalModelConnection"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LocalModels"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/local/service/start": {
+      "post": {
+        "summary": "Start Research Service",
+        "operationId": "start_research_service_api_local_service_start_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "confirmation": {
+                    "type": "string",
+                    "const": "start_research_service",
+                    "title": "Confirmation"
+                  }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "required": [
+                  "confirmation"
+                ],
+                "title": "LocalServiceStart"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/setup": {
       "get": {
         "summary": "Auth Setup",
@@ -395,6 +541,59 @@
         }
       }
     },
+    "/api/runs/{run_id}/site-icon/{domain}": {
+      "get": {
+        "summary": "Read Site Icon",
+        "operationId": "read_site_icon_api_runs__run_id__site_icon__domain__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteIconInfo"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/runs/{run_id}/reuse": {
       "post": {
         "summary": "Reuse Offer",
@@ -576,6 +775,114 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/StopInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/runs/{run_id}/retry-seller": {
+      "post": {
+        "summary": "Retry Seller",
+        "operationId": "retry_seller_api_runs__run_id__retry_seller_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetrySellerInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/runs/{run_id}/continue-discovery": {
+      "post": {
+        "summary": "Continue Discovery",
+        "operationId": "continue_discovery_api_runs__run_id__continue_discovery_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContinueDiscoveryInput"
               }
             }
           }
@@ -1049,6 +1356,40 @@
         ],
         "title": "CompanyFact"
       },
+      "CompanyIdentity": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "domain": {
+            "type": "string",
+            "title": "Domain"
+          },
+          "source_id": {
+            "type": "string",
+            "title": "Source Id"
+          },
+          "passage": {
+            "type": "string",
+            "maxLength": 1500,
+            "minLength": 15,
+            "title": "Passage"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "domain",
+          "source_id",
+          "passage"
+        ],
+        "title": "CompanyIdentity",
+        "description": "A saved first-party identity passage, distinct from ICP qualification."
+      },
       "CompanySignal": {
         "properties": {
           "label": {
@@ -1187,6 +1528,21 @@
         ],
         "title": "Confirmation"
       },
+      "ContinueDiscoveryInput": {
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "const": "use_saved_candidates_without_search",
+            "title": "Confirmation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "confirmation"
+        ],
+        "title": "ContinueDiscoveryInput"
+      },
       "CreditEntry": {
         "properties": {
           "id": {
@@ -1317,6 +1673,29 @@
           "required"
         ],
         "title": "Criterion"
+      },
+      "DraftCriterionIssue": {
+        "properties": {
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Description"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "description",
+          "reason"
+        ],
+        "title": "DraftCriterionIssue"
       },
       "EditEmailDraft": {
         "properties": {
@@ -1635,6 +2014,23 @@
         },
         "type": "object",
         "title": "LocalAuth"
+      },
+      "LocalModels": {
+        "properties": {
+          "models": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "title": "Models"
+          }
+        },
+        "type": "object",
+        "required": [
+          "models"
+        ],
+        "title": "LocalModels"
       },
       "MarketResearch": {
         "properties": {
@@ -2122,6 +2518,16 @@
             "maxItems": 3,
             "title": "People",
             "default": []
+          },
+          "company_identity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompanyIdentity"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -2142,6 +2548,21 @@
           "people"
         ],
         "title": "Research"
+      },
+      "RetrySellerInput": {
+        "properties": {
+          "confirmation": {
+            "type": "string",
+            "const": "retry_unstarted_seller",
+            "title": "Confirmation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "confirmation"
+        ],
+        "title": "RetrySellerInput"
       },
       "ReuseInput": {
         "properties": {
@@ -2504,6 +2925,16 @@
               }
             ],
             "title": "Termination"
+          },
+          "can_retry_seller": {
+            "type": "boolean",
+            "title": "Can Retry Seller",
+            "default": false
+          },
+          "can_continue_discovery": {
+            "type": "boolean",
+            "title": "Can Continue Discovery",
+            "default": false
           }
         },
         "type": "object",
@@ -2522,6 +2953,17 @@
       },
       "SavedRecord": {
         "properties": {
+          "source_issue": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Issue"
+          },
           "research": {
             "$ref": "#/components/schemas/Research"
           },
@@ -2676,7 +3118,6 @@
             },
             "type": "array",
             "maxItems": 12,
-            "minItems": 1,
             "title": "Criteria"
           },
           "unknowns": {
@@ -2686,6 +3127,14 @@
             "type": "array",
             "maxItems": 12,
             "title": "Unknowns"
+          },
+          "criteria_issues": {
+            "items": {
+              "$ref": "#/components/schemas/DraftCriterionIssue"
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Criteria Issues"
           }
         },
         "additionalProperties": false,
@@ -2744,6 +3193,23 @@
         },
         "type": "object",
         "title": "ServiceView"
+      },
+      "SiteIconInfo": {
+        "properties": {
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          }
+        },
+        "type": "object",
+        "title": "SiteIconInfo"
       },
       "Source": {
         "properties": {

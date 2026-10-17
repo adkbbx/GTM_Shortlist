@@ -11,6 +11,26 @@ from shortlist.store import Conflict, Store
 from shortlist.worker import execute_run
 
 
+def test_saved_model_failure_explanation_does_not_expose_or_mutate_diagnostics():
+    from copy import deepcopy
+
+    from shortlist.progress import public_events, step_label
+
+    run = {"checkpoint": {"market_model_output": {"content": "", "issues": [{"type": "json_object_required"}]},
+                          "model_outputs": {"example.test": {"content": "PRIVATE RAW OUTPUT",
+                              "issues": [{"type": "missing", "loc": ["name"]}],
+                              "repair_failure": {"content": "PRIVATE REPAIR", "issues": [{"type": "missing"}]}}}},
+           "events": [{"label": step_label("model", operation), "state": "failed",
+                       "detail": "Gemma output failed validation"}
+                      for operation in ("market:campaigns", "model:example.test", "repair:example.test")]}
+    before = deepcopy(run)
+    events = public_events(run)
+    assert "empty response" in events[0]["detail"]
+    assert all("missing required research fields" in event["detail"] for event in events[1:])
+    assert "PRIVATE" not in str(events)
+    assert run == before
+
+
 def test_failed_fetch_records_actual_step_and_confirmation_in_api(tmp_path):
     settings = Settings(db_path=tmp_path / "progress.sqlite3")
     store = Store(settings.db_path)

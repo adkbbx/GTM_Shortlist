@@ -170,6 +170,40 @@
       "title": "CompanyFact",
       "type": "object"
     },
+    "CompanyIdentity": {
+      "additionalProperties": false,
+      "description": "A saved first-party identity passage, distinct from ICP qualification.",
+      "properties": {
+        "name": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "domain": {
+          "title": "Domain",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "passage": {
+          "maxLength": 1500,
+          "minLength": 15,
+          "title": "Passage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "domain",
+        "source_id",
+        "passage"
+      ],
+      "title": "CompanyIdentity",
+      "type": "object"
+    },
     "CompanySignal": {
       "additionalProperties": false,
       "properties": {
@@ -258,6 +292,29 @@
         "required"
       ],
       "title": "Criterion",
+      "type": "object"
+    },
+    "DraftCriterionIssue": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "description",
+        "reason"
+      ],
+      "title": "DraftCriterionIssue",
       "type": "object"
     },
     "EmailDraft": {
@@ -933,6 +990,17 @@
           "maxItems": 3,
           "title": "People",
           "type": "array"
+        },
+        "company_identity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CompanyIdentity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -1064,6 +1132,18 @@
     },
     "SavedRecord": {
       "properties": {
+        "source_issue": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Issue"
+        },
         "research": {
           "$ref": "#/$defs/Research"
         },
@@ -1222,7 +1302,6 @@
             "$ref": "#/$defs/Criterion"
           },
           "maxItems": 12,
-          "minItems": 1,
           "title": "Criteria",
           "type": "array"
         },
@@ -1232,6 +1311,14 @@
           },
           "maxItems": 12,
           "title": "Unknowns",
+          "type": "array"
+        },
+        "criteria_issues": {
+          "items": {
+            "$ref": "#/$defs/DraftCriterionIssue"
+          },
+          "maxItems": 8,
+          "title": "Criteria Issues",
           "type": "array"
         }
       },
@@ -1567,6 +1654,16 @@
       ],
       "default": null,
       "title": "Termination"
+    },
+    "can_retry_seller": {
+      "default": false,
+      "title": "Can Retry Seller",
+      "type": "boolean"
+    },
+    "can_continue_discovery": {
+      "default": false,
+      "title": "Can Continue Discovery",
+      "type": "boolean"
     }
   },
   "required": [

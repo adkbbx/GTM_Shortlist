@@ -1,12 +1,14 @@
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import type { components } from './generated/api';
+import type { components, paths } from './generated/api';
 import runSchema from './generated/RunView.json';
 import healthSchema from './generated/Health.json';
 import authSchema from './generated/AuthSetup.json';
 import walletSchema from './generated/WalletView.json';
 import serviceSchema from './generated/ServiceView.json';
 import creditHistorySchema from './generated/CreditHistory.json';
+import modelsSchema from './generated/LocalModels.json';
+import iconSchema from './generated/SiteIconInfo.json';
 
 export type Run = components['schemas']['RunView'];
 export type Health = components['schemas']['Health'];
@@ -25,6 +27,8 @@ const ajv = new Ajv({ strict: false });
 addFormats(ajv);
 const isRun = ajv.compile<Run>(runSchema);
 const isHealth = ajv.compile<Health>(healthSchema);
+const isModels = ajv.compile<components['schemas']['LocalModels']>(modelsSchema);
+const isSiteIcon = ajv.compile<components['schemas']['SiteIconInfo']>(iconSchema);
 const isAuthSetup = ajv.compile<AuthSetup>(authSchema);
 const isWallet = ajv.compile<Wallet>(walletSchema);
 const isService = ajv.compile<Service>(serviceSchema);
@@ -66,7 +70,50 @@ function parseRun(data: unknown): Run {
   return data;
 }
 
+async function localResearchHealth(): Promise<Health> {
+  const health = await request('/api/health');
+  if (!isHealth(health)) throw new Error('Research readiness could not be checked. Try again.');
+  if (health.mode === 'local' && (!health.search_ready || !health.gemma_ready || health.local_search_error)) {
+    throw new Error('Set up company search and the research model in Settings before starting research.');
+  }
+  return health;
+}
+
+async function startLocalResearch(health: Health) {
+  if (health.mode !== 'local' || health.worker_online) return;
+  const started = await request('/api/local/service/start', { confirmation: 'start_research_service' });
+  if (!isHealth(started) || !started.worker_online) throw new Error('Background research could not start. Try again.');
+}
+
+async function researchCommand(path: string, input: unknown): Promise<Run> {
+  const health = await localResearchHealth();
+  const run = parseRun(await request(path, input));
+  try { if (['queued', 'running'].includes(run.status)) await startLocalResearch(health); }
+  catch (error) {
+    throw new Error(`Research was saved, but background processing could not start. Retry this action or open the saved run and choose Resume research. ${error instanceof Error ? error.message : ''}`);
+  }
+  return run;
+}
+
 export const api = {
+  async siteIcon(runId: string, domain: string) {
+    const data = await request(`/api/runs/${encodeURIComponent(runId)}/site-icon/${encodeURIComponent(domain)}`);
+    if (!isSiteIcon(data)) throw new Error('The site icon response was unreadable.');
+    if (!data.url) return null;
+    const url = new URL(data.url);
+    if (url.protocol !== 'https:' || url.username || url.password || (url.port && url.port !== '443')) return null;
+    return url.href;
+  },
+  async availableModels(input: paths['/api/local/model/models']['post']['requestBody']['content']['application/json']) {
+    const data = await request('/api/local/model/models', input);
+    if (!isModels(data)) throw new Error('The server returned an unreadable model list. Use advanced setup or try again.');
+    return data.models;
+  },
+  async resumeResearch(id: string) {
+    const run = parseRun(await request(`/api/runs/${encodeURIComponent(id)}`));
+    if (!['queued', 'running'].includes(run.status) || run.termination) throw new Error('This run is no longer waiting to resume. Reload the saved research.');
+    await startLocalResearch(await localResearchHealth());
+  },
   async startEmailDraft(id: string, recordId: string, input: components['schemas']['StartEmailDraft']) {
     return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/records/${encodeURIComponent(recordId)}/email-draft/start`, input));
   },
@@ -74,15 +121,26 @@ export const api = {
     return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/records/${encodeURIComponent(recordId)}/email-draft`, input));
   },
   async chooseWebsite(id: string, website_url: string) {
-    return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/website`, { website_url }));
+    return researchCommand(`/api/runs/${encodeURIComponent(id)}/website`, { website_url });
   },
   async configureTavily(key: string) {
     const data = await request('/api/local/tavily', { key });
     if (!isHealth(data)) throw new Error('Search setup could not be confirmed. Please reload.');
     return data;
   },
+  async configureModel(input: { base_url: string; model: string; key: string }) {
+    const data = await request('/api/local/model', input);
+    if (!isHealth(data)) throw new Error('Research model setup could not be confirmed. Please reload.');
+    return data;
+  },
   async stop(id: string) {
     return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/stop`, { confirmation: 'stop' }));
+  },
+  async retrySeller(id: string) {
+    return researchCommand(`/api/runs/${encodeURIComponent(id)}/retry-seller`, { confirmation: 'retry_unstarted_seller' });
+  },
+  async continueDiscovery(id: string) {
+    return researchCommand(`/api/runs/${encodeURIComponent(id)}/continue-discovery`, { confirmation: 'use_saved_candidates_without_search' });
   },
   async creditHistory(before: string | null = null) {
     const data = await request(`/api/credits/history${before ? `?before=${encodeURIComponent(before)}` : ''}`);
@@ -90,7 +148,7 @@ export const api = {
     return data;
   },
   async reuse(id: string, request_key: string) {
-    return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/reuse`, { request_key }));
+    return researchCommand(`/api/runs/${encodeURIComponent(id)}/reuse`, { request_key });
   },
   async service() {
     const data = await request('/api/service');
@@ -143,10 +201,10 @@ export const api = {
   },
   async run(id: string) { return parseRun(await request(`/api/runs/${encodeURIComponent(id)}`)); },
   async start(seller_url: string, request_key: string) {
-    return parseRun(await request('/api/sellers', { seller_url, request_key, experience_version: 2 }));
+    return researchCommand('/api/sellers', { seller_url, request_key, experience_version: 2 });
   },
   async confirm(id: string, input: Confirmation) {
-    return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/confirm`, input));
+    return researchCommand(`/api/runs/${encodeURIComponent(id)}/confirm`, input);
   },
   async review(id: string, recordId: string, decision: Review['decision'], reason: string) {
     return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/records/${encodeURIComponent(recordId)}/review`, { decision, reason }));

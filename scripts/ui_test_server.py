@@ -11,6 +11,7 @@ from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 from ui_test_providers import FixtureModel, FixtureSearch, fixture_fetch
 
 from shortlist.api import create_app
@@ -61,6 +62,34 @@ if __name__ == "__main__":
     thread.start()
     application = FastAPI()
 
+    @application.get("/api/runs/{run_id}/site-icon/{domain}")
+    def fixture_site_icon(run_id: str, domain: str):
+        # Browser tests explicitly substitute declared icons. Never fetch live sites.
+        return {"url": None}
+
+    @application.get("/", response_class=HTMLResponse)
+    def fixture_home():
+        # Never inherit an operator's live directory ID from built frontend assets.
+        html = (Path(__file__).resolve().parents[1] / "dist" / "index.html").read_text(encoding="utf-8")
+        return html.replace("<head>", '<head><meta name="shortlist-company-suggestions-client-id" content="">')
+
+    @application.post("/__fixture_recoverable_offer")
+    def recoverable_offer(keep_valid: bool = False):
+        import json
+        from uuid import uuid4
+        raw = json.loads((Path(__file__).resolve().parents[1] / "examples/evaluation/seller-recovery-rakuten.json").read_text())["response"]
+        if keep_valid:
+            raw["customer_criteria"][0] = {"id": "online-store", "subject": "target_customer",
+                "customer_characteristic": "Sells consumer products through an online store", "required": True}
+        with held_lock:
+            identity = store.create_draft("https://seller.example/", "recoverable-offer-" + uuid4().hex)
+            fence = store.claim(identity)
+            checkpoint = store.get_run(identity)["checkpoint"]
+            checkpoint["seller_model_output"] = {"content": json.dumps(raw), "issues": [{"type": "value_error"}]}
+            store.checkpoint(identity, fence, "confirmation", checkpoint, "awaiting_confirmation",
+                             "Gemma output failed validation")
+        return {"id": identity}
+
     @application.post("/__fixture_failed_offer")
     def failed_offer():
         from uuid import uuid4
@@ -71,6 +100,34 @@ if __name__ == "__main__":
             checkpoint["seller_model_output"] = {"content": "{}", "issues": [{"type": "missing"}]}
             store.checkpoint(identity, fence, "confirmation", checkpoint, "awaiting_confirmation",
                             "Gemma output failed validation. Enter and confirm your offer and target manually to continue.")
+        return {"id": identity}
+
+    @application.post("/__fixture_unstarted_seller")
+    def unstarted_seller():
+        from uuid import uuid4
+        with held_lock:
+            identity = store.create_draft("https://seller.example/", "unstarted-seller-" + uuid4().hex)
+            fence = store.claim(identity)
+            checkpoint = store.get_run(identity)["checkpoint"]
+            store.checkpoint(identity, fence, "seller", checkpoint, "partial", "Labelled pre-dispatch setup failure")
+        return {"id": identity}
+
+    @application.post("/__fixture_saved_discovery")
+    def saved_discovery():
+        from uuid import uuid4
+        draft = FixtureModel().seller(None)
+        profile = Profile(seller_url="https://seller.example/", offer=draft.offer, target=draft.target,
+                          criteria=tuple(draft.criteria))
+        with held_lock:
+            identity = store.create_run(profile, "saved-discovery-" + uuid4().hex)
+            fence = store.claim(identity)
+            checkpoint = store.get_run(identity)["checkpoint"]
+            candidate = FixtureSearch().search("labelled saved search", profile.seller_url)[0]
+            checkpoint.update(discovered=[candidate.model_dump(mode="json")], completed_queries=[0])
+            attempt = store.reserve(identity, fence, FixtureSearch.name, "search", "search:1")
+            store.outcome(attempt, "failed", run_id=identity, fence=fence,
+                          payload={"type": "provider", "message": "Labelled interrupted discovery"})
+            store.checkpoint(identity, fence, "discovery", checkpoint, "partial", "Labelled interrupted discovery")
         return {"id": identity}
 
     @application.post("/__fixture_corrupt_provider")
@@ -90,6 +147,25 @@ if __name__ == "__main__":
         with held_lock:
             identity = store.create_run(profile, "held-browser-" + uuid4().hex)
             held_runs[identity] = threading.Event()
+        return {"id": identity}
+
+    @application.post("/__fixture_historical_article")
+    def historical_article():
+        from uuid import uuid4
+
+        from shortlist.providers import validate_extraction
+        draft = FixtureModel().seller(None)
+        profile = Profile(seller_url="https://seller.example/", offer=draft.offer,
+                          target=draft.target, criteria=tuple(draft.criteria))
+        with held_lock:
+            identity = store.create_run(profile, "historical-article-" + uuid4().hex)
+            fence = store.claim(identity)
+            source = fixture_fetch("https://publisher.example/blog/third-party-product", "publisher.example")
+            record = validate_extraction({"name": "Another company", "findings": []}, profile, "publisher.example", (source,))
+            with store.connection() as db:
+                db.execute("INSERT INTO records(id,run_id,domain,research) VALUES (?,?,?,?)",
+                           (record.id, identity, record.domain, record.model_dump_json()))
+            store.checkpoint(identity, fence, "review", {}, "partial")
         return {"id": identity}
 
     @application.post("/__fixture_three_companies")
