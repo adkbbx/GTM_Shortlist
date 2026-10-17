@@ -30,7 +30,7 @@ test('anonymous hosted visitors get the landing page and keep their company thro
   page.on('request', request => { const path = new URL(request.url()).pathname; if (path.startsWith('/api/') && path !== '/api/auth/setup') research.push(`${request.method()} ${path}`); });
   await page.goto('/');
   await expect(page.locator('#pl-hero-title')).toContainText('Find who fits.');
-  await expect(page.getByRole('region', { name: 'Example shortlist with synthetic companies' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Illustrative sample shortlist' })).toBeVisible();
   await page.waitForTimeout(2500);
   await capture(page, `.impeccable/review/${info.project.name}-public-landing.png`);
   expect(research).toEqual([]);

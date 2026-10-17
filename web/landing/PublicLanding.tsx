@@ -5,7 +5,7 @@ import '@fontsource/schibsted-grotesk/500.css';
 import '@fontsource/schibsted-grotesk/800.css';
 import { SignalStream } from './signal-stream';
 import { CompanySearch } from '../CompanySearch';
-import { exampleCheckpoints, examplePassage, storySteps, storyWeights } from './landing-data';
+import { exampleCheckpoints, exampleMark, examplePassage, storySteps, storyWeights } from './landing-data';
 import type { FeedState } from './landing-data';
 import { useLenis, usePrefersReducedMotion } from './useLenis';
 import './landing.css';
@@ -18,6 +18,7 @@ const companyInput = () => document.getElementById('website') as HTMLInputElemen
 const clamp01 = (t: number) => Math.max(0, Math.min(1, t));
 const smoother = (t: number) => { t = clamp01(t); return t * t * t * (t * (t * 6 - 15) + 10); };
 
+function ExampleLogo({ domain }: { domain: string }) { return <span className="pl-logo" dangerouslySetInnerHTML={{ __html: exampleMark(domain) }} />; }
 function Arrow() { return <span className="pl-arrow" aria-hidden="true">→</span>; }
 function Lock() { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" /></svg>; }
 const glyph = {
@@ -118,9 +119,9 @@ function Hero({ reduced, onStart, directoryId, iconLookup, instrumentRef }: { re
               <div className="pl-g-bot"><b data-kept="">0</b><span>kept of <em data-checked="">0</em></span></div>
             </div>)}
         </div>
-        <section ref={cardOut} className="pl-card pl-shortlist" aria-label="Example shortlist with synthetic companies">
+        <section ref={cardOut} className="pl-card pl-shortlist" aria-label="Illustrative sample shortlist">
           <span ref={portOut} className="pl-port" aria-hidden="true" />
-          <header><div><strong>Shortlist</strong><small>Example run · synthetic companies</small></div><span ref={count} className="pl-badge" aria-label="Companies kept in this example">0</span></header>
+          <header><div><strong>Shortlist</strong><small>Illustrative sample</small></div><span ref={count} className="pl-badge" aria-label="Companies kept in this example">0</span></header>
           <ol ref={rows} className="pl-rows" />
           <footer><a href="#evidence">Every row opens to its sources <Arrow /></a></footer>
         </section>
@@ -202,8 +203,8 @@ function Story({ reduced, scrollTo }: { reduced: boolean; scrollTo: ScrollTo }) 
         <article className="pl-stage">
           <div className="pl-stage-text"><span className="pl-step-no">Step 1 of 6</span><h3>Understand your offer</h3><p>We read your website once and draft what you sell. Every word stays editable.</p></div>
           <div className="pl-card pl-ui">
-            <div className="pl-ui-head"><span className="pl-label">Offer draft</span><span className="pl-tag">Synthetic example</span></div>
-            <div className="pl-ui-row pl-fade" data-at="0"><span className="pl-mark ok">{glyph.ok}</span><div className="pl-grow"><b>relay-studio.example</b><small>Homepage read once and saved</small></div></div>
+            <div className="pl-ui-head"><span className="pl-label">Offer draft</span></div>
+            <div className="pl-ui-row pl-fade" data-at="0"><span className="pl-mark ok">{glyph.ok}</span><div className="pl-grow"><b>Relay Studio</b><small>Homepage read once and saved</small></div></div>
             <div className="pl-ui-block pl-fade" data-at=".15"><span className="pl-label">What you sell</span><p className="pl-quote">Customer onboarding workflow reviews for B2B software teams.</p></div>
             <div className="pl-ui-block pl-fade" data-at=".3"><span className="pl-label">Who it is for</span><p>Teams that want to improve the journey from signup to first value.</p></div>
             <div className="pl-ui-foot pl-fade" data-at=".45"><span className="pl-btnlike">Edit offer</span><span className="pl-btnlike">Edit target</span></div>
@@ -212,10 +213,10 @@ function Story({ reduced, scrollTo }: { reduced: boolean; scrollTo: ScrollTo }) 
         <article className="pl-stage">
           <div className="pl-stage-text"><span className="pl-step-no">Step 2 of 6</span><h3>Explore the market</h3><p>Nearby companies and campaign ideas, labelled as observations and hypotheses. Nothing is presented as fact.</p></div>
           <div className="pl-card pl-ui">
-            <div className="pl-ui-head"><span className="pl-label">Market</span><span className="pl-tag">Synthetic example</span></div>
-            <div className="pl-ui-row pl-fade" data-at="0"><span className="pl-ini">SH</span><div className="pl-grow"><b>signalhouse.example</b><small>Observation · publishes onboarding case studies</small></div><span className="pl-pill ok">Saved</span></div>
-            <div className="pl-ui-row pl-fade" data-at=".2"><span className="pl-ini">TW</span><div className="pl-grow"><b>tidewater.example</b><small>Observation · sells to the same buyers</small></div><span className="pl-pill ok">Saved</span></div>
-            <div className="pl-ui-row pl-fade" data-at=".4"><span className="pl-ini">PL</span><div className="pl-grow"><b>pagelane.example</b><small>Page could not be read</small></div><span className="pl-pill fail">Failed</span></div>
+            <div className="pl-ui-head"><span className="pl-label">Market</span></div>
+            <div className="pl-ui-row pl-fade" data-at="0"><ExampleLogo domain="signalhouse.example" /><div className="pl-grow"><b>Signalhouse</b><small>Observation · publishes onboarding case studies</small></div><span className="pl-pill ok">Saved</span></div>
+            <div className="pl-ui-row pl-fade" data-at=".2"><ExampleLogo domain="tidewater.example" /><div className="pl-grow"><b>Tidewater Labs</b><small>Observation · sells to the same buyers</small></div><span className="pl-pill ok">Saved</span></div>
+            <div className="pl-ui-row pl-fade" data-at=".4"><ExampleLogo domain="pagelane.example" /><div className="pl-grow"><b>Pagelane</b><small>Page could not be read</small></div><span className="pl-pill fail">Failed</span></div>
             <div className="pl-ui-row pl-fade pl-last" data-at=".6"><span className="pl-ini">H1</span><div className="pl-grow"><b>Time-to-value audit</b><small>Campaign idea · mid-size SaaS with self-serve signup</small></div><span className="pl-pill hyp">Hypothesis</span></div>
           </div>
         </article>
@@ -230,10 +231,10 @@ function Story({ reduced, scrollTo }: { reduced: boolean; scrollTo: ScrollTo }) 
         <article className="pl-stage">
           <div className="pl-stage-text"><span className="pl-step-no">Step 4 of 6</span><h3>Discover companies</h3><p>Candidates are checked against your confirmed criteria. Only the ones that pass are researched, and nothing is padded to look busy.</p></div>
           <div className="pl-card pl-ui pl-discover">
-            <div className="pl-ui-head"><span className="pl-label">Candidates</span><span className="pl-tag">Synthetic example</span></div>
-            <div className="pl-ui-row pl-fade" data-at="0" data-done=".25" data-kind="ok"><span className="pl-mark work" /><span className="pl-ini">NC</span><div className="pl-grow"><b>Northstar Cloud</b><small>northstar.example · onboarding product page</small></div><span className="pl-pill ok pl-show">Fits</span></div>
-            <div className="pl-ui-row pl-fade" data-at=".25" data-done=".5" data-kind="you"><span className="pl-mark work" /><span className="pl-ini">BH</span><div className="pl-grow"><b>Brightpath HR</b><small>brightpath.example · ownership unclear</small></div><span className="pl-pill you pl-show">Needs a call</span></div>
-            <div className="pl-ui-row pl-fade pl-last" data-at=".5" data-done=".75" data-kind="fail"><span className="pl-mark work" /><span className="pl-ini">QS</span><div className="pl-grow"><b>Quarry Stack</b><small>quarry.example · consumer-only</small></div><span className="pl-pill fail pl-show">Excluded</span></div>
+            <div className="pl-ui-head"><span className="pl-label">Candidates</span></div>
+            <div className="pl-ui-row pl-fade" data-at="0" data-done=".25" data-kind="ok"><span className="pl-mark work" /><ExampleLogo domain="northstar.example" /><div className="pl-grow"><b>Northstar Cloud</b><small>Onboarding product page found</small></div><span className="pl-pill ok pl-show">Fits</span></div>
+            <div className="pl-ui-row pl-fade" data-at=".25" data-done=".5" data-kind="you"><span className="pl-mark work" /><ExampleLogo domain="brightpath.example" /><div className="pl-grow"><b>Brightpath HR</b><small>Ownership unclear</small></div><span className="pl-pill you pl-show">Needs a call</span></div>
+            <div className="pl-ui-row pl-fade pl-last" data-at=".5" data-done=".75" data-kind="fail"><span className="pl-mark work" /><ExampleLogo domain="quarry.example" /><div className="pl-grow"><b>Quarry Stack</b><small>Consumer-only product</small></div><span className="pl-pill fail pl-show">Excluded</span></div>
             <div className="pl-ui-foot"><span className="pl-src">Only companies marked Fits move on to research.</span></div>
           </div>
         </article>
@@ -242,8 +243,8 @@ function Story({ reduced, scrollTo }: { reduced: boolean; scrollTo: ScrollTo }) 
           <div className="pl-card pl-ui">
             <div className="pl-ui-head"><span className="pl-label">Finding</span><span className="pl-pill ok pl-show" data-part="supported">Supported in source</span></div>
             <div className="pl-ui-block"><b>Northstar Cloud offers a B2B onboarding product</b></div>
-            <p className="pl-passage">“{examplePassage.split(' ').map((word, i) => <span key={i}><span className="pl-hw">{word}</span>{' '}</span>)}”</p>
-            <p className="pl-src">Synthetic passage · northstar.example/product · invented for this example</p>
+            <p className="pl-passage">“{examplePassage.split(' ').map((word, i, all) => <span key={i}><span className="pl-hw">{word}</span>{i < all.length - 1 ? ' ' : null}</span>)}”</p>
+            <p className="pl-src">From their product page · exact words saved</p>
             <div className="pl-ui-row pl-fade pl-last pl-unknown" data-at=".75"><span className="pl-mark idle" /><div className="pl-grow"><b>Unknown</b><small>Who owns the onboarding budget is not established.</small></div></div>
             <div className="pl-ui-foot"><span className="pl-btnlike">Open the saved page <Arrow /></span></div>
           </div>
@@ -251,7 +252,7 @@ function Story({ reduced, scrollTo }: { reduced: boolean; scrollTo: ScrollTo }) 
         <article className="pl-stage">
           <div className="pl-stage-text"><span className="pl-step-no">Step 6 of 6 · You decide</span><h3>Make the call</h3><p>Fit is an assessment, not buying intent. Accepting a company is your decision, saved separately from the model's.</p></div>
           <div className="pl-card pl-ui">
-            <div className="pl-ui-head"><span className="pl-label">Your review</span><span className="pl-tag">Synthetic example</span></div>
+            <div className="pl-ui-head"><span className="pl-label">Your review</span></div>
             <div className="pl-ui-block"><b>Northstar Cloud</b><p className="pl-src">Evidence: describes a business onboarding product. Unknown: budget ownership.</p></div>
             <p className="pl-fade pl-draft-line" data-at=".7">Optional: <span className="pl-accent">draft an email that cites this source <Arrow /></span></p>
             <div className="pl-ui-foot"><span className="pl-btnlike" data-part="accept">Accept</span><span className="pl-btnlike">Not a fit</span><span className="pl-btnlike">Needs a conversation</span><span className="pl-pill ok pl-show" data-part="accepted">{glyph.ok}Accepted by you</span></div>
@@ -272,9 +273,30 @@ function Evidence({ reduced }: { reduced: boolean }) {
     const observer = new IntersectionObserver(entries => { if (entries[0].isIntersecting) { setOn(true); observer.disconnect(); } }, { threshold: 0.3 });
     observer.observe(node); return () => observer.disconnect();
   }, [reduced]);
+  // Signal lines run from the gutter beside each footnote to its note, so they never cross the sentence. Wide layouts only.
+  const [leaders, setLeaders] = useState<string[]>([]);
+  useEffect(() => {
+    const node = grid.current; if (!node) return;
+    const wide = window.matchMedia('(min-width: 901px)');
+    const measure = () => {
+      const sentence = node.querySelector('.pl-sentence');
+      if (!wide.matches || !sentence) { setLeaders([]); return; }
+      const box = node.getBoundingClientRect(), rail = sentence.getBoundingClientRect().right - box.left + 12;
+      const sups = [...node.querySelectorAll('.pl-sentence sup')], nums = [...node.querySelectorAll('.pl-num')];
+      setLeaders(sups.map((sup, i) => {
+        const s = sup.getBoundingClientRect(), n = nums[i]?.getBoundingClientRect(); if (!n) return '';
+        const y1 = s.top - box.top + s.height / 2, x2 = n.left - box.left - 8, y2 = n.top - box.top + n.height / 2, mid = rail + (x2 - rail) * 0.5;
+        return `M${rail.toFixed(1)} ${y1.toFixed(1)} C ${mid.toFixed(1)} ${y1.toFixed(1)}, ${mid.toFixed(1)} ${y2.toFixed(1)}, ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+      }));
+    };
+    const observer = new ResizeObserver(measure); observer.observe(node);
+    wide.addEventListener('change', measure);
+    void document.fonts?.ready.then(measure);
+    return () => { observer.disconnect(); wide.removeEventListener('change', measure); };
+  }, []);
   const part = (n: number) => hot === n ? ' hot' : '';
   const notes = [
-    { n: 1, quote: '“…helps business teams manage…”', source: 'northstar.example/product · exact words saved' },
+    { n: 1, quote: '“…helps business teams manage…”', source: 'Product page · exact words saved' },
     { n: 2, quote: '“…customer onboarding, from the first welcome…”', source: 'Same page · highlighted in context' },
     { n: 3, quote: 'Unknown: budget owner', source: 'Not on their site, so it needs a conversation' },
   ];
@@ -286,11 +308,16 @@ function Evidence({ reduced }: { reduced: boolean }) {
       </div>
       <div className="pl-ev-grid" ref={grid}>
         <div>
-          <span className="pl-card pl-chip"><span className="pl-mark ok">{glyph.ok}</span><b>northstar.example</b><span>3 sources · synthetic example</span></span>
+          <span className="pl-card pl-chip"><span className="pl-mark ok">{glyph.ok}</span><b>Northstar Cloud</b><span>3 sources</span></span>
           <p className="pl-sentence">Northstar Cloud helps <span className={`pl-hl${part(1)}`}>business teams</span><sup>1</sup> manage <span className={`pl-hl second${part(2)}`}>customer onboarding</span><sup>2</sup>, from the first welcome to the handover. <span className={`pl-unk${part(3)}`}>Who owns that budget is not established.</span><sup className="u">3</sup></p>
         </div>
         <ol className="pl-notes">{notes.map(note => <li key={note.n} className={note.n === 3 ? 'unknown' : undefined} onPointerEnter={() => setHot(note.n)} onPointerLeave={() => setHot(0)}>
           <span className="pl-num">{note.n}</span><span>{note.quote}</span><small>{note.source}</small></li>)}</ol>
+        <svg className="pl-leaders" aria-hidden="true">{leaders.map((d, i) => d && <g key={i} className={`${i === 2 ? 'u' : ''}${hot === i + 1 ? ' hot' : ''}`}>
+          <path d={d} pathLength={1} style={{ transitionDelay: `${i * 0.25}s` }} />
+          <circle className="pl-start" r="3" cx={d.split(' ')[0].slice(1)} cy={d.split(' ')[1]} />
+          {!reduced && <circle className="pl-signal" r="2.6"><animateMotion dur={`${2.4 + i * 0.4}s`} repeatCount="indefinite" path={d} /></circle>}
+        </g>)}</svg>
       </div>
     </div>
   </section>;
@@ -328,7 +355,7 @@ function Checkpoints({ reduced }: { reduced: boolean }) {
     return () => { observer.disconnect(); window.clearTimeout(timer); feed.replaceChildren(); };
   }, [reduced]);
   return <div className="pl-card pl-feed" aria-label="Example checkpoints">
-    <header><span className="pl-label">Checkpoints</span><span className="pl-live-dot">Example run</span></header>
+    <header><span className="pl-label">Checkpoints</span><span className="pl-live-dot">Sample run</span></header>
     <ol ref={list} />
   </div>;
 }
@@ -408,6 +435,6 @@ export function PublicLanding({ onStart, onSignIn, directoryId, iconLookup = fal
       </section>
       <Closing reduced={reduced} onStart={onStart} />
     </main>
-    <footer className="pl-footer"><div className="pl-wrap"><div className="pl-big">GTM Shortlist</div><div className="pl-links"><span>Open-source company research</span><a href={sourceCodeUrl} target="_blank" rel="noreferrer">Source code</a>{signIn('', 'Sign in')}<a href="?demo=1">Interactive demo</a></div></div></footer>
+    <footer className="pl-footer"><div className="pl-wrap"><div className="pl-big">GTM Shortlist</div><div className="pl-links"><span>Open-source company research</span><a href={sourceCodeUrl} target="_blank" rel="noreferrer">Source code</a>{signIn('', 'Sign in')}<a href="?demo=1">Interactive demo</a></div><p className="pl-fine">Companies, quotes and figures shown on this page are an illustrative sample.</p></div></footer>
   </div>;
 }

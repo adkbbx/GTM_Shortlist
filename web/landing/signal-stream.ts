@@ -1,4 +1,4 @@
-import { exampleShortlist } from './landing-data';
+import { exampleMark, exampleShortlist } from './landing-data';
 
 /* The landing hero's stream. 21 evenly spaced lanes leave the company card, spread across the web and narrow through
    three checks (offer, target, evidence) into the example shortlist. Each check is a wall with one opening exactly as
@@ -15,6 +15,8 @@ const N = 21, HALF = (N - 1) / 2, LANES = Array.from({ length: N }, (_, i) => i 
 const KEEP = [HALF, 5, 2, 1], SQUEEZE = [1, 0.8, 0.66];
 const DOT: Array<[number, number, number, number]> = [[27, 27, 27, 0.5], [27, 27, 27, 0.72], [180, 80, 28, 0.9], [213, 104, 47, 1]];
 const TAU = Math.PI * 2;
+// An example shortlist stays shortlist-sized: fewer passing dots are counted as it nears this many companies.
+const SHORTLIST_SIZE = 60;
 const endsAt = (s: number) => { const m = Math.abs(s); return m > KEEP[1] ? 0 : m > KEEP[2] ? 1 : m > KEEP[3] ? 2 : 3; };
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const clamp01 = (t: number) => Math.max(0, Math.min(1, t));
@@ -25,7 +27,7 @@ const ICON = {
   you: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 8h8M8 4v8"/></svg>',
 };
 
-type Dot = { s: number; a: number; v: number; k: number; end: number; fade: number; dead?: boolean };
+type Dot = { s: number; a: number; v: number; k: number; end: number; fade: number; counted: boolean; dead?: boolean };
 
 export class SignalStream {
   private ctx: CanvasRenderingContext2D;
@@ -146,7 +148,10 @@ export class SignalStream {
     this.cache = cache;
   }
 
-  private spawn(a = this.a0) { const s = LANES[(Math.random() * N) | 0]; this.dots.push({ s, a, v: 0.85 + Math.random() * 0.3, k: 0, end: endsAt(s), fade: 0 }); }
+  private spawn(a = this.a0) {
+    const s = LANES[(Math.random() * N) | 0], counted = Math.random() < Math.max(0, 1 - this.keptCount[2] / SHORTLIST_SIZE);
+    this.dots.push({ s, a, v: 0.85 + Math.random() * 0.3, k: 0, end: endsAt(s), fade: 0, counted });
+  }
   private seed() {
     const n = Math.round(this.rate * (this.a1 - this.a0) / (this.base * this.U));
     for (let i = 0; i < n; i++) {
@@ -157,9 +162,9 @@ export class SignalStream {
     this.dots = this.dots.filter(d => !d.dead);
   }
   private addRow(animate: boolean) {
-    const fits = Math.random() < 0.8, name = exampleShortlist[this.nameIndex++ % exampleShortlist.length], sources = 2 + ((Math.random() * 4) | 0);
+    const fits = Math.random() < 0.8, company = exampleShortlist[this.nameIndex++ % exampleShortlist.length], sources = 2 + ((Math.random() * 4) | 0);
     const li = document.createElement('li'); if (animate && !this.reduced) li.className = 'new';
-    li.innerHTML = `<span class="pl-ini" aria-hidden="true">${name.slice(0, 2).toUpperCase()}</span><span class="pl-dom"><b>${name}.example</b><span>${fits ? `${sources} sources · fits your target` : 'Fits · budget owner unknown'}</span></span><span class="pl-mark ${fits ? 'ok' : 'you'}" role="img" aria-label="${fits ? 'Fits' : 'Needs a call'}">${fits ? ICON.ok : ICON.you}</span>`;
+    li.innerHTML = `<span class="pl-logo">${exampleMark(company.domain)}</span><span class="pl-dom"><b>${company.name}</b><span>${fits ? `${sources} sources · fits your target` : 'Fits · budget owner unknown'}</span></span><span class="pl-mark ${fits ? 'ok' : 'you'}" role="img" aria-label="${fits ? 'Fits' : 'Needs a call'}">${fits ? ICON.ok : ICON.you}</span>`;
     this.el.rows.prepend(li); while (this.el.rows.children.length > 8) this.el.rows.lastChild?.remove();
     if (animate && !this.reduced) { const p = this.el.portOut; p.classList.remove('ping'); void p.offsetWidth; p.classList.add('ping'); }
   }
@@ -202,13 +207,13 @@ export class SignalStream {
       if (d.fade) { d.fade -= dt / 0.35; if (d.fade <= 0) d.dead = true; else this.drawDot(d, d.fade); continue; }
       if (!reduced) d.a += v * d.v * dt;
       while (d.k < 3 && d.a >= G[d.k]) {
-        const k = d.k; if (intro >= 1) this.checked[k]++;
+        const k = d.k, counts = intro >= 1 && d.counted; if (counts) this.checked[k]++;
         if (d.end === k) { d.a = G[k] - 1; d.fade = 1; break; }
-        if (intro >= 1) this.keptCount[k]++;
+        if (counts) this.keptCount[k]++;
         this.glow[k] = Math.min(1, this.glow[k] + 0.18); d.k++;
       }
       if (d.fade) continue;
-      if (d.a >= this.a1) { d.dead = true; if (intro >= 1) this.arrivals++; continue; }
+      if (d.a >= this.a1) { d.dead = true; if (intro >= 1 && d.counted) this.arrivals++; continue; }
       if (d.a <= reach) this.drawDot(d, 1);
     }
     this.dots = this.dots.filter(d => !d.dead);
