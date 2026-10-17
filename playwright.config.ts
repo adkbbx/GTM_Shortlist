@@ -8,6 +8,8 @@ const hosted = Boolean(process.env.SHORTLIST_UI_TEST_PG_URL);
 const fixtureEnvironment = { PYTHONPATH: `${resolve('src')}${process.platform === 'win32' ? ';' : ':'}${resolve('.')}` };
 export default defineConfig({
   testDir: './tests/ui', timeout: 45000, fullyParallel: false, workers: 1,
+  // In CI, failures also become GitHub annotations so failing tests are visible without the raw job log.
+  reporter: process.env.CI ? [['github'], ['list']] : 'list',
   use: { baseURL: 'http://127.0.0.1:8015', trace: 'retain-on-failure' },
   projects: [
     { name: 'laptop', testIgnore: /credits.spec.ts/, use: { viewport: { width: 1366, height: 900 } } },
