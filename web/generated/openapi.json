@@ -1674,6 +1674,29 @@
         ],
         "title": "Criterion"
       },
+      "DraftCriterionIssue": {
+        "properties": {
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Description"
+          },
+          "reason": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "description",
+          "reason"
+        ],
+        "title": "DraftCriterionIssue"
+      },
       "EditEmailDraft": {
         "properties": {
           "subject": {
@@ -3095,7 +3118,6 @@
             },
             "type": "array",
             "maxItems": 12,
-            "minItems": 1,
             "title": "Criteria"
           },
           "unknowns": {
@@ -3105,6 +3127,14 @@
             "type": "array",
             "maxItems": 12,
             "title": "Unknowns"
+          },
+          "criteria_issues": {
+            "items": {
+              "$ref": "#/components/schemas/DraftCriterionIssue"
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Criteria Issues"
           }
         },
         "additionalProperties": false,

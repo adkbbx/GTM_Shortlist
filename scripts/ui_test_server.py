@@ -73,6 +73,23 @@ if __name__ == "__main__":
         html = (Path(__file__).resolve().parents[1] / "dist" / "index.html").read_text(encoding="utf-8")
         return html.replace("<head>", '<head><meta name="shortlist-company-suggestions-client-id" content="">')
 
+    @application.post("/__fixture_recoverable_offer")
+    def recoverable_offer(keep_valid: bool = False):
+        import json
+        from uuid import uuid4
+        raw = json.loads((Path(__file__).resolve().parents[1] / "examples/evaluation/seller-recovery-rakuten.json").read_text())["response"]
+        if keep_valid:
+            raw["customer_criteria"][0] = {"id": "online-store", "subject": "target_customer",
+                "customer_characteristic": "Sells consumer products through an online store", "required": True}
+        with held_lock:
+            identity = store.create_draft("https://seller.example/", "recoverable-offer-" + uuid4().hex)
+            fence = store.claim(identity)
+            checkpoint = store.get_run(identity)["checkpoint"]
+            checkpoint["seller_model_output"] = {"content": json.dumps(raw), "issues": [{"type": "value_error"}]}
+            store.checkpoint(identity, fence, "confirmation", checkpoint, "awaiting_confirmation",
+                             "Gemma output failed validation")
+        return {"id": identity}
+
     @application.post("/__fixture_failed_offer")
     def failed_offer():
         from uuid import uuid4

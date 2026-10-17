@@ -1,3 +1,4 @@
+import json
 import re
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -33,7 +34,7 @@ from shortlist.local_service import LocalResearchService, ServiceUnavailable
 from shortlist.market import MarketResearch, reviewed_market
 from shortlist.model_setup import LocalModels, ModelSetupError, available_models
 from shortlist.progress import RunProgress, public_events
-from shortlist.providers import SellerDraft, company_name_matches
+from shortlist.providers import SellerDraft, company_name_matches, recover_customer_draft
 from shortlist.relevance import record_issue
 from shortlist.selection import Selection
 from shortlist.site_icons import SiteIcons
@@ -288,6 +289,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         run = store.get_run(run_id)
         profile = Profile.model_validate(run["profile"]) if run["profile"] else None
         error = run["error"]
+        draft = run["checkpoint"].get("draft")
+        if profile is None and not draft and run["status"] == "awaiting_confirmation" and \
+                run["checkpoint"].get("seller_output_protocol") == 3:
+            diagnostic = run["checkpoint"].get("seller_model_output", {})
+            try:
+                data = json.loads(diagnostic.get("content", ""))
+                if isinstance(data, dict):
+                    draft = recover_customer_draft(data).model_dump(mode="json")
+            except (ValueError, TypeError):
+                pass  # Malformed summaries still need manual entry; never invent replacement text.
         matches = [Candidate.model_validate(value) for value in run["checkpoint"].get("website_matches", [])]
         company_name = run["checkpoint"].get("company_name")
         market = run["checkpoint"].get("market")
@@ -303,12 +314,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             if run["stage"] == "website" and not matches and not error:
                 error = "No clear website match was found. Enter your company's website below to continue."
         if profile is None and run["status"] == "awaiting_confirmation" and "seller_model_output" in run["checkpoint"]:
-            error = ("We couldn't create a usable offer summary from this page. Company search hasn't started. "
+            error = ("Your offer summary was recovered from the saved response. Review the proposed target and fit criteria below. "
+                     "No new model call was made." if draft else
+                     "We couldn't create a usable offer summary from this page. Company search hasn't started. "
                      "Enter what you sell and who you want to reach below, or choose New shortlist "
                      "and use a product or services page.")
         return RunView(id=run_id, seller_url=profile.seller_url if profile else run["checkpoint"]["seller_url"],
                        company_name=company_name, website_matches=matches,
-                       status=run["status"], stage=run["stage"], profile=profile, draft=run["checkpoint"].get("draft"),
+                       status=run["status"], stage=run["stage"], profile=profile, draft=draft,
                        records=records, error=error, created_at=run["created_at"],
                        updated_at=run["updated_at"], attempts=run["attempts"], credits=run.get("credits"),
                        legacy_credit_exempt=run.get("legacy_credit_exempt", False),

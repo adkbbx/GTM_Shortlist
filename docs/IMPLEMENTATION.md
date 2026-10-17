@@ -13,6 +13,7 @@ Last updated 16 October 2026 JST. Current authorized design work and its accepta
 ## 2. Seller and confirmation
 - [ ] Fetch seller pages with provenance and draft offer/target using Gemma.
 - [x] Persist editable draft and explicit immutable confirmation before discovery.
+- [x] Preserve usable seller summaries when individual customer criteria are invalid; remove those suggestions with editing reasons, recover saved protocol3 failures without inference, and require a valid criterion before confirmation. Verified with recorded/offline and phone/laptop fixtures.
 - [ ] Validate Eygentic offer and configurable targets for other sellers.
 
 ## 3. Discovery and identity

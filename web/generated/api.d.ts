@@ -624,6 +624,13 @@ export interface components {
              */
             required: boolean;
         };
+        /** DraftCriterionIssue */
+        DraftCriterionIssue: {
+            /** Description */
+            description: string;
+            /** Reason */
+            reason: string;
+        };
         /** EditEmailDraft */
         EditEmailDraft: {
             /** Subject */
@@ -1145,6 +1152,8 @@ export interface components {
             criteria: components["schemas"]["Criterion-Output"][];
             /** Unknowns */
             unknowns: string[];
+            /** Criteria Issues */
+            criteria_issues?: components["schemas"]["DraftCriterionIssue"][];
         };
         /** SellerInput */
         SellerInput: {

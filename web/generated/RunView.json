@@ -294,6 +294,29 @@
       "title": "Criterion",
       "type": "object"
     },
+    "DraftCriterionIssue": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "description",
+        "reason"
+      ],
+      "title": "DraftCriterionIssue",
+      "type": "object"
+    },
     "EmailDraft": {
       "additionalProperties": false,
       "properties": {
@@ -1279,7 +1302,6 @@
             "$ref": "#/$defs/Criterion"
           },
           "maxItems": 12,
-          "minItems": 1,
           "title": "Criteria",
           "type": "array"
         },
@@ -1289,6 +1311,14 @@
           },
           "maxItems": 12,
           "title": "Unknowns",
+          "type": "array"
+        },
+        "criteria_issues": {
+          "items": {
+            "$ref": "#/$defs/DraftCriterionIssue"
+          },
+          "maxItems": 8,
+          "title": "Criteria Issues",
           "type": "array"
         }
       },

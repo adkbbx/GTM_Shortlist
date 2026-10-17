@@ -1,0 +1,44 @@
+{
+  "label": "Recorded model output regression. Generated targeting suggestions are not verified company facts.",
+  "response": {
+    "seller_offer": "Rakuten Advertising is a global network and affiliate intelligence platform that connects advertisers with publishers through a massive, curated network of premium partners, leveraging data science and AI to provide insights, strategies, and solutions across the entire marketing funnel (Awareness, engagement, sales, loyalty).",
+    "target_customer": "Large global brands and enterprises looking to scale their marketing efforts through affiliate marketing partnerships.",
+    "customer_criteria": [
+      {
+        "id": "CC01",
+        "subject": "target_customer",
+        "customer_characteristic": "Operates a global brand with a need to scale marketing efforts through external partnerships."
+      },
+      {
+        "id": "CC02",
+        "subject": "target_customer",
+        "customer_characteristic": "Manages a marketing budget that requires measurable performance across multiple channels."
+      },
+      {
+        "id": "CC03",
+        "subject": "target_customer",
+        "customer_characteristic": "Requires sophisticated data analysis to understand and optimize customer acquisition and retention strategies."
+      },
+      {
+        "id": "CC04",
+        "subject": "target_customer",
+        "customer_characteristic": "Focuses on building long-term, multi-faceted customer relationships."
+      },
+      {
+        "id": "CC05",
+        "subject": "target_customer",
+        "customer_characteristic": "Needs access to diverse audience segments, including emerging influencer channels."
+      },
+      {
+        "id": "CC06",
+        "subject": "target_customer",
+        "customer_characteristic": "Operates in a market where performance and demonstrable ROI are critical for business growth."
+      }
+    ],
+    "unknowns": [
+      "Specific industry vertical of the target customer",
+      "Current size of the target customer's marketing team",
+      "Specific geographic focus of the target customer's operations"
+    ]
+  }
+}

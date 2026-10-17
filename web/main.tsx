@@ -41,7 +41,7 @@ function Arrow() {
 function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & { seller_url: string }; wallet: Wallet | null; hostedAccount: boolean; onSaved: (run: Run) => void }) {
   const [offer, setOffer] = useState(run.draft?.offer ?? '');
   const [target, setTarget] = useState(run.draft?.target ?? '');
-  const [criteria, setCriteria] = useState<Confirmation['criteria']>(run.draft?.criteria ?? [{ id: 'criterion-1', description: '', required: true }]);
+  const [criteria, setCriteria] = useState<Confirmation['criteria']>(run.draft?.criteria.length ? run.draft.criteria : [{ id: 'criterion-1', description: '', required: true }]);
   const [exclusions, setExclusions] = useState((run.draft_exclusions ?? []).join('\n'));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -74,7 +74,8 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
       <label htmlFor="target">Who should we look for?</label>
       <textarea id="target" required minLength={5} maxLength={2000} rows={2} value={target} onChange={e => setTarget(e.target.value)} />
       {campaignName && <><label htmlFor="discovery-terms">Search keywords</label><input id="discovery-terms" required minLength={5} maxLength={300} value={discoveryTerms} onChange={e => setDiscoveryTerms(e.target.value)} aria-describedby="discovery-help" /><p id="discovery-help" className="hint">Observable company terms, such as industry, product and public announcements. Private performance assumptions belong in hypotheses.</p></>}
-      <fieldset><legend>Fit criteria</legend><p className="hint">Required criteria must have evidence. An unknown stays visible as a question to verify.</p>
+      <fieldset><legend>Fit criteria</legend><p className="hint">These checks guide company research and determine fit with your target customer. Use observable characteristics, such as industry or customers served. Required checks need supporting evidence; missing evidence stays unknown.</p>
+        {!!run.draft?.criteria_issues?.length && <div className="notice" role="status"><p>Unsupported suggestions were removed. {run.draft.criteria.length ? 'Review the remaining criteria before confirming.' : 'Add at least one observable customer characteristic before confirming.'} Your offer summary is kept for editing.</p><details><summary>Review {run.draft.criteria_issues.length} removed {run.draft.criteria_issues.length === 1 ? 'suggestion' : 'suggestions'}</summary><ul>{run.draft.criteria_issues.map((issue, index) => <li key={index}><p>{issue.description}</p><p className="hint">{issue.reason}</p></li>)}</ul></details></div>}
         {criteria.map((criterion, index) => <div className="criterion-input" key={criterion.id}>
           <label htmlFor={`criterion-${index}`}>Criterion {index + 1}</label>
           <input id={`criterion-${index}`} value={criterion.description} required minLength={3} maxLength={500}
@@ -88,7 +89,7 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
       <label htmlFor="exclusions">Exclude from consideration <span className="optional">Optional, one per line</span></label>
       <textarea id="exclusions" value={exclusions} rows={2} maxLength={6012} onChange={e => setExclusions(e.target.value)} aria-describedby="exclusions-help" />
       <p id="exclusions-help" className="hint">Up to 12 conditions, 3–500 characters each. Each needs evidence; an unverified exclusion stays unknown.</p>
-      {run.draft?.unknowns.length ? <div className="unknowns"><h3>Still unknown about your offer</h3><ul>{run.draft.unknowns.map(u => <li key={u}>{u}</li>)}</ul></div> : null}
+      {run.draft?.unknowns.length ? <div className="unknowns"><h3>Still needs review</h3><ul>{run.draft.unknowns.map(u => <li key={u}>{u}</li>)}</ul></div> : null}
       {hostedAccount && wallet === null && <p className="notice" role="status">Your credit balance must load before you can confirm the batch cost. Reload the workspace to retry.</p>}
       {wallet?.mode === 'hosted' && <section className="batch-choice"><label htmlFor="company-limit">Companies in this batch</label><select id="company-limit" value={companyLimit} onChange={event => setCompanyLimit(Number(event.target.value))}>{[1, 2, 3].map(quantity => <option key={quantity} value={quantity} disabled={quantity > available}>{quantity} {quantity === 1 ? 'company' : 'companies'}</option>)}</select><p>{run.legacy_credit_exempt ? 'Your original demo allowance is preserved.' : `Maximum ${companyLimit} ${companyLimit === 1 ? 'credit' : 'credits'} · ${wallet.available} available`}</p><p className="hint">Completed unknown or non-fit research counts. Credits for technical failures are returned. Review and export are free.</p>{available === 0 && <p className="notice">No research credits available. Saved research stays accessible. Credit purchases are not available yet.</p>}</section>}
       {error && <p className="notice" role="alert">{error}</p>}

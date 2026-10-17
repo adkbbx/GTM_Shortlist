@@ -9,7 +9,7 @@ from shortlist.config import Settings
 from shortlist.domain import Candidate, Criterion, Profile, Source
 from shortlist.fetch import domain_of
 from shortlist.market import market_candidates
-from shortlist.providers import Gemma, ModelOutputError, candidates_from_results, validate_extraction
+from shortlist.providers import Gemma, candidates_from_results, validate_extraction
 from shortlist.relevance import candidate_issue, company_page_issue
 from shortlist.store import Store
 from shortlist.worker import execute_run
@@ -184,13 +184,15 @@ def test_new_seller_format_separates_offer_from_customer_and_saves_existing_cont
     {"customer_characteristic": "Trusted by 500,000 customers"},
     {"customer_characteristic": "Needs help with low lead quality"},
 ])
-def test_new_seller_format_rejects_wrong_subject_and_obvious_seller_marketing(monkeypatch, changes):
+def test_new_seller_format_removes_wrong_subject_and_seller_marketing_without_losing_summary(monkeypatch, changes):
     model = Gemma(Settings())
     monkeypatch.setattr(model, "complete", lambda *args, **kwargs: {
         **BUYER, "customer_criteria": [{**BUYER["customer_criteria"][0], **changes}]})
     monkeypatch.setattr(type(model), "compact", property(lambda self: False))
-    with pytest.raises(ModelOutputError):
-        model.seller(source("https://seller.example/"))
+    recovered = model.seller(source("https://seller.example/"))
+    assert recovered.offer == BUYER["seller_offer"]
+    assert recovered.target == BUYER["target_customer"]
+    assert recovered.criteria == [] and len(recovered.criteria_issues) == 1
 
 
 def test_campaigns_cannot_reintroduce_seller_marketing_as_customer_criteria():

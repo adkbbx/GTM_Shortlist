@@ -197,12 +197,21 @@ class CapturedSearch:
         return [candidate.model_copy(update={"discovered_at": self.capture.captured_at}) for candidate in candidates]
 
 
+class DraftCriterionIssue(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    description: str = Field(min_length=1, max_length=500)
+    reason: str = Field(min_length=1, max_length=200)
+
+
 class SellerDraft(BaseModel):
     model_config = ConfigDict(extra="forbid", json_schema_serialization_defaults_required=True)
     offer: str = Field(min_length=10, max_length=4000)
     target: str = Field(min_length=5, max_length=2000)
-    criteria: list[Criterion] = Field(min_length=1, max_length=12)
+    # Unconfirmed drafts may need human criteria. Confirmed Target requires at least one.
+    criteria: list[Criterion] = Field(max_length=12)
     unknowns: list[str] = Field(default_factory=list, max_length=12)
+    criteria_issues: list[DraftCriterionIssue] = Field(default_factory=list, max_length=8,
+                                                     exclude_if=lambda value: not value)
 
     @field_validator("criteria", mode="before")
     @classmethod
@@ -228,27 +237,48 @@ class CustomerDraft(BaseModel):
     model_config = ConfigDict(extra="forbid", json_schema_serialization_defaults_required=True)
     seller_offer: str = Field(min_length=10, max_length=4000)
     target_customer: str = Field(min_length=5, max_length=2000)
-    customer_criteria: list[CustomerCriterion] = Field(min_length=1, max_length=6)
+    customer_criteria: list[CustomerCriterion] = Field(max_length=6)
     unknowns: list[str] = Field(default_factory=list, max_length=12)
 
-    @field_validator("customer_criteria")
-    @classmethod
-    def buyer_characteristics(cls, values):
-        from shortlist.market import PRIVATE_CONDITION
-        if len({c.id for c in values}) != len(values):
-            raise ValueError("Customer criteria require distinct IDs")
-        for criterion in values:
-            text = criterion.customer_characteristic
-            if seller_marketing_criterion(text):
-                raise ValueError("Customer criteria must not describe the seller's voice, platform or marketing claims")
-            if PRIVATE_CONDITION.search(text):
-                raise ValueError("Customer criteria must be publicly observable, not assumptions about private performance")
-        return values
 
-    def saved_draft(self) -> SellerDraft:
-        return SellerDraft(offer=self.seller_offer, target=self.target_customer,
-                           criteria=[Criterion(id=c.id, description=c.customer_characteristic, required=c.required)
-                                     for c in self.customer_criteria], unknowns=self.unknowns)
+def recover_customer_draft(data: dict) -> SellerDraft:
+    """Keep valid summary fields; omit unsafe criteria without inference or invented replacements."""
+    from shortlist.market import PRIVATE_CONDITION
+
+    unknowns = data.get("unknowns", [])
+    summary = SellerDraft(offer=data.get("seller_offer"), target=data.get("target_customer"), criteria=[],
+                          unknowns=[item for item in unknowns if isinstance(item, str)][:12]
+                          if isinstance(unknowns, list) else [])
+    raw = data.get("customer_criteria", [])
+    criteria, issues, seen = [], [], set()
+    for index, value in enumerate(raw[:6] if isinstance(raw, list) else []):
+        text = value.get("customer_characteristic") if isinstance(value, dict) else value
+        description = text[:500] if isinstance(text, str) and text.strip() else f"Suggestion {index + 1}"
+        reason = None
+        try:
+            criterion = CustomerCriterion.model_validate(value)
+            if criterion.id in seen:
+                reason = "Repeated criterion identifier. Keep distinct customer checks."
+            elif seller_marketing_criterion(criterion.customer_characteristic):
+                reason = "Describes the seller rather than a target customer."
+            elif PRIVATE_CONDITION.search(criterion.customer_characteristic) or re.search(
+                    r"\b(?:needs?|seeks?|requires?|looking to|aims? to|wants? to|marketing budget|ROI|customer relationships)\b",
+                    criterion.customer_characteristic, re.IGNORECASE):
+                reason = "Assumes internal needs or performance. Replace with a publicly observable customer characteristic."
+            if reason is None:
+                criteria.append(Criterion(id=criterion.id, description=criterion.customer_characteristic,
+                                          required=criterion.required))
+                seen.add(criterion.id)
+        except ValidationError:
+            reason = "Not a valid target-customer criterion. Write a clear customer characteristic."
+        if reason:
+            issues.append(DraftCriterionIssue(description=description, reason=reason))
+    if isinstance(raw, list) and len(raw) > 6:
+        issues.append(DraftCriterionIssue(description="Additional suggestions", reason="Only the first six model suggestions were reviewed."))
+    if not criteria and not issues:
+        issues.append(DraftCriterionIssue(description="No fit criteria supplied",
+                                          reason="Add at least one publicly observable customer characteristic."))
+    return summary.model_copy(update={"criteria": criteria, "criteria_issues": issues})
 
 
 class Extraction(BaseModel):
@@ -479,6 +509,10 @@ class Gemma:
         if output_protocol not in (1, 2, 3):
             raise ProviderError("Unsupported seller output protocol")
         schema = CustomerDraft.model_json_schema() if output_protocol == 3 else SellerDraft.model_json_schema()
+        if output_protocol != 3:
+            # Editing notices are application metadata, never fields requested from a model.
+            schema["properties"].pop("criteria_issues", None)
+            schema.get("$defs", {}).pop("DraftCriterionIssue", None)
         if output_protocol == 3:
             schema["properties"]["customer_criteria"]["items"] = schema.pop("$defs")["CustomerCriterion"]
         if output_protocol == 2:
@@ -504,7 +538,8 @@ class Gemma:
                 "Example: an industrial equipment vendor may target manufacturers, not other equipment vendors. "
                 "Use only buyer segments supported by the seller page; mark speculative targeting and missing company "
                 "traits in unknowns. Do not invent pain, budget, buying intent, employee counts or geography. "
-                "Return one to six concise customer criteria with distinct IDs. The human edits and confirms the target.")
+                "Return zero to six concise customer criteria with distinct IDs. If no observable buyer characteristics "
+                "are supported, return an empty customer_criteria list and keep the offer summary. The human edits and confirms the target.")
         compact = self.compact
         data = self.complete(
             instruction,
@@ -516,7 +551,7 @@ class Gemma:
                       else "Return the seller's actual offer, a proposed customer target, observable criteria and unknowns."),
             output_tokens=1500 if compact else None)
         try:
-            return CustomerDraft.model_validate(data).saved_draft() if output_protocol == 3 else SellerDraft.model_validate(data)
+            return recover_customer_draft(data) if output_protocol == 3 else SellerDraft.model_validate(data)
         except ValidationError as exc:
             raise ModelOutputError(json.dumps(data), exc.errors(include_input=False, include_url=False,
                                                               include_context=False)) from exc
