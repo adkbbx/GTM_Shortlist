@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GTM Shortlist · landing prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="vendor/lenis.css">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* ---------- header ---------- */
+.site-head { position: sticky; top: 0; z-index: 30; background: rgba(247, 247, 245, .92); border-bottom: 1px solid transparent; transition: border-color .25s var(--ease), background .25s var(--ease); }
+.site-head.scrolled { border-bottom-color: var(--line); background: rgba(247, 247, 245, .97); }
+.site-head .wrap { display: flex; align-items: center; gap: 1.5rem; height: 4.25rem; }
+.site-head nav { display: flex; gap: 1.5rem; margin-left: auto; }
+.site-head nav a { font-size: .9375rem; text-decoration: none; color: var(--charcoal); opacity: .8; transition: opacity .16s; }
+.site-head nav a:hover { opacity: 1; }
+.site-head .btn { min-height: 2.6rem; padding: .55rem 1rem; font-size: .9375rem; }
+.signin { font-size: .9375rem; font-weight: 600; text-decoration: none; }
+
+/* ---------- hero ---------- */
+.hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+.hero canvas.flow { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.hero-grid { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr); gap: clamp(2rem, 4vw, 5rem); align-items: center; padding-block: clamp(3rem, 6vw, 6rem) clamp(3.5rem, 7vw, 7rem); }
+.hero h1 { font-size: clamp(2.75rem, 1.4rem + 3.4vw, 5.25rem); line-height: .98; letter-spacing: -.035em; text-transform: uppercase; font-weight: 800; }
+.hero .lede { max-width: 34rem; margin-top: 1.5rem; font-size: 1.1875rem; color: var(--muted); }
+.intake { position: relative; margin-top: 2.25rem; max-width: 36rem; }
+.intake label { display: block; font-weight: 600; margin-bottom: .55rem; }
+.intake-row { display: flex; gap: .6rem; }
+.intake input { flex: 1; min-width: 0; height: 3.25rem; padding: 0 1rem; font: 400 1.0625rem var(--font); color: var(--charcoal); background: var(--sheet); border: 1px solid var(--charcoal); border-radius: 2px; caret-color: var(--orange-ink); transition: box-shadow .18s var(--ease), border-color .18s; }
+.intake input:focus { outline: none; border-color: var(--orange-ink); box-shadow: 0 0 0 3px rgba(180, 80, 28, .22); }
+.intake .note { margin-top: .75rem; font-size: .875rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: .4rem 1.25rem; }
+.intake .note a { color: var(--orange-ink); font-weight: 600; text-decoration: none; }
+.suggest { position: absolute; left: 0; right: 0; top: calc(100% - 1.6rem); z-index: 5; background: var(--sheet); border: 1px solid var(--charcoal); border-radius: 2px; box-shadow: 0 2px 0 var(--charcoal); padding: .35rem 0; opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity .18s var(--ease), transform .18s var(--ease); }
+.suggest.open { opacity: 1; transform: none; pointer-events: auto; }
+.suggest .row { display: flex; align-items: center; gap: .75rem; padding: .55rem .85rem; font-size: .9375rem; }
+.suggest .row.choice { cursor: pointer; }
+.suggest .row.choice:hover { background: var(--paper); }
+.suggest .ini { width: 1.6rem; height: 1.6rem; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 4px; font-size: .6875rem; font-weight: 700; }
+.suggest .sk { height: .6rem; border-radius: 2px; background: var(--line-soft); animation: pulse 1.6s ease-in-out infinite; }
+.suggest .hint { padding: .45rem .85rem .35rem; font-size: .75rem; color: var(--muted); border-top: 1px solid var(--line-soft); }
+@keyframes pulse { 50% { opacity: .35; } }
+.account { margin-top: 1rem; padding: 1.25rem; display: none; }
+.account.open { display: block; animation: rise .32s var(--ease); }
+.account h3 { font-size: 1.125rem; }
+.account .company { display: inline-flex; gap: .5rem; align-items: center; margin: .6rem 0 1rem; padding: .3rem .6rem; background: var(--paper); border: 1px solid var(--line); border-radius: 2px; font-size: .875rem; }
+.account .fields { display: grid; gap: .6rem; }
+.account input { height: 2.9rem; padding: 0 .85rem; border: 1px solid var(--line); border-radius: 2px; font: inherit; background: var(--sheet); }
+.account .btn { margin-top: .9rem; width: 100%; }
+.account small { display: block; margin-top: .7rem; color: var(--muted); }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+
+/* Mission scope: GTM Shortlist's own hero drawing in the Eygentic blueprint language (a sibling of the eygentic.com rocket, not a copy) */
+.scope { position: relative; margin: 0; width: min(100%, 40rem); justify-self: center; }
+.scope-stage { position: relative; }
+.scope-chart { position: relative; aspect-ratio: 600 / 560; }
+.scope-drawing { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; fill: none; stroke: var(--charcoal); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.scope-drawing .fill-paper { fill: var(--paper); }
+.scope-drawing .thin { stroke-width: .8; }
+.scope-drawing .ring-target { stroke: var(--apricot); stroke-width: 1.2; stroke-dasharray: 6 5; }
+.scope-drawing .traj { stroke: var(--charcoal); stroke-width: .9; stroke-dasharray: 3 5; opacity: .55; }
+.scope-drawing .bearing line { stroke-width: .7; }
+.scope-drawing .bearing line.major { stroke-width: 1.2; }
+.scope-drawing .pin { fill: var(--orange); stroke: none; }
+.scope-drawing .wedge-wide { fill: var(--orange); opacity: .07; stroke: none; }
+.scope-drawing .wedge-near { fill: var(--orange); opacity: .14; stroke: none; }
+.scope-drawing .edge { stroke: var(--orange); stroke-width: 1.6; }
+.scope-drawing .sweep { opacity: 0; transition: opacity .8s var(--ease) 1.4s; }
+.scope.on .scope-drawing .sweep { opacity: 1; }
+.scope-drawing .cand { fill: var(--idle); stroke: none; }
+.scope-drawing .lock.ok { stroke: var(--ok); } .scope-drawing .lock.ok rect { fill: var(--ok); }
+.scope-drawing .lock.you { stroke: var(--you); } .scope-drawing .lock.you rect { fill: var(--you); }
+.scope-drawing .lock.fail { stroke: var(--fail); } .scope-drawing .lock.fail rect { fill: var(--fail); }
+.scope-drawing .lock { stroke-width: 1.8; transform-box: fill-box; transform-origin: center; transition: transform .25s var(--ease); }
+.scope-drawing .lock.ping { transform: scale(1.35); }
+.scope-drawing .leaders { stroke-width: .9; }
+.scope-drawing .probe { opacity: 0; }
+.scope-drawing .probe-flame { fill: var(--orange); stroke: none; }
+.scope .tag { position: absolute; left: var(--x); top: var(--y); transform: translate(-50%, -50%); font: 600 .6875rem/1.2 var(--font); letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; color: var(--charcoal); background: var(--paper); padding: .1rem .3rem; }
+.scope .tag-ring { color: var(--orange-ink); }
+.scope .tag-port { transform: translate(-30%, 0); }
+.scope-labels { position: absolute; inset: 0; margin: 0; padding: 0; list-style: none; pointer-events: none; }
+.scope-labels li { position: absolute; left: 81.5%; width: 20%; top: var(--y); transform: translateY(-50%); display: flex; gap: .5rem; align-items: center; opacity: 0; translate: -6px 0; transition: opacity .4s var(--ease) var(--dl), translate .4s var(--ease) var(--dl); }
+.scope-labels li > span:last-child { display: grid; }
+.scope-labels .mark { width: 1.35rem; height: 1.35rem; }
+.scope-labels .mark svg { width: .8rem; height: .8rem; }
+.scope.on .scope-labels li { opacity: 1; translate: 0 0; }
+.module-name { font: 600 .92rem/1.25 var(--font); letter-spacing: -.01em; white-space: nowrap; }
+.module-meaning { font-size: .8rem; line-height: 1.3; color: var(--muted); }
+.scope .hand { position: absolute; left: -3%; top: 82%; display: flex; flex-direction: column; font-size: clamp(.95rem, .7rem + .5vw, 1.15rem); transform: rotate(-8deg); transform-origin: left top; }
+.scope .hand span:last-child { color: var(--orange-ink); }
+
+/* ---------- section scaffolding ---------- */
+.section { padding-block: clamp(4.5rem, 9vw, 8.5rem); border-bottom: 1px solid var(--line); }
+.section-head { display: grid; gap: 1rem; margin-bottom: clamp(2.5rem, 5vw, 4rem); }
+.section-head h2 { font-size: clamp(2.1rem, 1.3rem + 2.6vw, 3.75rem); letter-spacing: -.03em; line-height: 1.02; max-width: 20ch; }
+.section-head p { max-width: 40rem; color: var(--muted); font-size: 1.0625rem; }
+
+/* ---------- pinned trace story ---------- */
+.trace { position: relative; height: 680vh; border-bottom: 1px solid var(--line); }
+.trace-stage { position: sticky; top: 4.25rem; height: calc(100svh - 4.25rem); display: grid; grid-template-rows: auto auto 1fr auto; gap: clamp(.75rem, 2vh, 1.5rem); padding-block: clamp(1rem, 3vh, 2.25rem) clamp(1rem, 2.5vh, 1.75rem); overflow: hidden; }
+.trace-top { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.trace-top h2 { font-size: clamp(1.4rem, 1rem + 1.4vw, 2.25rem); letter-spacing: -.025em; text-transform: uppercase; }
+.trace svg.line { width: 100%; height: auto; max-height: 24vh; overflow: visible; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.trace svg.line .base { stroke: var(--apricot); stroke-width: 1; stroke-dasharray: 10 4 2 4; }
+.trace svg.line .run { stroke: var(--orange-ink); stroke-width: 3; }
+.trace svg.line .branch { stroke: var(--charcoal); stroke-width: 1.4; }
+.trace svg.line .st circle.ring { fill: var(--sheet); stroke: var(--idle); stroke-width: 1.4; transition: stroke .3s var(--ease); }
+.trace svg.line .st .icon { stroke: var(--idle); stroke-width: 1.4; transition: stroke .3s var(--ease); }
+.trace svg.line .st text { fill: var(--muted); stroke: none; font: 600 12px var(--font); letter-spacing: .1em; text-anchor: middle; }
+.trace svg.line .st .done-pin { fill: var(--ok); stroke: var(--sheet); stroke-width: 2; opacity: 0; transform-box: fill-box; transform-origin: center; transform: scale(.4); transition: opacity .3s var(--ease), transform .3s var(--ease); }
+.trace svg.line .st .pulse { fill: none; stroke: var(--orange-ink); stroke-width: 2; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.trace svg.line .st.done circle.ring, .trace svg.line .st.done .icon { stroke: var(--charcoal); }
+.trace svg.line .st.done .done-pin { opacity: 1; transform: none; }
+.trace svg.line .st.now circle.ring, .trace svg.line .st.now .icon { stroke: var(--orange-ink); }
+.trace svg.line .st.now text { fill: var(--charcoal); }
+.trace svg.line .st.now .pulse { animation: ring 1.8s var(--ease) infinite; }
+.trace svg.line .st.you.now circle.ring, .trace svg.line .st.you.now .icon { stroke: var(--you); }
+.trace svg.line .st.you.now .pulse { stroke: var(--you); }
+@keyframes ring { 0% { opacity: .7; transform: scale(1); } 100% { opacity: 0; transform: scale(1.55); } }
+.trace svg.line .end { stroke-width: 1.6; opacity: 0; transition: opacity .3s var(--ease); }
+.trace svg.line .end.show { opacity: 1; }
+
+.stages { position: relative; min-height: 0; }
+.stage { position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(1.5rem, 4vw, 4.5rem); align-items: center; opacity: 0; visibility: hidden; transform: translateY(8px); transition: opacity .28s var(--ease), transform .28s var(--ease), visibility 0s linear .28s; }
+.stage.active { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+.stage-text .num { font: 800 clamp(3.5rem, 2rem + 4vw, 6.5rem)/.9 var(--font); letter-spacing: -.04em; color: transparent; -webkit-text-stroke: 1.4px var(--charcoal); }
+.stage-text h3 { margin-top: .6rem; font-size: clamp(1.6rem, 1.1rem + 1.6vw, 2.6rem); letter-spacing: -.025em; text-transform: uppercase; }
+.stage-text p { margin-top: .9rem; max-width: 30rem; font-size: 1.0625rem; color: var(--muted); }
+.stage-text .hand { display: inline-block; margin-top: 1.25rem; font-size: 1.15rem; transform: rotate(-4deg); color: var(--orange-ink); }
+.card { padding: clamp(1rem, 2vw, 1.6rem); display: grid; gap: .9rem; font-size: .9375rem; max-height: 100%; overflow: hidden; }
+.card .meta { display: flex; justify-content: space-between; gap: 1rem; }
+.card .row { display: flex; align-items: center; gap: .75rem; padding: .6rem 0; border-top: 1px solid var(--line-soft); }
+.card .row:first-of-type { border-top: 0; }
+.card .ini { width: 2rem; height: 2rem; flex: none; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 4px; font-size: .75rem; font-weight: 700; background: var(--paper); }
+.card .grow { flex: 1; min-width: 0; }
+.card .grow strong { display: block; }
+.card .grow span { color: var(--muted); font-size: .8125rem; }
+.pill { display: inline-flex; align-items: center; gap: .35rem; padding: .2rem .5rem; border-radius: 2px; font-size: .75rem; font-weight: 600; letter-spacing: .02em; white-space: nowrap; }
+.pill.ok { color: var(--ok); background: var(--ok-soft); }
+.pill.fail { color: var(--fail); background: var(--fail-soft); }
+.pill.you { color: var(--you); background: var(--you-soft); }
+.pill.work { color: var(--work); background: var(--work-soft); }
+.pill.hyp { color: var(--rust); background: var(--peach); }
+.fade-in { opacity: 0; transform: translateY(6px); transition: opacity .24s var(--ease), transform .24s var(--ease); }
+.fade-in.on { opacity: 1; transform: none; }
+.offer-flow { display: grid; gap: .6rem; }
+.chip { display: inline-flex; align-items: center; gap: .5rem; padding: .35rem .65rem; border: 1px solid var(--line); border-radius: 2px; background: var(--paper); font-size: .875rem; width: fit-content; }
+.quote { font-size: 1.0625rem; line-height: 1.55; }
+.btnlike { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.5rem; padding: .5rem .9rem; border: 1px solid var(--charcoal); border-radius: 2px; font-weight: 600; font-size: .875rem; background: var(--sheet); transition: background .2s, color .2s, transform .15s; }
+.btnlike.primary { background: var(--orange-ink); color: #fff; border-color: var(--orange-ink); box-shadow: 0 2px 0 var(--rust); }
+.btnlike.pressed { transform: translateY(1px); box-shadow: none; }
+.btnrow { display: flex; flex-wrap: wrap; gap: .5rem; }
+.stamp { position: absolute; right: 1rem; bottom: 1rem; padding: .35rem .6rem; border: 2px solid currentColor; border-radius: 3px; font: 700 .8125rem/1 var(--font); letter-spacing: .12em; text-transform: uppercase; transform: rotate(-7deg) scale(.4); opacity: 0; transition: opacity .3s var(--ease), transform .3s var(--ease); }
+.stamp.on { opacity: 1; transform: rotate(-7deg) scale(1); }
+.card { position: relative; }
+.criteria { display: grid; gap: .45rem; margin: 0; padding: 0; list-style: none; }
+.criteria li { display: flex; gap: .6rem; align-items: baseline; }
+.criteria li::before { content: ""; flex: none; width: .5rem; height: .5rem; border: 1.4px solid var(--charcoal); transform: translateY(-.05rem); }
+.passage { padding: 1rem 1.1rem; border-left: 3px solid var(--orange-ink); background: var(--paper); font-size: 1.125rem; line-height: 1.55; }
+.hw { background-image: linear-gradient(transparent 58%, rgba(213, 104, 47, .32) 58%); background-repeat: no-repeat; background-size: var(--f, 0%) 100%; }
+.progressbar { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .4rem; }
+.progressbar button { appearance: none; border: 0; background: none; padding: .5rem 0 0; text-align: left; font: 600 .75rem/1.2 var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); cursor: pointer; position: relative; }
+.progressbar button::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--line); }
+.progressbar button i { position: absolute; left: 0; top: 0; height: 3px; width: calc(var(--p, 0) * 100%); background: var(--orange-ink); }
+.progressbar button.now { color: var(--charcoal); }
+
+/* ---------- spec sheet ---------- */
+.spec { width: 100%; border-collapse: collapse; background: var(--sheet); border: 1px solid var(--charcoal); }
+.spec th, .spec td { text-align: left; vertical-align: top; padding: 1.1rem 1.25rem; border-top: 1px solid var(--line); }
+.spec th { width: 13rem; font: 600 .75rem/1.4 var(--font); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.spec td strong { display: block; font-size: 1.0625rem; }
+.spec td span { color: var(--muted); font-size: .9375rem; }
+.spec tr { opacity: 1; }
+.spec-wrap { overflow-x: auto; }
+
+/* ---------- open source / hosted ---------- */
+.duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border: 1px solid var(--charcoal); background: var(--sheet); }
+.duo > div { padding: clamp(1.5rem, 3vw, 2.5rem); display: grid; gap: .9rem; align-content: start; }
+.duo > div + div { border-left: 1px solid var(--charcoal); }
+.duo h3 { font-size: 1.5rem; letter-spacing: -.02em; }
+.duo ul { margin: 0; padding-left: 1.1rem; display: grid; gap: .45rem; color: var(--muted); }
+.duo ul li::marker { color: var(--orange-ink); }
+.duo svg { width: 4.5rem; height: 4.5rem; fill: none; stroke: var(--charcoal); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.duo svg .ink { stroke: var(--orange-ink); }
+
+/* ---------- closing ---------- */
+.closing { position: relative; overflow: hidden; text-align: center; padding-block: clamp(5rem, 11vw, 10rem); }
+.closing canvas.flow { position: absolute; inset: 0; pointer-events: none; }
+.closing .inner { position: relative; z-index: 1; display: grid; justify-items: center; gap: 1.75rem; }
+.swap { position: relative; display: grid; font: 800 clamp(2.2rem, 1.3rem + 3vw, 4.5rem)/1.02 var(--font); letter-spacing: -.035em; text-transform: uppercase; }
+.swap > span { grid-area: 1 / 1; }
+.swap .chunk { display: inline-block; }
+.swap [data-state="out"] .chunk { animation: chunkOut .42s ease both; animation-delay: calc(var(--i) * 90ms); }
+.swap [data-state="in"] .chunk { animation: chunkIn .42s ease both; animation-delay: calc(.52s + var(--i) * 90ms); }
+.swap [data-state="hidden"] { visibility: hidden; }
+@keyframes chunkOut { to { opacity: 0; filter: blur(4px); transform: translateY(-.55em); } }
+@keyframes chunkIn { from { opacity: 0; filter: blur(4px); transform: translateY(.55em); } }
+.closing p { color: var(--muted); max-width: 34rem; }
+footer { background: var(--frame); color: var(--frame-text); padding-block: 3.5rem 2.5rem; }
+footer .wrap { display: grid; gap: 2rem; }
+footer .big { font: 800 clamp(3rem, 1rem + 8vw, 9rem)/.9 var(--font); letter-spacing: -.05em; }
+footer .links { display: flex; flex-wrap: wrap; gap: 1.5rem; color: var(--frame-muted); font-size: .9375rem; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 1000px) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .scope { width: min(100%, 36rem); }
+  .site-head nav { display: none; }
+  .duo { grid-template-columns: 1fr; }
+  .duo > div + div { border-left: 0; border-top: 1px solid var(--charcoal); }
+}
+@media (max-width: 600px) {
+  .scope .hand, .scope-drawing .leaders { display: none; }
+  .scope-labels { position: static; display: grid; gap: .6rem; margin-top: 1rem; }
+  .scope-labels li { position: static; transform: none; width: auto; }
+  .scope .tag-port { transform: translate(0, 0); }
+}
+@media (max-width: 760px) {
+  .trace { height: 760vh; }
+  .stage { grid-template-columns: 1fr; align-content: center; gap: .9rem; }
+  .stage-text .num { font-size: 2.6rem; }
+  .stage-text h3 { margin-top: .2rem; font-size: 1.35rem; }
+  .stage-text p { margin-top: .4rem; font-size: .9375rem; }
+  .stage-text .hand, .trace-top .label { display: none; }
+  .stage-text p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .trace-top h2 { font-size: 1.15rem; }
+  .card { padding: .85rem; }
+  .card .row { padding: .4rem 0; }
+  .passage { font-size: 1rem; padding: .7rem .8rem; }
+  .stamp { position: static; justify-self: start; }
+  .trace svg.line .st text { display: none; }
+  .progressbar button { font-size: 0; }
+  .progressbar button span { display: none; }
+  .card { font-size: .875rem; gap: .6rem; }
+  .spec th { width: 7rem; padding: .9rem; }
+  .spec td { padding: .9rem; }
+  .site-head .signin, .site-head .proto-chip { display: none; }
+  .intake-row { flex-direction: column; }
+  .intake-row input { flex: none; width: 100%; }
+  .intake-row .btn { width: 100%; }
+}
+/* large screens: hero fills the first screen; content width grows with the root size */
+@media (min-width: 1600px) and (min-height: 860px) { .hero-grid { min-height: calc(100svh - 4.25rem); } }
+@media (min-width: 2200px) { .wrap { width: min(100% - 4rem, 92rem); } }
+
+/* ---------- reduced motion: everything visible, no pinning ---------- */
+html[data-motion="reduce"] .trace { height: auto; }
+html[data-motion="reduce"] .trace-stage { position: static; height: auto; overflow: visible; grid-template-rows: auto; }
+html[data-motion="reduce"] .stages { display: grid; gap: 3rem; }
+html[data-motion="reduce"] .stage { position: static; opacity: 1; visibility: visible; transform: none; }
+html[data-motion="reduce"] .progressbar { display: none; }
+html[data-motion="reduce"] .fade-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .trace svg.line .st.now .pulse { animation: none; } }
+</style>
+</head>
+<body>
+<header class="site-head" id="top">
+  <div class="wrap">
+    <a class="wordmark" href="#top" aria-label="GTM Shortlist home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 6h12M3 12h8M3 18h5"/><circle cx="17.5" cy="15.5" r="3.5" stroke="#b4501c"/><path d="m20 18 2.5 2.5" stroke="#b4501c"/></svg>
+      GTM Shortlist
+    </a>
+    <span class="proto-chip">Prototype · synthetic examples</span>
+    <nav aria-label="Sections"><a href="#how">How it works</a><a href="#get">What you get</a><a href="#open">Open source</a></nav>
+    <a class="signin" href="#" data-open-account="signin">Sign in</a>
+    <a class="btn btn-primary" href="#company" data-focus-field>Start research <span class="arrow" aria-hidden="true">→</span></a>
+  </div>
+</header>
+
+<main>
+<section class="hero" aria-labelledby="hero-title">
+  <canvas class="flow" aria-hidden="true"></canvas>
+  <div class="wrap hero-grid">
+    <div>
+      <p class="label">Company research for B2B sellers</p>
+      <h1 id="hero-title" data-reveal style="margin-top:1rem">Find who fits.<br><span class="accent">Check why.</span></h1>
+      <p class="lede">Enter your company. GTM Shortlist drafts your offer, finds up to three companies that match it, and links every claim to the exact words on their site. You make the call.</p>
+      <form class="intake" id="intake" autocomplete="off">
+        <label for="company">Company name or website</label>
+        <div class="intake-row" id="intake-row">
+          <input id="company" name="company" placeholder="yourcompany.com" aria-describedby="intake-note" aria-autocomplete="list" aria-controls="suggest">
+          <button class="btn btn-primary" type="submit">Start research <span class="arrow" aria-hidden="true">→</span></button>
+        </div>
+        <div class="suggest" id="suggest" role="listbox" aria-label="Company suggestions"></div>
+        <p class="note" id="intake-note"><span>You confirm the target before any search runs.</span><a href="#how">See how it works ↓</a></p>
+        <div class="account panel" id="account" aria-live="polite">
+          <h3 id="account-title">Save this research to an account</h3>
+          <div class="company">Company kept: <strong id="account-company">—</strong></div>
+          <div class="fields"><input type="email" placeholder="Email" aria-label="Email"><input type="password" placeholder="Password (12+ characters)" aria-label="Password"></div>
+          <button class="btn btn-primary" type="button" id="account-go">Create account and continue <span class="arrow" aria-hidden="true">→</span></button>
+          <small id="account-msg">Prototype only: nothing is sent and no account is created.</small>
+        </div>
+      </form>
+    </div>
+    <figure class="scope" id="scope" aria-label="Mission scope: your offer is the launch point, the rings are the target you confirm, a sweep scans candidate companies and three are locked as fits, needs a call, or not a fit.">
+      <div class="scope-stage">
+        <div class="scope-chart">
+        <svg class="scope-drawing draw" viewBox="0 0 600 560" aria-hidden="true" focusable="false">
+          <path class="cons" d="M18 290H482M250 48V532"/>
+          <g id="bearing" class="bearing"></g>
+          <circle class="ln" cx="250" cy="290" r="210" style="--d:250"/>
+          <circle class="dashed ring-target" cx="250" cy="290" r="140" style="--d:600"/>
+          <circle class="ln thin" cx="250" cy="290" r="70" style="--d:450"/>
+          <g id="sweep" class="sweep">
+            <path class="wedge-wide fillonly" d="M250 290 L460 290 A210 210 0 0 0 435.4 191.5 Z"/>
+            <path class="wedge-near fillonly" d="M250 290 L460 290 A210 210 0 0 0 455.4 246.3 Z"/>
+            <path class="edge fillonly" d="M250 290 L460 290"/>
+          </g>
+          <g id="cands"></g>
+          <path class="dashed traj" id="traj" d="M250 290 C 292 272, 330 238, 356 192 S 410 96, 492 54" style="--d:1300"/>
+          <circle class="ln fill-paper" cx="250" cy="290" r="24" style="--d:100"/>
+          <path class="thin" d="M232 278l36 0M228 290h44M232 302h36" style="--d:300"/>
+          <circle class="pin" cx="250" cy="290" r="4" style="--d:900"/>
+          <path d="M34 280h14v20H34z" class="fill-paper" style="--d:500"/>
+          <circle class="pin" cx="34" cy="290" r="3.4" style="--d:1000"/>
+          <circle id="entry-point" cx="30" cy="290" r=".01" style="stroke:none"/>
+          <circle id="entry-top" cx="250" cy="66" r=".01" style="stroke:none"/>
+          <path d="M243 80h14v-14h-14z" class="fill-paper" style="--d:520"/>
+          <g class="lock ok" style="--d:1500"><path d="M356 189v-5h5M369 184h5v5M374 198v5h-5M361 203h-5v-5"/><rect x="362" y="191" width="6" height="6" class="fillonly"/></g>
+          <g class="lock you" style="--d:1700"><path d="M420 333v-5h5M433 328h5v5M438 342v5h-5M425 347h-5v-5"/><rect x="426" y="335" width="6" height="6" class="fillonly"/></g>
+          <g class="lock fail" style="--d:1900"><path d="M297 380v-5h5M310 375h5v5M315 389v5h-5M302 394h-5v-5"/><rect x="303" y="382" width="6" height="6" class="fillonly"/></g>
+          <g class="leaders">
+            <path d="M374 186L418 142H486" style="--d:1600"/>
+            <path d="M438 330L452 304H486" style="--d:1800"/>
+            <path d="M315 392L362 432H486" style="--d:2000"/>
+          </g>
+          <g id="probe" class="probe">
+            <path class="probe-flame fillonly" d="M-6 -2.4L-15 0L-6 2.4Z"/>
+            <path class="fill-paper" d="M11 0C7 -3.6 2 -4.6 -6 -4.6L-6 4.6C2 4.6 7 3.6 11 0Z"/>
+            <path d="M-6 -4.6L-10 -9M-6 4.6L-10 9"/>
+          </g>
+        </svg>
+        <span class="tag tag-center" style="--x:41.67%;--y:59.8%">Your offer</span>
+        <span class="tag tag-ring" style="--x:41.67%;--y:23.4%">Target · you set the radius</span>
+        <span class="tag tag-port" style="--x:5.67%;--y:56.6%">Your site</span>
+        <p class="hand" aria-hidden="true"><span>Launch</span><span>Scan</span><span>Lock</span><span>Check</span><span>You</span></p>
+        </div>
+        <ol class="scope-labels">
+          <li style="--y:25%;--dl:1.7s"><span class="mark ok"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m4 8 3 3 5-6"/></svg></span><span><span class="module-name">Fits</span><span class="module-meaning">Source passage saved</span></span></li>
+          <li style="--y:54.3%;--dl:1.9s"><span class="mark you"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h8M8 4v8"/></svg></span><span><span class="module-name">Needs a call</span><span class="module-meaning">Budget owner unknown</span></span></li>
+          <li style="--y:77.1%;--dl:2.1s"><span class="mark fail"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 5 6 6m0-6-6 6"/></svg></span><span><span class="module-name">Not a fit</span><span class="module-meaning">Matches an exclusion</span></span></li>
+        </ol>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<section class="trace" id="how" aria-labelledby="trace-title">
+  <div class="trace-stage wrap">
+    <div class="trace-top"><h2 id="trace-title">How a shortlist gets made</h2><span class="label">Synthetic example · invented companies</span></div>
+    <svg class="line" viewBox="0 0 1200 210" aria-hidden="true">
+      <path class="base" d="M20 92 H1180"/>
+      <path class="branch" id="br-top" d="M690 92 C 735 92, 740 34, 780 34 H798"/>
+      <path class="branch" id="br-bot" d="M690 92 C 735 92, 740 150, 780 150 H798"/>
+      <g class="end" id="end-top"><circle cx="810" cy="34" r="9" style="fill:var(--fail-soft);stroke:var(--fail)"/><path d="m806 30 8 8m0-8-8 8" style="stroke:var(--fail)"/></g>
+      <g class="end" id="end-bot"><circle cx="810" cy="150" r="9" style="fill:var(--you-soft);stroke:var(--you)"/><path d="M806 150h8M810 146v8" style="stroke:var(--you)"/></g>
+      <path class="run" id="run" d="M20 92 H1180"/>
+      <g id="stations"></g>
+    </svg>
+    <div class="stages" id="stages">
+      <article class="stage" data-stage="0">
+        <div class="stage-text"><span class="num">01</span><h3>Understand your offer</h3><p>We read your website once and draft what you sell. Every word stays editable.</p><span class="hand">you can edit this</span></div>
+        <div class="card panel">
+          <div class="meta"><span class="label">Offer draft</span><span class="pill hyp">Synthetic example</span></div>
+          <div class="offer-flow">
+            <span class="chip fade-in" data-at=".08"><span class="mark ok" style="width:1.25rem;height:1.25rem"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m4 8 3 3 5-6"/></svg></span>relay-studio.example · page saved</span>
+            <p class="quote fade-in" data-at=".3"><strong>Customer onboarding workflow reviews for B2B software teams.</strong></p>
+            <p class="fade-in" data-at=".45" style="color:var(--muted)">For teams that want to improve the journey from signup to first value.</p>
+            <div class="btnrow fade-in" data-at=".6"><span class="btnlike">Edit offer</span><span class="btnlike">Edit target</span></div>
+          </div>
+        </div>
+      </article>
+      <article class="stage" data-stage="1">
+        <div class="stage-text"><span class="num">02</span><h3>Explore the market</h3><p>Nearby companies and campaign ideas, labelled as observations and hypotheses. Nothing is presented as fact.</p><span class="hand">observations, not facts</span></div>
+        <div class="card panel">
+          <div class="meta"><span class="label">Market</span><span class="pill hyp">Synthetic example</span></div>
+          <div class="row fade-in" data-at=".1"><span class="ini">SH</span><div class="grow"><strong>signalhouse.example</strong><span>Observation · publishes onboarding case studies</span></div><span class="pill ok">Saved</span></div>
+          <div class="row fade-in" data-at=".3"><span class="ini">TW</span><div class="grow"><strong>tidewater.example</strong><span>Observation · sells to the same buyers</span></div><span class="pill ok">Saved</span></div>
+          <div class="row fade-in" data-at=".5"><span class="ini">!</span><div class="grow"><strong>pagelane.example</strong><span>Page could not be read</span></div><span class="pill fail">Failed</span></div>
+          <div class="row fade-in" data-at=".7"><span class="ini">H1</span><div class="grow"><strong>Campaign: time-to-value audit</strong><span>Mid-size SaaS teams with a self-serve signup</span></div><span class="pill hyp">Hypothesis</span></div>
+        </div>
+      </article>
+      <article class="stage" data-stage="2">
+        <div class="stage-text"><span class="num">03</span><h3>Confirm the target</h3><p>No company search runs until you confirm who you want to reach and what counts as evidence.</p><span class="hand">nothing runs until you say so</span></div>
+        <div class="card panel">
+          <div class="meta"><span class="label">Your target</span><span class="pill you">Needs you</span></div>
+          <ul class="criteria"><li>B2B software teams with an onboarding product or flow</li><li>A company-owned page describing that product</li><li>Exclude directories and consumer-only products</li></ul>
+          <div class="btnrow"><span class="btnlike primary" id="confirm-btn">Confirm target →</span><span class="btnlike">Edit</span></div>
+          <span class="stamp" id="confirm-stamp" style="color:var(--you)">Confirmed by you</span>
+        </div>
+      </article>
+      <article class="stage" data-stage="3">
+        <div class="stage-text"><span class="num">04</span><h3>Discover companies</h3><p>Candidates are prioritised against your confirmed criteria. Up to three are researched, and never padded to look busy.</p><span class="hand">fewer is fine</span></div>
+        <div class="card panel" id="discover-card">
+          <div class="meta"><span class="label">Candidates</span><span class="pill hyp">Synthetic example</span></div>
+          <div class="row fade-in" data-at=".08" data-done=".3"><span class="mark work"></span><span class="ini">NC</span><div class="grow"><strong>Northstar Cloud</strong><span>northstar.example · onboarding product page</span></div><span class="pill ok" data-show-at=".3">Fits</span></div>
+          <div class="row fade-in" data-at=".32" data-done=".55"><span class="mark work"></span><span class="ini">BH</span><div class="grow"><strong>Brightpath HR</strong><span>brightpath.example · ownership unclear</span></div><span class="pill you" data-show-at=".55">Needs a call</span></div>
+          <div class="row fade-in" data-at=".56" data-done=".8"><span class="mark work"></span><span class="ini">QS</span><div class="grow"><strong>Quarry Stack</strong><span>quarry.example · consumer-only</span></div><span class="pill fail" data-show-at=".8">Excluded</span></div>
+        </div>
+      </article>
+      <article class="stage" data-stage="4">
+        <div class="stage-text"><span class="num">05</span><h3>Inspect the evidence</h3><p>Every claim opens to the exact words on the company's own page. What we could not find stays marked as unknown.</p><span class="hand">read it yourself</span></div>
+        <div class="card panel">
+          <div class="meta"><span class="label">Northstar Cloud · finding</span><span class="pill ok" id="ev-pill" style="opacity:0;transition:opacity .3s">Supported in source</span></div>
+          <strong>Offers a B2B onboarding product</strong>
+          <p class="passage" id="passage">“Our platform helps business teams manage customer onboarding, from the first welcome to the handover.”</p>
+          <p style="font-size:.8125rem;color:var(--muted)">Synthetic passage · northstar.example/product · no retrieval date (invented for this example)</p>
+          <div class="row fade-in" data-at=".75" style="border-top:1px dashed var(--line)"><span class="mark idle"></span><div class="grow"><strong>Unknown</strong><span>Who owns the onboarding budget is not established.</span></div></div>
+        </div>
+      </article>
+      <article class="stage" data-stage="5">
+        <div class="stage-text"><span class="num">06</span><h3>Make the call</h3><p>Fit is an assessment, not buying intent. Accepting a company is your decision, saved separately from the model's.</p><span class="hand">your call</span></div>
+        <div class="card panel">
+          <div class="meta"><span class="label">Your review</span><span class="pill hyp">Synthetic example</span></div>
+          <strong>Northstar Cloud</strong>
+          <p style="color:var(--muted)">Evidence: describes a business onboarding product. Unknown: budget ownership.</p>
+          <div class="btnrow"><span class="btnlike" id="accept-btn">Accept</span><span class="btnlike">Not a fit</span><span class="btnlike">Needs a conversation</span></div>
+          <p class="fade-in" data-at=".7" style="font-size:.875rem">Optional: <span class="accent" style="font-weight:600">draft an email that cites this source →</span></p>
+          <span class="stamp" id="accept-stamp" style="color:var(--ok)">Accepted by you</span>
+        </div>
+      </article>
+    </div>
+    <div class="progressbar" id="progressbar" role="group" aria-label="Jump to a stage"></div>
+  </div>
+</section>
+
+<section class="section" id="get" aria-labelledby="get-title">
+  <div class="wrap">
+    <div class="section-head"><p class="label">Spec sheet</p><h2 id="get-title" data-reveal>What one research run <span class="accent">gives you.</span></h2></div>
+    <div class="spec-wrap">
+      <table class="spec">
+        <tr><th scope="row">Input</th><td><strong>Your company name or website</strong><span>Read once and saved, so the offer draft can be checked later.</span></td></tr>
+        <tr><th scope="row">Your control</th><td><strong>An editable offer and target</strong><span>Discovery waits for your confirmation and shows the exact cost first on hosted accounts.</span></td></tr>
+        <tr><th scope="row">Output</th><td><strong>Up to three researched companies</strong><span>Fewer when the evidence is thin. Partial results are labelled, not padded.</span></td></tr>
+        <tr><th scope="row">Evidence</th><td><strong>Exact source passages beside each claim</strong><span>Unknowns and hypotheses are labelled separately from observed facts.</span></td></tr>
+        <tr><th scope="row">Decision</th><td><strong>Your review, saved separately</strong><span>Export the shortlist to CSV or JSON. Nothing is sent on your behalf.</span></td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="open" aria-labelledby="open-title">
+  <div class="wrap">
+    <div class="section-head"><p class="label">Two ways to run it</p><h2 id="open-title" data-reveal>Open source core. <span class="accent">Hosted if you want it.</span></h2></div>
+    <div class="duo">
+      <div>
+        <svg class="draw" viewBox="0 0 72 72" aria-hidden="true"><rect x="10" y="14" width="52" height="38" style="--d:0"/><path d="M10 22h52" style="--d:200"/><path class="ink" d="m22 32 6 5-6 5M33 42h12" style="--d:400"/><path d="M26 58h20M36 52v6" style="--d:500"/></svg>
+        <h3>Run it yourself</h3>
+        <ul><li>MIT-licensed core: web app, API and worker</li><li>Bring your own search and model keys</li><li>Your research stays in your own database</li></ul>
+        <a class="btn btn-ghost" href="#">Read the setup guide <span class="arrow" aria-hidden="true">→</span></a>
+      </div>
+      <div>
+        <svg class="draw" viewBox="0 0 72 72" aria-hidden="true"><path d="M20 48h34a12 12 0 0 0 0-24 16 16 0 0 0-30-4 12 12 0 0 0-4 28z" style="--d:0"/><path class="ink" d="m29 36 6 6 10-12" style="--d:500"/></svg>
+        <h3>Use the hosted version</h3>
+        <ul><li>An account that keeps your saved research</li><li>Research credits instead of provider keys</li><li>An optional call to talk through your shortlist</li></ul>
+        <a class="btn btn-primary" href="#company" data-focus-field>Start research <span class="arrow" aria-hidden="true">→</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="closing" id="start" aria-labelledby="closing-title">
+  <canvas class="flow" aria-hidden="true"></canvas>
+  <div class="wrap inner">
+    <h2 id="closing-title" class="swap" aria-label="Stop guessing who fits. Start from the source.">
+      <span data-state="in" aria-hidden="true"><span class="chunk" style="--i:0">Stop guessing</span> <span class="chunk" style="--i:1">who fits.</span></span>
+      <span data-state="hidden" aria-hidden="true" class="accent"><span class="chunk" style="--i:0">Start from</span> <span class="chunk" style="--i:1">the source.</span></span>
+    </h2>
+    <p>Three companies you can check for yourself beat a list of three hundred you can't.</p>
+    <a class="btn btn-primary" id="closing-cta" href="#company" data-focus-field>Start your research <span class="arrow" aria-hidden="true">→</span></a>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="big">GTM Shortlist</div>
+    <div class="links"><span>Open-source company research</span><a href="#">Source code</a><a href="#">Privacy</a><a href="#">Terms</a><a href="research.html">Prototype: research in progress →</a></div>
+  </div>
+</footer>
+
+<script src="vendor/lenis.min.js"></script>
+<script src="shared.js"></script>
+<script>
+(function () {
+  const P = window.proto;
+  const $ = (s, r = document) => r.querySelector(s);
+
+  /* header line after scroll */
+  const head = $('.site-head');
+  P.onScroll((y) => head.classList.toggle('scrolled', y > 20));
+
+  /* hero flow lines + mission scope. Grey lines rise into the company field; orange lines run from the field into the scope's
+     entry port (left port in two columns, top port when stacked, so no line crosses the drawing). The sweep and the probe
+     speed up with the same value as the lines: hover and focus, then typing. */
+  const hero = $('.hero'), field = $('#intake-row'), scope = $('#scope');
+  const entry = $('#entry-point'), entryTop = $('#entry-top'), sweep = $('#sweep'), probe = $('#probe'), traj = $('#traj');
+  const NS = 'http://www.w3.org/2000/svg', CX = 250, CY = 290;
+  const bearing = $('#bearing');
+  for (let a = 0; a < 360; a += 5) {
+    const r = a * Math.PI / 180, major = a % 30 === 0, r2 = major ? 224 : 217;
+    const l = document.createElementNS(NS, 'line');
+    l.setAttribute('x1', (CX + 210 * Math.cos(r)).toFixed(1)); l.setAttribute('y1', (CY + 210 * Math.sin(r)).toFixed(1));
+    l.setAttribute('x2', (CX + r2 * Math.cos(r)).toFixed(1)); l.setAttribute('y2', (CY + r2 * Math.sin(r)).toFixed(1));
+    if (major) l.setAttribute('class', 'major'); l.style.setProperty('--d', 300 + a * 2); bearing.appendChild(l);
+  }
+  const lockPts = [[365, 194], [429, 338], [306, 385]];
+  const lockAng = lockPts.map(([x, y]) => ((Math.atan2(y - CY, x - CX) * 180 / Math.PI) + 360) % 360);
+  const candG = $('#cands'), cands = []; let seed = 11;
+  const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  while (cands.length < 22) {
+    const ang = rnd() * 360, rad = 42 + rnd() * 160, a = ang * Math.PI / 180, x = CX + rad * Math.cos(a), y = CY + rad * Math.sin(a);
+    if (lockPts.some(([lx, ly]) => Math.hypot(lx - x, ly - y) < 22) || Math.hypot(x - 356, y - 192) < 30) continue;
+    const s = document.createElementNS(NS, 'rect'); s.setAttribute('x', (x - 2).toFixed(1)); s.setAttribute('y', (y - 2).toFixed(1)); s.setAttribute('width', 4); s.setAttribute('height', 4); s.setAttribute('class', 'cand fillonly');
+    candG.appendChild(s); cands.push({ el: s, ang });
+  }
+  const locks = [...document.querySelectorAll('.scope .lock')];
+  const trajLen = traj.getTotalLength();
+  let angle = 200, pt = 0.15;
+  function placeProbe(t) {
+    const L = trajLen * t, p = traj.getPointAtLength(L), q = traj.getPointAtLength(Math.min(trajLen, L + 2));
+    const rot = Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI;
+    probe.setAttribute('transform', `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${rot.toFixed(1)}) scale(1.5)`);
+    probe.style.opacity = scope.classList.contains('on') ? Math.min(1, t * 6, (1 - t) * 5).toFixed(2) : 0;
+  }
+  function paintScope() {
+    sweep.setAttribute('transform', `rotate(${angle.toFixed(2)} ${CX} ${CY})`);
+    for (const c of cands) { const d = ((angle - c.ang) % 360 + 360) % 360, hit = d < 50 ? 1 - d / 50 : 0; c.el.style.fill = hit > 0.02 ? '#d5682f' : ''; c.el.style.opacity = (0.4 + 0.6 * hit).toFixed(2); }
+    locks.forEach((l, i) => { const d = ((angle - lockAng[i]) % 360 + 360) % 360; l.classList.toggle('ping', d < 12); });
+  }
+  function scopeFrame(mult, dt) {
+    if (P.reduced) return;
+    const k = 1 + (mult - 1) * 0.22;
+    angle = (angle + dt * 28 * k) % 360;
+    pt += dt * 0.15 * (1 + (mult - 1) * 0.12); if (pt > 1) pt = 0;
+    paintScope(); placeProbe(pt);
+  }
+  const heroGeometry = (box) => {
+    const hb = box.getBoundingClientRect(), fb = field.getBoundingClientRect();
+    const fx = fb.left - hb.left, fy = fb.top - hb.top + fb.height / 2, fr = fb.right - hb.left, fbot = fb.bottom - hb.top;
+    const span = fr - fx, curves = [];
+    if (innerWidth > 1000) {
+      const pb = entry.getBoundingClientRect(), px = pb.left - hb.left, py = pb.top - hb.top, N = 9, fb2 = fbot + 3;
+      for (let i = 0; i < N; i++) {
+        const k = i / (N - 1), x0 = Math.max(0, fx - span * 0.35) + k * span * 1.25, y0 = hb.height, xe = fx + span * (0.12 + 0.6 * k);
+        curves.push({ p: [[x0, y0], [x0, y0 - (y0 - fb2) * 0.55], [xe, fb2 + (y0 - fb2) * 0.45], [xe, fb2]], len: 1.1 });
+      }
+      for (let i = 0; i < 5; i++) {
+        const off = (i - 2) * 3;
+        curves.push({ p: [[fr + 6, fy + off], [fr + (px - fr) * 0.5, fy + off], [px - (px - fr) * 0.35, py + off * 1.4], [px, py + off]], hot: true, dots: 2, len: 0.9, color: 'rgba(180,80,28,.28)' });
+      }
+    } else {
+      const pb = entryTop.getBoundingClientRect(), px = pb.left - hb.left, py = pb.top - hb.top;
+      if (py > fbot) for (let i = 0; i < 7; i++) {
+        const k = i / 6, x0 = fx + span * (0.18 + 0.64 * k), off = (i - 3) * 3;
+        curves.push({ p: [[x0, fbot + 4], [x0, fbot + (py - fbot) * 0.55], [px + off * 2, py - (py - fbot) * 0.35], [px + off, py]], hot: i % 2 === 0, dots: 2, len: 0.9, color: 'rgba(180,80,28,.22)' });
+      }
+    }
+    return curves;
+  };
+  const heroFlow = new P.FlowLines($('.hero canvas.flow'), heroGeometry, { onSpeed: scopeFrame });
+  const showScope = () => scope.classList.add('on');
+  if (P.reduced) { showScope(); angle = 330; paintScope(); placeProbe(0.55); }
+  else new IntersectionObserver((es, o) => { if (es[0].isIntersecting) { showScope(); o.disconnect(); } }, { threshold: 0.25 }).observe(scope);
+  const input = $('#company');
+  field.addEventListener('mouseenter', () => heroFlow.setHover(true));
+  field.addEventListener('mouseleave', () => heroFlow.setHover(document.activeElement === input));
+  input.addEventListener('focus', () => heroFlow.setHover(true));
+  input.addEventListener('blur', () => heroFlow.setHover(false));
+
+  /* suggestions: skeleton first, then the typed company (directory rows appear when configured) */
+  const suggest = $('#suggest'); let st;
+  const initials = (s) => s.replace(/^https?:\/\//, '').replace(/^www\./, '').slice(0, 2).toUpperCase();
+  input.addEventListener('input', () => {
+    heroFlow.boost(1200);
+    const v = input.value.trim(); clearTimeout(st);
+    if (v.length < 2) { suggest.classList.remove('open'); return; }
+    suggest.innerHTML = [0, 1, 2].map(() => '<div class="row"><span class="sk" style="width:1.6rem;height:1.6rem"></span><span class="sk" style="flex:1"></span><span class="sk" style="width:4rem"></span></div>').join('');
+    suggest.classList.add('open');
+    st = setTimeout(() => {
+      suggest.innerHTML = `<div class="row choice" role="option" tabindex="-1"><span class="ini">${initials(v)}</span><span style="flex:1"><strong>${v.replace(/[<>&]/g, '')}</strong></span><span style="color:var(--muted);font-size:.8125rem">we'll find the website</span></div><p class="hint">Directory suggestions with company logos appear here when configured.</p>`;
+      suggest.querySelector('.choice').addEventListener('click', () => { suggest.classList.remove('open'); input.focus(); });
+    }, 450);
+  });
+  document.addEventListener('click', (e) => { if (!e.target.closest('.intake')) suggest.classList.remove('open'); });
+
+  /* start research: hosted visitors keep their company through signup */
+  const account = $('#account');
+  $('#intake').addEventListener('submit', (e) => {
+    e.preventDefault(); suggest.classList.remove('open');
+    if (!input.value.trim()) { input.focus(); return; }
+    $('#account-company').textContent = input.value.trim();
+    $('#account-title').textContent = 'Save this research to an account';
+    account.classList.remove('open'); void account.offsetWidth; account.classList.add('open');
+    heroFlow.boost(2400); if (!P.reduced) { locks.forEach((l) => l.classList.add('ping')); setTimeout(() => locks.forEach((l) => l.classList.remove('ping')), 700); }
+  });
+  document.querySelectorAll('[data-open-account]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); $('#account-title').textContent = 'Sign in to your shortlist'; $('#account-company').textContent = input.value.trim() || '—'; account.classList.add('open'); P.scrollToY(0); }));
+  $('#account-go').addEventListener('click', () => { $('#account-msg').textContent = 'Prototype only: in the product this creates the account, then returns to target confirmation with your company filled in.'; });
+  document.querySelectorAll('[data-focus-field]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); P.scrollToY(0, () => input.focus({ preventScroll: true })); setTimeout(() => input.focus({ preventScroll: true }), P.reduced ? 0 : 1150); }));
+
+  /* ---------- pinned trace story ---------- */
+  const labels = ['Offer', 'Market', 'Target', 'Companies', 'Evidence', 'Decision'];
+  const icons = [
+    '<rect x="-8" y="-10" width="16" height="20"/><path d="M-4 -4h8M-4 1h8M-4 6h5"/>',
+    '<path d="M-10 4a10 10 0 0 1 14-14"/><path d="M-6 0a5 5 0 0 1 7-7"/><path d="M-2 -2l9 12M-6 10h14"/>',
+    '<circle cx="0" cy="0" r="8"/><path d="M0 -12v6M0 6v6M-12 0h6M6 0h6"/>',
+    '<rect x="-11" y="-9" width="7" height="7"/><rect x="2" y="-9" width="7" height="7"/><rect x="-4.5" y="2" width="7" height="7"/>',
+    '<circle cx="-2" cy="-2" r="7"/><path d="m3 3 7 7"/>',
+    '<rect x="-9" y="-9" width="18" height="18"/><path d="m-5 0 3.5 3.5L5 -4"/>',
+  ];
+  const sx = [90, 290, 490, 690, 890, 1090];
+  const stationsG = $('#stations');
+  stationsG.innerHTML = sx.map((x, i) => `<g class="st${i === 2 ? ' you' : ''}" data-i="${i}" transform="translate(${x} 92)"><circle class="pulse" r="26"/><circle class="ring" r="26"/><g class="icon">${icons[i]}</g><circle class="done-pin" cx="19" cy="-19" r="6"/><text y="54">${labels[i].toUpperCase()}</text></g>`).join('');
+  const run = $('#run'), runLen = run.getTotalLength(); run.style.strokeDasharray = runLen; run.style.strokeDashoffset = runLen;
+  const brT = $('#br-top'), brB = $('#br-bot'); [brT, brB].forEach((b) => { const L = b.getTotalLength(); b.dataset.len = L; b.style.strokeDasharray = L; b.style.strokeDashoffset = L; });
+  const weights = [1, 1.1, 1.1, 1.3, 2, 1.3], total = weights.reduce((a, b) => a + b, 0);
+  const starts = weights.reduce((acc, w, i) => (acc.push(i ? acc[i - 1] + weights[i - 1] / total : 0), acc), []);
+  const trace = $('#trace'), traceEl = $('#how'), stages = [...document.querySelectorAll('.stage')], sts = [...stationsG.children];
+  const bar = $('#progressbar');
+  bar.innerHTML = labels.map((l, i) => `<button type="button" data-i="${i}"><i></i><span>${l}</span></button>`).join('');
+  const barBtns = [...bar.children];
+  barBtns.forEach((b) => b.addEventListener('click', () => { const r = traceEl.offsetTop + starts[+b.dataset.i] * (traceEl.offsetHeight - innerHeight) + 4; P.scrollToY(r); }));
+  const passage = $('#passage'); passage.innerHTML = passage.textContent.split(' ').map((w) => `<span class="hw">${w}</span>`).join(' ');
+  const hws = [...passage.children];
+  let lastIdx = -1;
+  function renderTrace(y) {
+    if (P.reduced) { stages.forEach((s) => s.classList.add('active')); sts.forEach((s) => s.classList.add('done')); run.style.strokeDashoffset = 0; [brT, brB].forEach((b) => (b.style.strokeDashoffset = 0)); document.querySelectorAll('.end').forEach((e) => e.classList.add('show')); document.querySelectorAll('.fade-in').forEach((e) => e.classList.add('on')); hws.forEach((h) => h.style.setProperty('--f', '100%')); $('#ev-pill').style.opacity = 1; $('#confirm-stamp').classList.add('on'); $('#accept-stamp').classList.add('on'); document.querySelectorAll('#discover-card .mark').forEach((m) => (m.className = 'mark ok')); return; }
+    const range = traceEl.offsetHeight - innerHeight;
+    const p = P.clamp((y - traceEl.offsetTop) / range, 0, 1);
+    let idx = 0; for (let i = 0; i < 6; i++) if (p >= starts[i]) idx = i;
+    const local = P.clamp((p - starts[idx]) / (weights[idx] / total), 0, 1);
+    if (idx !== lastIdx) { stages.forEach((s, i) => s.classList.toggle('active', i === idx)); lastIdx = idx; }
+    // orange run line: reaches the current station, then creeps toward the next
+    const reachX = sx[idx] + (idx < 5 ? (sx[idx + 1] - sx[idx]) * Math.max(0, local - .55) / .45 : (1180 - sx[idx]) * local);
+    run.style.strokeDashoffset = Math.max(0, runLen - (reachX - 20));
+    sts.forEach((s, i) => { s.classList.toggle('done', i < idx || (i === idx && local > .92)); s.classList.toggle('now', i === idx && local <= .92); });
+    const brK = idx > 3 ? 1 : idx === 3 ? P.clamp((local - .5) / .4, 0, 1) : 0;
+    [brT, brB].forEach((b) => (b.style.strokeDashoffset = b.dataset.len * (1 - brK)));
+    $('#end-top').classList.toggle('show', brK >= 1); $('#end-bot').classList.toggle('show', brK >= 1);
+    barBtns.forEach((b, i) => { b.classList.toggle('now', i === idx); b.style.setProperty('--p', i < idx ? 1 : i === idx ? local : 0); });
+    const st = stages[idx];
+    st.querySelectorAll('.fade-in').forEach((el) => el.classList.toggle('on', local >= +el.dataset.at));
+    if (idx === 3) st.querySelectorAll('.row').forEach((row) => { const done = local >= +row.dataset.done; const m = row.querySelector('.mark'); const pill = row.querySelector('[data-show-at]'); m.className = 'mark ' + (done ? (pill.classList.contains('ok') ? 'ok' : pill.classList.contains('you') ? 'you' : 'fail') : 'work'); m.innerHTML = done ? (pill.classList.contains('ok') ? '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m4 8 3 3 5-6"/></svg>' : pill.classList.contains('you') ? '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h8M8 4v8"/></svg>' : '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 5 6 6m0-6-6 6"/></svg>') : ''; pill.style.opacity = done ? 1 : 0; });
+    if (idx === 4) { const k = P.clamp((local - .08) / .62, 0, 1) * hws.length; hws.forEach((h, i) => h.style.setProperty('--f', P.clamp(k - i, 0, 1) * 100 + '%')); $('#ev-pill').style.opacity = local > .72 ? 1 : 0; }
+    if (idx === 2) { const on = local > .62; $('#confirm-btn').classList.toggle('pressed', on); $('#confirm-stamp').classList.toggle('on', on); }
+    if (idx === 5) { const on = local > .45; const a = $('#accept-btn'); a.classList.toggle('primary', on); a.classList.toggle('pressed', on); $('#accept-stamp').classList.toggle('on', on); }
+  }
+  P.onScroll(renderTrace);
+
+  /* ---------- closing: phrase swap every 3.2 s while visible, lines into the CTA ---------- */
+  const swap = $('.swap'), phrases = [...swap.children]; let cur = 0, visible = false;
+  new IntersectionObserver((es) => (visible = es[0].isIntersecting)).observe(swap);
+  if (!P.reduced) setInterval(() => {
+    if (!visible || document.hidden) return;
+    const next = 1 - cur;
+    phrases[cur].dataset.state = 'out'; phrases[next].dataset.state = 'in';
+    const was = cur; setTimeout(() => { if (phrases[was].dataset.state === 'out') phrases[was].dataset.state = 'hidden'; }, 700);
+    cur = next;
+  }, 3200);
+  const cta = $('#closing-cta'), closing = $('.closing');
+  const closingFlow = new P.FlowLines($('.closing canvas.flow'), (box) => {
+    const hb = box.getBoundingClientRect(), cb = cta.getBoundingClientRect();
+    const cx = cb.left - hb.left + cb.width / 2, cy = cb.top - hb.top + cb.height / 2, curves = [];
+    for (let i = 0; i < 8; i++) {
+      const x0 = hb.width * (i / 7), y0 = hb.height;
+      curves.push({ p: [[x0, y0], [x0, cy + (hb.height - cy) * 0.4], [cx + (i - 3.5) * 10, cy + 70], [cx + (i - 3.5) * 3, cb.bottom - hb.top + 4]], len: 1.2, dots: 2 });
+    }
+    return curves;
+  }, { base: 0.035 });
+  cta.addEventListener('mouseenter', () => closingFlow.setHover(true));
+  cta.addEventListener('mouseleave', () => closingFlow.setHover(false));
+})();
+</script>
+</body>
+</html>

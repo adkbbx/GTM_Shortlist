@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Researching · GTM Shortlist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="shared.css">
+<style>
+body { min-height: 100dvh; display: grid; grid-template-rows: auto 1fr; }
+.topbar .crumb { color: var(--frame-muted); font-size: .9375rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar .spacer { flex: 1; }
+.topbar .acct { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.5rem; padding: .4rem .8rem; border: 1px solid var(--frame-line); border-radius: 2px; color: var(--frame-text); font-size: .875rem; }
+.shell { display: grid; grid-template-columns: 15rem minmax(0, 1fr); min-height: 0; }
+.side { background: var(--frame); color: var(--frame-text); border-right: 1px solid var(--frame-line); padding: 1.25rem .75rem; display: grid; align-content: start; gap: .35rem; }
+.side .label { color: var(--frame-muted); padding: 0 .6rem .5rem; }
+.side a { display: grid; grid-template-columns: auto 1fr; gap: .1rem .6rem; align-items: center; padding: .6rem; border-radius: 2px; text-decoration: none; color: var(--frame-text); font-size: .875rem; }
+.side a small { grid-column: 2; color: var(--frame-muted); font-size: .75rem; }
+.side a.on { background: #35312b; box-shadow: inset 2px 0 0 var(--orange); }
+.side .mark { width: 1.4rem; height: 1.4rem; grid-row: span 2; }
+main { padding: clamp(1.25rem, 3vw, 3rem) max(1rem, env(safe-area-inset-left, 0px)) 4rem; min-width: 0; }
+.content { width: min(100%, 92rem); margin-inline: auto; display: grid; gap: clamp(1.25rem, 2.2vw, 2rem); }
+
+/* run header */
+.runhead { display: flex; flex-wrap: wrap; gap: 1.25rem 2rem; align-items: end; justify-content: space-between; }
+.runhead h1 { font-size: clamp(1.6rem, 1.1rem + 1.2vw, 2.5rem); letter-spacing: -.03em; margin-top: .5rem; }
+.runhead .target { margin-top: .6rem; color: var(--muted); max-width: 46rem; }
+.leave { display: grid; gap: .5rem; justify-items: end; text-align: right; font-size: .875rem; color: var(--muted); }
+.leave .clock { font: 600 1.0625rem var(--font); color: var(--charcoal); font-variant-numeric: tabular-nums; }
+.toggle { display: inline-flex; align-items: center; gap: .55rem; min-height: 2.5rem; padding: .45rem .8rem; border: 1px solid var(--charcoal); border-radius: 2px; background: var(--sheet); font: 600 .875rem var(--font); cursor: pointer; }
+.toggle[aria-pressed="true"] { background: var(--charcoal); color: #fff; }
+
+/* stage trace (compact) */
+.trace { padding: 1rem 1.25rem .5rem; }
+.trace svg { width: 100%; height: auto; overflow: visible; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.trace .base { stroke: var(--apricot); stroke-dasharray: 10 4 2 4; }
+.trace .run { stroke: var(--orange-ink); stroke-width: 3; transition: stroke-dashoffset .9s var(--fluid); }
+.trace .signal { fill: var(--orange); }
+.trace .st circle.ring { fill: var(--sheet); stroke-width: 1.6; }
+.trace .st text { stroke: none; font: 600 12px var(--font); letter-spacing: .09em; text-anchor: middle; fill: var(--muted); }
+.trace .st text.sub { font-weight: 400; letter-spacing: .02em; font-size: 11px; }
+.trace .st .glyph { stroke-width: 2; }
+.trace .st .pulse { fill: none; stroke-width: 2; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.trace .st.work .pulse, .trace .st.you .pulse { animation: ring 1.8s var(--ease) infinite; }
+@keyframes ring { 0% { opacity: .7; transform: scale(1); } 100% { opacity: 0; transform: scale(1.6); } }
+
+/* body grid */
+.grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: clamp(1rem, 2vw, 1.75rem); align-items: start; }
+.console { padding: clamp(1.1rem, 2vw, 1.75rem); display: grid; gap: 1.1rem; position: relative; overflow: hidden; }
+.console .now { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.console .now .label { display: inline-flex; gap: .5rem; align-items: center; }
+.live-dot { width: .55rem; height: .55rem; border-radius: 50%; background: var(--orange); animation: blink 1.6s ease-in-out infinite; }
+.console[data-mode="review"] .live-dot { background: var(--you); animation: none; }
+@keyframes blink { 50% { opacity: .3; } }
+.console .step-time { font: 600 .875rem var(--font); font-variant-numeric: tabular-nums; color: var(--muted); }
+.console h2 { font-size: clamp(1.35rem, 1rem + 1vw, 2rem); letter-spacing: -.02em; min-height: 2.4em; }
+.console h2 .w { display: inline-block; transition: opacity .38s var(--ease), transform .38s var(--ease), filter .38s var(--ease); transition-delay: calc(var(--i) * 50ms); }
+.console h2.enter .w { opacity: 0; filter: blur(.08em); transform: translateY(.25em); transition-delay: 0s; }
+.viz { position: relative; min-height: 13rem; border: 1px solid var(--line); border-radius: 2px; background: var(--paper); overflow: hidden; }
+.viz > div { position: absolute; inset: 0; padding: 1rem; opacity: 0; visibility: hidden; transition: opacity .3s var(--ease), visibility 0s .3s; }
+.viz > div.on { opacity: 1; visibility: visible; transition-delay: 0s; }
+/* search */
+.queries { display: flex; flex-wrap: wrap; gap: .4rem; }
+.q { padding: .3rem .6rem; border: 1px solid var(--charcoal); border-radius: 2px; background: var(--sheet); font-size: .8125rem; animation: pop .3s var(--ease) both; }
+.results { margin-top: .8rem; display: grid; gap: .3rem; }
+.res { display: flex; align-items: center; gap: .6rem; padding: .35rem .5rem; background: var(--sheet); border: 1px solid var(--line-soft); font-size: .8125rem; animation: slidein .28s var(--ease) both; }
+.ini { width: 1.5rem; height: 1.5rem; flex: none; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 4px; font-size: .625rem; font-weight: 700; background: var(--paper); }
+@keyframes pop { from { opacity: 0; transform: scale(.85); } }
+@keyframes slidein { from { opacity: 0; transform: translateX(-8px); } }
+/* read */
+.browser { height: 100%; display: grid; grid-template-rows: auto 1fr; border: 1px solid var(--charcoal); background: var(--sheet); border-radius: 2px; overflow: hidden; }
+.browser .bar { display: flex; align-items: center; gap: .5rem; padding: .45rem .6rem; border-bottom: 1px solid var(--line); font-size: .8125rem; }
+.browser .bar i { width: .5rem; height: .5rem; border-radius: 50%; border: 1px solid var(--line); }
+.browser .url { flex: 1; padding: .2rem .5rem; background: var(--paper); border-radius: 2px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.page { position: relative; padding: .9rem 1rem; display: grid; gap: .55rem; align-content: start; overflow: hidden; }
+.page .ln { height: .55rem; border-radius: 2px; background: var(--line-soft); position: relative; }
+.page .ln.h { height: .9rem; width: 55%; background: var(--line); }
+.page .ln.match::after { content: ""; position: absolute; inset: -2px -3px; background: rgba(213, 104, 47, .3); border-radius: 2px; transform-origin: left; animation: mark .5s var(--ease) both; animation-delay: var(--md, 0s); }
+@keyframes mark { from { transform: scaleX(0); } }
+.scan { position: absolute; left: 0; right: 0; top: 0; height: 2.4rem; background: linear-gradient(transparent, rgba(213, 104, 47, .14) 70%, var(--orange) 70%, var(--orange) calc(70% + 2px), transparent calc(70% + 2px)); animation: scan 2.2s var(--fluid) infinite; }
+@keyframes scan { from { transform: translateY(-2.4rem); } to { transform: translateY(15rem); } }
+/* assess */
+.cands { display: grid; gap: .35rem; }
+.cand { display: grid; grid-template-columns: auto 1fr auto; gap: .6rem; align-items: center; padding: .45rem .6rem; background: var(--sheet); border: 1px solid var(--line-soft); font-size: .8125rem; transition: transform .4s var(--fluid), border-color .3s; }
+.cand.top { border-color: var(--orange-ink); }
+.crit { display: flex; gap: .25rem; }
+.crit b { width: .7rem; height: .7rem; border: 1.4px solid var(--idle); border-radius: 2px; transition: background .25s, border-color .25s; }
+.crit b.ok { background: var(--ok); border-color: var(--ok); }
+.crit b.you { background: var(--you-soft); border-color: var(--you); }
+.crit b.fail { background: var(--fail-soft); border-color: var(--fail); }
+/* verify */
+.claim { display: grid; gap: .6rem; }
+.claim .passage { padding: .8rem 1rem; border-left: 3px solid var(--orange-ink); background: var(--sheet); font-size: 1rem; line-height: 1.55; }
+.hw { background-image: linear-gradient(transparent 58%, rgba(213, 104, 47, .34) 58%); background-repeat: no-repeat; background-size: 0% 100%; }
+.verify.on .hw { animation: hl .35s var(--ease) forwards; animation-delay: calc(.3s + var(--i) * 90ms); }
+@keyframes hl { to { background-size: 100% 100%; } }
+/* review */
+.yourturn { display: grid; gap: .5rem; }
+.yourturn .item { display: flex; align-items: center; gap: .7rem; padding: .55rem .7rem; background: var(--sheet); border: 1px solid var(--line); }
+.yourturn .item .grow { flex: 1; min-width: 0; }
+.yourturn .item small { display: block; color: var(--muted); }
+.pill { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .5rem; border-radius: 2px; font-size: .75rem; font-weight: 600; white-space: nowrap; }
+.pill.ok { color: var(--ok); background: var(--ok-soft); } .pill.fail { color: var(--fail); background: var(--fail-soft); } .pill.you { color: var(--you); background: var(--you-soft); }
+.counters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--line); padding-top: 1rem; gap: 1rem; }
+.counters div { display: grid; gap: .2rem; }
+.counters strong { font: 700 clamp(1.5rem, 1.1rem + 1vw, 2.1rem)/1 var(--font); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.counters span { font-size: .8125rem; color: var(--muted); }
+.found { display: none; padding: .8rem 1rem; background: var(--ok-soft); border: 1px solid rgba(31, 122, 77, .25); border-radius: 2px; font-size: .875rem; }
+.found.on { display: block; animation: slidein .3s var(--ease); }
+
+/* checkpoint feed */
+.feed { display: grid; grid-template-rows: auto auto minmax(0, 1fr); max-height: calc(100dvh - 9rem); position: sticky; top: 4.5rem; }
+.feed header { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: 1.1rem 1.25rem .6rem; }
+.feed h3 { font-size: 1.0625rem; }
+.legend { display: flex; flex-wrap: wrap; gap: .4rem; padding: 0 1.25rem .8rem; border-bottom: 1px solid var(--line); }
+.legend button { display: inline-flex; align-items: center; gap: .35rem; padding: .25rem .5rem; border: 1px solid var(--line); border-radius: 2px; background: var(--sheet); font: 600 .75rem var(--font); cursor: pointer; color: var(--charcoal); }
+.legend button[aria-pressed="true"] { border-color: var(--charcoal); background: var(--paper); }
+.legend .mark { width: 1rem; height: 1rem; box-shadow: inset 0 0 0 1.2px var(--c); }
+.legend .mark svg { width: .65rem; height: .65rem; }
+.legend .mark.work::after { border-width: 1.5px; }
+.list { overflow-y: auto; overscroll-behavior: contain; padding: .25rem 0 1rem; }
+.list ol { list-style: none; margin: 0; padding: 0; }
+.group { position: sticky; top: 0; z-index: 1; padding: .55rem 1.25rem .35rem; background: rgba(255, 255, 255, .96); font: 600 .6875rem var(--font); letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+.item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: .2rem .75rem; align-items: start; padding: .7rem 1.25rem; border-top: 1px solid var(--line-soft); position: relative; }
+.item .mark { grid-row: span 2; margin-top: .05rem; }
+.item p { font-size: .875rem; line-height: 1.4; }
+.item .state { font-weight: 600; }
+.item .state.ok { color: var(--ok); } .item .state.fail { color: var(--fail); } .item .state.work { color: var(--work); } .item .state.you { color: var(--you); } .item .state.reuse { color: var(--reuse); }
+.item .detail { grid-column: 2 / 4; color: var(--muted); font-size: .8125rem; }
+.item time { font-size: .75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.item.fresh { animation: enter .42s var(--ease) both, flash 1.6s ease-out .1s both; }
+@keyframes enter { from { opacity: 0; transform: translateY(-10px); } }
+@keyframes flash { from { background: var(--peach); } to { background: transparent; } }
+.mark.popped { animation: popmark .35s var(--ease); }
+@keyframes popmark { 50% { transform: scale(1.25); } }
+.item.dim { display: none; }
+
+/* simulation controls (prototype only) */
+.sim { justify-self: start; display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; padding: .45rem .5rem .45rem .75rem; background: var(--frame); color: var(--frame-text); border-radius: 2px; font-size: .75rem; box-shadow: 0 2px 0 #000; }
+.sim button { min-height: 2rem; padding: .25rem .6rem; border: 1px solid var(--frame-line); border-radius: 2px; background: transparent; color: inherit; font: 600 .75rem var(--font); cursor: pointer; }
+.sim button[aria-pressed="true"] { background: var(--orange-ink); border-color: var(--orange-ink); }
+
+@media (max-width: 1280px) { .grid { grid-template-columns: 1fr; } .feed { position: static; max-height: 34rem; } }
+@media (max-width: 1100px) { .shell { grid-template-columns: 1fr; } .side { display: none; } }
+@media (max-width: 700px) {
+  .trace .st text { display: none; }
+  .counters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .leave { justify-items: start; text-align: left; }
+  .topbar .crumb, .topbar .acct span { display: none; }
+  .viz { min-height: 14rem; }
+  .runhead h1 { font-size: 1.5rem; }
+  .runhead .target { font-size: .875rem; }
+  .proto-chip .long { display: none; }
+}
+html[data-motion="reduce"] .scan { display: none; }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="wordmark" href="index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 6h12M3 12h8M3 18h5"/><circle cx="17.5" cy="15.5" r="3.5" stroke="#e4a07b"/><path d="m20 18 2.5 2.5" stroke="#e4a07b"/></svg>GTM Shortlist</a>
+  <span class="crumb">/ Onboarding reviews for B2B software teams</span>
+  <span class="spacer"></span>
+  <span class="proto-chip">Simulated<span class="long"> run · synthetic companies</span></span>
+  <span class="acct"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Account</span></span>
+</header>
+<div class="shell">
+  <aside class="side" aria-label="Saved runs">
+    <p class="label">Saved runs</p>
+    <a class="on" href="#" aria-current="page"><span class="mark work" id="side-mark"></span>Onboarding reviews<small id="side-state">In progress</small></a>
+    <a href="#"><span class="mark ok"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m4 8 3 3 5-6"/></svg></span>Agency pilots<small>Ready</small></a>
+  </aside>
+  <main>
+    <div class="content">
+      <section class="runhead">
+        <div>
+          <span class="label">Research run · simulated for this prototype</span>
+          <h1>Finding companies for Relay Studio</h1>
+          <p class="target">Target: B2B software teams with an onboarding product or flow · up to three companies · confirmed by you</p>
+        </div>
+        <div class="leave">
+          <span class="clock">Running for <span id="total">0:00</span></span>
+          <span>You can leave this page. Research continues and is saved.</span>
+          <button class="toggle" id="notify" aria-pressed="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/></svg><span>Notify me when it's ready</span></button>
+        </div>
+      </section>
+
+<div class="sim" role="group" aria-label="Prototype simulation controls"><span>Simulation</span><button id="replay">Replay</button><button data-speed="1" aria-pressed="true">1×</button><button data-speed="3" aria-pressed="false">3×</button><button id="skip">Skip to end</button></div>
+
+      <section class="trace panel" aria-label="Research stages">
+        <svg viewBox="0 0 1200 120" aria-hidden="true">
+          <path class="base" d="M60 44 H1140"/>
+          <path class="run" id="run" d="M60 44 H1140"/>
+          <circle class="signal" id="signal" r="5" cx="60" cy="44"/>
+          <g id="stations"></g>
+        </svg>
+      </section>
+
+      <div class="grid">
+        <section class="console panel" id="console" data-mode="search" aria-live="polite" aria-labelledby="action">
+          <div class="now"><span class="label"><span class="live-dot" aria-hidden="true"></span><span id="now-label">Working now</span></span><span class="step-time" id="step-time">for 0:00</span></div>
+          <h2 id="action">Searching for companies that match your target</h2>
+          <div class="viz" aria-hidden="true">
+            <div class="search on" data-v="search"><div class="queries" id="queries"></div><div class="results" id="results"></div></div>
+            <div data-v="assess"><div class="cands" id="cands"></div></div>
+            <div data-v="read"><div class="browser"><div class="bar"><i></i><i></i><span class="url" id="url">northstar.example/product</span></div><div class="page" id="page"><div class="scan"></div></div></div></div>
+            <div class="verify" data-v="verify"><div class="claim"><span class="label">Checking a finding · Northstar Cloud</span><strong>Offers a B2B onboarding product</strong><p class="passage" id="vpassage">“Our platform helps business teams manage customer onboarding, from the first welcome to the handover.”</p><span style="font-size:.75rem;color:var(--muted)">Synthetic passage invented for this prototype</span></div></div>
+            <div data-v="review"><div class="yourturn">
+              <div class="item"><span class="ini">NC</span><div class="grow"><strong>Northstar Cloud</strong><small>northstar.example · onboarding product found in source</small></div><span class="pill ok">Fits</span></div>
+              <div class="item"><span class="ini">BH</span><div class="grow"><strong>Brightpath HR</strong><small>brightpath.example · budget owner unknown</small></div><span class="pill you">Needs a call</span></div>
+              <div class="item"><span class="ini">QS</span><div class="grow"><strong>Quarry Stack</strong><small>quarry.example · consumer-only product</small></div><span class="pill fail">Not a fit</span></div>
+              <a class="btn btn-primary" href="#" style="justify-self:start;margin-top:.25rem">Review the three companies <span class="arrow" aria-hidden="true">→</span></a>
+            </div></div>
+          </div>
+          <div class="found" id="found"></div>
+          <div class="counters">
+            <div><strong id="c-cand">0</strong><span>Candidates found</span></div>
+            <div><strong id="c-pages">0</strong><span>Company pages read</span></div>
+            <div><strong id="c-sources">0</strong><span>Passages saved</span></div>
+            <div><strong><span id="c-done">0</span><span style="color:var(--muted);font-weight:500"> / 3</span></strong><span>Companies researched</span></div>
+          </div>
+        </section>
+
+        <section class="feed panel" aria-labelledby="feed-title">
+          <header><h3 id="feed-title">Checkpoints</h3><span class="label" id="feed-count">0 steps · newest first</span></header>
+          <div class="legend" id="legend" role="group" aria-label="Filter checkpoints"></div>
+          <div class="list" data-lenis-prevent><ol id="feed" aria-label="Research checkpoints"></ol></div>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="shared.js"></script>
+<script>
+(function () {
+  const P = window.proto, $ = (s) => document.querySelector(s);
+  let cur = null, timers = [], speed = 1, done = false;
+  const G = {
+    ok: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m4 8 3 3 5-6"/></svg>',
+    fail: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 5 6 6m0-6-6 6"/></svg>',
+    you: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 4v5M8 11.5v.5"/></svg>',
+    reuse: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7a4 4 0 0 1 7-2l1 1M12 9a4 4 0 0 1-7 2l-1-1"/><path d="M12 3v3H9M4 13v-3h3"/></svg>',
+    work: '', idle: '',
+  };
+  const WORD = { ok: 'Completed', fail: 'Failed', work: 'Working', you: 'Needs you', reuse: 'Reused', idle: 'Upcoming' };
+  const mark = (k, extra = '') => `<span class="mark ${k} ${extra}" title="${WORD[k]}">${G[k]}</span>`;
+
+  /* stages */
+  const stageNames = ['Understand offer', 'Explore market', 'Confirm target', 'Discover companies', 'Inspect evidence', 'Your review'];
+  const sx = [110, 306, 502, 698, 894, 1090];
+  const st = $('#stations');
+  st.innerHTML = sx.map((x, i) => `<g class="st" data-i="${i}" transform="translate(${x} 44)"><circle class="pulse" r="18"/><circle class="ring" r="18"/><g class="glyph"></g><text y="46">${stageNames[i].toUpperCase()}</text><text class="sub" y="62"></text></g>`).join('');
+  const stEls = [...st.children];
+  const glyphPaths = { ok: '<path d="m-6 0 4 4 8-9"/>', fail: '<path d="m-5 -5 10 10m0-10-10 10"/>', you: '<path d="M0 -6v7M0 5.5v.5"/>', reuse: '<path d="M-6 -1a6 6 0 0 1 10-3M6 1a6 6 0 0 1-10 3"/>', work: '<circle r="3" style="stroke:none"/>', idle: '' };
+  const colorOf = { ok: 'var(--ok)', fail: 'var(--fail)', work: 'var(--work)', you: 'var(--you)', reuse: 'var(--reuse)', idle: 'var(--idle)' };
+  const softOf = { ok: 'var(--ok-soft)', fail: 'var(--fail-soft)', work: 'var(--work-soft)', you: 'var(--you-soft)', reuse: 'var(--reuse-soft)', idle: 'var(--sheet)' };
+  const subOf = { ok: 'Saved', fail: 'Saved with gaps', work: 'Working', you: 'Needs you', idle: 'Upcoming' };
+  const run = $('#run'), runLen = run.getTotalLength(); run.style.strokeDasharray = runLen;
+  let currentStage = 0;
+  function setStage(i, state) {
+    stEls[i].className.baseVal = 'st ' + state;
+    const ring = stEls[i].querySelector('.ring'); ring.style.stroke = colorOf[state]; ring.style.fill = softOf[state];
+    if (state === 'idle') ring.style.strokeDasharray = '3 4'; else ring.style.strokeDasharray = '';
+    const gl = stEls[i].querySelector('.glyph'); gl.innerHTML = glyphPaths[state]; gl.style.stroke = colorOf[state]; gl.style.fill = state === 'work' ? colorOf[state] : 'none';
+    stEls[i].querySelector('.pulse').style.stroke = colorOf[state];
+    stEls[i].querySelector('.sub').textContent = subOf[state] || '';
+    stEls[i].querySelector('text').style.fill = state === 'idle' ? 'var(--muted)' : 'var(--charcoal)';
+  }
+  function moveRun(i) { currentStage = i; run.style.strokeDashoffset = runLen - (sx[i] - 60); }
+  // travelling signal: from the previous station to the current one, looping while work happens
+  let sigT = 0, working = true;
+  (function sig(now) {
+    const s = $('#signal');
+    if (working && !P.reduced) { sigT = (sigT + 0.012 * speed) % 1; const a = sx[Math.max(0, currentStage - 1)], b = sx[currentStage]; s.setAttribute('cx', a + (b - a) * (1 - Math.pow(1 - sigT, 2))); s.style.opacity = Math.sin(sigT * Math.PI); }
+    else s.style.opacity = 0;
+    requestAnimationFrame(sig);
+  })();
+
+  /* console */
+  const con = $('#console'), action = $('#action');
+  function setAction(text, mode, label = 'Working now') {
+    action.textContent = text; action.removeAttribute('data-split');
+    // word reveal on every real action change
+    action.innerHTML = text.split(' ').map((w, i) => `<span class="w" style="--i:${i}">${w}</span>`).join(' ');
+    action.classList.add('enter'); requestAnimationFrame(() => requestAnimationFrame(() => action.classList.remove('enter')));
+    con.dataset.mode = mode; $('#now-label').textContent = label;
+    con.querySelectorAll('.viz > div').forEach((d) => d.classList.toggle('on', d.dataset.v === mode));
+    stepStart = performance.now();
+  }
+  const counters = { cand: $('#c-cand'), pages: $('#c-pages'), sources: $('#c-sources'), done: $('#c-done') };
+  const bump = (k, v) => P.countTo(counters[k], v);
+
+  /* feed */
+  const feed = $('#feed'); let filter = 'all', stepCount = 0, groupFor = null;
+  const legend = $('#legend');
+  const kinds = ['ok', 'fail', 'work', 'you', 'reuse'];
+  legend.innerHTML = `<button aria-pressed="true" data-f="all">All</button>` + kinds.map((k) => `<button aria-pressed="false" data-f="${k}">${mark(k)}<span>${WORD[k]}</span><span class="n" data-n="${k}"></span></button>`).join('');
+  legend.addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; filter = b.dataset.f; legend.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', x === b)); applyFilter(); });
+  function applyFilter() { feed.querySelectorAll('.item').forEach((li) => li.classList.toggle('dim', filter !== 'all' && li.dataset.k !== filter)); }
+  function counts() { kinds.forEach((k) => { const n = feed.querySelectorAll(`.item[data-k="${k}"]`).length; legend.querySelector(`[data-n="${k}"]`).textContent = n ? `· ${n}` : ''; }); $('#feed-count').textContent = `${stepCount} steps · newest first`; }
+  const clock = (ms) => { const s = Math.floor(ms / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+  const t0 = Date.now() - 96000; let simStart = performance.now(), stepStart = performance.now(), totalBase = 96000;
+  const stamp = () => new Date(t0 + totalBase + (performance.now() - simStart) * speed).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  function addItem(k, label, detail, stage, fresh = true) {
+    if (groupFor !== stage) { const g = document.createElement('li'); g.className = 'group'; g.textContent = stageNames[stage]; feed.prepend(g); groupFor = stage; }
+    const li = document.createElement('li'); li.className = 'item' + (fresh && !P.reduced ? ' fresh' : ''); li.dataset.k = k;
+    li.innerHTML = `${mark(k)}<p><span class="state ${k}">${WORD[k]}</span> · ${label}</p><time>${stamp()}</time>${detail ? `<p class="detail">${detail}</p>` : ''}`;
+    const firstGroup = feed.querySelector('.group'); firstGroup.after(li);
+    stepCount++; counts(); applyFilter(); return li;
+  }
+  function resolve(li, k, label, detail) {
+    li.dataset.k = k; const m = li.querySelector('.mark'); m.outerHTML = mark(k, 'popped');
+    li.querySelector('.state').className = 'state ' + k; li.querySelector('.state').textContent = WORD[k];
+    if (label) li.querySelector('p').lastChild.textContent = ' · ' + label;
+    if (detail) { let d = li.querySelector('.detail'); if (!d) { d = document.createElement('p'); d.className = 'detail'; li.appendChild(d); } d.textContent = detail; }
+    counts(); applyFilter();
+  }
+
+  /* earlier checkpoints (already saved before this view opened) */
+  function seed() {
+    feed.innerHTML = ''; groupFor = null; stepCount = 0;
+    addItem('ok', 'Saved your company page', 'relay-studio.example · read once', 0, false);
+    addItem('ok', 'Drafted your offer summary', 'Editable before discovery', 0, false);
+    addItem('ok', 'Saved 2 market observations', 'signalhouse.example, tidewater.example', 1, false);
+    addItem('fail', "Couldn't read pagelane.example", 'The page blocked automated reading. Market step continued without it.', 1, false);
+    addItem('ok', 'Proposed 3 campaign hypotheses', 'Labelled as hypotheses, not facts', 1, false);
+    addItem('you', 'Waited for your target confirmation', 'Confirmed by you · nothing was searched before this', 2, false);
+    addItem('ok', 'Target confirmed', '3 criteria · 1 exclusion · up to 3 companies', 2, false);
+    [0, 1, 2].forEach((i) => setStage(i, i === 1 ? 'fail' : 'ok')); setStage(1, 'ok');
+    stEls[1].querySelector('.sub').textContent = 'Saved with gaps';
+    [3, 4, 5].forEach((i) => setStage(i, 'idle'));
+    Object.values(counters).forEach((c) => (c.textContent = '0'));
+    $('#queries').innerHTML = ''; $('#results').innerHTML = ''; $('#cands').innerHTML = ''; $('#found').className = 'found';
+  }
+
+  /* simulated event script: what real worker checkpoints would drive */
+  const pageLines = () => { const pg = $('#page'); pg.querySelectorAll('.ln').forEach((l) => l.remove()); const ws = [55, 92, 84, 96, 70, 88, 94, 60, 90, 78]; ws.forEach((w, i) => { const d = document.createElement('div'); d.className = 'ln' + (i === 0 ? ' h' : ''); if (i) d.style.width = w + '%'; pg.appendChild(d); }); return [...pg.querySelectorAll('.ln')]; };
+  const script = [
+    [0, () => { setStage(3, 'work'); moveRun(3); setAction('Searching for companies that match your target', 'search'); cur = addItem('work', 'Searching for companies', '3 search queries from your confirmed criteria', 3); }],
+    [600, () => $('#queries').insertAdjacentHTML('beforeend', '<span class="q">B2B customer onboarding software</span>')],
+    [1300, () => $('#queries').insertAdjacentHTML('beforeend', '<span class="q">onboarding workflow platform for SaaS</span>')],
+    [2000, () => $('#queries').insertAdjacentHTML('beforeend', '<span class="q">self-serve product onboarding tool</span>')],
+    ...['northstar.example', 'brightpath.example', 'quarry.example', 'lumenly.example', 'ferrylane.example', 'oakpoint.example', 'cindertrail.example', 'harbor-ops.example'].map((d, i) => [2400 + i * 420, () => { $('#results').insertAdjacentHTML('afterbegin', `<div class="res"><span class="ini">${d.slice(0, 2).toUpperCase()}</span><span style="flex:1">${d}</span><span style="color:var(--muted)">candidate</span></div>`); const r = $('#results'); while (r.children.length > 6) r.lastChild.remove(); bump('cand', i + 1); }]),
+    [6200, () => resolve(cur, 'ok', 'Saved 8 candidate companies', 'From 3 searches')],
+    [6900, () => { setAction('Prioritising candidates against your confirmed criteria', 'assess'); cur = addItem('work', 'Prioritising candidates', 'Checking each against 3 criteria and 1 exclusion', 3);
+      $('#cands').innerHTML = ['northstar.example', 'brightpath.example', 'quarry.example', 'lumenly.example', 'ferrylane.example'].map((d) => `<div class="cand" data-d="${d}"><span class="ini">${d.slice(0, 2).toUpperCase()}</span><span>${d}</span><span class="crit"><b></b><b></b><b></b></span></div>`).join(''); }],
+    ...[[0, ['ok', 'ok', 'ok']], [1, ['ok', 'you', 'ok']], [2, ['ok', 'ok', 'fail']], [3, ['ok', 'fail', 'fail']], [4, ['fail', 'fail', 'ok']]].map(([row, res], j) => [7600 + j * 650, () => { const bs = $('#cands').children[row].querySelectorAll('b'); res.forEach((r, k) => setTimeout(() => (bs[k].className = r), k * 140 / speed)); }]),
+    [11000, () => { [...$('#cands').children].slice(0, 3).forEach((c) => c.classList.add('top')); resolve(cur, 'ok', 'Selected 3 companies to research', 'northstar.example, brightpath.example, quarry.example'); setStage(3, 'ok'); }],
+    [11800, () => { setStage(4, 'work'); moveRun(4); $('#url').textContent = 'northstar.example/product'; const ls = pageLines(); setAction('Reading northstar.example/product', 'read'); cur = addItem('work', 'Reading northstar.example/product', null, 4); [3, 5].forEach((n, i) => { ls[n].style.setProperty('--md', 1.2 + i * .8 + 's'); ls[n].classList.add('match'); }); }],
+    [14200, () => { resolve(cur, 'ok', 'Saved company page', 'northstar.example/product · 1 page'); bump('pages', 1); }],
+    [14800, () => { setAction('Checking that the source supports each finding', 'verify'); const vp = $('#vpassage'); vp.innerHTML = vp.textContent.split(' ').map((w, i) => `<span class="hw" style="--i:${i}">${w}</span>`).join(' '); cur = addItem('work', 'Checking evidence for Northstar Cloud', null, 4); }],
+    [17200, () => { resolve(cur, 'ok', 'Supported: offers a B2B onboarding product', 'Exact passage saved beside the finding'); bump('sources', 1); bump('done', 1); $('#found').innerHTML = '<strong>Saved:</strong> Northstar Cloud · 1 supported finding · 1 unknown (budget owner)'; $('#found').className = 'found on'; }],
+    [18000, () => { setAction('Reusing saved evidence for brightpath.example', 'read', 'Working now'); $('#url').textContent = 'brightpath.example/about · saved copy'; pageLines(); addItem('reuse', 'Reused saved page for brightpath.example', 'Saved in an earlier run · no new request', 4); bump('pages', 2); }],
+    [19400, () => { cur = addItem('work', 'Assessing fit for Brightpath HR', null, 4); }],
+    [20800, () => { resolve(cur, 'ok', 'Brightpath HR assessed: budget owner unknown', 'Marked as needing a conversation'); bump('sources', 2); bump('done', 2); }],
+    [21500, () => { $('#url').textContent = 'quarry.example/about'; pageLines(); setAction('Reading quarry.example/about', 'read'); cur = addItem('work', 'Reading quarry.example/about', null, 4); }],
+    [23300, () => { resolve(cur, 'fail', "Couldn't read quarry.example/about", 'The page timed out. Trying the home page instead.'); }],
+    [24000, () => { $('#url').textContent = 'quarry.example'; const ls = pageLines(); ls[4].classList.add('match'); ls[4].style.setProperty('--md', '1s'); setAction('Reading quarry.example', 'read'); cur = addItem('work', 'Reading quarry.example', null, 4); }],
+    [25800, () => { resolve(cur, 'ok', 'Saved company page', 'quarry.example · 1 page'); bump('pages', 3); }],
+    [26400, () => { cur = addItem('work', 'Assessing fit for Quarry Stack', null, 4); setAction('Assessing fit for Quarry Stack', 'assess'); }],
+    [27900, () => { resolve(cur, 'ok', 'Quarry Stack assessed: consumer-only product', 'Matches your exclusion'); bump('sources', 3); bump('done', 3); setStage(4, 'ok'); }],
+    [28700, () => { setStage(5, 'you'); moveRun(5); working = false; setAction('Your shortlist is ready to review', 'review', 'Your turn'); addItem('you', 'Ready for your review', '3 companies saved · decide which to keep', 5); $('#side-mark').className = 'mark you'; $('#side-mark').innerHTML = G.you; $('#side-state').textContent = 'Needs your review'; document.title = 'Ready for review · GTM Shortlist'; $('#total').textContent = clock(totalBase + 28700); $('#step-time').textContent = 'waiting for you'; done = true; }],
+  ];
+  function play(fromStart = true) {
+    timers.forEach(clearTimeout); timers = []; done = false; working = true;
+    if (fromStart) { seed(); simStart = performance.now(); }
+    script.forEach(([at, fn]) => timers.push(setTimeout(fn, at / speed)));
+  }
+  document.querySelectorAll('[data-speed]').forEach((b) => b.addEventListener('click', () => { speed = +b.dataset.speed; document.querySelectorAll('[data-speed]').forEach((x) => x.setAttribute('aria-pressed', x === b)); play(true); }));
+  $('#replay').addEventListener('click', () => play(true));
+  $('#skip').addEventListener('click', () => { timers.forEach(clearTimeout); seed(); speed = 1000; script.forEach(([, fn]) => fn()); speed = 1; });
+  $('#notify').addEventListener('click', (e) => { const b = e.currentTarget; const on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', on); b.querySelector('span').textContent = on ? "We'll notify you in this browser" : "Notify me when it's ready"; });
+
+  /* live clocks from real timestamps (here: simulated start) */
+  setInterval(() => {
+    if (done) return;
+    $('#total').textContent = clock(totalBase + (performance.now() - simStart) * speed);
+    $('#step-time').textContent = 'for ' + clock((performance.now() - stepStart) * speed);
+    document.title = `● Researching (${currentStage + 1}/6) · GTM Shortlist`;
+  }, 500);
+
+  if (P.reduced) { seed(); speed = 1000; script.forEach(([, fn]) => fn()); speed = 1; } else play(true);
+})();
+</script>
+</body>
+</html>
