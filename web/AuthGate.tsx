@@ -9,6 +9,8 @@ import { keepCompany, peekKeptCompany } from './landing/kept-company';
 const PublicLanding = lazy(() => import('./landing/PublicLanding').then(module => ({ default: module.PublicLanding })));
 type AuthView = 'signin' | 'signup' | null;
 const authView = (): AuthView => { const view = new URLSearchParams(window.location.search).get('auth'); return view === 'signin' || view === 'signup' ? view : null; };
+// Saved-run links and auth callbacks belong to returning users: they go to sign-in, never to the public landing page.
+const returningLink = () => { const params = new URLSearchParams(window.location.search); return ['run', 'code', 'error', 'error_description'].some(name => params.has(name)); };
 
 type HostedSetup = Extract<AuthSetup, { mode: 'hosted' }>;
 type State = { kind: 'loading' } | { kind: 'local' } | { kind: 'error'; message: string } |
@@ -144,7 +146,7 @@ export function AuthGate({ workspace }: { workspace: (identity: string, account:
     const result = await state.client.auth.signOut({ scope: 'local' });
     if (result.error) setSignoutError(result.error.message);
   };
-  if (!state.session && !state.recovery && !state.expired && !view) return <Suspense fallback={<main className="account-page" />}><PublicLanding onSignIn={() => openAccount('signin')} onStart={company => { keepCompany(company); openAccount('signup'); }} /></Suspense>;
+  if (!state.session && !state.recovery && !state.expired && !view && !returningLink()) return <Suspense fallback={<main className="account-page" />}><PublicLanding onSignIn={() => openAccount('signin')} onStart={company => { keepCompany(company); openAccount('signup'); }} /></Suspense>;
   if (!state.session || state.recovery || state.expired) return <AccountForm key={view ?? 'signin'} initialMode={view === 'signup' ? 'signup' : 'signin'} keptCompany={peekKeptCompany()} client={state.client} setup={state.setup} recovery={state.recovery} expired={state.expired} externalError={signoutError} onRecovered={() => setState(old => old.kind === 'hosted' ? { ...old, recovery: false } : old)} />;
   if (!state.session.user.email_confirmed_at || state.session.user.is_anonymous) return <main className="account-page"><section className="sheet account-sheet"><h1>Confirm your email</h1><p>Open the confirmation link in your inbox before starting research.</p>{signoutError && <p className="notice" role="alert">{signoutError}</p>}<button className="secondary" onClick={() => { void signout(); }}>Back to sign in</button></section></main>;
   return workspace(state.session.user.id, <div className="account-nav"><span>{state.session.user.email}</span><button className="text-button" onClick={() => { void signout(); }}>Sign out</button>{signoutError && <p role="alert">{signoutError}</p>}</div>);

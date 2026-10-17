@@ -67,6 +67,13 @@ test('header sign-in opens the account form and browser back returns to the land
   await expect(page).not.toHaveURL(/auth=/);
 });
 
+test('a saved-run link without a session opens sign-in, not the public landing page', async ({ page }) => {
+  await hosted(page);
+  await page.goto('/?run=labelled-saved-run');
+  await expect(page.getByRole('heading', { name: 'Sign in to your shortlist' })).toBeVisible();
+  await expect(page.locator('#pl-hero-title')).toHaveCount(0);
+});
+
 test('the pinned story steps forward and back from its stepper', async ({ page }, info) => {
   await hosted(page);
   await page.goto('/');
