@@ -79,13 +79,27 @@ uvx gtm-shortlist ─► browser opens ─► Setup (2 steps) ─► Start resea
 - Landing → one-press start → live draft → review-first confirmation → progress → results.
 - The same review card, status colours and progress view in both paths. Hosted adds only the inline sign-in panel and the price line.
 
-## Build order
+## Build checklist
 
-| Phase | Hosted | Local | Size |
-|---|---|---|---|
-| 1 | Price line on the landing page, drop the demo link | `shortlist serve --open` opens the browser; first-run setup card using the existing settings APIs | Small |
-| 2 | Email OTP and Google sign-in panel (Supabase settings + UI) | Try with sample data | Medium |
-| 3 | Anonymous drafts, claim on sign-in, Turnstile and caps | PyPI package with the UI included; local Docker image | Medium–large |
+Ticked items are built, tested and pushed on `claude/signal-landing`; items marked *you* need an account setting only the owner can make.
+
+**Phase 1** (small)
+- [x] Hosted landing note shows "First 3 companies free · no card needed"; local and preview keep "Discovery waits until you confirm the target".
+- [x] The landing page no longer links to the demo; "While it runs" points to the company field. The workspace start page keeps "Try the demo".
+- [x] `shortlist serve --open` opens the browser once the API answers (`open_when_ready`, unit-tested).
+- [x] Local first-run setup card: "Research model" and "Company search" steps with status marks; each button opens Settings at its section. Replaces the "Open Settings" prompt.
+
+**Phase 2** (medium)
+- [ ] Email code sign-in (6 digits, same tab) on the account form. *You:* add `{{ .Token }}` to the Supabase magic-link email template.
+- [ ] Google sign-in button, shown only when configured. *You:* create a Google OAuth client and enable the provider in Supabase.
+- [ ] Local "Try with sample data": a run that uses the labelled synthetic providers, labelled on every screen and export.
+
+**Phase 3** (medium to large)
+- [ ] Anonymous draft-only runs: no search, page fetch and model call only; 24-hour expiry.
+- [ ] Claim on sign-in: the draft becomes a normal run awaiting confirmation; market exploration starts after.
+- [ ] Abuse limits: Turnstile, one draft per browser and IP per day, a global daily cap and a kill switch. *You:* Cloudflare Turnstile site and secret keys.
+- [ ] PyPI package with the built UI and a console entry that opens the browser. *You:* PyPI trusted publishing for the repository.
+- [ ] Local-mode Docker image published to GHCR.
 
 Phase 3 changes auth and data storage. It needs its own tests for expiry, claiming, abuse caps and the kill switch, plus Postgres migrations.
 

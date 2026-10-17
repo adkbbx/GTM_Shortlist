@@ -118,3 +118,22 @@ def test_existing_supervised_worker_is_reused_and_not_owned_by_api(tmp_path):
     service.close()
     assert store.worker_online()
     store.remove_worker("labelled-external-worker")
+
+
+def test_open_when_ready_waits_for_the_api_before_opening_the_browser():
+    from shortlist.local_server import open_when_ready
+    answers, opened = iter([OSError(), False, True]), []
+    def probe():
+        answer = next(answers)
+        if isinstance(answer, Exception):
+            raise answer
+        return answer
+    assert open_when_ready('http://127.0.0.1:8014/', opener=opened.append, probe=probe, wait=lambda: None)
+    assert opened == ['http://127.0.0.1:8014/']
+
+
+def test_open_when_ready_gives_up_quietly_when_the_api_never_answers():
+    from shortlist.local_server import open_when_ready
+    opened = []
+    assert not open_when_ready('http://127.0.0.1:8014/', attempts=3, opener=opened.append, probe=lambda: False, wait=lambda: None)
+    assert opened == []

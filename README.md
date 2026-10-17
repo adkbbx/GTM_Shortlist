@@ -43,7 +43,7 @@ npm ci
 python scripts/export_schema.py
 npm run schema
 npm run build
-shortlist serve --port 8014
+shortlist serve --port 8014 --open
 ```
 
 Open `http://127.0.0.1:8014`. This command starts and supervises the API and durable worker together. If either exits, both stop; restarting preserves saved jobs and uncertain-dispatch protection. The API serves the built UI. `npm run dev` starts the frontend dev server on port 5174 with an API proxy. Use the project virtual environment for Python commands.

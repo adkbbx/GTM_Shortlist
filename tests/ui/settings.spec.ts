@@ -30,7 +30,16 @@ test('local settings expose configuration and history identities without provide
       await expect(page.getByRole('button', { name: 'Settings', exact: true })).toHaveCount(0);
     }
     await page.getByLabel('Company name or website', { exact: true }).fill('My company');
-    await expect(page.getByRole('button', { name: 'Open Settings', exact: true })).toBeVisible();
+    // First run: a two-step setup card opens Settings at the right section.
+    const setup = page.getByRole('region', { name: 'Set up local research in two steps' });
+    await expect(setup).toBeVisible();
+    await setup.getByRole('button', { name: 'Add search key', exact: true }).click();
+    await expect(page.getByLabel('Tavily API key', { exact: true })).toBeFocused();
+    await page.keyboard.press('Escape');
+    await setup.getByRole('button', { name: 'Set up model', exact: true }).click();
+    await expect(page.locator('#local-model-form')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#local-model-form')).toHaveCount(0);
     await openSettings(page);
     const settings = page.getByRole('dialog', { name: 'Settings', exact: true });
     await expect(settings.locator('dd').filter({ hasText: /^Not configured$/ })).toHaveCount(3);
@@ -41,7 +50,7 @@ test('local settings expose configuration and history identities without provide
     await expect(page.getByLabel('Company name or website', { exact: true })).toHaveValue('My company');
     configured = true;
     await page.reload();
-    await expect(page.getByRole('button', { name: 'Open Settings', exact: true })).toHaveCount(0);
+    await expect(page.getByRole('region', { name: 'Set up local research in two steps' })).toHaveCount(0);
     if (info.project.name === 'laptop') await page.getByRole('button', { name: 'Hide saved runs', exact: true }).click();
     if (info.project.name === 'laptop') {
       await expect(page.locator('.saved-run-identity')).toHaveText(['AL', 'BS', 'CW']);

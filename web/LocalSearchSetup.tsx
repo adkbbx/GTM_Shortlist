@@ -7,6 +7,7 @@ import './LocalSettings.css';
 import { ModelSetup } from './ModelSetup';
 import { BrandfetchSetup } from './BrandfetchSettings';
 import { closeWorkspacePanel, openWorkspacePanel, trapPanelTab, workspacePanelOpen } from './workspace-panels';
+import type { LocalSetupSection } from './workspace-panels';
 import { usePageScrollLock } from './usePageScrollLock';
 
 type SaveState = { kind: 'idle' } | { kind: 'saving' } | { kind: 'saved' } | { kind: 'error'; message: string };
@@ -75,6 +76,17 @@ export function LocalSearchSetup({ health, onSaved, readOnly = false, brandfetch
     changingLayout.current = false;
     if (focusedControl.current?.getClientRects().length) focusedControl.current.focus();
   }, [narrow]);
+  useEffect(() => {
+    if (readOnly) return;
+    const openSection = (event: Event) => {
+      const section = (event as CustomEvent<LocalSetupSection>).detail;
+      setEditingBrandfetch(false); setModelSaved(false); setKey(''); setState({ kind: 'idle' });
+      setEditing(section === 'search'); setEditingModel(section === 'model');
+      openWorkspacePanel('local-settings');
+    };
+    window.addEventListener('shortlist:local-setup', openSection);
+    return () => window.removeEventListener('shortlist:local-setup', openSection);
+  }, [readOnly]);
   const closed = () => { if (open && !changingLayout.current && !workspacePanelOpen('local-settings')) reset(); };
   return <>
     <button className="local-settings-trigger secondary" type="button" popoverTarget={narrow ? undefined : 'local-settings'} onClick={() => { if (narrow) openWorkspacePanel('local-settings'); }} aria-label="Settings" title="Settings"><SettingsIcon /><span>Settings</span></button>

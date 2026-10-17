@@ -14,6 +14,12 @@ export function openWorkspacePanel(id: PanelId) {
   else if (panel instanceof HTMLDialogElement) panel.showModal();
 }
 
+/** First-run setup: open local Settings straight at the model or company-search section. */
+export type LocalSetupSection = 'model' | 'search';
+export function openLocalSetup(section: LocalSetupSection) {
+  window.dispatchEvent(new CustomEvent<LocalSetupSection>('shortlist:local-setup', { detail: section }));
+}
+
 export function closeWorkspacePanel(id: PanelId) {
   const panel = document.getElementById(id);
   if (panel?.matches(':popover-open')) panel.hidePopover();

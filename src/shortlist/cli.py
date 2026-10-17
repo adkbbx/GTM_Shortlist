@@ -40,6 +40,7 @@ def main():
     worker.add_argument("--once", action="store_true")
     server = sub.add_parser("serve", help="Start the local API and research worker together")
     server.add_argument("--port", type=int, choices=range(1024, 65536), default=8014, metavar="PORT")
+    server.add_argument("--open", action="store_true", help="Open the app in your browser once it is ready")
     show = sub.add_parser("show")
     show.add_argument("run_id")
     export = sub.add_parser("export")
@@ -152,7 +153,7 @@ def main():
     elif args.command == "resume":
         execute_run(store, settings, args.run_id)
     elif args.command == "serve":
-        serve(settings, args.port)
+        serve(settings, args.port, args.open)
     elif args.command == "show":
         print(json.dumps(store.get_run(args.run_id), ensure_ascii=False, indent=2))
     elif args.command == "export":

@@ -162,3 +162,15 @@ header.topbar .brand>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .confirmation .form-footer{position:sticky;bottom:0;z-index:2;margin-top:0;padding:1rem 0;background:var(--surface,#fff);box-shadow:0 -1px 0 var(--line)}
 .confirmation :is(input,textarea,select,summary){scroll-margin-bottom:7rem}
 @media(max-width:700px){.confirmation .form-footer{gap:.5rem;padding:.75rem 0}.confirmation .form-footer p{font-size:.8125rem}.confirmation :is(input,textarea,select,summary){scroll-margin-bottom:9rem}}
+
+/* First-run local setup: two steps, each opening the matching Settings section. */
+.local-setup-card{margin-top:1.5rem;padding:1.25rem;border:1px solid var(--line);border-radius:var(--radius-sheet,.875rem);background:var(--surface,#fff);text-align:left}
+.local-setup-card h3{font-size:1rem;line-height:1.4}
+.local-setup-card ol{display:grid;gap:.75rem;margin:.875rem 0 0;padding:0;list-style:none}
+.local-setup-card li{display:flex;align-items:center;gap:.75rem}
+.local-setup-card .status-mark{width:1.75rem;height:1.75rem}
+.local-setup-step{display:grid;flex:1;min-width:0;line-height:1.4}
+.local-setup-step>span{font-size:.8125rem;color:var(--muted)}
+.local-setup-card li>button{flex:none;min-height:2.75rem;padding:.5rem .875rem;font-size:.875rem}
+.local-setup-card .hint,.new-research .landing-start .local-setup-card .hint{margin-top:.875rem;text-align:left}
+@media(max-width:600px){.local-setup-card li{flex-wrap:wrap}.local-setup-card li>button{width:100%}}

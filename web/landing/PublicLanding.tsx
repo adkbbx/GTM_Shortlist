@@ -59,7 +59,7 @@ function Reveal({ as: Tag = 'h2', id, className, reduced, lead, accent, br = fal
   return <Tag ref={ref} id={id} className={className} data-reveal={shown ? 'shown' : 'hidden'}>{words(lead)}{br ? <br /> : ' '}<span className="pl-accent">{words(accent)}</span></Tag>;
 }
 
-function Hero({ reduced, onStart, directoryId, iconLookup, instrumentRef }: { reduced: boolean; onStart: (company: string) => void; directoryId: string; iconLookup: boolean; instrumentRef: RefObject<HTMLDivElement | null> }) {
+function Hero({ reduced, onStart, directoryId, iconLookup, note, instrumentRef }: { reduced: boolean; onStart: (company: string) => void; directoryId: string; iconLookup: boolean; note: string; instrumentRef: RefObject<HTMLDivElement | null> }) {
   const [company, setCompany] = useState('');
   const [invite, setInvite] = useState(true);
   const [shake, setShake] = useState(0);
@@ -111,7 +111,7 @@ function Hero({ reduced, onStart, directoryId, iconLookup, instrumentRef }: { re
                 onChange={value => { setInvite(false); setCompany(value); stream.current?.boost(1100); }} /></div>
             <button className="pl-btn pl-btn-primary pl-btn-block" type="submit" disabled={starting} aria-busy={starting}>{starting ? 'Starting research' : 'Start research'} <Arrow /></button>
           </div>
-          <p className="pl-note"><Lock /><span>Discovery waits until you confirm the target.</span></p>
+          <p className="pl-note"><Lock /><span>{note}</span></p>
           <span className="pl-port" aria-hidden="true" />
         </form>
         <div className="pl-stream" ref={streamEl} aria-hidden="true">
@@ -361,7 +361,7 @@ function Checkpoints({ reduced }: { reduced: boolean }) {
   </div>;
 }
 
-function Closing({ reduced, onStart }: { reduced: boolean; onStart: (company: string) => void }) {
+function Closing({ reduced, onStart, note }: { reduced: boolean; onStart: (company: string) => void; note: string }) {
   const [company, setCompany] = useState('');
   const [shake, setShake] = useState(0);
   const field = useRef<HTMLInputElement>(null);
@@ -378,14 +378,16 @@ function Closing({ reduced, onStart }: { reduced: boolean; onStart: (company: st
         <div className={`pl-field${shake % 2 ? ' shake' : shake ? ' shake-b' : ''}`}><input ref={field} aria-label="Company name or website" placeholder="yourcompany.com" spellCheck={false} autoCapitalize="off" maxLength={300} value={company} onChange={event => setCompany(event.target.value)} /></div>
         <button className="pl-btn pl-btn-primary" type="submit">Start research <Arrow /></button>
       </form>
-      <p className="pl-note"><Lock /><span>Discovery waits until you confirm the target.</span></p>
+      <p className="pl-note"><Lock /><span>{note}</span></p>
     </div>
   </section>;
 }
 
 /** The public landing page for hosted visitors without a session. It makes no research API or provider requests;
     company suggestions contact Brandfetch only when the installation configures a public client ID. */
-export function PublicLanding({ onStart, onSignIn, directoryId, iconLookup = false }: { onStart: (company: string) => void; onSignIn: () => void; directoryId: string; iconLookup?: boolean }) {
+// Hosted visitors see the free allowance up front; local and preview visitors see when discovery happens.
+export function PublicLanding({ onStart, onSignIn, directoryId, iconLookup = false, hosted = false }: { onStart: (company: string) => void; onSignIn: () => void; directoryId: string; iconLookup?: boolean; hosted?: boolean }) {
+  const note = hosted ? 'First 3 companies free · no card needed' : 'Discovery waits until you confirm the target.';
   const reduced = usePrefersReducedMotion();
   const lenis = useLenis(!reduced);
   const scrollTo = useScrollTo(lenis);
@@ -410,14 +412,14 @@ export function PublicLanding({ onStart, onSignIn, directoryId, iconLookup = fal
       </div>
     </header>
     <main>
-      <Hero reduced={reduced} onStart={onStart} directoryId={directoryId} iconLookup={iconLookup} instrumentRef={instrument} />
+      <Hero reduced={reduced} onStart={onStart} directoryId={directoryId} iconLookup={iconLookup} note={note} instrumentRef={instrument} />
       <Story reduced={reduced} scrollTo={scrollTo} />
       <Evidence reduced={reduced} />
       <section className="pl-section" id="live" aria-labelledby="pl-live-title">
         <div className="pl-wrap pl-live">
           <div><Reveal id="pl-live-title" className="pl-h2" reduced={reduced} lead="Watch the work," accent="not a spinner." />
             <p>See every search, page read and check as it happens, including what failed and why. Leave any time; the run keeps going.</p>
-            <a className="pl-btn pl-btn-ghost" href="?demo=1">Try the interactive demo <Arrow /></a></div>
+            <a className="pl-btn pl-btn-ghost" href="#website" onClick={event => { event.preventDefault(); focusField(); }}>Start with your company <Arrow /></a></div>
           <Checkpoints reduced={reduced} />
         </div>
       </section>
@@ -432,8 +434,8 @@ export function PublicLanding({ onStart, onSignIn, directoryId, iconLookup = fal
           </div>
         </div>
       </section>
-      <Closing reduced={reduced} onStart={onStart} />
+      <Closing reduced={reduced} onStart={onStart} note={note} />
     </main>
-    <footer className="pl-footer"><div className="pl-wrap"><div className="pl-big">GTM Shortlist</div><div className="pl-links"><span>Open-source company research</span><a href={sourceCodeUrl} target="_blank" rel="noreferrer">Source code</a>{signIn('', 'Sign in')}<a href="?demo=1">Interactive demo</a></div><p className="pl-fine">Companies, quotes and figures shown on this page are an illustrative sample.</p></div></footer>
+    <footer className="pl-footer"><div className="pl-wrap"><div className="pl-big">GTM Shortlist</div><div className="pl-links"><span>Open-source company research</span><a href={sourceCodeUrl} target="_blank" rel="noreferrer">Source code</a>{signIn('', 'Sign in')}</div><p className="pl-fine">Companies, quotes and figures shown on this page are an illustrative sample.</p></div></footer>
   </div>;
 }

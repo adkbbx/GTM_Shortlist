@@ -1,4 +1,4 @@
-import { openWorkspacePanel } from './workspace-panels';
+import { openLocalSetup, openWorkspacePanel } from './workspace-panels';
 import { MenuToggleIcon, PlusIcon } from './NavigationIcons';
 import { lazy, StrictMode, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
@@ -129,6 +129,23 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
       {error && <p className="notice" role="alert">{error}</p>}
       <div className="form-footer"><p>No outreach is sent. You review every company.</p><button type="submit" disabled={saving || (hostedAccount && wallet === null) || (wallet?.mode === 'hosted' && available < companyLimit)}>{saving ? 'Saving target…' : 'Confirm target and discover'}<Arrow /></button></div>
     </form>
+  </section>;
+}
+
+/** First run on a local install: two steps, each opening the right Settings section. Keys never leave this computer. */
+function LocalSetupCard({ health }: { health: Health }) {
+  const steps = [
+    { id: 'model', title: 'Research model', ready: health.gemma_ready, action: 'Set up model', detail: 'Ollama, LM Studio or any OpenAI-compatible endpoint' },
+    { id: 'search', title: 'Company search', ready: health.search_ready, action: 'Add search key', detail: 'A Tavily API key; Tavily has a free tier' },
+  ] as const;
+  return <section className="local-setup-card" aria-labelledby="local-setup-heading">
+    <h3 id="local-setup-heading">Set up local research in two steps</h3>
+    <ol>{steps.map((step, index) => <li key={step.id}>
+      <StatusMark status={step.ready ? 'ok' : 'idle'}>{index + 1}</StatusMark>
+      <span className="local-setup-step"><strong>{step.title}</strong><span>{step.ready ? 'Ready' : step.detail}</span></span>
+      {!step.ready && <button type="button" className="secondary" onClick={() => openLocalSetup(step.id)}>{step.action}</button>}
+    </li>)}</ol>
+    <p className="hint">Keys stay on this computer. Nothing runs until you start research.</p>
   </section>;
 }
 
@@ -405,7 +422,7 @@ function App({ account, identity }: { account: ReactNode; identity: string }) {
       {error && <div className="notice" role="alert">{error}<button className="text-button" onClick={() => window.location.reload()}>Reload workspace</button></div>}
       {active?.can_retry_seller && <RetrySeller key={`retry-${active.id}`} run={active} onSaved={websiteChosen} />}
       {active?.can_continue_discovery && <ContinueDiscovery key={`continue-${active.id}`} run={active} onSaved={websiteChosen} />}
-      {!active && !handingOver && <LandingDemo><section className="sheet start-sheet" aria-labelledby="start-heading"><h2 id="start-heading" className="sr-only">Start your company research</h2><form onSubmit={start}><label htmlFor="website">Company name or website</label><div className="website-form"><CompanySearch value={website} onChange={value => { setWebsite(value); requestKey.current = crypto.randomUUID(); }} clientId={brandfetchClientId} disabled={saving} /><button disabled={saving || loading || Boolean(previewWorkspace)} aria-busy={saving} type="submit">{saving ? 'Starting research…' : 'Start research'}<Arrow /></button></div></form><p className="hint">Up to three companies. You confirm the target before discovery.</p>{!previewWorkspace && health?.mode === 'local' && !health.search_ready && <p className="local-setup-prompt">Local company search needs setup. <button type="button" className="text-button" onClick={() => openWorkspacePanel('local-settings')}>Open Settings</button></p>}</section></LandingDemo>}
+      {!active && !handingOver && <LandingDemo><section className="sheet start-sheet" aria-labelledby="start-heading"><h2 id="start-heading" className="sr-only">Start your company research</h2><form onSubmit={start}><label htmlFor="website">Company name or website</label><div className="website-form"><CompanySearch value={website} onChange={value => { setWebsite(value); requestKey.current = crypto.randomUUID(); }} clientId={brandfetchClientId} disabled={saving} /><button disabled={saving || loading || Boolean(previewWorkspace)} aria-busy={saving} type="submit">{saving ? 'Starting research…' : 'Start research'}<Arrow /></button></div></form><p className="hint">Up to three companies. You confirm the target before discovery.</p>{!previewWorkspace && health?.mode === 'local' && (!health.search_ready || !health.gemma_ready) && <LocalSetupCard health={health} />}</section></LandingDemo>}
       {active && <ResearchProgress key={active.id} run={active} connected={!error} localResearch={health?.mode === 'local' && !previewWorkspace} />}{active && ['queued', 'running'].includes(active.status) && <ResearchStop key={`stop-${active.id}`} run={active} onStopped={stopped} />}{active?.credits && <p className="batch-credit-summary" role="status">{active.credits.used} {active.credits.used === 1 ? 'credit' : 'credits'} used · {active.credits.reserved} reserved · {active.credits.returned} returned</p>}
       {active && !pending && !active.termination && !active.seller_url && <WebsiteChoice key={`website-${active.id}`} run={active} onSaved={websiteChosen} />}{active?.status === 'awaiting_confirmation' && active.seller_url && <>{health && !health.search_ready && <p className="notice">Company search is not configured. Your target can be saved; configure search before discovery.</p>}<ConfirmationForm key={`offer-${active.id}`} run={{ ...active, seller_url: active.seller_url }} wallet={wallet} hostedAccount={account != null} onSaved={saved} /></>}{active?.status === 'awaiting_confirmation' && <ResearchStop key={`stop-${active.id}`} run={active} onStopped={stopped} />}
       {results && <><div className="results-toolbar"><div><h2>{eligibleRecords.length} {eligibleRecords.length === 1 ? 'company' : 'companies'} researched</h2><p>{active.status === 'partial' ? 'Some questions remain open. Review the unknowns before using these records.' : 'Model assessments are ready for your review.'}</p></div>{!!active.records.length && <div className="export-controls"><label className="checkbox-label"><input type="checkbox" checked={acceptedOnly} onChange={e => setAcceptedOnly(e.target.checked)} />Accepted only</label><div className="export-links">{(['xlsx', 'csv', 'json'] as const).map(format => <a className="secondary button-link" key={format} href={`/api/runs/${active.id}/export?format=${format}&accepted_only=${acceptedOnly}`} onClick={event => { event.preventDefault(); void api.download(active.id, format, acceptedOnly).catch(reason => setError(describeError(reason))); }}>Export {format === 'xlsx' ? 'Excel' : format.toUpperCase()}</a>)}</div></div>}</div>
