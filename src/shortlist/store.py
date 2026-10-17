@@ -437,7 +437,7 @@ class Store:
                 f"ORDER BY created_at,{self.order_key} LIMIT 50", (time.time(),))]
 
     def create_draft(self, seller_url: str | None, request_key: str, *, company_name: str | None = None,
-                     experience_version: int = 1) -> str:
+                     experience_version: int = 1, sample: bool = False) -> str:
         if experience_version not in (1, 2):
             raise ValueError("Unsupported research experience")
         if bool(seller_url) == bool(company_name):
@@ -445,24 +445,31 @@ class Store:
         digest = hashlib.sha256((seller_url if seller_url else "company:" + company_name.casefold()).encode()).hexdigest()
         if experience_version == 2:
             digest = hashlib.sha256((digest + ":experience-2").encode()).hexdigest()
+        if sample:
+            digest = hashlib.sha256((digest + ":sample").encode()).hexdigest()
+        extra = {**({"company_name": company_name} if company_name else {}), **({"sample": True} if sample else {})}
         with self.connection() as db:
             self.begin(db)
-            row = db.execute("SELECT id,payload_hash,deleted_at FROM runs WHERE request_key=?", (request_key,)).fetchone()
-            if row:
-                if row["deleted_at"]:
-                    raise Conflict("This request was deleted. Start a new shortlist")
-                if row["payload_hash"] != digest:
-                    raise Conflict("Request key was already used for a different website")
-                return row["id"]
-            run_id = new_id()
-            self.reserve_run(db, run_id, draft=True)
-            now = utcnow().isoformat()
-            db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,checkpoint,created_at,updated_at) "
-                       "VALUES (?,?,?,?,?,?,?,?,?)", (run_id, request_key, digest, "{}", "queued", "seller" if seller_url else "identity",
-                       json.dumps({"seller_url": seller_url, "experience_version": experience_version,
-                                   "seller_output_protocol": 3, "company_identity_policy": 1, "market_policy": 2,
-                                   **({"company_name": company_name} if company_name else {})}), now, now))
-            return run_id
+            return self.insert_draft(db, seller_url, request_key, digest, experience_version, extra)
+
+    def insert_draft(self, db, seller_url: str | None, request_key: str, digest: str, experience_version: int,
+                     extra: dict) -> str:
+        """A new queued offer draft inside the caller's transaction; replays return the saved run."""
+        row = db.execute("SELECT id,payload_hash,deleted_at FROM runs WHERE request_key=?", (request_key,)).fetchone()
+        if row:
+            if row["deleted_at"]:
+                raise Conflict("This request was deleted. Start a new shortlist")
+            if row["payload_hash"] != digest:
+                raise Conflict("Request key was already used for a different website")
+            return row["id"]
+        run_id = new_id()
+        self.reserve_run(db, run_id, draft=True)
+        now = utcnow().isoformat()
+        db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,checkpoint,created_at,updated_at) "
+                   "VALUES (?,?,?,?,?,?,?,?,?)", (run_id, request_key, digest, "{}", "queued", "seller" if seller_url else "identity",
+                   json.dumps({"seller_url": seller_url, "experience_version": experience_version,
+                               "seller_output_protocol": 3, "company_identity_policy": 1, "market_policy": 2, **extra}), now, now))
+        return run_id
 
     def confirm_website(self, run_id: str, website_url: str):
         from shortlist.fetch import canonical_url
@@ -496,9 +503,12 @@ class Store:
                 if previous["deleted_at"] or previous["payload_hash"] != digest:
                     raise Conflict("Request key was deleted or used for a different offer")
                 return previous["id"]
-            source = db.execute("SELECT profile,status FROM runs WHERE id=? AND deleted_at IS NULL", (source_id,)).fetchone()
+            source = db.execute("SELECT profile,status,checkpoint FROM runs WHERE id=? AND deleted_at IS NULL", (source_id,)).fetchone()
             if source is None:
                 raise KeyError(source_id)
+            if json.loads(source["checkpoint"]).get("sample"):
+                # A sample offer is invented; real search must never run on it.
+                raise Conflict("Sample research can't be reused. Start research with your company instead")
             if source["status"] not in ("ready", "partial") or not json.loads(source["profile"]):
                 raise Conflict("Finish a confirmed shortlist before reusing its offer")
             profile = Profile.model_validate_json(source["profile"])

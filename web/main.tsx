@@ -1,6 +1,6 @@
 import { openLocalSetup, openWorkspacePanel } from './workspace-panels';
 import { MenuToggleIcon, PlusIcon } from './NavigationIcons';
-import { lazy, StrictMode, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, StrictMode, Suspense, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '@fontsource/schibsted-grotesk/400.css';
@@ -27,6 +27,7 @@ import { LocalSearchSetup } from './LocalSearchSetup';
 import { WebsiteChoice } from './WebsiteChoice';
 import { clearKeptCompany, keepCompany, peekKeptCompany } from './landing/kept-company';
 import { StatusMark } from './StatusMark';
+import { SampleContext, sampleMark } from './SampleData';
 import './styles.css';
 import './Shortlist.css';
 
@@ -78,12 +79,12 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
     try {
       onSaved(await api.confirm(run.id, { offer, target, criteria, company_limit: companyLimit,
         exclusions: exclusions.split('\n').map(s => s.trim()).filter(Boolean), campaign_name: campaignName,
-        discovery_terms: campaignName ? discoveryTerms : null }));
+        discovery_terms: campaignName ? discoveryTerms : null }, run.sample));
     } catch (e) { setError(describeError(e)); } finally { setSaving(false); }
   };
   return <section className="sheet confirmation" aria-labelledby="confirm-heading">
     <div className="sheet-heading"><h2 id="confirm-heading">Confirm what a good fit means</h2><span className="step-label">Your target</span></div>
-    <p className="intro">Drafted from <a href={run.seller_url} target="_blank" rel="noopener noreferrer">{new URL(run.seller_url).hostname}</a>. Check it, edit anything that is off, then start discovery.</p>
+    <p className="intro">{run.sample ? 'Drafted from the sample company page' : <>Drafted from <a href={run.seller_url} target="_blank" rel="noopener noreferrer">{new URL(run.seller_url).hostname}</a></>}. Check it, edit anything that is off, then start discovery.</p>
     {run.reused_offer && <p className="notice">Copied from your saved offer. Review it and choose the maximum cost before starting. New research may return companies from earlier batches.</p>}
     {run.error && <div className="notice" role="status">{run.error}</div>}
     <form onSubmit={submit}>
@@ -132,8 +133,9 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
   </section>;
 }
 
-/** First run on a local install: two steps, each opening the right Settings section. Keys never leave this computer. */
-function LocalSetupCard({ health }: { health: Health }) {
+/** First run on a local install: two steps, each opening the right Settings section. Keys never leave this computer.
+    Sample data runs the same flow on invented companies first, for anyone without keys yet. */
+function LocalSetupCard({ health, onSample, starting }: { health: Health; onSample: () => void; starting: boolean }) {
   const steps = [
     { id: 'model', title: 'Research model', ready: health.gemma_ready, action: 'Set up model', detail: 'Ollama, LM Studio or any OpenAI-compatible endpoint' },
     { id: 'search', title: 'Company search', ready: health.search_ready, action: 'Add search key', detail: 'A Tavily API key; Tavily has a free tier' },
@@ -145,16 +147,18 @@ function LocalSetupCard({ health }: { health: Health }) {
       <span className="local-setup-step"><strong>{step.title}</strong><span>{step.ready ? 'Ready' : step.detail}</span></span>
       {!step.ready && <button type="button" className="secondary" onClick={() => openLocalSetup(step.id)}>{step.action}</button>}
     </li>)}</ol>
-    <p className="hint">Keys stay on this computer. Nothing runs until you start research.</p>
+    <div className="local-setup-sample"><span>No keys yet?</span><button type="button" className="text-button" disabled={starting} onClick={onSample}>{starting ? 'Starting the sample…' : 'Try it with sample data'}<Arrow /></button></div>
+    <p className="hint">Keys stay on this computer. Sample data uses invented companies and runs no searches.</p>
   </section>;
 }
 
 function EvidenceDetails({ passages, record }: { passages: Evidence[]; record: Record }) {
+  const sample = useContext(SampleContext);
   return passages.map((evidence, index) => {
       const source = record.research.sources.find(s => s.id === evidence.source_id);
       return <details className="evidence" key={`${evidence.source_id}-${index}`}><summary>{evidence.claim}<span>Inspect passage</span></summary>
         <blockquote>{evidence.passage}</blockquote>
-        {source && <div className="source-meta"><a href={source.url} target="_blank" rel="noopener noreferrer">{source.title}<Arrow /></a><p>Retrieved {date(source.retrieved_at)}</p><p>{source.published_at ? `Published ${date(source.published_at)}` : 'Publication date unknown'}</p></div>}
+        {source && <div className="source-meta">{sample ? <span>{source.title} · sample page</span> : <a href={source.url} target="_blank" rel="noopener noreferrer">{source.title}<Arrow /></a>}<p>Retrieved {date(source.retrieved_at)}</p><p>{source.published_at ? `Published ${date(source.published_at)}` : 'Publication date unknown'}</p></div>}
       </details>;
     });
 }
@@ -189,8 +193,8 @@ function CompanyReview({ record, run, onSaved }: { record: Record; run: Run; onS
   };
   return <details className="company-item" name={`shortlist-${run.id}`} ref={disclosure}>
     <summary className="company-row" ref={summary}>
-      <span className="shortlist-identity"><SiteIcon runId={run.id} domain={research.domain} fallback={research.name.trim().slice(0, 1).toUpperCase()} className="company-initial" />
-        <span><span className="shortlist-name">{research.name}</span><span className="shortlist-domain">{research.domain}</span></span></span>
+      <span className="shortlist-identity"><SiteIcon runId={run.id} domain={research.domain} mark={sampleMark(run.sample, research.domain)} fallback={research.name.trim().slice(0, 1).toUpperCase()} className="company-initial" />
+        <span><span className="shortlist-name">{research.name}</span><span className="shortlist-domain">{run.sample ? 'Sample company' : research.domain}</span></span></span>
       <span className="shortlist-description">{description?.evidence.claim ?? 'Company description not established from saved sources.'}</span>
       <span className="shortlist-assessment"><span>{qualification[research.qualification]}</span><span className="shortlist-decision">{decision}</span></span>
       <span className="shortlist-action"><span className="row-inspect">Inspect</span><span className="row-close">Close</span><svg className="row-chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m7 4 6 6-6 6" stroke="currentColor" strokeWidth="1.5" /></svg></span>
@@ -219,7 +223,7 @@ function CompanySheet({ record, run, onSaved, onUnsavedChange }: { record: Recor
   const research = record.research;
   const selection = run.selection?.find(item => item.domain === research.domain);
   return <article className="sheet company-sheet">
-    <header className="company-heading"><div><h3>{research.name}</h3><a href={`https://${research.domain}`} target="_blank" rel="noopener noreferrer">{research.domain}<Arrow /></a></div>
+    <header className="company-heading"><div><h3>{research.name}</h3>{run.sample ? <span className="hint">Sample company · invented</span> : <a href={`https://${research.domain}`} target="_blank" rel="noopener noreferrer">{research.domain}<Arrow /></a>}</div>
       <p className="qualification">{qualification[research.qualification]}<span>{research.status === 'partial' ? 'Partial research' : 'Research saved'}</span></p></header>
     <section className="company-overview" aria-label="Company overview"><dl>
       {(['description', 'location', 'team_size'] satisfies Array<NonNullable<typeof research.company_facts>[number]['kind']>).map(kind => {
@@ -235,8 +239,8 @@ function CompanySheet({ record, run, onSaved, onUnsavedChange }: { record: Recor
         : <p className="hint">No current team roles established from the saved pages.</p>}
     </section>
     {selection && <details className="selection-reason"><summary>Why this company was researched</summary><p>{selection.explanation}</p>
-      {selection.signals.map((signal, index) => <div key={`${signal.source_id}-${signal.label}-${signal.event_date}-${index}`}><h4>{signal.label} · dated company statement</h4><blockquote>{signal.passage}</blockquote><p>Statement date: <time dateTime={signal.event_date}>{new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(signal.event_date))}</time>{signal.campaign_relevant ? ' · Matches campaign signal type' : ''}</p><a href={signal.source_url} target="_blank" rel="noopener noreferrer">Inspect company source</a><p className="hint">A dated first-party statement, not independently corroborated buying intent.</p></div>)}
-      {selection.clues.map(clue => <div key={clue.label}><h4>{clue.label} · search clue</h4><blockquote>{clue.passage}</blockquote><a href={clue.source_url} target="_blank" rel="noopener noreferrer">Search result source</a><p className="hint">Observed {date(clue.observed_at)}. Event date, ownership and current relevance are unverified.</p></div>)}
+      {selection.signals.map((signal, index) => <div key={`${signal.source_id}-${signal.label}-${signal.event_date}-${index}`}><h4>{signal.label} · dated company statement</h4><blockquote>{signal.passage}</blockquote><p>Statement date: <time dateTime={signal.event_date}>{new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(signal.event_date))}</time>{signal.campaign_relevant ? ' · Matches campaign signal type' : ''}</p>{!run.sample && <a href={signal.source_url} target="_blank" rel="noopener noreferrer">Inspect company source</a>}<p className="hint">A dated first-party statement, not independently corroborated buying intent.</p></div>)}
+      {selection.clues.map(clue => <div key={clue.label}><h4>{clue.label} · search clue</h4><blockquote>{clue.passage}</blockquote>{!run.sample && <a href={clue.source_url} target="_blank" rel="noopener noreferrer">Search result source</a>}<p className="hint">Observed {date(clue.observed_at)}. Event date, ownership and current relevance are unverified.</p></div>)}
       <p className="hint">Search clues help prioritize research. They do not establish fit or buying intent.</p></details>}
     {record.credits_used != null && <p className="delivery-credit">{record.credits_used ? '1 research credit used' : 'No research credit charged'}</p>}
     <div className="findings">{research.findings.map(f => <FindingSheet key={f.criterion_id} finding={f} record={record} run={run} />)}</div>
@@ -402,6 +406,13 @@ function App({ account, identity }: { account: ReactNode; identity: string }) {
     } catch (e) { setError(describeError(e)); } finally { setSaving(false); setHandoff(''); }
   };
   const start = async (event: FormEvent) => { event.preventDefault(); await begin(website); };
+  const trySample = async () => {
+    setSaving(true); setError('');
+    try {
+      const run = await api.startSample(requestKey.current);
+      saved(run); select(run); requestKey.current = crypto.randomUUID();
+    } catch (e) { setError(describeError(e)); } finally { setSaving(false); }
+  };
   useEffect(() => {
     if (!handoff || loading || handingOff.current) return;
     if (active || previewWorkspace) { setHandoff(''); return; }
@@ -411,6 +422,7 @@ function App({ account, identity }: { account: ReactNode; identity: string }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [handoff, loading, active]);
   const handingOver = Boolean(handoff && !active);
+  const needsSetup = Boolean(!previewWorkspace && health?.mode === 'local' && (!health.search_ready || !health.gemma_ready));
   const pending = active && ['queued', 'running'].includes(active.status);
   const results = active && active.seller_url && ['ready', 'partial'].includes(active.status);
   const showSidebar = Boolean(active || runs.length);
@@ -418,27 +430,28 @@ function App({ account, identity }: { account: ReactNode; identity: string }) {
     <a className="skip-link" href="#main">Skip to research</a>
     <header className="topbar"><button ref={historyTrigger} className="mobile-history-trigger" type="button" aria-label="Saved runs" aria-controls="research-drawer" aria-expanded={mobileHistoryOpen} aria-haspopup="dialog" onClick={() => setMobileHistoryOpen(true)}><MenuToggleIcon open={mobileHistoryOpen} /></button><a className="brand" href="/" onClick={e => { e.preventDefault(); select(null); }}><span>GTM Shortlist</span></a>{showSidebar && <button className="desktop-history-toggle" type="button" aria-controls="research-navigation" aria-expanded={!historyCollapsed} aria-label={historyCollapsed ? 'Show saved runs' : 'Hide saved runs'} title={historyCollapsed ? 'Show saved runs' : 'Hide saved runs'} onClick={() => setHistoryCollapsed(value => !value)}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d={historyCollapsed ? 'm9 6 6 6-6 6' : 'm15 6-6 6 6 6'} /></svg></button>}{active && <button className="mobile-new-trigger" type="button" aria-label="New shortlist" title="New shortlist" onClick={() => { select(null); requestKey.current = crypto.randomUUID(); }}><PlusIcon /></button>}<div className="workspace-account">{!account && <span className="local-label">Local research workspace</span>}{active && <button className="desktop-new-trigger" type="button" aria-label="New shortlist" onClick={() => { select(null); requestKey.current = crypto.randomUUID(); }}><PlusIcon /><span>New shortlist</span></button>}{account ? <AccountTray onClosed={restoreMobileMenuFocus} account={account} wallet={wallet} showActivity={showActivity} onActivity={() => setShowActivity(value => !value)} /> : health?.mode === 'local' && <LocalSearchSetup onClosed={restoreMobileMenuFocus} health={health} onSaved={setHealth} readOnly={Boolean(previewWorkspace)} brandfetchClientId={brandfetchClientId} onBrandfetchSaved={setBrandfetchOverride} /> }</div></header>
     <div className={`workspace ${active ? 'has-research' : 'new-research'}${showSidebar ? '' : ' first-visit'}`}><ResearchSidebar collapsed={historyCollapsed} visibleDesktop={showSidebar} mobileOpen={mobileHistoryOpen} onMobileClose={closeMobileHistory} settingsTarget={account ? 'account-tray' : health?.mode === 'local' ? 'local-settings' : undefined} runs={runs} activeId={active?.id} loading={loading} onNew={() => { select(null); requestKey.current = crypto.randomUUID(); }} onSelect={run => select(run)} />
-    <main id="main" className="main" tabIndex={-1}>{previewWorkspace && <aside className="notice preview-notice" role="note"><p>Design preview · no live research</p><a href={previewWorkspace}>Open the research workspace<Arrow /></a></aside>}<div className="page-heading">{!active && !handingOver && <WorkshopField />}<h1 ref={headingRef} tabIndex={-1}>{handingOver ? 'Starting your research' : active?.termination === 'user_stopped' ? 'Research stopped' : pending ? active?.status === 'queued' && !active.progress.worker_online ? 'Research is waiting' : 'Researching your shortlist' : active ? active.status === 'awaiting_confirmation' ? 'Confirm your target' : active.profile ? 'Review your shortlist' : 'Define your shortlist' : 'Find companies that fit your offer.'}</h1><p>{handingOver ? 'You confirm the target before company discovery.' : active?.status === 'awaiting_confirmation' ? 'Review your offer and target below. Discovery starts after you confirm.' : active ? 'Saved research. Trace every assessment back to its source.' : 'Start with your company. We’ll help you build a shortlist backed by sources.'}</p>{handingOver && <p className="handoff-status" role="status"><StatusMark status="work" />Reading {handoff}</p>}</div>
+    <SampleContext value={Boolean(active?.sample)}><main id="main" className="main" tabIndex={-1}>{previewWorkspace && <aside className="notice preview-notice" role="note"><p>Design preview · no live research</p><a href={previewWorkspace}>Open the research workspace<Arrow /></a></aside>}
+      {active?.sample && <aside className="notice sample-notice" role="note"><p><strong>Sample data</strong> · Invented companies and pages. Nothing was searched or fetched.</p>{health?.mode === 'local' && (!health.search_ready || !health.gemma_ready) && <button type="button" className="text-button" onClick={() => openLocalSetup(health.gemma_ready ? 'search' : 'model')}>Set up real research<Arrow /></button>}</aside>}<div className="page-heading">{!active && !handingOver && <WorkshopField />}<h1 ref={headingRef} tabIndex={-1}>{handingOver ? 'Starting your research' : active?.termination === 'user_stopped' ? 'Research stopped' : pending ? active?.status === 'queued' && !active.progress.worker_online ? 'Research is waiting' : 'Researching your shortlist' : active ? active.status === 'awaiting_confirmation' ? 'Confirm your target' : active.profile ? 'Review your shortlist' : 'Define your shortlist' : 'Find companies that fit your offer.'}</h1><p>{handingOver ? 'You confirm the target before company discovery.' : active?.status === 'awaiting_confirmation' ? 'Review your offer and target below. Discovery starts after you confirm.' : active ? 'Saved research. Trace every assessment back to its source.' : 'Start with your company. We’ll help you build a shortlist backed by sources.'}</p>{handingOver && <p className="handoff-status" role="status"><StatusMark status="work" />Reading {handoff}</p>}</div>
       {error && <div className="notice" role="alert">{error}<button className="text-button" onClick={() => window.location.reload()}>Reload workspace</button></div>}
       {active?.can_retry_seller && <RetrySeller key={`retry-${active.id}`} run={active} onSaved={websiteChosen} />}
       {active?.can_continue_discovery && <ContinueDiscovery key={`continue-${active.id}`} run={active} onSaved={websiteChosen} />}
-      {!active && !handingOver && <LandingDemo><section className="sheet start-sheet" aria-labelledby="start-heading"><h2 id="start-heading" className="sr-only">Start your company research</h2><form onSubmit={start}><label htmlFor="website">Company name or website</label><div className="website-form"><CompanySearch value={website} onChange={value => { setWebsite(value); requestKey.current = crypto.randomUUID(); }} clientId={brandfetchClientId} disabled={saving} /><button disabled={saving || loading || Boolean(previewWorkspace)} aria-busy={saving} type="submit">{saving ? 'Starting research…' : 'Start research'}<Arrow /></button></div></form><p className="hint">Up to three companies. You confirm the target before discovery.</p>{!previewWorkspace && health?.mode === 'local' && (!health.search_ready || !health.gemma_ready) && <LocalSetupCard health={health} />}</section></LandingDemo>}
+      {!active && !handingOver && <LandingDemo demo={!needsSetup}><section className="sheet start-sheet" aria-labelledby="start-heading"><h2 id="start-heading" className="sr-only">Start your company research</h2><form onSubmit={start}><label htmlFor="website">Company name or website</label><div className="website-form"><CompanySearch value={website} onChange={value => { setWebsite(value); requestKey.current = crypto.randomUUID(); }} clientId={brandfetchClientId} disabled={saving} /><button disabled={saving || loading || Boolean(previewWorkspace)} aria-busy={saving} type="submit">{saving ? 'Starting research…' : 'Start research'}<Arrow /></button></div></form><p className="hint">Up to three companies. You confirm the target before discovery.</p>{needsSetup && health && <LocalSetupCard health={health} onSample={() => void trySample()} starting={saving} />}</section></LandingDemo>}
       {active && <ResearchProgress key={active.id} run={active} connected={!error} localResearch={health?.mode === 'local' && !previewWorkspace} />}{active && ['queued', 'running'].includes(active.status) && <ResearchStop key={`stop-${active.id}`} run={active} onStopped={stopped} />}{active?.credits && <p className="batch-credit-summary" role="status">{active.credits.used} {active.credits.used === 1 ? 'credit' : 'credits'} used · {active.credits.reserved} reserved · {active.credits.returned} returned</p>}
-      {active && !pending && !active.termination && !active.seller_url && <WebsiteChoice key={`website-${active.id}`} run={active} onSaved={websiteChosen} />}{active?.status === 'awaiting_confirmation' && active.seller_url && <>{health && !health.search_ready && <p className="notice">Company search is not configured. Your target can be saved; configure search before discovery.</p>}<ConfirmationForm key={`offer-${active.id}`} run={{ ...active, seller_url: active.seller_url }} wallet={wallet} hostedAccount={account != null} onSaved={saved} /></>}{active?.status === 'awaiting_confirmation' && <ResearchStop key={`stop-${active.id}`} run={active} onStopped={stopped} />}
-      {results && <><div className="results-toolbar"><div><h2>{eligibleRecords.length} {eligibleRecords.length === 1 ? 'company' : 'companies'} researched</h2><p>{active.status === 'partial' ? 'Some questions remain open. Review the unknowns before using these records.' : 'Model assessments are ready for your review.'}</p></div>{!!active.records.length && <div className="export-controls"><label className="checkbox-label"><input type="checkbox" checked={acceptedOnly} onChange={e => setAcceptedOnly(e.target.checked)} />Accepted only</label><div className="export-links">{(['xlsx', 'csv', 'json'] as const).map(format => <a className="secondary button-link" key={format} href={`/api/runs/${active.id}/export?format=${format}&accepted_only=${acceptedOnly}`} onClick={event => { event.preventDefault(); void api.download(active.id, format, acceptedOnly).catch(reason => setError(describeError(reason))); }}>Export {format === 'xlsx' ? 'Excel' : format.toUpperCase()}</a>)}</div></div>}</div>
+      {active && !pending && !active.termination && !active.seller_url && <WebsiteChoice key={`website-${active.id}`} run={active} onSaved={websiteChosen} />}{active?.status === 'awaiting_confirmation' && active.seller_url && <>{health && !health.search_ready && !active.sample && <p className="notice">Company search is not configured. Your target can be saved; configure search before discovery.</p>}<ConfirmationForm key={`offer-${active.id}`} run={{ ...active, seller_url: active.seller_url }} wallet={wallet} hostedAccount={account != null} onSaved={saved} /></>}{active?.status === 'awaiting_confirmation' && <ResearchStop key={`stop-${active.id}`} run={active} onStopped={stopped} />}
+      {results && <><div className="results-toolbar"><div><h2>{eligibleRecords.length} {eligibleRecords.length === 1 ? 'company' : 'companies'} researched</h2><p>{active.status === 'partial' ? 'Some questions remain open. Review the unknowns before using these records.' : 'Model assessments are ready for your review.'}</p></div>{!!active.records.length && <div className="export-controls"><label className="checkbox-label"><input type="checkbox" checked={acceptedOnly} onChange={e => setAcceptedOnly(e.target.checked)} />Accepted only</label><div className="export-links">{(['xlsx', 'csv', 'json'] as const).map(format => <a className="secondary button-link" key={format} href={`/api/runs/${active.id}/export?format=${format}&accepted_only=${acceptedOnly}`} onClick={event => { event.preventDefault(); void api.download(active.id, format, acceptedOnly, active.sample).catch(reason => setError(describeError(reason))); }}>Export {format === 'xlsx' ? 'Excel' : format.toUpperCase()}</a>)}</div></div>}</div>
         {active.error && <p className="notice" role="status">{active.error}</p>}
         {!!withheldRecords.length && <section className="notice" aria-label="Excluded saved sources"><h3>{withheldRecords.length} saved {withheldRecords.length === 1 ? "source" : "sources"} excluded from the shortlist</h3><p>These historical entries do not establish an official company. Original evidence is preserved in research history and JSON export.</p><ul>{withheldRecords.map(record => <li key={record.research.id}>{record.research.domain}: {record.source_issue}</li>)}</ul></section>}
         {eligibleRecords.length ? <section className="company-shortlist" aria-label="Researched companies"><p className="shortlist-instruction">Compare the companies, then open a research sheet to inspect evidence and decide.</p>{eligibleRecords.map(record => <CompanyReview key={record.research.id} record={record} run={active} onSaved={saved} />)}</section> : <section className="sheet"><h3>{withheldRecords.length ? "No eligible company records" : "No company records yet"}</h3><p>{withheldRecords.length ? "The saved sources did not establish official company identities." : "The run stopped before usable research could be saved."} {active.profile ? 'Your confirmed target is preserved.' : 'Your saved seller inputs remain available.'}</p><button className="secondary" onClick={() => select(null)}>Start another shortlist</button></section>}
         <section className="results-context" aria-label="Research context">
         {active.profile && <details className="target-summary"><summary>Confirmed target and offer</summary><p>{active.profile.offer}</p><p>{active.profile.target}</p>{!!active.profile.exclusions.length && <p>Exclusions: {active.profile.exclusions.join('; ')}</p>}<p className="hint">Confirmed {date(active.profile.confirmed_at)}. Start a new run to change this target.</p></details>}
-        {active.profile && <ReuseOffer key={active.id} run={active} onSaved={run => { saved(run); select(run); }} />}
+        {active.profile && !active.sample && <ReuseOffer key={active.id} run={active} onSaved={run => { saved(run); select(run); }} />}
         </section>
       </>}
       {results && active.profile && eligibleRecords.length > 0 && service?.booking_url && <section className="setup-call" aria-labelledby="setup-heading"><div><h2 id="setup-heading">Discuss your shortlist</h2><p>Get help with your target, evidence and next steps. The setup call is optional.</p></div><a className="secondary button-link" href={service.booking_url} target="_blank" rel="noopener noreferrer" onClick={() => { if (navigator.doNotTrack !== '1') void api.bookingClick(active.id).catch(() => undefined); }}>Book an optional setup call<Arrow /></a></section>}
       {active && !pending && <DeleteResearch key={`delete-${active.id}`} run={active} onDeleted={deleted} />}
       {message && <p className="notice" role="status">{message}</p>}
       <footer className="workspace-footer"><p>GTM Shortlist</p></footer>
-    </main></div>
+    </main></SampleContext></div>
   </BrandfetchContext>;
 }
 

@@ -408,6 +408,49 @@
         ]
       }
     },
+    "/api/samples": {
+      "post": {
+        "summary": "Sample",
+        "operationId": "sample_api_samples_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SampleInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/runs/{run_id}/website": {
       "post": {
         "summary": "Choose Website",
@@ -2989,6 +3032,11 @@
             "type": "boolean",
             "title": "Can Continue Discovery",
             "default": false
+          },
+          "sample": {
+            "type": "boolean",
+            "title": "Sample",
+            "default": false
           }
         },
         "type": "object",
@@ -3004,6 +3052,22 @@
           "progress"
         ],
         "title": "RunView"
+      },
+      "SampleInput": {
+        "properties": {
+          "request_key": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 8,
+            "title": "Request Key"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_key"
+        ],
+        "title": "SampleInput"
       },
       "SavedRecord": {
         "properties": {

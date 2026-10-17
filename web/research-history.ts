@@ -1,6 +1,7 @@
 import type { Run } from './api';
 
 export function historyCompany(run: Run): string {
+  if (run.sample) return 'Sample company';
   return run.company_name?.trim() || (run.seller_url ? new URL(run.seller_url).hostname : 'Website not selected');
 }
 
@@ -9,6 +10,11 @@ export function historyTitle(run: Run): string {
 }
 
 export function historyStatus(run: Run): string | null {
+  const status = runStatus(run);
+  return run.sample ? (status ? `Sample · ${status}` : 'Sample data') : status;
+}
+
+function runStatus(run: Run): string | null {
   if (run.termination === 'user_stopped') return 'Stopped';
   switch (run.status) {
     case 'awaiting_confirmation': return 'Needs confirmation';

@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 from uuid import UUID
@@ -167,6 +168,30 @@ def main():
                 args.output.write_text(content, encoding="utf-8")
         else:
             print(content)
+
+
+def home_database() -> Path:
+    """Where the installed app keeps research, so it does not depend on the folder the command runs from."""
+    if os.name == "nt" and os.getenv("LOCALAPPDATA"):
+        folder = Path(os.environ["LOCALAPPDATA"]) / "GTM Shortlist"
+    elif sys.platform == "darwin":
+        folder = Path.home() / "Library" / "Application Support" / "GTM Shortlist"
+    else:
+        folder = Path(os.getenv("XDG_DATA_HOME") or Path.home() / ".local" / "share") / "gtm-shortlist"
+    return folder / "shortlist.sqlite3"
+
+
+def start():
+    """`gtm-shortlist` (for example `uvx gtm-shortlist`): the whole local app in one command, opened in the browser."""
+    parser = argparse.ArgumentParser(prog="gtm-shortlist", description="Run GTM Shortlist on this computer and open it in your browser.")
+    parser.add_argument("--port", type=int, choices=range(1024, 65536), default=8014, metavar="PORT")
+    parser.add_argument("--no-browser", action="store_true", help="Start without opening a browser tab")
+    args = parser.parse_args()
+    os.environ["SHORTLIST_MODE"] = "local"
+    os.environ.setdefault("SHORTLIST_DB", str(home_database()))
+    settings = Settings.load()
+    print(f"Research is saved in {settings.db_path.resolve().parent}", flush=True)
+    serve(settings, args.port, open_browser=not args.no_browser)
 
 
 if __name__ == "__main__":

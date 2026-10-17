@@ -6,7 +6,19 @@ Created by Eygentic. Every seller uses the same workflow; Eygentic profiles are 
 
 This is an early local implementation. Hosted accounts, external signup, deployment, real provider benchmarks and observed user testing remain release gates in [the checklist](docs/IMPLEMENTATION.md). [Progress](docs/PROGRESS.md) records what has actually passed.
 
-## Local setup
+## Run it on your computer
+
+Once a release is published to PyPI, one command installs and opens the app (Python 3.11 or newer; no Node or build step):
+
+```sh
+uvx gtm-shortlist        # or: pipx run gtm-shortlist
+```
+
+It starts the API and research worker, opens `http://127.0.0.1:8014`, and keeps research in your user data folder (`%LOCALAPPDATA%\GTM Shortlist` on Windows, `~/Library/Application Support/GTM Shortlist` on macOS, `~/.local/share/gtm-shortlist` on Linux). Use `--port` to change the port or `--no-browser` to skip the tab. The start page then walks through model and search setup, or lets you try the whole flow on sample data first.
+
+**Releasing.** `.github/workflows/package.yml` builds the package with the UI inside and runs it from a fresh install on every push. Pushing a `v*` tag publishes it once PyPI trusted publishing is set up for this repository: project `gtm-shortlist`, workflow `package.yml`, environment `pypi`. To build by hand: `npm ci && npm run build`, `python scripts/package_ui.py`, `python -m build --outdir package-dist`, then `python scripts/package_smoke.py package-dist/*.whl`.
+
+## Local setup for contributors
 
 Python 3.11 or newer:
 
@@ -46,7 +58,9 @@ npm run build
 shortlist serve --port 8014 --open
 ```
 
-Open `http://127.0.0.1:8014`. This command starts and supervises the API and durable worker together. If either exits, both stop; restarting preserves saved jobs and uncertain-dispatch protection. The API serves the built UI. `npm run dev` starts the frontend dev server on port 5174 with an API proxy. Use the project virtual environment for Python commands.
+Open `http://127.0.0.1:8014`. Until a model and search key are set up, the start page shows a two-step setup card. **Try it with sample data** on that card runs the whole flow (offer, market, target, discovery, evidence, review and export) on invented companies from `src/shortlist/sample.py`, with no keys, searches or page fetches. Sample runs are labelled on every screen and in every export, and cannot be reused for real research.
+
+This command starts and supervises the API and durable worker together. If either exits, both stop; restarting preserves saved jobs and uncertain-dispatch protection. The API serves the built UI. `npm run dev` starts the frontend dev server on port 5174 with an API proxy. Use the project virtual environment for Python commands.
 
 `npx playwright install chromium` then `npm run test:ui` exercises the production build at 1366px laptop and 390px phone, plus 320px and 200% text sizing. It uses the actual API, worker, SQLite, review and download code with explicitly labelled synthetic providers. The test server is not a real discovery service. Screenshots are saved under `.impeccable/review/`. Generated TypeScript and runtime JSON validation schemas come from the Python API contracts.
 

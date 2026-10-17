@@ -1,11 +1,14 @@
 [build-system]
-requires = ["setuptools>=75"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "gtm-shortlist"
 version = "0.1.0"
 description = "Evidence-first company discovery and research"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.11"
 dependencies = ["fastapi>=0.115,<1", "uvicorn>=0.34,<1", "pydantic>=2.12,<3", "httpx>=0.28,<1", "certifi>=2026.1.4", "beautifulsoup4>=4.13,<5", "python-dotenv>=1,<2"]
 
@@ -13,11 +16,19 @@ dependencies = ["fastapi>=0.115,<1", "uvicorn>=0.34,<1", "pydantic>=2.12,<3", "h
 dev = ["pytest>=8,<10", "ruff>=0.11,<1"]
 hosted = ["psycopg[binary]>=3.3,<4"]
 
+[project.urls]
+Repository = "https://github.com/adkbbx/GTM_Shortlist"
+
 [project.scripts]
 shortlist = "shortlist.cli:main"
+gtm-shortlist = "shortlist.cli:start"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+# The built UI, copied in by scripts/package_ui.py before a release build. Contributors use dist/ directly.
+shortlist = ["web_dist/**/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

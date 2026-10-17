@@ -1,5 +1,27 @@
 # Progress and handoff
 
+## 18 October, lower-friction local path: sample data and the PyPI package
+
+Checklist in `docs/planning/LOW_FRICTION_PATHS.md`; phases 1 and 2 are complete on `claude/signal-landing`.
+- **Try it with sample data.** The local setup card's "Try it with sample data" runs the real API, worker and database on invented companies, with no keys, searches or page fetches.
+  - `POST /api/samples` (local only; hosted answers 404) creates a run flagged `sample`, and the worker swaps in `shortlist.sample` for every step. Companies sit on reserved `.example` domains; each page starts "Sample data: an invented company page"; every quoted passage is a literal sentence of that page.
+  - The default run shows two fits and one "Needs verification": Lumenly's page mentions employee onboarding, so the required customer-onboarding check honestly stays unknown.
+  - Every screen of the run carries a "Sample data" banner. Reserved domains read as the invented company names, sample links are plain text, and icons are the landing page's drawn marks.
+  - Exports carry the label: `sample_data` in JSON, a note line in Excel, a leading "Data" column in CSV, and `shortlist-sample-` filenames. Reusing a sample offer is refused, so real search never runs on it.
+  - Sample searches are journaled under the `sample_data` provider and never touch the real provider's global cap.
+- **Fewer choices on the start page.** The demo link hides while the setup card offers sample data. Finished results, partial ones included, lead with the shortlist and keep the stage history folded; an interruption before review still opens it.
+- **`uvx gtm-shortlist`.** The package ships the built UI (`scripts/package_ui.py` copies `dist/` to `shortlist/web_dist`). Its `gtm-shortlist` entry starts API and worker, opens the browser and keeps research in the user data folder. `.github/workflows/package.yml` builds and smoke-tests a fresh install on every push and publishes on `v*` tags through PyPI trusted publishing. The name was free on PyPI on 18 October.
+- **No local Docker image.** This was a deliberate decision: local mode's trust boundary is the loopback address, which a container cannot keep. The reasoning is in the plan.
+
+Verification:
+- `tests/test_sample.py` drives a full sample run with real providers set to fail if touched and name resolution blocked. It checks evidence grounding, export labels, blocked reuse and the hosted 404.
+- `tests/test_package.py` covers the one-command entry; `scripts/package_smoke.py` installed the built wheel into a fresh environment and ran it from an unrelated folder.
+- `tests/ui/sample-data.spec.ts` runs the flow on laptop and phone with no `.example` text or requests and no horizontal overflow; I inspected the screenshots.
+- Backend suite: 568 passed, 45 skipped (Postgres-only, run in CI). Ruff is clean.
+- Full browser suite: 144 passed and 5 failed on the first run. Two failures were test expectations on the folded history and one was Chromium's full-page capture closing the Settings popover. After the fixes, those tests and the settings and sample specs pass.
+
+Open: publishing needs a PyPI trusted publisher (project `gtm-shortlist`, workflow `package.yml`, environment `pypi`) and a `v0.1.0` tag.
+
 ## 18 October, one-press start, review-first confirmation and test plans
 
 Follow-ups from user review on `claude/signal-landing`:

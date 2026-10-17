@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { Run } from './api';
 import { SiteIcon } from './SiteIcon';
 import { historyCompany, historyTitle, historyStatus, groupHistory } from './research-history';
+import { sampleMark } from './SampleData';
 import './ResearchSidebar.css';
 
 export function ResearchSidebar({ runs, activeId, loading, onNew, onSelect, mobileOpen, onMobileClose, settingsTarget, visibleDesktop, collapsed }: {
@@ -45,7 +46,7 @@ export function ResearchSidebar({ runs, activeId, loading, onNew, onSelect, mobi
         return <button key={run.id} type="button" className={`saved-run ${activeId === run.id ? 'selected' : ''}`}
           onClick={() => { onSelect(run); if (narrow) onMobileClose(); }} aria-current={activeId === run.id ? 'page' : undefined}
           aria-label={description} title={description}>
-          <SiteIcon runId={run.id} domain={run.seller_url ? new URL(run.seller_url).hostname : undefined} fallback={initials} className="saved-run-identity" />
+          <SiteIcon runId={run.id} domain={run.seller_url ? new URL(run.seller_url).hostname : undefined} mark={sampleMark(run.sample, run.seller_url ? new URL(run.seller_url).hostname : undefined)} fallback={initials} className="saved-run-identity" />
           <span className="run-copy"><span className="run-name">{title}</span>{multipleCompanies && <span className="run-company">{company}</span>}{status && <span className="run-status">{status}</span>}</span>
         </button>;
       })}</section>)}

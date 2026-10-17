@@ -1664,6 +1664,11 @@
       "default": false,
       "title": "Can Continue Discovery",
       "type": "boolean"
+    },
+    "sample": {
+      "default": false,
+      "title": "Sample",
+      "type": "boolean"
     }
   },
   "required": [

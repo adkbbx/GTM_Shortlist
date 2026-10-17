@@ -7,7 +7,7 @@ export function ContinueDiscovery({ run, onSaved }: { run: Run; onSaved: (run: R
   const [error, setError] = useState<string | null>(null);
   const resume = async () => {
     setSaving(true); setError(null);
-    try { onSaved(await api.continueDiscovery(run.id)); }
+    try { onSaved(await api.continueDiscovery(run.id, run.sample)); }
     catch (reason) { setError(reason instanceof Error ? reason.message : 'Saved research could not continue.'); }
     finally { setSaving(false); }
   };

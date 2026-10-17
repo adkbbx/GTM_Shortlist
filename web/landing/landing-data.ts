@@ -13,6 +13,8 @@ const companies: Array<[name: string, domain: string]> = [
   ['Quarry Stack', 'quarry.example'], ['Relay Studio', 'relay-studio.example'],
 ];
 export const exampleShortlist = companies.slice(0, 16).map(([name, domain]) => ({ name, domain }));
+/** The invented name behind a reserved domain; the local sample run uses the same companies. */
+export const exampleName = (domain: string) => companies.find(([, known]) => known === domain)?.[0];
 
 const colours = ['#2457a6', '#1f6f6a', '#6a3417', '#1b1b1b', '#5b4b8a', '#b4501c', '#2f7d4f', '#8a6a1f', '#9b3b5a', '#3d6e8f'];
 const glyphs = [

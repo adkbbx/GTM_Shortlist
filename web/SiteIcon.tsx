@@ -6,8 +6,13 @@ import './SiteIcon.css';
 const declarations = new Map<string, Promise<string | null>>();
 
 /** Prefer a supplied or declared icon, then root favicon and opt-in Brandfetch. Suggestions without a directory logo
-    can look up the site's declared icon when `lookup` is set. */
-export function SiteIcon({ domain, runId, icon, fallback, className, lookup = false }: { domain?: string; runId?: string; icon?: string; fallback: string; className: string; lookup?: boolean }) {
+    can look up the site's declared icon when `lookup` is set. A drawn `mark` (sample companies) skips every lookup. */
+export function SiteIcon({ mark, ...props }: { domain?: string; runId?: string; icon?: string; fallback: string; className: string; lookup?: boolean; mark?: string }) {
+  // Constant SVG markup from the sample's own data, never from a page or a provider.
+  return mark ? <span className={`site-icon is-mark ${props.className}`} aria-hidden="true" dangerouslySetInnerHTML={{ __html: mark }} /> : <LookedUpIcon {...props} />;
+}
+
+function LookedUpIcon({ domain, runId, icon, fallback, className, lookup = false }: { domain?: string; runId?: string; icon?: string; fallback: string; className: string; lookup?: boolean }) {
   const [failed, setFailed] = useState<ReadonlySet<string>>(() => new Set());
   const container = useRef<HTMLSpanElement>(null);
   const [visible, setVisible] = useState(false);

@@ -70,10 +70,11 @@ function parseRun(data: unknown): Run {
   return data;
 }
 
-async function localResearchHealth(): Promise<Health> {
+/** Sample runs use invented data and no providers, so they need the local worker but not search or model keys. */
+async function localResearchHealth(sample = false): Promise<Health> {
   const health = await request('/api/health');
   if (!isHealth(health)) throw new Error('Research readiness could not be checked. Try again.');
-  if (health.mode === 'local' && (!health.search_ready || !health.gemma_ready || health.local_search_error)) {
+  if (!sample && health.mode === 'local' && (!health.search_ready || !health.gemma_ready || health.local_search_error)) {
     throw new Error('Set up company search and the research model in Settings before starting research.');
   }
   return health;
@@ -85,8 +86,8 @@ async function startLocalResearch(health: Health) {
   if (!isHealth(started) || !started.worker_online) throw new Error('Background research could not start. Try again.');
 }
 
-async function researchCommand(path: string, input: unknown): Promise<Run> {
-  const health = await localResearchHealth();
+async function researchCommand(path: string, input: unknown, sample = false): Promise<Run> {
+  const health = await localResearchHealth(sample);
   const run = parseRun(await request(path, input));
   try { if (['queued', 'running'].includes(run.status)) await startLocalResearch(health); }
   catch (error) {
@@ -119,7 +120,7 @@ export const api = {
   async resumeResearch(id: string) {
     const run = parseRun(await request(`/api/runs/${encodeURIComponent(id)}`));
     if (!['queued', 'running'].includes(run.status) || run.termination) throw new Error('This run is no longer waiting to resume. Reload the saved research.');
-    await startLocalResearch(await localResearchHealth());
+    await startLocalResearch(await localResearchHealth(run.sample));
   },
   async startEmailDraft(id: string, recordId: string, input: components['schemas']['StartEmailDraft']) {
     return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/records/${encodeURIComponent(recordId)}/email-draft/start`, input));
@@ -143,11 +144,11 @@ export const api = {
   async stop(id: string) {
     return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/stop`, { confirmation: 'stop' }));
   },
-  async retrySeller(id: string) {
-    return researchCommand(`/api/runs/${encodeURIComponent(id)}/retry-seller`, { confirmation: 'retry_unstarted_seller' });
+  async retrySeller(id: string, sample = false) {
+    return researchCommand(`/api/runs/${encodeURIComponent(id)}/retry-seller`, { confirmation: 'retry_unstarted_seller' }, sample);
   },
-  async continueDiscovery(id: string) {
-    return researchCommand(`/api/runs/${encodeURIComponent(id)}/continue-discovery`, { confirmation: 'use_saved_candidates_without_search' });
+  async continueDiscovery(id: string, sample = false) {
+    return researchCommand(`/api/runs/${encodeURIComponent(id)}/continue-discovery`, { confirmation: 'use_saved_candidates_without_search' }, sample);
   },
   async creditHistory(before: string | null = null) {
     const data = await request(`/api/credits/history${before ? `?before=${encodeURIComponent(before)}` : ''}`);
@@ -187,12 +188,12 @@ export const api = {
     if (!isAuthSetup(data)) throw new Error('Account setup is unavailable. Please reload.');
     return data;
   },
-  async download(id: string, format: 'xlsx' | 'csv' | 'json', acceptedOnly: boolean) {
+  async download(id: string, format: 'xlsx' | 'csv' | 'json', acceptedOnly: boolean, sample = false) {
     const response = await authorizedFetch(`/api/runs/${encodeURIComponent(id)}/export?format=${format}&accepted_only=${acceptedOnly}`);
     if (!response.ok) throw new Error('Export could not be downloaded. Check your session and try again.');
     const url = URL.createObjectURL(await response.blob());
     const link = document.createElement('a');
-    link.href = url; link.download = `shortlist-${id}.${format}`;
+    link.href = url; link.download = `${sample ? 'shortlist-sample' : 'shortlist'}-${id}.${format}`;
     document.body.append(link); link.click(); link.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   },
@@ -210,8 +211,12 @@ export const api = {
   async start(seller_url: string, request_key: string) {
     return researchCommand('/api/sellers', { seller_url, request_key, experience_version: 2 });
   },
-  async confirm(id: string, input: Confirmation) {
-    return researchCommand(`/api/runs/${encodeURIComponent(id)}/confirm`, input);
+  /** Local only: the whole flow on invented companies and pages, before any keys are set up. */
+  async startSample(request_key: string) {
+    return researchCommand('/api/samples', { request_key }, true);
+  },
+  async confirm(id: string, input: Confirmation, sample = false) {
+    return researchCommand(`/api/runs/${encodeURIComponent(id)}/confirm`, input, sample);
   },
   async review(id: string, recordId: string, decision: Review['decision'], reason: string) {
     return parseRun(await request(`/api/runs/${encodeURIComponent(id)}/records/${encodeURIComponent(recordId)}/review`, { decision, reason }));

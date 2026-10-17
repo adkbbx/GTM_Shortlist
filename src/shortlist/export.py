@@ -8,6 +8,8 @@ from shortlist.market import reviewed_market
 from shortlist.relevance import record_issue
 from shortlist.workbook import workbook_bytes
 
+SAMPLE_NOTE = "Sample data: invented companies, pages and passages from the local sample. Not research."
+
 
 def export_run(run: dict, format: str, accepted_only: bool = False) -> str | bytes:
     withheld = [{"reason": reason, "record": r} for r in run["records"]
@@ -32,12 +34,15 @@ def export_run(run: dict, format: str, accepted_only: bool = False) -> str | byt
                "used_saved_discovery": run["checkpoint"].get("use_saved_discovery", False),
                "candidate_sources": run["checkpoint"].get("sources", {}),
                "note": "Human acceptance is not buying intent. Findings are model assessments requiring review."}
+    sample = run["checkpoint"].get("sample", False)
+    if sample:
+        payload = {"sample_data": True, **payload, "note": SAMPLE_NOTE + " " + payload["note"]}
     if format == "json":
         return json.dumps(payload, ensure_ascii=False, indent=2)
     summary, details = customer_tables(run, records)
     if format == "xlsx":
         profile = run.get("profile") or {}
-        notes = ["GTM Shortlist", "Target: " + profile.get("target", "Not confirmed"),
+        notes = ["GTM Shortlist", *([SAMPLE_NOTE] if sample else []), "Target: " + profile.get("target", "Not confirmed"),
                  f'{len(records)} companies · {"accepted only" if accepted_only else "all saved records"}',
                  "Human acceptance is not buying intent. Unknown means unverified, not a failed criterion."]
         if run["checkpoint"].get("termination"):
@@ -84,9 +89,10 @@ def export_run(run: dict, format: str, accepted_only: bool = False) -> str | byt
         raise ValueError("Choose Excel, CSV or JSON")
     buffer = io.StringIO(newline="")
     writer = csv.writer(buffer)
-    writer.writerow(HEADERS)
+    # A copied sample row keeps its label, so it can never pass as research.
+    writer.writerow(["Data", *HEADERS] if sample else HEADERS)
     for row in summary:
-        cells = row
+        cells = ["Sample data, invented", *row] if sample else row
         cells = ["'" + cell if cell.lstrip().startswith(("=", "+", "-", "@", "\t", "\r")) else cell for cell in cells]
         # CSV has no row sizing or alignment. Embedded source-link/review-note
         # newlines make Excel expand whole rows, so use one physical line per company.

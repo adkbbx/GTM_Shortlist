@@ -70,7 +70,7 @@ uvx gtm-shortlist ─► browser opens ─► Setup (2 steps) ─► Start resea
 2. **Search:** paste a Tavily key, which has a free tier, with SerpApi as the alternative. Again with a Test button.
    - Keys are stored server-side as today; readiness only ever reports true or false.
 
-**Try with sample data:** runs the whole flow with the labelled synthetic providers the UI tests already use.
+**Try it with sample data** (built): runs the whole flow with a packaged sample provider, separate from the test fixtures.
 - A first-time user sees offer, target, discovery, evidence and review before getting any keys.
 - Every screen in this mode is labelled "Sample data" and nothing is exported as real research.
 
@@ -92,14 +92,14 @@ Ticked items are built, tested and pushed on `claude/signal-landing`; items mark
 **Phase 2** (medium)
 - [x] Email code sign-in (6 digits, same tab) on the account form, behind `SHORTLIST_AUTH_EMAIL_CODE=on`; pasted codes keep only digits. *You:* add `{{ .Token }}` to the Supabase Magic Link and Confirm signup templates (docs/sign-in.md).
 - [x] Google sign-in button behind `SHORTLIST_AUTH_GOOGLE=on`, using Supabase OAuth with the existing PKCE return. *You:* create a Google OAuth client and enable the provider in Supabase (docs/sign-in.md).
-- [ ] Local "Try with sample data": a run that uses the labelled synthetic providers, labelled on every screen and export.
+- [x] Local "Try it with sample data" on the setup card: `POST /api/samples` (local only) creates a flagged run; the worker swaps in `shortlist.sample` (invented companies on reserved `.example` domains, no network) for every step. A banner labels every screen. Domains read as company names, sample links are plain text, and the demo link is hidden while the card shows. JSON, CSV and Excel exports carry the label, and reuse is blocked.
 
 **Phase 3** (medium to large)
 - [ ] Anonymous draft-only runs: no search, page fetch and model call only; 24-hour expiry.
 - [ ] Claim on sign-in: the draft becomes a normal run awaiting confirmation; market exploration starts after.
 - [ ] Abuse limits: Turnstile, one draft per browser and IP per day, a global daily cap and a kill switch. *You:* Cloudflare Turnstile site and secret keys.
-- [ ] PyPI package with the built UI and a console entry that opens the browser. *You:* PyPI trusted publishing for the repository.
-- [ ] Local-mode Docker image published to GHCR.
+- [x] PyPI package with the built UI and a console entry that opens the browser. `gtm-shortlist` (name free on PyPI as of 18 October) runs API and worker locally, opens the browser and keeps research in the user data folder. `package.yml` builds and smoke-tests a fresh install on every push and publishes on `v*` tags. *You:* add a trusted publisher on PyPI (project `gtm-shortlist`, workflow `package.yml`, environment `pypi`), create the `pypi` environment in GitHub, then push a `v0.1.0` tag.
+- [x] ~~Local-mode Docker image published to GHCR.~~ Decided against (18 October). Local mode has no sign-in: its trust boundary is that requests come from this computer's loopback address, and `container_entrypoint` refuses local mode for that reason. In a container every request arrives from the Docker gateway, and on Docker Desktop LAN traffic does too, so key setup and saved research could be reached from the network. Host Ollama would also need a non-loopback HTTP exception. `uvx gtm-shortlist` already gives a one-command install with no Node or build.
 
 Phase 3 changes auth and data storage. It needs its own tests for expiry, claiming, abuse caps and the kill switch, plus Postgres migrations.
 
@@ -107,5 +107,5 @@ Phase 3 changes auth and data storage. It needs its own tests for expiry, claimi
 
 1. Are anonymous drafts acceptable at all? They spend model calls before an account exists. This plan bounds them with Turnstile, per-visitor and global caps, and no search.
 2. Should sign-in be OTP code only, or OTP plus Google? Google needs an OAuth client in Google Cloud and Supabase.
-3. PyPI package name (`gtm-shortlist` if available) and whether to publish a local Docker image.
-4. Should sample-data mode be offered on the hosted site too, for visitors who will not type their company?
+3. ~~PyPI package name and whether to publish a local Docker image.~~ `gtm-shortlist`; no local image (see the checklist).
+4. Should sample-data mode be offered on the hosted site too, for visitors who will not type their company? Not built: hosted runs belong to an account and spend credits, so `/api/samples` answers 404 there.

@@ -15,6 +15,9 @@ test('historical article is excluded from company review while saved evidence st
   await expect(page.getByRole('heading', { name: '0 companies researched' })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Excluded saved sources' })).toContainText('publisher.example');
   await expect(page.getByRole('button', { name: 'Accept company', exact: true })).toHaveCount(0);
+  // Finished research leads with the result; the stage history is one click away.
+  await expect(page.locator('.research-recap')).not.toHaveAttribute('open');
+  await page.locator('.research-recap > summary').click();
   await page.getByRole('button', { name: /Inspect evidence/ }).click();
   const panel = page.getByRole('region', { name: 'Inspect evidence saved information' });
   await expect(panel).toContainText('Excluded source');

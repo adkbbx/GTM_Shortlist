@@ -7,8 +7,9 @@ function Arrow() {
   return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 }
 
-export function LandingDemo({ children }: { children: ReactNode }) {
-  return <div className="landing-experience"><div className="landing-start">{children}</div><div className="landing-entry"><a className="text-button" href="?demo=1">Try the demo<Arrow /></a></div></div>;
+/** The start page. `demo` is off while a local setup card offers sample data, so there is one way to try the product. */
+export function LandingDemo({ children, demo = true }: { children: ReactNode; demo?: boolean }) {
+  return <div className="landing-experience"><div className="landing-start">{children}</div>{demo && <div className="landing-entry"><a className="text-button" href="?demo=1">Try the demo<Arrow /></a></div>}</div>;
 }
 
 export function DemoPage() {

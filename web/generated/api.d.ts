@@ -191,6 +191,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/samples": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sample */
+        post: operations["sample_api_samples_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/runs/{run_id}/website": {
         parameters: {
             query?: never;
@@ -1125,6 +1142,16 @@ export interface components {
              * @default false
              */
             can_continue_discovery: boolean;
+            /**
+             * Sample
+             * @default false
+             */
+            sample: boolean;
+        };
+        /** SampleInput */
+        SampleInput: {
+            /** Request Key */
+            request_key: string;
         };
         /** SavedRecord */
         SavedRecord: {
@@ -1585,6 +1612,39 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["SellerInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sample_api_samples_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SampleInput"];
             };
         };
         responses: {

@@ -180,3 +180,11 @@ header.topbar .brand>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .local-setup-card li>button{flex:none;min-height:2.75rem;padding:.5rem .875rem;font-size:.875rem}
 .local-setup-card .hint,.new-research .landing-start .local-setup-card .hint{margin-top:.875rem;text-align:left}
 @media(max-width:600px){.local-setup-card li{flex-wrap:wrap}.local-setup-card li>button{width:100%}}
+.local-setup-sample{display:flex;align-items:center;flex-wrap:wrap;gap:0 .5rem;margin-top:1rem;padding-top:.5rem;border-top:1px solid var(--line);font-size:.875rem;color:var(--muted)}
+.local-setup-sample .text-button{display:inline-flex;align-items:center;gap:.375rem;min-height:2.75rem;font-size:inherit;font-weight:600}
+
+/* Sample runs: one persistent label above every screen of the run, and drawn marks instead of looked-up icons. */
+.sample-notice{display:flex;align-items:center;flex-wrap:wrap;gap:0 1rem;margin:0 0 1.25rem;padding:.375rem 1rem}
+.sample-notice p{margin:.375rem 0;font-size:.875rem}
+.sample-notice .text-button{display:inline-flex;align-items:center;gap:.375rem;min-height:2.75rem;margin-left:auto;font-size:.875rem;font-weight:600}
+.site-icon.is-mark svg{display:block;width:100%;height:100%}

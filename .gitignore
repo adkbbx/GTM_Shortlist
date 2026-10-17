@@ -13,6 +13,9 @@ deploy/secrets/
 data/
 node_modules/
 dist/
+src/shortlist/web_dist/
+package-dist/
+build/
 test-results/
 playwright-report/
 *.tsbuildinfo

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from './api';
 import type { Record, Run } from './api';
+import { OutboundLink, useSiteLabel } from './SampleData';
 
 export function EmailDraftEditor({ record, runId, onSaved, onDirtyChange }: { record: Record; runId: string; onSaved: (run: Run) => void; onDirtyChange: (dirty: boolean) => void }) {
   const [base, setBase] = useState(record.email_draft ?? null);
@@ -53,6 +54,7 @@ export function EmailDraftEditor({ record, runId, onSaved, onDirtyChange }: { re
   };
   const id = `email-${record.research.id}`;
   const recipient = record.research.people.find(item => item.id === base?.person_id);
+  const label = useSiteLabel();
   return <section className="email-draft" aria-label="Email draft"><h4>Email draft</h4>
     <p className="hint">A starting point from your confirmed offer and available research. No email is sent and no address is guessed.</p>
     {!base ? <div className="draft-start"><label htmlFor={`${id}-person`}>Draft for</label>
@@ -60,13 +62,13 @@ export function EmailDraftEditor({ record, runId, onSaved, onDirtyChange }: { re
         <option value="">Company team</option>{record.research.people.map(item => <option key={item.id} value={item.id}>{item.name} · {item.role}</option>)}
       </select><button type="button" className="secondary" disabled={busy} onClick={create}>{operation === 'load' ? 'Loading…' : busy ? 'Creating draft…' : 'Create starting draft'}</button>
       <p className="hint">Uses saved research. No search or inference credits.</p></div>
-      : <form onSubmit={save}><p className="draft-recipient">For {recipient ? `${recipient.name} · ${recipient.role}` : `${record.research.domain} team`}</p>
+      : <form onSubmit={save}><p className="draft-recipient">For {recipient ? `${recipient.name} · ${recipient.role}` : `${label(record.research.domain)} team`}</p>
         <label htmlFor={`${id}-subject`}>Subject</label><input id={`${id}-subject`} value={subject} required maxLength={200} disabled={busy} onChange={event => { setSubject(event.target.value); setMessage(''); }} />
         <label htmlFor={`${id}-body`}>Message</label><textarea id={`${id}-body`} value={body} required maxLength={8000} rows={12} disabled={busy} onChange={event => { setBody(event.target.value); setMessage(''); }} />
         <p className="hint">Add your name and check every claim. Your edits are not automatically fact-checked. {dirty ? 'Unsaved changes.' : 'Saved draft.'}</p>
         {!!base.basis.length && <details className="draft-basis"><summary>Sources used for the starting draft</summary><ul>{base.basis.map((evidence, index) => {
           const source = record.research.sources.find(item => item.id === evidence.source_id);
-          return <li key={`${evidence.source_id}-${index}`}><p>{evidence.claim}</p><blockquote>{evidence.passage}</blockquote>{source && <><a href={source.url} target="_blank" rel="noopener noreferrer">{source.title}</a><p className="hint">Retrieved {new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(source.retrieved_at))}</p></>}</li>;
+          return <li key={`${evidence.source_id}-${index}`}><p>{evidence.claim}</p><blockquote>{evidence.passage}</blockquote>{source && <><OutboundLink href={source.url}>{source.title}</OutboundLink><p className="hint">Retrieved {new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(source.retrieved_at))}</p></>}</li>;
         })}</ul></details>}
         <div className="draft-actions"><button type="submit" disabled={busy || !dirty}>{operation === 'load' ? 'Loading…' : busy ? 'Saving…' : 'Save draft'}</button>
           {dirty && <button type="button" className="text-button" disabled={busy} onClick={load}>Discard changes and load saved draft</button>}</div>

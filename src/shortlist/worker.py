@@ -33,6 +33,7 @@ from shortlist.providers import (
     queries_for,
 )
 from shortlist.relevance import CompanyPageError, candidate_issue, primary_source_issue, record_issue
+from shortlist.sample import SAMPLE_PROVIDER, sample_providers
 from shortlist.selection import prioritize, prioritize_pages
 from shortlist.store import BudgetExceeded, Conflict, Store
 from shortlist.verification import (
@@ -44,12 +45,17 @@ from shortlist.verification import (
 
 
 def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search | None = None,
-                model: Gemma | None = None, fetch: Callable[..., Source] = fetch_page) -> bool:
+                model: Gemma | None = None, fetch: Callable[..., Source] = fetch_page, sample_pace: float = 1.0) -> bool:
     fence = store.claim(run_id)
     if fence is None:
         return False
     run = store.get_run(run_id)
     checkpoint = run["checkpoint"]
+    if checkpoint.get("sample"):
+        # Sample runs never reach a provider: invented pages, results and assessments. Journal inputs stay stable
+        # even if the person configures a real model while the sample is running.
+        search, model, fetch = sample_providers(sample_pace)
+        settings = settings.model_copy(update={"gemma_model": SAMPLE_PROVIDER, "gemma_base_url": ""})
     require_identity = checkpoint.get("company_identity_policy", 0) >= 1
     search = search or SearchProvider(settings)
     model = model or Gemma(settings)

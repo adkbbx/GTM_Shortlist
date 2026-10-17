@@ -1,23 +1,25 @@
 import type { Run } from './api';
+import { useSiteLabel } from './SampleData';
 
 type Campaign = NonNullable<Run['market']>['campaigns'][number];
 
 export function MarketOverview({ run, selected, onChoose }: {
   run: Run; selected: string | null; onChoose: (campaign: Campaign) => void;
 }) {
+  const label = useSiteLabel();
   if (!run.market) return null;
   const market = run.market;
   const chosen = market.campaigns.find(campaign => campaign.name === selected);
   return <div className="market-overview">
     <section className="seller-brief" aria-label="Company offer summary"><h3>Your company, in brief</h3>
-      <p className="market-domain">{run.seller_url ? new URL(run.seller_url).hostname : run.company_name}</p>
-      <p>{run.draft?.offer}</p><p className="hint">Drafted from your website. Correct the offer below before continuing.</p>
-      {run.seller_source && <details className="seller-source"><summary>Inspect the saved company page</summary><blockquote>{run.seller_source.text}</blockquote><a href={run.seller_source.url} target="_blank" rel="noopener noreferrer">Open source website</a><p className="hint">Retrieved {new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(run.seller_source.retrieved_at))}. The summary remains a draft for your confirmation.</p></details>}
+      <p className="market-domain">{run.sample ? 'Sample company' : run.seller_url ? new URL(run.seller_url).hostname : run.company_name}</p>
+      <p>{run.draft?.offer}</p><p className="hint">{run.sample ? 'Drafted from the sample company page.' : 'Drafted from your website.'} Correct the offer below before continuing.</p>
+      {run.seller_source && <details className="seller-source"><summary>Inspect the saved company page</summary><blockquote>{run.seller_source.text}</blockquote>{!run.sample && <a href={run.seller_source.url} target="_blank" rel="noopener noreferrer">Open source website</a>}<p className="hint">Retrieved {new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(run.seller_source.retrieved_at))}. The summary remains a draft for your confirmation.</p></details>}
     </section>
     <section aria-labelledby="competitors-heading"><div className="market-heading"><h3 id="competitors-heading">Explore the market</h3><span>{market.competitors.length} potential competitors</span></div>
       <p className="hint">This search explores similar offers. Relevance still needs verification.</p>
       {market.competitors.length > 0 && <ul className="competitor-list">{market.competitors.map(company => <li key={company.domain}>
-        <details><summary>{company.domain}</summary><p>{company.excerpt || 'No search excerpt was returned.'}</p><a href={company.url} target="_blank" rel="noopener noreferrer">Inspect search result</a><p className="hint">Found {new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(company.discovered_at))}. Search observation, not a verified comparison.</p></details>
+        <details><summary>{label(company.domain)}</summary><p>{company.excerpt || 'No search excerpt was returned.'}</p>{!run.sample && <a href={company.url} target="_blank" rel="noopener noreferrer">Inspect search result</a>}<p className="hint">Found {new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(company.discovered_at))}. Search observation, not a verified comparison.</p></details>
       </li>)}</ul>}
     </section>
     <section aria-labelledby="campaigns-heading"><div className="market-heading"><h3 id="campaigns-heading">Choose a campaign direction</h3><span>{market.campaigns.length} suggestions</span></div>

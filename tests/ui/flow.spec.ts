@@ -25,7 +25,10 @@ async function capture(page: Page, path: string) {
     await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     window.scrollTo(0, 0);
   });
-  await page.screenshot({ path, fullPage: true });
+  // Chromium's full-page capture light-dismisses an open popover such as Settings once the page outgrows the viewport,
+  // so a panel that is open is captured as it appears on screen.
+  const popover = await page.evaluate(() => Boolean(document.querySelector(':popover-open')));
+  await page.screenshot({ path, fullPage: !popover });
 }
 
 test('local model status opens setup and explains the offline worker without dispatch', async ({ page }, info) => {
@@ -640,9 +643,9 @@ test('saved seller → confirmation → evidence → review → export survives 
   await noOverflow(page);
   await capture(page, `.impeccable/review/${testInfo.project.name}-progress.png`);
   await expect(page.getByRole('heading', { name: '2 companies researched' })).toBeVisible({ timeout: 15000 });
-  await expect(page.locator('.research-recap')).toHaveAttribute('open');
-  await expect(page.locator('.real-research')).toBeVisible();
-  await page.locator('.research-recap > summary').click();
+  // Partial results lead with the shortlist; the toolbar names the open questions and the history stays one click away.
+  await expect(page.locator('.research-recap')).not.toHaveAttribute('open');
+  await expect(page.locator('.research-recap > summary')).toContainText('2 companies saved for your review');
   const first = page.locator('.company-sheet').first();
   await openCompany(page);
   await first.locator('.findings .evidence > summary').first().click();

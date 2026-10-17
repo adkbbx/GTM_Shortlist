@@ -7,7 +7,7 @@ export function RetrySeller({ run, onSaved }: { run: Run; onSaved: (run: Run) =>
   const [error, setError] = useState<string | null>(null);
   const retry = async () => {
     setSaving(true); setError(null);
-    try { onSaved(await api.retrySeller(run.id)); }
+    try { onSaved(await api.retrySeller(run.id, run.sample)); }
     catch (reason) { setError(reason instanceof Error ? reason.message : 'Company setup could not be retried.'); }
     finally { setSaving(false); }
   };

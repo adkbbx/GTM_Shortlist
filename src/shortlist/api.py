@@ -36,6 +36,7 @@ from shortlist.model_setup import LocalModels, ModelSetupError, available_models
 from shortlist.progress import RunProgress, public_events
 from shortlist.providers import SellerDraft, company_name_matches, recover_customer_draft
 from shortlist.relevance import record_issue
+from shortlist.sample import SAMPLE_SELLER_URL
 from shortlist.selection import Selection
 from shortlist.site_icons import SiteIcons
 from shortlist.store import BudgetExceeded, Conflict, Store, saved_discovery_available, seller_retry_available
@@ -71,6 +72,11 @@ class WebsiteInput(BaseModel):
     @classmethod
     def public_website(cls, value):
         return canonical_url(SellerInput.public_url(value))
+
+
+class SampleInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    request_key: str = Field(min_length=8, max_length=100)
 
 
 class LocalKeyInput(BaseModel):
@@ -189,6 +195,8 @@ class RunView(BaseModel):
     termination: Literal["user_stopped"] | None = None
     can_retry_seller: bool = False
     can_continue_discovery: bool = False
+    # Invented companies and pages from the local sample providers; never research.
+    sample: bool = False
 
 
 PUBLIC_HOST = re.compile(r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}")
@@ -221,6 +229,13 @@ class HostedAuth(BaseModel):
 
 
 AuthSetup = Annotated[LocalAuth | HostedAuth, Field(discriminator="mode")]
+
+
+def ui_directory() -> Path | None:
+    """The built UI: the repository's dist/ for contributors and containers, or the copy inside the installed package."""
+    here = Path(__file__).resolve()
+    return next((folder for folder in (here.parents[2] / "dist", here.parent / "web_dist")
+                 if (folder / "index.html").is_file()), None)
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -340,7 +355,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                        termination=run["checkpoint"].get("termination"),
                        draft_exclusions=run["checkpoint"].get("draft_exclusions", []),
                        can_retry_seller=seller_retry_available(run),
-                       can_continue_discovery=saved_discovery_available(run), progress=RunProgress(
+                       can_continue_discovery=saved_discovery_available(run), sample=run["checkpoint"].get("sample", False),
+                       progress=RunProgress(
                            worker_online=store.worker_online(), candidates=len(run["checkpoint"].get("candidates", [])),
                            sources=len({s["id"] for pages in run["checkpoint"].get("sources", {}).values() for s in pages}),
                            companies=sum(not record["source_issue"] for record in records), events=public_events(run)))
@@ -473,6 +489,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return view(store, store.create_draft(website, input.request_key, company_name=None if website else input.seller_url,
                                             experience_version=input.experience_version))
 
+    @app.post("/api/samples", response_model=RunView, status_code=201)
+    def sample(input: SampleInput, store: owned):
+        # Local only: hosted runs belong to an account and spend credits; sample data does neither.
+        if settings.mode != "local":
+            raise HTTPException(404, "Sample data is available in local workspaces")
+        return view(store, store.create_draft(SAMPLE_SELLER_URL, input.request_key, experience_version=2, sample=True))
+
     @app.post("/api/runs/{run_id}/website", response_model=RunView)
     def choose_website(run_id: str, input: WebsiteInput, store: owned):
         store.confirm_website(run_id, input.website_url)
@@ -494,6 +517,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(404, "Website is not part of this saved run") from None
         if normalized not in allowed or urlsplit(canonical_url(f"https://{domain}/")).hostname != domain:
             raise HTTPException(404, "Website is not part of this saved run")
+        if run["checkpoint"].get("sample"):
+            return SiteIconInfo()  # Reserved sample domains never resolve; the page draws their marks.
         return SiteIconInfo(url=site_icons.get(domain))
 
     @app.get("/api/site-icon/{domain}", response_model=SiteIconInfo)
@@ -558,11 +583,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/api/runs/{run_id}/export")
     def export(run_id: str, store: owned, format: Literal["json", "csv", "xlsx"] = "json", accepted_only: bool = False):
-        content = export_run(store.get_run(run_id), format, accepted_only)
+        run = store.get_run(run_id)
+        content = export_run(run, format, accepted_only)
         types = {"json": "application/json", "csv": "text/csv",
                  "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}
+        name = "shortlist-sample" if run["checkpoint"].get("sample") else "shortlist"
         return Response(content, media_type=types[format],
-                        headers={"Content-Disposition": f'attachment; filename="shortlist-{run_id}.{format}"'})
+                        headers={"Content-Disposition": f'attachment; filename="{name}-{run_id}.{format}"'})
 
     @app.post("/api/runs/{run_id}/records/{record_id}/email-draft/start", response_model=RunView)
     def start_email_draft(run_id: str, record_id: str, input: StartEmailDraft, store: owned):
@@ -574,8 +601,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         store.write_email_draft(run_id, record_id, input)
         return view(store, run_id)
 
-    dist = Path(__file__).resolve().parents[2] / "dist"
-    if dist.is_dir():
+    dist = ui_directory()
+    if dist is not None:
         @app.get("/", response_class=HTMLResponse, include_in_schema=False)
         @app.get("/index.html", response_class=HTMLResponse, include_in_schema=False)
         def ui_index():
