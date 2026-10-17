@@ -3,18 +3,29 @@ import io
 import json
 
 from shortlist.customer_export import HEADERS, customer_tables
+from shortlist.domain import Research
+from shortlist.market import reviewed_market
+from shortlist.relevance import record_issue
 from shortlist.workbook import workbook_bytes
 
 
 def export_run(run: dict, format: str, accepted_only: bool = False) -> str | bytes:
-    records = [r for r in run["records"] if not accepted_only or r["review"] and r["review"]["decision"] == "accepted"]
+    withheld = [{"reason": reason, "record": r} for r in run["records"]
+                if (reason := record_issue(Research.model_validate(r["research"]), strict=True))]
+    excluded = {item["record"]["research"]["id"] for item in withheld}
+    records = [r for r in run["records"] if r["research"]["id"] not in excluded
+               and (not accepted_only or r["review"] and r["review"]["decision"] == "accepted")]
+    offer = (run.get("profile") or run["checkpoint"].get("draft") or {}).get("offer", "")
+    seller_url = (run.get("profile") or {}).get("seller_url") or run["checkpoint"].get("seller_url", "https://seller.example/")
+    reviewed = reviewed_market(run["checkpoint"].get("market"), seller_url, offer)
+    market = reviewed.model_dump(mode="json") if reviewed else None
     payload = {"run_id": run["id"], "profile": run["profile"], "status": run["status"],
                "termination": run["checkpoint"].get("termination"),
-               "records": records, "discovery": run["checkpoint"].get("candidates", []),
+               "records": records, "withheld_records": withheld, "discovery": run["checkpoint"].get("candidates", []),
                "candidate_failures": run["checkpoint"].get("candidate_failures", {}),
                "page_failures": run["checkpoint"].get("page_failures", {}),
                "activity_failures": run["checkpoint"].get("activity_failures", {}),
-               "market": run["checkpoint"].get("market"), "campaign_name": run["checkpoint"].get("campaign_name"),
+               "market": market, "saved_market": run["checkpoint"].get("market"), "campaign_name": run["checkpoint"].get("campaign_name"),
                "selection": run["checkpoint"].get("selection", []), "seller_source": run["checkpoint"].get("seller_source"),
                "discovery_terms": run["checkpoint"].get("discovery_terms"),
                "discovery_failures": run["checkpoint"].get("discovery_failures", {}),
@@ -38,7 +49,6 @@ def export_run(run: dict, format: str, accepted_only: bool = False) -> str | byt
               "Source URL", "Retrieved (UTC)", "Published (UTC)", "Domain"], details,
              [24, 22, 45, 20, 55, 65, 45, 24, 24, 30]),
         ]
-        market = run["checkpoint"].get("market")
         drafts = []
         for record in records:
             draft = record.get("email_draft")

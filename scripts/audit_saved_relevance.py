@@ -4,8 +4,8 @@ import json
 import sqlite3
 from pathlib import Path
 
-from shortlist.domain import Candidate
-from shortlist.relevance import candidate_issue, company_page_issue
+from shortlist.domain import Candidate, Research, Source
+from shortlist.relevance import candidate_issue, company_page_issue, primary_source_issue, record_issue
 
 
 def main():
@@ -25,10 +25,18 @@ def main():
                 issue = candidate_issue(candidate)
                 pages = checkpoint.get("sources", {}).get(candidate.domain, [])
                 if not issue and pages:
-                    issue = company_page_issue(pages[0]["url"], pages[0]["title"])
+                    issue = primary_source_issue(Source.model_validate(pages[0]), strict=True)
                 candidates.append({"domain": candidate.domain, "url": candidate.url,
                                    "decision": "skip" if issue else "eligible_for_research", "reason": issue})
-            report.append({"run_id": identity, "candidates": candidates})
+            records = []
+            for (research,) in database.execute("SELECT research FROM records WHERE run_id=?", (identity,)):
+                record = Research.model_validate_json(research)
+                issue = record_issue(record, strict=True)
+                records.append({"domain": record.domain, "reason": issue, "decision": "withhold" if issue else "retain"})
+            market = [{"domain": value["domain"], "reason": candidate_issue(Candidate.model_validate(value)) or
+                       company_page_issue(value["url"], value["name"], strict=True)}
+                      for value in checkpoint.get("market_candidates", [])]
+            report.append({"run_id": identity, "candidates": candidates, "records": records, "market": market})
     if args.run and not report:
         parser.error("Saved run not found")
     print(json.dumps({"runs": report, "provider_calls": 0, "database_writes": 0}, indent=2))

@@ -17,6 +17,7 @@ from shortlist.domain import Candidate, Profile, Source
 from shortlist.local_credentials import apply_local_credentials
 from shortlist.prompting import LOOPBACK
 from shortlist.providers import Gemma, ModelOutputError, ProviderError, SellerDraft
+from shortlist.relevance import CompanyPageError
 from shortlist.verification import apply_verification
 
 
@@ -27,7 +28,7 @@ def step(label, function):
     except ModelOutputError as exc:
         print(f"FAILED  {label} ({time.monotonic() - start:.0f}s): invalid model output {exc.issues[:3]}")
         return None
-    except ProviderError as exc:
+    except (ProviderError, CompanyPageError) as exc:
         print(f"FAILED  {label} ({time.monotonic() - start:.0f}s): {exc}")
         return None
     print(f"OK      {label} ({time.monotonic() - start:.0f}s)")
@@ -79,7 +80,7 @@ def main():
     for domain in domains:
         sources = tuple(Source.model_validate(s) for s in checkpoint["sources"][domain])
         record = step("Inspect evidence: " + domain,
-                      lambda c=candidates[domain], s=sources: model.research(profile, c, s))
+                      lambda c=candidates[domain], s=sources: model.research(profile, c, s, require_identity=True))
         if record is None:
             continue
         audit = step("Check evidence:   " + domain, lambda r=record: model.verify(profile, r))

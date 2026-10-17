@@ -11,6 +11,7 @@ from shortlist.domain import (
     exclusion_id,
     qualify,
 )
+from shortlist.relevance import CompanyPageError
 
 
 class Judgment(BaseModel):
@@ -22,13 +23,17 @@ class Judgment(BaseModel):
 
 class Verification(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    judgments: list[Judgment] = Field(max_length=30)
+    judgments: list[Judgment] = Field(max_length=31)
 
 
 def assessments(profile: Profile, record: Research) -> list[dict]:
     criteria = {c.id: c.description for c in profile.criteria}
     exclusions = {exclusion_id(i): text for i, text in enumerate(profile.exclusions)}
     result = []
+    if record.company_identity:
+        result.append({"assessment_id": "company:identity", "condition":
+            "This passage identifies the website owner's own business, not a third-party employer, reviewed product, "
+            "publisher's subject, portfolio company or suspended page", "proposed": record.company_identity.model_dump(mode="json")})
     for finding in (*record.findings, *record.exclusion_findings):
         if finding.status == "unknown":
             continue
@@ -58,6 +63,11 @@ def apply_verification(profile: Profile, record: Research, audit: Verification) 
         if judgment.assessment_id not in expected or judgment.assessment_id in judgments:
             raise ValueError("Verifier returned unknown or duplicate assessment IDs")
         judgments[judgment.assessment_id] = judgment
+
+    if record.company_identity:
+        identity = judgments.get("company:identity")
+        if identity is None or identity.verdict != "entailed":
+            raise CompanyPageError("Official company identity was not independently verified; record withheld")
 
     def gate(finding, prefix, identity, unknown_type):
         if finding.status == "unknown":

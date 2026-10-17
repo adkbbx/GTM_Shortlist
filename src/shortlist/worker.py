@@ -32,7 +32,7 @@ from shortlist.providers import (
     company_name_matches,
     queries_for,
 )
-from shortlist.relevance import candidate_issue, company_page_issue
+from shortlist.relevance import CompanyPageError, candidate_issue, primary_source_issue, record_issue
 from shortlist.selection import prioritize, prioritize_pages
 from shortlist.store import BudgetExceeded, Conflict, Store
 from shortlist.verification import (
@@ -50,6 +50,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
         return False
     run = store.get_run(run_id)
     checkpoint = run["checkpoint"]
+    require_identity = checkpoint.get("company_identity_policy", 0) >= 1
     search = search or SearchProvider(settings)
     model = model or Gemma(settings)
 
@@ -72,7 +73,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
         try:
             result = call_step(store, run_id, fence, settings.global_search_cap, kind=kind, provider=provider,
                                operation=operation, function=traced, inputs=inputs, decode=decode)
-        except (ProviderError, FetchError, BudgetExceeded) as exc:
+        except (ProviderError, FetchError, BudgetExceeded, CompanyPageError) as exc:
             store.event(run_id, fence, ProgressUpdate(phase=phase, label=label, detail=str(exc)[:400], state="failed"))
             raise
         store.event(run_id, fence, ProgressUpdate(phase=phase, label=label,
@@ -107,18 +108,20 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
         if "market" in checkpoint:
             return
         store.checkpoint(run_id, fence, "campaigns" if "market_candidates" in checkpoint else "market", checkpoint)
+        market_policy = checkpoint.get("market_policy", 1)
         if "market_candidates" not in checkpoint:
-            query = competitor_query(draft.offer, checkpoint["seller_url"])
+            query = competitor_query(draft.offer, checkpoint["seller_url"], policy=market_policy)
 
             def decode_market(values):
                 try:
-                    return market_candidates(values, checkpoint["seller_url"])
+                    return market_candidates(values, checkpoint["seller_url"],
+                                             offer=draft.offer, strict=market_policy >= 2)
                 except ValueError as exc:
                     raise ProviderError("Competitor search returned invalid website identities") from exc
             try:
                 candidates = call("search", search.name, "market:search",
                                   lambda: decode_market(search.search(query, checkpoint["seller_url"])),
-                                  {"query": query, "seller_url": checkpoint["seller_url"], "market_policy": 1}, decode_market)
+                                  {"query": query, "seller_url": checkpoint["seller_url"], "market_policy": market_policy}, decode_market)
                 checkpoint["market_candidates"] = [c.model_dump(mode="json") for c in candidates]
             except (ProviderError, BudgetExceeded):
                 checkpoint["market_candidates"] = []
@@ -130,7 +133,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
             try:
                 plan = call("model", model.name, "market:campaigns", lambda: model.market(draft, candidates),
                             {"draft": draft.model_dump(mode="json"), "candidates": checkpoint["market_candidates"],
-                             "model": settings.gemma_model, "endpoint": settings.gemma_base_url, "campaign_policy": 2,
+                             "model": settings.gemma_model, "endpoint": settings.gemma_base_url, "campaign_policy": 3 if market_policy >= 2 else 2,
                              **prompt_inputs()},
                             read_campaign_plan)
                 checkpoint["market_plan"] = plan.model_dump(mode="json")
@@ -139,7 +142,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 if isinstance(exc, ModelOutputError):
                     checkpoint["market_model_output"] = exc.diagnostic()
             store.checkpoint(run_id, fence, "campaigns", checkpoint)
-        plan = read_campaign_plan(checkpoint.get("market_plan", {"campaigns": []}))
+        plan = read_campaign_plan(checkpoint.get("market_plan", {"campaigns": []}), distinct_targets=market_policy >= 2)
         campaigns = plan.campaigns
         issues = [checkpoint[key] for key in ("market_search_issue", "market_plan_issue") if key in checkpoint]
         issues.extend(plan.issues)
@@ -252,13 +255,13 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                     continue
                 if candidate.domain in saved_sources:
                     primary = Source.model_validate(saved_sources[candidate.domain][0])
-                    if issue := company_page_issue(primary.url, primary.title):
+                    if issue := primary_source_issue(primary, strict=require_identity):
                         reject_candidate(candidate, issue, "selection")
                     continue
                 try:
                     source = page(candidate.url, candidate.domain, f"fetch:{candidate.domain}")
                     saved_sources[candidate.domain] = [source.model_dump(mode="json")]
-                    if issue := company_page_issue(source.url, source.title):
+                    if issue := primary_source_issue(source, strict=require_identity):
                         reject_candidate(candidate, issue, "selection")
                 except FetchError as exc:
                     checkpoint.setdefault("candidate_failures", {})[candidate.domain] = {"url": candidate.url, "reason": str(exc)}
@@ -320,7 +323,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                     saved_sources[candidate.domain] = [source.model_dump(mode="json")]
                     store.checkpoint(run_id, fence, "research", checkpoint)
                 sources = tuple(Source.model_validate(s) for s in saved_sources[candidate.domain])
-                if issue := company_page_issue(sources[0].url, sources[0].title):
+                if issue := primary_source_issue(sources[0], strict=require_identity):
                     reject_candidate(candidate, issue, "research")
                     continue
                 # Initial-page links define the entire follow-up frontier. Never recurse.
@@ -345,11 +348,12 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 model_inputs = {"profile": profile.model_dump(mode="json"), "candidate": candidate.model_dump(mode="json"),
                                 "sources": [s.model_dump(mode="json") for s in sources],
                                 "model": settings.gemma_model, "endpoint": settings.gemma_base_url, "exclusion_policy": 1,
-                                **prompt_inputs()}
+                                **prompt_inputs(), **({"company_identity_policy": 1} if require_identity else {})}
+                identity_options = {"require_identity": require_identity} if isinstance(model, Gemma) else {}
                 if previous is None:
                     try:
                         record = call("model", model.name, f"model:{candidate.domain}",
-                                      lambda c=candidate, s=sources: model.research(profile, c, s),
+                                      lambda c=candidate, s=sources, options=identity_options: model.research(profile, c, s, **options),
                                       model_inputs, Research.model_validate)
                     except ModelOutputError as exc:
                         previous = exc.diagnostic()
@@ -361,7 +365,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                     repair_input = {k: v for k, v in previous.items() if k != "repair_failure"}
                     try:
                         record = call("model", model.name, f"repair:{candidate.domain}",
-                                      lambda c=candidate, s=sources, p=repair_input: model.research(profile, c, s, repair=p),
+                                      lambda c=candidate, s=sources, p=repair_input, options=identity_options: model.research(profile, c, s, repair=p, **options),
                                       {**model_inputs, "repair": repair_input},
                                       Research.model_validate)
                     except ModelOutputError as exc:
@@ -369,7 +373,13 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                         store.checkpoint(run_id, fence, "research", checkpoint)
                         raise
                 billable = True
+            except CompanyPageError as exc:
+                reject_candidate(candidate, str(exc), "research")
+                continue
             except (ProviderError, FetchError) as exc:
+                if require_identity and isinstance(model, Gemma):
+                    reject_candidate(candidate, "Company identity could not be established: " + str(exc), "research")
+                    continue
                 sources = tuple(Source.model_validate(s) for s in saved_sources.get(candidate.domain, []))
                 if isinstance(exc, FetchError) and not sources:
                     checkpoint.setdefault("candidate_failures", {})[candidate.domain] = {
@@ -397,10 +407,19 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                                   "verification_policy": 2, **prompt_inputs()}, decode_verification)
                     record = apply_verification(profile, record, audit)
                     checkpoint.setdefault("verification", {})[candidate.domain] = audit.model_dump(mode="json")
+                except CompanyPageError as exc:
+                    reject_candidate(candidate, str(exc), "research")
+                    continue
                 except (ProviderError, BudgetExceeded) as exc:
                     billable = False
+                    if record.company_identity:
+                        reject_candidate(candidate, "Company identity could not be verified: " + str(exc), "research")
+                        continue
                     record = unavailable(profile, record, str(exc))
                     checkpoint.setdefault("verification", {})[candidate.domain] = {"error": str(exc)}
+            if issue := record_issue(record, strict=True):
+                reject_candidate(candidate, issue, "research")
+                continue
             store.save_record(run_id, fence, record, billable=billable)
             store.event(run_id, fence, ProgressUpdate(phase="research", label="Saved research for " + candidate.domain,
                                                        state="succeeded"))

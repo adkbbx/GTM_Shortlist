@@ -12,7 +12,7 @@ from shortlist.export import export_run
 
 @pytest.fixture
 def customer_run():
-    research = {"id": "record-one", "domain": "example.com", "name": 'Example, "AI" 日本',
+    research = {"id": "record-one", "profile_id": "profile-fixture", "domain": "example.com", "name": 'Example, "AI" 日本',
                 "qualification": "needs_verification", "status": "partial",
                 "findings": [{"status": "supported", "criterion_id": "ai", "evidence": [{
                     "source_id": "source-one", "claim": "Offers AI software", "passage": "We build AI software for teams."}]},
@@ -175,7 +175,7 @@ def test_actual_api_workbook_download_preserves_run_and_review(tmp_path, custome
 @pytest.mark.parametrize("name", ["=HYPERLINK(\"evil\")", "+1+1", "-1+1", "@SUM(A1:A2)", "\t=1+1", "\r=1+1"])
 def test_csv_formula_cells_are_escaped(name):
     run = {"id": "run", "profile": {}, "status": "partial", "checkpoint": {}, "records": [{
-        "research": {"name": name, "domain": "example.com", "qualification": "needs_verification",
+        "research": {"id": "formula-fixture", "profile_id": "fixture-profile", "name": name, "domain": "example.com", "qualification": "needs_verification",
                      "status": "partial", "findings": [], "sources": [], "hypotheses": [], "unknowns": []},
         "review": None}]}
     rows = list(csv.reader(io.StringIO(export_run(run, "csv"))))
@@ -183,10 +183,10 @@ def test_csv_formula_cells_are_escaped(name):
 
 
 def test_market_context_has_readable_separate_sheet_and_complete_json(customer_run):
-    customer_run["checkpoint"].update(market={"competitors": [{"domain": "competitor.example",
+    customer_run["checkpoint"].update(market={"status": "saved", "competitors": [{"name": "Fixture competitor", "query": "fixture", "provider": "fixture", "domain": "competitor.example",
         "url": "https://competitor.example/", "excerpt": "x" * 400, "discovered_at": "2026-10-15T00:00:00+00:00"}],
         "campaigns": [{"name": '=HYPERLINK("fixture")', "target": "Software companies",
-                       "rationale": "Unverified campaign hypothesis."}]}, campaign_name="Software founders")
+                       "rationale": "Unverified campaign hypothesis.", "criteria": [{"id": "software", "description": "Offers software"}]}]}, campaign_name="Software founders")
     before = deepcopy(customer_run)
     package = workbook_xml(export_run(customer_run, "xlsx", accepted_only=True))
     ns = {"s": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}

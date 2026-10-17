@@ -30,10 +30,11 @@ from shortlist.local_credentials import (
     validate_tavily_key,
 )
 from shortlist.local_service import LocalResearchService, ServiceUnavailable
-from shortlist.market import MarketResearch
+from shortlist.market import MarketResearch, reviewed_market
 from shortlist.model_setup import LocalModels, ModelSetupError, available_models
 from shortlist.progress import RunProgress, public_events
 from shortlist.providers import SellerDraft, company_name_matches
+from shortlist.relevance import record_issue
 from shortlist.selection import Selection
 from shortlist.site_icons import SiteIcons
 from shortlist.store import BudgetExceeded, Conflict, Store, saved_discovery_available, seller_retry_available
@@ -88,6 +89,7 @@ class Confirmation(Target):
 
 
 class SavedRecord(BaseModel):
+    source_issue: str | None = None
     research: Research
     review: Review | None = None
     operator_review: OperatorReview | None = None
@@ -292,6 +294,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if market is None and "market_candidates" in run["checkpoint"]:
             market = MarketResearch(competitors=tuple(Candidate.model_validate(c) for c in run["checkpoint"]["market_candidates"]),
                                     status="partial")
+        offer = (run["profile"] or run["checkpoint"].get("draft") or {}).get("offer", "")
+        market = reviewed_market(market, profile.seller_url if profile else run["checkpoint"]["seller_url"], offer)
+        records = [{**record, "source_issue": record_issue(Research.model_validate(record["research"]), strict=True)}
+                   for record in run["records"]]
         if company_name:
             matches = [match for match in matches if company_name_matches(match, company_name)]
             if run["stage"] == "website" and not matches and not error:
@@ -303,7 +309,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return RunView(id=run_id, seller_url=profile.seller_url if profile else run["checkpoint"]["seller_url"],
                        company_name=company_name, website_matches=matches,
                        status=run["status"], stage=run["stage"], profile=profile, draft=run["checkpoint"].get("draft"),
-                       records=run["records"], error=error, created_at=run["created_at"],
+                       records=records, error=error, created_at=run["created_at"],
                        updated_at=run["updated_at"], attempts=run["attempts"], credits=run.get("credits"),
                        legacy_credit_exempt=run.get("legacy_credit_exempt", False),
                        reused_offer=run["checkpoint"].get("reused_offer", False),
@@ -318,7 +324,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                        can_continue_discovery=saved_discovery_available(run), progress=RunProgress(
                            worker_online=store.worker_online(), candidates=len(run["checkpoint"].get("candidates", [])),
                            sources=len({s["id"] for pages in run["checkpoint"].get("sources", {}).values() for s in pages}),
-                           companies=len(run["records"]), events=public_events(run)))
+                           companies=sum(not record["source_issue"] for record in records), events=public_events(run)))
 
     @app.get("/api/health", response_model=Health)
     def health():

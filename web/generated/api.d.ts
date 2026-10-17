@@ -494,6 +494,20 @@ export interface components {
             kind: "description" | "location" | "team_size";
             evidence: components["schemas"]["Evidence"];
         };
+        /**
+         * CompanyIdentity
+         * @description A saved first-party identity passage, distinct from ICP qualification.
+         */
+        CompanyIdentity: {
+            /** Name */
+            name: string;
+            /** Domain */
+            domain: string;
+            /** Source Id */
+            source_id: string;
+            /** Passage */
+            passage: string;
+        };
         /** CompanySignal */
         CompanySignal: {
             /**
@@ -927,6 +941,7 @@ export interface components {
              * @default []
              */
             people: components["schemas"]["PersonObservation"][];
+            company_identity?: components["schemas"]["CompanyIdentity"] | null;
         };
         /** RetrySellerInput */
         RetrySellerInput: {
@@ -1079,6 +1094,8 @@ export interface components {
         };
         /** SavedRecord */
         SavedRecord: {
+            /** Source Issue */
+            source_issue?: string | null;
             research: components["schemas"]["Research"];
             review?: components["schemas"]["Review-Output"] | null;
             operator_review?: components["schemas"]["OperatorReview"] | null;

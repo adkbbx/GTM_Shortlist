@@ -21,6 +21,7 @@ from shortlist.domain import (
 from shortlist.email_drafts import EditEmailDraft, EmailDraft, StartEmailDraft, starting_draft
 from shortlist.fetch import domain_of
 from shortlist.progress import ProgressUpdate
+from shortlist.relevance import record_issue
 
 
 class Conflict(ValueError):
@@ -219,9 +220,9 @@ class Store:
             run_id = new_id()
             self.reserve_run(db, run_id)
             now = utcnow().isoformat()
-            db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,created_at,updated_at) "
-                       "VALUES (?,?,?,?,?,?,?,?)", (run_id, request_key, digest, profile.model_dump_json(),
-                                                   "queued", "discovery", now, now))
+            db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,checkpoint,created_at,updated_at) "
+                       "VALUES (?,?,?,?,?,?,?,?,?)", (run_id, request_key, digest, profile.model_dump_json(),
+                                                   "queued", "discovery", json.dumps({"company_identity_policy": 1}), now, now))
             self.created_run(db, run_id)
             return run_id
 
@@ -459,7 +460,7 @@ class Store:
             db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,checkpoint,created_at,updated_at) "
                        "VALUES (?,?,?,?,?,?,?,?,?)", (run_id, request_key, digest, "{}", "queued", "seller" if seller_url else "identity",
                        json.dumps({"seller_url": seller_url, "experience_version": experience_version,
-                                   "seller_output_protocol": 3,
+                                   "seller_output_protocol": 3, "company_identity_policy": 1, "market_policy": 2,
                                    **({"company_name": company_name} if company_name else {})}), now, now))
             return run_id
 
@@ -635,6 +636,8 @@ class Store:
                 raise Conflict("Provider attempt has no result journal")
 
     def save_record(self, run_id: str, fence: int, record: Research, *, billable: bool = True):
+        if issue := record_issue(record, strict=True):
+            raise Conflict("Company record withheld: " + issue)
         with self.connection() as db:
             self.begin(db)
             self._assert_lease(db, run_id, fence)

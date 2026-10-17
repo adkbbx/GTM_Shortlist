@@ -132,6 +132,25 @@ if __name__ == "__main__":
             held_runs[identity] = threading.Event()
         return {"id": identity}
 
+    @application.post("/__fixture_historical_article")
+    def historical_article():
+        from uuid import uuid4
+
+        from shortlist.providers import validate_extraction
+        draft = FixtureModel().seller(None)
+        profile = Profile(seller_url="https://seller.example/", offer=draft.offer,
+                          target=draft.target, criteria=tuple(draft.criteria))
+        with held_lock:
+            identity = store.create_run(profile, "historical-article-" + uuid4().hex)
+            fence = store.claim(identity)
+            source = fixture_fetch("https://publisher.example/blog/third-party-product", "publisher.example")
+            record = validate_extraction({"name": "Another company", "findings": []}, profile, "publisher.example", (source,))
+            with store.connection() as db:
+                db.execute("INSERT INTO records(id,run_id,domain,research) VALUES (?,?,?,?)",
+                           (record.id, identity, record.domain, record.model_dump_json()))
+            store.checkpoint(identity, fence, "review", {}, "partial")
+        return {"id": identity}
+
     @application.post("/__fixture_three_companies")
     def three_companies():
         from uuid import uuid4

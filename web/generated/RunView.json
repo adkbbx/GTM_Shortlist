@@ -170,6 +170,40 @@
       "title": "CompanyFact",
       "type": "object"
     },
+    "CompanyIdentity": {
+      "additionalProperties": false,
+      "description": "A saved first-party identity passage, distinct from ICP qualification.",
+      "properties": {
+        "name": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "domain": {
+          "title": "Domain",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "passage": {
+          "maxLength": 1500,
+          "minLength": 15,
+          "title": "Passage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "domain",
+        "source_id",
+        "passage"
+      ],
+      "title": "CompanyIdentity",
+      "type": "object"
+    },
     "CompanySignal": {
       "additionalProperties": false,
       "properties": {
@@ -933,6 +967,17 @@
           "maxItems": 3,
           "title": "People",
           "type": "array"
+        },
+        "company_identity": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CompanyIdentity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -1064,6 +1109,18 @@
     },
     "SavedRecord": {
       "properties": {
+        "source_issue": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Issue"
+        },
         "research": {
           "$ref": "#/$defs/Research"
         },

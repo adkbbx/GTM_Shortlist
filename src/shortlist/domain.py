@@ -118,6 +118,14 @@ class PersonObservation(Value):
     evidence: Evidence
 
 
+class CompanyIdentity(Value):
+    """A saved first-party identity passage, distinct from ICP qualification."""
+    name: str = Field(min_length=1, max_length=300)
+    domain: str
+    source_id: str
+    passage: str = Field(min_length=15, max_length=1500)
+
+
 class Research(Value):
     id: str = Field(default_factory=new_id)
     domain: str
@@ -132,6 +140,7 @@ class Research(Value):
     unknowns: tuple[str, ...] = ()
     company_facts: tuple[CompanyFact, ...] = Field(default=(), max_length=3)
     people: tuple[PersonObservation, ...] = Field(default=(), max_length=3)
+    company_identity: CompanyIdentity | None = Field(default=None, exclude_if=lambda value: value is None)
 
     @model_validator(mode="after")
     def unique_observations(self):

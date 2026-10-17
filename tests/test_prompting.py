@@ -20,13 +20,13 @@ TEXT = "\n".join(["Labelled fixture company", "Menu", "Close", *[f"Navigation li
 
 
 def source(text=TEXT, index=0):
-    return Source(id=f"fixture-source-{index}", url=f"https://company.example/{index}", company_domain="company.example",
+    return Source(id=f"fixture-source-{index}", url=f"https://company.example/about/{index}", company_domain="company.example",
                   title="Labelled fixture", text=text, content_hash=hashlib.sha256(text.encode()).hexdigest())
 
 
 PROFILE = Profile(seller_url="https://seller.example", offer="Acquisition research service", target="AI business software",
                   criteria=(Criterion(id="ai", description="Sells AI software for business operations"),))
-CANDIDATE = Candidate(domain="company.example", name="Labelled fixture", url="https://company.example/0",
+CANDIDATE = Candidate(domain="company.example", name="Labelled fixture", url="https://company.example/about/0",
                       provider="fixture", query="fixture")
 GOOD = {"name": "Labelled fixture", "findings": [{"status": "supported", "criterion_id": "ai", "evidence": [
     {"source_id": "fixture-source-0", "passage": EVIDENCE, "claim": "The company sells AI software"}]}]}

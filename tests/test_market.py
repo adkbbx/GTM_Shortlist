@@ -20,7 +20,7 @@ def draft():
 
 def candidates():
     return [Candidate(domain=f"competitor-{i}.example", name=f"Labelled competitor {i}",
-                      url=f"https://competitor-{i}.example/", query="fixture", provider="fixture", excerpt="Search observation.")
+                      url=f"https://competitor-{i}.example/", query="fixture", provider="fixture", excerpt="Labelled customer acquisition experiments for software businesses.")
             for i in range(18)]
 
 
@@ -123,7 +123,7 @@ def test_market_identity_and_campaign_contracts():
     with pytest.raises(ValueError):
         CampaignPlan(campaigns=(campaign_plan().campaigns[0],) * 2)
     query = competitor_query(draft().offer, "https://seller.example/")
-    assert "seller.example" in query and "Customer acquisition" in query
+    assert "seller.example" in query and "customer acquisition" in query
 
 
 def test_experience_is_immutable_under_the_same_request_key(tmp_path):

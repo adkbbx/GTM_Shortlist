@@ -1356,6 +1356,40 @@
         ],
         "title": "CompanyFact"
       },
+      "CompanyIdentity": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "domain": {
+            "type": "string",
+            "title": "Domain"
+          },
+          "source_id": {
+            "type": "string",
+            "title": "Source Id"
+          },
+          "passage": {
+            "type": "string",
+            "maxLength": 1500,
+            "minLength": 15,
+            "title": "Passage"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "domain",
+          "source_id",
+          "passage"
+        ],
+        "title": "CompanyIdentity",
+        "description": "A saved first-party identity passage, distinct from ICP qualification."
+      },
       "CompanySignal": {
         "properties": {
           "label": {
@@ -2461,6 +2495,16 @@
             "maxItems": 3,
             "title": "People",
             "default": []
+          },
+          "company_identity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompanyIdentity"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -2886,6 +2930,17 @@
       },
       "SavedRecord": {
         "properties": {
+          "source_issue": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Issue"
+          },
           "research": {
             "$ref": "#/components/schemas/Research"
           },
