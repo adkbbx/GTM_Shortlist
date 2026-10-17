@@ -10,7 +10,7 @@ test('local settings expose configuration and history identities without provide
   const { id } = await (await page.request.post('/__fixture_held_run')).json();
   const run = await (await page.request.get(`/api/runs/${id}`)).json();
   const companies = ['Acme Labs', 'Birch Systems', 'Cedar Works'];
-  await page.route('**/api/runs', route => route.fulfill({ json: companies.map((company_name, index) => ({ ...run, id: index ? `history-${index}` : id, company_name })) }));
+  await page.route('**/api/runs', route => route.fulfill({ json: companies.map((company_name, index) => ({ ...run, id: index ? `history-${index}` : id, company_name, profile: null })) }));
   let configured = false;
   await page.route('**/api/health', route => route.fulfill({ json: { mode: 'local', search_ready: configured, gemma_ready: configured, worker_online: false, local_search_error: null } }));
   mkdirSync('.impeccable/review', { recursive: true });
@@ -45,7 +45,7 @@ test('local settings expose configuration and history identities without provide
     if (info.project.name === 'laptop') await page.getByRole('button', { name: 'Hide saved runs', exact: true }).click();
     if (info.project.name === 'laptop') {
       await expect(page.locator('.saved-run-identity')).toHaveText(['AL', 'BS', 'CW']);
-      await expect(page.getByRole('button', { name: /Acme Labs,/ })).toHaveAttribute('title', /Acme Labs/);
+      await expect(page.locator('.research-sidebar')).toBeHidden();
     }
     await capture('settings-entry');
     await openSettings(page);

@@ -19,7 +19,7 @@ test('phone header has saved runs and Settings, with new research only inside a 
       const phone = width <= 850;
       const menu = page.getByRole('button', { name: 'Saved runs', exact: true });
       await expect(menu).toBeVisible({ visible: phone });
-      await expect(page.getByRole('button', { name: 'New shortlist', exact: true })).toBeVisible({ visible: !phone });
+      await expect(page.getByRole('button', { name: 'New shortlist', exact: true })).toHaveCount(0);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
       expect(await page.locator('header.topbar').evaluate(element => element.getBoundingClientRect().height)).toBe(56);
       expect(await page.evaluate(() => getComputedStyle(document.querySelector('.research-sidebar')!, '::after').content)).toBe('none');

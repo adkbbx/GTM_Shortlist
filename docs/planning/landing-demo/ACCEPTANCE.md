@@ -86,6 +86,8 @@ Build, Ruff and regenerated contracts pass. Local verification:439 backend passe
 
 ## 17 October, requested navigation replacement
 
+The later history refinement supersedes the64px collapsed rail: closed desktop history is entirely hidden and main content uses the workspace width. New shortlist moves from the desktop panel to the header beside Settings/Account, only with an open run. History uses date groups, target-first titles, company context only for mixed-company history, attention-only statuses, filled muted24px favicons and search above15 runs. These are local implementation checks, not final user or research-quality acceptance.
+
 Follow-up feedback requires phone Settings to remain a centered modal, with rounded corners, visible margins and a dimmed backdrop. Full-screen Settings was an intermediate implementation and is superseded. The drawer now includes New shortlist above saved runs and uses a same-position menu/close toggle with bounded motion. Desktop Settings stays a header popover. Local responsive, keyboard and screenshot checks are recorded in PROGRESS.md; user acceptance remains pending.
 
 The user's latest direction supersedes the labelled phone bottom actions and earlier light toolbar: one charcoal56px header, hamburger saved runs at top left, Settings/Account inside the drawer and a plain plus at top right only while viewing a run. Desktop keeps Settings available in the header before first research, using a gear and visible label matching the hosted Account chip. The local workspace label has no divider. Local screenshot/interaction verification is recorded in PROGRESS.md; this is not a claim of final user acceptance or research-quality acceptance.

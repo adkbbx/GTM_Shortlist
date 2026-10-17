@@ -12,7 +12,7 @@ test('shell reaches the viewport bottom and footer uses the remaining space', as
     for (const viewport of [{ width: 1542, height: 1290 }, { width: 1366, height: 1000 }, { width: 390, height: 1100 }]) {
       await page.setViewportSize(viewport);
       await page.goto('/');
-      await expect(page.getByRole('button', { name: viewport.width <= 850 ? 'Saved runs' : 'New shortlist', exact: true })).toBeVisible();
+      await expect(page.getByRole('button', { name: viewport.width <= 850 ? 'Saved runs' : 'Hide saved runs', exact: true })).toBeVisible();
       await page.evaluate(() => document.fonts.ready);
       const geometry = await page.evaluate(() => {
         const rect = (selector: string) => document.querySelector(selector)!.getBoundingClientRect().toJSON();
@@ -124,7 +124,10 @@ test('saved research navigation collapses and expands without changing the run',
     }
     await expect(page).toHaveURL(new RegExp(id));
     if (info.project.name === 'phone') await expect(page.getByRole('dialog')).not.toBeVisible();
-    else expect((await sidebar.boundingBox())!.width).toBe(64);
+    else {
+      await expect(sidebar).toBeHidden();
+      expect((await page.locator('.main').boundingBox())!.width).toBe((await page.locator('.workspace').boundingBox())!.width);
+    }
     mkdirSync('.impeccable/review', { recursive: true });
     await page.screenshot({ path: `.impeccable/review/${info.project.name}-sidebar-collapsed.png` });
     await expand.press('Enter');
