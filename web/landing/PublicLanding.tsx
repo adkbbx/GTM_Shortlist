@@ -19,6 +19,8 @@ const clamp01 = (t: number) => Math.max(0, Math.min(1, t));
 const smoother = (t: number) => { t = clamp01(t); return t * t * t * (t * (t * 6 - 15) + 10); };
 
 function ExampleLogo({ domain }: { domain: string }) { return <span className="pl-logo" dangerouslySetInnerHTML={{ __html: exampleMark(domain) }} />; }
+// A campaign idea is not a company, so it gets a target mark in the hypothesis colour instead of a logo.
+function IdeaMark() { return <span className="pl-logo" aria-hidden="true"><svg viewBox="0 0 24 24"><rect width="24" height="24" rx="6" fill="#f6e0d3" /><circle cx="12" cy="12" r="5.5" fill="none" stroke="#b4501c" strokeWidth="1.8" /><circle cx="12" cy="12" r="1.9" fill="#b4501c" /></svg></span>; }
 function Arrow() { return <span className="pl-arrow" aria-hidden="true">→</span>; }
 function Lock() { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" /></svg>; }
 const glyph = {
@@ -94,9 +96,9 @@ function Hero({ reduced, onStart, directoryId, iconLookup, instrumentRef }: { re
   return <section className="pl-hero" aria-labelledby="pl-hero-title">
     <div className="pl-hero-in pl-wrap">
       <div className="pl-hero-top">
-        <div><span className="pl-kicker">Company research for B2B sellers</span>
+        <div>
           <Reveal as="h1" id="pl-hero-title" reduced={reduced} lead="Find who fits." accent="Check why." br /></div>
-        <p className="pl-lede">Start with your company. GTM Shortlist checks the web against <strong>your offer</strong> and <strong>your target</strong>, and keeps only the companies it can back with <strong>the exact words on their own site</strong>.</p>
+        <p className="pl-lede">Enter your company. We find businesses that fit your offer and show <strong>the exact words on their own site</strong> that prove it.</p>
       </div>
       <div className={`pl-instrument${on ? ' on' : ''}`} ref={instrumentRef}>
         <canvas ref={canvas} aria-hidden="true" />
@@ -113,9 +115,9 @@ function Hero({ reduced, onStart, directoryId, iconLookup, instrumentRef }: { re
           <span className="pl-port" aria-hidden="true" />
         </form>
         <div className="pl-stream" ref={streamEl} aria-hidden="true">
-          {[['01', 'Offer', domain ? `Fits ${domain}` : 'Needs what you sell'], ['02', 'Target', 'Your confirmed buyers'], ['03', 'Evidence', 'Proof on their own site']].map(([n, name, sub]) =>
+          {[['01', 'Offer', domain ? `Fits ${domain}` : 'Needs what you sell'], ['02', 'Target', 'Your confirmed buyers'], ['03', 'Evidence', 'Proof on their own site']].map(([, name, sub]) =>
             <div className="pl-gate" key={name}>
-              <div className="pl-g-top"><span className="pl-g-h"><i>{n}</i>{name}</span><span className="pl-g-sub">{sub}</span></div>
+              <div className="pl-g-top"><span className="pl-g-h">{name}</span><span className="pl-g-sub">{sub}</span></div>
               <div className="pl-g-bot"><b data-kept="">0</b><span>kept of <em data-checked="">0</em></span></div>
             </div>)}
         </div>
@@ -190,8 +192,7 @@ function Story({ reduced, scrollTo }: { reduced: boolean; scrollTo: ScrollTo }) 
   return <section className="pl-story" id="how" ref={root} aria-labelledby="pl-story-title">
     <div className="pl-story-stage pl-wrap">
       <div className="pl-story-head">
-        <div><span className="pl-kicker">How it works</span><h2 className="pl-h2" id="pl-story-title">How a shortlist <span className="pl-accent">gets made.</span></h2></div>
-        <p>Six steps from your website to a shortlist you can check. You confirm the target before anything runs, and you make the final call.</p>
+        <div><h2 className="pl-h2" id="pl-story-title">How a shortlist <span className="pl-accent">gets made.</span></h2></div>
       </div>
       <nav className="pl-stepper" aria-label="Steps">
         <ol>{storySteps.map((step, i) => <li key={step} className={i === 2 || i === 5 ? 'you' : undefined}>
@@ -201,7 +202,7 @@ function Story({ reduced, scrollTo }: { reduced: boolean; scrollTo: ScrollTo }) 
       </nav>
       <div className="pl-stages">
         <article className="pl-stage">
-          <div className="pl-stage-text"><span className="pl-step-no">Step 1 of 6</span><h3>Understand your offer</h3><p>We read your website once and draft what you sell. Every word stays editable.</p></div>
+          <div className="pl-stage-text"><h3>Understand your offer</h3><p>We read your website and draft what you sell. Every word stays editable.</p></div>
           <div className="pl-card pl-ui">
             <div className="pl-ui-head"><span className="pl-label">Offer draft</span></div>
             <div className="pl-ui-row pl-fade" data-at="0"><span className="pl-mark ok">{glyph.ok}</span><div className="pl-grow"><b>Relay Studio</b><small>Homepage read once and saved</small></div></div>
@@ -211,17 +212,17 @@ function Story({ reduced, scrollTo }: { reduced: boolean; scrollTo: ScrollTo }) 
           </div>
         </article>
         <article className="pl-stage">
-          <div className="pl-stage-text"><span className="pl-step-no">Step 2 of 6</span><h3>Explore the market</h3><p>Nearby companies and campaign ideas, labelled as observations and hypotheses. Nothing is presented as fact.</p></div>
+          <div className="pl-stage-text"><h3>Explore the market</h3><p>Nearby companies and campaign ideas, marked as observations, not facts.</p></div>
           <div className="pl-card pl-ui">
             <div className="pl-ui-head"><span className="pl-label">Market</span></div>
             <div className="pl-ui-row pl-fade" data-at="0"><ExampleLogo domain="signalhouse.example" /><div className="pl-grow"><b>Signalhouse</b><small>Observation · publishes onboarding case studies</small></div><span className="pl-pill ok">Saved</span></div>
             <div className="pl-ui-row pl-fade" data-at=".2"><ExampleLogo domain="tidewater.example" /><div className="pl-grow"><b>Tidewater Labs</b><small>Observation · sells to the same buyers</small></div><span className="pl-pill ok">Saved</span></div>
             <div className="pl-ui-row pl-fade" data-at=".4"><ExampleLogo domain="pagelane.example" /><div className="pl-grow"><b>Pagelane</b><small>Page could not be read</small></div><span className="pl-pill fail">Failed</span></div>
-            <div className="pl-ui-row pl-fade pl-last" data-at=".6"><span className="pl-ini">H1</span><div className="pl-grow"><b>Time-to-value audit</b><small>Campaign idea · mid-size SaaS with self-serve signup</small></div><span className="pl-pill hyp">Hypothesis</span></div>
+            <div className="pl-ui-row pl-fade pl-last" data-at=".6"><IdeaMark /><div className="pl-grow"><b>Time-to-value audit</b><small>Campaign idea · mid-size SaaS with self-serve signup</small></div><span className="pl-pill hyp">Hypothesis</span></div>
           </div>
         </article>
         <article className="pl-stage">
-          <div className="pl-stage-text"><span className="pl-step-no">Step 3 of 6 · You decide</span><h3>Confirm the target</h3><p>No company search runs until you confirm who you want to reach and what counts as evidence.</p></div>
+          <div className="pl-stage-text"><h3>Confirm the target</h3><p>Nothing is searched until you confirm who to look for.</p></div>
           <div className="pl-card pl-ui">
             <div className="pl-ui-head"><span className="pl-label">Your target</span><span className="pl-pill you">Needs you</span></div>
             <ul className="pl-criteria"><li>B2B software teams with an onboarding product or flow</li><li>A company-owned page that describes that product</li><li>Exclude directories and consumer-only products</li></ul>
@@ -229,7 +230,7 @@ function Story({ reduced, scrollTo }: { reduced: boolean; scrollTo: ScrollTo }) 
           </div>
         </article>
         <article className="pl-stage">
-          <div className="pl-stage-text"><span className="pl-step-no">Step 4 of 6</span><h3>Discover companies</h3><p>Candidates are checked against your confirmed criteria. Only the ones that pass are researched, and nothing is padded to look busy.</p></div>
+          <div className="pl-stage-text"><h3>Discover companies</h3><p>Candidates are checked against your criteria. Only real fits move on.</p></div>
           <div className="pl-card pl-ui pl-discover">
             <div className="pl-ui-head"><span className="pl-label">Candidates</span></div>
             <div className="pl-ui-row pl-fade" data-at="0" data-done=".25" data-kind="ok"><span className="pl-mark work" /><ExampleLogo domain="northstar.example" /><div className="pl-grow"><b>Northstar Cloud</b><small>Onboarding product page found</small></div><span className="pl-pill ok pl-show">Fits</span></div>
@@ -239,7 +240,7 @@ function Story({ reduced, scrollTo }: { reduced: boolean; scrollTo: ScrollTo }) 
           </div>
         </article>
         <article className="pl-stage">
-          <div className="pl-stage-text"><span className="pl-step-no">Step 5 of 6</span><h3>Inspect the evidence</h3><p>Every claim opens to the exact words on the company's own page. What we could not find stays marked as unknown.</p></div>
+          <div className="pl-stage-text"><h3>Inspect the evidence</h3><p>Every claim links to the exact words on the company's own site.</p></div>
           <div className="pl-card pl-ui">
             <div className="pl-ui-head"><span className="pl-label">Finding</span><span className="pl-pill ok pl-show" data-part="supported">Supported in source</span></div>
             <div className="pl-ui-block"><b>Northstar Cloud offers a B2B onboarding product</b></div>
@@ -250,7 +251,7 @@ function Story({ reduced, scrollTo }: { reduced: boolean; scrollTo: ScrollTo }) 
           </div>
         </article>
         <article className="pl-stage">
-          <div className="pl-stage-text"><span className="pl-step-no">Step 6 of 6 · You decide</span><h3>Make the call</h3><p>Fit is an assessment, not buying intent. Accepting a company is your decision, saved separately from the model's.</p></div>
+          <div className="pl-stage-text"><h3>Make the call</h3><p>Fit is our assessment. The decision is always yours.</p></div>
           <div className="pl-card pl-ui">
             <div className="pl-ui-head"><span className="pl-label">Your review</span></div>
             <div className="pl-ui-block"><b>Northstar Cloud</b><p className="pl-src">Evidence: describes a business onboarding product. Unknown: budget ownership.</p></div>
@@ -303,8 +304,8 @@ function Evidence({ reduced }: { reduced: boolean }) {
   return <section className={`pl-section pl-ev${on ? ' on' : ''}`} id="evidence" aria-labelledby="pl-ev-title">
     <div className="pl-wrap">
       <div className="pl-section-head">
-        <div><span className="pl-kicker">Evidence</span><Reveal id="pl-ev-title" className="pl-h2" reduced={reduced} lead="Every row opens to" accent="its sources." /></div>
-        <p>Claims are tied to the exact words on the company's own pages, with the page and the date it was read. Unknowns stay visible, so you know what still needs a conversation.</p>
+        <div><Reveal id="pl-ev-title" className="pl-h2" reduced={reduced} lead="Every row opens to" accent="its sources." /></div>
+        <p>Every claim points to the exact words on the company's own site. Unknowns stay visible.</p>
       </div>
       <div className="pl-ev-grid" ref={grid}>
         <div>
@@ -371,9 +372,8 @@ function Closing({ reduced, onStart }: { reduced: boolean; onStart: (company: st
   };
   return <section className="pl-closing" aria-labelledby="pl-closing-title">
     <div className="pl-wrap pl-closing-in">
-      <span className="pl-kicker">Start with your company</span>
+      
       <Reveal id="pl-closing-title" reduced={reduced} lead="Find who fits." accent="Check why." br />
-      <p>Enter your company. You confirm the target, then every company that reaches your shortlist comes with its sources.</p>
       <form onSubmit={submit} autoComplete="off" noValidate>
         <div className={`pl-field${shake % 2 ? ' shake' : shake ? ' shake-b' : ''}`}><input ref={field} aria-label="Company name or website" placeholder="yourcompany.com" spellCheck={false} autoCapitalize="off" maxLength={300} value={company} onChange={event => setCompany(event.target.value)} /></div>
         <button className="pl-btn pl-btn-primary" type="submit">Start research <Arrow /></button>
@@ -415,8 +415,8 @@ export function PublicLanding({ onStart, onSignIn, directoryId, iconLookup = fal
       <Evidence reduced={reduced} />
       <section className="pl-section" id="live" aria-labelledby="pl-live-title">
         <div className="pl-wrap pl-live">
-          <div><span className="pl-kicker">While it runs</span><Reveal id="pl-live-title" className="pl-h2" reduced={reduced} lead="Watch the work," accent="not a spinner." />
-            <p>Every search, page read and check is saved as it happens. You see what passed, what failed and why, with real timestamps. No made-up percentages, and you can leave the page at any time.</p>
+          <div><Reveal id="pl-live-title" className="pl-h2" reduced={reduced} lead="Watch the work," accent="not a spinner." />
+            <p>See every search, page read and check as it happens, including what failed and why. Leave any time; the run keeps going.</p>
             <a className="pl-btn pl-btn-ghost" href="?demo=1">Try the interactive demo <Arrow /></a></div>
           <Checkpoints reduced={reduced} />
         </div>
@@ -424,8 +424,7 @@ export function PublicLanding({ onStart, onSignIn, directoryId, iconLookup = fal
       <section className="pl-section" id="open" aria-labelledby="pl-open-title">
         <div className="pl-wrap">
           <div className="pl-section-head">
-            <div><span className="pl-kicker">Two ways to run it</span><Reveal id="pl-open-title" className="pl-h2" reduced={reduced} lead="Open source core." accent="Hosted if you want it." /></div>
-            <p>The research engine is open source. Run it with your own keys, or use the hosted version and keep your research in an account.</p>
+            <div><Reveal id="pl-open-title" className="pl-h2" reduced={reduced} lead="Open source core." accent="Hosted if you want it." /></div>
           </div>
           <div className="pl-duo">
             <div className="pl-card"><span className="pl-label">Open source</span><h3>Run it yourself</h3><ul><li>MIT-licensed web app, API and worker</li><li>Your own search and model keys</li><li>Research stays in your own database</li></ul><a className="pl-btn pl-btn-ghost" href={sourceCodeUrl} target="_blank" rel="noreferrer">Read the setup guide <Arrow /></a></div>

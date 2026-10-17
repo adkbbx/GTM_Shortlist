@@ -40,6 +40,16 @@ function Arrow() {
   return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6" stroke="currentColor" strokeWidth="1.5" /></svg>;
 }
 
+type TargetPart = 'offer' | 'target' | 'criteria' | 'exclusions';
+const targetFields: { [part in TargetPart]: string } = { offer: 'offer', target: 'target', criteria: 'criterion-0', exclusions: 'exclusions' };
+
+/** One part of the target: readable text with an Edit button, or its fields once edited or when it needs input. */
+function TargetPartView({ title, editLabel, editing, onEdit, review, children }: { title: string; editLabel: string; editing: boolean; onEdit: () => void; review: ReactNode; children: ReactNode }) {
+  return <div className={`target-part${editing ? ' is-editing' : ''}`}>
+    {editing ? children : <><div className="target-part-head"><h3>{title}</h3><button type="button" className="text-button" aria-label={editLabel} onClick={onEdit}>Edit</button></div>{review}</>}
+  </div>;
+}
+
 function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & { seller_url: string }; wallet: Wallet | null; hostedAccount: boolean; onSaved: (run: Run) => void }) {
   const [offer, setOffer] = useState(run.draft?.offer ?? '');
   const [target, setTarget] = useState(run.draft?.target ?? '');
@@ -50,6 +60,17 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
   const [companyLimit, setCompanyLimit] = useState(3);
   const [campaignName, setCampaignName] = useState<string | null>(run.campaign_name ?? null);
   const [discoveryTerms, setDiscoveryTerms] = useState(run.discovery_terms ?? run.draft?.target.slice(0, 300) ?? '');
+  // Review first: drafted parts read as text. A part opens for editing when chosen, or when it needs the person's input.
+  const [editing, setEditing] = useState<{ [part in TargetPart]: boolean }>(() => {
+    const drafted = run.draft?.criteria ?? [];
+    return { offer: !run.draft?.offer.trim(), target: !run.draft?.target.trim(),
+      criteria: !drafted.length || drafted.some(item => !item.description.trim()) || Boolean(run.draft?.criteria_issues?.length),
+      exclusions: Boolean(run.draft_exclusions?.length) };
+  });
+  const edit = (...parts: TargetPart[]) => {
+    setEditing(old => ({ ...old, ...Object.fromEntries(parts.map(part => [part, true])) }));
+    window.requestAnimationFrame(() => document.getElementById(targetFields[parts[0]])?.focus());
+  };
   const available = run.legacy_credit_exempt ? 3 : wallet?.available ?? 3;
   useEffect(() => { if (wallet?.mode === 'hosted' && available > 0) setCompanyLimit(old => Math.min(old, available)); }, [available, wallet?.mode]);
   const submit = async (event: FormEvent) => {
@@ -62,20 +83,22 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
   };
   return <section className="sheet confirmation" aria-labelledby="confirm-heading">
     <div className="sheet-heading"><h2 id="confirm-heading">Confirm what a good fit means</h2><span className="step-label">Your target</span></div>
-    <p className="intro">Edit the offer and criteria before discovery. This version stays attached to the research it produces.</p>
-    {run.market && <details className="confirmation-context"><summary>Explore campaign ideas and source context</summary><MarketOverview run={run} selected={campaignName} onChoose={campaign => {
-      setCampaignName(campaign.name); setTarget(campaign.target); setCriteria(campaign.criteria);
-      setDiscoveryTerms(campaign.search_terms || run.draft?.target.slice(0, 300) || '');
-    }} /></details>}
+    <p className="intro">Drafted from <a href={run.seller_url} target="_blank" rel="noopener noreferrer">{new URL(run.seller_url).hostname}</a>. Check it, edit anything that is off, then start discovery.</p>
     {run.reused_offer && <p className="notice">Copied from your saved offer. Review it and choose the maximum cost before starting. New research may return companies from earlier batches.</p>}
     {run.error && <div className="notice" role="status">{run.error}</div>}
-    <p className="website">Seller website <a href={run.seller_url} target="_blank" rel="noopener noreferrer">{run.seller_url}</a></p>
     <form onSubmit={submit}>
-      <label htmlFor="offer">What do you sell?</label>
-      <textarea id="offer" required minLength={10} maxLength={4000} rows={4} value={offer} onChange={e => setOffer(e.target.value)} />
-      <label htmlFor="target">Who should we look for?</label>
-      <textarea id="target" required minLength={5} maxLength={2000} rows={2} value={target} onChange={e => setTarget(e.target.value)} />
-      {campaignName && <><label htmlFor="discovery-terms">Search keywords</label><input id="discovery-terms" required minLength={5} maxLength={300} value={discoveryTerms} onChange={e => setDiscoveryTerms(e.target.value)} aria-describedby="discovery-help" /><p id="discovery-help" className="hint">Observable company terms, such as industry, product and public announcements. Private performance assumptions belong in hypotheses.</p></>}
+      <TargetPartView title="What you sell" editLabel="Edit what you sell" editing={editing.offer} onEdit={() => edit('offer')} review={<p className="target-text">{offer}</p>}>
+        <label htmlFor="offer">What do you sell?</label>
+        <textarea id="offer" required minLength={10} maxLength={4000} rows={4} value={offer} onChange={e => setOffer(e.target.value)} />
+      </TargetPartView>
+      <TargetPartView title="Who to look for" editLabel="Edit who to look for" editing={editing.target} onEdit={() => edit('target')}
+        review={<><p className="target-text">{target}</p>{campaignName && <p className="hint">Campaign: {campaignName} · Search keywords: {discoveryTerms}</p>}</>}>
+        <label htmlFor="target">Who should we look for?</label>
+        <textarea id="target" required minLength={5} maxLength={2000} rows={2} value={target} onChange={e => setTarget(e.target.value)} />
+        {campaignName && <><label htmlFor="discovery-terms">Search keywords</label><input id="discovery-terms" required minLength={5} maxLength={300} value={discoveryTerms} onChange={e => setDiscoveryTerms(e.target.value)} aria-describedby="discovery-help" /><p id="discovery-help" className="hint">Observable company terms, such as industry, product and public announcements. Private performance assumptions belong in hypotheses.</p></>}
+      </TargetPartView>
+      <TargetPartView title="Fit checks" editLabel="Edit fit checks" editing={editing.criteria} onEdit={() => edit('criteria')}
+        review={<ul className="target-checks">{criteria.map(criterion => <li key={criterion.id}><span>{criterion.description}</span><span className="target-check-kind">{criterion.required ? 'Required' : 'Nice to have'}</span></li>)}</ul>}>
       <fieldset><legend>Fit criteria</legend><p className="hint">These checks guide company research and determine fit with your target customer. Use observable characteristics, such as industry or customers served. Required checks need supporting evidence; missing evidence stays unknown.</p>
         {!!run.draft?.criteria_issues?.length && <div className="notice" role="status"><p>Unsupported suggestions were removed. {run.draft.criteria.length ? 'Review the remaining criteria before confirming.' : 'Add at least one observable customer characteristic before confirming.'} Your offer summary is kept for editing.</p><details><summary>Review {run.draft.criteria_issues.length} removed {run.draft.criteria_issues.length === 1 ? 'suggestion' : 'suggestions'}</summary><ul>{run.draft.criteria_issues.map((issue, index) => <li key={index}><p>{issue.description}</p><p className="hint">{issue.reason}</p></li>)}</ul></details></div>}
         {criteria.map((criterion, index) => <div className="criterion-input" key={criterion.id}>
@@ -88,9 +111,18 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
         </div>)}
         <button type="button" className="secondary" disabled={criteria.length >= 12} onClick={() => setCriteria([...criteria, { id: crypto.randomUUID(), description: '', required: true }])}>Add a criterion</button>
       </fieldset>
-      <label htmlFor="exclusions">Exclude from consideration <span className="optional">Optional, one per line</span></label>
-      <textarea id="exclusions" value={exclusions} rows={2} maxLength={6012} onChange={e => setExclusions(e.target.value)} aria-describedby="exclusions-help" />
-      <p id="exclusions-help" className="hint">Up to 12 conditions, 3–500 characters each. Each needs evidence; an unverified exclusion stays unknown.</p>
+      </TargetPartView>
+      {editing.exclusions && <div className="target-part is-editing"><label htmlFor="exclusions">Exclude from consideration <span className="optional">Optional, one per line</span></label>
+        <textarea id="exclusions" value={exclusions} rows={2} maxLength={6012} onChange={e => setExclusions(e.target.value)} aria-describedby="exclusions-help" />
+        <p id="exclusions-help" className="hint">Up to 12 conditions, 3–500 characters each. Each needs evidence; an unverified exclusion stays unknown.</p></div>}
+      {(!editing.exclusions || run.market) && <div className="target-optional">
+        {!editing.exclusions && <button type="button" className="text-button" onClick={() => edit('exclusions')}>Add exclusions</button>}
+        {run.market && <details className="confirmation-context"><summary>Explore campaign ideas and source context</summary><MarketOverview run={run} selected={campaignName} onChoose={campaign => {
+          setCampaignName(campaign.name); setTarget(campaign.target); setCriteria(campaign.criteria);
+          setDiscoveryTerms(campaign.search_terms || run.draft?.target.slice(0, 300) || '');
+          setEditing(old => ({ ...old, target: true, criteria: true }));
+        }} /></details>}
+      </div>}
       {run.draft?.unknowns.length ? <div className="unknowns"><h3>Still needs review</h3><ul>{run.draft.unknowns.map(u => <li key={u}>{u}</li>)}</ul></div> : null}
       {hostedAccount && wallet === null && <p className="notice" role="status">Your credit balance must load before you can confirm the batch cost. Reload the workspace to retry.</p>}
       {wallet?.mode === 'hosted' && <section className="batch-choice"><label htmlFor="company-limit">Companies in this batch</label><select id="company-limit" value={companyLimit} onChange={event => setCompanyLimit(Number(event.target.value))}>{[1, 2, 3].map(quantity => <option key={quantity} value={quantity} disabled={quantity > available}>{quantity} {quantity === 1 ? 'company' : 'companies'}</option>)}</select><p>{run.legacy_credit_exempt ? 'Your original demo allowance is preserved.' : `Maximum ${companyLimit} ${companyLimit === 1 ? 'credit' : 'credits'} · ${wallet.available} available`}</p><p className="hint">Completed unknown or non-fit research counts. Credits for technical failures are returned. Review and export are free.</p>{available === 0 && <p className="notice">No research credits available. Saved research stays accessible. Credit purchases are not available yet.</p>}</section>}
@@ -374,8 +406,8 @@ function App({ account, identity }: { account: ReactNode; identity: string }) {
       {active?.can_retry_seller && <RetrySeller key={`retry-${active.id}`} run={active} onSaved={websiteChosen} />}
       {active?.can_continue_discovery && <ContinueDiscovery key={`continue-${active.id}`} run={active} onSaved={websiteChosen} />}
       {!active && !handingOver && <LandingDemo><section className="sheet start-sheet" aria-labelledby="start-heading"><h2 id="start-heading" className="sr-only">Start your company research</h2><form onSubmit={start}><label htmlFor="website">Company name or website</label><div className="website-form"><CompanySearch value={website} onChange={value => { setWebsite(value); requestKey.current = crypto.randomUUID(); }} clientId={brandfetchClientId} disabled={saving} /><button disabled={saving || loading || Boolean(previewWorkspace)} aria-busy={saving} type="submit">{saving ? 'Starting research…' : 'Start research'}<Arrow /></button></div></form><p className="hint">Up to three companies. You confirm the target before discovery.</p>{!previewWorkspace && health?.mode === 'local' && !health.search_ready && <p className="local-setup-prompt">Local company search needs setup. <button type="button" className="text-button" onClick={() => openWorkspacePanel('local-settings')}>Open Settings</button></p>}</section></LandingDemo>}
-      {active && <ResearchProgress key={active.id} run={active} connected={!error} localResearch={health?.mode === 'local' && !previewWorkspace} />}{active && ['queued', 'running', 'awaiting_confirmation'].includes(active.status) && <ResearchStop key={`stop-${active.id}`} run={active} onStopped={stopped} />}{active?.credits && <p className="batch-credit-summary" role="status">{active.credits.used} {active.credits.used === 1 ? 'credit' : 'credits'} used · {active.credits.reserved} reserved · {active.credits.returned} returned</p>}
-      {active && !pending && !active.termination && !active.seller_url && <WebsiteChoice key={`website-${active.id}`} run={active} onSaved={websiteChosen} />}{active?.status === 'awaiting_confirmation' && active.seller_url && <>{health && !health.search_ready && <p className="notice">Company search is not configured. Your target can be saved; configure search before discovery.</p>}<ConfirmationForm key={`offer-${active.id}`} run={{ ...active, seller_url: active.seller_url }} wallet={wallet} hostedAccount={account != null} onSaved={saved} /></>}
+      {active && <ResearchProgress key={active.id} run={active} connected={!error} localResearch={health?.mode === 'local' && !previewWorkspace} />}{active && ['queued', 'running'].includes(active.status) && <ResearchStop key={`stop-${active.id}`} run={active} onStopped={stopped} />}{active?.credits && <p className="batch-credit-summary" role="status">{active.credits.used} {active.credits.used === 1 ? 'credit' : 'credits'} used · {active.credits.reserved} reserved · {active.credits.returned} returned</p>}
+      {active && !pending && !active.termination && !active.seller_url && <WebsiteChoice key={`website-${active.id}`} run={active} onSaved={websiteChosen} />}{active?.status === 'awaiting_confirmation' && active.seller_url && <>{health && !health.search_ready && <p className="notice">Company search is not configured. Your target can be saved; configure search before discovery.</p>}<ConfirmationForm key={`offer-${active.id}`} run={{ ...active, seller_url: active.seller_url }} wallet={wallet} hostedAccount={account != null} onSaved={saved} /></>}{active?.status === 'awaiting_confirmation' && <ResearchStop key={`stop-${active.id}`} run={active} onStopped={stopped} />}
       {results && <><div className="results-toolbar"><div><h2>{eligibleRecords.length} {eligibleRecords.length === 1 ? 'company' : 'companies'} researched</h2><p>{active.status === 'partial' ? 'Some questions remain open. Review the unknowns before using these records.' : 'Model assessments are ready for your review.'}</p></div>{!!active.records.length && <div className="export-controls"><label className="checkbox-label"><input type="checkbox" checked={acceptedOnly} onChange={e => setAcceptedOnly(e.target.checked)} />Accepted only</label><div className="export-links">{(['xlsx', 'csv', 'json'] as const).map(format => <a className="secondary button-link" key={format} href={`/api/runs/${active.id}/export?format=${format}&accepted_only=${acceptedOnly}`} onClick={event => { event.preventDefault(); void api.download(active.id, format, acceptedOnly).catch(reason => setError(describeError(reason))); }}>Export {format === 'xlsx' ? 'Excel' : format.toUpperCase()}</a>)}</div></div>}</div>
         {active.error && <p className="notice" role="status">{active.error}</p>}
         {!!withheldRecords.length && <section className="notice" aria-label="Excluded saved sources"><h3>{withheldRecords.length} saved {withheldRecords.length === 1 ? "source" : "sources"} excluded from the shortlist</h3><p>These historical entries do not establish an official company. Original evidence is preserved in research history and JSON export.</p><ul>{withheldRecords.map(record => <li key={record.research.id}>{record.research.domain}: {record.source_issue}</li>)}</ul></section>}

@@ -141,3 +141,24 @@ header.topbar .brand>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
 
 /* Landing handoff: research is starting from the company typed on the public landing page. */
 .handoff-status{display:flex;align-items:center;gap:.625rem;margin-top:1.25rem;font-weight:600;color:var(--ink)}
+
+/* Target confirmation, review first: each part reads as text with an Edit button until it is edited or needs input. */
+.confirmation .target-part{padding:1.125rem 0;border-top:1px solid var(--line)}
+.confirmation .target-part.is-editing{padding-bottom:.5rem}
+.confirmation .target-part-head{display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.confirmation .target-part-head h3{font-size:.75rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.confirmation .target-part-head .text-button{min-height:2.75rem;padding:.25rem .5rem;margin:-.75rem -.5rem -.75rem 0}
+.confirmation .target-text{margin-top:.375rem;max-width:62ch;font-size:1.0625rem;line-height:1.55;color:var(--ink);overflow-wrap:anywhere}
+.confirmation .target-checks{display:grid;gap:.5rem;margin:.5rem 0 0;padding:0;list-style:none}
+.confirmation .target-checks li{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;font-size:.9375rem;overflow-wrap:anywhere}
+.confirmation .target-checks li::before{content:"";flex:none;width:.5rem;height:.5rem;border:1.5px solid var(--orange);transform:translateY(-.0625rem)}
+.confirmation .target-checks li>span:first-child{flex:1}
+.confirmation .target-check-kind{flex:none;font-size:.75rem;color:var(--muted)}
+.confirmation .target-optional{display:flex;flex-wrap:wrap;align-items:center;gap:.25rem 1.5rem;padding:.5rem 0;border-top:1px solid var(--line)}
+.confirmation .target-optional .confirmation-context{margin:0;border:0}
+.confirmation .target-optional .confirmation-context>summary{display:flex;align-items:center;min-height:2.75rem}
+.confirmation .target-optional .confirmation-context[open]{flex-basis:100%;padding-bottom:1rem}
+/* The decision stays in view: the action bar sticks to the bottom of the screen while the card is taller than it. */
+.confirmation .form-footer{position:sticky;bottom:0;z-index:2;margin-top:0;padding:1rem 0;background:var(--surface,#fff);box-shadow:0 -1px 0 var(--line)}
+.confirmation :is(input,textarea,select,summary){scroll-margin-bottom:7rem}
+@media(max-width:700px){.confirmation .form-footer{gap:.5rem;padding:.75rem 0}.confirmation .form-footer p{font-size:.8125rem}.confirmation :is(input,textarea,select,summary){scroll-margin-bottom:9rem}}

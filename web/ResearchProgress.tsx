@@ -81,7 +81,8 @@ export function ResearchProgress({ run, connected = true, localResearch = false 
     ? offer ? 'Offer draft saved. Your confirmation is next.' : 'Offer summary unavailable. Enter your offer and target.'
     : current === 5 ? `${companyCount} ${companyCount === 1 ? 'company' : 'companies'} saved for your review`
       : currentState;
-  return <details className="research-recap" open={run.status === 'awaiting_confirmation' || run.status === 'partial' || viewedStage !== null}><summary><span>{handoff}</span><span>View research history</span></summary>{sheet}</details>;
+  // While the target waits for confirmation the history stays folded, so the decision is the first thing on the page.
+  return <details className="research-recap" open={run.status === 'partial' || viewedStage !== null}><summary><span>{handoff}</span><span>View research history</span></summary>{sheet}</details>;
 }
 
 function SavedStage({ run, stage }: { run: Run; stage: number }) {

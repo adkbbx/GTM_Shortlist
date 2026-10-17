@@ -531,7 +531,7 @@ test('seller field accepts domains and full HTTPS URLs', async ({ page }, info) 
     expect((await response.json()).seller_url).toBe('https://eygentic.com/');
     await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
     await expect(page.getByRole('button', { name: /Eygentic brief/ })).toHaveCount(0);
-    await expect(page.getByLabel('What do you sell?')).toHaveValue('Test fixture: customer acquisition experiments for software businesses');
+    await expect(page.locator('.confirmation .target-text').first()).toHaveText('Test fixture: customer acquisition experiments for software businesses');
     await noOverflow(page);
   }
   await capture(page, `.impeccable/review/${info.project.name}-domain-input-confirmation.png`);
@@ -561,7 +561,7 @@ test(`company name ${company} waits for website choice, retries and survives rel
   await expect(page.getByRole('alert')).toHaveText('Labelled website save failure');
   await page.getByRole('button', { name: 'Use example-1.com', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
-  await expect(page.getByLabel('What do you sell?')).not.toHaveValue('');
+  await expect(page.locator('.confirmation .target-text').first()).not.toBeEmpty();
   const saved = await (await page.request.get(`/api/runs/${run.id}`)).json();
   expect(saved.seller_url).toBe('https://example-1.com/');
   expect(saved.attempts.filter((attempt: { kind: string }) => attempt.kind === 'search')).toHaveLength(2);
@@ -602,11 +602,17 @@ test('saved seller → confirmation → evidence → review → export survives 
   await page.getByLabel('Company name or website', { exact: true }).fill('https://eygentic.com/');
   await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
-  await expect(page.locator('.research-recap')).toHaveAttribute('open');
+  // The history stays folded and the drafted target reads as text until a part is edited.
+  await expect(page.locator('.research-recap')).not.toHaveAttribute('open');
   await expect(page.locator('.confirmation-context')).not.toHaveAttribute('open');
-  await expect(page.locator('.real-research')).toBeVisible();
+  await expect(page.locator('.real-research')).toBeHidden();
+  await expect(page.getByLabel('What do you sell?')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Edit what you sell' }).click();
+  await expect(page.getByLabel('What do you sell?')).toBeFocused();
   await page.getByLabel('What do you sell?').fill('Test fixture edited offer: acquisition experiments for software businesses');
+  await page.getByRole('button', { name: 'Add exclusions' }).click();
   await page.getByLabel('Exclude from consideration').fill('Companies headquartered in Canada\nPublicly listed companies');
+  await page.getByRole('button', { name: 'Edit fit checks' }).click();
   const required = page.getByRole('checkbox', { name: 'Required', exact: true }).first();
   const control = await required.evaluate(element => ({
     width: element.getBoundingClientRect().width, height: element.getBoundingClientRect().height,

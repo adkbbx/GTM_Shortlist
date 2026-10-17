@@ -314,6 +314,7 @@ test('reuse offer skips profiling, preserves edits and quotes a separately charg
   await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByLabel('Companies in this batch')).toBeVisible({ timeout: 15000 });
   await page.getByLabel('Companies in this batch').selectOption('1');
+  await page.getByRole('button', { name: 'Add exclusions' }).click();
   await page.getByLabel('Exclude from consideration', { exact: false }).fill('Publicly listed companies');
   await page.getByRole('button', { name: 'Confirm target and discover' }).click();
   await expect(page.getByRole('heading', { name: '1 company researched' })).toBeVisible({ timeout: 15000 });

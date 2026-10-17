@@ -10,10 +10,11 @@ for (const keepValid of [false, true]) {
       if (request.url().includes('/api/') && request.method() !== 'GET') mutations.push(request.url());
     });
     await page.goto(`/?run=${id}`);
-    const offer = page.getByLabel('What do you sell?', { exact: true });
-    await expect(offer).toHaveValue(before.draft.offer);
-    await expect(page.getByLabel('Who should we look for?')).toHaveValue(before.draft.target);
     const form = page.getByRole('region', { name: 'Confirm what a good fit means' });
+    // A usable offer and target read as text; only the criteria that need attention open for editing.
+    const offer = form.locator('.target-text').first();
+    await expect(offer).toHaveText(before.draft.offer);
+    await expect(form.locator('.target-text').nth(1)).toHaveText(before.draft.target);
     await expect(form).toContainText('No new model call was made.');
     const criteria = form.locator('fieldset').filter({ has: page.locator('legend', { hasText: 'Fit criteria' }) });
     await expect(criteria).toContainText('These checks guide company research and determine fit');
@@ -24,7 +25,7 @@ for (const keepValid of [false, true]) {
     await expect(criteria).toContainText('Requires sophisticated data analysis');
     await expect(criteria).toContainText('Assumes internal needs or performance');
     await page.reload();
-    await expect(offer).toHaveValue(before.draft.offer);
+    await expect(offer).toHaveText(before.draft.offer);
     await expect(criterion).toHaveValue(keepValid ? 'Sells consumer products through an online store' : '');
     if (!keepValid) {
       await page.getByRole('button', { name: 'Confirm target and discover' }).click();
