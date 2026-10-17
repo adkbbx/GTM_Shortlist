@@ -381,6 +381,6 @@ function App({ account, identity }: { account: ReactNode; identity: string }) {
 const root = document.getElementById('root');
 if (!root) throw new Error('Application root is missing');
 // ?landing=1 previews the hosted landing page in any mode; its Start research hands the company to this workspace.
-const LandingPreview = lazy(() => import('./landing/PublicLanding').then(module => ({ default: () => <module.PublicLanding directoryId={savedBrandfetchId() ?? configuredDirectoryId()} onSignIn={() => window.location.assign('/?auth=signin')} onStart={company => { keepCompany(company); window.location.assign('/'); }} /> })));
+const LandingPreview = lazy(() => import('./landing/PublicLanding').then(module => ({ default: () => <module.PublicLanding directoryId={savedBrandfetchId() ?? configuredDirectoryId()} iconLookup onSignIn={() => window.location.assign('/?auth=signin')} onStart={company => { keepCompany(company); window.location.assign('/'); }} /> })));
 const params = new URLSearchParams(window.location.search);
 createRoot(root).render(<StrictMode>{params.get('demo') === '1' ? <DemoPage /> : params.get('landing') === '1' ? <Suspense fallback={null}><LandingPreview /></Suspense> : <AuthGate workspace={(identity, account) => <App key={identity} identity={identity} account={account} />} />}</StrictMode>);

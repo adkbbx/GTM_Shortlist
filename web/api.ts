@@ -95,14 +95,21 @@ async function researchCommand(path: string, input: unknown): Promise<Run> {
   return run;
 }
 
+function iconUrl(data: unknown) {
+  if (!isSiteIcon(data)) throw new Error('The site icon response was unreadable.');
+  if (!data.url) return null;
+  const url = new URL(data.url);
+  if (url.protocol !== 'https:' || url.username || url.password || (url.port && url.port !== '443')) return null;
+  return url.href;
+}
+
 export const api = {
   async siteIcon(runId: string, domain: string) {
-    const data = await request(`/api/runs/${encodeURIComponent(runId)}/site-icon/${encodeURIComponent(domain)}`);
-    if (!isSiteIcon(data)) throw new Error('The site icon response was unreadable.');
-    if (!data.url) return null;
-    const url = new URL(data.url);
-    if (url.protocol !== 'https:' || url.username || url.password || (url.port && url.port !== '443')) return null;
-    return url.href;
+    return iconUrl(await request(`/api/runs/${encodeURIComponent(runId)}/site-icon/${encodeURIComponent(domain)}`));
+  },
+  /** A suggested company's declared icon, for when the directory has no logo. Signed-in and local workspaces only. */
+  async suggestionIcon(domain: string) {
+    return iconUrl(await request(`/api/site-icon/${encodeURIComponent(domain)}`));
   },
   async availableModels(input: paths['/api/local/model/models']['post']['requestBody']['content']['application/json']) {
     const data = await request('/api/local/model/models', input);

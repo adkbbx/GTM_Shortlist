@@ -7,8 +7,10 @@ import './CompanySearch.css';
 
 type Lookup = { kind: 'idle' } | { kind: 'loading'; query: string } | { kind: 'loaded'; query: string; items: CompanySuggestion[] } | { kind: 'error'; query: string; message: string };
 
-export function CompanySearch({ value, onChange, clientId, disabled, label = 'Company name or website', placeholder = 'Company name or example.com' }: {
+export function CompanySearch({ value, onChange, clientId, disabled, label = 'Company name or website', placeholder = 'Company name or example.com', iconLookup = true }: {
   value: string; onChange: (value: string) => void; clientId: string; disabled: boolean; label?: string; placeholder?: string;
+  /** Look up a suggestion's own declared icon when the directory has no logo (needs a signed-in or local workspace). */
+  iconLookup?: boolean;
 }) {
   const [focused, setFocused] = useState(false);
   const [picked, setPicked] = useState<string | null>(null);
@@ -40,7 +42,7 @@ export function CompanySearch({ value, onChange, clientId, disabled, label = 'Co
       <p className="company-suggestions-source">Company suggestions</p>
       <ListBox<CompanySuggestion> aria-label="Company suggestions" className="company-suggestions-list" data-lenis-prevent="" renderEmptyState={() => <p className="suggestions-empty" role="status">{message}</p>}>
         {company => <ListBoxItem id={company.domain} textValue={company.domain} className="company-suggestion">
-          <SiteIcon key={`${company.domain}:${company.icon ?? ''}`} domain={company.domain} icon={company.icon} fallback={company.name.slice(0, 1).toUpperCase()} className="suggestion-icon" />
+          <SiteIcon key={`${company.domain}:${company.icon ?? ''}`} domain={company.domain} icon={company.icon} lookup={iconLookup} fallback={company.name.slice(0, 1).toUpperCase()} className="suggestion-icon" />
           <span className="suggestion-copy"><Text slot="label">{company.name}</Text></span>
           <span className="suggestion-domain">{company.domain}</span>
         </ListBoxItem>}

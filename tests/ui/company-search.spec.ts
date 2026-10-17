@@ -79,6 +79,20 @@ test('new company suggestions support keyboard selection and responsive layouts 
   expect(mutations).toEqual([]);
 });
 
+test('a suggestion without a directory logo uses the icon its own website declares', async ({ page }) => {
+  const declared = 'https://declared.example/assets/logo.png';
+  await installIconFixtures(page, { [declared]: syntheticIcon('#1f7a4d') });
+  await page.route('https://api.brandfetch.io/**', route => route.fulfill({ json: [{ name: 'Declared (synthetic)', domain: 'declared.example' }] }));
+  const lookups: string[] = [];
+  await page.route('**/api/site-icon/**', route => { lookups.push(new URL(route.request().url()).pathname); return route.fulfill({ json: { url: declared } }); });
+  await page.goto('/');
+  await page.getByRole('combobox', { name: 'Company name or website' }).fill('declared');
+  const icon = page.locator('.company-suggestion img');
+  await expect(icon).toHaveAttribute('data-requested-icon', declared);
+  await expect.poll(() => icon.evaluate(image => image instanceof HTMLImageElement ? image.naturalWidth : 0)).toBe(24);
+  expect(lookups).toEqual(['/api/site-icon/declared.example']);
+});
+
 test('website entry closes suggestions and does not query the company directory', async ({ page }) => {
   const lookups: string[] = [];
   await page.route('https://api.brandfetch.io/**', route => {

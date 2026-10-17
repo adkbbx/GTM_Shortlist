@@ -56,7 +56,7 @@ function Reveal({ as: Tag = 'h2', id, className, reduced, lead, accent, br = fal
   return <Tag ref={ref} id={id} className={className} data-reveal={shown ? 'shown' : 'hidden'}>{words(lead)}{br ? <br /> : ' '}<span className="pl-accent">{words(accent)}</span></Tag>;
 }
 
-function Hero({ reduced, onStart, directoryId, instrumentRef }: { reduced: boolean; onStart: (company: string) => void; directoryId: string; instrumentRef: RefObject<HTMLDivElement | null> }) {
+function Hero({ reduced, onStart, directoryId, iconLookup, instrumentRef }: { reduced: boolean; onStart: (company: string) => void; directoryId: string; iconLookup: boolean; instrumentRef: RefObject<HTMLDivElement | null> }) {
   const [company, setCompany] = useState('');
   const [invite, setInvite] = useState(true);
   const [shake, setShake] = useState(0);
@@ -104,7 +104,7 @@ function Hero({ reduced, onStart, directoryId, instrumentRef }: { reduced: boole
           <label className="pl-label" htmlFor="website">Start with your company</label>
           <div className="pl-controls">
             <div className={`pl-field${shake % 2 ? ' shake' : shake ? ' shake-b' : ''}`} onFocus={() => { setInvite(false); stream.current?.setHover(true); }} onBlur={() => stream.current?.setHover(false)}>
-              <CompanySearch value={company} clientId={directoryId} disabled={starting} label="Start with your company" placeholder="Company name or website"
+              <CompanySearch value={company} clientId={directoryId} iconLookup={iconLookup} disabled={starting} label="Start with your company" placeholder="Company name or website"
                 onChange={value => { setInvite(false); setCompany(value); stream.current?.boost(1100); }} /></div>
             <button className="pl-btn pl-btn-primary pl-btn-block" type="submit" disabled={starting} aria-busy={starting}>{starting ? 'Starting research' : 'Start research'} <Arrow /></button>
           </div>
@@ -358,7 +358,7 @@ function Closing({ reduced, onStart }: { reduced: boolean; onStart: (company: st
 
 /** The public landing page for hosted visitors without a session. It makes no research API or provider requests;
     company suggestions contact Brandfetch only when the installation configures a public client ID. */
-export function PublicLanding({ onStart, onSignIn, directoryId }: { onStart: (company: string) => void; onSignIn: () => void; directoryId: string }) {
+export function PublicLanding({ onStart, onSignIn, directoryId, iconLookup = false }: { onStart: (company: string) => void; onSignIn: () => void; directoryId: string; iconLookup?: boolean }) {
   const reduced = usePrefersReducedMotion();
   const lenis = useLenis(!reduced);
   const scrollTo = useScrollTo(lenis);
@@ -383,7 +383,7 @@ export function PublicLanding({ onStart, onSignIn, directoryId }: { onStart: (co
       </div>
     </header>
     <main>
-      <Hero reduced={reduced} onStart={onStart} directoryId={directoryId} instrumentRef={instrument} />
+      <Hero reduced={reduced} onStart={onStart} directoryId={directoryId} iconLookup={iconLookup} instrumentRef={instrument} />
       <Story reduced={reduced} scrollTo={scrollTo} />
       <Evidence reduced={reduced} />
       <section className="pl-section" id="live" aria-labelledby="pl-live-title">

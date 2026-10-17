@@ -191,6 +191,9 @@ class RunView(BaseModel):
     can_continue_discovery: bool = False
 
 
+PUBLIC_HOST = re.compile(r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}")
+
+
 class SiteIconInfo(BaseModel):
     url: str | None = None
 
@@ -487,6 +490,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(404, "Website is not part of this saved run") from None
         if normalized not in allowed or urlsplit(canonical_url(f"https://{domain}/")).hostname != domain:
             raise HTTPException(404, "Website is not part of this saved run")
+        return SiteIconInfo(url=site_icons.get(domain))
+
+    @app.get("/api/site-icon/{domain}", response_model=SiteIconInfo)
+    def read_suggestion_icon(domain: str, store: owned):
+        # Company suggestions have no saved run yet. Signed-in and local workspaces may read the declared icon of a
+        # plain public domain when the directory has none; the shared lookup keeps its cache, limits and SSRF checks.
+        if not PUBLIC_HOST.fullmatch(domain):
+            raise HTTPException(404, "Enter a public website domain")
+        try:
+            canonical = urlsplit(canonical_url(f"https://{domain}/")).hostname
+        except ValueError:
+            raise HTTPException(404, "Enter a public website domain") from None
+        if canonical != domain:
+            raise HTTPException(404, "Enter a public website domain")
         return SiteIconInfo(url=site_icons.get(domain))
 
     @app.delete("/api/runs/{run_id}", status_code=204)

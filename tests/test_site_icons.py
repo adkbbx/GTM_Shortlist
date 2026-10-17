@@ -73,6 +73,31 @@ def test_site_icon_api_restricts_domains_to_saved_run_and_preserves_data(tmp_pat
     assert store.get_run(run_id) == before
 
 
+def test_suggestion_icon_reads_only_plain_public_domains_without_changing_data(tmp_path, monkeypatch):
+    settings = Settings(db_path=tmp_path / 'suggestions.sqlite3')
+    calls = []
+    def get_icon(self, domain):
+        calls.append(domain)
+        return 'https://eygentic.com/assets/eygentic_logo.png'
+    monkeypatch.setattr(SiteIcons, 'get', get_icon)
+    with TestClient(create_app(settings)) as client:
+        assert client.get('/api/site-icon/eygentic.com').json() == {'url': 'https://eygentic.com/assets/eygentic_logo.png'}
+        for domain in ('127.0.0.1', 'localhost', 'eygentic.com:443', 'eygentic.com?bust=1', 'EYGENTIC.COM', 'user@eygentic.com', 'a..b.com'):
+            assert client.get(f'/api/site-icon/{quote(domain, safe="")}').status_code == 404
+        assert client.get('/api/runs').json() == []
+    assert calls == ['eygentic.com']
+
+
+def test_hosted_suggestion_icon_requires_authentication_before_any_lookup(monkeypatch):
+    def unexpected(*args, **kwargs):
+        raise AssertionError('An unauthenticated request must not read site metadata')
+    monkeypatch.setattr(SiteIcons, 'get', unexpected)
+    settings = Settings(mode='hosted', app_url='https://app.example', supabase_url='https://auth.example',
+                        supabase_publishable_key='sb_publishable_fixture', database_url='postgresql://unused')
+    with TestClient(create_app(settings), base_url='https://app.example') as client:
+        assert client.get('/api/site-icon/eygentic.com').status_code == 401
+
+
 def test_failed_homepage_is_cached_without_retry(monkeypatch):
     calls = []
     def fail(*args, **kwargs):
