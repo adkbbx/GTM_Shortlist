@@ -1,5 +1,13 @@
 # Progress and handoff
 
+## 17 October, compact-model branch integrated into design branch
+
+On the user's explicit integrate request, fetched and fast-forwarded codex/landing-demo-plan from589fccd to origin/claude/compact-model-profiles at5915da9, bringing in604e2b3 (compact/native Ollama support) and5915da9 (read-only saved-run replay script). All preceding design/history/settings fixes are ancestors and remain intact; no frontend source changed in this integration. Confirmed with branch PYTHONPATH that shortlist imports from this worktree's src/shortlist/__init__.py rather than the main checkout's editable install.
+
+Independent offline verification:497 backend tests passed,44 platform/database checks skipped; repository Ruff and TypeScript/Vite build pass. Eight phone/laptop history and guided-model-setup browser checks pass against fixture data. Existing Vite chunk-size and Starlette TestClient deprecation advisories remain. These checks do not independently verify the live Ollama timings or research-quality claims in Claude's preceding entry. No replay, model inference, search or enrichment was run during integration. Compact mode still omits company facts and people; model quality and discovery relevance remain open.
+
+The running8019 API was not restarted and therefore has not loaded the integrated Python backend. No worker was started, no database/settings were copied or changed, and8018 remains design-only with its existing data. No main merge or deployment. A service restart, actual local-model replay and any provider-backed evaluation are separate from this completed code integration; current-commit CI remains unverified.
+
 ## 17 October, compact prompts for small local models
 
 Diagnosed the local failures in Explore market, Inspect evidence and Review and draft. The saved local model was Ollama gemma4:e2b-it-qat (4.6B, Q4). Ollama's server log recorded "truncating input prompt limit=2051" for every campaign and research call (prompts of 6,044 to 12,813 tokens), so the instructions and schema were dropped and the saved outputs were free-form page summaries missing name and findings. Review and draft had no failure of its own; it displayed the three records whose assessments failed.
