@@ -1,3 +1,4 @@
+import { openSettings } from './navigation';
 import { expect, test } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 
@@ -20,7 +21,7 @@ test('hosted model guide lists choices only on request and recovers from key and
     return route.fulfill({ json: health() });
   });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await openSettings(page);
   await page.getByRole('button', { name: 'Research model: Not configured', exact: true }).click();
   await page.getByRole('radio', { name: 'Hosted provider', exact: true }).check();
   await expect(page.getByRole('button', { name: 'Find available models', exact: true })).toBeDisabled();
@@ -55,7 +56,7 @@ test('local presets and advanced manual fallback avoid guessing or automatic con
     return route.fulfill({ json: { mode: 'local', search_ready: true, gemma_ready: true, worker_online: false, local_search_error: null } });
   });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await openSettings(page);
   await page.getByRole('button', { name: /^Research model:/ }).click();
   await page.getByRole('radio', { name: 'On this computer', exact: true }).check();
   await page.getByLabel('Which app runs your model?', { exact: true }).selectOption('ollama');

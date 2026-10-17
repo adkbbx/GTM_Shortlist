@@ -1,3 +1,4 @@
+import { openSettings } from './navigation';
 import { expect, test } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 import { installIconFixtures, syntheticIcon } from './site-icons';
@@ -14,7 +15,7 @@ test('Brandfetch setup saves immediately, persists and disables without research
   await page.route('**/api/runs', route => route.fulfill({ json: [] }));
   page.on('request', request => { if (request.method() === 'POST' && request.url().includes('/api/')) mutations.push(request.url()); });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await openSettings(page);
   await page.getByRole('button', { name: 'Brandfetch: Not configured', exact: true }).click();
   await expect(page.getByLabel('Public client ID', { exact: true })).toBeFocused();
   await page.getByLabel('Public client ID', { exact: true }).fill('synthetic-public-id');
@@ -29,7 +30,7 @@ test('Brandfetch setup saves immediately, persists and disables without research
   await expect(page.getByRole('option')).toContainText('Clay (synthetic)');
   expect(new URL(providerRequests[0]).searchParams.get('c')).toBe('synthetic-public-id');
   await page.getByRole('combobox').press('Escape');
-  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await openSettings(page);
   await page.getByRole('button', { name: 'Brandfetch: Configured', exact: true }).click();
   await page.getByRole('button', { name: 'Turn off Brandfetch', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Brandfetch: Not configured', exact: true })).toBeVisible();
@@ -89,7 +90,7 @@ test('Brandfetch storage failures stay editable and preview disables configurati
     };
   });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await openSettings(page);
   await page.getByRole('button', { name: 'Brandfetch: Not configured', exact: true }).click();
   await page.getByLabel('Public client ID', { exact: true }).fill('synthetic-public-id');
   await page.getByRole('button', { name: 'Save Brandfetch', exact: true }).click();
@@ -102,7 +103,7 @@ test('Brandfetch storage failures stay editable and preview disables configurati
     await route.fulfill({ response, body: (await response.text()).replace('<head>', '<head><meta name="shortlist-preview-workspace" content="http://127.0.0.1:8019/">') });
   });
   await page.reload();
-  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await openSettings(page);
   await expect(page.getByRole('dialog', { name: 'Settings', exact: true })).toContainText('Disabled in preview');
   await expect(page.getByRole('button', { name: /^Brandfetch:/ })).toHaveCount(0);
 });

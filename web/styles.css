@@ -21,7 +21,7 @@ input:hover,textarea:hover{border-color:#918b80}
 input:focus,textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px #b4501c14}
 .topbar{height:76px;background:var(--surface);border-bottom:1px solid var(--line);padding:0 28px}
 .brand{gap:11px;font-size:1.1rem}.brand-product{font-size:.75rem}.brand-mark{width:30px;height:30px}
-.local-label{border-left:1px solid var(--line);padding-left:20px}
+
 .workspace{grid-template-columns:224px minmax(0,1fr);min-height:calc(100dvh - 76px);max-width:1680px}
 .sidebar{padding:28px 16px;gap:22px;background:#f1f0eb}.sidebar h2{padding:0 10px;text-transform:none;letter-spacing:0;font-weight:600;color:var(--muted)}
 .new-run{background:var(--surface);font-size:.875rem}.saved-run{border:0;border-radius:8px;min-height:82px;padding:12px;margin-bottom:4px}.saved-run.selected{background:var(--surface);border-left:0;box-shadow:inset 3px 0 var(--orange)}

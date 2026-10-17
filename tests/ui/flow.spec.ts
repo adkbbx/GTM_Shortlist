@@ -1,3 +1,4 @@
+import { openSettings } from './navigation';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { mkdirSync, readFileSync } from 'node:fs';
@@ -32,7 +33,7 @@ test('local model status opens setup and explains the offline worker without dis
     mode: 'local', search_ready: true, gemma_ready: false, worker_online: false, local_search_error: null,
   } }));
   await page.goto('/');
-  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await openSettings(page);
   const modelStatus = page.getByRole('button', { name: 'Research model: Not configured', exact: true });
   await expect(modelStatus).toHaveText('Not configured');
   await expect(page.getByRole('button', { name: 'Start research service', exact: true })).toHaveCount(0);
@@ -65,7 +66,7 @@ test('local model status opens setup and explains the offline worker without dis
   expect(await page.evaluate(() => JSON.stringify([localStorage, sessionStorage]))).not.toContain('labelled-browser-model-fixture');
   await page.unroute('**/api/health');
   await page.reload();
-  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await openSettings(page);
   await page.getByRole('button', { name: 'Research model: Configured', exact: true }).click();
   await page.getByRole('radio', { name: 'On this computer', exact: true }).check();
   await page.getByText('Change server address or authentication', { exact: true }).click();
@@ -103,7 +104,7 @@ test('starting research automatically starts processing after saving the command
     await route.fulfill({ json: health() });
   });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await openSettings(page);
   await expect(page.getByRole('button', { name: 'Start research service', exact: true })).toHaveCount(0);
   await capture(page, `.impeccable/review/${info.project.name}-service-stopped.png`);
   await page.getByRole('button', { name: 'Close settings' }).click();
@@ -113,7 +114,7 @@ test('starting research automatically starts processing after saving the command
   await page.getByRole('button', { name: 'Start research', exact: true }).click();
   await expect(page).toHaveURL(/run=/);
   expect(ids[0]).toBe(ids[1]);
-  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await openSettings(page);
   await expect(page.locator('.provider-status').getByText('Running', { exact: true })).toBeVisible();
   expect(starts).toBe(2);
   await capture(page, `.impeccable/review/${info.project.name}-service-running.png`);
@@ -399,7 +400,7 @@ test('stopping actual held research keeps completed sheets and ignores an older 
 test('local masked Tavily setup saves privately, recovers and clears browser input', async ({ page }, info) => {
   expect((await page.request.post('/__fixture_corrupt_provider')).ok()).toBeTruthy();
   await page.goto('/');
-  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await openSettings(page);
   await expect(page.getByRole('alert')).toContainText('Saved provider settings could not be read');
   const trigger = page.getByRole('button', { name: 'Company search: Settings unavailable', exact: true });
   await trigger.press('Enter');
@@ -437,7 +438,7 @@ test('local masked Tavily setup saves privately, recovers and clears browser inp
   await page.getByRole('button', { name: 'Cancel key change' }).press('Enter');
   await expect(update).toBeFocused();
   await page.reload();
-  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await openSettings(page);
   await expect(page.getByRole('dialog', { name: 'Settings', exact: true }).locator('.provider-status').getByText('Configured', { exact: true }).first()).toBeVisible();
   await expect(update).toHaveAttribute('aria-expanded', 'false');
   await update.click();

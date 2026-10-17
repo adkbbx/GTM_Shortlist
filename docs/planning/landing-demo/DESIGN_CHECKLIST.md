@@ -132,3 +132,6 @@ This reconciliation supersedes the preceding note that hosted fixes are absent. 
 - [x] User-requested rounded favicon containers across company results, suggestions and saved history, including initials fallback. Local Brandfetch setup saves immediately in Settings; hosted configuration stays operator-owned. Verification recorded in PROGRESS.md.
 
 - [x] Read declared site favicons for saved runs and company results without provider configuration. Eygentic's real assets/eygentic_logo.png verified in the local browser; rounded containers retained. Bounded requests, owner-scoped endpoint, safe fallback and phone/laptop checks recorded in PROGRESS.md.
+
+- [x] Replace phone bottom actions with a top-left hamburger for saved runs and drawer Settings/Account, plus a top-right new-research action only while viewing a run. Keep one56px charcoal header through same-mounted-page resizing, empty history, keyboard use and saved-run selection.
+- [x] Keep desktop Settings visible before the first run as a gear-plus-label chip matching Account. Share gear/person icons with phone drawer entries; remove the local workspace divider and obsolete mobile header overlays.

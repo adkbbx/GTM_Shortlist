@@ -1,3 +1,4 @@
+import { SettingsIcon } from './NavigationIcons';
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { api } from './api';
@@ -8,8 +9,8 @@ import { BrandfetchSetup } from './BrandfetchSettings';
 
 type SaveState = { kind: 'idle' } | { kind: 'saving' } | { kind: 'saved' } | { kind: 'error'; message: string };
 
-export function LocalSearchSetup({ health, onSaved, readOnly = false, brandfetchClientId, onBrandfetchSaved }: {
-  health: Health; onSaved: (health: Health) => void; readOnly?: boolean; brandfetchClientId: string; onBrandfetchSaved: (id: string) => void;
+export function LocalSearchSetup({ health, onSaved, readOnly = false, brandfetchClientId, onBrandfetchSaved, onClosed }: {
+  health: Health; onSaved: (health: Health) => void; readOnly?: boolean; brandfetchClientId: string; onBrandfetchSaved: (id: string) => void; onClosed?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [statusError, setStatusError] = useState('');
@@ -48,9 +49,9 @@ export function LocalSearchSetup({ health, onSaved, readOnly = false, brandfetch
     } catch (error) { setState({ kind: 'error', message: error instanceof Error ? error.message : 'Search setup could not be saved. Please try again.' }); }
   };
   return <>
-    <button className="local-settings-trigger secondary" type="button" popoverTarget="local-settings" aria-label="Settings" title="Settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg></button>
+    <button className="local-settings-trigger secondary" type="button" popoverTarget="local-settings" aria-label="Settings" title="Settings"><SettingsIcon /><span>Settings</span></button>
     <section id="local-settings" className="local-settings" popover="auto" role="dialog" aria-labelledby="local-settings-heading"
-      onToggle={event => { setOpen(event.newState === 'open'); if (event.newState === 'closed') { setEditing(false); setEditingModel(false); setEditingBrandfetch(false); setBrandfetchSaved(false); setModelSaved(false); setKey(''); setState({ kind: 'idle' }); } }}>
+      onToggle={event => { setOpen(event.newState === 'open'); if (event.newState === 'closed') { setEditing(false); setEditingModel(false); setEditingBrandfetch(false); setBrandfetchSaved(false); setModelSaved(false); setKey(''); setState({ kind: 'idle' }); onClosed?.(); } }}>
       <header className="local-settings-heading"><h2 id="local-settings-heading">Settings</h2><button type="button" popoverTarget="local-settings" popoverTargetAction="hide" aria-label="Close settings">×</button></header>
       <p className="hint">Local workspace · configuration on this computer</p>
       {!editingModel && !editingBrandfetch && <><dl className="provider-status">

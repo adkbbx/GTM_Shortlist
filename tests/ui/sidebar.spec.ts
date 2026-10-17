@@ -1,6 +1,10 @@
 import { expect, test } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 
+test.beforeEach(async ({ page }) => {
+  await page.route('**/favicon.ico', route => route.abort());
+});
+
 test('shell reaches the viewport bottom and footer uses the remaining space', async ({ page }) => {
   const fixture = await page.request.post('/__fixture_held_run');
   const { id } = await fixture.json();
@@ -8,7 +12,7 @@ test('shell reaches the viewport bottom and footer uses the remaining space', as
     for (const viewport of [{ width: 1542, height: 1290 }, { width: 1366, height: 1000 }, { width: 390, height: 1100 }]) {
       await page.setViewportSize(viewport);
       await page.goto('/');
-      await expect(page.getByRole('button', { name: 'New shortlist', exact: true })).toBeVisible();
+      await expect(page.getByRole('button', { name: viewport.width <= 850 ? 'Saved runs' : 'New shortlist', exact: true })).toBeVisible();
       await page.evaluate(() => document.fonts.ready);
       const geometry = await page.evaluate(() => {
         const rect = (selector: string) => document.querySelector(selector)!.getBoundingClientRect().toJSON();
@@ -50,9 +54,9 @@ test('navigation remains compact through resize and drawer transitions', async (
         expect(box!.width).toBeLessThanOrEqual(width - 32);
         expect((await page.locator('.main').boundingBox())!.y).toBe(before!.y);
         expect(before!.y).toBe(56);
-        expect((await page.locator('.research-sidebar').boundingBox())!.height).toBe(56);
+        expect((await page.locator('header.topbar').boundingBox())!.height).toBe(56);
         await page.keyboard.press('Shift+Tab');
-        await expect(dialog.getByRole('navigation').getByRole('button').last()).toBeFocused();
+        await expect(dialog.getByRole('button', { name: 'Settings', exact: true })).toBeFocused();
         await page.keyboard.press('Tab');
         await expect(dialog.getByRole('button', { name: 'Close saved runs', exact: true })).toBeFocused();
         await page.keyboard.press('Escape');
@@ -149,7 +153,7 @@ test('tablet preview keeps the available demo within the first viewport', async 
       await route.fulfill({ response, body: source.replace('</head>', '<meta name="shortlist-preview-workspace" content="http://127.0.0.1:8019/"></head>') });
     });
     await page.goto('/');
-    await expect(page.getByRole('button', { name: 'New shortlist', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Saved runs', exact: true })).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
     await expect(page.getByRole('button', { name: 'Start research', exact: true })).toBeDisabled();
     const demo = await page.getByRole('link', { name: 'Try the demo', exact: true }).boundingBox();

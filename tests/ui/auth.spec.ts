@@ -1,3 +1,4 @@
+import { openAccount } from './navigation';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
@@ -151,7 +152,7 @@ test('signed-in requests and exports carry tokens; sign-out clears the workspace
   expect(requests.some(request => request.url.includes('/export?format=xlsx'))).toBe(true);
   expect(requests.length).toBeGreaterThan(2);
   expect(requests.every(request => request.bearer?.startsWith('Bearer '))).toBe(true);
-  await page.getByRole('button', { name: 'Open account tray', exact: true }).click();
+  await openAccount(page);
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Sign in to your shortlist' })).toBeVisible();
   await expect(page.getByRole('complementary', { name: 'Saved research' })).toHaveCount(0);
@@ -221,11 +222,11 @@ test('account tray hides details and stays stable while credits load', async ({ 
   await page.goto('/');
   await signIn(page);
   await expect(page.getByRole('button', { name: 'Settings', exact: true })).toHaveCount(0);
-  const trigger = page.getByRole('button', { name: 'Open account tray', exact: true });
+  const trigger = page.getByRole('button', { name: info.project.name === 'phone' ? 'Saved runs' : 'Open account tray', exact: true });
   const before = await trigger.boundingBox();
   await expect(page.getByText('fixture@example.test', { exact: true })).not.toBeVisible();
   await expect(page.getByRole('button', { name: 'Sign out', exact: true })).not.toBeVisible();
-  await trigger.click();
+  await openAccount(page);
   const tray = page.getByRole('dialog', { name: 'Your account', exact: true });
   await expect(tray).toBeVisible();
   await expect(tray.getByText('Loading credit balance…')).toBeVisible();
@@ -237,10 +238,10 @@ test('account tray hides details and stays stable while credits load', async ({ 
   await page.keyboard.press('Escape');
   await expect(tray).not.toBeVisible();
   await expect(trigger).toBeFocused();
-  await trigger.click();
+  await openAccount(page);
   await tray.getByRole('button', { name: 'Close account tray', exact: true }).click();
   await expect(tray).not.toBeVisible();
-  await trigger.click();
+  await openAccount(page);
   // The phone popover covers the heading; dismiss through an exposed page gutter.
   await page.mouse.click(1, (page.viewportSize()?.height ?? 844) / 2);
   await expect(tray).not.toBeVisible();

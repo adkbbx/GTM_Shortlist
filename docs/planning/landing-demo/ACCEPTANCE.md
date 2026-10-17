@@ -82,3 +82,8 @@ The later documentation-head run38944488274 exposed a stale phone test locator f
 At the user's request, a546d3f merges hosted tip5eda740 into the design branch, preserving both histories. The shared UI retains the compact drawer, stable Account tray and responsive/motion behavior alongside hosted seller/discovery recovery, confirmation-stage stop, truthful failed-offer recap and password-focus fixes. This supersedes the preceding note that hosted work is separate from this branch.
 
 Build, Ruff and regenerated contracts pass. Local verification:439 backend passes with44 explicit platform/database skips;42 additional real-Postgres passes; all100 browser scenarios, including16 hosted credit cases, pass. Fresh phone/laptop screenshots were inspected. The UUID test cluster is stopped and the existing preview run remains queued. [CI run38947565998](https://github.com/adkbbx/GTM_Shortlist/actions/runs/38947565998) passes all five jobs for a546d3f. No main merge, deployment, provider spend or live-account action was performed. Product usefulness and external account/email acceptance remain open.
+
+
+## 17 October, requested navigation replacement
+
+The user's latest direction supersedes the labelled phone bottom actions and earlier light toolbar: one charcoal56px header, hamburger saved runs at top left, Settings/Account inside the drawer and a plain plus at top right only while viewing a run. Desktop keeps Settings available in the header before first research, using a gear and visible label matching the hosted Account chip. The local workspace label has no divider. Local screenshot/interaction verification is recorded in PROGRESS.md; this is not a claim of final user acceptance or research-quality acceptance.

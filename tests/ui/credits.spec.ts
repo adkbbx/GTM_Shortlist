@@ -1,3 +1,4 @@
+import { openAccount } from './navigation';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { randomUUID } from 'node:crypto';
@@ -10,7 +11,7 @@ test.afterEach(async ({ page }) => {
 
 async function openAccountTray(page: Page) {
   if (!await page.getByRole('dialog', { name: 'Your account', exact: true }).isVisible()) {
-    await page.getByRole('button', { name: 'Open account tray', exact: true }).click();
+    await openAccount(page);
   }
 }
 

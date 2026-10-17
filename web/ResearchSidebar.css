@@ -25,11 +25,14 @@
 
 @media(prefers-reduced-motion:no-preference){.research-sidebar .saved-run,.research-sidebar .new-run{transition:background-color 140ms ease-out}}
 
-/* One product header; mobile history lives in a modal drawer, never a second row. */
-header.topbar{height:56px;padding:0 24px;max-width:1680px;margin:auto;border-bottom:1px solid var(--line);background:var(--paper)}
-header.topbar .brand{height:56px;width:auto;flex:none;padding:0;color:var(--ink);font-size:17px;letter-spacing:-.025em;font-weight:600}
-header.topbar .workspace-account{min-width:0}
-/* Let the shell allocate its actual header height instead of subtracting stale constants. */
+/* One header on every screen. Phone navigation opens the saved-run drawer. */
+header.topbar{height:56px;padding:0 24px;max-width:1680px;margin:auto;border-bottom:1px solid #37332e;background:#201e1b}
+header.topbar .brand{height:56px;width:auto;flex:none;padding:0;color:#fff9f0;font-size:17px;letter-spacing:-.025em;font-weight:600}
+header.topbar .workspace-account{min-width:0;color:#e8e4dd}
+header.topbar .local-label,header.topbar .wallet-balance>span{color:#b1aaa0}
+header.topbar .text-button{color:#efa779}
+header.topbar .account-trigger{background:#2a2723;color:#e8e4dd;border-color:#494239}
+.mobile-history-trigger,.mobile-new-trigger{display:none}
 #root{display:flex;flex-direction:column;min-height:100dvh}
 #root>header.topbar{flex:none;width:100%}
 #root>.workspace{flex:1;width:100%;min-height:0}
@@ -37,61 +40,32 @@ header.topbar .workspace-account{min-width:0}
 .workspace>.main>*{flex-shrink:0}
 .workspace>.main>.workspace-footer{margin-top:auto;width:100%}
 #root>.workspace.first-visit{display:flex;flex-direction:column}
-.mobile-brand{display:none}
 .research-drawer{position:fixed;inset:0 auto 0 0;margin:0;border:0;border-right:1px solid #37332e;padding:20px 16px;width:min(320px,calc(100vw - 32px));max-width:none;height:100dvh;max-height:100dvh;background:#201e1b;color:#e8e4dd}
+.research-drawer[open]{display:flex;flex-direction:column;gap:20px}
 .research-drawer::backdrop{background:rgb(15 14 12 / .45)}
-.drawer-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}
+.drawer-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none}
 .workspace .research-sidebar .drawer-heading h2{color:#fff9f0;padding:0;margin:0;font-size:1rem}
 .drawer-heading button{min-height:44px;padding:8px;font-size:.8125rem;gap:12px}
 .drawer-heading button span{font-size:22px;font-weight:400}
+.research-drawer .research-navigation{min-height:0;flex:1;overflow:auto;scrollbar-color:#5c564d #201e1b}
+.research-sidebar .drawer-settings{flex:none;width:100%;justify-content:flex-start;min-height:48px;border-top:1px solid #494239;padding:16px 12px 0;border-radius:0}
+@media(min-width:851px){.workspace>.research-sidebar.is-empty{display:none}}
 @media(max-width:850px){
-  body:has(.research-sidebar) header.topbar:has(.local-label){display:none}
-  body:has(.research-sidebar) header.topbar .brand{display:none}
-  body:has(.research-sidebar) header.topbar{height:auto;min-height:0;padding:8px 16px}
-  .workspace:has(>.research-sidebar){display:flex;flex-direction:column}
-  .workspace>.research-sidebar,.workspace>.research-sidebar.is-collapsed{
-    display:flex;flex-direction:row;align-items:center;justify-content:space-between;
-    gap:8px;padding:6px 12px;flex:none;height:56px;min-height:56px;border-right:0;border-bottom:1px solid var(--line);background:var(--paper);color:var(--ink);
-  }
-  .research-sidebar .sidebar-header{padding:0;flex-direction:row;justify-content:flex-start;min-width:0;gap:8px}
-  .research-sidebar .sidebar-heading{display:none}
-  .research-sidebar .mobile-brand{display:block;order:1;font-size:.9375rem;font-weight:600;white-space:nowrap}
-  .research-sidebar .sidebar-toggle{order:0}
-  .research-sidebar .sidebar-toggle svg,.research-sidebar.is-collapsed .sidebar-toggle svg{transform:none}
-  .research-sidebar .new-run,.research-sidebar.is-collapsed .new-run{width:44px;margin:0;padding:10px;gap:0}
-  .research-sidebar .nav-label,.research-sidebar.is-collapsed .nav-label{display:none}
-  .research-sidebar button:hover{background:#eeede9}
-  .research-sidebar button:focus-visible{outline:2px solid var(--orange);outline-offset:0}
-  .research-sidebar .research-navigation{min-width:0}
-  .research-sidebar nav{max-height:calc(100dvh - 140px)}
-  .research-sidebar .saved-run{min-width:0}
-  .research-sidebar.is-collapsed .sidebar-heading{display:none}
-  .research-sidebar .research-drawer .research-navigation h2,.research-sidebar .research-drawer .run-copy{display:block}
-  .research-sidebar .research-drawer button:hover{background:#302d28}
-}
-
-/* Desktop navigation is one continuous frame around the paper workspace. */
-@media(min-width:851px){
- header.topbar{background:#201e1b;border-bottom-color:#37332e}
- header.topbar .brand{color:#fff9f0}
- header.topbar .workspace-account{color:#e8e4dd}
- header.topbar .local-label,
- header.topbar .wallet-balance>span{color:#b1aaa0}
- header.topbar .text-button{color:#efa779}
-}
-
-@media(min-width:851px){header.topbar .account-trigger{background:#2a2723;color:#e8e4dd;border-color:#494239}}
-.phone-nav-label{display:none}
-@media(max-width:850px){
- body:has(.research-sidebar) #root{padding-bottom:4rem}
- .research-sidebar::after{content:"";position:fixed;inset:auto 0 0;height:4rem;background:#201e1b;border-top:1px solid #37332e;z-index:3}
- .research-sidebar .sidebar-toggle{position:fixed;bottom:6px;left:16px;width:calc(50% - 24px);min-height:calc(4rem - 12px);display:flex;justify-content:center;gap:8px;z-index:4}
- .research-sidebar .sidebar-toggle .phone-nav-label{display:inline;font-size:.875rem;white-space:normal;line-height:1.15}
- .workspace>.research-sidebar.is-collapsed .new-run,.workspace>.research-sidebar:not(.is-collapsed) .new-run{position:fixed;bottom:6px;right:16px;width:calc(50% - 24px);min-height:calc(4rem - 12px);margin:0;display:flex;justify-content:center;gap:8px;z-index:4}
- .research-sidebar .new-run .nav-label{display:inline;font-size:.875rem;white-space:normal;line-height:1.15}
- #root>header.topbar{background:#201e1b;border-bottom-color:#37332e}
- header.topbar .brand{color:#fff9f0}
- .workspace>.research-sidebar,.workspace>.research-sidebar.is-collapsed{background:#201e1b;color:#e8e4dd;border-bottom-color:#37332e}
- .research-sidebar button:hover{background:#302d28}
- #root>header.topbar .account-trigger{color:#e8e4dd}
+ #root>header.topbar{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;grid-template-rows:56px;gap:0 8px;height:56px;min-height:56px;padding:0 12px;position:relative}
+ header.topbar .brand{grid-column:2;grid-row:1;justify-self:center;min-width:0;max-width:100%;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ header.topbar .workspace-account{grid-column:3;grid-row:1;width:0;height:0;max-width:none;padding:0}
+ header.topbar .workspace-account>.local-label,header.topbar .workspace-account>.local-settings-trigger,header.topbar .workspace-account>.account-trigger{display:none}
+ header.topbar .mobile-history-trigger,header.topbar .mobile-new-trigger{display:grid;place-items:center;width:44px;min-height:44px;padding:8px;background:transparent;color:#e8e4dd;border:0;box-shadow:none;border-radius:8px;grid-row:1;transform:none}
+ header.topbar .mobile-history-trigger{grid-column:1}
+ header.topbar .mobile-new-trigger{grid-column:3}
+ header.topbar .mobile-history-trigger:hover,header.topbar .mobile-new-trigger:hover{background:#302d28}
+ header.topbar .mobile-history-trigger:focus-visible,header.topbar .mobile-new-trigger:focus-visible{outline-color:#efa779;outline-offset:0}
+ .workspace:has(>.research-sidebar){display:flex;flex-direction:column}
+ .workspace>.research-sidebar,.workspace>.research-sidebar.is-collapsed{display:contents}
+ .research-sidebar>.sidebar-header,.research-sidebar>.new-run{display:none}
+ .research-sidebar .research-drawer .research-navigation h2,.research-sidebar .research-drawer .run-copy{display:block}
+ .research-sidebar .research-drawer .saved-run{width:100%;min-height:48px;padding:10px;justify-content:flex-start}
+ .research-sidebar .research-drawer button:hover{background:#302d28}
+ .research-sidebar .research-drawer nav{max-height:none}
+ .research-sidebar .research-drawer .sidebar-loading{display:block}
 }
