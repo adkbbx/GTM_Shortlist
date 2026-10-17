@@ -83,27 +83,24 @@ Follow the prototype's order, copy and behaviour.
 2. **Hero.** Two columns, the left about 1.08fr.
    - **Text and form.** Label "Company research for B2B sellers", then the headline "Find who fits. / Check why." with a word reveal on load. Body copy and the company form follow, reusing the existing `CompanySearch` combobox restyled to sharp panels.
    - **Flow lines** (canvas behind the hero):
-     - **Two-column layout (wider than 1000 px):** nine grey S-curves rise from the bottom edge into the field's lower edge, and five orange "fuel lines" run from the field's right edge into the rocket's launch tower arm (tower point x 92, y 500 in the drawing).
-     - **Stacked layout (1000 px and narrower):** only the fuel lines are drawn, seven of them dropping from the field's lower edge to the tower. Nothing may cross the drawing; the earlier grey bundle did, which the user reported as broken on narrow screens.
+     - **Two-column layout (wider than 1000 px):** nine grey S-curves rise from the bottom edge into the field's lower edge, and five orange lines run from the field's right edge into the scope's left entry port ("Your site", drawing point x 30, y 290).
+     - **Stacked layout (1000 px and narrower):** only the orange lines are drawn, seven of them dropping from the field's lower edge into the scope's top port (x 250, y 66). No line may cross the drawing; an earlier grey bundle did, which the user reported as broken on narrow screens.
    - **Dots.** About 3 per curve, 3–3.5 px squares. 22% are orange. Each fades over the first 1/8 and last 1/6 of its curve.
    - **Speed.** Ease toward the target with `1 − e^(−3.2·dt)`. Base `0.045` curve-lengths per second. Hovering or focusing the field sets 12×; each keystroke sets 24× for 1.2 s.
    - **Line draw-in.** Over 1.4 s with an ease-out cubic.
    - **Performance and fallback.** Cap the device-pixel ratio at 1.5. Pause when offscreen or the tab is hidden. Under reduced motion, draw one static frame.
-   - **Launch vehicle** (user's choice on 17 October: reuse the eygentic.com rocket). Use the same artwork as the eygentic.com hero vehicle (rocket viewBox 340×620, leaders viewBox 580×620; the user's own asset in the Eygentic site repository), relabelled bottom to top as one research run:
-
-     | Part | Label | Meaning line |
-     |---|---|---|
-     | Launchpad | Your website | Launchpad · read once, saved |
-     | Engine | Offer | Engine · drafted from your site |
-     | Fuel tanks | Target | Fuel · you confirm it |
-     | Guidance band | Evidence | Guidance · exact source words |
-     | Payload bay | Your shortlist (orange) | Payload · up to three companies |
-
-     - **Labels.** HTML text, not SVG text, so they stay readable at every size (minimum about 14.7 px). On the right of the rocket on screens wider than 600 px. At 600 px and narrower, use eygentic's mobile layout: a 7 rem rocket beside a vertical list of the five labels, with no leader lines or hand note.
-     - **Draw-in, bottom up like an assembly:** launchpad 0–0.5 s, engine and fins 0.6–0.8 s, body and tanks 0.8–1.1 s, nose and payload 1.15–1.35 s. Leaders and labels follow bottom to top from 1.5 s, 0.25 s apart. Strokes take 0.9 s with eygentic's ease; pins pop; dashed parts fade in.
-     - **Plume.** eygentic's `plumeIgnite` (1.8 s, after a 2.2 s delay) and `plumeFlicker` (2 s outer, 1.4 s inner, reversed). Its vertical scale follows the flow speed: about 1.28 while hovering or focused, up to 1.6 while typing. Start research also lifts the craft 10 px for 0.9 s with a 2.4 s thrust boost.
-     - **Hand note.** Stacked "Site / Offer / Target / Evidence / You", with "You" in orange-ink.
-     - **Static content.** No result cards on the rocket; outcomes are shown only in the scroll story with labelled synthetic data.
+   - **Mission scope** (GTM Shortlist's own drawing). Same family as eygentic.com: blueprint linework, apricot construction lines, orange pins, hand notes. **Do not reuse the eygentic.com launch-vehicle drawing.** It was tried on 17 October and the user rejected it as a copy of the Eygentic page. Eygentic's rocket is about preparing a launch; GTM Shortlist's picture is the mission, scanning for companies. All geometry is in the prototype (viewBox 600×560, centre 250, 290):
+     - **Rings.** A bearing ring (r 210, ticks every 5°, major every 30°); an apricot dashed target ring (r 140) tagged "Target · you set the radius"; an inner ring (r 70); a dashed construction crosshair.
+     - **Centre.** A small hatched "planet" tagged "Your offer" with an orange pin: the launch point.
+     - **Ports.** Entry ports at the left ("Your site") and top of the bearing ring, where the orange lines arrive.
+     - **Sweep.** A 28° orange wedge (7% fill, inner 12° at 14%) with a 1.6 px leading edge. It rotates clockwise at 28°/s, multiplied by `1 + (speed − 1) × 0.22`, so about 96°/s while hovering, using the same speed value as the lines. It fades in 1.4 s after the scope enters view.
+     - **Candidates.** 22 grey 4 px squares at fixed seeded positions inside the ring. When the sweep passes, each turns orange and brightens, fading over the 50° behind the leading edge.
+     - **Locks.** Three locks with corner reticles and a filled centre in the status colours: green "Fits · Source passage saved", blue "Needs a call · Budget owner unknown", red "Not a fit · Matches an exclusion". Each pings (scale 1.35) as the sweep crosses it. Leader lines run to HTML labels on the right with status marks. Start research pings all three.
+     - **Probe.** A small outlined rocket with an orange flame flies the dashed trajectory from the centre out past the bearing ring (0.15 of the path per second, faster with speed). It fades in and out at the ends and points along its path.
+     - **Hand note.** Stacked "Launch / Scan / Lock / Check / You", lower left, "You" in orange-ink.
+     - **Labels and tags.** HTML, not SVG text. At 600 px and narrower, the chart is full width and the three status labels become a list below it; leaders and the hand note are hidden.
+     - **Draw-in.** Centre, rings, ticks and ports from 0 to 1 s; locks and leaders 1.5–2 s; labels fade in 1.7–2.1 s; then the sweep and probe start.
+     - **Not results.** The three locks illustrate statuses, not results: no company names, counts or claims.
 3. **"How a shortlist gets made".** A pinned scroll story.
    - **Pin.** The section is 680 vh tall on desktop and 760 vh on phones. A sticky frame below the header holds the title, the trace line, the stage content and a six-part progress bar.
    - **Stage weights.** Offer 1, Market 1.1, Target 1.1, Companies 1.3, Evidence 2, Decision 1.3. Evidence gets the most scroll.
@@ -130,7 +127,7 @@ Follow the prototype's order, copy and behaviour.
 
 - No invented counters, testimonials, logos, customer outcomes, live activity or prices.
 - Example companies use reserved `.example` domains and every example surface says "Synthetic example".
-- The rocket and its labels illustrate the steps of a run, not results. They carry no company names, counts or claims.
+- The scope, its locks and labels illustrate the steps and statuses of a run, not results. They carry no company names, counts or claims.
 - "Fit" is never described as buying intent.
 
 ## 5. Live research progress ("agent at work")
@@ -299,7 +296,7 @@ Specifically:
 
 - [ ] An anonymous hosted visit to `/` shows the landing page. Sign-in works from the header. A typed company survives signup, confirmation and the redirect, and research does not start automatically.
 - [ ] Lenis is active only on the landing page, absent under reduced motion, and destroyed on entering the workspace. Drawers and modals still lock scrolling.
-- [ ] The hero lines speed up on hover, focus and typing and pause offscreen, and the rocket plume grows with them. The rocket draws in once. In the stacked layout no line crosses the drawing. With reduced motion everything is static and fully visible.
+- [ ] The hero lines speed up on hover, focus and typing and pause offscreen, and the scope sweep and probe speed up with them. The scope draws in once. In the stacked layout no line crosses the drawing. With reduced motion everything is static and fully visible.
 - [ ] The pinned story works forward and backward, its progress buttons jump to stages, it fits at 390×844 without clipped cards, and it becomes a static list under reduced motion.
 - [ ] The live research view shows the console visual for each activity, colour-coded marks with words, a feed with filters, entrance animation only for new events, and ambient motion only under the worker and visibility conditions above. The tab title and notifications work.
 - [ ] At 1920, 2560 and 3840 the frame is edge to edge, there is no horizontal overflow and type scales, verified by `large-screens.spec.ts` and inspected screenshots.
@@ -312,8 +309,8 @@ The prototype was checked in Chrome at 390×844, 1440×900, 1920×1080, 2560×14
 
 - no console errors and no horizontal overflow;
 - the root font size computed to 16 px (390–1920), 20.5 px (2560), 20.9 px (3440×1440) and 30.7 px (3840);
-- the rocket hero was checked at 390, 460×1205, 600, 768, 808, 1024, 1440, 1920, 2560, 3440 and 3840 px wide, with no overlapping labels and labels at least 14.7 px;
-- hover thrust rose from 1.0 to 1.28;
+- the mission-scope hero was checked at 390, 460×1205, 600, 768, 808, 1024, 1100, 1440, 1920, 2560 and 3840 px wide, with no overflow, no overlapping labels or tags, and tags inside the chart;
+- the sweep turns at 28°/s idle and about 96°/s while hovering the field;
 - all six story stages render at desktop and phone sizes;
 - the simulated research run completes;
 - reduced-motion versions render their final states.

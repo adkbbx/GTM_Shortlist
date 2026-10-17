@@ -52,34 +52,45 @@
 .account small { display: block; margin-top: .7rem; color: var(--muted); }
 @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
 
-/* Launch vehicle (Eygentic rocket blueprint, relabelled for a research run) */
-.vehicle { position: relative; margin: 0; width: min(100%, 38rem); justify-self: center; }
-.vehicle-stage { position: relative; aspect-ratio: 580 / 620; }
-.vehicle-drawing { position: absolute; top: 0; left: 0; width: 58.62%; height: 100%; overflow: visible; fill: none; stroke: var(--charcoal); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
-.vehicle-drawing .fill-paper { fill: var(--paper); }
-.vehicle-drawing .dashed { stroke-dasharray: 4 4; }
-.vehicle-drawing .payload-bay { stroke: var(--orange); }
-.vehicle-drawing .signal-band { fill: var(--orange); }
-.vehicle-drawing .thin { stroke-width: .8; }
-.vehicle-drawing .hatch { stroke-width: .7; opacity: .55; }
-.vehicle-drawing .shading { stroke-width: .6; opacity: .35; }
-.vehicle-drawing .pin, .vehicle-leaders .pin { fill: var(--orange); stroke: none; }
-.plume { transform-box: view-box; transform-origin: 190px 508px; animation: plumeIgnite 1.8s both 2.2s; }
-.plume-outer, .plume-inner { stroke: none; transform-box: fill-box; transform-origin: 50% 0; }
-.plume-outer { fill: var(--apricot); opacity: .55; animation: plumeFlicker 2s ease-in-out infinite; }
-.plume-inner { fill: var(--orange); opacity: .85; animation: plumeFlicker 1.4s ease-in-out infinite reverse; }
-@keyframes plumeIgnite { 0% { opacity: 0; transform: scale(1, 0); animation-timing-function: cubic-bezier(.15, .85, .3, 1); } 12% { opacity: 1; transform: scale(1, 1.5); animation-timing-function: cubic-bezier(.3, 0, .7, 1); } 40% { transform: scale(1, 1.42); animation-timing-function: cubic-bezier(.45, 0, .25, 1); } 100% { opacity: 1; transform: scale(1, 1); } }
-@keyframes plumeFlicker { 0%, 100% { transform: scale(1, 1); } 30% { transform: scale(.95, .9); } 55% { transform: scale(1.03, 1.06); } 80% { transform: scale(.97, .94); } }
-#craft { transition: translate .9s var(--ease); }
-#craft.lift { translate: 0 -10px; }
-.vehicle-leaders { position: absolute; inset: 0; width: 100%; height: 100%; fill: none; stroke: var(--charcoal); stroke-width: .9; overflow: visible; }
-.vehicle-modules { position: absolute; inset: 0; margin: 0; padding: 0; list-style: none; pointer-events: none; }
-.vehicle-modules li { position: absolute; left: 60.5%; top: var(--y); transform: translateY(-50%); display: grid; gap: .1rem; opacity: 0; translate: -6px 0; transition: opacity .4s var(--ease) var(--dl), translate .4s var(--ease) var(--dl); }
-.vehicle.on .vehicle-modules li { opacity: 1; translate: 0 0; }
-.module-name { font: 600 .92rem/1.3 var(--font); letter-spacing: -.01em; }
-.module-meaning { font-size: .82rem; line-height: 1.35; color: var(--muted); }
-.vehicle .hand { position: absolute; top: 3%; left: 0; width: 26%; display: flex; flex-direction: column; font-size: clamp(.95rem, .7rem + .55vw, 1.2rem); transform: rotate(-8deg); transform-origin: left top; }
-.vehicle .hand span:last-child { color: var(--orange-ink); }
+/* Mission scope: GTM Shortlist's own hero drawing in the Eygentic blueprint language (a sibling of the eygentic.com rocket, not a copy) */
+.scope { position: relative; margin: 0; width: min(100%, 40rem); justify-self: center; }
+.scope-stage { position: relative; }
+.scope-chart { position: relative; aspect-ratio: 600 / 560; }
+.scope-drawing { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; fill: none; stroke: var(--charcoal); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.scope-drawing .fill-paper { fill: var(--paper); }
+.scope-drawing .thin { stroke-width: .8; }
+.scope-drawing .ring-target { stroke: var(--apricot); stroke-width: 1.2; stroke-dasharray: 6 5; }
+.scope-drawing .traj { stroke: var(--charcoal); stroke-width: .9; stroke-dasharray: 3 5; opacity: .55; }
+.scope-drawing .bearing line { stroke-width: .7; }
+.scope-drawing .bearing line.major { stroke-width: 1.2; }
+.scope-drawing .pin { fill: var(--orange); stroke: none; }
+.scope-drawing .wedge-wide { fill: var(--orange); opacity: .07; stroke: none; }
+.scope-drawing .wedge-near { fill: var(--orange); opacity: .14; stroke: none; }
+.scope-drawing .edge { stroke: var(--orange); stroke-width: 1.6; }
+.scope-drawing .sweep { opacity: 0; transition: opacity .8s var(--ease) 1.4s; }
+.scope.on .scope-drawing .sweep { opacity: 1; }
+.scope-drawing .cand { fill: var(--idle); stroke: none; }
+.scope-drawing .lock.ok { stroke: var(--ok); } .scope-drawing .lock.ok rect { fill: var(--ok); }
+.scope-drawing .lock.you { stroke: var(--you); } .scope-drawing .lock.you rect { fill: var(--you); }
+.scope-drawing .lock.fail { stroke: var(--fail); } .scope-drawing .lock.fail rect { fill: var(--fail); }
+.scope-drawing .lock { stroke-width: 1.8; transform-box: fill-box; transform-origin: center; transition: transform .25s var(--ease); }
+.scope-drawing .lock.ping { transform: scale(1.35); }
+.scope-drawing .leaders { stroke-width: .9; }
+.scope-drawing .probe { opacity: 0; }
+.scope-drawing .probe-flame { fill: var(--orange); stroke: none; }
+.scope .tag { position: absolute; left: var(--x); top: var(--y); transform: translate(-50%, -50%); font: 600 .6875rem/1.2 var(--font); letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; color: var(--charcoal); background: var(--paper); padding: .1rem .3rem; }
+.scope .tag-ring { color: var(--orange-ink); }
+.scope .tag-port { transform: translate(-30%, 0); }
+.scope-labels { position: absolute; inset: 0; margin: 0; padding: 0; list-style: none; pointer-events: none; }
+.scope-labels li { position: absolute; left: 81.5%; width: 20%; top: var(--y); transform: translateY(-50%); display: flex; gap: .5rem; align-items: center; opacity: 0; translate: -6px 0; transition: opacity .4s var(--ease) var(--dl), translate .4s var(--ease) var(--dl); }
+.scope-labels li > span:last-child { display: grid; }
+.scope-labels .mark { width: 1.35rem; height: 1.35rem; }
+.scope-labels .mark svg { width: .8rem; height: .8rem; }
+.scope.on .scope-labels li { opacity: 1; translate: 0 0; }
+.module-name { font: 600 .92rem/1.25 var(--font); letter-spacing: -.01em; white-space: nowrap; }
+.module-meaning { font-size: .8rem; line-height: 1.3; color: var(--muted); }
+.scope .hand { position: absolute; left: -3%; top: 82%; display: flex; flex-direction: column; font-size: clamp(.95rem, .7rem + .5vw, 1.15rem); transform: rotate(-8deg); transform-origin: left top; }
+.scope .hand span:last-child { color: var(--orange-ink); }
 
 /* ---------- section scaffolding ---------- */
 .section { padding-block: clamp(4.5rem, 9vw, 8.5rem); border-bottom: 1px solid var(--line); }
@@ -196,17 +207,16 @@ footer .links { display: flex; flex-wrap: wrap; gap: 1.5rem; color: var(--frame-
 /* ---------- responsive ---------- */
 @media (max-width: 1000px) {
   .hero-grid { grid-template-columns: 1fr; }
-  .vehicle { width: min(100%, 32rem); }
+  .scope { width: min(100%, 36rem); }
   .site-head nav { display: none; }
   .duo { grid-template-columns: 1fr; }
   .duo > div + div { border-left: 0; border-top: 1px solid var(--charcoal); }
 }
 @media (max-width: 600px) {
-  .vehicle-stage { aspect-ratio: auto; display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: .75rem 1.25rem; }
-  .vehicle-drawing { position: static; width: 100%; height: auto; }
-  .vehicle-leaders, .vehicle .hand { display: none; }
-  .vehicle-modules { position: static; display: flex; flex-direction: column; justify-content: space-around; }
-  .vehicle-modules li { position: static; transform: none; }
+  .scope .hand, .scope-drawing .leaders { display: none; }
+  .scope-labels { position: static; display: grid; gap: .6rem; margin-top: 1rem; }
+  .scope-labels li { position: static; transform: none; width: auto; }
+  .scope .tag-port { transform: translate(0, 0); }
 }
 @media (max-width: 760px) {
   .trace { height: 760vh; }
@@ -284,58 +294,53 @@ html[data-motion="reduce"] .fade-in { opacity: 1; transform: none; }
         </div>
       </form>
     </div>
-    <figure class="vehicle" id="vehicle" aria-label="A research run drawn as a launch vehicle: your website is the launchpad, your offer the engine, your confirmed target the fuel, evidence the guidance, and your shortlist the payload.">
-      <div class="vehicle-stage">
-        <p class="hand" aria-hidden="true"><span>Site</span><span>Offer</span><span>Target</span><span>Evidence</span><span>You</span></p>
-        <svg class="vehicle-drawing draw" viewBox="0 0 340 620" aria-hidden="true" focusable="false">
-          <path class="cons" d="M190 8V592"/>
-          <g class="launchpad">
-            <path d="M10 580H330" style="--d:0"/>
-            <path class="hatch" d="M20 580l-10 12M44 580l-10 12M68 580l-10 12M92 580l-10 12M116 580l-10 12M140 580l-10 12M164 580l-10 12M188 580l-10 12M212 580l-10 12M236 580l-10 12M260 580l-10 12M284 580l-10 12M308 580l-10 12M332 580l-10 12" style="--d:120"/>
-            <rect x="60" y="540" width="260" height="10" style="--d:200"/>
-            <path d="M96 550L86 580M284 550L294 580M150 550V580M230 550V580" style="--d:280"/>
-            <path d="M96 540V466H124M284 540V466H256" style="--d:380"/>
-            <path class="thin" d="M96 500H110M284 500H270" style="--d:480"/>
-            <circle class="pin" cx="96" cy="500" r="3.4" style="--d:1500"/>
-            <circle id="fuel-point" cx="92" cy="500" r=".01" style="stroke:none"/>
+    <figure class="scope" id="scope" aria-label="Mission scope: your offer is the launch point, the rings are the target you confirm, a sweep scans candidate companies and three are locked as fits, needs a call, or not a fit.">
+      <div class="scope-stage">
+        <div class="scope-chart">
+        <svg class="scope-drawing draw" viewBox="0 0 600 560" aria-hidden="true" focusable="false">
+          <path class="cons" d="M18 290H482M250 48V532"/>
+          <g id="bearing" class="bearing"></g>
+          <circle class="ln" cx="250" cy="290" r="210" style="--d:250"/>
+          <circle class="dashed ring-target" cx="250" cy="290" r="140" style="--d:600"/>
+          <circle class="ln thin" cx="250" cy="290" r="70" style="--d:450"/>
+          <g id="sweep" class="sweep">
+            <path class="wedge-wide fillonly" d="M250 290 L460 290 A210 210 0 0 0 435.4 191.5 Z"/>
+            <path class="wedge-near fillonly" d="M250 290 L460 290 A210 210 0 0 0 455.4 246.3 Z"/>
+            <path class="edge fillonly" d="M250 290 L460 290"/>
           </g>
-          <g id="craft">
-            <g class="plume" id="plume"><g id="thrust">
-              <path class="plume-outer fillonly" d="M166 508C172 548 182 566 190 574C198 566 208 548 214 508Z"/>
-              <path class="plume-inner fillonly" d="M178 508C182 530 186 542 190 548C194 542 198 530 202 508Z"/>
-            </g></g>
-            <g class="rocket">
-              <path class="fill-paper" d="M190 24C168 60 158 110 158 150H222C222 110 212 60 190 24Z" style="--d:1150"/>
-              <path class="thin" d="M162 112H218" style="--d:1250"/>
-              <rect class="dashed payload-bay" x="175" y="80" width="30" height="50" rx="4" style="--d:1300"/>
-              <rect class="fill-paper" x="158" y="150" width="64" height="300" style="--d:800"/>
-              <rect class="signal-band" x="158" y="170" width="64" height="20" style="--d:1100"/>
-              <path class="thin" d="M158 206H222M158 430H222" style="--d:950"/>
-              <rect class="dashed" x="168" y="216" width="44" height="96" rx="12" style="--d:1050"/>
-              <rect class="dashed" x="168" y="322" width="44" height="96" rx="12" style="--d:1000"/>
-              <path class="thin" d="M190 312V322M190 418V450" style="--d:1050"/>
-              <path class="fill-paper" d="M158 380L124 452V476L158 450Z" style="--d:750"/>
-              <path class="fill-paper" d="M222 380L256 452V476L222 450Z" style="--d:750"/>
-              <path class="fill-paper" d="M166 450H214L208 466H172Z" style="--d:650"/>
-              <path class="fill-paper" d="M176 466H204L216 506H164Z" style="--d:600"/>
-              <path class="thin" d="M181 474L174 502M190 474V502M199 474L206 502" style="--d:700"/>
-            </g>
-            <g class="shading"><path d="M200 44C208 70 214 104 215 146M205 156V444M212 156V444" style="--d:1350"/></g>
+          <g id="cands"></g>
+          <path class="dashed traj" id="traj" d="M250 290 C 292 272, 330 238, 356 192 S 410 96, 492 54" style="--d:1300"/>
+          <circle class="ln fill-paper" cx="250" cy="290" r="24" style="--d:100"/>
+          <path class="thin" d="M232 278l36 0M228 290h44M232 302h36" style="--d:300"/>
+          <circle class="pin" cx="250" cy="290" r="4" style="--d:900"/>
+          <path d="M34 280h14v20H34z" class="fill-paper" style="--d:500"/>
+          <circle class="pin" cx="34" cy="290" r="3.4" style="--d:1000"/>
+          <circle id="entry-point" cx="30" cy="290" r=".01" style="stroke:none"/>
+          <circle id="entry-top" cx="250" cy="66" r=".01" style="stroke:none"/>
+          <path d="M243 80h14v-14h-14z" class="fill-paper" style="--d:520"/>
+          <g class="lock ok" style="--d:1500"><path d="M356 189v-5h5M369 184h5v5M374 198v5h-5M361 203h-5v-5"/><rect x="362" y="191" width="6" height="6" class="fillonly"/></g>
+          <g class="lock you" style="--d:1700"><path d="M420 333v-5h5M433 328h5v5M438 342v5h-5M425 347h-5v-5"/><rect x="426" y="335" width="6" height="6" class="fillonly"/></g>
+          <g class="lock fail" style="--d:1900"><path d="M297 380v-5h5M310 375h5v5M315 389v5h-5M302 394h-5v-5"/><rect x="303" y="382" width="6" height="6" class="fillonly"/></g>
+          <g class="leaders">
+            <path d="M374 186L418 142H486" style="--d:1600"/>
+            <path d="M438 330L452 304H486" style="--d:1800"/>
+            <path d="M315 392L362 432H486" style="--d:2000"/>
+          </g>
+          <g id="probe" class="probe">
+            <path class="probe-flame fillonly" d="M-6 -2.4L-15 0L-6 2.4Z"/>
+            <path class="fill-paper" d="M11 0C7 -3.6 2 -4.6 -6 -4.6L-6 4.6C2 4.6 7 3.6 11 0Z"/>
+            <path d="M-6 -4.6L-10 -9M-6 4.6L-10 9"/>
           </g>
         </svg>
-        <svg class="vehicle-leaders draw" viewBox="0 0 580 620" aria-hidden="true" focusable="false">
-          <path d="M300 545H342" style="--d:1500"/><circle class="pin" cx="300" cy="545" r="3" style="--d:1600"/>
-          <path d="M212 488L342 440" style="--d:1750"/><circle class="pin" cx="212" cy="488" r="3" style="--d:1850"/>
-          <path d="M212 300H342" style="--d:2000"/><circle class="pin" cx="212" cy="300" r="3" style="--d:2100"/>
-          <path d="M222 180H342" style="--d:2250"/><circle class="pin" cx="222" cy="180" r="3" style="--d:2350"/>
-          <path d="M206 100L342 104" style="--d:2500"/><circle class="pin" cx="206" cy="100" r="3" style="--d:2600"/>
-        </svg>
-        <ol class="vehicle-modules">
-          <li style="--y:16.8%;--dl:2.6s"><span class="module-name accent">Your shortlist</span><span class="module-meaning">Payload · up to three companies</span></li>
-          <li style="--y:29%;--dl:2.35s"><span class="module-name">Evidence</span><span class="module-meaning">Guidance · exact source words</span></li>
-          <li style="--y:48.4%;--dl:2.1s"><span class="module-name">Target</span><span class="module-meaning">Fuel · you confirm it</span></li>
-          <li style="--y:71%;--dl:1.85s"><span class="module-name">Offer</span><span class="module-meaning">Engine · drafted from your site</span></li>
-          <li style="--y:87.1%;--dl:1.6s"><span class="module-name">Your website</span><span class="module-meaning">Launchpad · read once, saved</span></li>
+        <span class="tag tag-center" style="--x:41.67%;--y:59.8%">Your offer</span>
+        <span class="tag tag-ring" style="--x:41.67%;--y:23.4%">Target · you set the radius</span>
+        <span class="tag tag-port" style="--x:5.67%;--y:56.6%">Your site</span>
+        <p class="hand" aria-hidden="true"><span>Launch</span><span>Scan</span><span>Lock</span><span>Check</span><span>You</span></p>
+        </div>
+        <ol class="scope-labels">
+          <li style="--y:25%;--dl:1.7s"><span class="mark ok"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m4 8 3 3 5-6"/></svg></span><span><span class="module-name">Fits</span><span class="module-meaning">Source passage saved</span></span></li>
+          <li style="--y:54.3%;--dl:1.9s"><span class="mark you"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h8M8 4v8"/></svg></span><span><span class="module-name">Needs a call</span><span class="module-meaning">Budget owner unknown</span></span></li>
+          <li style="--y:77.1%;--dl:2.1s"><span class="mark fail"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 5 6 6m0-6-6 6"/></svg></span><span><span class="module-name">Not a fit</span><span class="module-meaning">Matches an exclusion</span></span></li>
         </ol>
       </div>
     </figure>
@@ -487,37 +492,78 @@ html[data-motion="reduce"] .fade-in { opacity: 1; transform: none; }
   const head = $('.site-head');
   P.onScroll((y) => head.classList.toggle('scrolled', y > 20));
 
-  /* hero flow lines: grey lines rise into the company field; orange fuel lines run from the field into the launch tower.
-     In the stacked layout only the fuel lines are drawn, dropping from the field to the rocket below, so nothing crosses the drawing. */
-  const hero = $('.hero'), field = $('#intake-row'), fuelPt = $('#fuel-point'), thrust = $('#thrust'), craft = $('#craft'), vehicle = $('#vehicle');
+  /* hero flow lines + mission scope. Grey lines rise into the company field; orange lines run from the field into the scope's
+     entry port (left port in two columns, top port when stacked, so no line crosses the drawing). The sweep and the probe
+     speed up with the same value as the lines: hover and focus, then typing. */
+  const hero = $('.hero'), field = $('#intake-row'), scope = $('#scope');
+  const entry = $('#entry-point'), entryTop = $('#entry-top'), sweep = $('#sweep'), probe = $('#probe'), traj = $('#traj');
+  const NS = 'http://www.w3.org/2000/svg', CX = 250, CY = 290;
+  const bearing = $('#bearing');
+  for (let a = 0; a < 360; a += 5) {
+    const r = a * Math.PI / 180, major = a % 30 === 0, r2 = major ? 224 : 217;
+    const l = document.createElementNS(NS, 'line');
+    l.setAttribute('x1', (CX + 210 * Math.cos(r)).toFixed(1)); l.setAttribute('y1', (CY + 210 * Math.sin(r)).toFixed(1));
+    l.setAttribute('x2', (CX + r2 * Math.cos(r)).toFixed(1)); l.setAttribute('y2', (CY + r2 * Math.sin(r)).toFixed(1));
+    if (major) l.setAttribute('class', 'major'); l.style.setProperty('--d', 300 + a * 2); bearing.appendChild(l);
+  }
+  const lockPts = [[365, 194], [429, 338], [306, 385]];
+  const lockAng = lockPts.map(([x, y]) => ((Math.atan2(y - CY, x - CX) * 180 / Math.PI) + 360) % 360);
+  const candG = $('#cands'), cands = []; let seed = 11;
+  const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  while (cands.length < 22) {
+    const ang = rnd() * 360, rad = 42 + rnd() * 160, a = ang * Math.PI / 180, x = CX + rad * Math.cos(a), y = CY + rad * Math.sin(a);
+    if (lockPts.some(([lx, ly]) => Math.hypot(lx - x, ly - y) < 22) || Math.hypot(x - 356, y - 192) < 30) continue;
+    const s = document.createElementNS(NS, 'rect'); s.setAttribute('x', (x - 2).toFixed(1)); s.setAttribute('y', (y - 2).toFixed(1)); s.setAttribute('width', 4); s.setAttribute('height', 4); s.setAttribute('class', 'cand fillonly');
+    candG.appendChild(s); cands.push({ el: s, ang });
+  }
+  const locks = [...document.querySelectorAll('.scope .lock')];
+  const trajLen = traj.getTotalLength();
+  let angle = 200, pt = 0.15;
+  function placeProbe(t) {
+    const L = trajLen * t, p = traj.getPointAtLength(L), q = traj.getPointAtLength(Math.min(trajLen, L + 2));
+    const rot = Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI;
+    probe.setAttribute('transform', `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${rot.toFixed(1)}) scale(1.5)`);
+    probe.style.opacity = scope.classList.contains('on') ? Math.min(1, t * 6, (1 - t) * 5).toFixed(2) : 0;
+  }
+  function paintScope() {
+    sweep.setAttribute('transform', `rotate(${angle.toFixed(2)} ${CX} ${CY})`);
+    for (const c of cands) { const d = ((angle - c.ang) % 360 + 360) % 360, hit = d < 50 ? 1 - d / 50 : 0; c.el.style.fill = hit > 0.02 ? '#d5682f' : ''; c.el.style.opacity = (0.4 + 0.6 * hit).toFixed(2); }
+    locks.forEach((l, i) => { const d = ((angle - lockAng[i]) % 360 + 360) % 360; l.classList.toggle('ping', d < 12); });
+  }
+  function scopeFrame(mult, dt) {
+    if (P.reduced) return;
+    const k = 1 + (mult - 1) * 0.22;
+    angle = (angle + dt * 28 * k) % 360;
+    pt += dt * 0.15 * (1 + (mult - 1) * 0.12); if (pt > 1) pt = 0;
+    paintScope(); placeProbe(pt);
+  }
   const heroGeometry = (box) => {
-    const hb = box.getBoundingClientRect(), fb = field.getBoundingClientRect(), pb = fuelPt.getBoundingClientRect();
+    const hb = box.getBoundingClientRect(), fb = field.getBoundingClientRect();
     const fx = fb.left - hb.left, fy = fb.top - hb.top + fb.height / 2, fr = fb.right - hb.left, fbot = fb.bottom - hb.top;
-    const px = pb.left - hb.left, py = pb.top - hb.top, span = fr - fx, curves = [];
+    const span = fr - fx, curves = [];
     if (innerWidth > 1000) {
-      const N = 9, fb2 = fbot + 3;
+      const pb = entry.getBoundingClientRect(), px = pb.left - hb.left, py = pb.top - hb.top, N = 9, fb2 = fbot + 3;
       for (let i = 0; i < N; i++) {
         const k = i / (N - 1), x0 = Math.max(0, fx - span * 0.35) + k * span * 1.25, y0 = hb.height, xe = fx + span * (0.12 + 0.6 * k);
         curves.push({ p: [[x0, y0], [x0, y0 - (y0 - fb2) * 0.55], [xe, fb2 + (y0 - fb2) * 0.45], [xe, fb2]], len: 1.1 });
       }
       for (let i = 0; i < 5; i++) {
         const off = (i - 2) * 3;
-        curves.push({ p: [[fr + 6, fy + off], [fr + (px - fr) * 0.55, fy + off], [px - 70, py + off * 1.5], [px, py + off * 1.2]], hot: true, dots: 2, len: 0.9, color: 'rgba(180,80,28,.28)' });
+        curves.push({ p: [[fr + 6, fy + off], [fr + (px - fr) * 0.5, fy + off], [px - (px - fr) * 0.35, py + off * 1.4], [px, py + off]], hot: true, dots: 2, len: 0.9, color: 'rgba(180,80,28,.28)' });
       }
-    } else if (py > fbot) {
-      for (let i = 0; i < 7; i++) {
+    } else {
+      const pb = entryTop.getBoundingClientRect(), px = pb.left - hb.left, py = pb.top - hb.top;
+      if (py > fbot) for (let i = 0; i < 7; i++) {
         const k = i / 6, x0 = fx + span * (0.18 + 0.64 * k), off = (i - 3) * 3;
-        curves.push({ p: [[x0, fbot + 4], [x0, fbot + (py - fbot) * 0.55], [px - 90 + off, py + off], [px, py + off * 0.8]], hot: i % 2 === 0, dots: 2, len: 0.9, color: 'rgba(180,80,28,.22)' });
+        curves.push({ p: [[x0, fbot + 4], [x0, fbot + (py - fbot) * 0.55], [px + off * 2, py - (py - fbot) * 0.35], [px + off, py]], hot: i % 2 === 0, dots: 2, len: 0.9, color: 'rgba(180,80,28,.22)' });
       }
     }
     return curves;
   };
-  // the plume grows with the flow: hover and focus about 1.3x, typing about 1.6x
-  const heroFlow = new P.FlowLines($('.hero canvas.flow'), heroGeometry, {
-    onSpeed: (mult) => { const k = 1 + 0.6 * Math.min(1, Math.max(0, (mult - 1) / 23)); thrust.setAttribute('transform', `translate(190 508) scale(1 ${k.toFixed(3)}) translate(-190 -508)`); },
-  });
-  const showLabels = () => vehicle.classList.add('on');
-  if (P.reduced) showLabels(); else new IntersectionObserver((es, o) => { if (es[0].isIntersecting) { showLabels(); o.disconnect(); } }, { threshold: 0.25 }).observe(vehicle);
+  const heroFlow = new P.FlowLines($('.hero canvas.flow'), heroGeometry, { onSpeed: scopeFrame });
+  const showScope = () => scope.classList.add('on');
+  if (P.reduced) { showScope(); angle = 330; paintScope(); placeProbe(0.55); }
+  else new IntersectionObserver((es, o) => { if (es[0].isIntersecting) { showScope(); o.disconnect(); } }, { threshold: 0.25 }).observe(scope);
   const input = $('#company');
   field.addEventListener('mouseenter', () => heroFlow.setHover(true));
   field.addEventListener('mouseleave', () => heroFlow.setHover(document.activeElement === input));
@@ -548,7 +594,7 @@ html[data-motion="reduce"] .fade-in { opacity: 1; transform: none; }
     $('#account-company').textContent = input.value.trim();
     $('#account-title').textContent = 'Save this research to an account';
     account.classList.remove('open'); void account.offsetWidth; account.classList.add('open');
-    heroFlow.boost(2400); if (!P.reduced) { craft.classList.add('lift'); setTimeout(() => craft.classList.remove('lift'), 900); }
+    heroFlow.boost(2400); if (!P.reduced) { locks.forEach((l) => l.classList.add('ping')); setTimeout(() => locks.forEach((l) => l.classList.remove('ping')), 700); }
   });
   document.querySelectorAll('[data-open-account]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); $('#account-title').textContent = 'Sign in to your shortlist'; $('#account-company').textContent = input.value.trim() || '—'; account.classList.add('open'); P.scrollToY(0); }));
   $('#account-go').addEventListener('click', () => { $('#account-msg').textContent = 'Prototype only: in the product this creates the account, then returns to target confirmation with your company filled in.'; });
