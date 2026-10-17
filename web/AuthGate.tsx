@@ -71,7 +71,7 @@ function AccountForm({ client, setup, recovery, expired, externalError, onRecove
     </aside><section className="sheet account-sheet" aria-labelledby="account-heading">
     <h1 id="account-heading">{confirmationSent ? 'Check your inbox' : title}</h1>
     <p className="intro">{confirmationSent ? 'Verify your email to finish creating your research workspace.' : mode === 'signup' ? 'Create a workspace for your company research. We will email you a confirmation link.' : mode === 'reset' ? 'Enter your account email and we will send a password reset link.' : recovery ? 'Set a new password to reopen your workspace.' : 'Welcome back. Open your saved company research.'}</p>
-    {keptCompany && !recovery && !confirmationSent && mode !== 'reset' && <p className="notice kept-company" role="status">We kept <strong>{keptCompany}</strong>. {mode === 'signup' ? 'Create your account' : 'Sign in'}, then start research from your workspace. Nothing runs until you confirm the target.</p>}
+    {keptCompany && !recovery && !confirmationSent && mode !== 'reset' && <p className="notice kept-company" role="status">Research for <strong>{keptCompany}</strong> starts as soon as you {mode === 'signup' ? 'confirm your email and sign in' : 'sign in'}. Company discovery waits until you confirm the target.</p>}
     {expired && <p className="notice" role="status">Your session needs verification. Sign in again to reopen your saved research.</p>}
     {externalError && <p className="notice" role="alert">{externalError}</p>}
     {error && <p className="notice" role="alert">{error}</p>}{notice && <p className="notice" role="status">{notice}</p>}

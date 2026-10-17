@@ -24,7 +24,7 @@ async function capture(page: Page, path: string) {
   await page.screenshot({ path });
 }
 
-test('anonymous hosted visitors get the landing page and keep their company through sign-in without starting research', async ({ page }, info) => {
+test('anonymous hosted visitors get the landing page, and the research they started begins once they sign in', async ({ page }, info) => {
   await hosted(page);
   const research: string[] = [];
   page.on('request', request => { const path = new URL(request.url()).pathname; if (path.startsWith('/api/') && path !== '/api/auth/setup') research.push(`${request.method()} ${path}`); });
@@ -40,17 +40,29 @@ test('anonymous hosted visitors get the landing page and keep their company thro
   await page.getByLabel('Start with your company', { exact: true }).press('Enter');
   await expect(page).toHaveURL(/\?auth=signup$/);
   await expect(page.getByRole('heading', { name: 'Create your account' })).toBeVisible();
-  await expect(page.getByRole('status')).toContainText('We kept acme-analytics.example');
+  await expect(page.getByRole('status')).toContainText('Research for acme-analytics.example starts as soon as you confirm your email and sign in');
   expect(research).toEqual([]);
 
   await page.getByRole('button', { name: 'Back to sign in' }).click();
   await page.getByLabel('Email', { exact: true }).fill('landing@example.test');
   await page.getByLabel('Password', { exact: true }).fill('labelled-fixture-password');
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-  await expect(page.getByLabel('Company name or website', { exact: true })).toHaveValue('acme-analytics.example');
-  await expect(page).not.toHaveURL(/auth=/);
-  expect(research.filter(call => call.startsWith('POST /api/runs'))).toEqual([]);
-  await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toHaveCount(0);
+  // No second Start research: the press on the landing page starts exactly one run after sign-in.
+  await expect(page).toHaveURL(/\?run=/);
+  await expect(page.getByLabel('Company name or website', { exact: true })).toHaveCount(0);
+  expect(research.filter(call => call === 'POST /api/sellers')).toHaveLength(1);
+});
+
+test('the local landing preview starts research in one press and opens the run', async ({ page }) => {
+  await page.route('**/api/runs', route => route.request().method() === 'GET' ? route.fulfill({ json: [] }) : route.fallback());
+  const starts: string[] = [];
+  page.on('request', request => { if (request.method() === 'POST' && new URL(request.url()).pathname === '/api/sellers') starts.push(request.url()); });
+  await page.goto('/?landing=1');
+  await page.getByRole('combobox', { name: 'Start with your company' }).fill('https://eygentic.com/');
+  await page.getByRole('button', { name: 'Start research', exact: true }).first().click();
+  await expect(page).toHaveURL(/\?run=/);
+  expect(starts).toHaveLength(1);
+  await expect(page.locator('#pl-hero-title')).toHaveCount(0);
 });
 
 test('header sign-in opens the account form and browser back returns to the landing page', async ({ page }) => {

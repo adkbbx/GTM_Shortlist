@@ -109,7 +109,7 @@ function Hero({ reduced, onStart, directoryId, iconLookup, instrumentRef }: { re
                 onChange={value => { setInvite(false); setCompany(value); stream.current?.boost(1100); }} /></div>
             <button className="pl-btn pl-btn-primary pl-btn-block" type="submit" disabled={starting} aria-busy={starting}>{starting ? 'Starting research' : 'Start research'} <Arrow /></button>
           </div>
-          <p className="pl-note"><Lock /><span>Nothing runs until you confirm the target.</span></p>
+          <p className="pl-note"><Lock /><span>Discovery waits until you confirm the target.</span></p>
           <span className="pl-port" aria-hidden="true" />
         </form>
         <div className="pl-stream" ref={streamEl} aria-hidden="true">
@@ -378,7 +378,7 @@ function Closing({ reduced, onStart }: { reduced: boolean; onStart: (company: st
         <div className={`pl-field${shake % 2 ? ' shake' : shake ? ' shake-b' : ''}`}><input ref={field} aria-label="Company name or website" placeholder="yourcompany.com" spellCheck={false} autoCapitalize="off" maxLength={300} value={company} onChange={event => setCompany(event.target.value)} /></div>
         <button className="pl-btn pl-btn-primary" type="submit">Start research <Arrow /></button>
       </form>
-      <p className="pl-note"><Lock /><span>Nothing runs until you confirm the target.</span></p>
+      <p className="pl-note"><Lock /><span>Discovery waits until you confirm the target.</span></p>
     </div>
   </section>;
 }

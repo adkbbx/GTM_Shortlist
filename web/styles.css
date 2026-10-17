@@ -138,3 +138,6 @@ input[type=checkbox]:focus { box-shadow: none; }
    long heading words hyphenate or break and the first-visit heading takes the column width instead of its widest child. */
 @media(max-width:600px){h1,h2,h3,h4{overflow-wrap:anywhere;hyphens:auto}.new-research .page-heading{width:100%}}
 header.topbar .brand>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+
+/* Landing handoff: research is starting from the company typed on the public landing page. */
+.handoff-status{display:flex;align-items:center;gap:.625rem;margin-top:1.25rem;font-weight:600;color:var(--ink)}
