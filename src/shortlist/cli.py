@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 from datetime import timedelta
 from pathlib import Path
 from uuid import UUID
@@ -11,6 +12,18 @@ from shortlist.local_server import serve
 from shortlist.providers import CapturedSearch
 from shortlist.store import Store
 from shortlist.worker import execute_run, work
+
+# Plans until payments exist: operator grants on top of the 3 free signup credits, never a payment.
+# "pro" is a customer-facing test plan; "dev" is internal and only for workspaces in SHORTLIST_INTERNAL_WORKSPACES.
+PLAN_CREDITS = {"pro": 50, "dev": 500}
+
+
+def internal_workspaces() -> set[UUID]:
+    values = (value.strip() for value in os.getenv("SHORTLIST_INTERNAL_WORKSPACES", "").split(","))
+    try:
+        return {UUID(value) for value in values if value}
+    except ValueError:
+        raise SystemExit("SHORTLIST_INTERNAL_WORKSPACES must be comma-separated Supabase user IDs") from None
 
 
 def main():
@@ -49,6 +62,11 @@ def main():
     closure = sub.add_parser("close-account", help="Server-only irreversible managed account closure (up to100 runs per call)")
     closure.add_argument("--workspace", type=UUID, required=True)
     closure.add_argument("--confirm", type=UUID, required=True, help="Repeat the exact workspace UUID to confirm closure")
+    grant = sub.add_parser("grant-credits", help="Server-only operator credit grant for testing or an agreed pilot; never a payment")
+    grant.add_argument("--workspace", type=UUID, required=True, help="The account's Supabase user ID; it must have signed in once")
+    grant.add_argument("--plan", choices=tuple(PLAN_CREDITS), help="pro adds 50 credits; dev (internal accounts only) adds 500")
+    grant.add_argument("--credits", type=int, choices=range(1, 10001), metavar="1-10000", help="Exact credits instead of a plan")
+    grant.add_argument("--key", help="Operation key; repeating a key never grants twice (default: plan, credits and date)")
     args = parser.parse_args()
     settings = Settings.load()
     if args.command not in ("serve", "worker", "close-account"):
@@ -60,6 +78,28 @@ def main():
         print(result.model_dump_json())
         if result.state == "closing":
             raise SystemExit(2)
+        return
+    if args.command == "grant-credits":
+        if settings.mode != "hosted" or not settings.worker_database_url.get_secret_value():
+            parser.error("Credit grants are hosted-only and need the separate worker database credential")
+        if (args.plan is None) == (args.credits is None):
+            parser.error("Choose exactly one of --plan or --credits")
+        if args.plan == "dev" and args.workspace not in internal_workspaces():
+            parser.error("dev is internal: add this Supabase user ID to SHORTLIST_INTERNAL_WORKSPACES first")
+        quantity = args.credits or PLAN_CREDITS[args.plan]
+        key = args.key or f"operator-{args.plan or 'credits'}-{quantity}-{utcnow():%Y-%m-%d}"
+        label = f"{args.plan.title()} test plan" if args.plan else "Operator credits"
+        import psycopg
+
+        from shortlist.credits import CreditWallet
+        from shortlist.postgres import PostgresStore
+        wallet = CreditWallet(PostgresStore(settings.worker_database_url, args.workspace, worker=True))
+        try:
+            wallet.grant(quantity, key, f"{label}: operator grant, no payment")
+        except psycopg.errors.ForeignKeyViolation:
+            parser.error("No workspace for this user yet: sign in once with the account, then grant credits")
+        print(json.dumps({"workspace": str(args.workspace), "granted": quantity, "operation_key": key,
+                          **wallet.balance().model_dump()}))
         return
     if args.command == "config":
         print(json.dumps({"db": str(settings.db_path), "providers": settings.readiness()}))

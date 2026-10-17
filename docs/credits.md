@@ -89,6 +89,26 @@ Confirmed batches now replace the one-demo restriction. Previously granted legac
 
 A completed or partial confirmed run now offers Reuse this offer. It copies only the saved offer, target, criteria and exclusions into a new editable draft; no website/model profiling, source research or customer review is copied. The draft requires a fresh explicit confirmation and an upfront batch-cost quote. Balance and one-active-run guards still apply; there is no signup grant or research credit bypass. Automated profiling limits do not block this path because it makes no profiling call. Prior run inputs remain immutable. New research may return companies from earlier batches, which the confirmation screen states before charging.
 
+## Test plans before payments
+
+Until checkout exists, an operator grants credits from the server with the worker credential; it is never a payment and customers never see a plan name (credit activity shows "Credits added").
+
+| Plan | Credits | Who |
+|---|---|---|
+| free | 3 signup credits, automatic | Every verified account |
+| pro | +50 | Customer-facing test plan for invited testers |
+| dev | +500 | Internal only: the workspace must be listed in `SHORTLIST_INTERNAL_WORKSPACES` on the worker |
+
+Any granted account counts as paid: it is no longer limited to three automated seller drafts, but keeps the ten-drafts-per-day cap and the one-active-run rule. Run on the worker service (Render: worker → Shell), after the account has signed in once:
+
+```sh
+python -m shortlist.cli grant-credits --workspace <supabase-user-id> --plan pro
+python -m shortlist.cli grant-credits --workspace <supabase-user-id> --plan dev        # internal accounts only
+python -m shortlist.cli grant-credits --workspace <supabase-user-id> --credits 20 --key pilot-acme-1
+```
+
+Repeating a command with the same key (by default plan, credits and date) never grants twice. Credits do not add provider budget: hosted research still spends the operator's search, fetch and model allowances.
+
 ## Recent activity API
 
 GET /api/credits/history returns up to50 committed signup/addition/usage/refund entries for the verified owner, with entry identity, integer amount and timestamp. The next_cursor value can be sent as before to read earlier entries. The server resolves the UUID anchor only inside the verified workspace, compares the immutable timestamp/identity pair, and fetches one extra row to determine whether another page exists. Malformed cursors fail validation; unknown and foreign-owner cursors have identical unavailable-page responses. Local unmetered mode returns an empty list.

@@ -617,6 +617,25 @@ def test_credit_concurrent_reservations_cannot_overspend(owners):
     assert wallet.balance().used == 1
 
 
+def test_grant_credits_command_adds_a_test_plan_once_and_needs_an_existing_account(owners, monkeypatch, capsys):
+    from shortlist import cli
+    a, _, worker, _ = owners
+    hosted = Settings(mode="hosted", app_url="https://app.example", supabase_url="https://auth.example",
+                      supabase_publishable_key="sb_publishable_fixture", database_url="postgresql://unused",
+                      worker_database_url=worker.get_secret_value())
+    monkeypatch.setattr(cli.Settings, "load", staticmethod(lambda: hosted))
+    command = ["shortlist", "grant-credits", "--workspace", str(a.workspace_id), "--plan", "pro"]
+    monkeypatch.setattr(sys, "argv", command)
+    cli.main()
+    assert json.loads(capsys.readouterr().out)["available"] == 53
+    cli.main()  # The same day and plan reuse one operation key, so nothing is granted twice.
+    assert CreditWallet(a).balance().available == 53
+    monkeypatch.setattr(sys, "argv", ["shortlist", "grant-credits", "--workspace", str(uuid4()), "--credits", "5"])
+    with pytest.raises(SystemExit):
+        cli.main()
+    assert "sign in once" in capsys.readouterr().err
+
+
 def test_credit_grants_replay_once_and_ledger_cannot_be_changed(owners):
     a, b, worker, _ = owners
     wallet = CreditWallet(a)
