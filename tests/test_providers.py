@@ -86,7 +86,7 @@ def test_worker_real_database_flow(tmp_path, example):
     run = reopened.get_run(run_id)
     assert run["status"] == "ready"
     assert len(run["records"]) == 1
-    assert len(run["attempts"]) == 5
+    assert len(run["attempts"]) == 6  # Three searches (one company is low yield), one fetch, research and verification.
     assert not execute_run(reopened, settings, run_id)
     reopened.review(run_id, run["records"][0]["research"]["id"], Review(decision="accepted"))
     exported = export_run(reopened.get_run(run_id), "json", accepted_only=True)

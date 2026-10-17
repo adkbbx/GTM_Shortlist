@@ -50,6 +50,9 @@ from shortlist.verification import (
     unavailable,
 )
 
+# Fewer unique companies than one selection pool after the planned discovery searches: try one more query.
+LOW_YIELD = 6
+
 
 def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search | None = None,
                 model: Gemma | None = None, fetch: Callable[..., Source] = fetch_page, sample_pace: float = 1.0) -> bool:
@@ -243,6 +246,9 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
             completed_queries = checkpoint.get("completed_queries", [])
             for index, query in enumerate(queries_for(profile, checkpoint.get("discovery_terms"), policy=discovery_policy)):
                 if checkpoint.get("use_saved_discovery") or index in completed_queries or str(index) in checkpoint.get("discovery_failures", {}):
+                    continue
+                # The extra query is spent only when the first two left too few companies, and never past the run's cap.
+                if index >= 2 and (len({c["domain"] for c in discovered}) >= LOW_YIELD or not room("search", 1)):
                     continue
                 try:
                     candidates = call("search", search.name, f"search:{index}", lambda q=query: search.search(q, profile.seller_url),

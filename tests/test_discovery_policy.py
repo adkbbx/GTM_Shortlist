@@ -57,9 +57,11 @@ def test_policy_two_asks_for_companies_own_pages_and_policy_one_is_unchanged():
     profile = Profile(seller_url="https://seller.example/", offer="Customer acquisition experiments for software companies",
                       target="B2B and SaaS companies of any size or stage, seeking predictable growth",
                       criteria=(Criterion(id="software", description="Sells software to businesses"),))
-    assert queries_for(profile, policy=2) == ("B2B SaaS company official website", "B2B SaaS company pricing")
+    assert queries_for(profile, policy=2) == (
+        "B2B SaaS company official website", "B2B SaaS company pricing", "B2B SaaS company about us")
     assert queries_for(profile, "Dental clinics in Ontario", policy=2) == (
-        "Dental clinics Ontario company official website", "Dental clinics Ontario company about us")
+        "Dental clinics Ontario company official website", "Dental clinics Ontario company about us",
+        "Dental clinics Ontario company products services")
     assert queries_for(profile) == (f"{profile.target} software company official website", f"{profile.target} startup platform pricing")
     assert queries_for(profile, "global e-commerce") == (
         "global e-commerce company official website", "global e-commerce company (hiring OR expansion OR launch OR funding) official")

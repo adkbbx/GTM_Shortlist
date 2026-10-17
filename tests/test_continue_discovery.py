@@ -105,6 +105,7 @@ def test_worker_keeps_candidates_from_one_query_when_another_fails(tmp_path):
 
     assert execute_run(store, settings, identity, search=Search(), model=Model(), fetch=fetch)
     run = store.get_run(identity)
-    assert len(calls) == 2 and len(run["records"]) == 1 and run["status"] == "partial"
+    # One company is too few, so the low-yield query runs once; the failed query stays recorded and the run partial.
+    assert len(calls) == 3 and calls[2].endswith("about us") and len(run["records"]) == 1 and run["status"] == "partial"
     assert run["checkpoint"]["discovery_failures"] == {"1": "Labelled independent search failure"}
     assert not execute_run(store, settings, identity, search=Search(), model=Model(), fetch=fetch)

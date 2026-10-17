@@ -211,7 +211,8 @@ test('market observations and editable campaigns persist into confirmed targetin
   expect(saved.profile.target).toBe('Private AI B2B SaaS startups in edited test segment');
   expect(saved.discovery_terms).toBe('AI business software edited search segment');
   expect(saved.market.campaigns).toHaveLength(6);
-  expect(saved.attempts.filter((a: { kind: string }) => a.kind === 'search')).toHaveLength(3);
+  // Market search, two discovery searches, and the low-yield search: two fixture companies are fewer than one pool.
+  expect(saved.attempts.filter((a: { kind: string }) => a.kind === 'search')).toHaveLength(4);
   expect(saved.attempts.filter((a: { kind: string }) => a.kind === 'model')).toHaveLength(6);
   const draft = saved.records[0].email_draft;
   const elsewhere = await page.request.post(`/api/runs/${identity}/records/${saved.records[0].research.id}/email-draft`, {

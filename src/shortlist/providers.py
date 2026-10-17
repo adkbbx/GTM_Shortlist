@@ -8,6 +8,7 @@ import httpx
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
 from shortlist.config import Settings
+from shortlist.criteria import rarely_public
 from shortlist.domain import (
     Candidate,
     CompanyFact,
@@ -150,8 +151,10 @@ def queries_for(profile: Profile, discovery_terms: str | None = None, policy: in
         # Ask for the companies' own pages: an official site, and a pricing (software) or about page, which only the
         # company itself publishes. Long target sentences and event words returned articles, lists and job boards.
         phrase = search_phrase(discovery_terms or profile.target)
-        anchor = "pricing" if SOFTWARE_WORDS & set(phrase.casefold().split()) else "about us"
-        return (f"{phrase} company official website", f"{phrase} company {anchor}")
+        software = bool(SOFTWARE_WORDS & set(phrase.casefold().split()))
+        # The third query runs only when the first two leave too few companies (see worker.LOW_YIELD).
+        return (f"{phrase} company official website", f"{phrase} company {'pricing' if software else 'about us'}",
+                f"{phrase} company {'about us' if software else 'products services'}")
     target = (discovery_terms or profile.target)[:300]
     if discovery_terms:
         return (f'{target} company official website', f'{target} company (hiring OR expansion OR launch OR funding) official')
@@ -316,8 +319,10 @@ def recover_customer_draft(data: dict) -> SellerDraft:
                     criterion.customer_characteristic, re.IGNORECASE):
                 reason = "Assumes internal needs or performance. Replace with a publicly observable customer characteristic."
             if reason is None:
+                # Ownership, funding stage and financial thresholds are rarely on a company's own site; as required
+                # checks they hold every company at Needs verification, so drafted ones start as nice to have.
                 criteria.append(Criterion(id=criterion.id, description=criterion.customer_characteristic,
-                                          required=criterion.required))
+                                          required=criterion.required and not rarely_public(criterion.customer_characteristic)))
                 seen.add(criterion.id)
         except ValidationError:
             reason = "Not a valid target-customer criterion. Write a clear customer characteristic."

@@ -57,15 +57,16 @@ def test_actual_process_death_after_outcome_replays_without_paid_dispatch(setup,
                 "WHERE a.run_id=? AND a.operation_key LIKE 'model:%'", (run_id,)).fetchone()[0])
         assert people == payload["people"]
     calls = [json.loads(line)["kind"] for line in store.path.with_suffix(".calls.jsonl").read_text().splitlines()]
-    assert calls == ["search", "search", "fetch", "model", "verify"]
-    assert len(saved["attempts"]) == 5
+    # One company from two searches is low yield, so discovery policy 2 spends its one extra search.
+    assert calls == ["search", "search", "search", "fetch", "model", "verify"]
+    assert len(saved["attempts"]) == 6
     store.review(run_id, saved["records"][0]["research"]["id"], Review(decision="accepted", reason="Fixture review"))
     with store.connection() as db:
         db.execute("UPDATE runs SET status='queued' WHERE id=?", (run_id,))
     rerun = subprocess.run(command, check=False, timeout=20, capture_output=True)
     assert rerun.returncode == 0, rerun.stderr.decode()
     assert Store(store.path).get_run(run_id)["records"][0]["review"]["decision"] == "accepted"
-    assert store.path.with_suffix(".calls.jsonl").read_text().count("kind") == 5
+    assert store.path.with_suffix(".calls.jsonl").read_text().count("kind") == 6
 
 
 def test_corrupt_saved_verification_identity_stops_without_redispatch(setup):
@@ -88,7 +89,7 @@ def test_corrupt_saved_verification_identity_stops_without_redispatch(setup):
     assert saved["status"] == "partial"
     assert not saved["records"]
     assert "does not match this runtime" in saved["error"]
-    assert store.path.with_suffix(".calls.jsonl").read_text().count("kind") == 5
+    assert store.path.with_suffix(".calls.jsonl").read_text().count("kind") == 6
 
 
 def step(store, run_id, fence, function, *, inputs=None, provider="fixture"):
