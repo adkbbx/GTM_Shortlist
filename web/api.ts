@@ -9,6 +9,8 @@ import serviceSchema from './generated/ServiceView.json';
 import creditHistorySchema from './generated/CreditHistory.json';
 import modelsSchema from './generated/LocalModels.json';
 import iconSchema from './generated/SiteIconInfo.json';
+import draftSchema from './generated/DraftView.json';
+import draftCreatedSchema from './generated/DraftCreated.json';
 
 export type Run = components['schemas']['RunView'];
 export type Health = components['schemas']['Health'];
@@ -22,6 +24,7 @@ export type Finding = Record['research']['findings'][number];
 export type ExclusionFinding = Record['research']['exclusion_findings'][number];
 export type Evidence = components['schemas']['Evidence'];
 export type Review = NonNullable<Record['review']>;
+export type DraftView = components['schemas']['DraftView'];
 
 const ajv = new Ajv({ strict: false });
 addFormats(ajv);
@@ -33,6 +36,8 @@ const isAuthSetup = ajv.compile<AuthSetup>(authSchema);
 const isWallet = ajv.compile<Wallet>(walletSchema);
 const isService = ajv.compile<Service>(serviceSchema);
 const isCreditHistory = ajv.compile<CreditHistory>(creditHistorySchema);
+const isDraft = ajv.compile<DraftView>(draftSchema);
+const isDraftCreated = ajv.compile<components['schemas']['DraftCreated']>(draftCreatedSchema);
 let accessToken: (() => Promise<string | null>) | null = null;
 let sessionExpired: ((token: string | null) => void) | null = null;
 
@@ -49,18 +54,23 @@ async function authorizedFetch(path: string, options: RequestInit = {}) {
   return response;
 }
 
-async function request(path: string, body?: unknown): Promise<unknown> {
-  const response = await authorizedFetch(path, body === undefined ? undefined : {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+/** A refused request, with its HTTP status for callers that react differently to, say, "not yet" and "gone". */
+export class ApiError extends Error {
+  constructor(message: string, readonly status: number) { super(message); }
+}
+
+async function request(path: string, body?: unknown, headers: { [name: string]: string } = {}): Promise<unknown> {
+  const response = await authorizedFetch(path, body === undefined ? { headers } : {
+    method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body),
   });
   const unavailable = 'We could not connect to the app service. It may be starting up or temporarily unavailable. Wait a moment, then try again.';
-  if (!response.headers.get('content-type')?.includes('application/json')) throw new Error(unavailable);
+  if (!response.headers.get('content-type')?.includes('application/json')) throw new ApiError(unavailable, response.status);
   let data: unknown;
-  try { data = await response.json(); } catch { throw new Error(unavailable); }
+  try { data = await response.json(); } catch { throw new ApiError(unavailable, response.status); }
   if (!response.ok) {
     const message = data && typeof data === 'object' && 'detail' in data && typeof data.detail === 'string'
       ? data.detail : 'The request could not be saved. Check the fields and try again.';
-    throw new Error(message);
+    throw new ApiError(message, response.status);
   }
   return data;
 }
@@ -210,6 +220,21 @@ export const api = {
   async run(id: string) { return parseRun(await request(`/api/runs/${encodeURIComponent(id)}`)); },
   async start(seller_url: string, request_key: string) {
     return researchCommand('/api/sellers', { seller_url, request_key, experience_version: 2 });
+  },
+  /** Hosted, before signup: one page read and one model call draft the offer, target and fit checks. Never a search. */
+  async startDraft(website: string, browser_id: string, turnstile_token: string) {
+    const data = await request('/api/drafts', { website, browser_id, turnstile_token });
+    if (!isDraftCreated(data)) throw new Error('Your draft could not be started. Try again.');
+    return data;
+  },
+  async readDraft(id: string, claim: string) {
+    const data = await request(`/api/drafts/${encodeURIComponent(id)}`, undefined, { 'X-Draft-Claim': claim });
+    if (!isDraft(data)) throw new Error('Your draft could not be read. Reload the page.');
+    return data;
+  },
+  /** After sign-in: the draft becomes this account's run; market exploration follows, then target confirmation. */
+  async claimDraft(id: string, claim: string) {
+    return parseRun(await request(`/api/drafts/${encodeURIComponent(id)}/claim`, {}, { 'X-Draft-Claim': claim }));
   },
   /** Local only: the whole flow on invented companies and pages, before any keys are set up. */
   async startSample(request_key: string) {

@@ -39,6 +39,15 @@ class Settings(BaseModel):
     # Sign-in methods beyond email and password; each needs matching Supabase configuration first.
     auth_email_code: bool = False
     auth_google: bool = False
+    # Draft-only research before signup (hosted): one page fetch and one model call, never a search.
+    # Off unless switched on with both Turnstile keys; see docs/anonymous-drafts.md.
+    anonymous_drafts: bool = False
+    anonymous_daily_cap: int = Field(default=50, ge=1, le=1000)
+    turnstile_site_key: str = Field(default="", max_length=200, pattern=r"^[A-Za-z0-9_-]*$")
+    turnstile_secret_key: SecretStr = SecretStr("")
+    # The header this deployment's edge uses for the visitor address (for example CF-Connecting-IP). Empty uses the
+    # connection address. Only ever stored as a keyed hash for the one-draft-per-day limit.
+    client_address_header: str = Field(default="", max_length=64, pattern=r"^[A-Za-z0-9-]*$")
 
     @field_validator("supabase_admin_key")
     @classmethod
@@ -74,6 +83,9 @@ class Settings(BaseModel):
                 raise ValueError("Hosted mode is missing required environment settings: " + ", ".join(missing))
             if not self.supabase_publishable_key.startswith("sb_publishable_"):
                 raise ValueError("Use a Supabase publishable key; secret/service-role keys must not reach the browser")
+        if self.anonymous_drafts and (self.mode != "hosted" or not self.turnstile_site_key
+                                      or not self.turnstile_secret_key.get_secret_value()):
+            raise ValueError("SHORTLIST_ANONYMOUS_DRAFTS=on needs hosted mode, TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY")
         return self
 
     @classmethod
@@ -101,6 +113,11 @@ class Settings(BaseModel):
             supabase_admin_key=os.getenv("SUPABASE_ADMIN_SECRET_KEY", ""),
             auth_email_code=os.getenv("SHORTLIST_AUTH_EMAIL_CODE", "off").strip().lower() == "on",
             auth_google=os.getenv("SHORTLIST_AUTH_GOOGLE", "off").strip().lower() == "on",
+            anonymous_drafts=os.getenv("SHORTLIST_ANONYMOUS_DRAFTS", "off").strip().lower() == "on",
+            anonymous_daily_cap=os.getenv("SHORTLIST_ANONYMOUS_DAILY_CAP", "50"),
+            turnstile_site_key=os.getenv("TURNSTILE_SITE_KEY", ""),
+            turnstile_secret_key=os.getenv("TURNSTILE_SECRET_KEY", ""),
+            client_address_header=os.getenv("SHORTLIST_CLIENT_ADDRESS_HEADER", ""),
         )
         return settings
 

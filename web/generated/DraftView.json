@@ -1,0 +1,188 @@
+{
+  "$defs": {
+    "Criterion": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Description",
+          "type": "string"
+        },
+        "required": {
+          "default": true,
+          "title": "Required",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "description",
+        "required"
+      ],
+      "title": "Criterion",
+      "type": "object"
+    },
+    "DraftCriterionIssue": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "reason": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "description",
+        "reason"
+      ],
+      "title": "DraftCriterionIssue",
+      "type": "object"
+    },
+    "DraftEvent": {
+      "properties": {
+        "label": {
+          "maxLength": 300,
+          "title": "Label",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "started",
+            "succeeded",
+            "failed"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "state",
+        "created_at"
+      ],
+      "title": "DraftEvent",
+      "type": "object"
+    },
+    "SellerDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "offer": {
+          "maxLength": 4000,
+          "minLength": 10,
+          "title": "Offer",
+          "type": "string"
+        },
+        "target": {
+          "maxLength": 2000,
+          "minLength": 5,
+          "title": "Target",
+          "type": "string"
+        },
+        "criteria": {
+          "items": {
+            "$ref": "#/$defs/Criterion"
+          },
+          "maxItems": 12,
+          "title": "Criteria",
+          "type": "array"
+        },
+        "unknowns": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "title": "Unknowns",
+          "type": "array"
+        },
+        "criteria_issues": {
+          "items": {
+            "$ref": "#/$defs/DraftCriterionIssue"
+          },
+          "maxItems": 8,
+          "title": "Criteria Issues",
+          "type": "array"
+        }
+      },
+      "required": [
+        "offer",
+        "target",
+        "criteria",
+        "unknowns"
+      ],
+      "title": "SellerDraft",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "status": {
+      "enum": [
+        "queued",
+        "running",
+        "ready",
+        "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "website": {
+      "title": "Website",
+      "type": "string"
+    },
+    "draft": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SellerDraft"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "error": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/DraftEvent"
+      },
+      "maxItems": 12,
+      "title": "Events",
+      "type": "array"
+    }
+  },
+  "required": [
+    "status",
+    "website"
+  ],
+  "title": "DraftView",
+  "type": "object"
+}

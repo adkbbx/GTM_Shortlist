@@ -1191,3 +1191,78 @@ close_account(settings,identity,identity,transport=httpx.MockTransport(provider)
     resumed = close_account(closure_settings(a, credential), a.workspace_id, a.workspace_id,
                             transport=httpx.MockTransport(lambda _: httpx.Response(404, json={"error_code": "user_not_found"})))
     assert resumed.state == "closed" and resumed.erased_in_batch == 0
+
+
+def test_anonymous_drafts_are_claim_scoped_limited_and_claimed_once(owners, database):
+    from shortlist.postgres import ANONYMOUS_INTERRUPTED
+    from shortlist.providers import SellerDraft
+    from shortlist.worker import execute_draft
+    a, b, worker_dsn, _ = owners
+    operator = database[2]
+    anonymous = PostgresStore(a.dsn, None, anonymous=True)
+    worker = PostgresStore(worker_dsn, None, worker=True)
+
+    def key(name):
+        return hashlib.sha256(name.encode()).hexdigest()
+    draft_id, claim = uuid4(), key("labelled-claim-token")
+    assert anonymous.create_anonymous_draft(draft_id, claim, "https://seller.example/", [key("browser-1"), key("network-1")], 50) == "created"
+    assert anonymous.create_anonymous_draft(uuid4(), key("other"), "https://seller.example/", [key("browser-2"), key("network-1")], 50) == "visitor_limit"
+    assert anonymous.create_anonymous_draft(uuid4(), key("capped"), "https://seller.example/", [key("browser-3")], 1) == "daily_limit"
+    held_id = uuid4()
+    # Refused attempts marked nothing: both browsers can still draft today.
+    assert anonymous.create_anonymous_draft(held_id, key("held"), "https://held.example/", [key("browser-2"), key("browser-3")], 50) == "created"
+    assert anonymous.read_anonymous_draft(draft_id, key("another-browser")) is None
+    assert anonymous.read_anonymous_draft(draft_id, claim)["status"] == "queued"
+    with pytest.raises(psycopg.errors.InsufficientPrivilege), anonymous.connection() as db:
+        db.execute("SELECT * FROM anonymous_drafts")
+    with pytest.raises(psycopg.errors.InsufficientPrivilege), a.connection() as db:
+        db.execute("UPDATE anonymous_drafts SET status='ready'")
+    with pytest.raises(Conflict, match="still being written"):
+        b.claim_anonymous_draft(draft_id, claim, "draft-claim:early")
+
+    text = "Labelled fixture page. We review customer onboarding for B2B software teams."
+
+    def fetch(url, expected_domain=None):
+        return Source(url=url, company_domain="seller.example", title="Labelled fixture", text=text,
+                      content_hash=hashlib.sha256(text.encode()).hexdigest())
+
+    class Model:
+        name = "labelled-fixture-model"
+
+        def seller(self, source):
+            return SellerDraft(offer="Labelled onboarding reviews for software teams", target="B2B software companies",
+                               criteria=[Criterion(id="software", description="Sells software to businesses")])
+    assert str(draft_id) in worker.pending_anonymous_drafts()
+    assert execute_draft(worker, Settings(), str(draft_id), model=Model(), fetch=fetch)
+    assert not execute_draft(worker, Settings(), str(draft_id), model=Model(), fetch=fetch)  # Drafted once only.
+    assert anonymous.read_anonymous_draft(draft_id, claim)["status"] == "ready"
+
+    a.create_draft("https://active.example/", "active-shortlist")  # An unfinished shortlist blocks another.
+    with pytest.raises(BudgetExceeded):
+        a.claim_anonymous_draft(draft_id, claim, f"draft-claim:{draft_id}")
+    assert anonymous.read_anonymous_draft(draft_id, claim)["status"] == "ready"  # The refused claim kept the draft.
+    run_id = b.claim_anonymous_draft(draft_id, claim, f"draft-claim:{draft_id}")
+    assert b.claim_anonymous_draft(draft_id, claim, f"draft-claim:{draft_id}") == run_id
+    run = b.get_run(run_id)
+    assert run["status"] == "queued" and run["stage"] == "seller" and run["checkpoint"]["claimed_draft"]
+    assert run["checkpoint"]["draft"]["offer"].startswith("Labelled onboarding")
+    assert run["checkpoint"]["seller_source"]["url"] == "https://seller.example/"
+    assert anonymous.read_anonymous_draft(draft_id, claim) is None
+    with pytest.raises(KeyError):
+        a.claim_anonymous_draft(draft_id, claim, "draft-claim:again")
+    with pytest.raises(KeyError):
+        a.get_run(run_id)
+
+    assert worker.lease_anonymous_draft(str(held_id)) == "https://held.example/"
+    with worker.connection() as db:
+        db.execute("UPDATE anonymous_drafts SET lease_until=0 WHERE id=?", (held_id,))
+    assert str(held_id) not in worker.pending_anonymous_drafts()  # A lapsed lease is never dispatched again.
+    held = anonymous.read_anonymous_draft(held_id, key("held"))
+    assert held["status"] == "failed" and held["error"] == ANONYMOUS_INTERRUPTED
+
+    expired = uuid4()
+    assert anonymous.create_anonymous_draft(expired, key("expired"), "https://old.example/", [key("browser-4")], 50) == "created"
+    with psycopg.connect(operator) as db:
+        db.execute("UPDATE shortlist.anonymous_drafts SET expires_at=now()-interval '1 minute' WHERE id=%s", (expired,))
+    assert anonymous.read_anonymous_draft(expired, key("expired")) is None
+    assert str(expired) not in worker.pending_anonymous_drafts()

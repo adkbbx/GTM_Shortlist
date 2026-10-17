@@ -6,7 +6,7 @@ import { createRoot } from 'react-dom/client';
 import '@fontsource/schibsted-grotesk/400.css';
 import '@fontsource/schibsted-grotesk/600.css';
 import '@fontsource/schibsted-grotesk/700.css';
-import { api } from './api';
+import { api, ApiError } from './api';
 import type { Confirmation, Evidence, ExclusionFinding, Finding, Health, Record, Review, Run, Service, Wallet } from './api';
 import { ResearchProgress } from './ResearchProgress';
 import { DemoPage, LandingDemo } from './LandingDemo';
@@ -25,7 +25,7 @@ import { MarketOverview } from './MarketOverview';
 import { EmailDraftEditor } from './EmailDraftEditor';
 import { LocalSearchSetup } from './LocalSearchSetup';
 import { WebsiteChoice } from './WebsiteChoice';
-import { clearKeptCompany, keepCompany, peekKeptCompany } from './landing/kept-company';
+import { clearKeptCompany, clearKeptDraft, keepCompany, peekKeptCompany, peekKeptDraft } from './landing/kept-company';
 import { StatusMark } from './StatusMark';
 import { SampleContext, sampleMark } from './SampleData';
 import './styles.css';
@@ -398,10 +398,26 @@ function App({ account, identity }: { account: ReactNode; identity: string }) {
     setRuns(old => old.filter(run => run.id !== active.id)); select(null);
     requestKey.current = crypto.randomUUID(); setMessage('Saved research deleted. Your credit balance is unchanged.');
   };
+  // A draft written before signup for this company becomes the run: no second page read or model call. Claiming waits
+  // while it is still being written, starts afresh if it expired, and leaves it in place if the account cannot start yet.
+  const startResearch = async (company: string) => {
+    const draft = peekKeptDraft();
+    if (draft && draft.website === company) {
+      for (let attempt = 0; attempt < 40; attempt++) {
+        try { const run = await api.claimDraft(draft.id, draft.claim); clearKeptDraft(); return run; }
+        catch (reason) {
+          if (reason instanceof ApiError && reason.status === 409) { await new Promise(resolve => window.setTimeout(resolve, 1500)); continue; }
+          if (reason instanceof ApiError && reason.status === 404) { clearKeptDraft(); break; }
+          throw reason;
+        }
+      }
+    }
+    return api.start(company, requestKey.current);
+  };
   const begin = async (company: string) => {
     setSaving(true); setError('');
     try {
-      const run = await api.start(company, requestKey.current);
+      const run = await startResearch(company);
       saved(run); select(run); requestKey.current = crypto.randomUUID();
     } catch (e) { setError(describeError(e)); } finally { setSaving(false); setHandoff(''); }
   };

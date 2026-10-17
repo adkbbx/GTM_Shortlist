@@ -29,6 +29,18 @@
           "default": false,
           "title": "Google",
           "type": "boolean"
+        },
+        "draft_site_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Draft Site Key"
         }
       },
       "required": [

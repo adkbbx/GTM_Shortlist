@@ -150,7 +150,7 @@ def test_public_auth_setup_exposes_only_public_configuration(tmp_path):
     assert hosted.get("/api/auth/setup").json() == {
         "mode": "hosted", "supabase_url": "https://auth.example",
         "publishable_key": "sb_publishable_fixture", "redirect_url": "https://app.example/",
-        "email_code": False, "google": False,
+        "email_code": False, "google": False, "draft_site_key": None,
     }
 
 

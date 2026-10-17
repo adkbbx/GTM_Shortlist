@@ -451,6 +451,151 @@
         ]
       }
     },
+    "/api/drafts": {
+      "post": {
+        "summary": "Start Draft",
+        "operationId": "start_draft_api_drafts_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftCreated"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/drafts/{draft_id}": {
+      "get": {
+        "summary": "Read Draft",
+        "operationId": "read_draft_api_drafts__draft_id__get",
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Draft Id"
+            }
+          },
+          {
+            "name": "x-draft-claim",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 20,
+              "maxLength": 100,
+              "title": "X-Draft-Claim"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/drafts/{draft_id}/claim": {
+      "post": {
+        "summary": "Claim Draft",
+        "operationId": "claim_draft_api_drafts__draft_id__claim_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "draft_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Draft Id"
+            }
+          },
+          {
+            "name": "x-draft-claim",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 20,
+              "maxLength": 100,
+              "title": "X-Draft-Claim"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/runs/{run_id}/website": {
       "post": {
         "summary": "Choose Website",
@@ -1761,6 +1906,25 @@
         ],
         "title": "Criterion"
       },
+      "DraftCreated": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "claim_token": {
+            "type": "string",
+            "title": "Claim Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "claim_token"
+        ],
+        "title": "DraftCreated"
+      },
       "DraftCriterionIssue": {
         "properties": {
           "description": {
@@ -1783,6 +1947,119 @@
           "reason"
         ],
         "title": "DraftCriterionIssue"
+      },
+      "DraftEvent": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Label"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "started",
+              "succeeded",
+              "failed"
+            ],
+            "title": "State"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "state",
+          "created_at"
+        ],
+        "title": "DraftEvent"
+      },
+      "DraftInput": {
+        "properties": {
+          "website": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 3,
+            "title": "Website"
+          },
+          "browser_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Browser Id"
+          },
+          "turnstile_token": {
+            "type": "string",
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Turnstile Token"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "website",
+          "browser_id",
+          "turnstile_token"
+        ],
+        "title": "DraftInput",
+        "description": "A draft before signup needs a website: a company name would need a search, which waits for an account."
+      },
+      "DraftView": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "running",
+              "ready",
+              "failed"
+            ],
+            "title": "Status"
+          },
+          "website": {
+            "type": "string",
+            "title": "Website"
+          },
+          "draft": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SellerDraft"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/DraftEvent"
+            },
+            "type": "array",
+            "maxItems": 12,
+            "title": "Events"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "website"
+        ],
+        "title": "DraftView"
       },
       "EditEmailDraft": {
         "properties": {
@@ -2065,6 +2342,17 @@
             "type": "boolean",
             "title": "Google",
             "default": false
+          },
+          "draft_site_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Draft Site Key"
           }
         },
         "type": "object",

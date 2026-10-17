@@ -1,5 +1,30 @@
 # Progress and handoff
 
+## 18 October, drafts before signup (hosted, off by default)
+
+The last unbuilt item of `docs/planning/LOW_FRICTION_PATHS.md`. Operator steps are in `docs/anonymous-drafts.md`.
+- **Flow.** A visitor types their website on the landing page. They see their own offer, target and fit checks drafted live at `?draft=1`, from one page read and one model call, with no search and no account. **Save and find companies** opens sign-up (email code, Google or password) and keeps the draft for that browser only. After sign-in, the workspace claims it: the run starts at the offer stage with the saved page and draft, the worker explores the market, and the visitor confirms the target as usual.
+  - A company name, a refused draft or the switch being off falls back to the earlier sign-up path.
+- **Storage (migration 011).** Three tables the API role cannot read or write. It only calls three SECURITY DEFINER functions, each scoped by the SHA-256 of a browser-held claim token. The worker has explicit grants. It checks for the table at startup, so deploying the code before migrating is safe.
+  - Claiming removes the draft and creates the run in one transaction, so a refused credit or allowance check keeps the draft.
+  - A lapsed worker lease marks the draft failed and never re-dispatches the model call.
+- **Limits.**
+  - Turnstile is verified server-side before any model call.
+  - One draft per browser and per network address each day, stored only as HMACs keyed with the Turnstile secret.
+  - `SHORTLIST_ANONYMOUS_DAILY_CAP` sets a global daily cap (default 50).
+  - `SHORTLIST_ANONYMOUS_DRAFTS` is the kill switch. It is off by default, and the service refuses to start with it on and a Turnstile key missing.
+  - The per-network limit is best-effort and depends on `SHORTLIST_CLIENT_ADDRESS_HEADER`; the bot check and daily cap are the real bounds.
+
+Verification:
+- `tests/test_anonymous_drafts.py` (16 tests): switch and keys, bot check, website-only input, both limits, claim-token scoping, no stored addresses or browser IDs, the worker step, and Turnstile failing closed.
+- `tests/test_postgres.py::test_anonymous_drafts_are_claim_scoped_limited_and_claimed_once` runs in CI's Postgres job.
+- `tests/ui/drafts.spec.ts` (laptop and phone): landing to draft to code sign-in to claimed run. It covers the retry while a draft is still being written and checks that no `POST /api/sellers` happens. It also covers the company-name and refused-draft fallbacks. Turnstile and the draft endpoints are labelled stand-ins.
+- I inspected the draft screenshots on laptop and phone.
+- Backend suite: 587 passed, 47 skipped (Postgres-only). Ruff is clean.
+- Full browser suite against the restarted fixture server: 153 passed, 3 skipped (hosted credit projects run only in CI).
+
+Open: apply migration 011 to Supabase, create a Turnstile widget, set the web service's `SHORTLIST_ANONYMOUS_DRAFTS=on` and both keys, then restart both services. No live draft has been run against a real model or Turnstile.
+
 ## 18 October, lower-friction local path: sample data and the PyPI package
 
 Checklist in `docs/planning/LOW_FRICTION_PATHS.md`; phases 1 and 2 are complete on `claude/signal-landing`.

@@ -169,6 +169,22 @@ header.topbar .brand>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .account-divider::before,.account-divider::after{content:"";flex:1;height:1px;background:var(--line)}
 #account-code{letter-spacing:.3em;font-variant-numeric:tabular-nums}
 
+/* A draft before signup: live steps, then the drafted offer, target and fit checks with one action. */
+.draft-page .draft-sheet{max-width:36rem;margin:2.5rem auto 0}
+.draft-sheet .intro{margin-bottom:1.25rem}
+.draft-check:empty{display:none}.draft-check{margin-bottom:1rem}
+.draft-steps{display:grid;gap:.75rem;margin:0 0 1.5rem;padding:0;list-style:none}
+.draft-steps li{display:flex;align-items:center;gap:.75rem;font-size:.9375rem;line-height:1.45}
+.draft-steps .status-mark{flex:none;width:1.5rem;height:1.5rem}
+.draft-result{display:grid;gap:0;margin:0 0 1.5rem}
+.draft-result>div{padding:1rem 0;border-top:1px solid var(--line)}.draft-result>div:last-child{border-bottom:1px solid var(--line)}
+.draft-result dt{font-size:.8125rem;font-weight:600;color:var(--muted);margin-bottom:.375rem}
+.draft-result dd{margin:0;font-size:1rem;line-height:1.55}
+.draft-result ul{margin:0;padding-left:1.125rem;display:grid;gap:.25rem}
+.draft-actions{display:grid;gap:.75rem}.draft-actions button{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;width:100%}
+.draft-actions .hint{margin:0;text-align:center}
+@media(max-width:700px){.draft-page .draft-sheet{margin-top:1.5rem}}
+
 /* First-run local setup: two steps, each opening the matching Settings section. */
 .local-setup-card{margin-top:1.5rem;padding:1.25rem;border:1px solid var(--line);border-radius:var(--radius-sheet,.875rem);background:var(--surface,#fff);text-align:left}
 .local-setup-card h3{font-size:1rem;line-height:1.4}

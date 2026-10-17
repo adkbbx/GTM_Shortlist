@@ -208,6 +208,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/drafts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start Draft */
+        post: operations["start_draft_api_drafts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/drafts/{draft_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read Draft */
+        get: operations["read_draft_api_drafts__draft_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/drafts/{draft_id}/claim": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Claim Draft */
+        post: operations["claim_draft_api_drafts__draft_id__claim_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/runs/{run_id}/website": {
         parameters: {
             query?: never;
@@ -658,12 +709,67 @@ export interface components {
              */
             required: boolean;
         };
+        /** DraftCreated */
+        DraftCreated: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Claim Token */
+            claim_token: string;
+        };
         /** DraftCriterionIssue */
         DraftCriterionIssue: {
             /** Description */
             description: string;
             /** Reason */
             reason: string;
+        };
+        /** DraftEvent */
+        DraftEvent: {
+            /** Label */
+            label: string;
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "started" | "succeeded" | "failed";
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+        };
+        /**
+         * DraftInput
+         * @description A draft before signup needs a website: a company name would need a search, which waits for an account.
+         */
+        DraftInput: {
+            /** Website */
+            website: string;
+            /**
+             * Browser Id
+             * Format: uuid
+             */
+            browser_id: string;
+            /** Turnstile Token */
+            turnstile_token: string;
+        };
+        /** DraftView */
+        DraftView: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "queued" | "running" | "ready" | "failed";
+            /** Website */
+            website: string;
+            draft?: components["schemas"]["SellerDraft"] | null;
+            /** Error */
+            error?: string | null;
+            /** Events */
+            events?: components["schemas"]["DraftEvent"][];
         };
         /** EditEmailDraft */
         EditEmailDraft: {
@@ -785,6 +891,8 @@ export interface components {
              * @default false
              */
             google: boolean;
+            /** Draft Site Key */
+            draft_site_key?: string | null;
         };
         /** Hypothesis */
         Hypothesis: {
@@ -1647,6 +1755,105 @@ export interface operations {
                 "application/json": components["schemas"]["SampleInput"];
             };
         };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_draft_api_drafts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DraftInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftCreated"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_draft_api_drafts__draft_id__get: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-draft-claim": string;
+            };
+            path: {
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DraftView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    claim_draft_api_drafts__draft_id__claim_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-draft-claim": string;
+            };
+            path: {
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             201: {

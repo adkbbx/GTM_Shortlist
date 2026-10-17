@@ -3,8 +3,9 @@ import type { FormEvent, ReactNode } from 'react';
 import type { Session, SupabaseClient } from '@supabase/supabase-js';
 import { api, setSessionAccess } from './api';
 import type { AuthSetup } from './api';
-import { keepCompany, peekKeptCompany } from './landing/kept-company';
+import { keepCompany, peekKeptCompany, peekKeptDraft } from './landing/kept-company';
 import { configuredDirectoryId } from './company-suggestions';
+import { DraftPreview } from './DraftPreview';
 
 // Hosted visitors without a session see the public landing page; it loads separately from the workspace.
 const PublicLanding = lazy(() => import('./landing/PublicLanding').then(module => ({ default: module.PublicLanding })));
@@ -12,15 +13,18 @@ type AuthView = 'signin' | 'signup' | null;
 const authView = (): AuthView => { const view = new URLSearchParams(window.location.search).get('auth'); return view === 'signin' || view === 'signup' ? view : null; };
 // Saved-run links and auth callbacks belong to returning users: they go to sign-in, never to the public landing page.
 const returningLink = () => { const params = new URLSearchParams(window.location.search); return ['run', 'code', 'error', 'error_description'].some(name => params.has(name)); };
+const draftView = () => new URLSearchParams(window.location.search).has('draft');
+// A draft before signup needs a website: looking up a company name is a search, which waits for an account.
+const isWebsite = (value: string) => /^(https?:\/\/)?[^\s/@]+\.[a-z]{2,}(\/\S*)?$/i.test(value.trim());
 
 type HostedSetup = Extract<AuthSetup, { mode: 'hosted' }>;
 type State = { kind: 'loading' } | { kind: 'local' } | { kind: 'error'; message: string } |
   { kind: 'hosted'; setup: HostedSetup; client: SupabaseClient; session: Session | null; recovery: boolean; expired: boolean };
 const message = (error: unknown) => error instanceof Error ? error.message : 'Account access is unavailable. Please try again.';
 
-function AccountForm({ client, setup, recovery, expired, externalError, onRecovered, initialMode = 'signin', keptCompany = '' }: {
+function AccountForm({ client, setup, recovery, expired, externalError, onRecovered, initialMode = 'signin', keptCompany = '', keptDraft = false }: {
   client: SupabaseClient; setup: HostedSetup; recovery: boolean; expired: boolean; externalError: string; onRecovered: () => void;
-  initialMode?: 'signin' | 'signup'; keptCompany?: string;
+  initialMode?: 'signin' | 'signup'; keptCompany?: string; keptDraft?: boolean;
 }) {
   const [mode, setMode] = useState<'signin' | 'signup' | 'reset'>(initialMode);
   const [email, setEmail] = useState('');
@@ -98,7 +102,8 @@ function AccountForm({ client, setup, recovery, expired, externalError, onRecove
     </aside><section className="sheet account-sheet" aria-labelledby="account-heading">
     <h1 id="account-heading">{confirmationSent ? 'Check your inbox' : title}</h1>
     <p className="intro">{confirmationSent ? 'Verify your email to finish creating your research workspace.' : usingCode ? codeSent ? `Enter the 6-digit code we emailed to ${email}.` : 'We will email you a 6-digit code. No password needed.' : mode === 'signup' ? 'Create a workspace for your company research. We will email you a confirmation link.' : mode === 'reset' ? 'Enter your account email and we will send a password reset link.' : recovery ? 'Set a new password to reopen your workspace.' : 'Welcome back. Open your saved company research.'}</p>
-    {keptCompany && !recovery && !confirmationSent && mode !== 'reset' && <p className="notice kept-company" role="status">Research for <strong>{keptCompany}</strong> starts as soon as you {mode === 'signup' && !usingCode ? 'confirm your email and sign in' : 'sign in'}. Company discovery waits until you confirm the target.</p>}
+    {keptCompany && keptDraft && !recovery && !confirmationSent && mode !== 'reset' && <p className="notice kept-company" role="status">Your draft for <strong>{keptCompany}</strong> is saved in this browser. It opens as soon as you {mode === 'signup' && !usingCode ? 'confirm your email and sign in' : 'sign in'}; company discovery waits until you confirm the target.</p>}
+    {keptCompany && !keptDraft && !recovery && !confirmationSent && mode !== 'reset' && <p className="notice kept-company" role="status">Research for <strong>{keptCompany}</strong> starts as soon as you {mode === 'signup' && !usingCode ? 'confirm your email and sign in' : 'sign in'}. Company discovery waits until you confirm the target.</p>}
     {expired && <p className="notice" role="status">Your session needs verification. Sign in again to reopen your saved research.</p>}
     {externalError && <p className="notice" role="alert">{externalError}</p>}
     {error && <p className="notice" role="alert">{error}</p>}{notice && <p className="notice" role="status">{notice}</p>}
@@ -127,19 +132,22 @@ export function AuthGate({ workspace }: { workspace: (identity: string, account:
   const [state, setState] = useState<State>({ kind: 'loading' });
   const [signoutError, setSignoutError] = useState('');
   const [view, setView] = useState<AuthView>(authView);
+  const [drafting, setDrafting] = useState(draftView);
   useEffect(() => {
-    const sync = () => setView(authView());
+    const sync = () => { setView(authView()); setDrafting(draftView()); };
     window.addEventListener('popstate', sync);
     return () => window.removeEventListener('popstate', sync);
   }, []);
   const signedIn = state.kind === 'hosted' && Boolean(state.session);
   useEffect(() => {
-    // Once signed in, the account view parameter has done its job.
-    if (!signedIn || !view) return;
-    const params = new URLSearchParams(window.location.search); params.delete('auth');
-    window.history.replaceState(null, '', params.size ? `?${params}` : window.location.pathname); setView(null);
-  }, [signedIn, view]);
+    // Once signed in, the account and draft view parameters have done their job.
+    if (!signedIn || (!view && !drafting)) return;
+    const params = new URLSearchParams(window.location.search); params.delete('auth'); params.delete('draft');
+    window.history.replaceState(null, '', params.size ? `?${params}` : window.location.pathname); setView(null); setDrafting(false);
+  }, [signedIn, view, drafting]);
   const openAccount = (next: 'signin' | 'signup') => { window.history.pushState(null, '', `?auth=${next}`); setView(next); window.scrollTo(0, 0); };
+  const openDraft = () => { window.history.pushState(null, '', '?draft=1'); setDrafting(true); window.scrollTo(0, 0); };
+  const closeDraft = () => { window.history.replaceState(null, '', window.location.pathname); setDrafting(false); };
   useEffect(() => {
     let cancelled = false;
     let unsubscribe: (() => void) | undefined;
@@ -185,8 +193,11 @@ export function AuthGate({ workspace }: { workspace: (identity: string, account:
     const result = await state.client.auth.signOut({ scope: 'local' });
     if (result.error) setSignoutError(result.error.message);
   };
-  if (!state.session && !state.recovery && !state.expired && !view && !returningLink()) return <Suspense fallback={<main className="account-page" />}><PublicLanding hosted directoryId={configuredDirectoryId()} onSignIn={() => openAccount('signin')} onStart={company => { keepCompany(company); openAccount('signup'); }} /></Suspense>;
-  if (!state.session || state.recovery || state.expired) return <AccountForm key={view ?? 'signin'} initialMode={view === 'signup' ? 'signup' : 'signin'} keptCompany={peekKeptCompany()} client={state.client} setup={state.setup} recovery={state.recovery} expired={state.expired} externalError={signoutError} onRecovered={() => setState(old => old.kind === 'hosted' ? { ...old, recovery: false } : old)} />;
+  const drafts = state.setup.draft_site_key;
+  const kept = peekKeptCompany();
+  if (!state.session && !state.recovery && !state.expired && !view && drafting && drafts && isWebsite(kept)) return <DraftPreview key={kept} website={kept} siteKey={drafts} onSave={() => openAccount('signup')} onBack={closeDraft} />;
+  if (!state.session && !state.recovery && !state.expired && !view && !returningLink()) return <Suspense fallback={<main className="account-page" />}><PublicLanding hosted directoryId={configuredDirectoryId()} onSignIn={() => openAccount('signin')} onStart={company => { keepCompany(company); if (drafts && isWebsite(company)) openDraft(); else openAccount('signup'); }} /></Suspense>;
+  if (!state.session || state.recovery || state.expired) return <AccountForm key={view ?? 'signin'} initialMode={view === 'signup' ? 'signup' : 'signin'} keptCompany={kept} keptDraft={peekKeptDraft()?.website === kept} client={state.client} setup={state.setup} recovery={state.recovery} expired={state.expired} externalError={signoutError} onRecovered={() => setState(old => old.kind === 'hosted' ? { ...old, recovery: false } : old)} />;
   if (!state.session.user.email_confirmed_at || state.session.user.is_anonymous) return <main className="account-page"><section className="sheet account-sheet"><h1>Confirm your email</h1><p>Open the confirmation link in your inbox before starting research.</p>{signoutError && <p className="notice" role="alert">{signoutError}</p>}<button className="secondary" onClick={() => { void signout(); }}>Back to sign in</button></section></main>;
   return workspace(state.session.user.id, <div className="account-nav"><span>{state.session.user.email}</span><button className="text-button" onClick={() => { void signout(); }}>Sign out</button>{signoutError && <p role="alert">{signoutError}</p>}</div>);
 }

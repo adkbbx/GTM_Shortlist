@@ -1,13 +1,17 @@
+import hashlib
+import hmac
+import ipaddress
 import json
 import re
+import secrets
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Literal
 from urllib.parse import urlsplit
-from uuid import UUID
+from uuid import UUID, uuid4
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.staticfiles import StaticFiles
@@ -40,6 +44,7 @@ from shortlist.sample import SAMPLE_SELLER_URL
 from shortlist.selection import Selection
 from shortlist.site_icons import SiteIcons
 from shortlist.store import BudgetExceeded, Conflict, Store, saved_discovery_available, seller_retry_available
+from shortlist.turnstile import verify_turnstile
 
 
 class SellerInput(BaseModel):
@@ -77,6 +82,41 @@ class WebsiteInput(BaseModel):
 class SampleInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
     request_key: str = Field(min_length=8, max_length=100)
+
+
+class DraftInput(BaseModel):
+    """A draft before signup needs a website: a company name would need a search, which waits for an account."""
+    model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
+    website: str = Field(min_length=3, max_length=300)
+    browser_id: UUID
+    turnstile_token: str = Field(min_length=1, max_length=2048)
+
+    @field_validator("website")
+    @classmethod
+    def website_only(cls, value):
+        url = SellerInput.public_url(value)
+        if not url.startswith("https://"):
+            raise ValueError("Pick your company from the list or enter its website")
+        return url
+
+
+class DraftCreated(BaseModel):
+    id: UUID
+    claim_token: str
+
+
+class DraftEvent(BaseModel):
+    label: str = Field(max_length=300)
+    state: Literal["started", "succeeded", "failed"]
+    created_at: datetime
+
+
+class DraftView(BaseModel):
+    status: Literal["queued", "running", "ready", "failed"]
+    website: str
+    draft: SellerDraft | None = None
+    error: str | None = None
+    events: list[DraftEvent] = Field(default_factory=list, max_length=12)
 
 
 class LocalKeyInput(BaseModel):
@@ -226,6 +266,8 @@ class HostedAuth(BaseModel):
     # Optional sign-in methods, offered only when the operator has configured them in Supabase.
     email_code: bool = False
     google: bool = False
+    # Drafts before signup: the public Turnstile site key, present only while the operator has them switched on.
+    draft_site_key: str | None = None
 
 
 AuthSetup = Annotated[LocalAuth | HostedAuth, Field(discriminator="mode")]
@@ -455,7 +497,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             return LocalAuth()
         return HostedAuth(supabase_url=settings.supabase_url, publishable_key=settings.supabase_publishable_key,
                           redirect_url=settings.app_url.rstrip("/") + "/", email_code=settings.auth_email_code,
-                          google=settings.auth_google)
+                          google=settings.auth_google,
+                          draft_site_key=settings.turnstile_site_key if settings.anonymous_drafts else None)
 
     @app.get("/api/service", response_model=ServiceView)
     def service():
@@ -495,6 +538,61 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if settings.mode != "local":
             raise HTTPException(404, "Sample data is available in local workspaces")
         return view(store, store.create_draft(SAMPLE_SELLER_URL, input.request_key, experience_version=2, sample=True))
+
+    # Drafts before signup (hosted). Creating one is switched off unless the operator turns it on with Turnstile keys;
+    # reading and claiming stay available so a visitor's draft from before a switch-off can still be kept.
+    def anonymous_store():
+        if settings.mode != "hosted":
+            raise HTTPException(404, "Drafts before signup are only on the hosted site")
+        from shortlist.postgres import PostgresStore
+        return PostgresStore(settings.database_url, None, anonymous=True)
+
+    def claim_hash(token: str) -> str:
+        return hashlib.sha256(token.encode()).hexdigest()
+
+    def visitor_address(request: Request) -> str | None:
+        header = settings.client_address_header
+        value = request.headers.get(header, "").split(",")[0].strip() if header else request.client.host if request.client else ""
+        try:
+            return str(ipaddress.ip_address(value))
+        except ValueError:
+            return None
+
+    @app.post("/api/drafts", response_model=DraftCreated, status_code=201)
+    def start_draft(input: DraftInput, request: Request):
+        if settings.mode != "hosted" or not settings.anonymous_drafts:
+            raise HTTPException(404, "Drafts before signup are not available. Sign in to start research")
+        store = anonymous_store()
+        address = visitor_address(request)
+        if not verify_turnstile(settings.turnstile_secret_key, input.turnstile_token, address):
+            raise HTTPException(403, "The browser check did not pass. Reload the page and try again")
+        # Keyed hashes: the database never holds an address or a browser ID, and they cannot be reversed without the secret.
+        key = settings.turnstile_secret_key.get_secret_value().encode()
+        visitors = [hmac.new(key, name.encode(), "sha256").hexdigest()
+                    for name in ("browser:" + str(input.browser_id), *(["network:" + address] if address else []))]
+        token = secrets.token_urlsafe(32)
+        draft_id = uuid4()
+        outcome = store.create_anonymous_draft(draft_id, claim_hash(token), input.website, visitors,
+                                               settings.anonymous_daily_cap)
+        if outcome == "visitor_limit":
+            raise HTTPException(429, "You have already drafted a company today. Sign in to keep going")
+        if outcome != "created":
+            raise HTTPException(429, "Drafts before signup are paused for today. Sign in to start research")
+        return DraftCreated(id=draft_id, claim_token=token)
+
+    @app.get("/api/drafts/{draft_id}", response_model=DraftView)
+    def read_draft(draft_id: UUID, x_draft_claim: Annotated[str, Header(min_length=20, max_length=100)]):
+        row = anonymous_store().read_anonymous_draft(draft_id, claim_hash(x_draft_claim))
+        if row is None:
+            raise HTTPException(404, "This draft has expired or belongs to another browser")
+        return DraftView(status=row["status"], website=row["website"], error=row["error"],
+                         draft=json.loads(row["draft"]) if row["draft"] else None, events=json.loads(row["events"]))
+
+    @app.post("/api/drafts/{draft_id}/claim", response_model=RunView, status_code=201)
+    def claim_draft(draft_id: UUID, x_draft_claim: Annotated[str, Header(min_length=20, max_length=100)], store: owned):
+        if settings.mode != "hosted":
+            raise HTTPException(404, "Drafts before signup are only on the hosted site")
+        return view(store, store.claim_anonymous_draft(draft_id, claim_hash(x_draft_claim), f"draft-claim:{draft_id}"))
 
     @app.post("/api/runs/{run_id}/website", response_model=RunView)
     def choose_website(run_id: str, input: WebsiteInput, store: owned):

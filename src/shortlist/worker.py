@@ -11,6 +11,7 @@ from shortlist.domain import (
     Unknown,
     exclusion_id,
     new_id,
+    utcnow,
 )
 from shortlist.fetch import FetchError, canonical_url, domain_of, fetch_page
 from shortlist.journal import call_step
@@ -453,6 +454,45 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
     return True
 
 
+def execute_draft(store, settings: Settings, draft_id: str, *, model: Gemma | None = None,
+                  fetch: Callable[..., Source] = fetch_page) -> bool:
+    """A draft before signup: one page fetch and one model call, never a search. The page text is untrusted input;
+    only a validated offer draft is saved. Failures keep the saved page so a claimed run need not fetch it again."""
+    website = store.lease_anonymous_draft(draft_id)
+    if website is None:
+        return False
+    events: list[dict] = []
+
+    def note(label: str, state: str, *, save: bool = True):
+        events.append({"label": label, "state": state, "created_at": utcnow().isoformat()})
+        if save:
+            store.save_anonymous_draft(draft_id, events=events)
+
+    host = domain_of(website)
+    source = None
+    try:
+        note("Reading " + host, "started")
+        source = fetch(website)
+        if source.company_domain != host:
+            raise FetchError("The page moved to a different website")
+        note("Saved the page from " + host, "succeeded")
+        note("Drafting what you sell, who to look for and fit checks", "started")
+        model = model or Gemma(settings)
+        draft = model.seller(source, output_protocol=3) if isinstance(model, Gemma) else model.seller(source)
+        draft = SellerDraft.model_validate(draft)
+        note("Drafted your offer, target and fit checks", "succeeded", save=False)
+        store.save_anonymous_draft(draft_id, events=events, status="ready", source=source.model_dump_json(),
+                                   draft=draft.model_dump_json())
+    except (FetchError, ProviderError, ValueError):
+        # Provider and page details stay in the worker; the visitor's view gets a plain next step.
+        reason = ("We couldn't read that website. Sign in to enter your offer and target yourself."
+                  if source is None else "We couldn't draft from that page. Sign in to continue; your research starts again.")
+        note(reason, "failed", save=False)
+        store.save_anonymous_draft(draft_id, events=events, status="failed", error=reason,
+                                   source=source.model_dump_json() if source is not None else None)
+    return True
+
+
 def work(settings: Settings, once: bool = False, *, stopped: Event | None = None, started: Event | None = None):
     if settings.mode == "hosted":
         from shortlist.postgres import PostgresStore
@@ -464,6 +504,8 @@ def work(settings: Settings, once: bool = False, *, stopped: Event | None = None
     worker_id = new_id()
     stopped = stopped if stopped is not None else Event()
     store.worker_heartbeat(worker_id)
+    # Drafts before signup need migration 011; an older database keeps working without them until it is migrated.
+    drafts = settings.mode == "hosted" and store.anonymous_drafts_available()
 
     def heartbeat():
         while not stopped.wait(5):
@@ -486,6 +528,11 @@ def work(settings: Settings, once: bool = False, *, stopped: Event | None = None
                     continue  # Keep queued work and setup access; dispatch no provider.
                 execute_run(store.for_run(run_id) if settings.mode == "hosted" else store,
                             configuration, run_id)
+            if drafts:
+                for draft_id in store.pending_anonymous_drafts():
+                    if stopped.is_set():
+                        break
+                    execute_draft(store, settings, draft_id)
             if once:
                 return
             stopped.wait(2)

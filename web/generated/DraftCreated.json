@@ -1,0 +1,19 @@
+{
+  "properties": {
+    "id": {
+      "format": "uuid",
+      "title": "Id",
+      "type": "string"
+    },
+    "claim_token": {
+      "title": "Claim Token",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "claim_token"
+  ],
+  "title": "DraftCreated",
+  "type": "object"
+}

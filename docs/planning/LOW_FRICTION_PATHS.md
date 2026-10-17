@@ -1,6 +1,8 @@
 # Lowest-friction paths: hosted and local
 
-17 October 2026. Request: the shortest possible path to value for a hosted visitor and for someone who wants to run GTM Shortlist on their own machine. This is a plan; nothing here is built yet except where marked.
+17 October 2026. Request: the shortest possible path to value for a hosted visitor and for someone who wants to run GTM Shortlist on their own machine.
+
+**Status, 18 October:** built on `claude/signal-landing`; see the checklist. Items marked *You* need a setting only the owner can make. Drafts before signup and the newer sign-in methods stay off until switched on.
 
 Measure for both paths: **time to the first useful screen**. That is the visitor's own drafted offer, target and fit checks, plus the number of decisions and installs before it.
 
@@ -27,9 +29,11 @@ company     drafts the offer,     my business" moment;    or a 6-digit email cod
 - A plain company name without a website therefore needs a Brandfetch suggestion (which carries the domain) or a typed website. "Pick your company from the list or enter its website" is the only prompt.
 
 **Anonymous draft (new):**
-- **Endpoint:** `POST /api/drafts` takes `{ website, turnstile_token }` and returns `{ draft_id, claim_token }`. `GET /api/drafts/{id}` takes the claim token as a bearer and streams the same progress events as a run.
+- **Endpoint (built):**
+  - `POST /api/drafts` takes `{ website, browser_id, turnstile_token }` and returns `{ id, claim_token }`.
+  - `GET /api/drafts/{id}` takes the claim token in an `X-Draft-Claim` header and returns status, progress events and, when ready, the draft.
 - **Storage:** a separate `anonymous_drafts` table holding the website, saved page snapshot, draft and events. It has no workspace and no credits, and expires after 24 hours.
-- **Claiming:** after sign-in, `POST /api/drafts/{id}/claim` copies the draft into a normal run in `awaiting_confirmation`, then deletes the anonymous copy. Market exploration starts in the background after the claim; campaign ideas appear in the review card when ready and never block confirmation.
+- **Claiming (built):** after sign-in, `POST /api/drafts/{id}/claim` turns the draft into the account's run at the offer stage, with the saved page and draft, then deletes the anonymous copy in the same transaction. The worker explores the market (no second fetch or model call) and the run then waits for target confirmation.
 - **Browser state:** the claim token stays in this browser only (local storage, 24 hours), next to the kept company that exists today.
 
 **Abuse limits** (required before launch):
@@ -95,9 +99,9 @@ Ticked items are built, tested and pushed on `claude/signal-landing`; items mark
 - [x] Local "Try it with sample data" on the setup card: `POST /api/samples` (local only) creates a flagged run; the worker swaps in `shortlist.sample` (invented companies on reserved `.example` domains, no network) for every step. A banner labels every screen. Domains read as company names, sample links are plain text, and the demo link is hidden while the card shows. JSON, CSV and Excel exports carry the label, and reuse is blocked.
 
 **Phase 3** (medium to large)
-- [ ] Anonymous draft-only runs: no search, page fetch and model call only; 24-hour expiry.
-- [ ] Claim on sign-in: the draft becomes a normal run awaiting confirmation; market exploration starts after.
-- [ ] Abuse limits: Turnstile, one draft per browser and IP per day, a global daily cap and a kill switch. *You:* Cloudflare Turnstile site and secret keys.
+- [x] Anonymous draft-only runs: no search, page fetch and model call only; 24-hour expiry. Migration 011 adds three tables the API role cannot touch, only three claim-hash-scoped functions. The worker drafts queued rows and never re-dispatches a lapsed lease. The landing page shows the draft live at `?draft=1`. *You:* apply migration 011.
+- [x] Claim on sign-in: removing the draft and creating the run share one transaction, so a refused credit check keeps the draft. The run starts at the offer stage with the saved page and draft, so market exploration follows with no second fetch or model call. The workspace retries while the draft is still being written.
+- [x] Abuse limits: Turnstile verified server-side before any model call; one draft per browser and per network address each day, kept only as keyed hashes; a global daily cap (`SHORTLIST_ANONYMOUS_DAILY_CAP`); and the kill switch `SHORTLIST_ANONYMOUS_DRAFTS` (off by default). *You:* Cloudflare Turnstile site and secret keys, then switch it on (docs/anonymous-drafts.md).
 - [x] PyPI package with the built UI and a console entry that opens the browser. `gtm-shortlist` (name free on PyPI as of 18 October) runs API and worker locally, opens the browser and keeps research in the user data folder. `package.yml` builds and smoke-tests a fresh install on every push and publishes on `v*` tags. *You:* add a trusted publisher on PyPI (project `gtm-shortlist`, workflow `package.yml`, environment `pypi`), create the `pypi` environment in GitHub, then push a `v0.1.0` tag.
 - [x] ~~Local-mode Docker image published to GHCR.~~ Decided against (18 October). Local mode has no sign-in: its trust boundary is that requests come from this computer's loopback address, and `container_entrypoint` refuses local mode for that reason. In a container every request arrives from the Docker gateway, and on Docker Desktop LAN traffic does too, so key setup and saved research could be reached from the network. Host Ollama would also need a non-loopback HTTP exception. `uvx gtm-shortlist` already gives a one-command install with no Node or build.
 
@@ -105,7 +109,7 @@ Phase 3 changes auth and data storage. It needs its own tests for expiry, claimi
 
 ## Open decisions
 
-1. Are anonymous drafts acceptable at all? They spend model calls before an account exists. This plan bounds them with Turnstile, per-visitor and global caps, and no search.
+1. Are anonymous drafts acceptable at all? They spend model calls before an account exists. Built behind a default-off switch, bounded by Turnstile, per-visitor and global caps, and no search; the owner decides when to switch it on.
 2. Should sign-in be OTP code only, or OTP plus Google? Google needs an OAuth client in Google Cloud and Supabase.
 3. ~~PyPI package name and whether to publish a local Docker image.~~ `gtm-shortlist`; no local image (see the checklist).
 4. Should sample-data mode be offered on the hosted site too, for visitors who will not type their company? Not built: hosted runs belong to an account and spend credits, so `/api/samples` answers 404 there.

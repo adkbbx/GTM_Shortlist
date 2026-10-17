@@ -1,6 +1,8 @@
 """Postgres adapter for the shared command/journal core, scoped by database RLS."""
 
+import hashlib
 import json
+import time
 from contextlib import contextmanager
 from uuid import UUID
 
@@ -9,6 +11,8 @@ from pydantic import SecretStr
 
 from shortlist.auth import AuthenticationError
 from shortlist.store import BudgetExceeded, Conflict, Store
+
+ANONYMOUS_INTERRUPTED = "Drafting was interrupted. Sign in to continue; your research starts again from your website."
 
 
 class Row(dict):
@@ -36,11 +40,14 @@ class Connection:
 class PostgresStore(Store):
     order_key = "position"
 
-    def __init__(self, dsn: SecretStr, workspace_id: UUID | None, *, worker: bool = False, maintenance: bool = False):
-        if workspace_id is None and not worker:
+    def __init__(self, dsn: SecretStr, workspace_id: UUID | None, *, worker: bool = False, maintenance: bool = False,
+                 anonymous: bool = False):
+        if workspace_id is None and not worker and not anonymous:
             raise ValueError("Hosted access requires a verified workspace")
         if maintenance and (not worker or workspace_id is None):
             raise ValueError("Account maintenance requires an explicitly scoped worker credential")
+        if anonymous and (worker or workspace_id is not None):
+            raise ValueError("Drafts before signup use the API credential without a workspace")
         self.dsn = dsn
         self.workspace_id = workspace_id
         self.worker = worker
@@ -212,3 +219,74 @@ class PostgresStore(Store):
     def reserve_global_search(self, db, provider: str, month: str, cap: int):
         if not db.execute("SELECT reserve_search_quota(?,?,?)", (provider, month, cap)).fetchone()[0]:
             raise BudgetExceeded("Global monthly search cap reached")
+
+    # Drafts before signup. The API role reaches them only through the claim-scoped functions in migration 011.
+
+    def create_anonymous_draft(self, draft_id: UUID, claim_hash: str, website: str, visitors: list[str],
+                               daily_cap: int) -> str:
+        with self.connection() as db:
+            self.begin(db)
+            return db.execute("SELECT create_anonymous_draft(?,?,?,?,?) AS outcome",
+                              (draft_id, claim_hash, website, visitors, daily_cap)).fetchone()["outcome"]
+
+    def read_anonymous_draft(self, draft_id: UUID, claim_hash: str) -> dict | None:
+        with self.connection() as db:
+            row = db.execute("SELECT * FROM read_anonymous_draft(?,?)", (draft_id, claim_hash)).fetchone()
+        return dict(row) if row else None
+
+    def claim_anonymous_draft(self, draft_id: UUID, claim_hash: str, request_key: str) -> str:
+        """The signed-in owner's run from a draft. Removing the draft and creating the run share one transaction, so a
+        refused credit or allowance check leaves the draft in place to claim later."""
+        if self.workspace_id is None or self.worker:
+            raise ValueError("Claiming a draft requires the signed-in owner's workspace")
+        with self.connection() as db:
+            self.begin(db)
+            replay = db.execute("SELECT id FROM runs WHERE request_key=? AND deleted_at IS NULL", (request_key,)).fetchone()
+            if replay:
+                return replay["id"]
+            saved = db.execute("SELECT * FROM read_anonymous_draft(?,?)", (draft_id, claim_hash)).fetchone()
+            if saved is None:
+                raise KeyError(str(draft_id))
+            if saved["status"] in ("queued", "running"):
+                raise Conflict("Your draft is still being written. Try again in a moment")
+            taken = db.execute("SELECT * FROM take_anonymous_draft(?,?)", (draft_id, claim_hash)).fetchone()
+            if taken is None:
+                raise KeyError(str(draft_id))
+            # A ready draft skips the page fetch and model call; the worker then explores the market as usual.
+            seed = {"claimed_draft": True}
+            if taken["source"]:
+                seed["seller_source"] = json.loads(taken["source"])
+            if taken["status"] == "ready" and taken["draft"]:
+                seed["draft"] = json.loads(taken["draft"])
+            digest = hashlib.sha256(("claimed-draft:" + taken["website"]).encode()).hexdigest()
+            return self.insert_draft(db, taken["website"], request_key, digest, 2, seed)
+
+    def anonymous_drafts_available(self) -> bool:
+        with self.connection() as db:
+            return db.execute("SELECT to_regclass('shortlist.anonymous_drafts') IS NOT NULL AS present").fetchone()["present"]
+
+    def pending_anonymous_drafts(self) -> list[str]:
+        if not self.worker:
+            raise ValueError("Only the worker drafts before signup")
+        with self.connection() as db:
+            # A lapsed lease may already have reached the model; never dispatch the same draft twice.
+            db.execute("UPDATE anonymous_drafts SET status='failed',error=? WHERE status='running' AND lease_until<=?",
+                       (ANONYMOUS_INTERRUPTED, time.time()))
+            return [str(row["id"]) for row in db.execute(
+                "SELECT id FROM anonymous_drafts WHERE status='queued' AND expires_at>now() ORDER BY created_at LIMIT 20")]
+
+    def lease_anonymous_draft(self, draft_id: str) -> str | None:
+        with self.connection() as db:
+            row = db.execute("UPDATE anonymous_drafts SET status='running',lease_until=? WHERE id=? AND status='queued' "
+                             "AND expires_at>now() RETURNING website", (time.time() + 300, draft_id)).fetchone()
+        return row["website"] if row else None
+
+    def save_anonymous_draft(self, draft_id: str, *, events: list[dict], status: str | None = None,
+                             source: str | None = None, draft: str | None = None, error: str | None = None):
+        with self.connection() as db:
+            if status is None:
+                db.execute("UPDATE anonymous_drafts SET events=? WHERE id=? AND status='running'",
+                           (json.dumps(events), draft_id))
+            else:
+                db.execute("UPDATE anonymous_drafts SET status=?,source=?,draft=?,error=?,events=? "
+                           "WHERE id=? AND status='running'", (status, source, draft, error, json.dumps(events), draft_id))
