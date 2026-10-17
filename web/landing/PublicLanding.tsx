@@ -4,6 +4,7 @@ import type Lenis from 'lenis';
 import '@fontsource/schibsted-grotesk/500.css';
 import '@fontsource/schibsted-grotesk/800.css';
 import { SignalStream } from './signal-stream';
+import { CompanySearch } from '../CompanySearch';
 import { exampleCheckpoints, examplePassage, storySteps, storyWeights } from './landing-data';
 import type { FeedState } from './landing-data';
 import { useLenis, usePrefersReducedMotion } from './useLenis';
@@ -12,6 +13,8 @@ import './landing.css';
 export const sourceCodeUrl = 'https://github.com/adkbbx/GTM_Shortlist';
 const verticalQuery = '(max-width: 1180px)';
 const domainOf = (value: string) => value.trim().replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+// The hero field is the workspace's company search (input id 'website'), with Brandfetch suggestions when configured.
+const companyInput = () => document.getElementById('website') as HTMLInputElement | null;
 const clamp01 = (t: number) => Math.max(0, Math.min(1, t));
 const smoother = (t: number) => { t = clamp01(t); return t * t * t * (t * (t * 6 - 15) + 10); };
 
@@ -53,7 +56,7 @@ function Reveal({ as: Tag = 'h2', id, className, reduced, lead, accent, br = fal
   return <Tag ref={ref} id={id} className={className} data-reveal={shown ? 'shown' : 'hidden'}>{words(lead)}{br ? <br /> : ' '}<span className="pl-accent">{words(accent)}</span></Tag>;
 }
 
-function Hero({ reduced, onStart, fieldRef, instrumentRef }: { reduced: boolean; onStart: (company: string) => void; fieldRef: RefObject<HTMLInputElement | null>; instrumentRef: RefObject<HTMLDivElement | null> }) {
+function Hero({ reduced, onStart, directoryId, instrumentRef }: { reduced: boolean; onStart: (company: string) => void; directoryId: string; instrumentRef: RefObject<HTMLDivElement | null> }) {
   const [company, setCompany] = useState('');
   const [invite, setInvite] = useState(true);
   const [shake, setShake] = useState(0);
@@ -83,7 +86,7 @@ function Hero({ reduced, onStart, fieldRef, instrumentRef }: { reduced: boolean;
   const submit = (event: FormEvent) => {
     event.preventDefault();
     const value = company.trim();
-    if (!value) { fieldRef.current?.focus(); setShake(n => n + 1); return; }
+    if (!value) { companyInput()?.focus(); setShake(n => n + 1); return; }
     setStarting(true); stream.current?.burst();
     window.setTimeout(() => onStart(value), reduced ? 0 : 450);
   };
@@ -97,12 +100,12 @@ function Hero({ reduced, onStart, fieldRef, instrumentRef }: { reduced: boolean;
       <div className={`pl-instrument${on ? ' on' : ''}`} ref={instrumentRef}>
         <canvas ref={canvas} aria-hidden="true" />
         <form ref={cardIn} className={`pl-card pl-intake${invite ? ' invite' : ''}`} onSubmit={submit} autoComplete="off" noValidate
-          onPointerEnter={() => stream.current?.setHover(true)} onPointerLeave={() => stream.current?.setHover(document.activeElement === fieldRef.current)}>
-          <label className="pl-label" htmlFor="pl-company">Start with your company</label>
+          onPointerEnter={() => stream.current?.setHover(true)} onPointerLeave={() => stream.current?.setHover(document.activeElement === companyInput())}>
+          <label className="pl-label" htmlFor="website">Start with your company</label>
           <div className="pl-controls">
-            <div className={`pl-field${shake % 2 ? ' shake' : shake ? ' shake-b' : ''}`}><input ref={fieldRef} id="pl-company" name="company" placeholder="yourcompany.com" spellCheck={false} autoCapitalize="off" maxLength={300} value={company}
-              onFocus={() => { setInvite(false); stream.current?.setHover(true); }} onBlur={() => stream.current?.setHover(false)}
-              onChange={event => { setInvite(false); setCompany(event.target.value); stream.current?.boost(1100); }} /></div>
+            <div className={`pl-field${shake % 2 ? ' shake' : shake ? ' shake-b' : ''}`} onFocus={() => { setInvite(false); stream.current?.setHover(true); }} onBlur={() => stream.current?.setHover(false)}>
+              <CompanySearch value={company} clientId={directoryId} disabled={starting} label="Start with your company" placeholder="Company name or website"
+                onChange={value => { setInvite(false); setCompany(value); stream.current?.boost(1100); }} /></div>
             <button className="pl-btn pl-btn-primary pl-btn-block" type="submit" disabled={starting} aria-busy={starting}>{starting ? 'Starting research' : 'Start research'} <Arrow /></button>
           </div>
           <p className="pl-note"><Lock /><span>Nothing runs until you confirm the target.</span></p>
@@ -353,34 +356,34 @@ function Closing({ reduced, onStart }: { reduced: boolean; onStart: (company: st
   </section>;
 }
 
-/** The public landing page for hosted visitors without a session. It makes no API or provider requests. */
-export function PublicLanding({ onStart, onSignIn }: { onStart: (company: string) => void; onSignIn: () => void }) {
+/** The public landing page for hosted visitors without a session. It makes no research API or provider requests;
+    company suggestions contact Brandfetch only when the installation configures a public client ID. */
+export function PublicLanding({ onStart, onSignIn, directoryId }: { onStart: (company: string) => void; onSignIn: () => void; directoryId: string }) {
   const reduced = usePrefersReducedMotion();
   const lenis = useLenis(!reduced);
   const scrollTo = useScrollTo(lenis);
-  const field = useRef<HTMLInputElement>(null);
   const instrument = useRef<HTMLDivElement>(null);
   const focusField = () => {
     const node = instrument.current; if (!node) return;
     const header = parseFloat(getComputedStyle(document.documentElement).fontSize) * 6;
     const y = Math.max(0, node.getBoundingClientRect().top + window.scrollY - header);
-    scrollTo(y, () => field.current?.focus({ preventScroll: true }));
+    scrollTo(y, () => companyInput()?.focus({ preventScroll: true }));
   };
-  const startLink = (label: string, extra = '') => <a className={`pl-btn pl-btn-primary${extra}`} href="#pl-company" onClick={event => { event.preventDefault(); focusField(); }}>{label} <Arrow /></a>;
+  const startLink = (label: string, extra = '') => <a className={`pl-btn pl-btn-primary${extra}`} href="#website" onClick={event => { event.preventDefault(); focusField(); }}>{label} <Arrow /></a>;
   const signIn = (className: string, label = 'Sign in') => <a className={className} href="?auth=signin" onClick={event => { event.preventDefault(); onSignIn(); }}>{label}</a>;
   useEffect(() => { document.title = 'GTM Shortlist · Find who fits. Check why.'; return () => { document.title = 'GTM Shortlist'; }; }, []);
   return <div className="pl" id="top">
-    <a className="pl-skip" href="#pl-company" onClick={event => { event.preventDefault(); field.current?.focus(); }}>Skip to company field</a>
+    <a className="pl-skip" href="#website" onClick={event => { event.preventDefault(); companyInput()?.focus(); }}>Skip to company field</a>
     <header className="pl-site-head">
       <div className="pl-wrap">
         <a className="pl-wordmark" href="#top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M3 6h12M3 12h8M3 18h5" /><circle cx="17.5" cy="15.5" r="3.5" stroke="#b4501c" /><path d="m20 18 2.5 2.5" stroke="#b4501c" /></svg>GTM Shortlist</a>
         <nav aria-label="Sections"><a href="#how">How it works</a><a href="#evidence">Evidence</a><a href="#open">Open source</a></nav>
         {signIn('pl-signin')}
-        <a className="pl-btn pl-btn-primary pl-btn-sm" href="#pl-company" onClick={event => { event.preventDefault(); focusField(); }}><span className="pl-long">Start research</span><span className="pl-short">Start</span> <Arrow /></a>
+        <a className="pl-btn pl-btn-primary pl-btn-sm" href="#website" onClick={event => { event.preventDefault(); focusField(); }}><span className="pl-long">Start research</span><span className="pl-short">Start</span> <Arrow /></a>
       </div>
     </header>
     <main>
-      <Hero reduced={reduced} onStart={onStart} fieldRef={field} instrumentRef={instrument} />
+      <Hero reduced={reduced} onStart={onStart} directoryId={directoryId} instrumentRef={instrument} />
       <Story reduced={reduced} scrollTo={scrollTo} />
       <Evidence reduced={reduced} />
       <section className="pl-section" id="live" aria-labelledby="pl-live-title">

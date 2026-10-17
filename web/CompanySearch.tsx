@@ -7,8 +7,8 @@ import './CompanySearch.css';
 
 type Lookup = { kind: 'idle' } | { kind: 'loading'; query: string } | { kind: 'loaded'; query: string; items: CompanySuggestion[] } | { kind: 'error'; query: string; message: string };
 
-export function CompanySearch({ value, onChange, clientId, disabled }: {
-  value: string; onChange: (value: string) => void; clientId: string; disabled: boolean;
+export function CompanySearch({ value, onChange, clientId, disabled, label = 'Company name or website', placeholder = 'Company name or example.com' }: {
+  value: string; onChange: (value: string) => void; clientId: string; disabled: boolean; label?: string; placeholder?: string;
 }) {
   const [focused, setFocused] = useState(false);
   const [picked, setPicked] = useState<string | null>(null);
@@ -32,13 +32,13 @@ export function CompanySearch({ value, onChange, clientId, disabled }: {
   const current = lookup.kind !== 'idle' && lookup.query === query ? lookup : null;
   const items = directory && current?.kind === 'loaded' ? current.items : [];
   const message = directory ? current?.kind === 'error' ? current.message : current?.kind === 'loaded' ? 'No matching companies. Enter a website to continue.' : 'Finding companies…' : 'Enter a company name or website.';
-  return <ComboBox<CompanySuggestion> className="company-search" aria-label="Company name or website" inputValue={value} onInputChange={next => { if (next !== picked) setPicked(null); onChange(next); }}
+  return <ComboBox<CompanySuggestion> className="company-search" aria-label={label} inputValue={value} onInputChange={next => { if (next !== picked) setPicked(null); onChange(next); }}
     items={items} selectedKey={picked} allowsCustomValue allowsEmptyCollection={Boolean(directory)} menuTrigger="input" isDisabled={disabled}
     onSelectionChange={key => { setPicked(key === null ? null : String(key)); if (key !== null) onChange(String(key)); }} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}>
-    <Input id="website" type="text" autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="Company name or example.com" required maxLength={2048} />
+    <Input id="website" type="text" autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder={placeholder} required maxLength={2048} />
     <Popover className="company-suggestions" placement="bottom start" offset={8}>
       <p className="company-suggestions-source">Company suggestions</p>
-      <ListBox<CompanySuggestion> aria-label="Company suggestions" className="company-suggestions-list" renderEmptyState={() => <p className="suggestions-empty" role="status">{message}</p>}>
+      <ListBox<CompanySuggestion> aria-label="Company suggestions" className="company-suggestions-list" data-lenis-prevent="" renderEmptyState={() => <p className="suggestions-empty" role="status">{message}</p>}>
         {company => <ListBoxItem id={company.domain} textValue={company.domain} className="company-suggestion">
           <SiteIcon key={`${company.domain}:${company.icon ?? ''}`} domain={company.domain} icon={company.icon} fallback={company.name.slice(0, 1).toUpperCase()} className="suggestion-icon" />
           <span className="suggestion-copy"><Text slot="label">{company.name}</Text></span>

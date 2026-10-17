@@ -67,6 +67,35 @@ test('header sign-in opens the account form and browser back returns to the land
   await expect(page).not.toHaveURL(/auth=/);
 });
 
+test('the landing field offers Brandfetch company suggestions when the installation configures a public ID', async ({ page }) => {
+  await hosted(page);
+  await page.route('**/favicon.ico', route => route.abort());
+  await page.route('https://cdn.brandfetch.io/**', route => route.abort());
+  const lookups: string[] = [];
+  await page.route('https://api.brandfetch.io/**', route => {
+    lookups.push(new URL(route.request().url()).pathname);
+    return route.fulfill({ json: [{ name: 'Clay (synthetic)', domain: 'clay.example' }, { name: 'Clay Studio (synthetic)', domain: 'clay-studio.example' }] });
+  });
+  // Runtime public configuration, as the server injects it, keeps this independent of a developer's ID.
+  await page.route('http://127.0.0.1:8015/', async route => {
+    const response = await route.fetch();
+    await route.fulfill({ response, body: (await response.text()).replace('<head>', '<head><meta name="shortlist-company-suggestions-client-id" content="synthetic-public-client-id">') });
+  });
+  const research: string[] = [];
+  page.on('request', request => { const path = new URL(request.url()).pathname; if (path.startsWith('/api/') && path !== '/api/auth/setup') research.push(path); });
+  await page.goto('/');
+  const field = page.getByRole('combobox', { name: 'Start with your company' });
+  await field.fill('clay');
+  await expect(page.getByRole('option')).toHaveCount(2);
+  expect(lookups.at(-1)).toBe('/v2/search/clay');
+  // Keyboard selection: scrolling to reach an option would close the list, as comboboxes do.
+  await field.press('ArrowDown');
+  await field.press('Enter');
+  await expect(field).toHaveValue('clay.example');
+  await expect(page.locator('.pl-g-sub').first()).toHaveText('Fits clay.example');
+  expect(research).toEqual([]);
+});
+
 test('a saved-run link without a session opens sign-in, not the public landing page', async ({ page }) => {
   await hosted(page);
   await page.goto('/?run=labelled-saved-run');

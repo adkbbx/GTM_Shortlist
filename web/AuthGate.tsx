@@ -4,6 +4,7 @@ import type { Session, SupabaseClient } from '@supabase/supabase-js';
 import { api, setSessionAccess } from './api';
 import type { AuthSetup } from './api';
 import { keepCompany, peekKeptCompany } from './landing/kept-company';
+import { configuredDirectoryId } from './company-suggestions';
 
 // Hosted visitors without a session see the public landing page; it loads separately from the workspace.
 const PublicLanding = lazy(() => import('./landing/PublicLanding').then(module => ({ default: module.PublicLanding })));
@@ -146,7 +147,7 @@ export function AuthGate({ workspace }: { workspace: (identity: string, account:
     const result = await state.client.auth.signOut({ scope: 'local' });
     if (result.error) setSignoutError(result.error.message);
   };
-  if (!state.session && !state.recovery && !state.expired && !view && !returningLink()) return <Suspense fallback={<main className="account-page" />}><PublicLanding onSignIn={() => openAccount('signin')} onStart={company => { keepCompany(company); openAccount('signup'); }} /></Suspense>;
+  if (!state.session && !state.recovery && !state.expired && !view && !returningLink()) return <Suspense fallback={<main className="account-page" />}><PublicLanding directoryId={configuredDirectoryId()} onSignIn={() => openAccount('signin')} onStart={company => { keepCompany(company); openAccount('signup'); }} /></Suspense>;
   if (!state.session || state.recovery || state.expired) return <AccountForm key={view ?? 'signin'} initialMode={view === 'signup' ? 'signup' : 'signin'} keptCompany={peekKeptCompany()} client={state.client} setup={state.setup} recovery={state.recovery} expired={state.expired} externalError={signoutError} onRecovered={() => setState(old => old.kind === 'hosted' ? { ...old, recovery: false } : old)} />;
   if (!state.session.user.email_confirmed_at || state.session.user.is_anonymous) return <main className="account-page"><section className="sheet account-sheet"><h1>Confirm your email</h1><p>Open the confirmation link in your inbox before starting research.</p>{signoutError && <p className="notice" role="alert">{signoutError}</p>}<button className="secondary" onClick={() => { void signout(); }}>Back to sign in</button></section></main>;
   return workspace(state.session.user.id, <div className="account-nav"><span>{state.session.user.email}</span><button className="text-button" onClick={() => { void signout(); }}>Sign out</button>{signoutError && <p role="alert">{signoutError}</p>}</div>);
