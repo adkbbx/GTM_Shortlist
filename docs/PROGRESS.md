@@ -17,7 +17,9 @@ Verification:
 - Playwright, laptop and phone: 135 passed, 3 skipped. This includes the new `public-landing.spec.ts` and `large-screens.spec.ts` (1920, 2560 and 3840).
 - Manual Chrome sweep at 360, 390, 808, 1024, 1366, 1440, 1920 and 3840 px: no overflow, no overlaps, no story clipping and no console errors. The handoff to the workspace works.
 
-Not verified locally: the hosted Postgres credits suite (CI only), a real Supabase signup email round trip, and physical devices.
+CI run 39030017288 on `cb45fa7` failed in the hosted browser tests. A reload of `/?run=...` after account closure reached the landing page instead of sign-in. Saved-run links and auth callbacks (`run`, `code`, `error`) without a session now open sign-in, covered by a new test. CI run 39030708933 on `a635765` then passed every job: core, Postgres, Windows lifecycle, container, and the browser suite including the hosted Postgres credits specs.
+
+Not verified: a real Supabase signup email round trip, and physical devices.
 
 Still open from the brief: the agent console, filterable checkpoint feed, tab title and notifications (sections 5.2 to 5.5), and the `activity`/`subject` progress-event fields they need. `prototype/index.html` is superseded by `prototype/signal.html`.
 
