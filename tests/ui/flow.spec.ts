@@ -312,7 +312,7 @@ test('company icons use the site favicon and fall back when unavailable', async 
     await expect(page.locator('.company-initial').nth(1).locator('img')).toHaveCount(0);
     await noOverflow(page);
     if (info.project.name === 'phone') await page.getByRole('button', { name: 'Saved runs', exact: true }).click();
-    else if (await page.getByRole('button', { name: 'Expand sidebar' }).count()) await page.getByRole('button', { name: 'Expand sidebar' }).click();
+    else if (await page.getByRole('button', { name: 'Show saved runs' }).count()) await page.getByRole('button', { name: 'Show saved runs' }).click();
     const savedIcon = page.locator('.saved-run-identity img').first();
     await expect(savedIcon).toHaveAttribute('data-requested-icon', 'https://eygentic.com/favicon.ico');
     await expect.poll(() => savedIcon.evaluate(image => (image as HTMLImageElement).naturalWidth)).toBe(24);

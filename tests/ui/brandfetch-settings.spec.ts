@@ -68,7 +68,7 @@ test('saved runs and results use rounded icons with optional Brandfetch fallback
     mkdirSync('.impeccable/review', { recursive: true });
     await page.locator('.company-shortlist').screenshot({ path: `.impeccable/review/${info.project.name}-rounded-result-icons.png` });
     if (info.project.name === 'phone') await page.getByRole('button', { name: 'Saved runs', exact: true }).click();
-    else if (await page.getByRole('button', { name: 'Expand sidebar' }).count()) await page.getByRole('button', { name: 'Expand sidebar' }).click();
+    else if (await page.getByRole('button', { name: 'Show saved runs' }).count()) await page.getByRole('button', { name: 'Show saved runs' }).click();
     const saved = page.locator('.saved-run-identity').first();
     await expect(saved).toHaveCSS('border-radius', '6px');
     await expect(saved.locator('img')).toHaveAttribute('data-requested-icon', 'https://cdn.brandfetch.io/domain/eygentic.com/fallback/404?c=synthetic-public-id');
@@ -133,7 +133,7 @@ test('saved research displays declared icons without any provider configuration'
     await expect.poll(() => image.evaluate(element => (element as HTMLImageElement).naturalWidth)).toBe(24);
     await expect(page.locator('.company-initial').first()).toHaveCSS('border-radius', '8px');
     if (info.project.name === 'phone') await page.getByRole('button', { name: 'Saved runs', exact: true }).click();
-    else if (await page.getByRole('button', { name: 'Expand sidebar' }).count()) await page.getByRole('button', { name: 'Expand sidebar' }).click();
+    else if (await page.getByRole('button', { name: 'Show saved runs' }).count()) await page.getByRole('button', { name: 'Show saved runs' }).click();
     const historyImage = page.locator('.saved-run-identity img').first();
     await expect(historyImage).toHaveAttribute('data-requested-icon', 'https://eygentic.com/assets/eygentic_logo.png');
     await expect.poll(() => historyImage.evaluate(element => (element as HTMLImageElement).naturalWidth)).toBe(24);

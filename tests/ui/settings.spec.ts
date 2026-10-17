@@ -42,7 +42,7 @@ test('local settings expose configuration and history identities without provide
     configured = true;
     await page.reload();
     await expect(page.getByRole('button', { name: 'Open Settings', exact: true })).toHaveCount(0);
-    if (info.project.name === 'laptop') await page.getByRole('button', { name: 'Collapse sidebar', exact: true }).click();
+    if (info.project.name === 'laptop') await page.getByRole('button', { name: 'Hide saved runs', exact: true }).click();
     if (info.project.name === 'laptop') {
       await expect(page.locator('.saved-run-identity')).toHaveText(['AL', 'BS', 'CW']);
       await expect(page.getByRole('button', { name: /Acme Labs,/ })).toHaveAttribute('title', /Acme Labs/);
@@ -53,7 +53,7 @@ test('local settings expose configuration and history identities without provide
     await expect(settings).toContainText('Research quality has not been tested.');
     await capture('settings-configured');
     await settings.getByRole('button', { name: 'Close settings' }).click();
-    await page.getByRole('button', { name: /^(Expand sidebar|Saved runs)$/ }).click();
+    await page.getByRole('button', { name: /^(Show saved runs|Saved runs)$/ }).click();
     const history = page.getByRole('navigation', { name: 'Research history' });
     await expect(history.getByRole('button')).toHaveCount(3);
     await expect(history.locator('.run-name')).toHaveText(companies);

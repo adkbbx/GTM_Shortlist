@@ -278,6 +278,8 @@ The latest user feedback replaces the bottom actions with one56px charcoal phone
 
 ## Saved-stage review and site icons, 17 October
 
+Desktop saved-run visibility is controlled in the header after the wordmark, never before it or inside the panel. Anchor the44px button above the expanded panel's right inset and keep it stationary when collapsed. Use a left/right chevron for hide/show, a visible button surface with hover fill, and matching Hide saved runs / Show saved runs accessible names and tooltips. Phone keeps its top-left hamburger before the centered wordmark.
+
 Phone Settings opens as a centered, rounded native modal with a dimmed backdrop, at least16px margins and content-sized height. Long setup forms scroll within it while the close control stays visible. Desktop retains its header popover. Preserve form drafts and focus when resizing across850/851px; drawer-to-Settings handoff must keep background scrolling locked until dismissal. The phone drawer has a labelled New shortlist action above saved runs even on the entry page; the header plus remains run-only. Keep the hamburger and close icon in the same44px position, with a short180ms transition and no authored animation under reduced motion.
 
 User feedback replaces the large live-research animation with a visible six-stage plan and an expanded newest-first checkpoint timeline. Each stage is a keyboard-operable read-only review action; viewing an earlier stage never moves the actual progress marker or starts provider work. Missing saved results stay explicit. Keep partial/confirmation history open. Use each site's own favicon in company results and saved history, with existing initials as fallback and no third-party icon lookup.

@@ -7,17 +7,16 @@ import type { Run } from './api';
 import { SiteIcon } from './SiteIcon';
 import './ResearchSidebar.css';
 
-export function ResearchSidebar({ runs, activeId, loading, onNew, onSelect, mobileOpen, onMobileClose, settingsTarget, visibleDesktop }: {
+export function ResearchSidebar({ runs, activeId, loading, onNew, onSelect, mobileOpen, onMobileClose, settingsTarget, visibleDesktop, collapsed }: {
   runs: Run[]; activeId?: string; loading: boolean; onNew: () => void; onSelect: (run: Run) => void;
-  mobileOpen: boolean; onMobileClose: () => void; settingsTarget?: 'local-settings' | 'account-tray'; visibleDesktop: boolean;
+  mobileOpen: boolean; onMobileClose: () => void; settingsTarget?: 'local-settings' | 'account-tray'; visibleDesktop: boolean; collapsed: boolean;
 }) {
-  const [collapsed, setCollapsed] = useState(() => window.matchMedia('(max-width: 850px)').matches);
   const [narrow, setNarrow] = useState(() => window.matchMedia('(max-width: 850px)').matches);
   const drawer = useRef<HTMLDialogElement>(null);
   usePageScrollLock(narrow && mobileOpen);
   useEffect(() => {
     const query = window.matchMedia('(max-width: 850px)');
-    const changed = () => { setNarrow(query.matches); setCollapsed(true); onMobileClose(); };
+    const changed = () => { setNarrow(query.matches); onMobileClose(); };
     query.addEventListener('change', changed);
     return () => query.removeEventListener('change', changed);
   }, [onMobileClose]);
@@ -43,12 +42,7 @@ export function ResearchSidebar({ runs, activeId, loading, onNew, onSelect, mobi
       })}</nav> : <p className="sidebar-loading">Your saved runs will appear here.</p>}
     </div>;
   return <aside className={`sidebar research-sidebar ${collapsed ? 'is-collapsed' : ''}${visibleDesktop ? '' : 'is-empty'}`} aria-label="Saved research">
-    <div className="sidebar-header"><span className="sidebar-heading">Workspace</span><button className="sidebar-toggle" type="button"
-      aria-expanded={!collapsed} aria-controls={narrow ? 'research-drawer' : 'research-navigation'} aria-haspopup={narrow ? 'dialog' : undefined} aria-label={narrow ? 'Saved runs' : collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-      title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} onClick={() => setCollapsed(value => !value)}>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d={collapsed ? "M9 4v16m3-11 3 3-3 3" : "M9 4v16m6-11-3 3 3 3"}/></svg>
-    </button></div>
-    <button className="new-run" type="button" onClick={() => { onNew(); if (narrow) setCollapsed(true); }} aria-label="New shortlist" title="New shortlist">
+    <button className="new-run" type="button" onClick={onNew} aria-label="New shortlist" title="New shortlist">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8v8m-4-4h8"/></svg><span className="nav-label">New shortlist</span>
     </button>
     {narrow ? <dialog id="research-drawer" ref={drawer} className="research-drawer" aria-labelledby="drawer-title" onCancel={onMobileClose} onKeyDown={event => {

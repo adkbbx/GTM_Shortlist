@@ -38,11 +38,11 @@ test('navigation remains compact through resize and drawer transitions', async (
   try {
     await page.setViewportSize({ width: 1366, height: 800 });
     await page.goto('/');
-    await expect(page.getByRole('button', { name: 'Collapse sidebar', exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'Collapse sidebar', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Hide saved runs', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Hide saved runs', exact: true }).click();
     for (const width of [1366, 1024, 851, 850, 731, 701, 700, 390, 320, 851, 1366]) {
       await page.setViewportSize({ width, height: 800 });
-      const expand = page.getByRole('button', { name: /^(Expand sidebar|Saved runs)$/ });
+      const expand = page.getByRole('button', { name: /^(Show saved runs|Saved runs)$/ });
       await expect(expand).toBeVisible();
       const before = await page.locator('.main').boundingBox();
       await expand.click();
@@ -64,9 +64,12 @@ test('navigation remains compact through resize and drawer transitions', async (
         await expect(expand).toBeFocused();
       } else {
         const sidebar = await page.locator('.research-sidebar').boundingBox();
-        const header = await page.locator('.sidebar-header').boundingBox();
-        expect(header!.y - sidebar!.y).toBeLessThan(24);
-        await page.getByRole('button', { name: 'Collapse sidebar', exact: true }).click();
+        const toggle = page.getByRole('button', { name: 'Hide saved runs', exact: true });
+        const box = await toggle.boundingBox();
+        expect(box!.y).toBe(6);
+        expect(box!.x + box!.width).toBe(sidebar!.x + sidebar!.width - 12);
+        await expect(toggle).toHaveAttribute('title', 'Hide saved runs');
+        await page.getByRole('button', { name: 'Hide saved runs', exact: true }).click();
       }
       const geometry = await page.evaluate(() => ({
         overflow: document.documentElement.scrollWidth > innerWidth,
@@ -78,13 +81,13 @@ test('navigation remains compact through resize and drawer transitions', async (
       expect(geometry.heading).toBeGreaterThan(Math.min(280, width - 48));
     }
     await page.setViewportSize({ width: 790, height: 800 });
-    await page.getByRole('button', { name: /^(Expand sidebar|Saved runs)$/ }).click();
+    await page.getByRole('button', { name: /^(Show saved runs|Saved runs)$/ }).click();
     await expect(page.getByRole('dialog')).toBeVisible();
     await page.setViewportSize({ width: 1366, height: 800 });
     await expect(page.getByRole('dialog')).toHaveCount(0);
     expect(await page.evaluate(() => document.body.style.overflow)).not.toBe('hidden');
     await page.getByLabel('Company name or website', { exact: true }).fill('Preserved company');
-    await page.getByRole('button', { name: /^(Expand sidebar|Saved runs)$/ }).click();
+    await page.getByRole('button', { name: /^(Show saved runs|Saved runs)$/ }).click();
     await expect(page.getByLabel('Company name or website', { exact: true })).toHaveValue('Preserved company');
   } finally { await page.request.post(`/__fixture_release/${id}`); }
 });
@@ -95,22 +98,39 @@ test('saved research navigation collapses and expands without changing the run',
   try {
     await page.goto(`/?run=${id}`);
     const sidebar = page.locator('.research-sidebar');
+    const toggle = page.locator('header.topbar .desktop-history-toggle');
+    const initialToggle = info.project.name === 'laptop' ? await toggle.boundingBox() : null;
+    if (initialToggle) {
+      const brand = await page.locator('header.topbar .brand').boundingBox();
+      expect(initialToggle.x).toBeGreaterThan(brand!.x + brand!.width);
+      expect(initialToggle.x + initialToggle.width).toBe((await sidebar.boundingBox())!.x + (await sidebar.boundingBox())!.width - 12);
+      expect(await toggle.evaluate(element => element.previousElementSibling?.classList.contains('brand'))).toBe(true);
+      await expect(toggle.locator('path')).toHaveAttribute('d', 'm15 6-6 6 6 6');
+      await toggle.hover();
+      await expect(toggle).toHaveCSS('background-color', 'rgb(53, 49, 43)');
+    }
     if (info.project.name === 'phone') {
-      await page.getByRole('button', { name: /^(Expand sidebar|Saved runs)$/ }).click();
+      await page.getByRole('button', { name: /^(Show saved runs|Saved runs)$/ }).click();
       await expect(page.getByRole('dialog', { name: 'Your workspace' })).toBeVisible();
     }
     await expect(sidebar.locator('[aria-current=page]')).toHaveCount(1);
-    await page.getByRole('button', { name: info.project.name === 'phone' ? 'Close saved runs' : 'Collapse sidebar', exact: true }).click();
-    const expand = page.getByRole('button', { name: /^(Expand sidebar|Saved runs)$/ });
+    await page.getByRole('button', { name: info.project.name === 'phone' ? 'Close saved runs' : 'Hide saved runs', exact: true }).click();
+    const expand = page.getByRole('button', { name: /^(Show saved runs|Saved runs)$/ });
     await expect(expand).toHaveAttribute('aria-expanded', 'false');
+    if (initialToggle) {
+      expect(await expand.boundingBox()).toEqual(initialToggle);
+      await expect(expand).toHaveAttribute('title', 'Show saved runs');
+      await expect(expand.locator('path')).toHaveAttribute('d', 'm9 6 6 6-6 6');
+    }
     await expect(page).toHaveURL(new RegExp(id));
     if (info.project.name === 'phone') await expect(page.getByRole('dialog')).not.toBeVisible();
     else expect((await sidebar.boundingBox())!.width).toBe(64);
     mkdirSync('.impeccable/review', { recursive: true });
     await page.screenshot({ path: `.impeccable/review/${info.project.name}-sidebar-collapsed.png` });
     await expand.press('Enter');
+    if (initialToggle) expect(await toggle.boundingBox()).toEqual(initialToggle);
     await expect(sidebar.getByRole('navigation', { name: 'Research history' })).toBeVisible();
-    await expect(page.getByRole('button', { name: info.project.name === 'phone' ? 'Close saved runs' : 'Collapse sidebar', exact: true })).toBeFocused();
+    await expect(page.getByRole('button', { name: info.project.name === 'phone' ? 'Close saved runs' : 'Hide saved runs', exact: true })).toBeFocused();
     await page.screenshot({ path: `.impeccable/review/${info.project.name}-sidebar-expanded.png` });
     if (info.project.name === 'phone') {
       // Selecting a saved run dismisses the drawer and restores the workspace.
@@ -129,7 +149,7 @@ test('long saved history scrolls without compressing or overlapping rows', async
     const run = await response.json();
     await page.route('**/api/runs', route => route.fulfill({ json: Array.from({ length: 25 }, (_, index) => ({ ...run, id: index === 0 ? id : `history-${index}`, company_name: `Saved company ${index + 1}` })) }));
     await page.goto(`/?run=${id}`);
-    if (info.project.name === 'phone') await page.getByRole('button', { name: /^(Expand sidebar|Saved runs)$/ }).click();
+    if (info.project.name === 'phone') await page.getByRole('button', { name: /^(Show saved runs|Saved runs)$/ }).click();
     const rows = page.getByRole('navigation', { name: 'Research history' }).getByRole('button');
     await expect(rows).toHaveCount(25);
     const geometry = await rows.evaluateAll(elements => elements.map(element => {

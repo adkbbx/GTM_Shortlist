@@ -1,5 +1,13 @@
 # Progress and handoff
 
+## 17 October, desktop saved-run toggle in header
+
+Moved the desktop visibility button out of ResearchSidebar into the header immediately after the GTM Shortlist wordmark. Lifted the collapsed state into App so header and panel share one state. The44px button stays anchored above the expanded panel's right inset, independent of collapse; a shared224px panel-width token keeps its position and panel geometry aligned. Left/right chevrons indicate hide/show. The button has a bordered surface, hover fill, keyboard focus and identical Hide saved runs / Show saved runs aria-labels and title tooltips. Removed the old in-panel heading/toggle and its CSS. Phone hamburger, centered wordmark, run-only plus, drawer and Settings remain unchanged. Empty desktop history still hides the panel and its toggle while keeping Settings accessible.
+
+Verification: build, Ruff and21 backend API/progress checks pass. All26 phone/laptop sidebar, navigation, Settings and Brandfetch browser checks pass. Added real geometry assertions for wordmark-before-toggle order, expanded-panel alignment, identical button coordinates in both states, hover fill, tooltip and chevron direction, alongside same-mounted-page resizing through1366/1024/851/850/731/701/700/390/320px and back. Updated every old Expand sidebar / Collapse sidebar test caller. Inspected expanded/collapsed laptop screenshots and phone header screenshot using synthetic saved runs. Existing Vite bundle-size advisory remains. Current-commit CI and user acceptance remain unverified.
+
+Local assets update on refresh; no API/worker restart, saved database mutation, provider credits, main merge or deployment. Port8018 remains design-only.
+
 ## 17 October, phone Settings modal and drawer follow-up
 
 Corrected phone Settings from desktop corner placement to a centered native modal. The intermediate full-screen treatment was rejected by the user and is superseded: the final panel has12px corners, at least16px margins, a dimmed backdrop and content-sized height capped to the viewport. Long forms scroll inside with a sticky close control. Desktop keeps its existing header popover. The same dialog element preserves setup selections and drafts through850/851px transitions; keyboard focus remains within the phone modal and returns to the menu on dismissal. Shared scroll-lock ownership prevents drawer-to-Settings handoff from leaving the page locked or prematurely unlocking it.
