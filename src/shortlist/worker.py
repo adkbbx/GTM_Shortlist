@@ -52,6 +52,10 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
     search = search or SearchProvider(settings)
     model = model or Gemma(settings)
 
+    def prompt_inputs() -> dict:
+        # Compact and Ollama requests differ from the hosted shape; journal them as distinct inputs.
+        return model.runtime.journal() if isinstance(model, Gemma) else {}
+
     def call(kind: str, provider: str, operation: str, function, inputs: dict, decode):
         phase = ("market" if operation == "market:search" else "campaigns" if operation == "market:campaigns"
                  else "seller" if operation.startswith("seller:") else "discovery" if kind == "search" else "research")
@@ -119,7 +123,8 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
             try:
                 plan = call("model", model.name, "market:campaigns", lambda: model.market(draft, candidates),
                             {"draft": draft.model_dump(mode="json"), "candidates": checkpoint["market_candidates"],
-                             "model": settings.gemma_model, "endpoint": settings.gemma_base_url, "campaign_policy": 2},
+                             "model": settings.gemma_model, "endpoint": settings.gemma_base_url, "campaign_policy": 2,
+                             **prompt_inputs()},
                             read_campaign_plan)
                 checkpoint["market_plan"] = plan.model_dump(mode="json")
             except (ProviderError, BudgetExceeded) as exc:
@@ -181,7 +186,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                     draft = SellerDraft.model_validate(checkpoint["draft"])
                 else:
                     seller_inputs = {"source": source.model_dump(mode="json"), "model": settings.gemma_model,
-                                     "endpoint": settings.gemma_base_url}
+                                     "endpoint": settings.gemma_base_url, **prompt_inputs()}
                     protocol = checkpoint.get("seller_output_protocol", 1)
                     if protocol != 1:
                         seller_inputs["output_protocol"] = protocol
@@ -312,7 +317,8 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 previous = diagnostics.get(candidate.domain)
                 model_inputs = {"profile": profile.model_dump(mode="json"), "candidate": candidate.model_dump(mode="json"),
                                 "sources": [s.model_dump(mode="json") for s in sources],
-                                "model": settings.gemma_model, "endpoint": settings.gemma_base_url, "exclusion_policy": 1}
+                                "model": settings.gemma_model, "endpoint": settings.gemma_base_url, "exclusion_policy": 1,
+                                **prompt_inputs()}
                 if previous is None:
                     try:
                         record = call("model", model.name, f"model:{candidate.domain}",
@@ -361,7 +367,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                                   "research": record.model_dump(mode="json", exclude={
                                       key for key in ("company_facts", "people") if not getattr(record, key)}),
                                   "model": settings.gemma_model, "endpoint": settings.gemma_base_url,
-                                  "verification_policy": 2}, decode_verification)
+                                  "verification_policy": 2, **prompt_inputs()}, decode_verification)
                     record = apply_verification(profile, record, audit)
                     checkpoint.setdefault("verification", {})[candidate.domain] = audit.model_dump(mode="json")
                 except (ProviderError, BudgetExceeded) as exc:

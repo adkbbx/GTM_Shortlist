@@ -70,6 +70,8 @@ def public_events(run: dict) -> tuple[dict, ...]:
             issues = diagnostic.get("issues", [])
             if not diagnostic.get("content") and any(issue.get("type") == "json_object_required" for issue in issues):
                 projected["detail"] = "The model returned an empty response instead of the required structured output."
+            elif any(issue.get("type") == "output_truncated" for issue in issues):
+                projected["detail"] = "The model ran out of output space before finishing. This assessment was not completed."
             elif any(issue.get("type") == "missing" for issue in issues):
                 projected["detail"] = "The model response was missing required research fields. This assessment was not completed."
         result.append(projected)

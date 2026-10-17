@@ -1,5 +1,15 @@
 # Progress and handoff
 
+## 17 October, compact prompts for small local models
+
+Diagnosed the local failures in Explore market, Inspect evidence and Review and draft. The saved local model was Ollama gemma4:e2b-it-qat (4.6B, Q4). Ollama's server log recorded "truncating input prompt limit=2051" for every campaign and research call (prompts of 6,044 to 12,813 tokens), so the instructions and schema were dropped and the saved outputs were free-form page summaries missing name and findings. Review and draft had no failure of its own; it displayed the three records whose assessments failed.
+
+Added src/shortlist/prompting.py and a compact/full prompt profile chosen from the model connection (docs/local-provider-setup.md, Prompt profiles). Ollama connections use native /api/chat with explicit num_ctx, an enforced schema and reasoning disabled. Compact requests send smaller payloads, ranked verbatim page excerpts, at most three campaigns and criteria/exclusion-only research, with a task reminder after the data. All profiles pin criterion, exclusion and assessment identifiers in the schema and label JSON replies stopped by length as output_truncated. SHORTLIST_PROMPT_PROFILE overrides the choice. Hosted request payloads and journal hashes are unchanged.
+
+Verification: Ruff and the backend suite pass, including 15 new labelled-fixture tests in tests/test_prompting.py (profile detection without probing hosted endpoints, excerpts, pinned schemas, native request shape, a worker run, truncation and window guards, unchanged hosted payload). Replayed the two saved local runs read-only against local Ollama (no paid calls): seller, campaigns, research and verification all completed for three companies each, in about 6 to 19 seconds per step, and the Ollama log recorded no further truncation.
+
+Not done: research quality from a 4.6B model remains weak (it accepted an article page as fitting); evaluate a larger or hosted model with user approval. Seller criteria can still describe the seller rather than observable target-company traits, competitor and discovery queries still search long phrases and accept article sites as companies, and the UI does not yet say that compact runs skip company facts and people. No UI change, provider-credit use, main merge or deployment.
+
 ## 17 October, searchable grouped history and run-only header action
 
 Moved desktop New shortlist from the panel into the header next to Settings/Account, with a plus and visible label only while viewing a run. Start screen has no header action. Phone retains its run-only header plus and the previously requested labelled drawer action. Closing desktop history now hides it entirely, including every run icon, and main content uses the full workspace width; removed the64px rail rules and bypassed the existing1320px content cap specifically for this state. The stationary header toggle still reopens history.
