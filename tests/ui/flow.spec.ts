@@ -841,6 +841,9 @@ test('optional demo explains evidence without creating research', async ({ page 
     await demo.locator('.demo-stage-list > summary').click();
   }
   await demo.getByRole('button', { name: /5 Inspect evidence/ }).click();
+  // Choosing a stage moves focus to its heading on the next frame; press Enter only after that, or the
+  // focus move can land between Playwright focusing the button and the key press.
+  await expect(demo.getByRole('heading', { name: 'Inspect evidence', level: 2 })).toBeFocused();
   await demo.getByRole('button', { name: 'Inspect example passage', exact: true }).press('Enter');
   await expect(demo.getByText('Synthetic example passage', { exact: true })).toBeVisible();
   await expect(demo.getByText('Synthetic example · invented companies and passages')).toBeVisible();
