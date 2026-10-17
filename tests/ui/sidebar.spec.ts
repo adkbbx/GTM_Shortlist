@@ -51,7 +51,8 @@ test('navigation remains compact through resize and drawer transitions', async (
         await expect(dialog).toBeVisible();
         await expect(dialog.getByRole('button', { name: 'Close saved runs', exact: true })).toBeFocused();
         const box = await dialog.boundingBox();
-        expect(box!.width).toBeLessThanOrEqual(width - 32);
+        // Transformed Chromium bounds may include a few millionths of a pixel.
+        expect(box!.width).toBeLessThanOrEqual(width - 32 + 0.01);
         expect((await page.locator('.main').boundingBox())!.y).toBe(before!.y);
         expect(before!.y).toBe(56);
         expect((await page.locator('header.topbar').boundingBox())!.height).toBe(56);
