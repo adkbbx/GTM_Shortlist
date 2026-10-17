@@ -14,16 +14,50 @@ DIRECTORIES = frozenset({"linkedin.com", "crunchbase.com", "g2.com", "capterra.c
                          "freedict.com", "vocabulary.com", "builtin.com", "builtinla.com", "builtinnyc.com",
                          "builtinboston.com", "builtinaustin.com", "builtinseattle.com", "builtinchicago.org",
                          "50pros.com", "getonbrd.com", "getonbrd.com.ar"})
+# Sites whose pages are never a candidate company's own: video and social platforms, job boards, review and
+# comparison sites, market-research publishers, and company or startup databases. Observed in saved searches.
+NON_COMPANY_SITES = frozenset({
+    "youtube.com", "youtu.be", "vimeo.com", "tiktok.com", "instagram.com", "facebook.com", "x.com", "twitter.com",
+    "pinterest.com", "quora.com", "medium.com", "substack.com", "slideshare.net", "scribd.com",
+    "indeed.com", "ziprecruiter.com", "glassdoor.com", "monster.com", "simplyhired.com", "careerbuilder.com",
+    "startup.jobs", "workingnomads.com", "remoteok.com", "weworkremotely.com",
+    "gartner.com", "forrester.com", "trustradius.com", "getapp.com", "softwareadvice.com", "sourceforge.net",
+    "alternativeto.net", "saasworthy.com", "clutch.co", "goodfirms.co", "upwork.com", "fiverr.com", "trustpilot.com",
+    "statista.com", "mordorintelligence.com", "grandviewresearch.com", "marketsandmarkets.com",
+    "businessresearchinsights.com", "fortunebusinessinsights.com", "precedenceresearch.com", "researchandmarkets.com",
+    "gminsights.com", "alliedmarketresearch.com", "imarcgroup.com", "expertmarketresearch.com", "verifiedmarketresearch.com",
+    "pitchbook.com", "cbinsights.com", "dealroom.co", "owler.com", "zoominfo.com", "rocketreach.co", "growthlist.co",
+    "topstartups.io", "vcbacked.co", "openvc.app", "startupik.com", "businessofapps.com", "influencermarketinghub.com",
+    "datamation.com", "techtarget.com", "saastr.com", "forbes.com", "businessinsider.com", "entrepreneur.com", "inc.com",
+})
 CONTENT_SECTIONS = frozenset({"blog", "blogs", "article", "articles", "news", "newsroom", "insights",
                               "resources", "learn", "tips", "reports", "whitepapers", "press", "podcast",
                               "podcasts", "guides", "wiki", "dictionary", "definition", "lists", "community",
                               "academy", "case-studies", "customer-stories", "job", "jobs", "careers", "events",
-                              "feed", "feeds", "rss", "cgi-sys"})
+                              "feed", "feeds", "rss", "cgi-sys",
+                              "glossary", "post", "posts", "p", "watch", "video", "videos", "webinar", "webinars",
+                              "library", "libraries", "tech-hub", "knowledge-base", "kb", "market-reports",
+                              "industry-reports", "statistics", "directory", "list", "investor-lists",
+                              "funded-startups", "executive-biography", "biography", "courses", "course", "latest",
+                              "whatis", "matrices", "topics", "tag", "tags", "category", "author", "authors"})
+# Count-led lists ("25,000+ Funded Startups", "16 of the Best ...") and research or job listings are about other companies.
+LISTING_TITLE = re.compile(
+    r"^\d[\d,]*\+?\s+(?:[\w&-]+\s+){0,4}(?:companies|startups|businesses|agencies|firms|tools|apps|platforms|vendors|"
+    r"websites|programs|investors|ideas|examples|alternatives|brands)\b|\b\d+\s+of\s+the\s+best\b|\blist of\b|"
+    r"\bmarket (?:size|forecast|report)\b|\bmarket\s+\d{4}\b|\bglossary\b|\bjob postings\b|\bcareer opportunities\b|"
+    r"\b(?:now hiring|apply today)\b", re.IGNORECASE)
+PUBLIC_SECTOR = re.compile(
+    r"\b(?:government|public sector|municipal|county|counties|city|cities|federal|state agenc\w*|agenc(?:y|ies)|"
+    r"council|ministr\w*|school|universit\w*|college|education\w*|campus|nonprofit|non-profit|ngo|charit\w*|"
+    r"hospital|health system|central bank|intergovernmental)\b", re.IGNORECASE)
+PUBLIC_HOST = re.compile(r"(?:^|\.)(?:gov|mil|edu|int)(?:\.[a-z]{2})?$|(?:^|\.)(?:gov|ac|edu)\.[a-z]{2}$|(?:^|\.)europa\.eu$")
+TRACKING_PARAMETERS = re.compile(r"^(?:utm_\w+|ref|source|gclid|fbclid|msclkid|hl|lang)$", re.IGNORECASE)
 BUSINESS_SECTIONS = frozenset({"product", "products", "platform", "solutions", "services", "about", "company",
                                "pricing", "features", "industries", "team", "leadership", "contact"})
 EDITORIAL_TITLE = re.compile(
     r"^(?:how|why|what|your guide|the ultimate guide)\b|\b(?:top|best)\s+\d+\b|"
-    r"\b\d+\s+(?:top|best)\b|\b(?:playbook|framework|report|definition|roundup|explained)\b", re.IGNORECASE)
+    r"\b\d+\s+(?:top|best)\b|\b(?:playbook|framework|report|definition|roundup|explained)\b|"
+    r"\b(?:guides?|strategies|statistics|trends|tips|ideas|benchmarks|checklist|mistakes)\b", re.IGNORECASE)
 EDITORIAL_SLUG = re.compile(r"(?:^|[-_])(?:guide|playbook|framework|report|definition|examples|roundup|best|top)(?:[-_]|$)", re.IGNORECASE)
 
 
@@ -38,13 +72,17 @@ def company_page_issue(url: str, title: str = "", *, strict: bool = False) -> st
     host = (urlsplit(url).hostname or "").casefold()
     if host.startswith(("jobs.", "careers.")):
         return "Recruitment website; this is not the employer's official company page"
+    if host.startswith(("blog.", "news.", "community.", "forum.", "forums.", "learn.", "academy.", "resources.")):
+        return "Article, guide, news or directory page; an official company or product page is required"
     if parts and parts[-1].endswith((".pdf", ".xml", ".rss", ".csv", ".xls", ".xlsx")):
         return "Document, feed or data listing; not a company identity page"
-    if any(part in CONTENT_SECTIONS for part in parts):
+    if any(part in CONTENT_SECTIONS or re.match(r"(?:blog|news|insight|article)s?[-_]", part) for part in parts):
         return "Article, guide, news or directory page; an official company or product page is required"
     business_page = bool(parts and parts[0] in BUSINESS_SECTIONS)
     if parts and not business_page and (EDITORIAL_SLUG.search(parts[-1]) or EDITORIAL_TITLE.search(title)):
         return "Editorial title or article URL; this page does not establish the publisher as a target company"
+    if parts and LISTING_TITLE.search(title):  # A homepage is never refused by its title alone.
+        return "List, market report or job listing; it describes other companies rather than establishing one"
     if strict:
         # Unmarked third-party reviews often have no /blog/ prefix. Require a
         # recognisable business entry page instead of assuming an arbitrary slug is official.
@@ -55,9 +93,23 @@ def company_page_issue(url: str, title: str = "", *, strict: bool = False) -> st
     return None
 
 
+def research_entry(url: str, title: str = "") -> str:
+    """Where research starts for a company found through one of its own pages. A recognisable company page is used as
+    found; any other deep page (a product area, a market landing page) starts from the site's homepage instead of
+    being fetched and then refused. Content pages never reach this point: admission rejects them."""
+    if company_page_issue(url, title) is None and company_page_issue(url, title, strict=True):
+        return f"https://{urlsplit(url).hostname}/"
+    return url
+
+
+def listed_site(host: str, sites: frozenset[str]) -> bool:
+    host = host.casefold().removeprefix("www.")
+    return any(host == site or host.endswith("." + site) for site in sites)
+
+
 def primary_source_issue(source: Source, *, strict: bool = False) -> str | None:
     owner = (urlsplit(source.url).hostname or "").removeprefix("www.")
-    if any(owner == domain or owner.endswith("." + domain) for domain in DIRECTORIES):
+    if listed_site(owner, DIRECTORIES | NON_COMPANY_SITES):
         return "Third-party directory or job board; not the employer's own website"
     issue = company_page_issue(source.url, source.title, strict=strict)
     if issue:
@@ -112,8 +164,18 @@ def record_issue(record: Research, *, strict: bool = False) -> str | None:
 
 
 def candidate_issue(candidate: Candidate) -> str | None:
-    if any(candidate.domain == domain or candidate.domain.endswith("." + domain) for domain in DIRECTORIES):
+    if listed_site(candidate.domain, DIRECTORIES):
         return "Directory or reference website; not an official candidate company page"
+    if listed_site(candidate.domain, NON_COMPANY_SITES):
+        return "Video, social, job, review, research or company-database site; not a candidate company's own page"
+    parsed = urlsplit(candidate.url)
+    host = (parsed.hostname or "").casefold()
+    # Government, education and intergovernmental sites are candidates only when the search is about that sector.
+    if PUBLIC_HOST.search(host) and not PUBLIC_SECTOR.search(candidate.query):
+        return "Public-sector or education website outside a public-sector search"
+    if parsed.query and parsed.path.strip("/") == "" and any(
+            not TRACKING_PARAMETERS.match(name.split("=")[0]) for name in parsed.query.split("&") if name):
+        return "Filtered listing view rather than a company's own page"
     return company_page_issue(candidate.url, candidate.name)
 
 

@@ -5,6 +5,7 @@ import json
 from shortlist.customer_export import HEADERS, customer_tables
 from shortlist.domain import Research
 from shortlist.market import reviewed_market
+from shortlist.ranking import by_evidence
 from shortlist.relevance import record_issue
 from shortlist.workbook import workbook_bytes
 
@@ -15,8 +16,8 @@ def export_run(run: dict, format: str, accepted_only: bool = False) -> str | byt
     withheld = [{"reason": reason, "record": r} for r in run["records"]
                 if (reason := record_issue(Research.model_validate(r["research"]), strict=True))]
     excluded = {item["record"]["research"]["id"] for item in withheld}
-    records = [r for r in run["records"] if r["research"]["id"] not in excluded
-               and (not accepted_only or r["review"] and r["review"]["decision"] == "accepted")]
+    records = by_evidence(run.get("profile"), [r for r in run["records"] if r["research"]["id"] not in excluded
+                                               and (not accepted_only or r["review"] and r["review"]["decision"] == "accepted")])
     offer = (run.get("profile") or run["checkpoint"].get("draft") or {}).get("offer", "")
     seller_url = (run.get("profile") or {}).get("seller_url") or run["checkpoint"].get("seller_url", "https://seller.example/")
     reviewed = reviewed_market(run["checkpoint"].get("market"), seller_url, offer)

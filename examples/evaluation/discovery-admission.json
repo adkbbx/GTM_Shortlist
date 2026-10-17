@@ -1,0 +1,680 @@
+{
+ "note": "Real web search results (Tavily) saved by local research runs between 13 and 16 October 2026: discovery ('search') and competitor ('market') searches. URLs and titles only; search queries and excerpts are omitted. Labels were assigned by hand from the URL and title on 18 October 2026, not by a model. 'company' is an operating company's own page that identifies it (homepage, product, pricing or service page). 'not_company' is a page that cannot be a candidate company (publishers, lists and databases, job posts, video, market reports, government and education, glossaries, forums). 'editorial' is a blog post, guide or list hosted on an operating vendor's own site: the domain is a company, but the page is content about a topic.",
+ "counts": {
+  "company": 21,
+  "editorial": 37,
+  "not_company": 46
+ },
+ "results": [
+  {
+   "url": "https://www.smeron.com/",
+   "title": "Smeron | Custom AI Applications & B2B SaaS Growth Studio",
+   "search": "search",
+   "label": "company"
+  },
+  {
+   "url": "https://prismatic.io/",
+   "title": "Embedded iPaaS for B2B Software Companies | Prismatic",
+   "search": "search",
+   "label": "company"
+  },
+  {
+   "url": "https://b2bhub.ltd/",
+   "title": "B2B Hub | AI-Native Business Operating System",
+   "search": "search",
+   "label": "company"
+  },
+  {
+   "url": "https://tandemworks.ai/",
+   "title": "TandemWorks | Agentic AI for B2B Revenue Teams",
+   "search": "search",
+   "label": "company"
+  },
+  {
+   "url": "https://siesta.ai/",
+   "title": "Siesta AI | Context-Native Enterprise AI Platform",
+   "search": "search",
+   "label": "company"
+  },
+  {
+   "url": "https://backofficeboss.ai/",
+   "title": "BackOfficeBoss.ai — Custom AI automation built around your business",
+   "search": "search",
+   "label": "company"
+  },
+  {
+   "url": "https://freshify.io/pricing",
+   "title": "Pricing — Freshify software products",
+   "search": "search",
+   "label": "company"
+  },
+  {
+   "url": "https://www.happyfox.com/crm/pricing/",
+   "title": "HappyFox CRM Pricing | Plans for B2B SaaS Teams",
+   "search": "search",
+   "label": "company"
+  },
+  {
+   "url": "https://delegatezero.com/",
+   "title": "DelegateZero - AI Decision Proxy for B2B SaaS Founders",
+   "search": "search",
+   "label": "company"
+  },
+  {
+   "url": "https://www.actaa.ai/startups",
+   "title": "Actaa — For startups",
+   "search": "search",
+   "label": "company"
+  },
+  {
+   "url": "https://caacgo.cresclab.com/pricing",
+   "title": "Pricing — CAAC Go | Start Free, Scale as You Grow",
+   "search": "search",
+   "label": "company"
+  },
+  {
+   "url": "https://www.runwork.ai/pricing/",
+   "title": "Pricing | Runwork",
+   "search": "search",
+   "label": "company"
+  },
+  {
+   "url": "https://saasfractionalcpo.com/blog/b2b-saas-growth-strategies",
+   "title": "B2B SaaS Growth: Strategies, Stages, and Playbooks [2026]",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://growthlist.co/b2b-saas-startups",
+   "title": "25,000+ Funded B2B SaaS Startups 2026 | Get Verified Leads - Growth List",
+   "search": "search",
+   "label": "not_company",
+   "kind": "startup database"
+  },
+  {
+   "url": "https://www.performixbiz.com/best-b2b-saas-enterprise-software-company-for-2026",
+   "title": "Best B2B SaaS Enterprise Software Company for 2026",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://filament.digital/best-b2b-saas-marketing-agencies",
+   "title": "The 10 Best B2B SaaS Marketing Agencies in 2026",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://www.mordorintelligence.com/industry-reports/b2b-saas-market",
+   "title": "B2B SaaS Market Size, Share Analysis, Growth Report 2026 – 2031",
+   "search": "search",
+   "label": "not_company",
+   "kind": "market report"
+  },
+  {
+   "url": "https://www.datamation.com/cloud/saas-companies",
+   "title": "76 Top SaaS Companies to Know in 2026",
+   "search": "search",
+   "label": "not_company",
+   "kind": "publisher list"
+  },
+  {
+   "url": "https://amasty.com/blog/top-b2b-saas-companies",
+   "title": "Top 25+ B2B SaaS Companies",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://ideaproof.io/lists/b2b-saas-ideas",
+   "title": "50 B2B SaaS Ideas for 2026 — With Market Data, Pricing & Competitive Analysis",
+   "search": "search",
+   "label": "not_company",
+   "kind": "list"
+  },
+  {
+   "url": "https://www.roverlead.com/blog/b-2-b-saas-companies",
+   "title": "B2B SaaS Companies: The Ultimate Sales Guide for 2026 | RoverLead",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://resources.rework.com/libraries/saas-growth/b2b-saas-growth-model",
+   "title": "\"B2B SaaS Model Explained: How Recurring Revenue Compounds (2026)\"",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://monday.com/blog/project-management/b2b-software",
+   "title": "18 Best B2B SaaS Enterprise Software Tools for 2026",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://staxbill.com/blog/b2b-saas",
+   "title": "Your Guide to B2B SaaS: Definition, Companies, and Outlook",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://winstonfrancois.com/blog/saas-pricing-strategy-series-a",
+   "title": "SaaS Pricing Strategy Guide for Series A Companies | Pricing Framework",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://www.njbusiness-attorney.com/top-law-firms-for-saas-companies-and-startups-in-2026",
+   "title": "Top Law Firms for SaaS Companies and Startups in 2026 - SaaS Law Firm Andrew S. Bosin LLC",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://revenuebase.ai/companies/b2b-saas-companies/italy",
+   "title": "Top 22 B2B SaaS companies based in Italy",
+   "search": "search",
+   "label": "not_company",
+   "kind": "company database"
+  },
+  {
+   "url": "https://getathenic.com/blog/startup-pricing-strategy-b2b-saas",
+   "title": "Startup Pricing Strategy for B2B SaaS: Value-Based vs Usage-Based – Remery Blog",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://reliablestartup.com/business-ideas/b2b-saas-startup-pricing-models-explained-with-examples",
+   "title": "B2B SaaS Pricing Models Explained With Examples",
+   "search": "search",
+   "label": "not_company",
+   "kind": "publisher"
+  },
+  {
+   "url": "https://smartbuy.alibaba.com/b2b/a-b2b-saas-company-at-series-a-funding-stage",
+   "title": "How to Choose a B2B SaaS Company at Series A Funding Stage for Growth-Ready Investors",
+   "search": "search",
+   "label": "not_company",
+   "kind": "marketplace article"
+  },
+  {
+   "url": "https://www.getmonetizely.com/articles/outcome-based-pricing-the-next-frontier-in-saas-monetization",
+   "title": "Outcome-Based Pricing: The Next Frontier in SaaS Monetization?",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://valasysbusiness.com/saas-business-model-metrics-pricing-growth",
+   "title": "SaaS Business Model Metrics and Pricing Strategies for Growth",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://www.emailers.io/best-customer-engagement-software-for-saas-companies",
+   "title": "10 Best Customer Engagement Software for SaaS Companies 2026",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://trackier.com/affiliate-marketing-strategies",
+   "title": "Top Affiliate Marketing Strategies 2026: Build and Scale",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://www.businessofapps.com/affiliate/programs",
+   "title": "Top Affiliate Marketing Programs (2026) - Business of Apps",
+   "search": "search",
+   "label": "not_company",
+   "kind": "publisher list"
+  },
+  {
+   "url": "https://www.awin.com/us/affiliate-marketing/15-powerful-affiliate-marketing-statistics",
+   "title": "15 affiliate marketing statistics that matter in 2026 | Awin",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://www.youtube.com/watch?v=OjR_1N9Snf4",
+   "title": "Top ten affiliate programs to join in 2026",
+   "search": "search",
+   "label": "not_company",
+   "kind": "video"
+  },
+  {
+   "url": "https://www.businessresearchinsights.com/market-reports/affiliate-market-118327",
+   "title": "Affiliate Marketing Market 2026–2035 | Analysis & Growth ...",
+   "search": "search",
+   "label": "not_company",
+   "kind": "market report"
+  },
+  {
+   "url": "https://influencermarketinghub.com/affiliate-marketing-websites",
+   "title": "16 of the Best Affiliate Marketing Websites for 2026",
+   "search": "search",
+   "label": "not_company",
+   "kind": "publisher list"
+  },
+  {
+   "url": "https://www.businessresearchinsights.com/market-reports/affiliate-networks-and-market-112649",
+   "title": "Affiliate Networks and Marketing Platforms Market Forecast",
+   "search": "search",
+   "label": "not_company",
+   "kind": "market report"
+  },
+  {
+   "url": "https://www.businessofapps.com/affiliate",
+   "title": "Top Affiliate Marketing Companies (2026) - Business of Apps",
+   "search": "search",
+   "label": "not_company",
+   "kind": "publisher list"
+  },
+  {
+   "url": "https://impact.com/partners/affiliate-partners",
+   "title": "Affiliate Partner Marketplace - impact.com",
+   "search": "search",
+   "label": "company"
+  },
+  {
+   "url": "https://www.paloaltonetworks.com/",
+   "title": "Leader in Cybersecurity Protection & Software for the Modern Enterprises",
+   "search": "market",
+   "label": "company"
+  },
+  {
+   "url": "https://www.iqvia.com/",
+   "title": "Transforming Life Sciences with Data, Technology & Human Science | IQVIA",
+   "search": "market",
+   "label": "company"
+  },
+  {
+   "url": "https://www.wellington.com/en",
+   "title": "Wellington Homepage",
+   "search": "market",
+   "label": "company"
+  },
+  {
+   "url": "https://www.sandovalcountynm.gov/",
+   "title": "Home - Sandoval County",
+   "search": "market",
+   "label": "not_company",
+   "kind": "government"
+  },
+  {
+   "url": "https://www.swancc.org/",
+   "title": "SWANCC | Solid Waste Agency of Northern Cook County",
+   "search": "market",
+   "label": "not_company",
+   "kind": "public agency"
+  },
+  {
+   "url": "https://www.articsledge.com/post/channel-partner-management-software",
+   "title": "Channel Partner Management Software: 2026 Guide",
+   "search": "search",
+   "label": "not_company",
+   "kind": "publisher guide"
+  },
+  {
+   "url": "https://www.gartner.com/reviews/market/partner-relationship-management-applications",
+   "title": "Best Partner Relationship Management Applications (Transitioning to Partner and Ecosystem Relationship Management Applications) Reviews 2026 | Gartner Peer Insights",
+   "search": "search",
+   "label": "not_company",
+   "kind": "review site"
+  },
+  {
+   "url": "https://www.channeltivity.com/channel-management",
+   "title": "Channel Management Software Guide for High Tech 2026 | Channeltivity",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://www.salesforce.com/sales/partner-relationship-management/software",
+   "title": "Best Partner Relationship Management (PRM) Software | Salesforce",
+   "search": "search",
+   "label": "company"
+  },
+  {
+   "url": "https://www.youtube.com/watch?v=qxKO-Hr85vA",
+   "title": "Best Partnership Management Software",
+   "search": "search",
+   "label": "not_company",
+   "kind": "video"
+  },
+  {
+   "url": "https://resources.rework.com/libraries/saas-growth/channel-partner-program",
+   "title": "\"Channel Partner Program: Scaling SaaS Distribution Through Partners\"",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://widelly.com/revenue-operations/gtm-operations",
+   "title": "GTM Operations Services | Go-to-Market RevOps | Widelly",
+   "search": "search",
+   "label": "company"
+  },
+  {
+   "url": "https://startup.jobs/head-of-revenue-operations-inspiren-7097870",
+   "title": "Head of Revenue Operations at Inspiren",
+   "search": "search",
+   "label": "not_company",
+   "kind": "job posting"
+  },
+  {
+   "url": "https://leadafi.com/executive-biography/greg-larsen-a-trailblazer-in-revenue-operations-and-go-to-market-strategy",
+   "title": "Greg Larsen: A Trailblazer in Revenue Operations and Go-to-Market Strategy",
+   "search": "search",
+   "label": "not_company",
+   "kind": "biography"
+  },
+  {
+   "url": "https://startupik.com/defaultcom-the-gtm-platform-for-revenue-teams",
+   "title": "Default.com: The GTM Platform for Revenue Teams - Startupik",
+   "search": "search",
+   "label": "not_company",
+   "kind": "publisher article"
+  },
+  {
+   "url": "https://dave392.substack.com/p/the-role-of-go-to-market-gtm-teams",
+   "title": "The Role of Go-to-Market (GTM) Teams in VC Platforms",
+   "search": "search",
+   "label": "not_company",
+   "kind": "newsletter"
+  },
+  {
+   "url": "https://surgence.io/blog/top-10-web3-marketing-agencies-2025",
+   "title": "Best Web3 Marketing Agencies 2026: Pricing & Reviews",
+   "search": "market",
+   "label": "editorial"
+  },
+  {
+   "url": "https://superops.com/tech-hub/what-is-msp-marketing",
+   "title": "MSP marketing: A complete guide to acquiring clients",
+   "search": "market",
+   "label": "editorial"
+  },
+  {
+   "url": "https://www.reachly.co/blogs/top-b2b-lead-generation-agencies-in-2026",
+   "title": "12 Best B2B Lead Generation Agencies in 2026 (Pricing, Specialties, Honest Pros and Cons)",
+   "search": "market",
+   "label": "editorial"
+  },
+  {
+   "url": "https://www.cmswire.com/digital-marketing/ideal-customer-profile-and-personas-your-broken-funnel-starts-at-the-top",
+   "title": "Crafting the Perfect Ideal Customer Profile for Your Business",
+   "search": "market",
+   "label": "not_company",
+   "kind": "publisher article"
+  },
+  {
+   "url": "https://intelligentresourcing.co/blogs/marketing-checklist-accounting-firms",
+   "title": "Marketing Checklist for Accounting Firms (2026)",
+   "search": "market",
+   "label": "editorial"
+  },
+  {
+   "url": "https://agenticskills.io/skills/marketing-skills",
+   "title": "Marketing Skills by Corey Haines | AgenticSkills",
+   "search": "market",
+   "label": "not_company",
+   "kind": "skills directory"
+  },
+  {
+   "url": "https://www.indeed.com/q-lead-generation-l-remote-jobs.html",
+   "title": "Flexible Lead Generation Jobs – Apply Today to Work From Home in Remote (October 12, 2026) | Indeed",
+   "search": "market",
+   "label": "not_company",
+   "kind": "job board"
+  },
+  {
+   "url": "https://hardskill.exchange/ai-practice-sessions/diamond-grade-marketing-2025",
+   "title": "Diamond-Grade Marketing 2025 | HSE",
+   "search": "market",
+   "label": "not_company",
+   "kind": "course"
+  },
+  {
+   "url": "https://www.flyweel.co/blog/lead-gen-cpl-cac-benchmark-index-2025",
+   "title": "Cost Per Lead Benchmarks 2025: 20+ Industries | Flyweel",
+   "search": "market",
+   "label": "editorial"
+  },
+  {
+   "url": "https://connect.wofford.edu/myWofford/registrar/courseSchedule/courseSchedules/ACAPD_Interim_2027.pdf",
+   "title": "Interim Descriptions",
+   "search": "market",
+   "label": "not_company",
+   "kind": "university"
+  },
+  {
+   "url": "https://www.aiib.org/en/opportunities/career/job-vacancies/staff/index.html",
+   "title": "Career Opportunities",
+   "search": "market",
+   "label": "not_company",
+   "kind": "careers page"
+  },
+  {
+   "url": "https://data.ecb.europa.eu/",
+   "title": "Homepage | ECB Data Portal",
+   "search": "market",
+   "label": "not_company",
+   "kind": "central bank data portal"
+  },
+  {
+   "url": "https://www.fresno.gov/personnel/jobs",
+   "title": "Job Postings – City of Fresno",
+   "search": "market",
+   "label": "not_company",
+   "kind": "government jobs"
+  },
+  {
+   "url": "https://www.yokogawa.com/us",
+   "title": "Yokogawa America",
+   "search": "market",
+   "label": "company"
+  },
+  {
+   "url": "https://leadmagic.io/funded-startups/seed-saas",
+   "title": "104+ Seed SaaS Startups Funded (2026)",
+   "search": "search",
+   "label": "not_company",
+   "kind": "startup list"
+  },
+  {
+   "url": "https://www.bonfirevc.com/news/raise-seed-funding-b2b-software-startup",
+   "title": "How to Raise Seed Funding for a B2B Software Startup",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://fundraiseinsider.com/blog/b2b-saas-companies",
+   "title": "List of Funded B2B SaaS Companies (2026) - Fundraise Insider",
+   "search": "search",
+   "label": "not_company",
+   "kind": "publisher list"
+  },
+  {
+   "url": "https://www.team4.agency/glossary/b2b-saas-investment-seed-funding-and-series-funding",
+   "title": "B2B SaaS Investment: Seed Funding and Series Funding",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://redbud.vc/latest/best-us-pre-seed-investors-for-b2b-saas-startups-in-2026",
+   "title": "Best US Pre-Seed Investors for B2B SaaS Startups in 2026 | Redbud VC",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://www.forumvc.com/",
+   "title": "B2B Pre-seed Fund, Accelerator and AI Venture Studio | Forum Ventures",
+   "search": "search",
+   "label": "company"
+  },
+  {
+   "url": "https://tinyseed.com/",
+   "title": "TinySeed",
+   "search": "search",
+   "label": "company"
+  },
+  {
+   "url": "https://www.vcbacked.co/directory/funding/seed/industry/saas",
+   "title": "3,529 SaaS Seed Startups (October 2026) | VCBacked",
+   "search": "search",
+   "label": "not_company",
+   "kind": "startup directory"
+  },
+  {
+   "url": "https://www.openvc.app/investor-lists/saas-investors",
+   "title": "List of SaaS Investors & VC Firms for Startups (2026)",
+   "search": "search",
+   "label": "not_company",
+   "kind": "investor list"
+  },
+  {
+   "url": "https://topstartups.io/?funding_round=Series+A",
+   "title": "Top Startups — Funded by Sequoia, A16Z, YC",
+   "search": "search",
+   "label": "not_company",
+   "kind": "startup directory"
+  },
+  {
+   "url": "https://www.youtube.com/watch?v=EFbsOsVQP-c",
+   "title": "How to Raise Series A Funding (Preparing for the Post-Seed Stage Startup Funding Process)",
+   "search": "search",
+   "label": "not_company",
+   "kind": "video"
+  },
+  {
+   "url": "https://visible.vc/blog/startup-funding-stages",
+   "title": "The Ultimate Guide to Startup Funding Stages - Visible.vc",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://carta.com/learn/startups/fundraising/series-a",
+   "title": "Series A Funding: How to Raise Your First Priced Round",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://www.ecaplabs.com/blogs/saas-funding",
+   "title": "SaaS Funding Guide 2026: How Startups Raise Capital | ECL",
+   "search": "search",
+   "label": "editorial"
+  },
+  {
+   "url": "https://www.ziprecruiter.com/Jobs/Series-B-Startup-Saas-Sales",
+   "title": "Series B Startup Saas Sales Jobs (NOW HIRING) Oct 26",
+   "search": "search",
+   "label": "not_company",
+   "kind": "job board"
+  },
+  {
+   "url": "https://topstartups.io/?industries=SaaS",
+   "title": "Top Startups — Funded by Sequoia, A16Z, YC",
+   "search": "search",
+   "label": "not_company",
+   "kind": "startup directory"
+  },
+  {
+   "url": "https://www.youtube.com/watch?v=Q15paKSGIS8",
+   "title": "99% of Beginners Don’t Know the Basics of SaaS",
+   "search": "search",
+   "label": "not_company",
+   "kind": "video"
+  },
+  {
+   "url": "https://csrc.nist.gov/glossary/term/software_as_a_service",
+   "title": "Software as a Service (SaaS) - Glossary | CSRC",
+   "search": "search",
+   "label": "not_company",
+   "kind": "government glossary"
+  },
+  {
+   "url": "https://www.techtarget.com/whatis/video/An-explanation-of-software-as-a-service-SaaS",
+   "title": "An explanation of software-as-a-service (SaaS)",
+   "search": "search",
+   "label": "not_company",
+   "kind": "publisher glossary"
+  },
+  {
+   "url": "https://attack.mitre.org/matrices/enterprise/cloud/saas",
+   "title": "Matrix - Enterprise - SaaS | MITRE ATT&CK®",
+   "search": "search",
+   "label": "not_company",
+   "kind": "security framework"
+  },
+  {
+   "url": "https://www.cisa.gov/resources-tools/resources/software-transparency-saas-environments-0",
+   "title": "Software Transparency in SaaS Environments | CISA",
+   "search": "search",
+   "label": "not_company",
+   "kind": "government"
+  },
+  {
+   "url": "https://www.saastr.com/dear-saastr-what-does-a-typical-day-look-like-for-a-saas-sales-rep",
+   "title": "What a Typical Day Looks Like for a SaaS Sales Rep | SaaStrAI",
+   "search": "search",
+   "label": "not_company",
+   "kind": "publisher"
+  },
+  {
+   "url": "https://blog.pragmaticengineer.com/i-replaced-a-120-year-micro-saas-in-20-minutes-with-llm-generated-code",
+   "title": "I replaced a $120/year micro-SaaS in 20 minutes with LLM-generated code - The Pragmatic Engineer",
+   "search": "search",
+   "label": "not_company",
+   "kind": "personal blog"
+  },
+  {
+   "url": "https://www.omnilabconsulting.com/blog/the-12-best-b2b-demand-gen-agencies",
+   "title": "The 12 Best B2B Demand Gen Agencies",
+   "search": "market",
+   "label": "editorial"
+  },
+  {
+   "url": "https://www.dimartec.co.uk/blog-posts/5-best-b2b-saas-marketing-agencies-for-scaling-past-eu2m-arr",
+   "title": "5 Best B2B SaaS Marketing Agencies for Scaling Past €2M ARR",
+   "search": "market",
+   "label": "editorial"
+  },
+  {
+   "url": "https://growleads.io/blog/top-b2b-pipeline-generation-companies/",
+   "title": "10 Pipeline Generation Companies for SaaS Growth in 2026",
+   "search": "market",
+   "label": "editorial"
+  },
+  {
+   "url": "https://www.callboxinc.com/growth-hacking/customer-acquisition-strategy/",
+   "title": "B2B Customer Acquisition Strategy That Actually Scales",
+   "search": "market",
+   "label": "editorial"
+  },
+  {
+   "url": "https://rightleftagency.com/blog/b2b-saas-lead-generation-challenges/",
+   "title": "B2B SaaS Lead Generation Challenges: How to Overcome ...",
+   "search": "market",
+   "label": "editorial"
+  },
+  {
+   "url": "https://filament.digital/best-b2b-saas-marketing-agencies/",
+   "title": "The 10 Best B2B SaaS Marketing Agencies in 2026",
+   "search": "market",
+   "label": "editorial"
+  },
+  {
+   "url": "https://productled.com/blog/customer-acquisition-strategies",
+   "title": "Ultimate Guide to Customer Acquisition Strategies for B2B ...",
+   "search": "market",
+   "label": "editorial"
+  },
+  {
+   "url": "https://www.reddit.com/r/ProductMarketing/comments/1fb5rvq/help_me_find_process_for_icp_strategy_and/",
+   "title": "Help me find process for ICP strategy and marketing plan ...",
+   "search": "market",
+   "label": "not_company",
+   "kind": "forum"
+  },
+  {
+   "url": "https://www.contra.agency/insights/b2b-saas-marketing-trends",
+   "title": "The Latest Trends In SaaS B2B Marketing.",
+   "search": "market",
+   "label": "editorial"
+  }
+ ]
+}

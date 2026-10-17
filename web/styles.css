@@ -154,6 +154,9 @@ header.topbar .brand>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .confirmation .target-checks li::before{content:"";flex:none;width:.5rem;height:.5rem;border:1.5px solid var(--orange);transform:translateY(-.0625rem)}
 .confirmation .target-checks li>span:first-child{flex:1}
 .confirmation .target-check-kind{flex:none;font-size:.75rem;color:var(--muted)}
+.confirmation .target-check-note{display:block;margin-top:.25rem;font-size:.8125rem;line-height:1.5;color:var(--muted)}
+.confirmation .target-check-note .text-button{display:inline;min-height:0;padding:0;font-size:inherit;font-weight:600}
+.confirmation .criterion-input .target-check-note{margin:.375rem 0 0}
 .confirmation .target-optional{display:flex;flex-wrap:wrap;align-items:center;gap:.25rem 1.5rem;padding:.5rem 0;border-top:1px solid var(--line)}
 .confirmation .target-optional .confirmation-context{margin:0;border:0}
 .confirmation .target-optional .confirmation-context>summary{display:flex;align-items:center;min-height:2.75rem}

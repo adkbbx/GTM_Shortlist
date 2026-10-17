@@ -31,6 +31,7 @@
 .company-row .shortlist-description { grid-area: description; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.65; }
 .company-row .shortlist-assessment { grid-area: assessment; display: grid; gap: .4375rem; font-size: .8125rem; font-weight: 500; }
 .shortlist-decision { color: var(--muted); font-size: .75rem; font-weight: 400; }
+.shortlist-evidence { color: var(--ink); font-size: .75rem; font-weight: 400; }
 .company-row .shortlist-action { grid-area: action; display: flex; align-items: center; gap: .5rem; min-height: 2.25rem; color: var(--orange); font-size: .75rem; font-weight: 500; }
 .row-chevron { flex: 0 0 1.125rem; width: 1.125rem; height: 1.125rem; transition: transform .18s; }
 .row-close { display: none; }

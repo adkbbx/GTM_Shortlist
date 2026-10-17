@@ -1,5 +1,36 @@
 # Progress and handoff
 
+## 18 October, shortlisting reliability: discovery, admission and qualification
+
+Diagnosis used saved evidence only (read-only copies of the local databases), with no search, fetch or model call.
+- **Qualification.** The 18 local runs saved 19 company records and **none qualified as a fit**: 17 needs verification, 2 does not fit, all partial, for 74 provider calls. Required checks a company website never states stayed unknown every time: ownership 16 of 16, funding stage 3 of 3, internal pains 15 of 15. The shortlist also listed Prismatic (3 of 4 required checks supported) like a company with none.
+- **Discovery.** Searching the confirmed target sentence verbatim returned guides, lists, Gartner reviews, YouTube, market reports, job posts and glossaries (the earlier audit found 12 of 12 rejected in the Clay and Eygentic runs). The one short noun-phrase query returned 6 of 6 company homepages.
+
+Changes:
+- **`discovery_policy` 2** for newly confirmed targets; runs confirmed earlier replay unchanged.
+  - Queries use a compact company phrase (`providers.search_phrase`, for example "B2B SaaS" or "channel partner programs"), not the target sentence. They drop funding-stage words, which pull investor content, and anchor on a company's own pages: "official website", plus "pricing" for software targets or "about us" otherwise.
+  - Research starts from a company's own entry page (`relevance.research_entry`), so a company found on a deep product page is no longer fetched and then refused.
+  - Research continues past the first six candidates (up to twelve) when rejected pages leave the batch short. It stops cleanly, with a plain message, when the run cannot afford another company.
+- **Admission.** Before any fetch it now refuses video, social, job, review, market-research and startup-database sites. It also refuses content paths and subdomains, count-led lists, market reports, glossaries, job postings, and filtered listing views. Government, education and intergovernmental sites are refused unless the search is about the public sector. Homepages are never refused by title alone.
+- **Ranking.** The shortlist and every export list fits first, then unverified companies by how many required checks are supported, then mismatches (`shortlist/ranking.py`). Each row says "3 of 4 required checks supported" or "1 check against your target". Fit labels are unchanged.
+- **Fit-check advice.** Confirmation flags required checks a company site rarely states (ownership, funding stage, revenue thresholds and budgets, internal pains and intent), with one-click "Make it nice to have".
+
+Measured on `examples/evaluation/discovery-admission.json` (104 real saved search results, labelled by hand; `scripts/evaluate_discovery.py`):
+
+| | Before | After |
+|---|---|---|
+| Real company pages reaching research | 16 of 21 | 21 of 21 |
+| Non-company pages reaching research | 5 of 46 | 3 of 46 |
+| Fetches spent on pages refused after download | 39 | 0 |
+
+The fit-check classifier separates 12 rarely-public from 15 observable checks with no errors (`scripts/check_fit_checks.mjs`).
+
+Verification:
+- Backend: 610 passed, 47 skipped (Postgres-only), and Ruff is clean. New tests: `tests/test_discovery_policy.py` and `tests/test_ranking.py`.
+- Browser: flow, relevance and sample specs on laptop and phone, after updating the main flow test to find companies by name now that the order follows evidence. I inspected the confirmation and results screenshots.
+
+Not verified, and needing your approval: the yield of the new queries on live search. The evidence is the saved natural experiment above, not a new run. A bounded check would be 2 searches for each of 3 saved targets (6 searches, 2.4% of the monthly SerpApi allowance), compared against the saved results.
+
 ## 18 October, drafts before signup (hosted, off by default)
 
 The last unbuilt item of `docs/planning/LOW_FRICTION_PATHS.md`. Operator steps are in `docs/anonymous-drafts.md`.

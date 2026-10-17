@@ -23,6 +23,12 @@ from shortlist.fetch import domain_of
 from shortlist.progress import ProgressUpdate
 from shortlist.relevance import record_issue
 
+# Provider attempts allowed per run, including uncertain outcomes.
+RUN_CAPS = {"search": 4, "model": 8, "fetch": 21}
+# New confirmations search with compact company phrases, start research from a company's own entry page, and may
+# research past the first six candidates; runs confirmed earlier keep the behaviour they were journaled with.
+DISCOVERY_POLICY = 2
+
 
 class Conflict(ValueError):
     pass
@@ -222,7 +228,8 @@ class Store:
             now = utcnow().isoformat()
             db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,checkpoint,created_at,updated_at) "
                        "VALUES (?,?,?,?,?,?,?,?,?)", (run_id, request_key, digest, profile.model_dump_json(),
-                                                   "queued", "discovery", json.dumps({"company_identity_policy": 1}), now, now))
+                                                   "queued", "discovery", json.dumps({"company_identity_policy": 1,
+                                                                                      "discovery_policy": DISCOVERY_POLICY}), now, now))
             self.created_run(db, run_id)
             return run_id
 
@@ -546,6 +553,7 @@ class Store:
             if row["status"] != "awaiting_confirmation" or checkpoint["seller_url"] != profile.seller_url:
                 raise Conflict("Seller draft is not ready for confirmation")
             checkpoint["company_limit"] = company_limit
+            checkpoint["discovery_policy"] = DISCOVERY_POLICY
             if checkpoint.get("experience_version") == 2:
                 checkpoint["selection_policy"] = 3
             if discovery_terms is not None:
@@ -589,7 +597,7 @@ class Store:
 
     def reserve(self, run_id: str, fence: int, provider: str, kind: str, operation_key: str,
                 global_cap: int = 200, request_hash: str = "") -> str:
-        caps = {"search": 4, "model": 8, "fetch": 21}
+        caps = RUN_CAPS
         month = utcnow().strftime("%Y-%m")
         with self.connection() as db:
             self.begin(db)

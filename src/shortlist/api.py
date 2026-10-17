@@ -39,6 +39,7 @@ from shortlist.market import MarketResearch, reviewed_market
 from shortlist.model_setup import LocalModels, ModelSetupError, available_models
 from shortlist.progress import RunProgress, public_events
 from shortlist.providers import SellerDraft, company_name_matches, recover_customer_draft
+from shortlist.ranking import by_evidence
 from shortlist.relevance import record_issue
 from shortlist.sample import SAMPLE_SELLER_URL
 from shortlist.selection import Selection
@@ -370,8 +371,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                                     status="partial")
         offer = (run["profile"] or run["checkpoint"].get("draft") or {}).get("offer", "")
         market = reviewed_market(market, profile.seller_url if profile else run["checkpoint"]["seller_url"], offer)
-        records = [{**record, "source_issue": record_issue(Research.model_validate(record["research"]), strict=True)}
-                   for record in run["records"]]
+        records = by_evidence(run["profile"], [{**record, "source_issue": record_issue(Research.model_validate(record["research"]), strict=True)}
+                                               for record in run["records"]])
         if company_name:
             matches = [match for match in matches if company_name_matches(match, company_name)]
             if run["stage"] == "website" and not matches and not error:

@@ -28,6 +28,7 @@ import { WebsiteChoice } from './WebsiteChoice';
 import { clearKeptCompany, clearKeptDraft, keepCompany, peekKeptCompany, peekKeptDraft } from './landing/kept-company';
 import { StatusMark } from './StatusMark';
 import { SampleContext, sampleMark } from './SampleData';
+import { rarelyPublicCheck } from './criteria';
 import './styles.css';
 import './Shortlist.css';
 
@@ -99,7 +100,9 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
         {campaignName && <><label htmlFor="discovery-terms">Search keywords</label><input id="discovery-terms" required minLength={5} maxLength={300} value={discoveryTerms} onChange={e => setDiscoveryTerms(e.target.value)} aria-describedby="discovery-help" /><p id="discovery-help" className="hint">Observable company terms, such as industry, product and public announcements. Private performance assumptions belong in hypotheses.</p></>}
       </TargetPartView>
       <TargetPartView title="Fit checks" editLabel="Edit fit checks" editing={editing.criteria} onEdit={() => edit('criteria')}
-        review={<ul className="target-checks">{criteria.map(criterion => <li key={criterion.id}><span>{criterion.description}</span><span className="target-check-kind">{criterion.required ? 'Required' : 'Nice to have'}</span></li>)}</ul>}>
+        review={<ul className="target-checks">{criteria.map(criterion => <li key={criterion.id}><span>{criterion.description}
+          {criterion.required && rarelyPublicCheck(criterion.description) && <span className="target-check-note">Rarely on a company's own website, so it usually stays unknown and keeps every company at Needs verification. <button type="button" className="text-button" onClick={() => setCriteria(criteria.map(c => c.id === criterion.id ? { ...c, required: false } : c))}>Make it nice to have</button></span>}
+        </span><span className="target-check-kind">{criterion.required ? 'Required' : 'Nice to have'}</span></li>)}</ul>}>
       <fieldset><legend>Fit criteria</legend><p className="hint">These checks guide company research and determine fit with your target customer. Use observable characteristics, such as industry or customers served. Required checks need supporting evidence; missing evidence stays unknown.</p>
         {!!run.draft?.criteria_issues?.length && <div className="notice" role="status"><p>Unsupported suggestions were removed. {run.draft.criteria.length ? 'Review the remaining criteria before confirming.' : 'Add at least one observable customer characteristic before confirming.'} Your offer summary is kept for editing.</p><details><summary>Review {run.draft.criteria_issues.length} removed {run.draft.criteria_issues.length === 1 ? 'suggestion' : 'suggestions'}</summary><ul>{run.draft.criteria_issues.map((issue, index) => <li key={index}><p>{issue.description}</p><p className="hint">{issue.reason}</p></li>)}</ul></details></div>}
         {criteria.map((criterion, index) => <div className="criterion-input" key={criterion.id}>
@@ -109,6 +112,7 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
           <div className="criterion-controls"><label className="checkbox-label"><input type="checkbox" checked={criterion.required}
             onChange={e => setCriteria(criteria.map((c, i) => i === index ? { ...c, required: e.target.checked } : c))} />Required</label>
             {criteria.length > 1 && <button type="button" className="text-button" onClick={() => setCriteria(criteria.filter((_, i) => i !== index))} aria-label={`Remove criterion ${index + 1}`}>Remove</button>}</div>
+          {criterion.required && rarelyPublicCheck(criterion.description) && <p className="hint target-check-note">Rarely on a company's own website: as a required check it usually stays unknown and keeps every company at Needs verification. Consider making it nice to have and asking about it in conversation.</p>}
         </div>)}
         <button type="button" className="secondary" disabled={criteria.length >= 12} onClick={() => setCriteria([...criteria, { id: crypto.randomUUID(), description: '', required: true }])}>Add a criterion</button>
       </fieldset>
@@ -178,6 +182,19 @@ function ExclusionSheet({ finding, record, run }: { finding: ExclusionFinding; r
   </section>;
 }
 
+/** How close an assessment is, so "Needs verification" with three of four checks reads differently from none of four. */
+function evidenceSummary(record: Record, run: Run) {
+  const required = run.profile?.criteria.filter(criterion => criterion.required) ?? [];
+  const status = new Map(record.research.findings.map(finding => [finding.criterion_id, finding.status]));
+  const against = record.research.findings.filter(finding => finding.status === 'contradicted').length
+    + record.research.exclusion_findings.filter(finding => finding.status === 'matched').length;
+  if (against) return `${against} ${against === 1 ? 'check' : 'checks'} against your target`;
+  if (!required.length) return '';
+  const supported = required.filter(criterion => status.get(criterion.id) === 'supported').length;
+  return supported === required.length ? `All ${required.length} required ${required.length === 1 ? 'check' : 'checks'} supported`
+    : `${supported} of ${required.length} required checks supported`;
+}
+
 function CompanyReview({ record, run, onSaved }: { record: Record; run: Run; onSaved: (run: Run) => void }) {
   const disclosure = useRef<HTMLDetailsElement>(null);
   const summary = useRef<HTMLElement>(null);
@@ -187,6 +204,7 @@ function CompanyReview({ record, run, onSaved }: { record: Record; run: Run; onS
   const selection = run.selection?.find(item => item.domain === research.domain);
   const signal = selection?.signals.find(item => item.campaign_relevant) ?? selection?.signals[0];
   const decision = record.review ? { accepted: 'Accepted', rejected: 'Rejected', needs_research: 'Needs more research' }[record.review.decision] : 'Not reviewed';
+  const evidence = evidenceSummary(record, run);
   const close = () => {
     if (disclosure.current) disclosure.current.open = false;
     summary.current?.focus();
@@ -196,7 +214,7 @@ function CompanyReview({ record, run, onSaved }: { record: Record; run: Run; onS
       <span className="shortlist-identity"><SiteIcon runId={run.id} domain={research.domain} mark={sampleMark(run.sample, research.domain)} fallback={research.name.trim().slice(0, 1).toUpperCase()} className="company-initial" />
         <span><span className="shortlist-name">{research.name}</span><span className="shortlist-domain">{run.sample ? 'Sample company' : research.domain}</span></span></span>
       <span className="shortlist-description">{description?.evidence.claim ?? 'Company description not established from saved sources.'}</span>
-      <span className="shortlist-assessment"><span>{qualification[research.qualification]}</span><span className="shortlist-decision">{decision}</span></span>
+      <span className="shortlist-assessment"><span>{qualification[research.qualification]}</span>{evidence && <span className="shortlist-evidence">{evidence}</span>}<span className="shortlist-decision">{decision}</span></span>
       <span className="shortlist-action"><span className="row-inspect">Inspect</span><span className="row-close">Close</span><svg className="row-chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m7 4 6 6-6 6" stroke="currentColor" strokeWidth="1.5" /></svg></span>
       <span className="shortlist-context"><span className="shortlist-signal">{signal ? <>{signal.label} · <time dateTime={signal.event_date}>{new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeZone: 'UTC' }).format(new Date(signal.event_date))}</time> · Company statement</> : 'No dated company activity established'}</span>
         <span>{research.people.length ? `${research.people.length} ${research.people.length === 1 ? 'person' : 'people'} identified` : 'No team roles established'}</span>

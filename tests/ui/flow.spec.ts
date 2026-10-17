@@ -2,7 +2,7 @@ import { openSettings } from './navigation';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { mkdirSync, readFileSync } from 'node:fs';
-import { openCompany } from './shortlist';
+import { openCompany, openCompanyNamed } from './shortlist';
 import { installIconFixtures, syntheticIcon } from './site-icons';
 
 test.beforeEach(async ({ page }) => {
@@ -646,8 +646,9 @@ test('saved seller → confirmation → evidence → review → export survives 
   // Partial results lead with the shortlist; the toolbar names the open questions and the history stays one click away.
   await expect(page.locator('.research-recap')).not.toHaveAttribute('open');
   await expect(page.locator('.research-recap > summary')).toContainText('2 companies saved for your review');
-  const first = page.locator('.company-sheet').first();
-  await openCompany(page);
+  // Ordered by evidence: the unverified company leads; the one an exclusion rules out comes last.
+  await expect(page.locator('.company-row .shortlist-evidence')).toHaveText(['1 of 2 required checks supported', '1 check against your target']);
+  const first = (await openCompanyNamed(page, 'example-1.com')).locator('.company-sheet');
   await first.locator('.findings .evidence > summary').first().click();
   await expect(first.locator('.findings .evidence blockquote').first()).toContainText('artificial intelligence software');
   await expect(first.locator('.findings').getByText('Publication date unknown').first()).toBeVisible();
@@ -665,7 +666,7 @@ test('saved seller → confirmation → evidence → review → export survives 
   await first.getByRole('button', { name: 'Accept company' }).click();
   await expect(first.getByText('Saved: accepted')).toBeVisible();
   await page.reload();
-  await openCompany(page);
+  await openCompanyNamed(page, 'example-1.com');
   await expect(first.getByText('Saved: accepted')).toBeVisible();
   await expect(first.getByLabel('Review note')).toHaveValue('Accepted after inspecting the fixture passage');
   if (!await page.locator('.research-recap').getAttribute('open').then(value => value !== null)) await page.locator('.research-recap > summary').click();
@@ -716,7 +717,7 @@ test('saved seller → confirmation → evidence → review → export survives 
   expect(response.ok()).toBeTruthy();
   await page.reload();
   const serviceReview = first.getByRole('region', { name: 'Service review', exact: true });
-  await openCompany(page);
+  await openCompanyNamed(page, 'example-1.com');
   await expect(serviceReview.getByText('Evidence reviewed', { exact: true })).toBeVisible();
   await expect(serviceReview.getByText('TEST FIXTURE service note.', { exact: false })).toBeVisible();
   await expect(first.getByText('Saved: accepted')).toBeVisible();

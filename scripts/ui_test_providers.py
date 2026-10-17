@@ -29,7 +29,7 @@ class FixtureSearch:
                 excerpt="TEST FIXTURE. Customer acquisition experiments and growth services for AI business software startups.",
             )
             for index in (range(1, 17) if 'similar companies official websites' in query
-                          else (1, 2, 3) if 'Three comparison companies' in query else (1, 2))
+                          else (1, 2, 3) if 'Three comparison' in query else (1, 2))
         ]
 
 

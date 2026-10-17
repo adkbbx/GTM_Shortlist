@@ -100,8 +100,58 @@ def candidates_from_results(results: list[dict], query: str, provider: str, sell
     return candidates[:15]
 
 
-def queries_for(profile: Profile, discovery_terms: str | None = None) -> tuple[str, ...]:
+# Where the defining part of a target sentence ends: what follows qualifies it (needs, size, examples).
+CLAUSE_END = re.compile(r"[,;:.!?]|\s[-–—]\s|\s(?:that|which|who|whose|seeking|looking|wanting|trying|struggling|"
+                        r"aiming|focused|focusing|with|without|where|while|because|including|such as|from|so that|"
+                        r"in order|especially|ready|needing|requiring|using|experiencing|despite|moving|transitioning|"
+                        r"facing|having|currently|recently)\s", re.IGNORECASE)
+# Words that steer web search toward articles, investors or job posts instead of companies' own sites.
+QUERY_FILLER = frozenset({
+    "a", "an", "the", "and", "or", "of", "for", "to", "in", "on", "at", "by", "as", "is", "are", "their", "its", "any",
+    "all", "every", "various", "other", "etc", "size", "sizes", "stage", "stages", "level", "levels", "type", "types",
+    "managing", "scaling", "running", "operating", "building", "growing", "selling", "offering", "providing",
+    "seed", "pre-seed", "series", "funded", "venture-backed", "vc-backed", "pe-backed", "bootstrapped",
+    "early-stage", "growth-stage", "late-stage", "launched", "scale", "efforts", "through", "via", "improve",
+    "increase", "drive", "manage", "need", "needs", "want", "wants", "require", "requires", "help", "strong", "focus",
+})
+# A head made only of these names no particular kind of company ("Global brands", "Large enterprises").
+GENERIC_ENTITIES = frozenset({"companies", "company", "businesses", "brands", "enterprises", "organizations", "organisations",
+                              "firms", "providers", "vendors", "advertisers", "teams", "corporations"})
+GENERIC_QUALIFIERS = frozenset({"global", "large", "small", "mid-market", "mid-sized", "midsize", "leading", "local", "regional",
+                                "national", "international", "established", "emerging", "new", "modern", "complex",
+                                "fast-growing", "high-growth", "sophisticated", "joint"})
+SOFTWARE_WORDS = frozenset({"software", "saas", "platform", "platforms", "app", "apps", "tool", "tools", "ai", "api", "cloud", "b2b"})
+
+
+def search_phrase(text: str, limit: int = 6) -> str:
+    """The searchable core of a confirmed target: the noun phrase naming the companies, without qualifying clauses,
+    funding stage or filler. Long need-based sentences return guides and lists; short noun phrases return companies."""
+    text = re.sub(r"\([^)]*\)", " ", " ".join(text.split()))
+    # "Sales teams within technology companies": search for the companies; the teams are who to contact there.
+    teams = re.match(r"^(?P<roles>.+?)\s+(?:teams?|departments?|leaders?|executives?|managers?|staff)\s+(?:within|at|in|of)\s+(?P<companies>.+)$",
+                     text, re.IGNORECASE)
+    head, *rest = CLAUSE_END.split(teams.group("companies") if teams else text, maxsplit=1)
+
+    def keep(segment: str) -> list[str]:
+        words = (word.rstrip(".'&+-") for word in re.findall(r"[\w][\w&'.+-]*", segment))
+        return [word for word in words if word.casefold() not in QUERY_FILLER and not word.isdigit()]
+    words = keep(head)
+    if not [word for word in words if word.casefold() not in GENERIC_ENTITIES | GENERIC_QUALIFIERS] and rest:
+        # Only a generic entity so far: borrow what distinguishes it from the clause that follows.
+        words += [word for word in keep(rest[0]) if word.casefold() not in GENERIC_ENTITIES | GENERIC_QUALIFIERS][:3]
+    if len([word for word in words if word.casefold() not in {"companies", "businesses", "organizations", "organisations", "firms"}]) >= 2:
+        words = [word for word in words if word.casefold() not in {"companies", "businesses", "organizations", "organisations", "firms"}]
+    return " ".join(words[:limit]) or " ".join(keep(text)[:limit]) or text[:80]
+
+
+def queries_for(profile: Profile, discovery_terms: str | None = None, policy: int = 1) -> tuple[str, ...]:
     # User-confirmed targeting, not a model allowed to invent network actions.
+    if policy >= 2:
+        # Ask for the companies' own pages: an official site, and a pricing (software) or about page, which only the
+        # company itself publishes. Long target sentences and event words returned articles, lists and job boards.
+        phrase = search_phrase(discovery_terms or profile.target)
+        anchor = "pricing" if SOFTWARE_WORDS & set(phrase.casefold().split()) else "about us"
+        return (f"{phrase} company official website", f"{phrase} company {anchor}")
     target = (discovery_terms or profile.target)[:300]
     if discovery_terms:
         return (f'{target} company official website', f'{target} company (hiring OR expansion OR launch OR funding) official')

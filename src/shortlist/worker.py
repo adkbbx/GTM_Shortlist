@@ -33,10 +33,16 @@ from shortlist.providers import (
     company_name_matches,
     queries_for,
 )
-from shortlist.relevance import CompanyPageError, candidate_issue, primary_source_issue, record_issue
+from shortlist.relevance import (
+    CompanyPageError,
+    candidate_issue,
+    primary_source_issue,
+    record_issue,
+    research_entry,
+)
 from shortlist.sample import SAMPLE_PROVIDER, sample_providers
 from shortlist.selection import prioritize, prioritize_pages
-from shortlist.store import BudgetExceeded, Conflict, Store
+from shortlist.store import RUN_CAPS, BudgetExceeded, Conflict, Store
 from shortlist.verification import (
     Verification,
     apply_verification,
@@ -58,6 +64,15 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
         search, model, fetch = sample_providers(sample_pace)
         settings = settings.model_copy(update={"gemma_model": SAMPLE_PROVIDER, "gemma_base_url": ""})
     require_identity = checkpoint.get("company_identity_policy", 0) >= 1
+    discovery_policy = checkpoint.get("discovery_policy", 1)
+
+    def entry(candidate: Candidate) -> str:
+        # Policy 2 starts at a company's own entry page instead of fetching a page the identity check would refuse.
+        return research_entry(candidate.url, candidate.name) if discovery_policy >= 2 else candidate.url
+
+    def room(kind: str, needed: int) -> bool:
+        used = sum(attempt["kind"] == kind for attempt in store.get_run(run_id)["attempts"])
+        return used + needed <= RUN_CAPS[kind]
     search = search or SearchProvider(settings)
     model = model or Gemma(settings)
 
@@ -226,7 +241,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
         if "candidates" not in checkpoint:
             discovered = checkpoint.get("discovered", [])
             completed_queries = checkpoint.get("completed_queries", [])
-            for index, query in enumerate(queries_for(profile, checkpoint.get("discovery_terms"))):
+            for index, query in enumerate(queries_for(profile, checkpoint.get("discovery_terms"), policy=discovery_policy)):
                 if checkpoint.get("use_saved_discovery") or index in completed_queries or str(index) in checkpoint.get("discovery_failures", {}):
                     continue
                 try:
@@ -266,7 +281,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                         reject_candidate(candidate, issue, "selection")
                     continue
                 try:
-                    source = page(candidate.url, candidate.domain, f"fetch:{candidate.domain}")
+                    source = page(entry(candidate), candidate.domain, f"fetch:{candidate.domain}")
                     saved_sources[candidate.domain] = [source.model_dump(mode="json")]
                     if issue := primary_source_issue(source, strict=require_identity):
                         reject_candidate(candidate, issue, "selection")
@@ -313,7 +328,9 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 detail="Dated company statements are source claims, not buying intent. Missing dates receive no signal priority.", state="succeeded"))
             store.checkpoint(run_id, fence, "research", checkpoint)
         researched = {r["research"]["domain"] for r in store.get_run(run_id)["records"]}
-        for data in checkpoint["candidates"][:6]:
+        # Policy 2 keeps going past the first six candidates when rejected pages left the batch short, and stops
+        # cleanly when the run cannot afford another company rather than failing on a provider cap.
+        for data in checkpoint["candidates"][:12 if discovery_policy >= 2 else 6]:
             candidate = Candidate.model_validate(data)
             if candidate.domain in researched or candidate.domain in checkpoint.get("candidate_failures", {}):
                 continue
@@ -322,11 +339,14 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
             if issue := candidate_issue(candidate):
                 reject_candidate(candidate, issue, "research")
                 continue
-            billable = False
             saved_sources = checkpoint.setdefault("sources", {})
+            if discovery_policy >= 2 and not (room("model", 2) and (candidate.domain in saved_sources or room("fetch", 1))):
+                checkpoint["research_budget_reached"] = True
+                break
+            billable = False
             try:
                 if candidate.domain not in saved_sources:
-                    source = page(candidate.url, candidate.domain, f"fetch:{candidate.domain}")
+                    source = page(entry(candidate), candidate.domain, f"fetch:{candidate.domain}")
                     saved_sources[candidate.domain] = [source.model_dump(mode="json")]
                     store.checkpoint(run_id, fence, "research", checkpoint)
                 sources = tuple(Source.model_validate(s) for s in saved_sources[candidate.domain])
@@ -339,6 +359,8 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 for index, link in enumerate(sources[0].research_links):
                     if link in completed_pages or link in failures or link in {s.url for s in sources}:
                         continue
+                    if discovery_policy >= 2 and not room("fetch", 1):
+                        break  # Research the pages already saved rather than stop the run on the fetch cap.
                     try:
                         if domain_of(link) != candidate.domain:
                             raise FetchError("Research link changed company identity")
@@ -434,7 +456,8 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
         records = store.get_run(run_id)["records"]
         incomplete_pages = any(checkpoint.get("page_failures", {}).values()) or bool(checkpoint.get("activity_failures"))
         incomplete_discovery = bool(checkpoint.get("discovery_failures")) or bool(checkpoint.get("use_saved_discovery"))
-        partial = (not records or incomplete_pages or incomplete_discovery
+        short = bool(checkpoint.get("research_budget_reached")) and len(records) < checkpoint.get("company_limit", 3)
+        partial = (not records or incomplete_pages or incomplete_discovery or short
                    or any(r["research"]["status"] == "partial" for r in records))
         store.event(run_id, fence, ProgressUpdate(phase="review", label=f"Saved {len(records)} companies for your review",
                                                    state="waiting"))
@@ -442,7 +465,9 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                          ("No readable company evidence could be collected" if checkpoint.get("candidate_failures")
                           else "No candidate companies found") if not records else
                          "Some linked company pages could not be fetched; review the saved sources." if incomplete_pages else
-                         "Discovery was incomplete; these records use the candidates that were saved." if incomplete_discovery else None)
+                         "Discovery was incomplete; these records use the candidates that were saved." if incomplete_discovery else
+                         f"Research stopped at this run's provider limit with {len(records)} of {checkpoint.get('company_limit', 3)} "
+                         "companies. Unused credits are returned." if short else None)
     except (ProviderError, FetchError, BudgetExceeded, Conflict) as exc:
         # Lost lease cannot write; the replacement worker owns the current state.
         try:
