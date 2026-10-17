@@ -1,18 +1,25 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import type { Session, SupabaseClient } from '@supabase/supabase-js';
 import { api, setSessionAccess } from './api';
 import type { AuthSetup } from './api';
+import { keepCompany, peekKeptCompany } from './landing/kept-company';
+
+// Hosted visitors without a session see the public landing page; it loads separately from the workspace.
+const PublicLanding = lazy(() => import('./landing/PublicLanding').then(module => ({ default: module.PublicLanding })));
+type AuthView = 'signin' | 'signup' | null;
+const authView = (): AuthView => { const view = new URLSearchParams(window.location.search).get('auth'); return view === 'signin' || view === 'signup' ? view : null; };
 
 type HostedSetup = Extract<AuthSetup, { mode: 'hosted' }>;
 type State = { kind: 'loading' } | { kind: 'local' } | { kind: 'error'; message: string } |
   { kind: 'hosted'; setup: HostedSetup; client: SupabaseClient; session: Session | null; recovery: boolean; expired: boolean };
 const message = (error: unknown) => error instanceof Error ? error.message : 'Account access is unavailable. Please try again.';
 
-function AccountForm({ client, setup, recovery, expired, externalError, onRecovered }: {
+function AccountForm({ client, setup, recovery, expired, externalError, onRecovered, initialMode = 'signin', keptCompany = '' }: {
   client: SupabaseClient; setup: HostedSetup; recovery: boolean; expired: boolean; externalError: string; onRecovered: () => void;
+  initialMode?: 'signin' | 'signup'; keptCompany?: string;
 }) {
-  const [mode, setMode] = useState<'signin' | 'signup' | 'reset'>('signin');
+  const [mode, setMode] = useState<'signin' | 'signup' | 'reset'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [saving, setSaving] = useState(false);
@@ -61,6 +68,7 @@ function AccountForm({ client, setup, recovery, expired, externalError, onRecove
     </aside><section className="sheet account-sheet" aria-labelledby="account-heading">
     <h1 id="account-heading">{confirmationSent ? 'Check your inbox' : title}</h1>
     <p className="intro">{confirmationSent ? 'Verify your email to finish creating your research workspace.' : mode === 'signup' ? 'Create a workspace for your company research. We will email you a confirmation link.' : mode === 'reset' ? 'Enter your account email and we will send a password reset link.' : recovery ? 'Set a new password to reopen your workspace.' : 'Welcome back. Open your saved company research.'}</p>
+    {keptCompany && !recovery && !confirmationSent && mode !== 'reset' && <p className="notice kept-company" role="status">We kept <strong>{keptCompany}</strong>. {mode === 'signup' ? 'Create your account' : 'Sign in'}, then start research from your workspace. Nothing runs until you confirm the target.</p>}
     {expired && <p className="notice" role="status">Your session needs verification. Sign in again to reopen your saved research.</p>}
     {externalError && <p className="notice" role="alert">{externalError}</p>}
     {error && <p className="notice" role="alert">{error}</p>}{notice && <p className="notice" role="status">{notice}</p>}
@@ -77,6 +85,20 @@ function AccountForm({ client, setup, recovery, expired, externalError, onRecove
 export function AuthGate({ workspace }: { workspace: (identity: string, account: ReactNode) => ReactNode }) {
   const [state, setState] = useState<State>({ kind: 'loading' });
   const [signoutError, setSignoutError] = useState('');
+  const [view, setView] = useState<AuthView>(authView);
+  useEffect(() => {
+    const sync = () => setView(authView());
+    window.addEventListener('popstate', sync);
+    return () => window.removeEventListener('popstate', sync);
+  }, []);
+  const signedIn = state.kind === 'hosted' && Boolean(state.session);
+  useEffect(() => {
+    // Once signed in, the account view parameter has done its job.
+    if (!signedIn || !view) return;
+    const params = new URLSearchParams(window.location.search); params.delete('auth');
+    window.history.replaceState(null, '', params.size ? `?${params}` : window.location.pathname); setView(null);
+  }, [signedIn, view]);
+  const openAccount = (next: 'signin' | 'signup') => { window.history.pushState(null, '', `?auth=${next}`); setView(next); window.scrollTo(0, 0); };
   useEffect(() => {
     let cancelled = false;
     let unsubscribe: (() => void) | undefined;
@@ -96,6 +118,8 @@ export function AuthGate({ workspace }: { workspace: (identity: string, account:
       const { data } = authClient.auth.onAuthStateChange((event, session) => {
         if (cancelled) return;
         if (event === 'SIGNED_IN') setSignoutError('');
+        // A returning user who signs out (or whose session ends) goes back to sign-in, not the public landing page.
+        if (event === 'SIGNED_OUT') { window.history.replaceState(null, '', '?auth=signin'); setView('signin'); }
         // Synchronous callback: no auth SDK requests while its session lock is held.
         setState(old => ({ kind: 'hosted', setup, client: authClient, session,
           recovery: event === 'PASSWORD_RECOVERY' || (old.kind === 'hosted' && old.recovery),
@@ -120,7 +144,8 @@ export function AuthGate({ workspace }: { workspace: (identity: string, account:
     const result = await state.client.auth.signOut({ scope: 'local' });
     if (result.error) setSignoutError(result.error.message);
   };
-  if (!state.session || state.recovery || state.expired) return <AccountForm client={state.client} setup={state.setup} recovery={state.recovery} expired={state.expired} externalError={signoutError} onRecovered={() => setState(old => old.kind === 'hosted' ? { ...old, recovery: false } : old)} />;
+  if (!state.session && !state.recovery && !state.expired && !view) return <Suspense fallback={<main className="account-page" />}><PublicLanding onSignIn={() => openAccount('signin')} onStart={company => { keepCompany(company); openAccount('signup'); }} /></Suspense>;
+  if (!state.session || state.recovery || state.expired) return <AccountForm key={view ?? 'signin'} initialMode={view === 'signup' ? 'signup' : 'signin'} keptCompany={peekKeptCompany()} client={state.client} setup={state.setup} recovery={state.recovery} expired={state.expired} externalError={signoutError} onRecovered={() => setState(old => old.kind === 'hosted' ? { ...old, recovery: false } : old)} />;
   if (!state.session.user.email_confirmed_at || state.session.user.is_anonymous) return <main className="account-page"><section className="sheet account-sheet"><h1>Confirm your email</h1><p>Open the confirmation link in your inbox before starting research.</p>{signoutError && <p className="notice" role="alert">{signoutError}</p>}<button className="secondary" onClick={() => { void signout(); }}>Back to sign in</button></section></main>;
   return workspace(state.session.user.id, <div className="account-nav"><span>{state.session.user.email}</span><button className="text-button" onClick={() => { void signout(); }}>Sign out</button>{signoutError && <p role="alert">{signoutError}</p>}</div>);
 }

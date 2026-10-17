@@ -78,7 +78,7 @@ for (const failure of [
   test(`account setup recovers from ${failure.status} ${failure.contentType}`, async ({ page }, info) => {
     await fixture(page);
     await page.route('**/api/auth/setup', route => route.fulfill(failure));
-    await page.goto('/');
+    await page.goto('/?auth=signin');
     await expect(page.getByRole('alert')).toContainText('We could not connect to the app service');
     await expect(page.getByRole('alert')).not.toContainText('Unexpected token');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
@@ -92,7 +92,7 @@ for (const failure of [
 
 test('signup confirmation, sign-in errors and password reset remain usable', async ({ page }, info) => {
   const backend = await fixture(page);
-  await page.goto('/');
+  await page.goto('/?auth=signin');
   await expect(page.getByRole('heading', { name: 'Sign in to your shortlist' })).toBeVisible();
   await capture(page, `.impeccable/review/${info.project.name}-signin.png`);
   await page.getByRole('button', { name: 'Create an account' }).click();
@@ -130,7 +130,7 @@ test('signup confirmation, sign-in errors and password reset remain usable', asy
 
 test('signed-in requests and exports carry tokens; sign-out clears the workspace', async ({ page }) => {
   await fixture(page);
-  await page.goto('/');
+  await page.goto('/?auth=signin');
   const requests: { url: string; bearer: string | undefined }[] = [];
   page.on('request', request => { if (request.url().includes('/api/') && !request.url().includes('/auth/setup'))
     requests.push({ url: request.url(), bearer: request.headers()['authorization'] }); });
@@ -190,7 +190,7 @@ test('PKCE recovery opens a new-password form and updates the account', async ({
 
 test('unconfirmed account can retry failed sign-out without entering research', async ({ page }) => {
   const backend = await fixture(page, true);
-  await page.goto('/');
+  await page.goto('/?auth=signin');
   await page.getByLabel('Email', { exact: true }).fill('fixture@example.test');
   await page.getByLabel('Password', { exact: true }).fill('labelled-fixture-password');
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
@@ -219,7 +219,7 @@ test('account tray hides details and stays stable while credits load', async ({ 
     await creditsGate;
     await route.fulfill({ json: { mode: 'hosted', available: 3, reserved: 0, used: 0 } });
   });
-  await page.goto('/');
+  await page.goto('/?auth=signin');
   await signIn(page);
   await expect(page.getByRole('button', { name: 'Settings', exact: true })).toHaveCount(0);
   const trigger = page.getByRole('button', { name: info.project.name === 'phone' ? 'Saved runs' : 'Open account tray', exact: true });

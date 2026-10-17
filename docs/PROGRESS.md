@@ -1,5 +1,26 @@
 # Progress and handoff
 
+## 17 October, Signal landing page, large screens and status colours implemented
+
+Branch `claude/signal-landing`, from `main` after PR #2, with the alive-landing brief and prototypes merged in.
+
+- **Public landing page** (`web/landing/`): the approved Signal design in React. Hosted visitors without a session see it at `/`; `?landing=1` previews it in any mode. The company card, three checks and example shortlist sit on one centre line, a canvas stream of 21 hairlines narrows through Offer, Target and Evidence, and a pinned six-step story uses a numbered stepper. All examples use labelled `.example` companies; the page makes no API or provider requests (asserted in tests). Lenis 1.3.26 is pinned (1.3.27 is two days old), runs only on this page, never under reduced motion, and is destroyed on unmount. The page loads as a separate 60 KB chunk.
+- **Routing and auth**: `?auth=signin` and `?auth=signup` open the existing account form, and sign-out returns to sign-in rather than the landing page. Start research on the landing page keeps the company in local storage for 24 hours, so it survives the email-confirmation tab. The account form shows it, and the workspace prefills it once. Research still needs Start research and target confirmation. `auth.spec.ts` and `credits.spec.ts` now open `/?auth=signin`.
+- **Large screens**: removed the 1600/1680 px frame caps, so the header and sidebar start at x = 0 at every width. The root size is now `clamp(100%, min(.8vw, 1.45vh), 200%)`, and 1,106 px values across ten workspace stylesheets are now rem. Values of 2 px or less and media queries stay px, so rendering is unchanged at a 16 px root. A side effect is that browser text-size settings now enlarge workspace text. At 320 px with 200% text, narrow-screen headings may break long words, and the first-visit heading takes the column width.
+- **Status colours**: `web/StatusMark.tsx` gives checkpoints and stages colour, glyph and word: ok tick, fail cross, reuse loop, needs-you "!", stopped square, and a working arc only on the newest started step while the worker is online.
+- An inline SVG favicon removes the `/favicon.ico` 404.
+
+Verification:
+
+- `npm run build` passes.
+- pytest: 555 passed, 44 skipped. Ruff is clean.
+- Playwright, laptop and phone: 135 passed, 3 skipped. This includes the new `public-landing.spec.ts` and `large-screens.spec.ts` (1920, 2560 and 3840).
+- Manual Chrome sweep at 360, 390, 808, 1024, 1366, 1440, 1920 and 3840 px: no overflow, no overlaps, no story clipping and no console errors. The handoff to the workspace works.
+
+Not verified locally: the hosted Postgres credits suite (CI only), a real Supabase signup email round trip, and physical devices.
+
+Still open from the brief: the agent console, filterable checkpoint feed, tab title and notifications (sections 5.2 to 5.5), and the `activity`/`subject` progress-event fields they need. `prototype/index.html` is superseded by `prototype/signal.html`.
+
 ## 17 October, Settings expansion assertion corrected
 
 CI39026155129 completed with138 browser passes and two failures in the same phone-modal test. The test compared the close button after expanding model setup against the modal position before expansion; content expansion correctly changes its centered position. Replaced that stale coordinate comparison with one atomic measurement of the current modal, sticky heading and close button, retaining containment, keyboard trapping, scroll and resize checks. Six repeated phone/laptop cases pass, followed by both final strengthened containment cases. This changes only the test; full CI remains required before the authorized merge.

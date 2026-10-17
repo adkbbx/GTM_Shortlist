@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { api } from './api';
 import type { Run } from './api';
 import { researchStage, stagePhases } from './research-stages';
+import { StatusMark, eventStatus, stageStatus } from './StatusMark';
 import './ResearchProgress.css';
 
 const descriptions = [
@@ -14,10 +15,6 @@ const descriptions = [
 ];
 const time = (value: string) => new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date(value));
 const eventLabels = { started: 'Started', succeeded: 'Completed', failed: 'Failed', reused: 'Reused', waiting: 'Waiting' };
-
-function SavedMark({ state }: { state: string }) {
-  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.3" />{state === 'succeeded' || state === 'reused' ? <path d="m7 12 3 3 7-7" stroke="currentColor" strokeWidth="1.5" /> : state === 'failed' ? <path d="m8 8 8 8m0-8-8 8" stroke="currentColor" strokeWidth="1.5" /> : <circle cx="12" cy="12" r="2" fill="currentColor" />}</svg>;
-}
 
 export function ResearchProgress({ run, connected = true, localResearch = false }: { run: Run; connected?: boolean; localResearch?: boolean }) {
   const [resuming, setResuming] = useState(false);
@@ -37,7 +34,7 @@ export function ResearchProgress({ run, connected = true, localResearch = false 
   const shownEvents = showOlderSteps ? newestFirst : newestFirst.slice(0, 3);
   const checkpointTimeline = <section className="real-history" aria-labelledby="checkpoints-heading">
     <header><h4 id="checkpoints-heading">Saved research checkpoints</h4><span className="history-meta">{shownEvents.length < visibleEvents.length ? `Showing ${shownEvents.length} of ${visibleEvents.length}` : visibleEvents.length} steps · latest first</span></header>
-    {visibleEvents.length ? <ol id="saved-checkpoint-list" className="checkpoint-list" aria-label="Saved research checkpoints">{shownEvents.map(event => <li key={event.id} className={event.id === latest?.id ? 'latest-checkpoint' : undefined}><span className="real-event-mark" aria-hidden="true"><SavedMark state={event.state} /></span><div><p><span className="checkpoint-detail">{eventLabels[event.state]} · </span>{event.label}</p>{event.detail && <p className="checkpoint-detail">{event.detail}</p>}{event.state === 'reused' && <p className="checkpoint-detail">Saved evidence reused; no new provider request.</p>}</div><time dateTime={event.created_at}>{time(event.created_at)}</time></li>)}</ol> : <p className="hint">No checkpoints saved for this stage. Older runs may predate the activity timeline.</p>}
+    {visibleEvents.length ? <ol id="saved-checkpoint-list" className="checkpoint-list" aria-label="Saved research checkpoints">{shownEvents.map(event => { const status = eventStatus(event, event.id === latest?.id, working, Boolean(run.termination)); return <li key={event.id} className={event.id === latest?.id ? 'latest-checkpoint' : undefined}><StatusMark status={status} /><div><p><span className={`checkpoint-word ${status}`}>{eventLabels[event.state]}</span><span className="checkpoint-detail"> · </span>{event.label}</p>{event.detail && <p className="checkpoint-detail">{event.detail}</p>}{event.state === 'reused' && <p className="checkpoint-detail">Saved evidence reused; no new provider request.</p>}</div><time dateTime={event.created_at}>{time(event.created_at)}</time></li>; })}</ol> : <p className="hint">No checkpoints saved for this stage. Older runs may predate the activity timeline.</p>}
     {visibleEvents.length > 3 && <button type="button" className="text-button" aria-expanded={showOlderSteps} aria-controls="saved-checkpoint-list" onClick={() => setShowOlderSteps(value => !value)}>{showOlderSteps ? 'Hide older steps' : `Show ${visibleEvents.length - 3} older steps`}</button>}
   </section>;
   const currentState = run.termination ? 'Research stopped' : !connected ? 'Reconnecting'
@@ -57,9 +54,9 @@ export function ResearchProgress({ run, connected = true, localResearch = false 
     {localResearch && pending && !run.progress.worker_online && <div className="notice"><p>Resuming research may use your provider credits.</p><button type="button" disabled={resuming} onClick={resume}>{resuming ? 'Resuming research…' : 'Resume research'}</button>{resumeError && <p role="alert">{resumeError}</p>}</div>}
     <div className="demo-workspace">
       <div className="demo-stage-rail"><p className="demo-step-count">Stage {current + 1} of 6 · {states[current].label}</p>
-        <ol className="real-stage-list" aria-label="Research stages">{states.map((stage, index) => <li key={stage.label} aria-current={stage.current ? 'step' : undefined} className={stage.complete ? 'is-saved' : ''}>
-          <button type="button" className="stage-review" aria-pressed={displayed === index} aria-controls="research-stage-panel" onClick={() => { setViewedStage(index); setShowOlderSteps(false); }}><span className={`demo-stage-number ${stage.complete ? 'real-stage-saved' : ''}`} aria-hidden="true">{stage.complete ? <SavedMark state="succeeded" /> : index + 1}</span><span><strong>{stage.label}</strong><small>{stage.state}</small></span></button>
-        </li>)}</ol><p className="demo-rail-note">Stages advance when work is saved. Confirmation and review need your judgment.</p>
+        <ol className="real-stage-list" aria-label="Research stages">{states.map((stage, index) => { const status = stageStatus(stage.state, working); return <li key={stage.label} aria-current={stage.current ? 'step' : undefined} className={stage.complete ? 'is-saved' : ''}>
+          <button type="button" className="stage-review" aria-pressed={displayed === index} aria-controls="research-stage-panel" onClick={() => { setViewedStage(index); setShowOlderSteps(false); }}>{status ? <StatusMark status={status} className="demo-stage-number" /> : <span className="demo-stage-number" aria-hidden="true">{index + 1}</span>}<span><strong>{stage.label}</strong><small>{stage.state}</small></span></button>
+        </li>; })}</ol><p className="demo-rail-note">Stages advance when work is saved. Confirmation and review need your judgment.</p>
       </div>
       <div className="demo-scene-wrap"><div className="demo-scene-top"><span>{currentState}</span><span>Progress from saved work</span></div>
         <div className="demo-scene real-scene" id="research-stage-panel" key={`${run.id}:${displayed}`} role="region" aria-label={`${states[displayed].label} saved information`}>

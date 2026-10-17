@@ -36,7 +36,7 @@ async function hostedFixture(page: Page) {
       user: { id: identity, aud: 'authenticated', role: 'authenticated', email: 'credits@example.test',
         email_confirmed_at: '2026-10-14T00:00:00Z', app_metadata: {}, user_metadata: {}, identities: [], created_at: '2026-10-14T00:00:00Z' } },
   }));
-  await page.goto('/');
+  await page.goto('/?auth=signin');
   await page.getByLabel('Email', { exact: true }).fill('credits@example.test');
   await page.getByLabel('Password', { exact: true }).fill('labelled-fixture-password');
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();

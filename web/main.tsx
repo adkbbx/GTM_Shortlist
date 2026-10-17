@@ -1,6 +1,6 @@
 import { openWorkspacePanel } from './workspace-panels';
 import { MenuToggleIcon, PlusIcon } from './NavigationIcons';
-import { StrictMode, useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, StrictMode, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import '@fontsource/schibsted-grotesk/400.css';
@@ -25,6 +25,7 @@ import { MarketOverview } from './MarketOverview';
 import { EmailDraftEditor } from './EmailDraftEditor';
 import { LocalSearchSetup } from './LocalSearchSetup';
 import { WebsiteChoice } from './WebsiteChoice';
+import { clearKeptCompany, keepCompany, peekKeptCompany } from './landing/kept-company';
 import './styles.css';
 import './Shortlist.css';
 
@@ -257,7 +258,9 @@ function App({ account, identity }: { account: ReactNode; identity: string }) {
   const [service, setService] = useState<Service | null>(null);
   const [runs, setRuns] = useState<Run[]>([]);
   const [active, setActive] = useState<Run | null>(null);
-  const [website, setWebsite] = useState(() => { try { return sessionStorage.getItem('shortlist-company-entry:' + identity) ?? ''; } catch { return ''; } });
+  // A company typed on the public landing page prefills the field once; research still waits for Start research.
+  const [website, setWebsite] = useState(() => { const kept = peekKeptCompany(); if (kept) return kept; try { return sessionStorage.getItem('shortlist-company-entry:' + identity) ?? ''; } catch { return ''; } });
+  useEffect(() => { clearKeptCompany(); }, []);
   useEffect(() => { try { sessionStorage.setItem('shortlist-company-entry:' + identity, website); } catch { /* Optional tab-local input recovery. */ } }, [website, identity]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -377,4 +380,7 @@ function App({ account, identity }: { account: ReactNode; identity: string }) {
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Application root is missing');
-createRoot(root).render(<StrictMode>{new URLSearchParams(window.location.search).get('demo') === '1' ? <DemoPage /> : <AuthGate workspace={(identity, account) => <App key={identity} identity={identity} account={account} />} />}</StrictMode>);
+// ?landing=1 previews the hosted landing page in any mode; its Start research hands the company to this workspace.
+const LandingPreview = lazy(() => import('./landing/PublicLanding').then(module => ({ default: () => <module.PublicLanding onSignIn={() => window.location.assign('/?auth=signin')} onStart={company => { keepCompany(company); window.location.assign('/'); }} /> })));
+const params = new URLSearchParams(window.location.search);
+createRoot(root).render(<StrictMode>{params.get('demo') === '1' ? <DemoPage /> : params.get('landing') === '1' ? <Suspense fallback={null}><LandingPreview /></Suspense> : <AuthGate workspace={(identity, account) => <App key={identity} identity={identity} account={account} />} />}</StrictMode>);

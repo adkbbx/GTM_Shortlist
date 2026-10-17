@@ -1,0 +1,100 @@
+import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { mkdirSync } from 'node:fs';
+
+const authOrigin = 'https://shortlist-auth.example';
+const userId = 'b9999999-1111-4444-8888-333333333333';
+
+/** Hosted mode with a labelled fake auth service; the research API stays the local fixture server. */
+async function hosted(page: Page) {
+  const expiry = Math.floor(Date.now() / 1000) + 3600;
+  const token = `${Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url')}.${Buffer.from(JSON.stringify({ sub: userId, exp: expiry, role: 'authenticated' })).toString('base64url')}.labelled-landing-fixture`;
+  await page.route('**/api/auth/setup', route => route.fulfill({ json: { mode: 'hosted', supabase_url: authOrigin, publishable_key: 'sb_publishable_fixture', redirect_url: 'http://127.0.0.1:8015/' } }));
+  await page.route(`${authOrigin}/auth/v1/**`, route => {
+    const headers = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*', 'Access-Control-Allow-Methods': '*' };
+    if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers });
+    return route.fulfill({ headers, json: { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: expiry, refresh_token: 'labelled-refresh',
+      user: { id: userId, aud: 'authenticated', role: 'authenticated', email: 'landing@example.test', email_confirmed_at: '2026-10-14T00:00:00Z', app_metadata: {}, user_metadata: {}, identities: [], created_at: '2026-10-14T00:00:00Z' } } });
+  });
+  await page.route('**/api/runs', route => route.request().method() === 'GET' ? route.fulfill({ json: [] }) : route.fallback());
+}
+async function capture(page: Page, path: string) {
+  mkdirSync('.impeccable/review', { recursive: true });
+  await page.evaluate(async () => { await document.fonts.ready; });
+  await page.screenshot({ path });
+}
+
+test('anonymous hosted visitors get the landing page and keep their company through sign-in without starting research', async ({ page }, info) => {
+  await hosted(page);
+  const research: string[] = [];
+  page.on('request', request => { const path = new URL(request.url()).pathname; if (path.startsWith('/api/') && path !== '/api/auth/setup') research.push(`${request.method()} ${path}`); });
+  await page.goto('/');
+  await expect(page.locator('#pl-hero-title')).toContainText('Find who fits.');
+  await expect(page.getByRole('region', { name: 'Example shortlist with synthetic companies' })).toBeVisible();
+  await page.waitForTimeout(2500);
+  await capture(page, `.impeccable/review/${info.project.name}-public-landing.png`);
+  expect(research).toEqual([]);
+
+  await page.getByLabel('Start with your company', { exact: true }).fill('acme-analytics.example');
+  await expect(page.locator('.pl-g-sub').first()).toHaveText('Fits acme-analytics.example');
+  await page.getByLabel('Start with your company', { exact: true }).press('Enter');
+  await expect(page).toHaveURL(/\?auth=signup$/);
+  await expect(page.getByRole('heading', { name: 'Create your account' })).toBeVisible();
+  await expect(page.getByRole('status')).toContainText('We kept acme-analytics.example');
+  expect(research).toEqual([]);
+
+  await page.getByRole('button', { name: 'Back to sign in' }).click();
+  await page.getByLabel('Email', { exact: true }).fill('landing@example.test');
+  await page.getByLabel('Password', { exact: true }).fill('labelled-fixture-password');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await expect(page.getByLabel('Company name or website', { exact: true })).toHaveValue('acme-analytics.example');
+  await expect(page).not.toHaveURL(/auth=/);
+  expect(research.filter(call => call.startsWith('POST /api/runs'))).toEqual([]);
+  await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toHaveCount(0);
+});
+
+test('header sign-in opens the account form and browser back returns to the landing page', async ({ page }) => {
+  await hosted(page);
+  await page.goto('/');
+  await page.getByRole('banner').getByRole('link', { name: 'Sign in', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Sign in to your shortlist' })).toBeVisible();
+  await expect(page).toHaveURL(/\?auth=signin$/);
+  await page.goBack();
+  await expect(page.locator('#pl-hero-title')).toBeVisible();
+  // An empty submit keeps the visitor on the page and puts the cursor in the field.
+  await page.getByRole('button', { name: 'Start research', exact: true }).first().click();
+  await expect(page.getByLabel('Start with your company', { exact: true })).toBeFocused();
+  await expect(page).not.toHaveURL(/auth=/);
+});
+
+test('the pinned story steps forward and back from its stepper', async ({ page }, info) => {
+  await hosted(page);
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Step 4: Companies' }).click();
+  await expect(page.getByRole('heading', { name: 'Discover companies' })).toBeVisible({ timeout: 6000 });
+  await expect(page.getByRole('button', { name: 'Step 4: Companies' })).toHaveAttribute('aria-current', 'step');
+  await page.getByRole('button', { name: 'Step 2: Market' }).click();
+  await expect(page.getByRole('heading', { name: 'Explore the market' })).toBeVisible({ timeout: 6000 });
+  await expect(page.getByRole('heading', { name: 'Discover companies' })).toBeHidden();
+  const clipped = await page.evaluate(() => {
+    const stage = document.querySelector('.pl-story-stage')?.getBoundingClientRect(), active = document.querySelector('.pl-stage.active')?.getBoundingClientRect();
+    return !stage || !active ? 'missing' : active.bottom - stage.bottom;
+  });
+  expect(typeof clipped === 'number' && clipped <= 1).toBe(true);
+  await capture(page, `.impeccable/review/${info.project.name}-landing-story.png`);
+});
+
+test('reduced motion shows the whole story statically without smooth scrolling or overflow', async ({ page }, info) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await hosted(page);
+  await page.goto('/');
+  await expect(page.locator('#pl-hero-title')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.classList.contains('lenis'))).toBe(false);
+  for (const heading of ['Understand your offer', 'Explore the market', 'Confirm the target', 'Discover companies', 'Inspect the evidence', 'Make the call'])
+    await expect(page.getByRole('heading', { name: heading })).toBeVisible();
+  await expect(page.getByText('Confirmed by you', { exact: true })).toBeVisible();
+  await expect(page.getByText('Accepted by you', { exact: true })).toBeVisible();
+  await page.setViewportSize({ width: 320, height: 740 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  await page.setViewportSize(info.project.use.viewport ?? { width: 390, height: 844 });
+});

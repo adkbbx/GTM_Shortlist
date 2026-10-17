@@ -1,17 +1,17 @@
-.workshop-field{position:relative;width:320px;max-width:100%;align-self:center}.workshop-plate{position:relative;aspect-ratio:320/250}.workshop-plate svg,.workshop-plate canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.workshop-plate svg{stroke:#91897b;stroke-width:1;stroke-linecap:round}.workshop-plate .plate-grid{stroke:#d5cfc4;stroke-width:.6;opacity:.5}.workshop-plate .plate-frame{stroke:#b1a797;stroke-dasharray:2 3}.workshop-plate .plate-accent{stroke:var(--orange);stroke-width:1.8}.workshop-motion{display:block;margin:0 auto;min-height:44px;padding:6px 10px;background:transparent;color:var(--muted);box-shadow:none;border:0;font-size:.75rem;font-weight:400;text-decoration:underline;text-underline-offset:4px}.workshop-motion:hover{background:var(--surface);color:var(--ink);transform:none}.new-research .page-heading:has(.workshop-field){display:grid;grid-template-columns:minmax(0,1fr) 300px;column-gap:32px;max-width:1000px;text-align:left;align-items:center}.new-research .page-heading:has(.workshop-field) h1{grid-column:1;grid-row:1;margin:0}.new-research .page-heading:has(.workshop-field)>p{grid-column:1;grid-row:2;margin:16px 0 0}.new-research .page-heading>.workshop-field{grid-column:2;grid-row:1/3}.new-research .page-heading:has(.workshop-field) h1{font-size:clamp(36px,4vw,54px)}/* Size the hero against the space left after navigation, not the viewport. */
+.workshop-field{position:relative;width:20rem;max-width:100%;align-self:center}.workshop-plate{position:relative;aspect-ratio:320/250}.workshop-plate svg,.workshop-plate canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.workshop-plate svg{stroke:#91897b;stroke-width:1;stroke-linecap:round}.workshop-plate .plate-grid{stroke:#d5cfc4;stroke-width:.6;opacity:.5}.workshop-plate .plate-frame{stroke:#b1a797;stroke-dasharray:2 3}.workshop-plate .plate-accent{stroke:var(--orange);stroke-width:1.8}.workshop-motion{display:block;margin:0 auto;min-height:2.75rem;padding:.375rem .625rem;background:transparent;color:var(--muted);box-shadow:none;border:0;font-size:.75rem;font-weight:400;text-decoration:underline;text-underline-offset:.25rem}.workshop-motion:hover{background:var(--surface);color:var(--ink);transform:none}.new-research .page-heading:has(.workshop-field){display:grid;grid-template-columns:minmax(0,1fr) 18.75rem;column-gap:2rem;max-width:62.5rem;text-align:left;align-items:center}.new-research .page-heading:has(.workshop-field) h1{grid-column:1;grid-row:1;margin:0}.new-research .page-heading:has(.workshop-field)>p{grid-column:1;grid-row:2;margin:1rem 0 0}.new-research .page-heading>.workshop-field{grid-column:2;grid-row:1/3}.new-research .page-heading:has(.workshop-field) h1{font-size:clamp(2.25rem,4vw,3.375rem)}/* Size the hero against the space left after navigation, not the viewport. */
 .workspace>.main{container-type:inline-size}
 @container (max-width:700px){
- .new-research .page-heading:has(.workshop-field){grid-template-columns:minmax(0,1fr) 220px;gap:20px}
- .workshop-field{width:220px}
+ .new-research .page-heading:has(.workshop-field){grid-template-columns:minmax(0,1fr) 13.75rem;gap:1.25rem}
+ .workshop-field{width:13.75rem}
 }
 @container (max-width:580px){
  .new-research .page-heading:has(.workshop-field){display:flex;flex-direction:column;text-align:center;gap:0}
- .new-research .page-heading:has(.workshop-field) h1{order:0;font-size:36px;max-width:20ch}
- .new-research .page-heading:has(.workshop-field)>p{order:1;margin-top:16px}
- .new-research .page-heading>.workshop-field{order:2;width:210px;margin-top:12px}
+ .new-research .page-heading:has(.workshop-field) h1{order:0;font-size:2.25rem;max-width:20ch}
+ .new-research .page-heading:has(.workshop-field)>p{order:1;margin-top:1rem}
+ .new-research .page-heading>.workshop-field{order:2;width:13.125rem;margin-top:.75rem}
  .workshop-plate{aspect-ratio:320/200;overflow:hidden}
  .workshop-plate svg,.workshop-plate canvas{height:125%;top:-12.5%}
  .workshop-motion{font-size:.75rem}
- .new-research .page-heading{margin-bottom:24px}
+ .new-research .page-heading{margin-bottom:1.5rem}
 }
 @media(prefers-reduced-motion:reduce){.workshop-motion{display:none}}

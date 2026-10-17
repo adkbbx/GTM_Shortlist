@@ -1,12 +1,12 @@
-.topbar .account-trigger{display:flex;align-items:center;gap:8px;min-height:44px;padding:8px 12px;box-shadow:none;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:.8125rem;border-radius:8px}
+.topbar .account-trigger{display:flex;align-items:center;gap:.5rem;min-height:2.75rem;padding:.5rem .75rem;box-shadow:none;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:.8125rem;border-radius:.5rem}
 .account-trigger svg{stroke:currentColor;stroke-width:1.5;stroke-linecap:round}
-.account-tray{position:fixed;inset:64px 16px auto auto;margin:0;width:min(420px,calc(100vw - 32px));max-height:calc(100dvh - 80px);overflow:auto;padding:20px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);box-shadow:0 12px 32px rgb(20 18 14 / .14)}
-.account-tray-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px}
+.account-tray{position:fixed;inset:4rem 1rem auto auto;margin:0;width:min(26.25rem,calc(100vw - 2rem));max-height:calc(100dvh - 5rem);overflow:auto;padding:1.25rem;border:1px solid var(--line);border-radius:.75rem;background:var(--surface);color:var(--ink);box-shadow:0 .75rem 2rem rgb(20 18 14 / .14)}
+.account-tray-heading{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.75rem}
 .account-tray-heading h2{font-size:1rem}
-.account-tray-heading button{min-height:44px;width:44px;padding:8px;box-shadow:none;border:0;background:transparent;color:var(--ink);font-size:24px;font-weight:400}
-.topbar .workspace-account .account-tray .account-nav{max-width:none;width:100%;flex-direction:column;align-items:flex-start;gap:8px}
+.account-tray-heading button{min-height:2.75rem;width:2.75rem;padding:.5rem;box-shadow:none;border:0;background:transparent;color:var(--ink);font-size:1.5rem;font-weight:400}
+.topbar .workspace-account .account-tray .account-nav{max-width:none;width:100%;flex-direction:column;align-items:flex-start;gap:.5rem}
 .topbar .workspace-account .account-tray .account-nav>span{display:block;max-width:100%;overflow-wrap:anywhere;white-space:normal;color:var(--muted);font-size:.875rem}
 .topbar .workspace-account .account-tray .text-button{color:var(--orange)}
-.tray-credits{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px 20px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+.tray-credits{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem 1.25rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--line)}
 .topbar .account-tray .wallet-balance{font-size:.875rem;color:var(--ink);max-width:none}
 .topbar .account-tray .wallet-balance>span{color:var(--muted)}

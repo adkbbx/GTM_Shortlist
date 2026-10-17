@@ -2,7 +2,19 @@
 
 17 October 2026. Branch `claude/alive-landing-brief`, based on `codex/landing-demo-plan` at `589fccd`. Audience: the implementing agent (Codex). This brief is a plan with a working prototype; it does not change application code.
 
-Prototype: [`prototype/index.html`](prototype/index.html) (public landing) and [`prototype/research.html`](prototype/research.html) (research in progress). Open either file directly in a browser; no build step. Add `?motion=reduce` to see the reduced-motion version. All companies, passages and the research run in the prototype are synthetic and labelled.
+Prototype: [`prototype/signal.html`](prototype/signal.html) (public landing, the approved Signal direction) and [`prototype/research.html`](prototype/research.html) (research in progress). [`prototype/index.html`](prototype/index.html) is the superseded mission-scope version, kept only for history. Open any file directly in a browser; no build step. Add `?motion=reduce` to see the reduced-motion version. All companies, passages and the research run in the prototype are synthetic and labelled.
+
+## Implementation status, 17 October
+
+Built on `claude/signal-landing` (from `main` after PR #2):
+
+- **Public landing page** (`web/landing/`): the Signal page in React, shown to hosted visitors without a session. `?landing=1` previews it in any mode. It replaces section 4.4's mission scope, hand notes, spec sheet and closing phrase swap; the user rejected those as cluttered.
+- **Routing and auth**: `?auth=signin` and `?auth=signup` open the existing account form; sign-out returns to sign-in. A company typed on the landing page is kept for 24 hours in local storage, shown on the account form and prefilled in the workspace once. Research never starts by itself.
+- **Lenis 1.3.26**: only on the landing page, never under reduced motion, destroyed on leaving it.
+- **Large screens** (section 6): full-bleed frame, fluid root size and rem-based workspace stylesheets.
+- **Status colours** (section 5.1): `web/StatusMark.tsx` in checkpoints and stages.
+
+Still open: the agent console, filterable feed, tab title and notifications in sections 5.2 to 5.5, and the `activity`/`subject` event fields they need.
 
 ## 1. Decisions
 
