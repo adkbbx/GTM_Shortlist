@@ -1,5 +1,9 @@
 # Progress and handoff
 
+## 17 October, Settings expansion assertion corrected
+
+CI39026155129 completed with138 browser passes and two failures in the same phone-modal test. The test compared the close button after expanding model setup against the modal position before expansion; content expansion correctly changes its centered position. Replaced that stale coordinate comparison with one atomic measurement of the current modal, sticky heading and close button, retaining containment, keyboard trapping, scroll and resize checks. Six repeated phone/laptop cases pass, followed by both final strengthened containment cases. This changes only the test; full CI remains required before the authorized merge.
+
 ## 17 October, final drawer-boundary regression check
 
 The bounded disposable-Postgres replay passed all13 credit checks and13 of14 phone/laptop browser cases, including actual hosted Account history and deletion. The remaining drawer assertion compared288px to Chromium's transformed bound288.0000076px. Added a0.01px numerical tolerance while retaining the32px viewport gutter. All10 repeated phone/laptop resize/drawer cases pass. The disposable cluster was stopped by the checker. Full CI on the resulting head remains the merge gate; no deployment or provider evaluation is authorized or performed.

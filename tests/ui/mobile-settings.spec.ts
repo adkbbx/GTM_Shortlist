@@ -44,9 +44,17 @@ test('phone Settings is a centered modal with reachable controls and safe resize
     await page.getByRole('button', { name: 'Research model: Not configured', exact: true }).click();
     await settings.evaluate(element => { element.scrollTop = element.scrollHeight; });
     const close = page.getByRole('button', { name: 'Close settings', exact: true });
-    const closeBox = await close.boundingBox();
-    expect(closeBox!.y).toBeGreaterThanOrEqual(box!.y);
-    expect(closeBox!.y).toBeLessThan(box!.y + 56);
+    // Expanding setup recenters the modal; use the current sticky header bounds.
+    const headerBounds = await settings.evaluate(element => {
+      const heading = element.querySelector('.local-settings-heading')!.getBoundingClientRect();
+      const button = element.querySelector('.local-settings-heading button')!.getBoundingClientRect();
+      const modal = element.getBoundingClientRect();
+      return { top: heading.top, bottom: heading.bottom, buttonTop: button.top, buttonBottom: button.bottom, modalTop: modal.top, modalBottom: modal.bottom };
+    });
+    expect(headerBounds.top).toBeGreaterThanOrEqual(headerBounds.modalTop);
+    expect(headerBounds.bottom).toBeLessThanOrEqual(headerBounds.modalBottom);
+    expect(headerBounds.buttonTop).toBeGreaterThanOrEqual(headerBounds.top);
+    expect(headerBounds.buttonBottom).toBeLessThanOrEqual(headerBounds.bottom);
     await close.focus();
     await close.press('Shift+Tab');
     expect(await settings.evaluate(element => element.contains(document.activeElement))).toBe(true);
