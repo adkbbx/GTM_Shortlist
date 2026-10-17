@@ -1,5 +1,31 @@
 # Progress and handoff
 
+## 18 October, one-press start, review-first confirmation and test plans
+
+Follow-ups from user review on `claude/signal-landing`:
+- **One press to start.** Start research on the landing page now starts the run: immediately in local mode, and after sign-in on the hosted site. Saved-run links never start research, discovery still waits for target confirmation, and the landing note now says "Discovery waits until you confirm the target".
+- **Review-first confirmation.** The drafted offer, target and fit checks read as text with an Edit button each. Parts open by themselves when they need input (empty offer, removed or blank criteria, an applied campaign). Exclusions and campaign ideas sit behind their own controls, research history folds away while the target waits, Stop this run moves below the card, and the action bar stays in view on long forms.
+- **Landing page.**
+  - Only two text tiers remain: no kickers, step labels or uppercase card labels.
+  - The copy is about half as long, and examples use invented companies with drawn logo marks and no visible domains, labelled once as an illustrative sample.
+  - The evidence signal lines are restored, running from the gutter beside each footnote, and the example count levels off.
+  - The hero field is the workspace company search, with Brandfetch suggestions.
+- **Suggestion icons.** `GET /api/site-icon/{domain}` (authenticated workspaces only) supplies a website's declared icon when Brandfetch has no logo. The anonymous hosted landing page does not call it.
+- **Test plans before payments.** `grant-credits` issues replay-safe operator credits: pro adds 50, and dev adds 500 for internal accounts listed in `SHORTLIST_INTERNAL_WORKSPACES`. See `docs/credits.md`.
+- **Plan for lower friction.** `docs/planning/LOW_FRICTION_PATHS.md` proposes drafting before signup with inline OTP/Google sign-in for hosted users, and a one-command local install with a setup card and a sample-data mode. It records the recommendation to ask for signup at "Find companies", not after a full anonymous run. Not built.
+
+Verification:
+- Local full browser suite: 143 passed, 3 skipped.
+- Targeted landing and search runs after later changes all passed.
+- Backend icon and grant tests pass, and Ruff is clean.
+- CI run 39047177512 on `cf46667` passed every job, including the Postgres grant test and the hosted credits browser tests.
+
+To use the plans on Render:
+1. Deploy the branch to both services; auto-deploy is off.
+2. Sign in once with the account.
+3. Set `SHORTLIST_INTERNAL_WORKSPACES` on the worker.
+4. Run `python -m shortlist.cli grant-credits --workspace <uid> --plan dev` in the worker shell.
+
 ## 17 October, Signal landing page, large screens and status colours implemented
 
 Branch `claude/signal-landing`, from `main` after PR #2, with the alive-landing brief and prototypes merged in.
