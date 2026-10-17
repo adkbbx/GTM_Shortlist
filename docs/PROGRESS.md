@@ -1,5 +1,9 @@
 # Progress and handoff
 
+## 17 October, final drawer-boundary regression check
+
+The bounded disposable-Postgres replay passed all13 credit checks and13 of14 phone/laptop browser cases, including actual hosted Account history and deletion. The remaining drawer assertion compared288px to Chromium's transformed bound288.0000076px. Added a0.01px numerical tolerance while retaining the32px viewport gutter. All10 repeated phone/laptop resize/drawer cases pass. The disposable cluster was stopped by the checker. Full CI on the resulting head remains the merge gate; no deployment or provider evaluation is authorized or performed.
+
 ## 17 October, remaining merge-gate defects isolated
 
 The first merge-preparation correction2bcc520 passed core/Postgres/Windows but Linux UI run39025342817 still failed4 cases with134 passes: delayed close focus, asynchronous resize scroll cleanup, and hosted website entry. The complete local run against disposable cluster a1899ac7 likewise exposed the website-entry blocker and a distinct empty-sidebar defect, ending133 passed/5 failed; its42 backend Postgres checks passed and its own cluster was stopped. Those runs are diagnostic failures, not green acceptance.
