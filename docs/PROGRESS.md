@@ -44,6 +44,8 @@ Verification:
 - **Fixed during the replay: a fit with no evidence.** When every required check is made nice to have, nothing establishes fit, yet `qualify` returned "fits" for list pages. Now `qualify` needs at least one required check, a draft keeps its required checks if all are rarely public, and the "Make it nice to have" button is withheld for a target's only required check.
 - **Read-only database copies.** The replay ran on copies of the local databases; `tests/test_replay.py` repeats it on a small built database.
 
+**Live entry-page check** (18 October, `scripts/check_entry_pages.py`, page fetches only, no search, model or enrichment credit). For all 21 labelled real companies, the page research starts from was fetched with the app's fetcher and checked with the strict identity gate on the page that actually came back. **Before: 16 of 21 researchable** (HappyFox, Actaa, impact.com, Salesforce and Widelly refused after download). **After: 21 of 21 researchable**, none unreadable. The output is in `examples/evaluation/entry-pages-2026-10-18.json`.
+
 Not verified, and needing your approval: the yield of the new queries on live search. The evidence is the saved natural experiment above, not a new run. A bounded check would be 2 searches for each of 3 saved targets (6 searches, 2.4% of the monthly SerpApi allowance), compared against the saved results.
 
 ## 18 October, drafts before signup (hosted, off by default)

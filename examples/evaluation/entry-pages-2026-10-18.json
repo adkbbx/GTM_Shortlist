@@ -1,0 +1,328 @@
+{
+ "checked_at": "2026-10-18T13:34:05",
+ "summary": {
+  "before:researchable": 16,
+  "before:refused": 5,
+  "before:unreadable": 0,
+  "after:researchable": 21,
+  "after:refused": 0,
+  "after:unreadable": 0
+ },
+ "rows": [
+  {
+   "company": "smeron.com",
+   "before": {
+    "url": "https://www.smeron.com/",
+    "outcome": "researchable",
+    "detail": "Smeron | Custom AI Applications & B2B SaaS Growth Studio",
+    "words": 779
+   },
+   "after": {
+    "url": "https://www.smeron.com/",
+    "outcome": "researchable",
+    "detail": "Smeron | Custom AI Applications & B2B SaaS Growth Studio",
+    "words": 779
+   }
+  },
+  {
+   "company": "prismatic.io",
+   "before": {
+    "url": "https://prismatic.io/",
+    "outcome": "researchable",
+    "detail": "Embedded iPaaS for B2B Software Companies | Prismatic",
+    "words": 2025
+   },
+   "after": {
+    "url": "https://prismatic.io/",
+    "outcome": "researchable",
+    "detail": "Embedded iPaaS for B2B Software Companies | Prismatic",
+    "words": 2025
+   }
+  },
+  {
+   "company": "b2bhub.ltd",
+   "before": {
+    "url": "https://b2bhub.ltd/",
+    "outcome": "researchable",
+    "detail": "B2B Hub | AI-Native Business Operating System — Build, Incorporate & Run Your Company",
+    "words": 14
+   },
+   "after": {
+    "url": "https://b2bhub.ltd/",
+    "outcome": "researchable",
+    "detail": "B2B Hub | AI-Native Business Operating System — Build, Incorporate & Run Your Company",
+    "words": 14
+   }
+  },
+  {
+   "company": "tandemworks.ai",
+   "before": {
+    "url": "https://tandemworks.ai/",
+    "outcome": "researchable",
+    "detail": "TandemWorks | Agentic AI for B2B Revenue Teams",
+    "words": 1094
+   },
+   "after": {
+    "url": "https://tandemworks.ai/",
+    "outcome": "researchable",
+    "detail": "TandemWorks | Agentic AI for B2B Revenue Teams",
+    "words": 1094
+   }
+  },
+  {
+   "company": "siesta.ai",
+   "before": {
+    "url": "https://siesta.ai/",
+    "outcome": "researchable",
+    "detail": "Siesta AI | Context-Native Enterprise AI Platform",
+    "words": 2655
+   },
+   "after": {
+    "url": "https://siesta.ai/",
+    "outcome": "researchable",
+    "detail": "Siesta AI | Context-Native Enterprise AI Platform",
+    "words": 2655
+   }
+  },
+  {
+   "company": "backofficeboss.ai",
+   "before": {
+    "url": "https://backofficeboss.ai/",
+    "outcome": "researchable",
+    "detail": "BackOfficeBoss.ai — Custom AI automation built around your business",
+    "words": 2038
+   },
+   "after": {
+    "url": "https://backofficeboss.ai/",
+    "outcome": "researchable",
+    "detail": "BackOfficeBoss.ai — Custom AI automation built around your business",
+    "words": 2038
+   }
+  },
+  {
+   "company": "freshify.io",
+   "before": {
+    "url": "https://freshify.io/pricing",
+    "outcome": "researchable",
+    "detail": "Pricing — Freshify software products",
+    "words": 633
+   },
+   "after": {
+    "url": "https://freshify.io/pricing",
+    "outcome": "researchable",
+    "detail": "Pricing — Freshify software products",
+    "words": 633
+   }
+  },
+  {
+   "company": "happyfox.com",
+   "before": {
+    "url": "https://www.happyfox.com/crm/pricing/",
+    "outcome": "refused",
+    "detail": "Page purpose is not established as an official company, product or service page",
+    "words": 865
+   },
+   "after": {
+    "url": "https://www.happyfox.com/",
+    "outcome": "researchable",
+    "detail": "HappyFox Help Desk Software | AI-Powered Customer Support",
+    "words": 1164
+   }
+  },
+  {
+   "company": "delegatezero.com",
+   "before": {
+    "url": "https://delegatezero.com/",
+    "outcome": "researchable",
+    "detail": "DelegateZero - AI Decision Proxy for B2B SaaS Founders",
+    "words": 2631
+   },
+   "after": {
+    "url": "https://delegatezero.com/",
+    "outcome": "researchable",
+    "detail": "DelegateZero - AI Decision Proxy for B2B SaaS Founders",
+    "words": 2631
+   }
+  },
+  {
+   "company": "actaa.ai",
+   "before": {
+    "url": "https://www.actaa.ai/startups",
+    "outcome": "refused",
+    "detail": "Page purpose is not established as an official company, product or service page",
+    "words": 762
+   },
+   "after": {
+    "url": "https://www.actaa.ai/",
+    "outcome": "researchable",
+    "detail": "Actaa AI — private AI company OS: mail, chat, docs, HR and finance",
+    "words": 662
+   }
+  },
+  {
+   "company": "caacgo.cresclab.com",
+   "before": {
+    "url": "https://caacgo.cresclab.com/pricing",
+    "outcome": "researchable",
+    "detail": "Pricing — CAAC Go | Start Free, Scale as You Grow",
+    "words": 1205
+   },
+   "after": {
+    "url": "https://caacgo.cresclab.com/pricing",
+    "outcome": "researchable",
+    "detail": "Pricing — CAAC Go | Start Free, Scale as You Grow",
+    "words": 1205
+   }
+  },
+  {
+   "company": "runwork.ai",
+   "before": {
+    "url": "https://www.runwork.ai/pricing/",
+    "outcome": "researchable",
+    "detail": "Pricing | Runwork",
+    "words": 1519
+   },
+   "after": {
+    "url": "https://www.runwork.ai/pricing/",
+    "outcome": "researchable",
+    "detail": "Pricing | Runwork",
+    "words": 1519
+   }
+  },
+  {
+   "company": "impact.com",
+   "before": {
+    "url": "https://impact.com/partners/affiliate-partners",
+    "outcome": "refused",
+    "detail": "Page purpose is not established as an official company, product or service page",
+    "words": 1340
+   },
+   "after": {
+    "url": "https://impact.com/",
+    "outcome": "researchable",
+    "detail": "impact.com - The All-in-One Partnership Management Platform",
+    "words": 1408
+   }
+  },
+  {
+   "company": "paloaltonetworks.com",
+   "before": {
+    "url": "https://www.paloaltonetworks.com/",
+    "outcome": "researchable",
+    "detail": "Leader in Cybersecurity Protection & Software for the Modern Enterprises - Palo Alto Netwo",
+    "words": 1769
+   },
+   "after": {
+    "url": "https://www.paloaltonetworks.com/",
+    "outcome": "researchable",
+    "detail": "Leader in Cybersecurity Protection & Software for the Modern Enterprises - Palo Alto Netwo",
+    "words": 1769
+   }
+  },
+  {
+   "company": "iqvia.com",
+   "before": {
+    "url": "https://www.iqvia.com/",
+    "outcome": "researchable",
+    "detail": "Transforming Life Sciences with Data, Technology & Human Science | IQVIA",
+    "words": 5055
+   },
+   "after": {
+    "url": "https://www.iqvia.com/",
+    "outcome": "researchable",
+    "detail": "Transforming Life Sciences with Data, Technology & Human Science | IQVIA",
+    "words": 5055
+   }
+  },
+  {
+   "company": "wellington.com",
+   "before": {
+    "url": "https://www.wellington.com/en",
+    "outcome": "researchable",
+    "detail": "Wellington Homepage | Wellington Management",
+    "words": 1480
+   },
+   "after": {
+    "url": "https://www.wellington.com/en",
+    "outcome": "researchable",
+    "detail": "Wellington Homepage | Wellington Management",
+    "words": 1480
+   }
+  },
+  {
+   "company": "salesforce.com",
+   "before": {
+    "url": "https://www.salesforce.com/sales/partner-relationship-management/software",
+    "outcome": "refused",
+    "detail": "Page purpose is not established as an official company, product or service page",
+    "words": 2283
+   },
+   "after": {
+    "url": "https://www.salesforce.com/",
+    "outcome": "researchable",
+    "detail": "世界No.1 AI CRM | AIエージェント搭載のSFA、CRM | セールスフォース・ジャパン",
+    "words": 262
+   }
+  },
+  {
+   "company": "widelly.com",
+   "before": {
+    "url": "https://widelly.com/revenue-operations/gtm-operations",
+    "outcome": "refused",
+    "detail": "Page purpose is not established as an official company, product or service page",
+    "words": 718
+   },
+   "after": {
+    "url": "https://widelly.com/",
+    "outcome": "researchable",
+    "detail": "Widelly – AI Powered Business Growth Platform",
+    "words": 1199
+   }
+  },
+  {
+   "company": "yokogawa.com",
+   "before": {
+    "url": "https://www.yokogawa.com/us",
+    "outcome": "researchable",
+    "detail": "Yokogawa America",
+    "words": 560
+   },
+   "after": {
+    "url": "https://www.yokogawa.com/us",
+    "outcome": "researchable",
+    "detail": "Yokogawa America",
+    "words": 560
+   }
+  },
+  {
+   "company": "forumvc.com",
+   "before": {
+    "url": "https://www.forumvc.com/",
+    "outcome": "researchable",
+    "detail": "B2B Pre-seed Fund, Accelerator and AI Venture Studio | Forum Ventures",
+    "words": 1224
+   },
+   "after": {
+    "url": "https://www.forumvc.com/",
+    "outcome": "researchable",
+    "detail": "B2B Pre-seed Fund, Accelerator and AI Venture Studio | Forum Ventures",
+    "words": 1224
+   }
+  },
+  {
+   "company": "tinyseed.com",
+   "before": {
+    "url": "https://tinyseed.com/",
+    "outcome": "researchable",
+    "detail": "TinySeed",
+    "words": 2045
+   },
+   "after": {
+    "url": "https://tinyseed.com/",
+    "outcome": "researchable",
+    "detail": "TinySeed",
+    "words": 2045
+   }
+  }
+ ]
+}
