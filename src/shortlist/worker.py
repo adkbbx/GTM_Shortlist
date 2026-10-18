@@ -376,6 +376,20 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 # Initial-page links define the entire follow-up frontier. Never recurse.
                 completed_pages = checkpoint.setdefault("completed_pages", {}).setdefault(candidate.domain, [])
                 failures = checkpoint.setdefault("page_failures", {}).setdefault(candidate.domain, {})
+                # Policy 3 also reads the page search found when research started from the homepage instead. The
+                # partner-programme pages that made NICE, Hitachi Energy and Lumen targets (18 October) were never read.
+                found = candidate.url
+                if (discovery_policy >= 3 and found != entry(candidate) and found not in completed_pages
+                        and found not in failures and room("fetch", 1)):
+                    try:
+                        found_page = page(found, candidate.domain, f"fetch:{candidate.domain}:found")
+                        if found_page.url not in {s.url for s in sources}:
+                            sources = (sources[0], found_page, *sources[1:])
+                            saved_sources[candidate.domain] = [s.model_dump(mode="json") for s in sources]
+                        completed_pages.append(found)
+                    except FetchError as exc:
+                        failures[found] = str(exc)
+                    store.checkpoint(run_id, fence, "research", checkpoint)
                 for index, link in enumerate(sources[0].research_links):
                     if link in completed_pages or link in failures or link in {s.url for s in sources}:
                         continue

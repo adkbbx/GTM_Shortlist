@@ -50,14 +50,18 @@ def test_bad_pages_cannot_be_delivered_or_charged(tmp_path, url, title, text):
 
 
 @pytest.mark.parametrize("compact", [False, True])
-@pytest.mark.parametrize("identity_kind", ["valid", "missing", "other-domain", "invented-passage", "other-name"])
+@pytest.mark.parametrize("identity_kind", ["valid", "missing", "other-domain", "invented-passage",
+                                           "invented-passage-unnamed-page", "other-name"])
 def test_model_identity_requires_grounded_website_owner(monkeypatch, compact, identity_kind):
-    source = page("https://acme.example/", "Acme", "Acme provides business software. We sell to business sales teams.")
+    text = "Acme provides business software.\nWe sell to business sales teams."
+    if identity_kind == "invented-passage-unnamed-page":
+        text = "We provide business software.\nWe sell to business sales teams."
+    source = page("https://acme.example/", "Acme", text)
     identity = {"name": "Acme", "domain": "acme.example", "source_id": source.id,
                 "passage": "Acme provides business software."}
     if identity_kind == "other-domain":
         identity["domain"] = "default.com"
-    if identity_kind == "invented-passage":
+    if identity_kind.startswith("invented-passage"):
         identity["passage"] = "Acme is the largest company in the world."
     if identity_kind == "other-name":
         identity["name"] = "Default.com"
@@ -75,12 +79,14 @@ def test_model_identity_requires_grounded_website_owner(monkeypatch, compact, id
 
     monkeypatch.setattr(model, "complete", complete)
     candidate = Candidate(domain="acme.example", name="Search title", url=source.url, query="fixture", provider="fixture")
-    if identity_kind != "valid":
+    if identity_kind not in ("valid", "invented-passage"):
         with pytest.raises(CompanyPageError):
             model.research(profile(), candidate, (source,), require_identity=True)
     else:
         record = model.research(profile(), candidate, (source,), require_identity=True)
-        assert record.name == "Acme" and record.company_identity == CompanyIdentity(**identity)
+        # A loose quote naming the right owner is replaced by the page's own line naming it, never kept.
+        expected = {**identity, "passage": "Acme provides business software."}
+        assert record.name == "Acme" and record.company_identity == CompanyIdentity(**expected)
         assert record.findings[0].status == "unknown"  # Identity does not establish the ICP criterion.
         with pytest.raises(CompanyPageError):
             apply_verification(profile(), record, Verification(judgments=[]))

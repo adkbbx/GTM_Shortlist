@@ -72,7 +72,36 @@ For the software target, the restored anchors produce exactly the queries saved 
   - Both are fixed: named home documents are accepted after a redirect, and a large page is read up to the limit instead of refused. Re-fetched live (free), both pass the identity check (Front reads 1,272 words).
 - **Refused: NICE.** The small model's identity quote was not word for word on the page.
 
-Not re-run: research on Lumen and Front after the fix, which would need model calls beyond the approved six.
+**Repeat and policy-3 research runs** (approved by the user on 18 October on the same terms: local model, at most six model calls per run, no searches; same script and database, new run keys).
+
+*Repeat run* (fetch fixes only, discovery policy 2). This was also a live check of the set-aside feature.
+- **Set aside.** Channel Institute and Channeltivity were set aside as already shortlisted, so no model calls were spent on them.
+- **Calls.** 5 fetches, 5 model calls, 0 searches.
+- **Front: "fits".** On inspection, the fit rested on a menu label ("Channel Partnerships") and a product tagline. The model's own claims said "suggests".
+- **NICE, Hitachi Energy and Lumen: refused.** The identity check could not find their identity quotes, after their pages and model calls had been paid for.
+
+The causes were found offline from the saved pages and the rebuilt prompt excerpts:
+- **Invisible characters.** NICE's page puts zero-width spaces between words, and matching collapsed only whitespace. Across 29 saved pages, 1 has invisible format characters and 19 have typographic quotes.
+- **Little real text in the excerpts.** The compact prompt's excerpts were mostly language and region menus: Hitachi Energy's research got 1,719 characters. Lumen's homepage redirected to a non-English locale page and gave 405 characters.
+- **The found page was dropped.** The page search found, each company's English partner-program page, was dropped when research started from the homepage.
+
+Changes:
+- **One shared quote check (`quoted_in`)** for identity, findings, exclusions, people and facts. It ignores only spacing, invisible format characters, and the style of quote marks, dashes and ellipses. Every visible word and its case must still match.
+- **Identity re-grounding (`ground_identity`).** When the model names the right owner but quotes loosely, a real line naming that company is used instead. The line must come from a saved page that passes the strict company-page gate, and every identity rule still applies, including the name being tied to the website owner. Offline on the saved pages, NiCE, NICE, Hitachi Energy, Lumen and Lumen Technologies all ground; an invented "NICE Ltd." does not.
+- **Discovery policy 3 reads the page search found** beside the homepage, within the run's fetch cap. Runs confirmed earlier keep the policy they were journaled with.
+- **A claim the model hedges** ("suggests", "may", "likely") no longer establishes a check, unless the check itself is worded that way. Replayed over saved records, it withholds 1 of 23 observations: Front's menu-label claim.
+
+*Policy-3 run* on the three refused companies (Front set aside). 3 fetches (their found pages), 6 model calls, 0 searches.
+
+| Company | Before | After |
+|---|---|---|
+| NICE | Refused | Record. Partner check supported by its partner page ("Our partners, including referral and resale partner, come from leading Carriers, UCaaS, CRM, VAR and System Integrators…"); verifier entailed |
+| Lumen | Refused | Record. Partner check quoted from its English partner page ("Partner with Lumen / Grow your business…"); the verifier omitted that judgment, so it stays unknown |
+| Hitachi Energy | Refused | Record. Identity verified; its partner-page quote was not found on the page, so unknown |
+
+None qualifies as a fit: the second check (need for structured partner onboarding) is unestablished for all three. In this run, NICE's second check was withheld as hedged because its claim echoed the check's own wording ("suggesting"). The check-wording exemption above was added after this run.
+
+Not done: rerunning NICE's second check with the exemption; recovering the verifier's omitted judgment for Lumen (a repair call); keeping the rejected quote when a finding is refused, so misquotes like Hitachi Energy's can be diagnosed.
 
 ## 18 October, drafts before signup (hosted, off by default)
 

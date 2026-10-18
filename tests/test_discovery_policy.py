@@ -139,14 +139,14 @@ def readable(fetched, unreadable=()):
     return fetch
 
 
-def research_run(tmp_path, candidates):
+def research_run(tmp_path, candidates, policy=2):
     store = Store(tmp_path / "policy.sqlite3")
     profile = Profile(seller_url="https://seller.example", offer="Customer acquisition research", target="Business software",
                       criteria=(Criterion(id="software", description="Offers software"),))
     run_id = store.create_run(profile, "policy-two")
-    assert store.get_run(run_id)["checkpoint"]["discovery_policy"] == 2  # New runs use the new discovery behaviour.
+    assert store.get_run(run_id)["checkpoint"]["discovery_policy"] == 3  # New runs use the new discovery behaviour.
     fence = store.claim(run_id)
-    store.checkpoint(run_id, fence, "research", {"discovery_policy": 2, "company_identity_policy": 1,
+    store.checkpoint(run_id, fence, "research", {"discovery_policy": policy, "company_identity_policy": 1,
                                                  "candidates": [c.model_dump(mode="json") for c in candidates]}, "queued")
     with store.connection() as db:
         db.execute("UPDATE runs SET lease_until=0 WHERE id=?", (run_id,))
@@ -169,6 +169,18 @@ def test_research_continues_past_six_rejected_candidates_and_starts_from_entry_p
     assert fetched[0] == "https://company-0.example/"  # Not the partner page the identity check would refuse.
     assert {r["research"]["domain"] for r in saved["records"]} == {"company-0.example", "company-6.example", "company-7.example"}
     assert "company-8.example" not in {domain_of(url) for url in fetched}  # Stops once the batch is complete.
+    assert "https://company-0.example/partners/program" not in fetched  # Policy 2 never reads the found page.
+
+
+def test_policy_three_also_reads_the_page_search_found(tmp_path):
+    found = companies(2, deep_first=True)
+    store, run_id = research_run(tmp_path, found, policy=3)
+    fetched = []
+    execute_run(store, Settings(db_path=store.path), run_id, model=Model(), fetch=readable(fetched))
+    record = next(r["research"] for r in store.get_run(run_id)["records"] if r["research"]["domain"] == "company-0.example")
+    # Identity still rests on the homepage; the partner page found by search is read as evidence beside it.
+    assert [s["url"] for s in record["sources"]] == ["https://company-0.example/", "https://company-0.example/partners/program"]
+    assert fetched.count("https://company-1.example/") == 1 and len([u for u in fetched if "company-1" in u]) == 1
 
 
 class Found:

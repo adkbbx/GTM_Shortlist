@@ -13,7 +13,7 @@ from pathlib import Path
 
 from shortlist.config import Settings
 from shortlist.domain import Criterion, Profile
-from shortlist.store import RUN_CAPS, Store
+from shortlist.store import DISCOVERY_POLICY, RUN_CAPS, Store
 from shortlist.worker import execute_run
 
 
@@ -32,6 +32,10 @@ def main():
     parser.add_argument("--output-db", type=Path, required=True)
     parser.add_argument("--model", default="gemma4:e2b-it-qat")
     parser.add_argument("--endpoint", default="http://localhost:11434/v1")
+    parser.add_argument("--run-key", default="research-run-channel-partner-2026-10-18",
+                        help="A new key in the same output database is a repeat run: it sets aside companies already saved")
+    parser.add_argument("--discovery-policy", type=int, default=DISCOVERY_POLICY,
+                        help="The first two runs of 18 October used 2; 3 also reads the page search found")
     args = parser.parse_args()
     if not args.allow_provider_calls:
         parser.error("Disabled without --allow-provider-calls and the user's approval.")
@@ -48,12 +52,15 @@ def main():
             for candidate in item["admitted"]:
                 found.setdefault(candidate["domain"], candidate)
     store = Store(args.output_db)
-    run_id = store.create_run(profile, "research-run-channel-partner-2026-10-18")
+    run_id = store.create_run(profile, args.run_key)
     run = store.get_run(run_id)
     if run["status"] == "queued" and run["stage"] == "discovery" and "discovered" not in run["checkpoint"]:
         fence = store.claim(run_id)
-        store.checkpoint(run_id, fence, "discovery", {**run["checkpoint"], "discovery_policy": 2, "selection_policy": 3,
+        # A repeat run sets aside earlier companies, leaving too few for the low-yield third query; it is not approved.
+        store.checkpoint(run_id, fence, "discovery", {**run["checkpoint"], "discovery_policy": args.discovery_policy,
+                         "selection_policy": 3,
                          "company_limit": 3, "discovered": list(found.values()), "completed_queries": [0, 1],
+                         "discovery_failures": {"2": "Not run: this approved evaluation makes no searches"},
                          "campaign_name": campaign["name"], "evaluation": "approved research run on saved live search results"},
                          "queued")
         with store.connection() as db:
@@ -66,6 +73,7 @@ def main():
     saved = store.get_run(run_id)
     print("status", saved["status"], "| error", saved["error"])
     print("attempts", {kind: sum(a["kind"] == kind for a in saved["attempts"]) for kind in ("search", "fetch", "model")})
+    print("set aside as already shortlisted", saved["checkpoint"].get("previously_researched", []))
     for reason in saved["checkpoint"].get("candidate_failures", {}).items():
         print("  refused", reason[0], "|", reason[1]["reason"][:120])
     for record in saved["records"]:

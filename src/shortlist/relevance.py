@@ -1,5 +1,6 @@
 """Conservative page-type gates, not claims that a company fits a target."""
 import re
+import unicodedata
 from urllib.parse import unquote, urlsplit
 
 from shortlist.domain import Candidate, CompanyIdentity, Research, Source
@@ -7,6 +8,23 @@ from shortlist.domain import Candidate, CompanyIdentity, Research, Source
 
 class CompanyPageError(ValueError):
     """A rejected company identity must never become a partial company record."""
+
+QUOTE_MARKS = str.maketrans({"‘": "'", "’": "'", "“": '"', "”": '"', "…": "...",
+                             **dict.fromkeys("‐‑‒–—―−", "-")})
+
+
+def grounding_text(text: str) -> str:
+    # Invisible format characters (zero-width spaces and joiners, soft hyphens, byte-order marks) and the style of
+    # quote marks, dashes and ellipses are not words. nice.com (live, 18 October) puts zero-width spaces between words; the model's quote left them out
+    # and the company was refused. 19 of 29 saved pages use typographic apostrophes a model may straighten.
+    visible = "".join(ch for ch in text if unicodedata.category(ch) != "Cf")
+    return " ".join(visible.translate(QUOTE_MARKS).split())
+
+
+def quoted_in(passage: str, text: str) -> bool:
+    """The passage's words appear in the page in order; only spacing, invisible characters and the style of quote
+    marks, dashes and ellipses may differ."""
+    return grounding_text(passage) in grounding_text(text)
 
 DIRECTORIES = frozenset({"linkedin.com", "crunchbase.com", "g2.com", "capterra.com", "ycombinator.com",
                          "techcrunch.com", "wellfound.com", "producthunt.com", "tracxn.com", "github.com",
@@ -141,7 +159,7 @@ def identity_issue(identity: CompanyIdentity, sources: tuple[Source, ...], domai
         return issue
     if (urlsplit(page.url).hostname or "").removeprefix("www.") != domain:
         return "Identity source belongs to another website"
-    if " ".join(identity.passage.split()) not in " ".join(page.text.split()):
+    if not quoted_in(identity.passage, page.text):
         return "Company identity passage was not found in the saved page"
     name = " ".join(identity.name.casefold().split())
     if name not in " ".join(identity.passage.casefold().split()):
@@ -152,6 +170,29 @@ def identity_issue(identity: CompanyIdentity, sources: tuple[Source, ...], domai
     if not any(len(alias) >= 3 and (alias == brand or len(alias) >= 4 and alias in brand) for alias in aliases):
         return "Company name cannot be tied to the source website owner"
     return None
+
+
+def ground_identity(identity: CompanyIdentity, sources: tuple[Source, ...], domain: str) -> tuple[CompanyIdentity, str | None]:
+    """The model's identity when it holds; otherwise the same name grounded in a line of a saved company page.
+
+    A small model often names the right company but quotes it loosely or cites the wrong page: NICE, Hitachi Energy and
+    Lumen were all refused this way in the live run of 18 October after their pages were paid for. A real line naming
+    the company on a page that passes the strict company-page gate replaces the quote, and every identity rule still
+    applies to it, including the name being tied to the website owner."""
+    issue = identity_issue(identity, sources, domain)
+    if issue is None or identity.domain != domain:
+        return identity, issue
+    name = " ".join(identity.name.casefold().split())
+    for source in sources:
+        if source.company_domain != domain or primary_source_issue(source, strict=True):
+            continue
+        for line in source.text.splitlines():
+            line = " ".join(line.split())
+            if 15 <= len(line) <= 300 and name in line.casefold():
+                grounded = CompanyIdentity(name=identity.name, domain=domain, source_id=source.id, passage=line)
+                if identity_issue(grounded, sources, domain) is None:
+                    return grounded, None
+    return identity, issue
 
 
 def record_issue(record: Research, *, strict: bool = False) -> str | None:

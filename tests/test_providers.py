@@ -48,6 +48,72 @@ def test_real_passage_retained(example):
     assert record.sources[0].retrieved_at == source.retrieved_at
 
 
+@pytest.mark.parametrize("passage,kept", [
+    # Labelled text shaped like nice.com's homepage (18 October): zero-width spaces and a typographic apostrophe.
+    ("The AI platform built for better customer experience. The world's leading brands trust Acme.", True),
+    ("The AI platform built for \u200bbetter customer experience\u200b. The world’s leading brands trust Acme.", True),
+    ("The AI platform built for the best customer experience. The world's leading brands trust Acme.", False),
+    ("The AI platform built for better customer experience. The world's leading brands trust Acme!", False),
+    ("the ai platform built for better customer experience. The world's leading brands trust Acme.", False),
+])
+def test_quote_ignores_only_invisible_characters_and_quote_marks(passage, kept):
+    profile = Profile(seller_url="https://eygentic.com", offer="Customer acquisition experiments",
+                      target="Private AI software startups", criteria=(Criterion(id="ai", description="AI software"),))
+    text = "The AI platform built for \u200b\nbetter customer experience\u200b.\nThe world’s leading brands trust Acme."
+    source = Source(id="source-1", url="https://acme.example", company_domain="acme.example", title="Acme", text=text,
+                    content_hash=hashlib.sha256(text.encode()).hexdigest())
+    raw = {"name": "Acme", "findings": [{"status": "supported", "criterion_id": "ai", "evidence": [{
+        "source_id": source.id, "passage": passage, "claim": "AI software"}]}]}
+    record = validate_extraction(raw, profile, "acme.example", (source,))
+    assert (record.qualification == "fits") is kept and (record.findings[0].status == "unknown") is not kept
+
+
+@pytest.mark.parametrize("claim,kept", [
+    ("The presence of 'Channel Partnerships' in the navigation suggests the company is involved in partnerships.", False),
+    ("The company may run a partner program.", False),
+    ("The company likely sells AI software.", False),
+    ("The company sells artificial intelligence software for business operations.", True),
+    ("Founded in May 2020, the company sells AI software.", True),  # The month is not a hedge.
+])
+def test_a_claim_the_model_hedges_does_not_establish_a_check(example, claim, kept):
+    profile, source = example
+    raw = {"name": "Example", "findings": [{"status": "supported", "criterion_id": "ai", "evidence": [{
+        "source_id": source.id, "passage": source.text, "claim": claim}]}]}
+    finding = validate_extraction(raw, profile, "example.com", (source,)).findings[0]
+    assert (finding.status == "supported") is kept
+    if not kept:
+        assert "inference" in finding.reason
+
+
+def test_a_check_worded_as_a_hedge_can_be_restated_and_typographic_dashes_match(example):
+    _, source = example
+    # The live channel-partner check reads "indicators suggesting a need"; restating it is not the model hedging.
+    profile = Profile(seller_url="https://eygentic.com", offer="Customer acquisition experiments", target="AI startups",
+                      criteria=(Criterion(id="ai", description="Indicators suggesting a need for AI software"),))
+    raw = {"name": "Example", "findings": [{"status": "supported", "criterion_id": "ai", "evidence": [{
+        "source_id": source.id, "passage": source.text, "claim": "It sells AI software, suggesting a need for it."}]}]}
+    assert validate_extraction(raw, profile, "example.com", (source,)).findings[0].status == "supported"
+    text = "Acme – inventory software… built for teams."
+    page = source.model_copy(update={"text": text})
+    raw["findings"][0]["evidence"][0].update(passage="Acme - inventory software... built for teams.", claim="Sells software.")
+    assert validate_extraction(raw, profile, "example.com", (page,)).findings[0].status == "supported"
+
+
+def test_identity_is_grounded_in_a_real_line_when_the_quote_is_loose():
+    from shortlist.domain import CompanyIdentity
+    from shortlist.relevance import ground_identity
+    text = "NiCE: Customer Experience (CX) AI Platform\nLogin\nPartners\nNiCE delivers AI across the entire CX journey."
+    home = Source(id="home", url="https://www.nice.example/", company_domain="nice.example", title="NiCE", text=text,
+                  content_hash=hashlib.sha256(text.encode()).hexdigest())
+    loose = CompanyIdentity(name="NiCE", domain="nice.example", source_id="home", passage="NiCE is the CX AI platform company.")
+    grounded, issue = ground_identity(loose, (home,), "nice.example")
+    assert issue is None and grounded.passage == "NiCE: Customer Experience (CX) AI Platform"
+    # A name the page never uses, or one that cannot be tied to the website owner, is still refused.
+    for name in ("Acme", "Customer Experience"):
+        _, issue = ground_identity(loose.model_copy(update={"name": name}), (home,), "nice.example")
+        assert issue is not None, name
+
+
 def test_exact_quote_from_other_company_rejected(example):
     profile, source = example
     raw = {"name": "Other", "findings": [{"status": "supported", "criterion_id": "ai", "evidence": [{

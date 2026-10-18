@@ -25,9 +25,10 @@ from shortlist.relevance import record_issue
 
 # Provider attempts allowed per run, including uncertain outcomes.
 RUN_CAPS = {"search": 4, "model": 8, "fetch": 21}
-# New confirmations search with compact company phrases, start research from a company's own entry page, and may
-# research past the first six candidates; runs confirmed earlier keep the behaviour they were journaled with.
-DISCOVERY_POLICY = 2
+# New confirmations search with compact company phrases, start research from a company's own entry page, may
+# research past the first six candidates (2) and also read the page search found (3); runs confirmed earlier keep the
+# behaviour they were journaled with.
+DISCOVERY_POLICY = 3
 
 
 class Conflict(ValueError):
