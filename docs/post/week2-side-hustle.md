@@ -163,7 +163,7 @@ Here's what being open actually changed for me.
 
 ## My First User
 
-The first user is me. The first real shortlist was for Eygentic, the company I'm building, and DealHub is the first company that matched what I was looking for. I haven't sold GTM Shortlist to anyone yet. What I want to find out next is whether a founder who has just launched will trust a list that says "unknown" a lot, instead of one that gives every company a confident score.
+The first user is me. The first real shortlist was for Eygentic, the company I'm building, and DealHub was the first company that matched what I was looking for. The bigger model later added DelegateZero and Prismatic. I haven't sold GTM Shortlist to anyone yet. What I want to find out next is whether a founder who has just launched will trust a list that says "unknown" a lot, instead of one that gives every company a confident score.
 
 ## Code
 
