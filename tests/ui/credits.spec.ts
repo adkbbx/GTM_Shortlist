@@ -314,8 +314,12 @@ test('reuse offer skips profiling, preserves edits and quotes a separately charg
   await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByLabel('Companies in this batch')).toBeVisible({ timeout: 15000 });
   await page.getByLabel('Companies in this batch').selectOption('1');
-  await page.getByRole('button', { name: 'Add exclusions' }).click();
-  await page.getByLabel('Exclude from consideration', { exact: false }).fill('Publicly listed companies');
+  // A product target opens with a proposed services exclusion, so the field may already be showing.
+  const addExclusions = page.getByRole('button', { name: 'Add exclusions' });
+  const exclusions = page.getByLabel('Exclude from consideration', { exact: false });
+  await expect(addExclusions.or(exclusions)).toBeVisible();
+  if (await addExclusions.isVisible()) await addExclusions.click();
+  await exclusions.fill('Publicly listed companies');
   await page.getByRole('button', { name: 'Confirm target and discover' }).click();
   await expect(page.getByRole('heading', { name: '1 company researched' })).toBeVisible({ timeout: 15000 });
   const firstId = new URL(page.url()).searchParams.get('run');
