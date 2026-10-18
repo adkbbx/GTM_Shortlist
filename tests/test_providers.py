@@ -142,6 +142,29 @@ def test_navigation_text_does_not_establish_a_check(passage, kept):
     assert navigation(passage) is not kept and (finding.status == "supported") is kept
 
 
+def test_a_verifier_answering_in_research_words_is_read_against_the_proposed_status():
+    from shortlist.providers import verdicts_as_judgments
+    from shortlist.verification import Verification
+    items = [{"assessment_id": "company:identity", "proposed": {"name": "Acme"}},
+             {"assessment_id": "criterion:ai", "proposed": {"status": "supported"}},
+             {"assessment_id": "criterion:saas", "proposed": {"status": "supported"}},
+             {"assessment_id": "exclusion:exclude-1", "proposed": {"status": "cleared"}},
+             {"assessment_id": "criterion:b2b", "proposed": {"status": "supported"}}]
+    # Shapes from the hosted gemma-4-31B on prismatic.io and freshify.io (19 October).
+    data = {"judgments": [{"assessment_id": "company:identity", "verdict": "entailed", "reason": "Own site."},
+                          {"assessment_id": "criterion:ai", "verdict": "supported", "reason": "Agrees."},
+                          {"assessment_id": "criterion:saas", "verdict": "contradicted", "reason": "Disagrees."},
+                          {"assessment_id": "exclusion:exclude-1", "verdict": "cleared", "reason": "Agrees."},
+                          {"assessment_id": "criterion:b2b", "verdict": "unknown", "reason": "Not stated."}]}
+    verdicts = {j.assessment_id: j.verdict for j in Verification.model_validate(verdicts_as_judgments(data, items)).judgments}
+    assert verdicts == {"company:identity": "entailed", "criterion:ai": "entailed", "criterion:saas": "unsupported",
+                        "exclusion:exclude-1": "entailed", "criterion:b2b": "uncertain"}
+    # Identity has no status, so a research word there still fails validation.
+    data["judgments"][0]["verdict"] = "supported"
+    with pytest.raises(ValueError):
+        Verification.model_validate(verdicts_as_judgments(data, items))
+
+
 def test_identity_is_grounded_in_a_real_line_when_the_quote_is_loose():
     from shortlist.domain import CompanyIdentity
     from shortlist.relevance import ground_identity

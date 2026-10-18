@@ -454,6 +454,30 @@ def navigation(passage: str) -> bool:
     return (len(lines) == 1 and len(lines[0]) <= 2) or (len(lines) >= 3 and max(map(len, lines)) < 6)
 
 
+STATUS_WORDS = frozenset({"supported", "contradicted", "matched", "cleared"})
+
+
+def verdicts_as_judgments(data: dict, items: list[dict]) -> dict:
+    """A verifier that answers in the research vocabulary ("cleared", "contradicted") states its own status for that
+    finding: agreeing with the proposed status is entailed, disagreeing is unsupported, "unknown" is uncertain. The
+    hosted gemma-4-31B did this for prismatic.io and freshify.io on 19 October, and both companies were dropped.
+    Assessments without a status (identity, facts, people) are left to fail validation as before."""
+    proposed = {item["assessment_id"]: item["proposed"].get("status") for item in items if isinstance(item.get("proposed"), dict)}
+    judgments = data.get("judgments") if isinstance(data, dict) else None
+    if not isinstance(judgments, list):
+        return data
+    mapped = []
+    for judgment in judgments:
+        verdict = judgment.get("verdict") if isinstance(judgment, dict) else None
+        status = proposed.get(judgment.get("assessment_id")) if isinstance(judgment, dict) else None
+        if status and verdict in STATUS_WORDS:
+            judgment = {**judgment, "verdict": "entailed" if verdict == status else "unsupported"}
+        elif status and verdict == "unknown":
+            judgment = {**judgment, "verdict": "uncertain"}
+        mapped.append(judgment)
+    return {**data, "judgments": mapped}
+
+
 def cited(evidence: Evidence, sources: tuple[Source, ...], domain: str) -> Evidence | str:
     """The evidence as cited, or re-attributed to the company's own saved page that holds the exact quote: a small model
     often quotes one page under another page's id. Otherwise the reason it cannot be used."""
@@ -820,7 +844,7 @@ class Gemma:
             reminder="Return one judgment per assessment_id: entailed, unsupported or uncertain, with a reason.",
             output_tokens=output_tokens)
         try:
-            audit = Verification.model_validate(data)
+            audit = Verification.model_validate(verdicts_as_judgments(data, items))
             apply_verification(profile, record, audit)
             return audit
         except (ValidationError, ValueError) as exc:

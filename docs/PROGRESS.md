@@ -1,5 +1,22 @@
 # Progress and handoff
 
+## 19 October, hosted model on the saved Eygentic companies: real fits, and one more dropped-company bug fixed
+
+Approved by the user: the app's configured hosted model (`gemma-4-31B-it`, DigitalOcean inference) on the 12 companies real searches found for eygentic.com on 13 October, no searches, at most six model calls per run (18 used), with the confirmation screen's advice applied (AI as a core capability and sells software to businesses required; subscription and ownership nice to have; the rarely-public exclusion "Publicly listed companies" removed; "Consultancies without a software product" kept). Database `data/evaluations/eygentic-saved-2026-10-19-hosted.sqlite3`.
+
+| Company | Result |
+|---|---|
+| delegatezero.com | **Fits.** "DelegateZero - AI Decision Proxy for B2B SaaS Founders" (AI, sells to businesses); "Pricing that scales with your team / Monthly / Annual / ... Solo / $49/mo" (subscription) |
+| prismatic.io | Dropped in the run; **fits** once the fix below is applied to its saved verifier answer ("Embedded iPaaS for B2B Software Companies") |
+| smeron.com, backofficeboss.ai | Set aside as services (the 19 October service rule) |
+| tandemworks.ai, siesta.ai, happyfox.com, actaa.ai, runwork.ai | Needs verification |
+| freshify.io | Dropped in the run; needs verification once the fix is applied (AI unknown, subscription contradicted) |
+| b2bhub.ltd, caacgo.cresclab.com | Refused: identity could not be tied to the website owner |
+
+- **Fixed: verifier answers in research words.** The hosted model answered some assessments with the research vocabulary ("cleared" for an exclusion, "contradicted" for a check). One such word failed validation for the whole answer, and the company was dropped. A status word is now read against the proposed status (agreeing is entailed, disagreeing is unsupported, "unknown" is uncertain); assessments without a status still fail as before. Replayed on the two saved answers: Prismatic fits, Freshify needs verification.
+- **Result.** With the hosted model and the app's own advice, 2 of the 12 real companies are qualified Eygentic leads with verified first-party quotes (DelegateZero, Prismatic), and both services firms are set aside. The local 4 to 5B models qualified none of the product companies.
+- **Verification.** Ruff passes; full backend 838 passed, 48 skipped, 0 failed.
+
 ## 19 October, real Eygentic search results: fewer failures, but the small local model rarely cites evidence
 
 Same inputs for every version: the 12 companies that real searches found for eygentic.com on 13 October (saved run `4916be8e`, target "Private AI B2B SaaS startups", four required checks: AI as a core capability, sells software to businesses, subscription or hosted, privately held), local `gemma4:e2b-it-qat` (4.6B), no searches, three companies per run with at most six model calls (databases `data/evaluations/eygentic-saved-2026-10-19-{old,new,advised}.sqlite3`; "advised" makes the rarely-public ownership check nice to have, as the confirmation screen advises).
