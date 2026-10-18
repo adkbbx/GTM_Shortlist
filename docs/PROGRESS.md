@@ -4,7 +4,11 @@
 
 The connected `eygentic.tech` domain reached Render but returned `400 Invalid host header`. Added explicit `SHORTLIST_ADDITIONAL_APP_URLS` origins alongside the canonical app URL. Both configured hosts retain same-origin API access and receive their own configured authentication callback. Unlisted hosts, foreign origins, wildcard URLs and forwarded-host redirect injection remain rejected.
 
-Verification: 47 auth/startup tests passed; Ruff passed. No search, inference, enrichment or app-account credits used. Hosted deployment, custom-domain callbacks and advancing worker heartbeat still require rollout evidence. The public health field currently checks only local workers; hosted health must be confirmed from database heartbeats.
+Verification: 47 auth/startup tests passed; Ruff passed. No search, inference, enrichment or app-account credits used.
+
+Rollout observed 18 October 19:26 JST: web commit `322884f` is Live on Render. Worker commit `d8b9ce4` is Live; its heartbeat expiry advanced from `1792318902.34632` to `1792318960.91963` for the same worker, remaining ahead of database time. Only two partial runs existed; none queued/running. The public health field still checks only local workers and misleadingly returns false in hosted mode; actual hosted heartbeat verification is separate.
+
+`https://eygentic.tech` is the canonical app URL, with the Render hostname explicitly retained as an alias. Supabase Site URL and both exact callback URLs are saved. Both domains return root/auth-setup 200, their own configured callback URL, unauthenticated research 401, and foreign-origin 403. Live landing and sign-in inspected at 1366x900 and 390x844 with no horizontal overflow. No signup, email delivery or research run was submitted. Full hosted journey remains unverified. CI core/Postgres/Windows passed for the patch; full UI CI remained running at this observation. Screenshot: local `release-domain-laptop.png` under the task visualization directory.
 
 ## 18 October, reader readiness for a public post
 
