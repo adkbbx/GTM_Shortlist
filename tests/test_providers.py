@@ -123,6 +123,25 @@ def test_an_exact_quote_cited_under_another_saved_page_is_re_attributed(example)
     assert [item["issue"] for item in rejected] == ["quoted passage could not be found in source"] * 2
 
 
+@pytest.mark.parametrize("passage,kept", [
+    ("Channel Partnerships", False),  # Front's menu link, 18 October.
+    ("Hitachi Energy in the US\nDigitalization\nHitachi Energy\nMenu\nChannel Partner\nProgram\nReady to Partner?  Contact us", False),
+    ("Founded in 2015", True),
+    ("SOC 2 Type II certified", True),
+    ("Partner with Lumen\nGrow your business with a powerful global network and comprehensive portfolio.", True),
+])
+def test_navigation_text_does_not_establish_a_check(passage, kept):
+    from shortlist.providers import navigation
+    profile = Profile(seller_url="https://eygentic.com", offer="Customer acquisition experiments", target="AI startups",
+                      criteria=(Criterion(id="ai", description="Runs a partner program"),))
+    source = Source(id="page", url="https://acme.example/", company_domain="acme.example", title="Acme", text=passage,
+                    content_hash=hashlib.sha256(passage.encode()).hexdigest())
+    raw = {"name": "Acme", "findings": [{"status": "supported", "criterion_id": "ai", "evidence": [{
+        "source_id": "page", "passage": passage, "claim": "Runs a partner program"}]}]}
+    finding = validate_extraction(raw, profile, "acme.example", (source,)).findings[0]
+    assert navigation(passage) is not kept and (finding.status == "supported") is kept
+
+
 def test_identity_is_grounded_in_a_real_line_when_the_quote_is_loose():
     from shortlist.domain import CompanyIdentity
     from shortlist.relevance import ground_identity
@@ -265,7 +284,7 @@ def test_excerpt_gap_keeps_real_sentence_ellipsis(gap_pages):
     assert cited(evidence, (page,), "example.com") == evidence
 
 
-@pytest.mark.parametrize("fragment,kept", [("12345678901234", False), ("123456789012345", True)])
+@pytest.mark.parametrize("fragment,kept", [("Acme sells kit", False), ("Acme sells kits", True)])  # 14 and 15 characters.
 def test_excerpt_gap_fifteen_character_boundary(gap_pages, fragment, kept):
     from shortlist.domain import Evidence
     from shortlist.providers import cited

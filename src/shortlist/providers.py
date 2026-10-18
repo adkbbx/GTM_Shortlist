@@ -399,6 +399,14 @@ def hedged(claim: str, check: str) -> str | None:
     return None
 
 
+def navigation(passage: str) -> bool:
+    """A lone one- or two-word label, or three or more lines none of which has six words: menu text, not a statement.
+    Front's "Channel Partnerships" link and Hitachi Energy's "Hitachi Energy in the US / Digitalization / ... / Channel
+    Partner / Program" fragment both qualified checks on 18 October."""
+    lines = [line.split() for line in passage.splitlines() if line.strip()]
+    return (len(lines) == 1 and len(lines[0]) <= 2) or (len(lines) >= 3 and max(map(len, lines)) < 6)
+
+
 def cited(evidence: Evidence, sources: tuple[Source, ...], domain: str) -> Evidence | str:
     """The evidence as cited, or re-attributed to the company's own saved page that holds the exact quote: a small model
     often quotes one page under another page's id. Otherwise the reason it cannot be used."""
@@ -408,7 +416,7 @@ def cited(evidence: Evidence, sources: tuple[Source, ...], domain: str) -> Evide
     if len(fragments) > 1:
         pages = ([source] if source is not None else []) + [s for s in owned if s is not source]
         for fragment in sorted((part.strip() for part in fragments), key=len, reverse=True):
-            if len(fragment) < 15:
+            if len(fragment) < 15 or navigation(fragment):
                 continue
             for page in pages:
                 if quoted_in(fragment, page.text) and (passage := verbatim_quote(fragment, page.text)) is not None:
@@ -480,6 +488,9 @@ def validate_extraction(raw: dict, profile: Profile, domain: str, sources: tuple
                     issues.append(f"{finding.criterion_id}: the claim is an inference ('{hedge}'), "
                                   "not something the passage states")
                     break
+                if navigation(evidence.passage):
+                    issues.append(f"{finding.criterion_id}: the quote is navigation text, not a statement")
+                    break
                 kept.append(evidence)
             finding = (finding.model_copy(update={"evidence": tuple(kept)}) if len(kept) == len(finding.evidence)
                        else Unknown(criterion_id=finding.criterion_id, reason=issues[-1]))
@@ -500,6 +511,9 @@ def validate_extraction(raw: dict, profile: Profile, domain: str, sources: tuple
                     break
                 if hedge := hedged(evidence.claim, exclusion_texts[check.exclusion_id]):
                     reason = f"Exclusion claim is an inference ('{hedge}'), not something the passage states"
+                    break
+                if navigation(evidence.passage):
+                    reason = "Exclusion quote is navigation text, not a statement"
                     break
                 kept.append(evidence)
             check = (ExclusionUnknown(exclusion_id=check.exclusion_id, reason=reason) if reason

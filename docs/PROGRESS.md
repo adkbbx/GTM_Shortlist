@@ -214,6 +214,13 @@ Saved-database SHA-256 before and after:
 **Remaining:** the recovered Hitachi Energy partner-programme fragment has not received a new independent model judgment. Saved evaluation results are immutable and do not claim a post-fix fit.
 
 
+**Hitachi Energy after the gap fix, and a navigation guard** (local model, no searches; databases `data/evaluations/research-run-2026-10-18-gaps.sqlite3` and `-navigation.sqlite3`; 3 fetches and 3 model calls each).
+- **Gap run.** Hitachi Energy qualified, but its partner-programme evidence was the recovered fragment "Hitachi Energy in the US / Digitalization / Hitachi Energy / Menu / Channel Partner / Program / Ready to Partner? Contact us": menu text, the same weakness as Front's "Channel Partnerships" link.
+- **Navigation guard.** A quote that is a lone one- or two-word label, or three or more lines none of which has six words, no longer establishes a check or exclusion, and gap recovery skips such fragments. Replayed over 35 saved observations it withholds exactly those 2.
+- **Navigation run.** Hitachi Energy fits, both required checks verified: its partner page's own title "Channel Partner Program | Hitachi Energy" and "As a partner of choice in CPP, we empower strategic partners with the tools, training, and support needed to grow their business...".
+- **Result for Unifyr's channel campaign.** 4 of the 6 channel-partner companies now qualify with verified first-party evidence for both required checks: Channel Institute, NICE, Lumen and Hitachi Energy. Channeltivity needs verification; Front does not qualify on menu text.
+- **Checks.** Full backend suite 718 passed, 48 skipped; Ruff passes.
+
 ## 18 October, drafts before signup (hosted, off by default)
 
 The last unbuilt item of `docs/planning/LOW_FRICTION_PATHS.md`. Operator steps are in `docs/anonymous-drafts.md`.
