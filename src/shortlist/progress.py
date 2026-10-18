@@ -6,6 +6,9 @@ from pydantic import Field
 
 from shortlist.domain import Value
 
+ANSWERED = {"Ready for your offer and target confirmation": "You confirmed your offer and target",
+            "Choose the website for your company": "You chose your company website"}
+
 
 class ProgressUpdate(Value):
     phase: Literal["seller", "market", "campaigns", "confirmation", "discovery", "research", "review"]
@@ -24,6 +27,7 @@ class RunProgress(Value):
     candidates: int = Field(ge=0)
     sources: int = Field(ge=0)
     companies: int = Field(ge=0)
+    company_limit: int | None = Field(default=None, ge=1)  # The confirmed batch size, for a time estimate only.
     events: tuple[ProgressEvent, ...] = Field(max_length=100)
 
 
@@ -101,8 +105,13 @@ def public_events(run: dict, records: list[dict] | None = None) -> tuple[dict, .
     eligible = [record for record in (records if records is not None else run.get("records", [])) if not record.get("source_issue")]
     reviewed = sum(bool(record.get("review")) for record in eligible)
     result = []
-    for event in run["events"]:
+    events = list(run["events"])
+    for position, event in enumerate(events):
         projected = dict(event)
+        # A wait for the user that later work followed was answered; it should not read "Waiting" any more.
+        if event["state"] == "waiting" and event.get("phase") != "review" and any(
+                later.get("phase") != "review" for later in events[position + 1:]):
+            projected.update(state="succeeded", detail=None, label=ANSWERED.get(event["label"], "You answered: " + event["label"]))
         diagnostic = diagnostics.get(event["label"])
         if event["state"] == "failed" and event["detail"] == "Gemma output failed validation" and diagnostic:
             issues = diagnostic.get("issues", [])

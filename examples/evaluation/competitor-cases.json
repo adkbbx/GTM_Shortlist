@@ -1,0 +1,183 @@
+{
+  "description": "Labelled saved primary-page excerpts. No provider calls. reported_ui is explicitly not a saved page.",
+  "cases": [
+    {
+      "domain": "channelinstitute.com",
+      "label": "competitor/peer",
+      "label_source": "User-provided hand label, 18 October 2026",
+      "source_database": "../../../data/evaluations/controlled-2026-10-18-new-a.sqlite3",
+      "source_run": "ad4b9bc2d5584f668c8b9fddc58700e9",
+      "provenance": "saved_primary_excerpt",
+      "seller": {
+        "domain": "unifyr.com",
+        "offer": "Partner Ecosystem Management Platform with AI \u2013 Unifyr. The platform provides an agentic partner experience, enabling co-sell, co-market, partner enablement, channel sales, partner engagement, partner management, channel marketing, and channel learning through a unified platform.",
+        "target": "Mid-market B2B companies with growing channel partner networks (50-500 partners) focused on rapid scaling and co-selling initiatives."
+      },
+      "primary": {
+        "url": "https://www.channelinstitute.com/",
+        "title": "Channel Management Training, Channel Sales Training, and Channel Marketing Training from the Channel Institute.",
+        "opening": "Channel Management Training, Channel Sales Training, and Channel Marketing Training from the Channel Institute.\nEmail:\ninfo@channelinstitute.com\nThe Global Standard in\nChannel Business Certification\nIndustry accredited training for channel business professionals\nFor Your Career and Your Team\nThe Channel Institute provides structured, assessed training and certification for channel professionals across the first fifteen years of a channel career. For individuals, a certificate in channel management, channel sales or channel marketing is proof of what you know, earned by passing an assessed exam",
+        "source_id": "72d711eb957245e0a580880970007c45",
+        "saved_content_hash": "9eff79e942f29295aa7fad452eb7f98bda87d484206ee15d5a4d744caf535a6e"
+      }
+    },
+    {
+      "domain": "channeltivity.com",
+      "label": "competitor/peer",
+      "label_source": "User-provided hand label, 18 October 2026",
+      "source_database": "../../../data/evaluations/controlled-2026-10-18-new-a.sqlite3",
+      "source_run": "ad4b9bc2d5584f668c8b9fddc58700e9",
+      "provenance": "saved_primary_excerpt",
+      "seller": {
+        "domain": "unifyr.com",
+        "offer": "Partner Ecosystem Management Platform with AI \u2013 Unifyr. The platform provides an agentic partner experience, enabling co-sell, co-market, partner enablement, channel sales, partner engagement, partner management, channel marketing, and channel learning through a unified platform.",
+        "target": "Mid-market B2B companies with growing channel partner networks (50-500 partners) focused on rapid scaling and co-selling initiatives."
+      },
+      "primary": {
+        "url": "https://www.channeltivity.com/",
+        "title": "Channeltivity | Enterprise Partner Relationship Management (PRM) Software",
+        "opening": "Channeltivity | Enterprise Partner Relationship Management (PRM) Software\nIntelligent.\nEnterprise.\nChannel\nManagement.\nEnterprise partner relationship management software to recruit, enable, and activate partners with the controls you need to grow your channel revenue\nBook a Demo\n+\n+\nTrusted by teams building and scaling real partner revenue\nBuilt for your team\nOne PRM platform, purpose-built for every stakeholder",
+        "source_id": "a41c80fe081b486cb93b8ddab7884097",
+        "saved_content_hash": "62cb6ba92b7863cb5b13608d8cce94eaef12c9c73b3c4f5bfdc4fdbeeb61ec71"
+      }
+    },
+    {
+      "domain": "front.com",
+      "label": "buyer",
+      "label_source": "User-provided hand label, 18 October 2026",
+      "source_database": "../../../data/evaluations/controlled-2026-10-18-new-a.sqlite3",
+      "source_run": "ad4b9bc2d5584f668c8b9fddc58700e9",
+      "provenance": "saved_primary_excerpt",
+      "seller": {
+        "domain": "unifyr.com",
+        "offer": "Partner Ecosystem Management Platform with AI \u2013 Unifyr. The platform provides an agentic partner experience, enabling co-sell, co-market, partner enablement, channel sales, partner engagement, partner management, channel marketing, and channel learning through a unified platform.",
+        "target": "Mid-market B2B companies with growing channel partner networks (50-500 partners) focused on rapid scaling and co-selling initiatives."
+      },
+      "primary": {
+        "url": "https://front.com/",
+        "title": "Front | Customer service platform, powered by AI",
+        "opening": "Front | Customer service platform, powered by AI\nIntroducing:\na new way for customer teams and AI agents to work together.\nRead it now \u2192\nProduct\nSolutions\nResources\nPricing\nSign in\nRequest a demo\nTry for free\nSee Front in Action",
+        "source_id": "093838e29f884f0ba72ea38a7db547d0",
+        "saved_content_hash": "b85f849149b4ca78aa9a868e54ffb98a5cfa71ab0f22ffaa9af553fd2de53f22"
+      }
+    },
+    {
+      "domain": "nice.com",
+      "label": "buyer",
+      "label_source": "User-provided hand label, 18 October 2026",
+      "source_database": "../../../data/evaluations/controlled-2026-10-18-new-b.sqlite3",
+      "source_run": "0424eb7a402d4366bd7e06eda77de7cd",
+      "provenance": "saved_primary_excerpt",
+      "seller": {
+        "domain": "unifyr.com",
+        "offer": "Partner Ecosystem Management Platform with AI \u2013 Unifyr. The platform provides an agentic partner experience, enabling co-sell, co-market, partner enablement, channel sales, partner engagement, partner management, channel marketing, and channel learning through a unified platform.",
+        "target": "Mid-market B2B companies with growing channel partner networks (50-500 partners) focused on rapid scaling and co-selling initiatives."
+      },
+      "primary": {
+        "url": "https://www.nice.com/",
+        "title": "NiCE: Customer Experience (CX) AI Platform for Transformation at Scale",
+        "opening": "NiCE: Customer Experience (CX) AI Platform for Transformation at Scale\nLogin\nStatus\nSupport\nPartners\nPricing\nCareers\nEN\nLanguages\nEnglish\nDeutsch\nFran\u00e7ais",
+        "source_id": "c7e7ef57b904415fbf97ff4f07ad135e",
+        "saved_content_hash": "ac702e06cff04ae09eb7430181dc8f39e55dca90b1728d91d29c1ccbff009579"
+      }
+    },
+    {
+      "domain": "hitachienergy.com",
+      "label": "buyer",
+      "label_source": "User-provided hand label, 18 October 2026",
+      "source_database": "../../../data/evaluations/controlled-2026-10-18-new-b.sqlite3",
+      "source_run": "0424eb7a402d4366bd7e06eda77de7cd",
+      "provenance": "saved_primary_excerpt",
+      "seller": {
+        "domain": "unifyr.com",
+        "offer": "Partner Ecosystem Management Platform with AI \u2013 Unifyr. The platform provides an agentic partner experience, enabling co-sell, co-market, partner enablement, channel sales, partner engagement, partner management, channel marketing, and channel learning through a unified platform.",
+        "target": "Mid-market B2B companies with growing channel partner networks (50-500 partners) focused on rapid scaling and co-selling initiatives."
+      },
+      "primary": {
+        "url": "https://www.hitachienergy.com/",
+        "title": "Hitachi Energy - Powering the electricity era",
+        "opening": "Hitachi Energy - Powering the electricity era\nLogin\nGlobal\n| EN\nChoose your region and language\nRegion\nGlobal\nAlgeria\nAngola\nArgentina\nAustralia\nAustria",
+        "source_id": "08ec5785bb804da6a316324062a09230",
+        "saved_content_hash": "9d390ec189980c81b0e22352e98b903cc83338e5bc2108d115b15705317ce967"
+      }
+    },
+    {
+      "domain": "lumen.com",
+      "label": "buyer",
+      "label_source": "User-provided hand label, 18 October 2026",
+      "source_database": "../../../data/evaluations/controlled-2026-10-18-new-b.sqlite3",
+      "source_run": "0424eb7a402d4366bd7e06eda77de7cd",
+      "provenance": "saved_primary_excerpt",
+      "seller": {
+        "domain": "unifyr.com",
+        "offer": "Partner Ecosystem Management Platform with AI \u2013 Unifyr. The platform provides an agentic partner experience, enabling co-sell, co-market, partner enablement, channel sales, partner engagement, partner management, channel marketing, and channel learning through a unified platform.",
+        "target": "Mid-market B2B companies with growing channel partner networks (50-500 partners) focused on rapid scaling and co-selling initiatives."
+      },
+      "primary": {
+        "url": "https://www.lumen.com/ja-jp/home.html",
+        "title": "Business & Enterprise | Techology Solutions",
+        "opening": "Business & Enterprise | Techology Solutions\nWarning\nX\nSign In\nHi,\nUser Name\nLumen Connect\nSign Out\nSession Timout\nYour session has timed out, please sign in again.\nSign Out\nYou have been signed out",
+        "source_id": "85a39ba5f3cd41718e66b790080c60be",
+        "saved_content_hash": "e0cf672094dc3800e48d6c177f8b1e651cb4f240a0d1b3a18f001977e57458a2"
+      }
+    },
+    {
+      "domain": "mikesonders.com",
+      "label": "competitor/peer",
+      "label_source": "User-provided hand label and UI report, 18 October 2026",
+      "source_database": null,
+      "provenance": "reported_ui",
+      "source_note": "No primary page found in the inspected saved SQLite checkpoints; title and description supplied by the user.",
+      "seller": {
+        "domain": "eygentic.com",
+        "offer": "Focused customer-acquisition experiments for B2B and SaaS teams to identify scalable growth drivers. The service moves through a structured process (Inspect, Assemble, Test, Calibrate, Launch) to isolate whether the ICP, message, offer, or channel is the bottleneck. Offerings include GTM Booster (audit and prioritization), GTM Raptor (execution of one focused experiment), and GTM Starship (recurring experimentation and scaling).",
+        "target": "B2B and SaaS companies of any size or stage, including specialized business software, seeking more predictable customer acquisition and evidence-based growth rather than volume-based activity.",
+        "source_database": "../../../data/shortlist.sqlite3",
+        "source_run": "35249a4ea6a64dfa8222b208975867c8"
+      },
+      "primary": {
+        "url": "https://mikesonders.com/",
+        "title": "Mike Sonders | Digital Marketing Consultant",
+        "opening": "Mike Sonders is a digital marketing consultant."
+      }
+    }
+  ],
+  "need_cases": [
+    {
+      "domain": "channeltivity.com",
+      "source_database": "../../../data/evaluations/controlled-2026-10-18-new-a.sqlite3",
+      "source_id": "a41c80fe081b486cb93b8ddab7884097",
+      "source_url": "https://www.channeltivity.com/",
+      "criterion": "Observable indicators suggesting a need for structured partner onboarding or training processes.",
+      "passage": "You're building a partner or dealer network and need a structured way to recruit, onboard, and manage partners without slowing down growth.",
+      "label": "reader_need"
+    },
+    {
+      "domain": "channelinstitute.com",
+      "source_database": "../../../data/evaluations/controlled-2026-10-18-new-a.sqlite3",
+      "source_id": "72d711eb957245e0a580880970007c45",
+      "source_url": "https://www.channelinstitute.com/",
+      "criterion": "Observable indicators suggesting a need for structured partner onboarding or training processes.",
+      "passage": "For teams, the same courses give everyone one set of definitions and methods, so the people recruiting partners, selling through them and marketing with them work from the same playbook.",
+      "label": "company_programme_or_offering"
+    },
+    {
+      "domain": "nice.com",
+      "source_database": "../../../data/evaluations/controlled-2026-10-18-new-b.sqlite3",
+      "source_id": "6b917d050cb54682a248541751e384d0",
+      "source_url": "https://www.nice.com/channel-partner",
+      "criterion": "Observable indicators suggesting a need for structured partner onboarding or training processes.",
+      "passage": "Partner enablement training and support\nHelp your team hit the ground running with e-learning programs and ongoing training.",
+      "label": "company_programme_or_offering"
+    },
+    {
+      "domain": "hitachienergy.com",
+      "source_database": "../../../data/evaluations/controlled-2026-10-18-new-b.sqlite3",
+      "source_id": "9d94fff77e7b45fe8d784eeab9445c4e",
+      "source_url": "https://www.hitachienergy.com/us/en/company/partners/channel-partner-program",
+      "criterion": "Observable indicators suggesting a need for structured partner onboarding or training processes.",
+      "passage": "As a partner of choice in CPP, we empower strategic partners with the tools, training, and support needed to grow their business, expand market reach, and deliver exceptional innovative, sustainable, and scalable solutions to meet evolving customer demands.",
+      "label": "company_programme_or_offering"
+    }
+  ]
+}

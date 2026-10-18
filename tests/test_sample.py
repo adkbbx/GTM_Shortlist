@@ -47,7 +47,7 @@ def test_sample_run_covers_the_whole_flow_offline_and_labelled(tmp_path, monkeyp
     assert draft["market"]["competitors"] and len(draft["market"]["campaigns"]) == 3
     assert draft["seller_source"]["text"].startswith(PAGE_LABEL)
 
-    body = {key: draft["draft"][key] for key in ("offer", "target", "criteria")} | {"exclusions": ["Consumer-only products"]}
+    body = {key: draft["draft"][key] for key in ("offer", "target", "criteria")} | {"exclusions": ["Consumer-only products"], "company_limit": 3}  # All three sample companies.
     assert client.post(f"/api/runs/{run_id}/confirm", json=body).status_code == 200
     run_sample(store, settings, run_id)
     result = client.get(f"/api/runs/{run_id}").json()

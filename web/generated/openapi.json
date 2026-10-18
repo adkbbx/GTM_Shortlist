@@ -1791,7 +1791,7 @@
             "maximum": 3.0,
             "minimum": 1.0,
             "title": "Company Limit",
-            "default": 3
+            "default": 1
           }
         },
         "additionalProperties": false,
@@ -3127,6 +3127,18 @@
             "minimum": 0.0,
             "title": "Companies"
           },
+          "company_limit": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company Limit"
+          },
           "events": {
             "items": {
               "$ref": "#/components/schemas/ProgressEvent"
@@ -3143,6 +3155,7 @@
           "candidates",
           "sources",
           "companies",
+          "company_limit",
           "events"
         ],
         "title": "RunProgress"

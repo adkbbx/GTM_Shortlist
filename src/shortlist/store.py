@@ -28,7 +28,8 @@ RUN_CAPS = {"search": 4, "model": 8, "fetch": 21}
 # New confirmations search with compact company phrases, start research from a company's own entry page, may
 # research past the first six candidates (2) and also read the page search found (3); runs confirmed earlier keep the
 # behaviour they were journaled with. Policy 4 sets aside service providers for product-company targets.
-DISCOVERY_POLICY = 4
+# Policy 5 also sets aside same-category sellers and rejects reader needs as company-need evidence.
+DISCOVERY_POLICY = 5
 
 
 class Conflict(ValueError):
@@ -554,7 +555,7 @@ class Store:
                        (identity, "confirmation", "Saved offer copied; review before starting a new batch", "waiting", now))
             return identity
 
-    def confirm_draft(self, run_id: str, profile: Profile, company_limit: int = 3, campaign_name: str | None = None,
+    def confirm_draft(self, run_id: str, profile: Profile, company_limit: int = 1, campaign_name: str | None = None,
                       discovery_terms: str | None = None):
         with self.connection() as db:
             self.begin(db)

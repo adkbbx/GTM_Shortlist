@@ -207,3 +207,4 @@ header.topbar .brand>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .sample-notice p{margin:.375rem 0;font-size:.875rem}
 .sample-notice .text-button{display:inline-flex;align-items:center;gap:.375rem;min-height:2.75rem;margin-left:auto;font-size:.875rem;font-weight:600}
 .site-icon.is-mark svg{display:block;width:100%;height:100%}
+.account-demo{margin-top:1.375rem;padding-top:1.125rem;border-top:1px solid var(--line);font-size:.875rem;color:var(--muted)}.account-demo a{color:var(--orange);font-weight:600;text-underline-offset:.2rem}.account-demo span{display:block;margin-top:.25rem;font-size:.8125rem}

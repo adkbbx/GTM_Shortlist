@@ -21,13 +21,20 @@ type HostedSetup = Extract<AuthSetup, { mode: 'hosted' }>;
 type State = { kind: 'loading' } | { kind: 'local' } | { kind: 'error'; message: string } |
   { kind: 'hosted'; setup: HostedSetup; client: SupabaseClient; session: Session | null; recovery: boolean; expired: boolean };
 const message = (error: unknown) => error instanceof Error ? error.message : 'Account access is unavailable. Please try again.';
+// The demo is a separate page; this tab remembers what the visitor typed so returning keeps it.
+const BEFORE_DEMO = 'gtm-shortlist-before-demo';
+function beforeDemo(): { email?: string; mode?: 'signin' | 'signup' } {
+  try { return JSON.parse(window.sessionStorage.getItem(BEFORE_DEMO) ?? '{}'); } catch { return {}; }
+}
 
 function AccountForm({ client, setup, recovery, expired, externalError, onRecovered, initialMode = 'signin', keptCompany = '', keptDraft = false }: {
   client: SupabaseClient; setup: HostedSetup; recovery: boolean; expired: boolean; externalError: string; onRecovered: () => void;
   initialMode?: 'signin' | 'signup'; keptCompany?: string; keptDraft?: boolean;
 }) {
-  const [mode, setMode] = useState<'signin' | 'signup' | 'reset'>(initialMode);
-  const [email, setEmail] = useState('');
+  const [mode, setMode] = useState<'signin' | 'signup' | 'reset'>(() => beforeDemo().mode ?? initialMode);
+  const [email, setEmail] = useState(() => beforeDemo().email ?? '');
+  useEffect(() => { try { window.sessionStorage.removeItem(BEFORE_DEMO); } catch { /* Storage unavailable: nothing to clear. */ } }, []);
+  const tryDemo = () => { try { window.sessionStorage.setItem(BEFORE_DEMO, JSON.stringify({ email, mode: mode === 'signup' ? 'signup' : 'signin' })); } catch { /* The demo still opens. */ } };
   const [password, setPassword] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -129,6 +136,7 @@ function AccountForm({ client, setup, recovery, expired, externalError, onRecove
     {confirmationSent && <div className="account-confirmation"><p>Use the newest confirmation email for <strong>{email}</strong>. Open it in this browser to finish signing up.</p><button type="button" className="text-button" disabled={saving} onClick={() => { void resend(); }}>Resend confirmation email</button><button type="button" className="text-button" disabled={saving} onClick={() => { setConfirmationSent(false); setNotice(''); setError(''); }}>Use a different email</button></div>}
     {usingCode && !codeSent && <div className="account-actions"><button type="button" className="text-button" disabled={saving} onClick={() => changeMethod('password')}>Use a password instead</button></div>}
     {!recovery && !usingCode && <div className="account-actions"><button type="button" className="text-button" disabled={saving} onClick={() => changeMode(mode === 'signin' ? 'signup' : 'signin')}>{mode === 'signin' ? 'Create an account' : 'Back to sign in'}</button>{mode === 'signin' && <button type="button" className="text-button" disabled={saving} onClick={() => changeMode('reset')}>Forgot password?</button>}{setup.email_code && mode !== 'reset' && <button type="button" className="text-button" disabled={saving} onClick={() => changeMethod('code')}>Email me a code instead</button>}</div>}
+    {!recovery && !confirmationSent && mode !== 'reset' && <p className="account-demo">{mode === 'signup' ? 'Not ready to sign up?' : 'No account yet?'} <a href="?demo=1" onClick={tryDemo}>Try the demo</a><span>Sample companies, no account, no research credits.</span></p>}
   </section></div><footer className="account-footer">Company fit is a research assessment. Buying intent still needs a conversation.</footer></main>;
 }
 

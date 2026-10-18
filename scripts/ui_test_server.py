@@ -43,6 +43,8 @@ def loop():
         store.worker_heartbeat("labelled_browser_fixture")
         for run in store.list_runs():
             if run["status"] in ("queued", "running"):
+                if store.get_run(run["id"])["checkpoint"].get("competitor_fixture"):
+                    continue
                 with held_lock:
                     hold = held_runs.get(run["id"])
                 def fetch(url, expected_domain=None, hold=hold):
@@ -168,6 +170,37 @@ if __name__ == "__main__":
                               candidates=[] if empty else [candidate.model_dump(mode="json")],
                               candidate_failures={"service.example": {"reason": "Sells services to this market rather than being in it"}})
             store.checkpoint(identity, fence, "review", checkpoint, "partial")
+        return {"id": identity}
+
+    @application.post("/__fixture_competitors")
+    def competitor_fixture():
+        import json
+        from uuid import uuid4
+
+        from check_competitors import CASES, inputs
+
+        from shortlist.providers import validate_extraction
+
+        class SavedPageModel:
+            name = "labelled_saved_page_fixture"
+
+            def research(self, profile, candidate, sources):
+                return validate_extraction({"name": candidate.name, "findings": []}, profile, candidate.domain, sources)
+
+        rows = [inputs(c) for c in json.loads(CASES.read_text(encoding="utf-8"))["cases"]
+                if c["seller"]["domain"] == "unifyr.com"]
+        profile = rows[0][0]
+        with held_lock:
+            identity = store.create_run(profile, "saved-peer-fixture-" + uuid4().hex)
+            fence = store.claim(identity)
+            checkpoint = store.get_run(identity)["checkpoint"]
+            checkpoint.update(competitor_fixture=True, company_limit=6,
+                candidates=[c.model_dump(mode="json") for _, c, _ in rows],
+                sources={c.domain: [s.model_dump(mode="json")] for _, c, s in rows})
+            store.checkpoint(identity, fence, "research", checkpoint, "queued")
+        def forbidden(*args, **kwargs):
+            raise AssertionError("Saved-page browser fixture must not fetch")
+        execute_run(store, settings, identity, model=SavedPageModel(), fetch=forbidden)
         return {"id": identity}
 
     @application.post("/__fixture_corrupt_provider")

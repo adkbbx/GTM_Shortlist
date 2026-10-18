@@ -72,6 +72,7 @@ test('real hosted API and Postgres settle partial research; review/export are fr
   await expect(page.getByLabel('Companies in this batch')).toBeVisible({ timeout: 15000 });
   await expect(page.getByText('Maximum 3 credits · 3 available')).toBeVisible();
   await capture(page, `.impeccable/review/${info.project.name}-credit-confirmation.png`);
+  await page.getByLabel('Companies in this batch').selectOption('3');  // The default is one company; these flows check several.
   await page.getByRole('button', { name: 'Confirm target and discover' }).click();
   await expect(page.getByRole('heading', { name: '2 companies researched' })).toBeVisible({ timeout: 15000 });
   await expect(page.getByText('1 credit used · 0 reserved · 2 returned')).toBeVisible();

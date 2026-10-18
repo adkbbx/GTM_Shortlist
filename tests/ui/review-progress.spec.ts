@@ -14,6 +14,7 @@ test('partial and completed reviews update the stage and newest checkpoint', asy
   await expect(start).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
+  await page.getByLabel('Companies in this batch').selectOption('3');  // The default is one company; these flows check several.
   await page.getByRole('button', { name: 'Confirm target and discover', exact: true }).press('Enter');
   await expect(page.getByRole('heading', { name: '2 companies researched' })).toBeVisible({ timeout: 15000 });
   const first = await openCompany(page);

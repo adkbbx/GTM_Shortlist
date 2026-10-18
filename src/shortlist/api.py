@@ -142,7 +142,7 @@ class TargetGuidance(BaseModel):
 class Confirmation(Target):
     campaign_name: str | None = Field(default=None, min_length=3, max_length=100)
     discovery_terms: str | None = Field(default=None, min_length=5, max_length=300)
-    company_limit: int = Field(default=3, ge=1, le=3)
+    company_limit: int = Field(default=1, ge=1, le=3)  # One company by default; up to three on request.
 
 
 class SavedRecord(BaseModel):
@@ -414,7 +414,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                        progress=RunProgress(
                            worker_online=store.worker_online(), candidates=len(run["checkpoint"].get("candidates", [])),
                            sources=len({s["id"] for pages in run["checkpoint"].get("sources", {}).values() for s in pages}),
-                           companies=sum(not record["source_issue"] for record in records), events=public_events(run, records)))
+                           companies=sum(not record["source_issue"] for record in records),
+                           company_limit=run["checkpoint"].get("company_limit"), events=public_events(run, records)))
 
     @app.post("/api/target-guidance", response_model=TargetGuidance)
     def target_guidance(body: TargetGuidanceInput, store: owned):

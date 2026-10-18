@@ -1,5 +1,32 @@
 # Progress and handoff
 
+## 18 October, live progress, a demo without an account, one company by default
+
+From the user's hosted testing on a phone:
+- **Answered waits.** The timeline kept "Waiting · Ready for your offer and target confirmation" after the user had confirmed and research had moved on. A wait for the user that later work followed now reads "You confirmed your offer and target" (or "You chose your company website"); the newest wait stays waiting (`public_events`, `tests/test_progress_waiting.py`).
+- **Live progress.** While research works, the progress view shows the step in progress with a pulsing marker, a timer that ticks every second, a rail filled by the share of finished steps, found companies as chips, a scanning sweep while a page is read, and "About N min until your review · estimate". The estimate uses this run's own measured step durations, with defaults of 15 s per search, 10 s per page and 45 s per model step until the run has timed its own; it covers only work the saved run implies, and is hidden when the user's input is next. After 90 s on one step it says slow websites and models can take a few minutes. The batch size is exposed read-only as `progress.company_limit`. Motion stops for reduced-motion visitors.
+- **Follow mode.** While research works, the view stays on the current stage; stage buttons are `aria-disabled` with "Available when this step finishes" and reopen when the run finishes or needs the user.
+- **Demo without an account.** The hosted sign-in and sign-up card offers "Try the demo" (sample companies, no account, no research credits), which opens the existing standalone demo with no research requests; coming back keeps the typed email, the sign-up view and the kept company.
+- **One company by default.** New confirmations research one company (one credit) unless the user picks two or three (UI, API and local store). The hosted creation hold stays as before and the unused part returns at confirmation; runs saved earlier keep their saved limit.
+- **Found during verification.** The new progress field first made the browser reject run responses ("The saved research response is incomplete") until the generated schema was refreshed; the schema export now includes it. Local mode had no batch selector, so the one-company default would have locked local users to one company; local mode now shows the selector with provider wording, and free sample data keeps all three sample companies.
+- **Verification** (reviewer, normal Windows session): Ruff passes; full backend 828 passed, 48 skipped, 0 failed; schema export limited to the new field; web build passes; full Playwright 173 passed, 3 intentional skips, 0 failed; phone and laptop live-progress screenshots inspected.
+
+## 18 October, controlled before/after and competitors set aside
+
+**Controlled comparison** (same six channel-partner companies, same saved search results, same checks for seller Unifyr, local model, no searches; two runs of three companies per version, each capped at six model calls; databases `data/evaluations/controlled-2026-10-18-{old,new}-{a,b}.sqlite3`).
+
+| Measure | Before (`7a3e585`) | After (`37c76eb`) |
+|---|---|---|
+| Refused after pages and model calls were paid | 3 of 6 (Front page too large, Lumen homepage not recognised, Hitachi Energy identity quote) | 0 of 4 researched |
+| Required checks established on saved records | 2 of 6 | 8 of 8 |
+| Fits | 1 | 4 |
+| Not reached | 0 | 2 (Front, Lumen), only because this evaluation capped each run at six model calls; the app's cap is 8 |
+
+- **Finding.** Two of the four fits, Channeltivity (partner relationship management software) and Channel Institute (channel training), sell what Unifyr sells. Channeltivity's onboarding-need quote was copy addressed to its customers ("You're building a partner or dealer network and need a structured way to recruit, onboard, and manage partners..."). Same failure class as the hosted eygentic.com run that delivered a marketing consultant.
+- **Change (policy 5).** A candidate whose own primary-page description offers the seller's category is set aside as "Offers what you sell; likely a competitor or peer, not a buyer". Saved competitor-search domains are deliberately not used: Unifyr's saved list was unrelated (paloaltonetworks.com, iqvia.com, a county site), and using it also set aside buyers in the browser fixtures. A passage addressed to the reader's own need cannot establish a need check about the company; passages stating the company's own programme are kept.
+- **Measured** (`scripts/check_competitors.py`, `examples/evaluation/competitor-cases.json`, 7 hand-labelled cases): peers set aside 1 of 3 before, 3 of 3 after; buyers kept 4 of 4, none lost; reader-need quotes accepted 1 before, 0 after; company programme quotes kept 3 of 3. A small set, so this is a precise fix rather than a broad proof.
+- **Verification** (reviewer, normal Windows session): Ruff passes; full backend 825 passed, 48 skipped, 0 failed.
+
 ## 18 October, broad targets and low-yield next steps
 
 - Added advisory target breadth guidance and a saved-checkpoint coverage explanation with offer reuse. Broad confirmation remains allowed; the campaign shortcut reveals and focuses a saved suggestion directly.

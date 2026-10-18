@@ -661,7 +661,7 @@ export interface components {
             discovery_terms?: string | null;
             /**
              * Company Limit
-             * @default 3
+             * @default 1
              */
             company_limit: number;
         };
@@ -1189,6 +1189,8 @@ export interface components {
             sources: number;
             /** Companies */
             companies: number;
+            /** Company Limit */
+            company_limit: number | null;
             /** Events */
             events: components["schemas"]["ProgressEvent"][];
         };

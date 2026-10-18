@@ -1,4 +1,5 @@
 """Separate semantic judgments; missing or inconclusive judgments never pass."""
+import re
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -11,7 +12,7 @@ from shortlist.domain import (
     exclusion_id,
     qualify,
 )
-from shortlist.relevance import CompanyPageError
+from shortlist.relevance import CompanyPageError, grounding_text
 
 
 class Judgment(BaseModel):
@@ -119,3 +120,37 @@ def unavailable(profile: Profile, record: Research, reason: str) -> Research:
     audit = Verification(judgments=[Judgment(assessment_id=a["assessment_id"], verdict="uncertain",
                                             reason=reason[:1000]) for a in assessments(profile, record)])
     return apply_verification(profile, record, audit)
+
+
+READER_NEED = re.compile(
+    r"^(?:you(?:'re| are)\b[^.!?]{0,180}\bneed\b|you need\b|"
+    r"your (?:team|company|business|organization|organisation) needs?\b)", re.IGNORECASE)
+
+
+def reader_need(passage: str) -> bool:
+    """Only explicit reader-need statements; invitations such as 'Help your team' remain usable."""
+    return any(READER_NEED.search(grounding_text(line)) for line in re.split(r"\n|(?<=[.!?])\s+", passage))
+
+
+def company_need_evidence(profile: Profile, record: Research, *, policy: int = 5) -> Research:
+    if policy < 5:
+        return record
+    needs = {c.id for c in profile.criteria if re.search(r"\bneeds?\b", c.description, re.IGNORECASE)}
+    findings = []
+    reasons = []
+    for finding in record.findings:
+        if finding.criterion_id in needs and finding.status == "supported":
+            evidence = tuple(e for e in finding.evidence if not reader_need(e.passage))
+            if evidence:
+                finding = finding.model_copy(update={"evidence": evidence})
+            else:
+                reason = "This passage states the reader's need, not the company's own need"
+                reasons.append(reason)
+                finding = Unknown(criterion_id=finding.criterion_id, reason=reason)
+        findings.append(finding)
+    if not reasons and tuple(findings) == record.findings:
+        return record
+    return record.model_copy(update={"findings": tuple(findings),
+        "qualification": qualify(profile, tuple(findings), record.exclusion_findings),
+        "status": "partial" if reasons else record.status,
+        "unknowns": tuple(dict.fromkeys((*record.unknowns, *reasons)))})

@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from './api';
 import type { Run } from './api';
+import { LiveProgress } from './LiveProgress';
 import { researchStage, stagePhases } from './research-stages';
 import { StatusMark, eventStatus, stageStatus } from './StatusMark';
 import { OutboundLink, useSiteLabel } from './SampleData';
@@ -30,7 +31,10 @@ export function ResearchProgress({ run, connected = true, localResearch = false 
     finally { setResuming(false); }
   };
   const { current, states, events, latest, pending, working, reviewed, reviewComplete, reviewLabel } = researchStage(run);
-  const displayed = viewedStage ?? current;
+  // While research works, the view follows the current step; earlier stages open once it finishes or needs you.
+  const following = pending && run.progress.worker_online && !run.termination;
+  useEffect(() => { if (following) setViewedStage(null); }, [following]);
+  const displayed = following ? current : viewedStage ?? current;
   const visibleEvents = viewedStage === null ? events : events.filter(event => stagePhases[displayed].includes(event.phase));
   const newestFirst = [...visibleEvents].reverse();
   const shownEvents = showOlderSteps ? newestFirst : newestFirst.slice(0, 3);
@@ -57,13 +61,14 @@ export function ResearchProgress({ run, connected = true, localResearch = false 
     <div className="demo-workspace">
       <div className="demo-stage-rail"><p className="demo-step-count">Stage {current + 1} of 6 · {states[current].label}</p>
         <ol className="real-stage-list" aria-label="Research stages">{states.map((stage, index) => { const status = stageStatus(stage.state, working); return <li key={stage.label} aria-current={stage.current ? 'step' : undefined} className={stage.complete ? 'is-saved' : ''}>
-          <button type="button" className="stage-review" aria-pressed={displayed === index} aria-controls="research-stage-panel" onClick={() => { setViewedStage(index); setShowOlderSteps(false); }}>{status ? <StatusMark status={status} className="demo-stage-number" /> : <span className="demo-stage-number" aria-hidden="true">{index + 1}</span>}<span><strong>{stage.label}</strong><small>{stage.state}</small></span></button>
-        </li>; })}</ol><p className="demo-rail-note">Stages advance when work is saved. Confirmation and review need your judgment.</p>
+          <button type="button" className="stage-review" aria-pressed={displayed === index} aria-controls="research-stage-panel" aria-disabled={following || undefined} title={following ? 'Available when this step finishes' : undefined} onClick={() => { if (following) return; setViewedStage(index); setShowOlderSteps(false); }}>{status ? <StatusMark status={status} className="demo-stage-number" /> : <span className="demo-stage-number" aria-hidden="true">{index + 1}</span>}<span><strong>{stage.label}</strong><small>{stage.state}</small></span></button>
+        </li>; })}</ol><p className="demo-rail-note">{following ? 'Following the current step. Earlier stages open when this step finishes.' : 'Stages advance when work is saved. Confirmation and review need your judgment.'}</p>
       </div>
       <div className="demo-scene-wrap"><div className="demo-scene-top"><span>{currentState}</span><span>Progress from saved work</span></div>
         <div className="demo-scene real-scene" id="research-stage-panel" key={`${run.id}:${displayed}`} role="region" aria-label={`${states[displayed].label} saved information`}>
+          {following && <LiveProgress run={run} current={current} />}
           <h3>{states[displayed].label}</h3><p>{descriptions[displayed]}</p>
-          {viewedStage !== null && <p className="hint">Reviewing saved information · {states[displayed].state}. <button className="text-button" onClick={() => { setViewedStage(null); setShowOlderSteps(false); }}>Follow current progress</button></p>}
+          {viewedStage !== null && !following && <p className="hint">Reviewing saved information · {states[displayed].state}. <button className="text-button" onClick={() => { setViewedStage(null); setShowOlderSteps(false); }}>Follow current progress</button></p>}
           <div className="agent-activity"><div className="agent-observation"><p className="agent-domain">{run.sample ? 'Sample company' : run.seller_url ? new URL(run.seller_url).hostname : run.company_name ?? 'Your company'}</p><p role="status">{label(status)}</p>{latest?.detail && <p className="checkpoint-detail">{label(latest.detail)}</p>}</div></div>
           {checkpointTimeline}
           {offer && (viewedStage === null || displayed === 0) && <details className="real-saved-offer" open={viewedStage === 0}><summary>Saved offer summary</summary><p>{offer}</p>{run.seller_source && <details><summary>Inspect saved company page</summary><blockquote>{run.seller_source.text}</blockquote>{!run.sample && <a href={run.seller_source.url} target="_blank" rel="noopener noreferrer">Open saved source website</a>}</details>}</details>}

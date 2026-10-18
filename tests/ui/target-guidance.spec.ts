@@ -48,6 +48,7 @@ test('broad advice allows confirmation without campaigns', async ({ page }) => {
   await page.goto('/?run=' + id);
   await expect(page.locator('#target-breadth-note')).toContainText('This target is broad.');
   await expect(page.getByRole('button', { name: 'Pick a suggested campaign' })).toHaveCount(0);
+  await page.getByLabel('Companies in this batch').selectOption('3');  // The default is one company; these flows check several.
   await page.getByRole('button', { name: 'Confirm target and discover', exact: true }).press('Enter');
   await expect(page.getByRole('heading', { name: '2 companies researched' })).toBeVisible({ timeout: 15000 });
   const run = await (await page.request.get('/api/runs/' + id)).json();

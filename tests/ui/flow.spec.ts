@@ -149,6 +149,7 @@ test('market observations and editable campaigns persist into confirmed targetin
   const before = await (await page.request.get(`/api/runs/${identity}`)).json();
   expect(before.profile).toBeNull();
   expect(before.records).toHaveLength(0);
+  await page.getByLabel('Companies in this batch').selectOption('3');  // The default is one company; these flows check several.
   await page.getByRole('button', { name: 'Confirm target and discover' }).click();
   await expect(page.getByRole('heading', { name: '2 companies researched' })).toBeVisible({ timeout: 15000 });
   await openCompany(page);
@@ -264,20 +265,22 @@ test('research stages and latest checkpoints stay visible without animation cont
     const mutations: string[] = [];
     const recordMutation = (request: import('@playwright/test').Request) => { if (request.method() === 'POST' && request.url().includes('/api/')) mutations.push(request.url()); };
     page.on('request', recordMutation);
+    // While research works, the view stays on the current step: stage buttons are locked until it finishes or needs you.
+    const currentPanel = await page.locator('#research-stage-panel').getAttribute('aria-label');
     for (const label of ['Understand offer', 'Explore market', 'Confirm target', 'Discover companies', 'Inspect evidence', 'Review and draft']) {
       const button = page.locator('.real-stage-list').getByRole('button', { name: new RegExp(label) });
+      await expect(button).toHaveAttribute('aria-disabled', 'true');
       await button.focus();
       await page.keyboard.press('Enter');
-      await expect(button).toHaveAttribute('aria-pressed', 'true');
-      await expect(page.getByRole('region', { name: `${label} saved information`, exact: true })).toBeVisible();
+      await expect(page.locator('#research-stage-panel')).toHaveAttribute('aria-label', currentPanel ?? '');
       await expect(page.locator('.real-stage-list [aria-current=step]')).toHaveText(currentStage ?? '');
       await noOverflow(page);
     }
     await capture(page, `.impeccable/review/${info.project.name}-stage-review.png`);
-    await expect(page.locator('.real-history button')).toHaveCount(0);
+    // The full current history keeps only its older-steps toggle; no other controls appear in it.
+    await expect(page.locator('.real-history button')).toHaveText([/Show \d+ older steps|Hide older steps/]);
     expect(mutations).toEqual([]);
     page.off('request', recordMutation);
-    await page.getByRole('button', { name: 'Follow current progress' }).click();
     await page.getByText('Saved offer summary', { exact: true }).click();
     await expect(page.locator('.real-saved-offer')).toContainText('customer acquisition');
     await expect(page.getByRole('progressbar')).toHaveCount(0);
@@ -638,6 +641,7 @@ test('saved seller → confirmation → evidence → review → export survives 
   await page.emulateMedia({ forcedColors: 'none' });
   await noOverflow(page);
   await capture(page, `.impeccable/review/${testInfo.project.name}-confirmation.png`);
+  await page.getByLabel('Companies in this batch').selectOption('3');  // The default is one company; these flows check several.
   await page.getByRole('button', { name: 'Confirm target and discover' }).click();
   await expect(page.getByRole('heading', { name: 'Your research, step by step' })).toBeVisible({ timeout: 10000 });
   await expect(page.getByRole('list', { name: 'Saved research checkpoints' })).toBeVisible();

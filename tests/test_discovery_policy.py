@@ -144,7 +144,7 @@ def research_run(tmp_path, candidates, policy=2):
     profile = Profile(seller_url="https://seller.example", offer="Customer acquisition research", target="Business software",
                       criteria=(Criterion(id="software", description="Offers software"),))
     run_id = store.create_run(profile, "policy-two")
-    assert store.get_run(run_id)["checkpoint"]["discovery_policy"] == 4  # New runs use the new discovery behaviour.
+    assert store.get_run(run_id)["checkpoint"]["discovery_policy"] == 5  # New runs use the new discovery behaviour.
     fence = store.claim(run_id)
     store.checkpoint(run_id, fence, "research", {"discovery_policy": policy, "company_identity_policy": 1,
                                                  "candidates": [c.model_dump(mode="json") for c in candidates]}, "queued")

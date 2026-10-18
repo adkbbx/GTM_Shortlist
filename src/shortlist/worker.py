@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from threading import Event, Thread
 
+from shortlist.competitors import PEER_REASON, competitor_issue
 from shortlist.config import Settings
 from shortlist.domain import (
     Candidate,
@@ -49,6 +50,7 @@ from shortlist.verification import (
     Verification,
     apply_verification,
     assessments,
+    company_need_evidence,
     narrowed,
     unavailable,
     unjudged,
@@ -137,9 +139,15 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
 
     def reject_candidate(candidate, reason, stage):
         checkpoint.setdefault("candidate_failures", {})[candidate.domain] = {"url": candidate.url, "reason": reason}
-        store.event(run_id, fence, ProgressUpdate(phase="discovery", label="Skipped non-company page: " + candidate.domain,
+        label = "Set aside company: " if reason == PEER_REASON else "Skipped non-company page: "
+        store.event(run_id, fence, ProgressUpdate(phase="discovery", label=label + candidate.domain,
                                                 detail=reason, state="failed"))
         store.checkpoint(run_id, fence, stage, checkpoint)
+
+    def peer_issue(candidate, primary=None):
+        # Saved competitor-search domains are not used: for Unifyr they were unrelated (paloaltonetworks.com, iqvia.com,
+        # a county site), so a buyer found by both searches would be lost. Only the company's own description decides.
+        return competitor_issue(profile, candidate.domain, primary, policy=discovery_policy)
 
     def explore_market(draft):
         if "market" in checkpoint:
@@ -288,7 +296,10 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
             admitted = []
             for data in discovered:
                 candidate = Candidate.model_validate(data)
-                if discovery_policy >= 4 and (issue := candidate_issue(candidate, target=profile.target, policy=discovery_policy)):
+                issue = peer_issue(candidate)
+                if discovery_policy >= 4:
+                    issue = issue or candidate_issue(candidate, target=profile.target, policy=discovery_policy)
+                if issue:
                     reject_candidate(candidate, issue, "discovery")
                 else:
                     admitted.append(data)
@@ -316,18 +327,18 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 saved_sources = checkpoint.setdefault("sources", {})
                 if candidate.domain in checkpoint.get("candidate_failures", {}):
                     continue
-                if issue := candidate_issue(candidate, target=profile.target, policy=discovery_policy):
+                if issue := peer_issue(candidate) or candidate_issue(candidate, target=profile.target, policy=discovery_policy):
                     reject_candidate(candidate, issue, "selection")
                     continue
                 if candidate.domain in saved_sources:
                     primary = Source.model_validate(saved_sources[candidate.domain][0])
-                    if issue := primary_source_issue(primary, strict=require_identity):
+                    if issue := primary_source_issue(primary, strict=require_identity) or peer_issue(candidate, primary):
                         reject_candidate(candidate, issue, "selection")
                     continue
                 try:
                     source = page(entry(candidate), candidate.domain, f"fetch:{candidate.domain}")
                     saved_sources[candidate.domain] = [source.model_dump(mode="json")]
-                    if issue := primary_source_issue(source, strict=require_identity):
+                    if issue := primary_source_issue(source, strict=require_identity) or peer_issue(candidate, source):
                         reject_candidate(candidate, issue, "selection")
                 except FetchError as exc:
                     checkpoint.setdefault("candidate_failures", {})[candidate.domain] = {"url": candidate.url, "reason": str(exc)}
@@ -380,10 +391,14 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 continue
             if len(store.get_run(run_id)["records"]) >= checkpoint.get("company_limit", 3):
                 break
-            if issue := candidate_issue(candidate, target=profile.target, policy=discovery_policy):
+            if issue := peer_issue(candidate) or candidate_issue(candidate, target=profile.target, policy=discovery_policy):
                 reject_candidate(candidate, issue, "research")
                 continue
             saved_sources = checkpoint.setdefault("sources", {})
+            if candidate.domain in saved_sources and (issue := peer_issue(
+                    candidate, Source.model_validate(saved_sources[candidate.domain][0]))):
+                reject_candidate(candidate, issue, "research")
+                continue
             model_room = (room_for("model", f"model:{candidate.domain}", f"verify:{candidate.domain}")
                           if discovery_policy >= 3 else room("model", 2))
             fetch_room = (room_for("fetch", f"fetch:{candidate.domain}") if discovery_policy >= 3 else room("fetch", 1))
@@ -397,7 +412,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                     saved_sources[candidate.domain] = [source.model_dump(mode="json")]
                     store.checkpoint(run_id, fence, "research", checkpoint)
                 sources = tuple(Source.model_validate(s) for s in saved_sources[candidate.domain])
-                if issue := primary_source_issue(sources[0], strict=require_identity):
+                if issue := primary_source_issue(sources[0], strict=require_identity) or peer_issue(candidate, sources[0]):
                     reject_candidate(candidate, issue, "research")
                     continue
                 # Initial-page links define the entire follow-up frontier. Never recurse.
@@ -493,6 +508,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                                   exclusion_findings=tuple(ExclusionUnknown(exclusion_id=exclusion_id(i), reason=str(exc))
                                                            for i in range(len(profile.exclusions))),
                                   sources=sources, qualification="needs_verification", status="partial", unknowns=(str(exc),))
+            record = company_need_evidence(profile, record, policy=discovery_policy)
             if assessments(profile, record):
                 def decode_verification(payload, proposed=record):
                     audit = Verification.model_validate(payload)

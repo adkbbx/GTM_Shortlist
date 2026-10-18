@@ -128,6 +128,25 @@ test('signup confirmation, sign-in errors and password reset remain usable', asy
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 });
 
+test('visitors can try the demo from sign-up without an account and come back to what they typed', async ({ page }, info) => {
+  await fixture(page);
+  await page.goto('/?auth=signin');
+  await expect(page.getByRole('link', { name: 'Try the demo', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Create an account' }).click();
+  await page.getByLabel('Email', { exact: true }).fill('visitor@example.com');
+  const research: string[] = [];
+  page.on('request', request => { const path = new URL(request.url()).pathname; if (path.startsWith('/api/') && path !== '/api/auth/setup') research.push(path); });
+  await page.getByRole('link', { name: 'Try the demo', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'See how a shortlist takes shape.' })).toBeVisible();
+  expect(research).toEqual([]);
+  await page.goBack();
+  await expect(page.getByRole('heading', { name: 'Create your account' })).toBeVisible();
+  await expect(page.getByLabel('Email', { exact: true })).toHaveValue('visitor@example.com');
+  await expect(page.getByRole('button', { name: 'Create account' })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await capture(page, `.impeccable/review/${info.project.name}-signup-demo-link.png`);
+});
+
 test('signed-in requests and exports carry tokens; sign-out clears the workspace', async ({ page }) => {
   await fixture(page);
   await page.goto('/?auth=signin');
@@ -140,6 +159,7 @@ test('signed-in requests and exports carry tokens; sign-out clears the workspace
   await expect(page.getByRole('heading', { name: 'Confirm what a good fit means' })).toBeVisible({ timeout: 15000 });
   const runId = new URL(page.url()).searchParams.get('run');
   expect(runId).toBeTruthy();
+  await page.getByLabel('Companies in this batch').selectOption('3');  // The default is one company; these flows check several.
   await page.getByRole('button', { name: 'Confirm target and discover' }).click();
   await expect(page.getByRole('heading', { name: '2 companies researched' })).toBeVisible({ timeout: 15000 });
   const download = page.waitForEvent('download');

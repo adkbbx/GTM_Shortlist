@@ -1,0 +1,19 @@
+.live-progress{margin:0 0 1.25rem;padding:1rem 1.125rem;border:1px solid var(--line);border-radius:var(--radius-control);background:var(--surface)}
+.live-rail{height:.375rem;border-radius:999px;background:var(--line);overflow:hidden}
+.live-rail span{position:relative;display:block;height:100%;border-radius:inherit;background:var(--orange);transition:width .8s ease;overflow:hidden}
+.live-rail span::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform:translateX(-100%);animation:live-sheen 1.8s ease-in-out infinite}
+.live-step{display:flex;align-items:center;gap:.625rem;margin:.875rem 0 0;font-weight:600;min-width:0}
+.live-step>span:nth-child(2){flex:1;min-width:0;overflow-wrap:anywhere}
+.live-pulse{flex:none;width:.625rem;height:.625rem;border-radius:50%;background:var(--orange);animation:live-pulse 1.6s ease-out infinite}
+.live-elapsed{flex:none;font-variant-numeric:tabular-nums;font-weight:400;color:var(--muted);font-size:.875rem}
+.live-scan{position:relative;overflow:hidden}
+.live-scan::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--orange) 22%,transparent),transparent);transform:translateX(-100%);animation:live-sheen 1.4s ease-in-out infinite}
+.live-eta{margin:.375rem 0 0 1.25rem;font-size:.875rem;color:var(--muted)}
+.live-found{display:flex;flex-wrap:wrap;gap:.5rem;list-style:none;padding:0;margin:.875rem 0 0}
+.live-found li{padding:.25rem .625rem;border:1px solid var(--line);border-radius:999px;font-size:.8125rem;background:var(--paper);animation:live-in .5s ease-out both}
+.live-found li:nth-child(2){animation-delay:.08s}.live-found li:nth-child(3){animation-delay:.16s}.live-found li:nth-child(4){animation-delay:.24s}.live-found li:nth-child(5){animation-delay:.32s}.live-found li:nth-child(6){animation-delay:.4s}
+.stage-review[aria-disabled=true]{cursor:default}
+@keyframes live-sheen{to{transform:translateX(100%)}}
+@keyframes live-pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--orange) 55%,transparent)}70%,100%{box-shadow:0 0 0 .625rem transparent}}
+@keyframes live-in{from{opacity:0;transform:translateY(.375rem)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.live-progress *,.live-progress *::after{animation:none!important;transition:none!important}}

@@ -1111,6 +1111,19 @@
           "title": "Companies",
           "type": "integer"
         },
+        "company_limit": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Company Limit"
+        },
         "events": {
           "items": {
             "$ref": "#/$defs/ProgressEvent"
@@ -1125,6 +1138,7 @@
         "candidates",
         "sources",
         "companies",
+        "company_limit",
         "events"
       ],
       "title": "RunProgress",
