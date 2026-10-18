@@ -14,6 +14,31 @@ def hosted_settings(**overrides):
                     **overrides)
 
 
+def test_custom_domain_and_platform_alias_keep_explicit_host_origin_and_redirect_boundaries():
+    from fastapi.testclient import TestClient
+
+    from shortlist.api import create_app
+    app = create_app(hosted_settings(additional_app_urls=("https://custom.tech/",)))
+    for origin in ("https://app.example", "https://custom.tech"):
+        client = TestClient(app, base_url=origin)
+        response = client.get("/api/auth/setup", headers={"Origin": origin})
+        assert response.status_code == 200
+        assert response.json()["redirect_url"] == origin + "/"
+        assert client.get("/api/auth/setup", headers={"Origin": "https://foreign.example"}).status_code == 403
+        assert client.get("/api/runs").status_code == 401
+    client = TestClient(app, base_url="https://foreign.example")
+    assert client.get("/api/auth/setup").status_code == 400
+    client = TestClient(app, base_url="https://app.example")
+    assert client.get("/api/auth/setup", headers={"X-Forwarded-Host": "foreign.example"}).json()["redirect_url"] == "https://app.example/"
+
+
+@pytest.mark.parametrize("origin", ["http://custom.tech", "https://*.tech", "https://custom.tech/path",
+                                    "https://user:secret@custom.tech", "https://custom.tech?next=elsewhere"])
+def test_additional_app_origins_reject_unsafe_destinations(origin):
+    with pytest.raises(ValidationError, match="SHORTLIST_ADDITIONAL_APP_URLS"):
+        hosted_settings(additional_app_urls=(origin,))
+
+
 def test_configuration_errors_do_not_print_raw_secret_inputs():
     secret = "labelled-secret-must-not-appear-in-startup-logs"
     with pytest.raises(ValidationError) as failed:

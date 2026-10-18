@@ -296,7 +296,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 await run_in_threadpool(research_service.close)
 
     app = FastAPI(title="GTM Shortlist", version="0.1.0", lifespan=lifespan)
-    hosts = ["localhost", "127.0.0.1", "testserver"] if settings.mode == "local" else [urlsplit(settings.app_url).hostname]
+    app_origins = tuple(url.rstrip("/") for url in (settings.app_url, *settings.additional_app_urls))
+    hosts = ["localhost", "127.0.0.1", "testserver"] if settings.mode == "local" else [urlsplit(url).hostname for url in app_origins]
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=hosts)
     bearer = HTTPBearer(auto_error=False)
 
@@ -316,8 +317,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.middleware("http")
     async def local_origin(request: Request, call_next):
         origin = request.headers.get("origin")
-        expected_origin = settings.app_url.rstrip("/") if settings.mode == "hosted" else str(request.base_url).rstrip("/")
-        if origin and origin != expected_origin:
+        expected_origins = app_origins if settings.mode == "hosted" else (str(request.base_url).rstrip("/"),)
+        if origin and origin not in expected_origins:
             return JSONResponse({"detail": "Cross-origin access is not permitted"}, status_code=403)
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
@@ -493,11 +494,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return await run_in_threadpool(health)
 
     @app.get("/api/auth/setup", response_model=AuthSetup)
-    def auth_setup():
+    def auth_setup(request: Request):
         if settings.mode == "local":
             return LocalAuth()
+        redirect_origin = next((url for url in app_origins if urlsplit(url).hostname == request.url.hostname), app_origins[0])
         return HostedAuth(supabase_url=settings.supabase_url, publishable_key=settings.supabase_publishable_key,
-                          redirect_url=settings.app_url.rstrip("/") + "/", email_code=settings.auth_email_code,
+                          redirect_url=redirect_origin + "/", email_code=settings.auth_email_code,
                           google=settings.auth_google,
                           draft_site_key=settings.turnstile_site_key if settings.anonymous_drafts else None)
 

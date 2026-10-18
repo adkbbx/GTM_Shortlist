@@ -9,6 +9,12 @@
 - **Verification.** Reviewer, normal Windows session: Ruff passes; full backend 747 passed, 48 skipped, 0 failed; web build passes; full Playwright 157 passed, 3 intentional skips, 0 failed. Phone and laptop screenshots inspected for the changed flows.
 - **Scope.** Removed the Chromium GPU debug.log and temporary verification helpers. The reviewer-owned backlog remains unchanged. No provider calls, saved-evidence edits, commits, or deployments. Remaining external validation: normal-user native credential checks, live discovery quality, and actual hosted email delivery.
 
+## 18 October, custom domain release
+
+The connected `eygentic.tech` domain reached Render but returned `400 Invalid host header`. Added explicit `SHORTLIST_ADDITIONAL_APP_URLS` origins alongside the canonical app URL. Both configured hosts retain same-origin API access and receive their own configured authentication callback. Unlisted hosts, foreign origins, wildcard URLs and forwarded-host redirect injection remain rejected.
+
+Verification: 47 auth/startup tests passed; Ruff passed. No search, inference, enrichment or app-account credits used. Hosted deployment, custom-domain callbacks and advancing worker heartbeat still require rollout evidence. The public health field currently checks only local workers; hosted health must be confirmed from database heartbeats.
+
 ## 18 October, reader readiness for a public post
 
 Audit and command-by-command evidence: [READER_READINESS.md](READER_READINESS.md). Baseline `18081e3`, branch `claude/signal-landing`.
