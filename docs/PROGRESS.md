@@ -1,5 +1,20 @@
 # Progress and handoff
 
+## 19 October, real Eygentic search results: fewer failures, but the small local model rarely cites evidence
+
+Same inputs for every version: the 12 companies that real searches found for eygentic.com on 13 October (saved run `4916be8e`, target "Private AI B2B SaaS startups", four required checks: AI as a core capability, sells software to businesses, subscription or hosted, privately held), local `gemma4:e2b-it-qat` (4.6B), no searches, three companies per run with at most six model calls (databases `data/evaluations/eygentic-saved-2026-10-19-{old,new,advised}.sqlite3`; "advised" makes the rarely-public ownership check nice to have, as the confirmation screen advises).
+
+| Measure | Old (`7a3e585`) | New (`7cafdb0`) | New, advised checks |
+|---|---|---|---|
+| Refused after pages and model calls were paid | 5 of 12 (Smeron, Prismatic, B2B Hub, HappyFox, Actaa) | 0 of 10 | 0 of 10 |
+| Records | 7 | 10 (2 not reached at the evaluation's six-call cap) | 10 (2 not reached) |
+| Fits | 0 | 0 | 0 |
+| Required checks supported on records | 13 of 28 | 5 of 40 | 4 of 30 |
+
+- **Old support was partly false.** For siesta.ai the old run supported "Privately held startup" with "SaaS or Private deployment" (a deployment option, not ownership) and "AI as a core capability" with a navigation menu. Today's rules refuse both kinds.
+- **The new shortfall is the model, not the pages.** The excerpts sent for siesta.ai contain "Siesta AI | Context-Native Enterprise AI Platform" and "Everything you expect from an AI platform ...". Two direct probes on those saved pages (local model, no searches) returned "unknown" for all four checks with the claim restated as the reason; without the excerpt-gap sentence the model's output failed the schema instead. The 4.6B local model does not reliably copy evidence for a four-check profile.
+- **Next lever.** Research with a stronger model (a hosted model, or a larger local one) on the same saved inputs; it needs the user's approval because hosted inference uses credits. Fits on the Unifyr channel campaign (two required checks) did qualify with the same local model, so fewer required checks per target also helps small models.
+
 ## 18 October, live progress, a demo without an account, one company by default
 
 From the user's hosted testing on a phone:
