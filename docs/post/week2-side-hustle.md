@@ -6,7 +6,7 @@ This month I've shipped an app every week for these challenges, with two coding 
 
 I'm building [Eygentic](https://eygentic.com), a company that runs customer-acquisition experiments for B2B and SaaS teams: which customers, messages and channels actually work, before anyone spends money on growth. Every one of those experiments starts with the same boring thing, a list of companies that might buy. Most prospecting tools I looked at sell you access to a big pre-built database of companies and contacts, and you trust that each row is right. That works if you already have a sales budget. A two-person AI startup that just shipped usually doesn't.
 
-If distribution is now the hard part of starting a software company, I don't think it should only be available to companies that can already afford a sales stack. So I built the tool I wanted for my own first list, made it open source, and put it online.
+If distribution is now the hard part of starting a software company, I don't think it should only be available to companies that can already afford a sales stack. So I built the tool I wanted for my own first list, made it open source, and put it online. It's not complete yet, but this challenge gave me the motivation to finally get started on it.
 
 ## What I Built
 
