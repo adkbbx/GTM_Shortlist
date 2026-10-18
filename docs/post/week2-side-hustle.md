@@ -30,7 +30,7 @@ If distribution is now the hard part of starting a software company, I don't thi
 
 **Who would pay for this?** Founders of small B2B software and AI companies doing their own sales, and the GTM consultants and outbound agencies who build a new list for a new campaign every week. The hosted version gives you your first three companies free with no card. Research there runs on credits, one per researched company, and paid checkout isn't built yet. Self-hosting is free apart from your own search and model costs. The managed version I'm testing through Eygentic is a $99 reviewed pilot shortlist. Nobody has paid that yet, so treat it as a price I'm testing, not a business.
 
-## The first real run, and why it found nothing useful
+## The first real run, and what it got wrong
 
 On 16 October I ran the hosted app on my own website with the target "B2B AI SaaS companies". Three SerpApi searches, eight Gemma calls, 17 page reads. Two of the searches failed. The first time, the whole run stopped with nothing, because discovery wanted every query to succeed before it used any candidates, and all three credits came back. I changed that so a failed query is saved and the run carries on with the candidates it already has. The same run then finished from its saved candidates without searching again.
 
