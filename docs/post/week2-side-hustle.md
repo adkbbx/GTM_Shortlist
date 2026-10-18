@@ -1,6 +1,8 @@
 *This is a submission for the [Hacktoberfest Open-Source AI Challenge Week 2: Side Hustle](https://dev.to/challenges/hacktoberfest-week2-2026-10-12)*
 
-![The GTM Shortlist landing page at eygentic.tech: "Find who fits. Check why." A company box on the left, a funnel of candidates narrowing through Offer, Target and Evidence, and an illustrative shortlist on the right](https://raw.githubusercontent.com/adkbbx/GTM_Shortlist/worktree-week2-post/docs/post/landing.png)
+![The GTM Shortlist landing page at eygentic.tech: "Find who fits. Check why." Candidates flow through Offer, Target and Evidence into an illustrative shortlist, then the page scrolls to "Every row opens to its sources"](https://raw.githubusercontent.com/adkbbx/GTM_Shortlist/worktree-week2-post/docs/post/landing.gif)
+
+*GTM Shortlist, live at [eygentic.tech](https://eygentic.tech).*
 
 AI has made building software cheap and fast, and you can see it in the numbers:
 
@@ -26,11 +28,11 @@ If finding customers is now the hard part of starting a software company, I don'
 4. **Gives you a short list.** Next to each company it shows the exact sentence from that company's site that backs up the match. If it can't find proof, it says "unknown" instead of guessing.
 5. **Lets you decide.** You mark each company yes or no, download the list as a spreadsheet, and can start a first email that points to what you found. It never sends anything for you.
 
+![The demo at eygentic.tech/?demo=1, with invented companies: the app understands the offer, explores the market, waits for the target to be confirmed, checks candidates, shows the exact passage behind a match, and ends with accept or reject](https://raw.githubusercontent.com/adkbbx/GTM_Shortlist/worktree-week2-post/docs/post/workflow.gif)
+
+*Every step, using the demo on eygentic.tech. The companies and sentences are made up for the demo, so you can try it without an account or spending anything.*
+
 A company is only marked as a fit when every must-have is backed by a sentence found word for word on its own site, and a second check by the model agrees that the sentence really says that. Your yes or no is kept separate from the app's opinion, and a fit never means "this company wants to buy".
-
-![Confirm your target: the offer GTM Shortlist drafted from eygentic.com ("Focused customer-acquisition experiments for B2B and SaaS teams...") and the target "B2B AI SaaS companies", both editable, with discovery waiting for confirmation](https://raw.githubusercontent.com/adkbbx/GTM_Shortlist/worktree-week2-post/docs/post/confirm-target-v2.png)
-
-*The confirmation step on my own website. The app wrote the description from [eygentic.com](https://eygentic.com). Nothing is searched until I confirm it.*
 
 **Who would pay for this?** Founders of small B2B software and AI companies who do their own sales, and the consultants and agencies who build a new list of target companies for every campaign. The hosted version gives you your first three companies free, with no card. After that, research runs on credits, one per company researched, and paying for more credits isn't built yet. If you run it yourself, it's free apart from your own search and AI costs.
 
@@ -94,19 +96,17 @@ So 2 of the 12 are real leads for Eygentic. It's a short list, but every name on
 
 **[eygentic.tech](https://eygentic.tech)**: type your company's website or name. Your first three companies are free and no card is needed.
 
-If you'd rather not sign up, tap **Try the demo** on the start page to watch it run on made-up companies, with no account. You can also install it from the code and choose **Try it with sample data**, which runs the whole thing on three made-up companies with no accounts or keys, and every screen says it's sample data.
+If you'd rather not sign up, tap **Try the demo** on the start page, the walkthrough in the GIF above. You can also install it from the code and choose **Try it with sample data**, which runs the whole thing on three made-up companies with no accounts or keys.
 
 ## How I Built It
 
 ![Architecture: your browser, a Render web service at eygentic.tech serving the API and UI, Supabase for sign-in and Postgres, a Render background worker, and the worker's calls to SerpApi, the companies' own websites and Gemma 4 31B on DigitalOcean. The same code runs on a laptop with SQLite and Ollama](https://raw.githubusercontent.com/adkbbx/GTM_Shortlist/worktree-week2-post/docs/post/architecture.png)
 
-The app is a website (React) with a Python server behind it, plus a separate background worker that does the slow research. Before the worker makes anything that costs money, like a search, a page visit or a call to the AI model, it writes it down first. If the server restarts halfway through, it carries on from its notes instead of paying for the same thing twice. If it can't tell whether a request went through, it stops and tells you instead of trying again. Every run has hard limits: at most 4 searches, 8 AI calls and 3 pages per company.
+The app is a website (React) with a Python server behind it, plus a separate background worker that does the slow research. Before the worker does anything that costs money, like a search, a page visit or a call to the AI model, it writes it down first. If the server restarts halfway through, it carries on from its notes instead of paying for the same thing twice, and if it can't tell whether a request went through, it stops and tells you instead of trying again. Every run has hard limits: at most 4 searches, 8 AI calls and 3 pages per company.
 
 {% details SerpApi: the Google search %}
 
-SerpApi gives the app Google search results. Each run gets at most 4 searches, and a third search only happens when the first two found fewer than six companies.
-
-My first real search took about 29 seconds and timed out, so the app now waits up to 60 seconds. A search that times out is never retried automatically, because it may already count against my monthly limit. Each kind of failure gets its own clear message, and the key never shows up in the logs.
+SerpApi gives the app Google search results, at most 4 searches per run. My first real search took about 29 seconds and timed out, so the app now waits up to 60 seconds, and a search that times out is never retried automatically, because it may already count against my monthly limit.
 
 I'm on SerpApi's free plan, 250 searches a month, so my coding agents had to ask me before spending any. While building, the app used saved search results instead of new ones, and SerpApi's free account check confirms the key works without using up a search. On 16 October I still had 236 of my 250 searches left.
 
@@ -114,27 +114,23 @@ I'm on SerpApi's free plan, 250 searches a month, so my coding agents had to ask
 
 {% details Gemma on DigitalOcean: the AI model %}
 
-The hosted app uses Gemma 4 31B, an open model from Google, running on DigitalOcean's hosted AI service, so I don't have to run any servers for it. It does four jobs: describing your business from your homepage, suggesting campaign ideas, finding quotes on each company's site, and double-checking that each quote really supports the match.
+The hosted app uses Gemma 4 31B, an open model from Google, on DigitalOcean's hosted AI service, so I don't run any servers for it. It does four jobs: describing your business from your homepage, suggesting campaign ideas, finding quotes on each company's site, and double-checking each quote. On 30 test cases for that double-check (29 written for the test, 1 from a real website) it got all 30 right. That's a check of one job, not an independent benchmark.
 
-For that double-check, I tested it on 30 example cases (29 written for the test, 1 from a real website) and it got all 30 right. That's a check of this one job, not an independent benchmark.
+On my laptop, the first runs gave useless answers. The program running the model was quietly cutting my instructions short, keeping about 2,000 pieces of text out of 6,000 to 12,800, so the model never saw what I'd asked for. Shorter instructions and a bigger limit fixed it.
 
-On my laptop, the first runs gave useless answers. The program that runs the model locally was quietly cutting my instructions short: it kept about 2,000 pieces of text when my instructions were 6,000 to 12,800, so the model never saw what I'd asked for. A shorter set of instructions and a bigger limit fixed it.
-
-The model never has the last word. Ordinary code checks that each quote really is on the page, that the page belongs to that company, and that every must-have is covered, and it decides the order of the list.
+The model never has the last word. Ordinary code checks that each quote really is on the page, that the page belongs to that company and that every must-have is covered, and it decides the order of the list.
 
 {% enddetails %}
 
 {% details Render: running the app online %}
 
-Render runs two pieces from the same code: the website and the background worker. Passwords and keys are stored in Render's dashboard, never in the code.
-
-I only release a version after the automatic tests pass. During the first real run I released an update halfway through, and the new worker picked up exactly where the old one stopped, without searching again. Afterwards I restarted everything on purpose, and the exported results were exactly the same as before.
+Render runs two pieces from the same code: the website and the background worker. Passwords and keys live in Render's dashboard, never in the code. I only release a version after the automatic tests pass. During the first real run I released an update halfway through, and the new worker picked up exactly where the old one stopped, without searching again. Afterwards I restarted everything on purpose, and the exported results were exactly the same.
 
 {% enddetails %}
 
 {% details eygentic.tech: the web address %}
 
-The app lives at eygentic.tech. When I first connected the domain to Render, the app refused it with "400 Invalid host header", because it only trusted its original Render address. Now it accepts a fixed list of addresses, each with its own sign-in link, and still refuses anything else.
+[eygentic.com](https://eygentic.com) is the company. [eygentic.tech](https://eygentic.tech) is the tool, open for anyone to use. When I first connected the domain to Render, the app refused it with "400 Invalid host header", because it only trusted its original Render address. Now it accepts a fixed list of addresses, each with its own sign-in link, and still refuses anything else.
 
 {% enddetails %}
 
@@ -155,11 +151,19 @@ Here's what being open actually changed for me.
 
 **Your list stays yours.** Who you're trying to sell to is private business information. If you run it yourself with a local model, your research stays in a file on your own computer. The only things that leave it are the searches and the visits to the companies' own websites.
 
-**It's cheap enough for one person.** Run it yourself with a local model and you only pay for searches. At 4 searches a run, SerpApi's free plan covers dozens of lists a month. That's what "accessible to everyone" means to me.
+**It's cheap enough for one person.** Run it yourself and you only pay for searches and the model. At 4 searches a run, SerpApi's free plan covers dozens of lists a month. That's what "accessible to everyone" means to me.
 
 **I could check its work.** Every problem above was found by reading the saved pages and the model's saved answers, not by guessing. Because the model is open, I could try the small version on my laptop and the big version online on exactly the same pages, and see for myself that this job needs the big one.
 
 **The rules are visible.** What counts as a match, which pages get skipped and how quotes are checked are all in the code, so you can disagree with them and change them.
+
+## What it can't do yet
+
+- **It doesn't find email addresses** or contact details. It finds companies and the proof that they fit. Reaching out is still up to you.
+- **Some things stay unknown.** Funding, ownership and budgets are rarely on a company's own website, so the app leaves them as "unknown" instead of guessing.
+- **Small models aren't good enough yet.** On my laptop they couldn't produce a single real match for my own business. Research needs a bigger model, which means a hosted service or a powerful computer.
+- **Runs are small.** Up to three companies at a time, so it's a shortlist, not a database.
+- **You can't buy more credits yet.** The free three work, but paying for more isn't built.
 
 ## My First User
 
@@ -171,19 +175,17 @@ The first user is me. The first real shortlist was for Eygentic, the company I'm
 
 Open source under the MIT licence and built during the challenge: the first commit was on 14 October, and there are 188 so far. 838 automated tests on the server side and 173 browser tests at phone and laptop sizes pass, and every real test I ran with paid services is written down in `docs/PROGRESS.md`, including the ones that failed.
 
-## How I built it with two agents
-
-Same setup as last week. Claude Code wrote the plans, reviewed the changes and ran the tests on my machine. Codex wrote much of the code from those plans, and each plan said what was true now, what should be true afterwards, and what checks had to pass before it came back. The project's rules also say no paid search or AI call without my approval for that specific test, which is why so many of the fixes above came from re-checking saved runs instead of paying for new searches.
+Claude Code wrote the plans, reviewed the changes and ran the tests on my machine, and Codex wrote much of the code from those plans. The project's rules say no paid search or AI call without my approval for that specific test, which is why so many of the fixes above came from re-checking saved runs instead of paying for new searches.
 
 ## Prize Categories
 
 **Best Use of SerpApi.** SerpApi is how the hosted app finds companies at all. The app sends short Google searches aimed at companies' own websites, skips results that aren't companies before opening them, and keeps every run to 4 searches. Each search is written down before it's sent, a slow search gets up to 60 seconds, and a failed one is never retried automatically, so the free plan's 250 searches a month go a long way.
 
-**Best Use of DigitalOcean.** Every AI call the hosted app makes goes to Gemma 4 31B (`gemma-4-31B-it`) on DigitalOcean's hosted AI service: describing the business, suggesting campaign ideas, finding quotes and double-checking each one. On the same 12 saved companies for my own business, the small models on my laptop found no product company that matched, and Gemma 4 31B on DigitalOcean found two, each with proof from its own website, in 18 AI calls. It also got 30 of 30 on my double-check test cases, and the same code can switch to a model on your own laptop with one setting.
+**Best Use of DigitalOcean.** Every AI call the hosted app makes goes to Gemma 4 31B (`gemma-4-31B-it`) on DigitalOcean's hosted AI service: describing the business, suggesting campaign ideas, finding quotes and double-checking each one. On the same 12 saved companies for my own business, the small models on my laptop found no product company that matched, and Gemma 4 31B on DigitalOcean found two, each with proof from its own website, in 18 AI calls.
 
 **Best Use of Render.** Render runs the website and the background research worker from the same code, with passwords kept in the dashboard. When I released an update in the middle of a real run, the worker carried on from its notes with no repeated searches and no double charge, and restarting both afterwards left the results exactly the same.
 
-**Best Use of a .tech Domain.** The app is live at [eygentic.tech](https://eygentic.tech), the .tech domain I claimed through Hacktoberfest, running on Render. Getting there meant fixing a real "400 Invalid host header" error: the app now accepts a fixed list of addresses, gives each its own sign-in link, and still refuses anything else.
+**Best Use of a .tech Domain.** The app is live at [eygentic.tech](https://eygentic.tech), the .tech domain I claimed through Hacktoberfest, running on Render. eygentic.com is the company and eygentic.tech is the open tool, and both GIFs in this post were recorded on the live domain. Getting there meant fixing a real "400 Invalid host header" error: the app now accepts a fixed list of addresses, gives each its own sign-in link, and still refuses anything else.
 
 Built solo.
 
