@@ -18,7 +18,7 @@ test('phone Settings is a centered modal with reachable controls and safe resize
   await page.getByLabel('Company name or website', { exact: true }).fill('Preserved input');
   await openSettings(page);
   const settings = page.getByRole('dialog', { name: 'Settings', exact: true });
-  expect(await settings.evaluate(element => element.matches(':modal'))).toBe(false);
+  await expect.poll(() => settings.evaluate(element => element.matches(':modal'))).toBe(false);
   expect((await settings.boundingBox())!.width).toBe(480);
   await page.screenshot({ path: '.impeccable/review/laptop-settings-placement.png' });
   await page.getByRole('button', { name: 'Close settings', exact: true }).click();
@@ -70,11 +70,11 @@ test('phone Settings is a centered modal with reachable controls and safe resize
   await page.setViewportSize({ width: 851, height: 844 });
   await expect(settings).toBeVisible();
   await expect.poll(() => page.evaluate(() => document.body.style.overflow)).not.toBe('hidden');
-  expect(await settings.evaluate(element => element.matches(':modal'))).toBe(false);
+  await expect.poll(() => settings.evaluate(element => element.matches(':modal'))).toBe(false);
   await expect(page.getByRole('radio', { name: 'Hosted provider', exact: true })).toBeChecked();
   await page.setViewportSize({ width: 850, height: 844 });
   await expect(settings).toBeVisible();
-  expect(await settings.evaluate(element => element.matches(':modal'))).toBe(true);
+  await expect.poll(() => settings.evaluate(element => element.matches(':modal'))).toBe(true);  // The resize handler switches modes after layout; CI runners are slower.
   await expect(page.getByRole('radio', { name: 'Hosted provider', exact: true })).toBeChecked();
   await page.keyboard.press('Escape');
   await expect(settings).not.toBeVisible();
