@@ -243,7 +243,11 @@ def record_issue(record: Research, *, strict: bool = False) -> str | None:
 
 
 SERVICE_BUSINESS = re.compile(
-    r"\b(?:consultants?|consultanc(?:y|ies)|consulting (?:firm|company|services)|agenc(?:y|ies)|freelancers?|coach(?:es)?|coaching|services? (?:firm|provider|company|business)|(?:marketing|operations|development|design|acquisition|automation|advisory) services)\b",
+    r"\b(?:consultants?|consultanc(?:y|ies)|consulting (?:firm|company|services)|agenc(?:y|ies)|freelancers?|coach(?:es)?|coaching|services? (?:firm|provider|company|business)|(?:marketing|operations|development|design|acquisition|automation|advisory) services"
+    # Built-to-order work, as on smeron.com ("Custom AI Applications & B2B SaaS Growth Studio") and backofficeboss.ai
+    # ("Custom AI automation built around your business"), both qualified for a SaaS target on 19 October.
+    r"|bespoke|custom (?:ai |software |web |mobile )?(?:applications?|apps|software|automation|development|solutions|builds?)"
+    r"|(?:growth|design|product|development|venture|creative|digital|ai) studios?)\b",
     re.IGNORECASE)
 PRODUCT_TARGET = re.compile(r"\b(?:software|saas|platforms?|apps?|startups?|companies)\b", re.IGNORECASE)
 TARGET_END = re.compile(r"\b(?:seeking|looking|with|that|which|who|for|to)\b", re.IGNORECASE)
