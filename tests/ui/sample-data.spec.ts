@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 
 // A first local run without keys: the setup card offers sample data, which runs the real API, worker and database on
 // invented companies. Every screen keeps the label, and nothing reaches a reserved sample address.
@@ -22,8 +22,10 @@ test('sample data runs the whole flow without keys and stays labelled', async ({
   const setup = page.getByRole('region', { name: 'Set up local research in two steps' });
   await expect(setup.getByText('No keys yet?')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Try the demo' })).toHaveCount(0);  // One way to try it, not two.
+  await expect(setup.getByRole('button', { name: 'Try it with sample data' })).toBeInViewport({ ratio: 1 });
   await capture('setup');
-  await setup.getByRole('button', { name: 'Try it with sample data' }).click();
+  await setup.getByRole('button', { name: 'Try it with sample data' }).focus();
+  await page.keyboard.press('Enter');
   await expect(label).toBeVisible();
   await expect(page).toHaveURL(/\?run=/);
 
@@ -32,7 +34,7 @@ test('sample data runs the whole flow without keys and stays labelled', async ({
   await expect(page.getByText('Company search is not configured')).toHaveCount(0);
   await expect(main).not.toContainText('.example');
   await capture('confirm');
-  await page.getByRole('button', { name: 'Confirm target and discover' }).click();
+  await page.getByRole('button', { name: 'Confirm target and discover' }).press('Enter');
 
   await expect(page.getByRole('heading', { name: 'Review your shortlist', level: 1 })).toBeVisible({ timeout: 60_000 });
   await expect(label).toBeVisible();
@@ -54,8 +56,25 @@ test('sample data runs the whole flow without keys and stays labelled', async ({
   await expect(sheet.locator('.source-meta').first()).toContainText('sample page');
   await capture('sheet');
 
+  await sheet.getByLabel('Review note').fill('Sample review after inspecting the invented passage');
+  await sheet.getByRole('button', { name: 'Accept company', exact: true }).press('Enter');
+  await expect(sheet.getByText('Saved: accepted', { exact: true })).toBeVisible();
+  await page.reload();
+  await rows.first().press('Enter');
+  await expect(sheet.getByText('Saved: accepted', { exact: true })).toBeVisible();
+  await page.getByLabel('Accepted only').check();
+  await capture('accepted');
+
   const download = page.waitForEvent('download');
   await page.getByRole('link', { name: 'Export CSV' }).click();
-  expect((await download).suggestedFilename()).toMatch(/^shortlist-sample-.+\.csv$/);
+  const csv = await download;
+  expect(csv.suggestedFilename()).toMatch(/^shortlist-sample-.+\.csv$/);
+  const path = info.outputPath('sample-accepted.csv');
+  await csv.saveAs(path);
+  const content = readFileSync(path, 'utf8');
+  expect(content).toContain('Sample data, invented');
+  expect(content).toContain(',Accepted,');
+  expect(content).toContain('Sample review after inspecting the invented passage');
+  expect(content.split('Sample data, invented')).toHaveLength(2);
   expect(reached).toEqual([]);
 });

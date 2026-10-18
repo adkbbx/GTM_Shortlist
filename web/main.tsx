@@ -152,12 +152,12 @@ function LocalSetupCard({ health, onSample, starting }: { health: Health; onSamp
   ] as const;
   return <section className="local-setup-card" aria-labelledby="local-setup-heading">
     <h3 id="local-setup-heading">Set up local research in two steps</h3>
+    <div className="local-setup-sample"><span>No keys yet?</span><button type="button" className="text-button" disabled={starting} onClick={onSample}>{starting ? 'Starting the sample…' : 'Try it with sample data'}<Arrow /></button></div>
     <ol>{steps.map((step, index) => <li key={step.id}>
       <StatusMark status={step.ready ? 'ok' : 'idle'}>{index + 1}</StatusMark>
       <span className="local-setup-step"><strong>{step.title}</strong><span>{step.ready ? 'Ready' : step.detail}</span></span>
       {!step.ready && <button type="button" className="secondary" onClick={() => openLocalSetup(step.id)}>{step.action}</button>}
     </li>)}</ol>
-    <div className="local-setup-sample"><span>No keys yet?</span><button type="button" className="text-button" disabled={starting} onClick={onSample}>{starting ? 'Starting the sample…' : 'Try it with sample data'}<Arrow /></button></div>
     <p className="hint">Keys stay on this computer. Sample data uses invented companies and runs no searches.</p>
   </section>;
 }

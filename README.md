@@ -6,63 +6,88 @@ Created by Eygentic. Every seller uses the same workflow; Eygentic profiles are 
 
 This is an early local implementation. Hosted accounts, external signup, deployment, real provider benchmarks and observed user testing remain release gates in [the checklist](docs/IMPLEMENTATION.md). [Progress](docs/PROGRESS.md) records what has actually passed.
 
-## Run it on your computer
+## Try it with sample data
 
-Once a release is published to PyPI, one command installs and opens the app (Python 3.11 or newer; no Node or build step):
+No provider keys are needed. Install from source below, open the local app, and choose **Try it with sample data** on the setup card. Confirm the sample target, inspect the three invented companies and their evidence, accept or reject a result, and export CSV, JSON or Excel. Every screen and export labels the sample data. Sample source links are plain text because the invented pages do not exist online.
 
-```sh
-uvx gtm-shortlist        # or: pipx run gtm-shortlist
-```
+## Install from source today
 
-It starts the API and research worker, opens `http://127.0.0.1:8014`, and keeps research in your user data folder (`%LOCALAPPDATA%\GTM Shortlist` on Windows, `~/Library/Application Support/GTM Shortlist` on macOS, `~/.local/share/gtm-shortlist` on Linux). Use `--port` to change the port or `--no-browser` to skip the tab. The start page then walks through model and search setup, or lets you try the whole flow on sample data first.
-
-**Releasing.** `.github/workflows/package.yml` builds the package with the UI inside and runs it from a fresh install on every push. Pushing a `v*` tag publishes it once PyPI trusted publishing is set up for this repository: project `gtm-shortlist`, workflow `package.yml`, environment `pypi`. To build by hand: `npm ci && npm run build`, `python scripts/package_ui.py`, `python -m build --outdir package-dist`, then `python scripts/package_smoke.py package-dist/*.whl`.
-
-## Local setup for contributors
-
-Python 3.11 or newer:
+Install Git, Python 3.11 or newer, and Node.js 22.12 or newer with npm. Run these commands in a terminal:
 
 ```sh
-python -m venv .venv
-# Windows: .venv/Scripts/python.exe; macOS/Linux: .venv/bin/python
-python -m pip install -r requirements.lock.txt
-python -m pip install -e . --no-deps
-cp .env.example .env
-shortlist config
+git clone --branch claude/signal-landing https://github.com/adkbbx/GTM_Shortlist.git
+cd GTM_Shortlist
 ```
 
-Run commands inside the activated virtual environment. Configure your own Tavily/SerpApi credentials and a trusted OpenAI-compatible Gemma endpoint in `.env`. Secrets stay on the server. Settings readiness reports booleans, never keys. Search requests use basic depth with at most four attempts per run and the configured global monthly cap, including uncertain outcomes. Gemma uses at most eight attempts. The model's licence is separate from this repository's MIT licence.
+Windows PowerShell:
+
+```powershell
+py -m venv .venv
+.venv/Scripts/python.exe -m pip install -r requirements.lock.txt
+.venv/Scripts/python.exe -m pip install -e . --no-deps
+npm ci
+npm run build
+.venv/Scripts/python.exe -m shortlist.cli serve --port 8014 --open
+```
+
+macOS or Linux:
 
 ```sh
-shortlist run examples/eygentic-profile.json --request-key eygentic-first
-shortlist worker
-shortlist show RUN_ID
-shortlist export RUN_ID --format json
-shortlist export RUN_ID --format csv --accepted-only
-shortlist export RUN_ID --format xlsx --output shortlist.xlsx
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.lock.txt
+.venv/bin/python -m pip install -e . --no-deps
+npm ci
+npm run build
+.venv/bin/python -m shortlist.cli serve --port 8014 --open
 ```
 
-The example profile is user-supplied planning input, not a fetched seller assessment. Correct it before using it for other offers. Commands with the same request key return the original run; changed input under that key is rejected.
+Keep the terminal open. The app opens at http://127.0.0.1:8014 and starts its API and research worker together. If the browser does not open, visit that address manually. Stop with Ctrl+C. Source installs save research in `data/shortlist.sqlite3` inside the checkout. No environment activation or `.env` file is needed for the sample path. On Linux, your distribution may require its Python venv package before creating the environment.
 
-Excel exports have a readable Shortlist sheet and an Evidence sheet with exact passages, open questions, source links and dates. CSV now uses readable columns instead of nested JSON cells; use JSON for the complete technical record and unchanged integration contract. See [customer exports](docs/customer-export.md).
+The install commands download dependencies. They do not make research-provider requests. The source path includes the UI build; installing only the editable Python package does not build the UI.
 
-Run `pytest -q` and `ruff check --config pyproject.toml src tests scripts`. Tests use labelled synthetic sources unless explicitly described as live. TLS verification and public-address validation stay enabled; unsafe or unavailable pages produce explicit partial results. The citation gate verifies exact passages and company source identity. Semantic entailment is still a model assessment requiring evaluation and human review.
+## Install a published package
+
+The PyPI release is still a release gate. Use the source instructions above today. After the maintainer publishes `gtm-shortlist`, Python 3.11 or newer plus [uv](https://docs.astral.sh/uv/getting-started/installation/) can run it without Node or a UI build:
+
+```sh
+uvx gtm-shortlist
+```
+
+Alternatively, with [pipx](https://pipx.pypa.io/stable/installation/) installed:
+
+```sh
+pipx run gtm-shortlist
+```
+
+The package starts the API and worker, opens http://127.0.0.1:8014, and stores research in your user data folder: `%LOCALAPPDATA%\GTM Shortlist` on Windows, `~/Library/Application Support/GTM Shortlist` on macOS, or `~/.local/share/gtm-shortlist` on Linux. Use `--port` to change the port or `--no-browser` to skip the tab. The package workflow builds and smoke-tests the bundled UI before publishing. See [release steps](docs/planning/LOW_FRICTION_PATHS.md).
+
+## Connect your own providers
+
+Real research needs **both a search provider and a research model**. A hosted model key alone does not enable company search.
+
+1. In **Settings → Company search**, enter your own [Tavily key](https://app.tavily.com/). Saving does not test the key or run a search. For SerpApi instead, copy the search settings from [.env.example](.env.example) into a local `.env`: set `SHORTLIST_SEARCH_PROVIDER=serpapi` and `SERPAPI_API_KEY`, then restart the app. The search-key form supports Tavily only. A Tavily key already saved in Settings takes precedence over `.env`; to switch to SerpApi without changing that workspace, set `SHORTLIST_DB=data/serpapi-shortlist.sqlite3` in `.env` as well. Existing research remains in the original database.
+2. In **Settings → Research model**, choose **On this computer** or **Hosted provider**. For Ollama, install it, download a Gemma model that fits your hardware, and keep its server running. Select Ollama in the app. For a hosted provider, enter its key and review its pricing. **Find available models** reads the server's catalog only. Choose the exact model ID, or enter it manually, then save. Availability does not prove structured-output support or research quality. See [model connection details](docs/local-provider-setup.md#guided-model-connection).
+3. Return to the start page and enter your company website. Review and edit the drafted offer, target and observable fit checks before confirming discovery. A company-name lookup or website profiling can already use search, page reads and model calls before confirmation. If setup fails, reopen Settings to correct the key, server address or model ID. Paused runs offer **Resume research**; starting a new run can incur new costs.
+
+Keys saved through Settings stay in the local private provider database, beside the research database with `.providers` appended to its filename. Windows uses current-user encryption; macOS and Linux use owner-only file permissions. Saved keys are never loaded back into the form or included in exports. Saving makes no provider request. Model catalog lookup requires your explicit click.
+
+## Review evidence and limits
+
+Open a company row to see criterion-level assessments, exact saved passages, source-page links and retrieval dates. For new real research, **Fits** requires every required check to be supported and independently model-verified, with exclusions ruled out; **Needs verification** preserves missing or uncertain checks. The citation gate checks the passage against the saved company page. Semantic entailment remains a model judgment, not independent real-world confirmation. Your accept or reject decision is separate and never establishes buying intent.
+
+New qualification policies from 18 October use the search result's found page within the existing page cap, prevent a hedged claim from establishing an unhedged check, and allow one bounded verification follow-up for omitted judgments. Unsupported quotes remain diagnostics instead of customer evidence. Excerpt-gap recovery keeps a verbatim fragment from a saved page; that fragment still needs independent verification. In the saved comparison, the quotes run established 4 of 6 required checks across three records, compared with 2 of 4 in the first run. The subsets differ; this is not a controlled accuracy benchmark. The later menus run still left one required check unknown. See [the measured results and limits](docs/PROGRESS.md).
+
+Export the full shortlist or accepted results in CSV, JSON or Excel. Excel includes a Shortlist sheet and an Evidence sheet with passages, source links, dates and open questions. JSON keeps the complete technical record. See [customer exports](docs/customer-export.md).
+
+Real runs can return fewer than three usable companies. Search and model providers may charge for failed requests as well as successful ones. Runs share bounded attempts, including repairs: at most four searches and eight model calls, with at most three saved pages per company. The default monthly search cap is 200 attempts in this database. It does not track your provider account's allowance across other databases or services. Check your account's quota and pricing before research. Local model inference uses your own hardware; model licences are separate from this repository's MIT licence.
+
+Local research, reviews, source snapshots and diagnostic model output stay in the configured SQLite database. Backups and exports can contain business research. Real research sends queries to your search provider, page requests to source sites, and supplied page excerpts and targeting criteria to the selected model server. A hosted model receives those inputs outside your computer. Optional Brandfetch sends typed company searches and domain requests from the browser when configured. Sample data makes no provider requests. The local app trusts one operator on loopback; do not expose it publicly.
+
+## Contributor checks
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the backend, Ruff and browser checks. [Checks](https://github.com/adkbbx/GTM_Shortlist/actions/workflows/checks.yml) and [Package](https://github.com/adkbbx/GTM_Shortlist/actions/workflows/package.yml) show actual CI results. A workflow link is not a claim that the current revision passed. Report vulnerabilities through [SECURITY.md](SECURITY.md). The open-source core uses the [MIT licence](LICENSE); hosted operations and provider licences are separate.
 
 ## Guided local UI
-
-```sh
-npm ci
-python scripts/export_schema.py
-npm run schema
-npm run build
-shortlist serve --port 8014 --open
-```
-
-Open `http://127.0.0.1:8014`. Until a model and search key are set up, the start page shows a two-step setup card. **Try it with sample data** on that card runs the whole flow (offer, market, target, discovery, evidence, review and export) on invented companies from `src/shortlist/sample.py`, with no keys, searches or page fetches. Sample runs are labelled on every screen and in every export, and cannot be reused for real research.
-
-This command starts and supervises the API and durable worker together. If either exits, both stop; restarting preserves saved jobs and uncertain-dispatch protection. The API serves the built UI. `npm run dev` starts the frontend dev server on port 5174 with an API proxy. Use the project virtual environment for Python commands.
-
-`npx playwright install chromium` then `npm run test:ui` exercises the production build at 1366px laptop and 390px phone, plus 320px and 200% text sizing. It uses the actual API, worker, SQLite, review and download code with explicitly labelled synthetic providers. The test server is not a real discovery service. Screenshots are saved under `.impeccable/review/`. Generated TypeScript and runtime JSON validation schemas come from the Python API contracts.
 
 The research view shows persisted, timestamped checkpoints, actual saved page/company counts, source reuse, repairs and failures. Worker availability is heartbeat-based; an offline worker produces a clear waiting state. Requests poll serially, so slow responses cannot overwrite newer progress. No fabricated percentage or ETA is shown. Completed activity remains in the saved history. Older runs without events are labelled accordingly.
 

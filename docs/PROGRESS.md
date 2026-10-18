@@ -1,5 +1,27 @@
 # Progress and handoff
 
+## 18 October, reader readiness for a public post
+
+Audit and command-by-command evidence: [READER_READINESS.md](READER_READINESS.md). Baseline `18081e3`, branch `claude/signal-landing`.
+
+- README now leads with the key-free sample and complete Windows/POSIX source setup. It identifies the implementation branch, separates the pending package release, explains both provider requirements and saved-Tavily precedence, and documents local storage, outbound data, database-local caps and provider costs.
+- The qualification explanation uses only the measured results in the previous top section. It distinguishes exact quotation grounding, independent model judgment and human acceptance. No controlled accuracy improvement or post-fix historical fit is claimed.
+- Phone inspection found sample entry below both provider steps. The existing action now precedes them. The browser regression requires it fully in the initial viewport on phone and laptop, uses keyboard start/confirmation/review, checks persisted acceptance after reload, and inspects a one-company labelled accepted-only CSV.
+- Added CONTRIBUTING.md, SECURITY.md using the existing general contact address, and licence/actual workflow links. Mailbox monitoring and remote CI status are unverified. A repeatable local reader-link check now runs in core CI.
+
+Verification:
+- Ruff: `PYTHONPATH=src .venv/Scripts/python.exe -m ruff check .` prints `All checks passed!`.
+- Full backend (reviewer, normal Windows session): 713 passed, 48 skipped, 0 failed.
+- TypeScript and Vite production build pass after the UI change. npm is unavailable in PATH, so their installed CLIs ran through the available Node executable.
+- Full browser suite after the sample-row reorder (reviewer, normal Windows session): 153 passed, 3 intentional phone-project large-screen skips, 0 failed. The sandbox could not use native DPAPI, which is why native credential scenarios failed there only.
+- After the reorder, 20 affected model/settings/modal/Brandfetch checks passed. The two strengthened sample checks initially expected lowercase “accepted” in CSV; the export correctly uses “Accepted”. After correcting the assertion, both sample checks pass, 2 passed. The 22 affected checks are covered across those runs. The full suite was not rerun after this one-row move; its four native failures remain blockers.
+- Inspected final 1366 × 900 and 390 × 844 setup/results/evidence/review screenshots. Sample entry is visible without scrolling; captured stages assert no horizontal overflow. Existing keyboard, 320px/200% text and modal checks ran.
+- An isolated source-launcher check with no provider settings passed API/worker/UI startup, sample confirmation, three records and labelled JSON export. Its browser-open call was stubbed to inspect the loopback URL. It used a temporary database.
+- Thirty reader-document local links pass. The retained landing-demo playback command passes. The README dependency command passed with indexes and version checks disabled, all pinned dependencies already satisfied. This is not a clean-install claim.
+- Every remaining README command has an execution result or an exact limitation in the readiness report. This Windows sandbox lacks a usable system Python launcher and npm; the existing .venv is a junction outside this worktree and was not recreated or given a new editable install. Fresh downloads, POSIX installation, uvx/pipx package installation and remote CI were not attempted under the no-fetch rule.
+
+Unfinished: rerun native credential and complete UI checks in a normal OS-user session; verify fresh source installs and release CI; make the reviewed changes public; configure/publish and verify PyPI if that route is advertised; confirm the security mailbox is monitored. Hosted account/email/deployment validation, any bounded live research evaluation, demo recording and final post wording require the user. The gate remains not green. No provider calls, saved-database edits, commits, pushes, branch changes or publishing occurred.
+
 ## 18 October, shortlisting reliability: discovery, admission and qualification
 
 Diagnosis used saved evidence only (read-only copies of the local databases), with no search, fetch or model call.
