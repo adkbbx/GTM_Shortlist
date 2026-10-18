@@ -183,3 +183,107 @@ def test_worker_real_database_flow(tmp_path, example):
     assert source.text in exported
     assert "accepted" in exported
     assert "Human acceptance is not buying intent" in exported
+
+
+@pytest.fixture
+def gap_pages(example):
+    """Labelled synthetic pages with two separated observations, never captured company facts."""
+    profile, home = example
+    text = "Our partners sell AI software.\nUnquoted intervening content.\nWe train partners through our academy."
+    page = home.model_copy(update={"id": "partners", "url": "https://example.com/partners", "text": text})
+    return profile, home, page
+
+
+def test_excerpt_gap_selects_longest_fragment_and_reattributes(gap_pages):
+    from shortlist.domain import Evidence
+    from shortlist.providers import cited
+    _, home, page = gap_pages
+    quote = "Our partners sell AI software.\n…\nWe train partners through our academy."
+    evidence = Evidence(source_id=home.id, passage=quote, claim="The company trains partners.")
+    result = cited(evidence, (home, page), "example.com")
+    assert result.source_id == page.id
+    assert result.passage == "We train partners through our academy."
+    assert result.passage in page.text and "…" not in result.passage
+    assert evidence.passage == quote  # The journaled proposal stays unchanged.
+
+
+def test_excerpt_gap_prefers_cited_page_and_restores_verbatim_characters(gap_pages):
+    from shortlist.domain import Evidence
+    from shortlist.providers import cited
+    _, home, page = gap_pages
+    text = "Our partners’ academy offers\nAI training."
+    page = page.model_copy(update={"text": text})
+    duplicate = home.model_copy(update={"text": text})
+    evidence = Evidence(source_id=page.id, passage="Invented fragment.\n…\nOur partners' academy offers AI training.",
+                        claim="Partners receive training.")
+    result = cited(evidence, (duplicate, page), "example.com")
+    assert result.source_id == page.id and result.passage == text
+
+
+@pytest.mark.parametrize("quote", ["AI software\n…\nFor partners", "Invented long passage here.\n…\nTraining"])
+def test_excerpt_gap_refuses_short_or_absent_fragments(gap_pages, quote):
+    from shortlist.domain import Evidence
+    from shortlist.providers import cited
+    _, home, page = gap_pages
+    result = cited(Evidence(source_id=home.id, passage=quote, claim="Partners receive training."),
+                   (home, page), "example.com")
+    assert result == "quoted passage could not be found in source"
+
+
+def test_excerpt_gap_never_joins_fragments_or_uses_another_company(gap_pages):
+    from shortlist.domain import Evidence
+    from shortlist.providers import cited
+    _, home, page = gap_pages
+    quote = "Our partners sell AI software.\n…\nWe train partners through our academy."
+    evidence = Evidence(source_id=home.id, passage=quote, claim="The company trains partners.")
+    other = page.model_copy(update={"company_domain": "other.example", "url": "https://other.example/"})
+    assert isinstance(cited(evidence, (home, other), "example.com"), str)
+    joined = page.model_copy(update={"text": "Our partners sell AI software. We train partners through our academy."})
+    result = cited(evidence, (home, joined), "example.com")
+    assert result.passage == "We train partners through our academy."
+    assert result.passage != joined.text
+
+
+def test_excerpt_gap_recovery_still_needs_independent_verification(gap_pages):
+    from shortlist.verification import Verification, apply_verification
+    profile, home, page = gap_pages
+    raw = {"name": "Example", "findings": [{"criterion_id": "ai", "status": "supported", "evidence": [{
+        "source_id": home.id, "passage": "Our partners sell AI software.\n…\nWe train partners through our academy.",
+        "claim": "The company trains partners."}]}]}
+    record = validate_extraction(raw, profile, "example.com", (home, page))
+    assert record.findings[0].evidence[0].passage == "We train partners through our academy."
+    assert apply_verification(profile, record, Verification(judgments=[])).findings[0].status == "unknown"
+
+
+def test_excerpt_gap_keeps_real_sentence_ellipsis(gap_pages):
+    from shortlist.domain import Evidence
+    from shortlist.providers import cited
+    _, home, _ = gap_pages
+    page = home.model_copy(update={"text": "Our partners… receive AI software training."})
+    evidence = Evidence(source_id=page.id, passage="Our partners... receive AI software training.",
+                        claim="Partners receive training.")
+    assert cited(evidence, (page,), "example.com") == evidence
+
+
+@pytest.mark.parametrize("fragment,kept", [("12345678901234", False), ("123456789012345", True)])
+def test_excerpt_gap_fifteen_character_boundary(gap_pages, fragment, kept):
+    from shortlist.domain import Evidence
+    from shortlist.providers import cited
+    _, home, _ = gap_pages
+    page = home.model_copy(update={"text": fragment})
+    evidence = Evidence(source_id=page.id, passage=fragment + "\n…\nAbsent fragment long enough.", claim="Fixture claim.")
+    result = cited(evidence, (page,), "example.com")
+    assert (not isinstance(result, str)) is kept
+    if kept:
+        assert result.passage == fragment
+
+
+def test_excerpt_gap_longest_fragment_wins_over_shorter_cited_page(gap_pages):
+    from shortlist.domain import Evidence
+    from shortlist.providers import cited
+    _, home, page = gap_pages
+    home = home.model_copy(update={"text": "Our partners sell AI software."})
+    evidence = Evidence(source_id=home.id, passage=home.text + "\n…\nWe train partners through our academy.",
+                        claim="Fixture partner training claim.")
+    result = cited(evidence, (home, page), "example.com")
+    assert result.source_id == page.id and result.passage == "We train partners through our academy."

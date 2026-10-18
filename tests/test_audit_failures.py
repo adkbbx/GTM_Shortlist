@@ -79,7 +79,7 @@ def test_audit_reads_all_runs_and_stages_without_writing(auditor, labelled_datab
         opened.append(url)
         return connect(url, **kwargs)
 
-    monkeypatch.setattr(auditor.sqlite3, "connect", read_only)
+    monkeypatch.setattr("shortlist.saved_runs.sqlite3.connect", read_only)
     report = auditor.audit([labelled_database, labelled_database])
     assert report["databases"] == 2 and report["runs"] == 4 and report["records"] == 2
     assert report["occurrences"] == 16

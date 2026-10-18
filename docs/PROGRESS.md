@@ -115,7 +115,7 @@ Changes after the quote run:
 - **Omitted judgments.** Policy 3 allows one follow-up verification for assessments the verifier left out, within the run's model-call cap.
 - **Compact excerpts.** Long runs of short menu lines are removed without joining text across them. Measured on 38 saved company page sets, content share rose from 80% to 84%. Every verified passage in saved records is still sent except Front's "Channel Partnerships" menu label, the false-fit evidence. `scripts/check_excerpts.py` repeats the comparison on read-only saved databases without provider calls.
 
-**Not done:** Hitachi Energy re-run with menu removal, which needs model calls and the user's approval. Follow-up verification has only been tested with fixtures.
+**Saved menus run inspected offline:** the run is present in `research-run-2026-10-18-menus.sqlite3`; its measured outcome and the remaining verification limit are recorded below.
 
 - **Offline verification.** Full backend suite: 665 passed, 48 skipped; Ruff passes. No provider calls were made.
 
@@ -142,6 +142,55 @@ Changes after the quote run:
 
 - **Verification.** Full backend suite: 699 passed, 48 skipped; Ruff passes. Both saved-evidence scripts complete on all four databases, read-only, with their SHA-256 hashes unchanged. No provider calls were made.
 - **Review.** Reviewed `058b824..HEAD` and the complete final diff for passage grounding, required fit checks, domain-tied identities, provider caps, checkpoint policy gates, immutable saved evidence and export isolation. The two fixes above are in `src/shortlist/worker.py:82` and `:395`; both have reproducing regression tests. No further findings.
+
+**Measured across the five evaluation runs** (`scripts/compare_research_runs.py`, saved databases opened with `mode=ro`, no provider calls). All use seller Unifyr and the same six-company channel-partner candidate pool: Channel Institute, Channeltivity, Front, Hitachi Energy, Lumen and NICE. Set-asides and bounded calls mean different subsets reached research. Keys below omit the shared `research-run-channel-partner-` prefix and `-2026-10-18` suffix; the first key is `research-run-channel-partner-2026-10-18`.
+
+| Run | Policy | Attempted | Refused | Records | Fits | Required attempted | Established | Quote lost | Hedge lost | Verification lost | No observation | Model / fetch / search |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| First | 2 | 5 | 3 | 2 | 1 | 4 | 2 | 0 | 0 | 2 | 0 | 5 / 15 / 0 |
+| repeat | 2 | 4 | 3 | 1 | 1 | 2 | 2 | 0 | 0 | 0 | 0 | 5 / 5 / 0 |
+| policy3 | 3 | 3 | 0 | 3 | 0 | 6 | 1 | 2 | 1 | 1 | 1 | 6 / 3 / 0 |
+| quotes | 3 | 3 | 0 | 3 | 2 | 6 | 4 | 1 | 0 | 0 | 1 | 6 / 11 / 0 |
+| menus | 3 | 1 | 0 | 1 | 0 | 2 | 1 | 1 | 0 | 0 | 0 | 3 / 3 / 0 |
+
+Attempted means saved records plus candidate refusals with a saved source or fetch/model attempt, excluding pre-fetch admission refusals and budget-stopped candidates with neither a record nor refusal. Required attempted is records times required criteria. Established means supported with an entailed saved verification judgment. Loss groups count final required findings once, without counting rejected-quote diagnostics again. Other unknown and contradicted counts are zero in every run. Calls count all attempt rows, including failures. Fits preserve saved qualification, including Front's previously identified false fit in the repeat run; this is historical measurement, not a new semantic evaluation.
+
+- Refusals after research began fell from 3/5 (60%) in the first run and 3/4 (75%) in repeat to 0/3 in policy3, 0/3 in quotes and 0/1 in menus. Across the two earlier runs this is 6/9, versus 0/7 across the later three. The subsets differ, so this does not establish a controlled causal effect.
+- Required checks established per saved company rose from 2/2 (1.00) in the first run to 4/3 (1.33) in quotes. Saved fits rose from 1 to 2 in those runs; menus assessed only Hitachi Energy and saved no fit. No run made a search.
+- Hitachi Energy menus run measured 3 fetches, 3 model calls, 0 searches. Training is supported and verified: "As a partner of choice in CPP, we empower strategic partners with the tools, training, and support needed...". Its partner-programme check was lost to a quote spanning an excerpt gap.
+
+**Excerpt-gap recovery.** Citation grounding now splits only a standalone `…` separator line and keeps the longest matching fragment of at least 15 characters from the company's own saved pages, preferring the cited page for that fragment. It stores an original page substring, including the page's punctuation and spacing, and never joins fragments. Compact research and verification instructions prohibit quotes across the separator. Journaled input dictionaries, identity rules and required-check qualification rules are unchanged. An offline check of the real menus rejection recovers a 326-character verbatim fragment without changing the original proposal. This is grounding recovery only; independent verification must still judge that fragment before the check can be established. No new inference was run and no saved finding was rewritten.
+
+
+**Verification for excerpt gaps and measured comparison.** Commands used `PYTHONPATH=src .venv/Scripts/python.exe`.
+- Ruff: `-m ruff check .` printed `All checks passed!`.
+- Full pytest: `-m pytest -q -p no:cacheprovider` finished with 713 passed, 48 skipped.
+- Focused checks: `-m pytest -q -p no:cacheprovider tests/test_providers.py tests/test_compare_research_runs.py tests/test_audit_failures.py -k "excerpt_gap or compare_research_runs or sealed_database or audit"` finished with 40 passed, 47 deselected.
+- Both `scripts/compare_research_runs.py` and `scripts/audit_failures.py` completed on the three requested databases. The audit measured 5 runs, 10 records and 22 overlapping occurrences; the comparison counts distinct required findings instead. The shared reader uses `mode=ro`, with an immutable fallback only when a sealed database has no WAL. A fixture proves an existing WAL is never ignored.
+- Final review covered the complete diff and new files against AGENTS.md. Recovered passages are original page substrings; fragments are never joined; foreign-company pages remain refused; verification, identity and required-check rules remain intact. Journaled input dictionaries are unchanged. Review fixes restored original punctuation/spacing when normalized fragments match and handled the menus database's missing sidecars without writing. No provider calls, commits or saved-database changes.
+
+Permitted full-suite failures in `tests/test_local_credentials.py`:
+- `test_actual_private_storage_roundtrip_and_separate_process`
+- `test_concurrent_replacement_is_complete_and_failed_write_keeps_old_key`
+- `test_corruption_fails_closed_and_dynamic_settings_never_mutate_original`
+- `test_local_key_boundary_never_echoes_or_overwrites_on_rejection`
+- `test_next_worker_run_loads_new_key_without_restarting_original_settings`
+- `test_corrupt_payload_keeps_startup_and_setup_available_without_provider_dispatch`
+- `test_real_process_death_recovers_the_last_committed_private_key[False]`
+- `test_real_process_death_recovers_the_last_committed_private_key[True]`
+
+Permitted full-suite failures in `tests/test_local_model_setup.py`:
+- `test_model_and_search_persist_independently_and_next_run_reads_replacement`
+- `test_model_api_is_local_bounded_never_echoes_and_makes_no_network_request`
+- `test_next_worker_uses_saved_model_and_failed_replacement_keeps_previous`
+
+Saved-database SHA-256 before and after:
+- `research-run-2026-10-18.sqlite3`: `00dde2731383ad5995d1cfbd441241061d4057393309c61994840fdf1a660438`
+- `research-run-2026-10-18-quotes.sqlite3`: `407c894096a4757587d8cfd167a2c87cf48d32b48193a2be477f86de57524b19`
+- `research-run-2026-10-18-menus.sqlite3`: `d5511fc868b015795c508e76ed8d00359d696007a4f0f7db4f98c5701648e865`
+
+**Remaining:** the recovered Hitachi Energy partner-programme fragment has not received a new independent model judgment. Saved evaluation results are immutable and do not claim a post-fix fit.
+
 
 ## 18 October, drafts before signup (hosted, off by default)
 

@@ -2,9 +2,10 @@
 import argparse
 import json
 import re
-import sqlite3
 from contextlib import closing
 from pathlib import Path
+
+from shortlist.saved_runs import read_only_database
 
 
 def group_reason(reason: str) -> str:
@@ -50,7 +51,7 @@ def audit(paths: list[Path]) -> dict:
         stages[stage] = stages.get(stage, 0) + 1
 
     for path in paths:
-        with closing(sqlite3.connect("file:" + str(path) + "?mode=ro", uri=True)) as db:
+        with closing(read_only_database(path)) as db:
             for run_id, payload in db.execute("SELECT id,checkpoint FROM runs ORDER BY rowid"):
                 runs += 1
                 checkpoint = json.loads(payload)

@@ -26,6 +26,26 @@ def quoted_in(passage: str, text: str) -> bool:
     marks, dashes and ellipses may differ."""
     return grounding_text(passage) in grounding_text(text)
 
+
+def verbatim_quote(passage: str, text: str) -> str | None:
+    """Locate a normalized quote while returning only the original page's characters."""
+    characters, offsets = [], []
+    for index, char in enumerate(text):
+        if unicodedata.category(char) == "Cf":
+            continue
+        for visible in char.translate(QUOTE_MARKS):
+            if visible.isspace():
+                if not characters or characters[-1] == " ":
+                    continue
+                visible = " "
+            characters.append(visible)
+            offsets.append(index)
+    quote = grounding_text(passage)
+    start = "".join(characters).find(quote)
+    if not quote or start < 0:
+        return None
+    return text[offsets[start]:offsets[start + len(quote) - 1] + 1]
+
 DIRECTORIES = frozenset({"linkedin.com", "crunchbase.com", "g2.com", "capterra.com", "ycombinator.com",
                          "techcrunch.com", "wellfound.com", "producthunt.com", "tracxn.com", "github.com",
                          "wikipedia.org", "wikidata.org", "definitions.net", "thefreedictionary.com",
