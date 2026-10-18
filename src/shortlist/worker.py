@@ -34,9 +34,11 @@ from shortlist.providers import (
     queries_for,
 )
 from shortlist.relevance import (
+    SERVICE_EXCLUSION,
     CompanyPageError,
     candidate_issue,
     primary_source_issue,
+    product_target,
     record_issue,
     research_entry,
 )
@@ -233,12 +235,17 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                     seller_inputs = {"source": source.model_dump(mode="json"), "model": settings.gemma_model,
                                      "endpoint": settings.gemma_base_url, **prompt_inputs()}
                     protocol = checkpoint.get("seller_output_protocol", 1)
+                    draft_policy = checkpoint.get("seller_draft_policy", 3)
+                    if draft_policy >= 4:
+                        seller_inputs["draft_policy"] = draft_policy
                     if protocol != 1:
                         seller_inputs["output_protocol"] = protocol
                     draft = call("model", model.name, "seller:model",
-                                 lambda: model.seller(source, output_protocol=protocol) if isinstance(model, Gemma)
+                                 lambda: model.seller(source, output_protocol=protocol, draft_policy=draft_policy) if isinstance(model, Gemma)
                                  else model.seller(source), seller_inputs, SellerDraft.model_validate)
                     checkpoint["draft"] = draft.model_dump(mode="json")
+                    if checkpoint.get("seller_draft_policy", 3) >= 4 and product_target(draft.target):
+                        checkpoint["draft_exclusions"] = [SERVICE_EXCLUSION]
                     store.checkpoint(run_id, fence, "seller", checkpoint)
                 if checkpoint.get("experience_version", 1) == 2:
                     explore_market(draft)
@@ -278,7 +285,14 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 completed_queries.append(index)
                 checkpoint.update(discovered=discovered, completed_queries=completed_queries)
                 store.checkpoint(run_id, fence, "discovery", checkpoint)
-            unique = {c["domain"]: c for c in reversed(discovered)}
+            admitted = []
+            for data in discovered:
+                candidate = Candidate.model_validate(data)
+                if discovery_policy >= 4 and (issue := candidate_issue(candidate, target=profile.target, policy=discovery_policy)):
+                    reject_candidate(candidate, issue, "discovery")
+                else:
+                    admitted.append(data)
+            unique = {c["domain"]: c for c in reversed(admitted)}
             set_aside = sorted(domain for domain in unique if domain in earlier)
             candidates, selection = prioritize(profile, [Candidate.model_validate(c) for c in reversed(list(unique.values()))
                                                          if c["domain"] not in earlier][:12])
@@ -302,7 +316,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 saved_sources = checkpoint.setdefault("sources", {})
                 if candidate.domain in checkpoint.get("candidate_failures", {}):
                     continue
-                if issue := candidate_issue(candidate):
+                if issue := candidate_issue(candidate, target=profile.target, policy=discovery_policy):
                     reject_candidate(candidate, issue, "selection")
                     continue
                 if candidate.domain in saved_sources:
@@ -366,7 +380,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 continue
             if len(store.get_run(run_id)["records"]) >= checkpoint.get("company_limit", 3):
                 break
-            if issue := candidate_issue(candidate):
+            if issue := candidate_issue(candidate, target=profile.target, policy=discovery_policy):
                 reject_candidate(candidate, issue, "research")
                 continue
             saved_sources = checkpoint.setdefault("sources", {})
@@ -387,6 +401,11 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                     reject_candidate(candidate, issue, "research")
                     continue
                 # Initial-page links define the entire follow-up frontier. Never recurse.
+                if discovery_policy >= 4:
+                    primary_candidate = candidate.model_copy(update={"name": sources[0].title, "excerpt": sources[0].text[:600]})
+                    if issue := candidate_issue(primary_candidate, target=profile.target, policy=discovery_policy):
+                        reject_candidate(candidate, issue, "research")
+                        continue
                 completed_pages = checkpoint.setdefault("completed_pages", {}).setdefault(candidate.domain, [])
                 failures = checkpoint.setdefault("page_failures", {}).setdefault(candidate.domain, {})
                 # Policy 3 also reads the page search found when research started from the homepage instead. The

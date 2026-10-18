@@ -1,9 +1,10 @@
 {
- "note": "Real web search results (Tavily) saved by local research runs between 13 and 16 October 2026: discovery ('search') and competitor ('market') searches. URLs and titles only; search queries and excerpts are omitted. Labels were assigned by hand from the URL and title on 18 October 2026, not by a model. 'company' is an operating company's own page that identifies it (homepage, product, pricing or service page). 'not_company' is a page that cannot be a candidate company (publishers, lists and databases, job posts, video, market reports, government and education, glossaries, forums). 'editorial' is a blog post, guide or list hosted on an operating vendor's own site: the domain is a company, but the page is content about a topic.",
+ "note": "Real web search results (Tavily) saved by local research runs between 13 and 16 October 2026: discovery ('search') and competitor ('market') searches. URLs and titles only; search queries and excerpts are omitted. Labels were assigned by hand from the URL and title on 18 October 2026, not by a model. 'company' is an operating company's own page that identifies it (homepage, product, pricing or service page). 'not_company' is a page that cannot be a candidate company (publishers, lists and databases, job posts, video, market reports, government and education, glossaries, forums). 'editorial' is a blog post, guide or list hosted on an operating vendor's own site: the domain is a company, but the page is content about a topic. The reported_ui entry is supplied by the product owner on 18 October, not a saved provider response. target_company annotates product identities described by the saved titles; service_provider annotates explicit services descriptions. These annotations do not establish other fit criteria.",
  "counts": {
   "company": 21,
   "editorial": 37,
-  "not_company": 46
+  "not_company": 46,
+  "service_provider": 1
  },
  "results": [
   {
@@ -16,25 +17,29 @@
    "url": "https://prismatic.io/",
    "title": "Embedded iPaaS for B2B Software Companies | Prismatic",
    "search": "search",
-   "label": "company"
+   "label": "company",
+   "target_company": true
   },
   {
    "url": "https://b2bhub.ltd/",
    "title": "B2B Hub | AI-Native Business Operating System",
    "search": "search",
-   "label": "company"
+   "label": "company",
+   "target_company": true
   },
   {
    "url": "https://tandemworks.ai/",
    "title": "TandemWorks | Agentic AI for B2B Revenue Teams",
    "search": "search",
-   "label": "company"
+   "label": "company",
+   "target_company": true
   },
   {
    "url": "https://siesta.ai/",
    "title": "Siesta AI | Context-Native Enterprise AI Platform",
    "search": "search",
-   "label": "company"
+   "label": "company",
+   "target_company": true
   },
   {
    "url": "https://backofficeboss.ai/",
@@ -46,13 +51,15 @@
    "url": "https://freshify.io/pricing",
    "title": "Pricing — Freshify software products",
    "search": "search",
-   "label": "company"
+   "label": "company",
+   "target_company": true
   },
   {
    "url": "https://www.happyfox.com/crm/pricing/",
    "title": "HappyFox CRM Pricing | Plans for B2B SaaS Teams",
    "search": "search",
-   "label": "company"
+   "label": "company",
+   "target_company": true
   },
   {
    "url": "https://delegatezero.com/",
@@ -275,7 +282,8 @@
    "url": "https://www.paloaltonetworks.com/",
    "title": "Leader in Cybersecurity Protection & Software for the Modern Enterprises",
    "search": "market",
-   "label": "company"
+   "label": "company",
+   "target_company": true
   },
   {
    "url": "https://www.iqvia.com/",
@@ -327,7 +335,8 @@
    "url": "https://www.salesforce.com/sales/partner-relationship-management/software",
    "title": "Best Partner Relationship Management (PRM) Software | Salesforce",
    "search": "search",
-   "label": "company"
+   "label": "company",
+   "target_company": true
   },
   {
    "url": "https://www.youtube.com/watch?v=qxKO-Hr85vA",
@@ -346,7 +355,8 @@
    "url": "https://widelly.com/revenue-operations/gtm-operations",
    "title": "GTM Operations Services | Go-to-Market RevOps | Widelly",
    "search": "search",
-   "label": "company"
+   "label": "company",
+   "service_provider": true
   },
   {
    "url": "https://startup.jobs/head-of-revenue-operations-inspiren-7097870",
@@ -675,6 +685,15 @@
    "title": "The Latest Trends In SaaS B2B Marketing.",
    "search": "market",
    "label": "editorial"
+  },
+  {
+   "url": "https://mikesonders.com/",
+   "title": "Mike Sonders | Digital Marketing Consultant",
+   "search": "reported_ui",
+   "label": "service_provider",
+   "service_provider": true,
+   "target": "B2B and SaaS companies seeking to make their customer acquisition more predictable.",
+   "note": "Product-owner supplied UI title on 18 October. No page fetch or passage invented."
   }
  ]
 }

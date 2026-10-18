@@ -37,7 +37,7 @@ async function fixture(page: Page, unconfirmed = false) {
       const signed = session(now() + 3600, url.searchParams.get('grant_type') ?? 'signin');
       return route.fulfill({ headers, json: unconfirmed ? { ...signed, user: { ...signed.user, email_confirmed_at: null } } : signed });
     }
-    if (url.pathname.endsWith('/signup')) return route.fulfill({ headers, json: { user: session().user, session: null } });
+    if (url.pathname.endsWith('/signup')) return route.fulfill({ headers, json: { user: { ...session().user, email_confirmed_at: null, identities: [{ id: userId, provider: 'email', user_id: userId }] }, session: null } });
     if (url.pathname.endsWith('/user')) return route.fulfill({ headers, json: session().user });
     return route.fulfill({ headers, json: {} });
   });
@@ -246,4 +246,24 @@ test('account tray hides details and stays stable while credits load', async ({ 
   await page.mouse.click(1, (page.viewportSize()?.height ?? 844) / 2);
   await expect(tray).not.toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('existing-account signup offers sign-in with the email preserved', async ({ page }, info) => {
+  await fixture(page);
+  await page.route(`${authOrigin}/auth/v1/signup**`, route => route.fulfill({ json: { user: session().user, session: null } }));
+  await page.goto('/?auth=signup');
+  await page.getByLabel('Email', { exact: true }).fill('fixture@example.test');
+  await page.getByLabel('Password', { exact: true }).fill('labelled-fixture-password');
+  await page.getByRole('button', { name: 'Create account', exact: true }).press('Enter');
+  await expect(page.getByRole('alert')).toHaveText('An account already exists for this email. Sign in instead, or reset your password.');
+  await expect(page.getByRole('heading', { name: 'Check your inbox' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Resend confirmation email' })).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+  await capture(page, `.impeccable/review/${info.project.name}-existing-account.png`);
+  await page.getByRole('button', { name: 'Back to sign in', exact: true }).press('Enter');
+  await expect(page.getByRole('heading', { name: 'Sign in to your shortlist' })).toBeVisible();
+  await expect(page.getByLabel('Email', { exact: true })).toHaveValue('fixture@example.test');
+  await expect(page.getByLabel('Password', { exact: true })).toHaveValue('');
+  await page.getByRole('button', { name: 'Forgot password?', exact: true }).press('Enter');
+  await expect(page.getByLabel('Email', { exact: true })).toHaveValue('fixture@example.test');
 });

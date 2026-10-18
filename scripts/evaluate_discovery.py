@@ -11,18 +11,20 @@ from pathlib import Path
 
 from shortlist.domain import Source
 from shortlist.providers import candidates_from_results
-from shortlist.relevance import primary_source_issue, research_entry
+from shortlist.relevance import candidate_issue, primary_source_issue, research_entry
 
 FIXTURE = Path(__file__).resolve().parents[1] / "examples/evaluation/discovery-admission.json"
 
 
-def outcome(result: dict, policy: int) -> tuple[str, str | None]:
+def outcome(result: dict, policy: int, admission_policy: int = 3) -> tuple[str, str | None]:
     """'research' (reaches research), 'wasted' (fetched, then rejected) or 'skipped' (never fetched), with the URL used.
     Policy 1 fetches the page as found; policy 2 starts research from `research_entry`."""
     admitted = candidates_from_results([{"url": result["url"], "title": result["title"]}], "labelled evaluation", "fixture", None)
     if not admitted:
         return "skipped", None
     candidate = admitted[0]
+    if candidate_issue(candidate, target=result.get("target", "B2B SaaS companies"), policy=admission_policy):
+        return "skipped", None
     url = research_entry(candidate.url, candidate.name) if policy >= 2 else candidate.url
     # The fetched page's own title is unknown offline; the search title stands in for it.
     page = Source(url=url, company_domain=candidate.domain, title=candidate.name, text="Labelled evaluation page",

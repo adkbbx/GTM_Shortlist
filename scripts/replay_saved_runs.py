@@ -55,7 +55,7 @@ def replay(path: str) -> dict:
             candidate = found.get(research.domain) or Candidate(
                 domain=research.domain, url=research.sources[0].url if research.sources else f"https://{research.domain}/",
                 name=research.name, query=profile.target, provider="saved")
-            if issue := candidate_issue(candidate):
+            if issue := candidate_issue(candidate, target=profile.target):
                 outcome = f"{research.qualification} -> {after}; now refused before research: {issue}"
                 totals["credits_saved:not_a_company_page"] += 1
             elif research.domain in seen[seller]:

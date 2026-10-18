@@ -7,7 +7,10 @@ from datetime import UTC, datetime, timedelta
 from shortlist.domain import Candidate, Criterion, Source
 from shortlist.fetch import domain_of
 from shortlist.providers import ProviderError, SellerDraft, validate_extraction
+from shortlist.relevance import SERVICE_EXCLUSION
 from shortlist.verification import Judgment, Verification, assessments
+
+SOFTWARE_ONLY = "TEST FIXTURE: We sell our own software, not agency, consulting or freelance services."
 
 
 class FixtureSearch:
@@ -40,6 +43,7 @@ def fixture_fetch(url, expected_domain=None):
         "We provide artificial intelligence software for business operations as a hosted subscription. "
         "Example Labs is a privately held startup. No buying intent has been observed."
     )
+    text += " " + SOFTWARE_ONLY
     yesterday = (datetime.now(UTC) - timedelta(days=1)).date().isoformat()
     if expected_domain != "activity-fixture.example" or url.endswith("/news"):
         text += f" On {yesterday}, we are hiring a sales manager."
@@ -129,8 +133,12 @@ class FixtureModel:
                     }
                 )
         exclusion_findings = []
-        for index, _ in enumerate(profile.exclusions):
-            if candidate.domain == "example-1.com":
+        for index, exclusion in enumerate(profile.exclusions):
+            if exclusion == SERVICE_EXCLUSION:
+                exclusion_findings.append({"exclusion_id": f"exclude-{index + 1}", "status": "cleared",
+                    "evidence": [{"source_id": sources[0].id, "passage": SOFTWARE_ONLY,
+                                  "claim": "Labelled synthetic company sells software rather than services."}]})
+            elif candidate.domain == "example-1.com":
                 passage = (
                     "Example Labs is headquartered in Canada."
                     if index == 0

@@ -29,7 +29,7 @@ export function ResearchProgress({ run, connected = true, localResearch = false 
     catch (error) { setResumeError(error instanceof Error ? error.message : 'Research could not resume. Try again.'); }
     finally { setResuming(false); }
   };
-  const { current, states, events, latest, pending, working } = researchStage(run);
+  const { current, states, events, latest, pending, working, reviewed, reviewComplete, reviewLabel } = researchStage(run);
   const displayed = viewedStage ?? current;
   const visibleEvents = viewedStage === null ? events : events.filter(event => stagePhases[displayed].includes(event.phase));
   const newestFirst = [...visibleEvents].reverse();
@@ -40,14 +40,14 @@ export function ResearchProgress({ run, connected = true, localResearch = false 
     {visibleEvents.length > 3 && <button type="button" className="text-button" aria-expanded={showOlderSteps} aria-controls="saved-checkpoint-list" onClick={() => setShowOlderSteps(value => !value)}>{showOlderSteps ? 'Hide older steps' : `Show ${visibleEvents.length - 3} older steps`}</button>}
   </section>;
   const currentState = run.termination ? 'Research stopped' : !connected ? 'Reconnecting'
-    : !pending ? current === 5 ? run.status === 'partial' ? 'Partial research saved' : 'Ready for your review' : run.status === 'partial' ? 'Research interrupted' : 'Waiting for you'
+    : !pending ? current === 5 ? reviewComplete ? 'Review complete' : reviewed ? reviewLabel : run.status === 'partial' ? 'Partial research saved' : 'Ready for your review' : run.status === 'partial' ? 'Research interrupted' : 'Waiting for you'
       : !run.progress.worker_online ? 'Research paused' : run.status === 'queued' ? 'Queued' : working ? 'Research active' : 'Saving progress';
   const status = run.termination ? 'Processing has stopped. Saved sources and assessments remain available.'
     : !connected ? 'Showing the last saved checkpoint while the connection recovers.'
       : !pending && run.status === 'partial' && current !== 5 ? run.error ?? 'Research was interrupted. Inspect the saved checkpoints for details.'
       : pending && !run.progress.worker_online ? localResearch ? 'Your run is saved. Resume research to continue from its saved progress.' : 'Your run is saved. Processing will continue when the research service reconnects.'
         : run.status === 'queued' ? 'Waiting for the worker to pick up your saved run.'
-          : current === 5 ? run.records.some(record => !record.source_issue) ? 'Open a company research sheet below to inspect sources and decide.' : 'No company records were saved. Review the checkpoints for details.'
+          : current === 5 && reviewed ? reviewLabel : current === 5 ? run.records.some(record => !record.source_issue) ? 'Open a company research sheet below to inspect sources and decide.' : 'No company records were saved. Review the checkpoints for details.'
             : latest?.label ?? 'Your saved research is ready to continue.';
   const companyCount = run.records.filter(record => !record.source_issue).length;
   const offer = run.profile?.offer ?? run.draft?.offer;
@@ -81,7 +81,7 @@ export function ResearchProgress({ run, connected = true, localResearch = false 
   if (pending) return sheet;
   const handoff = run.termination ? 'Research stopped' : current === 2
     ? offer ? 'Offer draft saved. Your confirmation is next.' : 'Offer summary unavailable. Enter your offer and target.'
-    : current === 5 ? `${companyCount} ${companyCount === 1 ? 'company' : 'companies'} saved for your review`
+    : current === 5 && reviewed ? reviewLabel : current === 5 ? `${companyCount} ${companyCount === 1 ? 'company' : 'companies'} saved for your review`
       : currentState;
   // While the target waits for confirmation, and once companies are ready for review, the history stays folded so the
   // decision is the first thing on the page. An interruption before review opens it to show what stopped.

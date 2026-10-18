@@ -29,8 +29,8 @@ export function eventStatus(event: ProgressEvent, latest: boolean, working: bool
 
 /** Stage words from research-stages.ts mapped to marks; null keeps the stage number. */
 export function stageStatus(state: string, working: boolean): Status | null {
-  if (state === 'Saved' || state === 'Saved with gaps') return 'ok';
-  if (state === 'Needs your input' || state === 'Your review') return 'you';
+  if (/^Reviewed (\d+) of \1 companies$/.test(state) || state === 'Saved' || state === 'Saved with gaps') return 'ok';
+  if (state.startsWith('Reviewed ') || state === 'Needs your input' || state === 'Your review') return 'you';
   if (state === 'Interrupted') return 'fail';
   if (state === 'Stopped') return 'stopped';
   if (state === 'Current stage' && working) return 'work';

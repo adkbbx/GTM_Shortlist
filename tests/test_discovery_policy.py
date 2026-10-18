@@ -89,7 +89,7 @@ def test_public_sector_sites_are_candidates_only_for_public_sector_searches():
     agency = candidate("https://www.labelledagency.org/", "SWANCC | Solid Waste Agency of Northern Labelled County")
     assert "Public-sector" in candidate_issue(agency)
     assert candidate_issue(agency.model_copy(update={"query": "municipal waste agencies company official website"})) is None
-    assert candidate_issue(candidate("https://acme.example/", "Acme | B2B Marketing Agency for SaaS")) is None
+    assert candidate_issue(candidate("https://acme.example/", "Acme | B2B Marketing Agency for SaaS"), policy=3) is None
 
 
 def test_filtered_listings_lists_and_reports_are_refused_but_company_titles_are_not():
@@ -144,7 +144,7 @@ def research_run(tmp_path, candidates, policy=2):
     profile = Profile(seller_url="https://seller.example", offer="Customer acquisition research", target="Business software",
                       criteria=(Criterion(id="software", description="Offers software"),))
     run_id = store.create_run(profile, "policy-two")
-    assert store.get_run(run_id)["checkpoint"]["discovery_policy"] == 3  # New runs use the new discovery behaviour.
+    assert store.get_run(run_id)["checkpoint"]["discovery_policy"] == 4  # New runs use the new discovery behaviour.
     fence = store.claim(run_id)
     store.checkpoint(run_id, fence, "research", {"discovery_policy": policy, "company_identity_policy": 1,
                                                  "candidates": [c.model_dump(mode="json") for c in candidates]}, "queued")
@@ -407,3 +407,29 @@ def test_policy_three_found_page_keeps_three_page_company_bound(tmp_path):
     assert fetched == ["https://company-0.example/", "https://company-0.example/partners/program", "https://company-0.example/about"]
     assert [source["url"] for source in record["sources"]] == fetched
     assert record["qualification"] == "fits"
+
+@pytest.mark.parametrize("policy", [3, 4])
+def test_policy_four_sets_aside_service_providers_before_fetch_and_keeps_legacy_runs(tmp_path, policy):
+    found = companies(2)
+    found[0] = found[0].model_copy(update={"name": "Labelled marketing consultant"})
+    store, run_id = research_run(tmp_path, found, policy=policy)
+    fetched, model = [], Model()
+    execute_run(store, Settings(db_path=store.path), run_id, model=model, fetch=readable(fetched))
+    saved = store.get_run(run_id)
+    if policy == 4:
+        assert "company-0.example" not in {r["research"]["domain"] for r in saved["records"]}
+        assert not any("company-0.example" in url for url in fetched)
+        assert saved["checkpoint"]["candidate_failures"]["company-0.example"]["reason"] == "Sells services to this market rather than being in it"
+    else:
+        assert len(saved["records"]) == 2
+
+
+def test_policy_four_checks_the_fetched_opening_before_inference(tmp_path):
+    store, run_id = research_run(tmp_path, companies(1), policy=4)
+    model, original = Model(), readable([])
+
+    def fetch(url, expected_domain=None):
+        return original(url, expected_domain).model_copy(update={"text": "Labelled is a consultant for SaaS companies."})
+
+    execute_run(store, Settings(db_path=store.path), run_id, model=model, fetch=fetch)
+    assert model.calls == 0 and not store.get_run(run_id)["records"]

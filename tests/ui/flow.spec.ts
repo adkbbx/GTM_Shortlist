@@ -614,7 +614,7 @@ test('saved seller → confirmation → evidence → review → export survives 
   await page.getByRole('button', { name: 'Edit what you sell' }).click();
   await expect(page.getByLabel('What do you sell?')).toBeFocused();
   await page.getByLabel('What do you sell?').fill('Test fixture edited offer: acquisition experiments for software businesses');
-  await page.getByRole('button', { name: 'Add exclusions' }).click();
+  await expect(page.getByLabel('Exclude from consideration')).toHaveValue('Agencies, consultancies or freelancers that sell services to these companies');
   await page.getByLabel('Exclude from consideration').fill('Companies headquartered in Canada\nPublicly listed companies');
   await page.getByRole('button', { name: 'Edit fit checks' }).click();
   const required = page.getByRole('checkbox', { name: 'Required', exact: true }).first();

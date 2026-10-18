@@ -44,8 +44,10 @@ from shortlist.relevance import (
     candidate_issue,
     ground_identity,
     primary_source_issue,
+    product_target,
     quoted_in,
     seller_marketing_criterion,
+    service_business,
     verbatim_quote,
 )
 from shortlist.selection import discussion_page
@@ -97,7 +99,7 @@ def candidates_from_results(results: list[dict], query: str, provider: str, sell
         excerpt = result.get("content") or result.get("snippet") or ""
         candidate = Candidate(domain=domain, name=str(title)[:300], url=url, query=query, provider=provider,
                               excerpt=excerpt[:3000] if isinstance(excerpt, str) else "")
-        if candidate_issue(candidate):
+        if candidate_issue(candidate, policy=3):
             continue
         seen.add(domain)
         candidates.append(candidate)
@@ -302,7 +304,28 @@ class CustomerDraft(BaseModel):
     unknowns: list[str] = Field(default_factory=list, max_length=12)
 
 
-def recover_customer_draft(data: dict) -> SellerDraft:
+def product_category(target: str) -> str | None:
+    if not product_target(target):
+        return None
+    head = CLAUSE_END.split(target, maxsplit=1)[0]
+    if re.search(r"\b(?:saas|software)\b", head, re.IGNORECASE):
+        return "Provides SaaS or business software as its own product"
+    if re.search(r"\bplatforms?\b", head, re.IGNORECASE):
+        return "Provides a platform as its own product"
+    if re.search(r"\bapps?\b", head, re.IGNORECASE):
+        return "Provides an app as its own product"
+    return None
+
+
+def own_product_check(text: str, category: str) -> bool:
+    words = r"(?:saas|software)" if "software" in category else r"platform" if "platform" in category else r"app"
+    return bool(re.search(r"\b" + words + r"s?\b", text, re.IGNORECASE)
+                and not service_business(text)
+                and not re.search(r"\b(?:works? with|serves?|uses?|using)\b|\b(?:to|for)\b.{0,60}\b" + words + r"s?\b",
+                                  text, re.IGNORECASE))
+
+
+def recover_customer_draft(data: dict, *, policy: int = 4) -> SellerDraft:
     """Keep valid summary fields; omit unsafe criteria without inference or invented replacements."""
     from shortlist.market import PRIVATE_CONDITION
 
@@ -337,6 +360,16 @@ def recover_customer_draft(data: dict) -> SellerDraft:
             reason = "Not a valid target-customer criterion. Write a clear customer characteristic."
         if reason:
             issues.append(DraftCriterionIssue(description=description, reason=reason))
+    category = product_category(summary.target) if policy >= 4 else None
+    if category:
+        defining = [c for c in criteria if own_product_check(c.description, category) and not rarely_public(c.description)]
+        if defining:
+            criteria = [c.model_copy(update={"required": True}) if c in defining else c for c in criteria]
+        else:
+            identifier = "target-product"
+            while identifier in seen:
+                identifier += "-own"
+            criteria.append(Criterion(id=identifier, description=category))
     if criteria and not any(c.required for c in criteria):
         # Every drafted check is rarely public: keep what the model marked required, because a target with no required
         # check can never establish fit. The confirmation advice still explains the trade-off.
@@ -640,7 +673,7 @@ class Gemma:
             raise ModelOutputError(content, [{"type": "output_truncated"}])
         return json_object(content)
 
-    def seller(self, source: Source, *, output_protocol: int = 3) -> SellerDraft:
+    def seller(self, source: Source, *, output_protocol: int = 3, draft_policy: int = 4) -> SellerDraft:
         if output_protocol not in (1, 2, 3):
             raise ProviderError("Unsupported seller output protocol")
         schema = CustomerDraft.model_json_schema() if output_protocol == 3 else SellerDraft.model_json_schema()
@@ -675,6 +708,10 @@ class Gemma:
                 "traits in unknowns. Do not invent pain, budget, buying intent, employee counts or geography. "
                 "Return zero to six concise customer criteria with distinct IDs. If no observable buyer characteristics "
                 "are supported, return an empty customer_criteria list and keep the offer summary. The human edits and confirms the target.")
+        if output_protocol == 3 and draft_policy >= 4:
+            instruction += (" The target's defining category must be a required check. For SaaS or software companies, "
+                            "check that the buyer sells its OWN software product, not services to software companies. "
+                            "B2B alone is insufficient. Ownership, funding and other rarely-public checks are nice to have.")
         compact = self.compact
         data = self.complete(
             instruction,
@@ -686,7 +723,7 @@ class Gemma:
                       else "Return the seller's actual offer, a proposed customer target, observable criteria and unknowns."),
             output_tokens=1500 if compact else None)
         try:
-            return recover_customer_draft(data) if output_protocol == 3 else SellerDraft.model_validate(data)
+            return recover_customer_draft(data, policy=draft_policy) if output_protocol == 3 else SellerDraft.model_validate(data)
         except ValidationError as exc:
             raise ModelOutputError(json.dumps(data), exc.errors(include_input=False, include_url=False,
                                                               include_context=False)) from exc

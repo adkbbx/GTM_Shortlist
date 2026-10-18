@@ -231,7 +231,32 @@ def record_issue(record: Research, *, strict: bool = False) -> str | None:
     return None
 
 
-def candidate_issue(candidate: Candidate) -> str | None:
+SERVICE_BUSINESS = re.compile(
+    r"\b(?:consultants?|consultanc(?:y|ies)|consulting (?:firm|company|services)|agenc(?:y|ies)|freelancers?|coach(?:es)?|coaching|services? (?:firm|provider|company|business)|(?:marketing|operations|development|design|acquisition|automation|advisory) services)\b",
+    re.IGNORECASE)
+PRODUCT_TARGET = re.compile(r"\b(?:software|saas|platforms?|apps?|startups?|companies)\b", re.IGNORECASE)
+TARGET_END = re.compile(r"\b(?:seeking|looking|with|that|which|who|for|to)\b", re.IGNORECASE)
+SERVICE_EXCLUSION = "Agencies, consultancies or freelancers that sell services to these companies"
+
+
+def product_target(target: str) -> bool:
+    head = TARGET_END.split(target, maxsplit=1)[0]
+    return bool(PRODUCT_TARGET.search(head) and not SERVICE_BUSINESS.search(head))
+
+
+def service_business(title: str, opening: str = "") -> bool:
+    # Software for agencies describes the customers, not the website owner.
+    title = re.split(r"\b(?:for|to)\b", title, maxsplit=1, flags=re.IGNORECASE)[0]
+    title = re.sub(r"\b(?:agency|consultant|coach)\s+(?:management\s+)?(?:software|platform|app)\b", "", title, flags=re.IGNORECASE)
+    if SERVICE_BUSINESS.search(title):
+        return True
+    first = re.split(r"[.!?](?:\s|$)", opening, maxsplit=1)[0]
+    first = re.split(r"\b(?:for|to)\b", first, maxsplit=1, flags=re.IGNORECASE)[0]
+    return bool(re.search(r"\b(?:is an?|are an?|we are|i am|i'm)\b[^.!?]{0,100}\b" + SERVICE_BUSINESS.pattern,
+                          first, re.IGNORECASE))
+
+
+def candidate_issue(candidate: Candidate, *, target: str | None = None, policy: int = 4) -> str | None:
     if listed_site(candidate.domain, DIRECTORIES):
         return "Directory or reference website; not an official candidate company page"
     if listed_site(candidate.domain, NON_COMPANY_SITES):
@@ -244,7 +269,11 @@ def candidate_issue(candidate: Candidate) -> str | None:
     if parsed.query and parsed.path.strip("/") == "" and any(
             not TRACKING_PARAMETERS.match(name.split("=")[0]) for name in parsed.query.split("&") if name):
         return "Filtered listing view rather than a company's own page"
-    return company_page_issue(candidate.url, candidate.name)
+    if issue := company_page_issue(candidate.url, candidate.name):
+        return issue
+    if policy >= 4 and product_target(target or candidate.query) and service_business(candidate.name, candidate.excerpt):
+        return "Sells services to this market rather than being in it"
+    return None
 
 
 def seller_marketing_criterion(text: str) -> bool:

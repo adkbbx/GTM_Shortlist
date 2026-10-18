@@ -360,7 +360,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             try:
                 data = json.loads(diagnostic.get("content", ""))
                 if isinstance(data, dict):
-                    draft = recover_customer_draft(data).model_dump(mode="json")
+                    draft = recover_customer_draft(data, policy=run["checkpoint"].get("seller_draft_policy", 3)).model_dump(mode="json")
             except (ValueError, TypeError):
                 pass  # Malformed summaries still need manual entry; never invent replacement text.
         matches = [Candidate.model_validate(value) for value in run["checkpoint"].get("website_matches", [])]
@@ -402,7 +402,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                        progress=RunProgress(
                            worker_online=store.worker_online(), candidates=len(run["checkpoint"].get("candidates", [])),
                            sources=len({s["id"] for pages in run["checkpoint"].get("sources", {}).values() for s in pages}),
-                           companies=sum(not record["source_issue"] for record in records), events=public_events(run)))
+                           companies=sum(not record["source_issue"] for record in records), events=public_events(run, records)))
 
     @app.get("/api/health", response_model=Health)
     def health():

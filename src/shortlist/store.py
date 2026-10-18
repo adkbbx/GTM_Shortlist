@@ -27,8 +27,8 @@ from shortlist.relevance import record_issue
 RUN_CAPS = {"search": 4, "model": 8, "fetch": 21}
 # New confirmations search with compact company phrases, start research from a company's own entry page, may
 # research past the first six candidates (2) and also read the page search found (3); runs confirmed earlier keep the
-# behaviour they were journaled with.
-DISCOVERY_POLICY = 3
+# behaviour they were journaled with. Policy 4 sets aside service providers for product-company targets.
+DISCOVERY_POLICY = 4
 
 
 class Conflict(ValueError):
@@ -496,7 +496,7 @@ class Store:
         db.execute("INSERT INTO runs(id,request_key,payload_hash,profile,status,stage,checkpoint,created_at,updated_at) "
                    "VALUES (?,?,?,?,?,?,?,?,?)", (run_id, request_key, digest, "{}", "queued", "seller" if seller_url else "identity",
                    json.dumps({"seller_url": seller_url, "experience_version": experience_version,
-                               "seller_output_protocol": 3, "company_identity_policy": 1, "market_policy": 2, **extra}), now, now))
+                               "seller_output_protocol": 3, "seller_draft_policy": 4, "company_identity_policy": 1, "market_policy": 2, **extra}), now, now))
         return run_id
 
     def confirm_website(self, run_id: str, website_url: str):

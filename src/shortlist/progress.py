@@ -52,7 +52,7 @@ def step_label(kind: str, operation: str, domain: str | None = None) -> str:
     return "Assessing company fit for " + company
 
 
-def public_events(run: dict) -> tuple[dict, ...]:
+def public_events(run: dict, records: list[dict] | None = None) -> tuple[dict, ...]:
     """Explain saved schema failures without exposing model output or changing history."""
     checkpoint = run["checkpoint"]
     diagnostics = {
@@ -62,6 +62,8 @@ def public_events(run: dict) -> tuple[dict, ...]:
     for domain, output in checkpoint.get("model_outputs", {}).items():
         diagnostics[step_label("model", "model:" + domain)] = output
         diagnostics[step_label("model", "repair:" + domain)] = output.get("repair_failure")
+    eligible = [record for record in (records if records is not None else run.get("records", [])) if not record.get("source_issue")]
+    reviewed = sum(bool(record.get("review")) for record in eligible)
     result = []
     for event in run["events"]:
         projected = dict(event)
@@ -74,5 +76,8 @@ def public_events(run: dict) -> tuple[dict, ...]:
                 projected["detail"] = "The model ran out of output space before finishing. This assessment was not completed."
             elif any(issue.get("type") == "missing" for issue in issues):
                 projected["detail"] = "The model response was missing required research fields. This assessment was not completed."
+        if event.get("phase") == "review" and event["state"] == "waiting" and reviewed:
+            projected.update(label=f"Reviewed {reviewed} of {len(eligible)} companies",
+                             state="succeeded" if reviewed == len(eligible) else "waiting", detail=None)
         result.append(projected)
     return tuple(result)

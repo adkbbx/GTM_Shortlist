@@ -1,5 +1,14 @@
 # Progress and handoff
 
+## 18 October, product targets, review progress, and existing-account signup
+
+- **Admission.** Policy 4 sets aside explicit service providers for product targets. The labelled comparison admits 2 service providers before and 0 after, retaining all 8 annotated product companies. Existing evaluation labels are unchanged. [Report and exact entry audit](target-review-signup-verification.md).
+- **Drafts.** New seller jobs require the defining software or product category and propose an editable services exclusion. Checkpoint gates retain earlier drafting and discovery behavior. A supported B2B check alone no longer qualifies the labelled SaaS draft.
+- **Saved evidence.** Across 33 unique saved candidates, admitted service descriptions remain 0 before and after. Both saved generic-target queries admit 0 of 21 combined results. Saved alternatives do not establish an additional query improvement, so queries are unchanged.
+- **Review and signup.** Phone and laptop checks cover partial review, completed review after reload, a saved draft, keyboard focus, overflow, and existing-account signup with retained email. Inspected all six changed-flow screenshots. Stored review history and model qualification remain independent.
+- **Verification.** Reviewer, normal Windows session: Ruff passes; full backend 747 passed, 48 skipped, 0 failed; web build passes; full Playwright 157 passed, 3 intentional skips, 0 failed. Phone and laptop screenshots inspected for the changed flows.
+- **Scope.** Removed the Chromium GPU debug.log and temporary verification helpers. The reviewer-owned backlog remains unchanged. No provider calls, saved-evidence edits, commits, or deployments. Remaining external validation: normal-user native credential checks, live discovery quality, and actual hosted email delivery.
+
 ## 18 October, reader readiness for a public post
 
 Audit and command-by-command evidence: [READER_READINESS.md](READER_READINESS.md). Baseline `18081e3`, branch `claude/signal-landing`.

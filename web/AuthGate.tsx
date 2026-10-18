@@ -53,6 +53,10 @@ function AccountForm({ client, setup, recovery, expired, externalError, onRecove
       } else if (mode === 'signup') {
         const result = await client.auth.signUp({ email, password, options: { emailRedirectTo: setup.redirect_url } });
         if (result.error) throw result.error;
+        if (result.data.user?.identities?.length === 0) {
+          setPassword(''); setError('An account already exists for this email. Sign in instead, or reset your password.');
+          return;
+        }
         setPassword(''); setNotice('Check your inbox for an account confirmation link, then sign in.');
         setConfirmationSent(true);
       } else {
