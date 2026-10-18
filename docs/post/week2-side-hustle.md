@@ -24,11 +24,11 @@ If distribution is now the hard part of starting a software company, I don't thi
 
 "Fits" only shows up when every required check is supported by a quote that was found word for word on the company's site and then verified. Your accept or reject is stored separately from the model's opinion, and nothing in the app treats a fit as buying intent. It never sends an email for you.
 
-![Confirm your target: the offer GTM Shortlist drafted from eygentic.com ("Focused customer-acquisition experiments for B2B and SaaS teams...") and the target "B2B AI SaaS companies", both editable, with discovery waiting for confirmation](https://raw.githubusercontent.com/adkbbx/GTM_Shortlist/worktree-week2-post/docs/post/confirm-target.png)
+![Confirm your target: the offer GTM Shortlist drafted from eygentic.com ("Focused customer-acquisition experiments for B2B and SaaS teams...") and the target "B2B AI SaaS companies", both editable, with discovery waiting for confirmation](https://raw.githubusercontent.com/adkbbx/GTM_Shortlist/worktree-week2-post/docs/post/confirm-target-v2.png)
 
 *The confirmation step on my own website. Gemma drafted the offer from [eygentic.com](https://eygentic.com). Nothing is searched until I confirm it.*
 
-**Who would pay for this?** Founders of small B2B software and AI companies doing their own sales, and the GTM consultants and outbound agencies who build a new list for a new campaign every week. The hosted version gives you your first three companies free with no card. Research there runs on credits, one per researched company, and paid checkout isn't built yet. Self-hosting is free apart from your own search and model costs. The managed version I'm testing through Eygentic is a $99 reviewed pilot shortlist. Nobody has paid that yet, so treat it as a price I'm testing, not a business.
+**Who would pay for this?** Founders of small B2B software and AI companies doing their own sales, and the GTM consultants and outbound agencies who build a new list for a new campaign every week. The hosted version gives you your first three companies free with no card. Research there runs on credits, one per researched company, and paid checkout isn't built yet. Self-hosting is free apart from your own search and model costs.
 
 ## The first real run, and what it got wrong
 
