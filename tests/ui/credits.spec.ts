@@ -70,7 +70,7 @@ test('real hosted API and Postgres settle partial research; review/export are fr
   await page.getByLabel('Company name or website', { exact: true }).fill('https://eygentic.com/');
   await page.getByRole('button', { name: 'Start research' }).click();
   await expect(page.getByLabel('Companies in this batch')).toBeVisible({ timeout: 15000 });
-  await expect(page.getByText('Maximum 3 credits · 3 available')).toBeVisible();
+  await expect(page.getByText('Maximum 1 credit · 3 available')).toBeVisible();  // One company by default.
   await capture(page, `.impeccable/review/${info.project.name}-credit-confirmation.png`);
   await page.getByLabel('Companies in this batch').selectOption('3');  // The default is one company; these flows check several.
   await page.getByRole('button', { name: 'Confirm target and discover' }).click();
@@ -329,6 +329,8 @@ test('reuse offer skips profiling, preserves edits and quotes a separately charg
   expect(new URL(page.url()).searchParams.get('run')).not.toBe(firstId);
   await expect(page.getByLabel('Exclude from consideration', { exact: false })).toHaveValue('Publicly listed companies');
   await expect(page.getByText(/Copied from your saved offer/)).toBeVisible();
+  await expect(page.getByText('Maximum 1 credit · 2 available')).toBeVisible();  // One company by default.
+  await page.getByLabel('Companies in this batch').selectOption('2');
   await expect(page.getByText('Maximum 2 credits · 2 available')).toBeVisible();
   await page.getByLabel('Companies in this batch').selectOption('1');
   await expect(page.getByText('Maximum 1 credit · 2 available')).toBeVisible();
