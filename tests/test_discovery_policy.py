@@ -27,7 +27,7 @@ def evaluator():
 def test_labelled_real_search_results_reach_research_only_as_company_pages():
     report = evaluator().evaluate(policy=2)
     assert report["companies_reaching_research"] == "21 of 21"
-    assert int(report["non_companies_reaching_research"].split()[0]) <= 3
+    assert int(report["non_companies_reaching_research"].split()[0]) <= 2
     assert report["fetches_wasted_on_rejected_pages"] == 0
     # Without entry pages, real companies found through deep product pages were fetched and then refused.
     assert evaluator().evaluate(policy=1)["companies_reaching_research"] == "16 of 21"
@@ -85,6 +85,10 @@ def test_public_sector_sites_are_candidates_only_for_public_sector_searches():
     assert "Public-sector" in candidate_issue(candidate(county, "Home - Labelled County"))
     assert candidate_issue(candidate(county, "Home - Labelled County", "county government agencies company official website")) is None
     assert "Public-sector" in candidate_issue(candidate("https://data.labelled.europa.eu/", "Data portal"))
+    agency = candidate("https://www.labelledagency.org/", "SWANCC | Solid Waste Agency of Northern Labelled County")
+    assert "Public-sector" in candidate_issue(agency)
+    assert candidate_issue(agency.model_copy(update={"query": "municipal waste agencies company official website"})) is None
+    assert candidate_issue(candidate("https://acme.example/", "Acme | B2B Marketing Agency for SaaS")) is None
 
 
 def test_filtered_listings_lists_and_reports_are_refused_but_company_titles_are_not():

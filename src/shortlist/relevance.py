@@ -50,6 +50,10 @@ PUBLIC_SECTOR = re.compile(
     r"\b(?:government|public sector|municipal|county|counties|city|cities|federal|state agenc\w*|agenc(?:y|ies)|"
     r"council|ministr\w*|school|universit\w*|college|education\w*|campus|nonprofit|non-profit|ngo|charit\w*|"
     r"hospital|health system|central bank|intergovernmental)\b", re.IGNORECASE)
+# Titles that name a public body rather than a company ("Solid Waste Agency of ... County", "City of ...").
+PUBLIC_BODY_TITLE = re.compile(
+    r"\b(?:county|city of|municipality|ministry of|department of|agency of|school district|public schools|university)\b",
+    re.IGNORECASE)
 PUBLIC_HOST = re.compile(r"(?:^|\.)(?:gov|mil|edu|int)(?:\.[a-z]{2})?$|(?:^|\.)(?:gov|ac|edu)\.[a-z]{2}$|(?:^|\.)europa\.eu$")
 TRACKING_PARAMETERS = re.compile(r"^(?:utm_\w+|ref|source|gclid|fbclid|msclkid|hl|lang)$", re.IGNORECASE)
 BUSINESS_SECTIONS = frozenset({"product", "products", "platform", "solutions", "services", "about", "company",
@@ -171,7 +175,7 @@ def candidate_issue(candidate: Candidate) -> str | None:
     parsed = urlsplit(candidate.url)
     host = (parsed.hostname or "").casefold()
     # Government, education and intergovernmental sites are candidates only when the search is about that sector.
-    if PUBLIC_HOST.search(host) and not PUBLIC_SECTOR.search(candidate.query):
+    if (PUBLIC_HOST.search(host) or PUBLIC_BODY_TITLE.search(candidate.name)) and not PUBLIC_SECTOR.search(candidate.query):
         return "Public-sector or education website outside a public-sector search"
     if parsed.query and parsed.path.strip("/") == "" and any(
             not TRACKING_PARAMETERS.match(name.split("=")[0]) for name in parsed.query.split("&") if name):

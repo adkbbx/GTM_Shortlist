@@ -11,7 +11,7 @@ Changes:
   - Queries use a compact company phrase (`providers.search_phrase`, for example "B2B SaaS" or "channel partner programs"), not the target sentence. They drop funding-stage words, which pull investor content, and anchor on a company's own pages: "official website", plus "pricing" for software targets or "about us" otherwise.
   - Research starts from a company's own entry page (`relevance.research_entry`), so a company found on a deep product page is no longer fetched and then refused.
   - Research continues past the first six candidates (up to twelve) when rejected pages leave the batch short. It stops cleanly, with a plain message, when the run cannot afford another company.
-- **Admission.** Before any fetch it now refuses video, social, job, review, market-research and startup-database sites. It also refuses content paths and subdomains, count-led lists, market reports, glossaries, job postings, and filtered listing views. Government, education and intergovernmental sites are refused unless the search is about the public sector. Homepages are never refused by title alone.
+- **Admission.** Before any fetch it now refuses video, social, job, review, market-research and startup-database sites. It also refuses content paths and subdomains, count-led lists, market reports, glossaries, job postings, and filtered listing views. Government, education and intergovernmental sites, and titles naming a public body (county, city of, agency of, university), are refused unless the search is about the public sector. Homepages are never refused by title alone.
 - **Ranking.** The shortlist and every export list fits first, then unverified companies by how many required checks are supported, then mismatches (`shortlist/ranking.py`). Each row says "3 of 4 required checks supported" or "1 check against your target". Fit labels are unchanged.
 - **Fit-check advice.** Confirmation flags required checks a company site rarely states (ownership, funding stage, revenue thresholds and budgets, internal pains and intent), with one-click "Make it nice to have".
 - **Drafted defaults.** Drafted (not user-typed) ownership, funding-stage and financial-threshold checks start as nice to have (`shortlist/criteria.py`, mirrored in `web/criteria.ts`). They still order the shortlist when a page states them. Drafted internal-pain checks were already removed.
@@ -23,7 +23,7 @@ Measured on `examples/evaluation/discovery-admission.json` (104 real saved searc
 | | Before | After |
 |---|---|---|
 | Real company pages reaching research | 16 of 21 | 21 of 21 |
-| Non-company pages reaching research | 5 of 46 | 3 of 46 |
+| Non-company pages reaching research | 5 of 46 | 2 of 46 |
 | Fetches spent on pages refused after download | 39 | 0 |
 
 The fit-check classifier separates 12 rarely-public from 15 observable checks with no errors (`scripts/check_fit_checks.mjs`).
