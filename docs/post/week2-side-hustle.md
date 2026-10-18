@@ -63,31 +63,38 @@ To check the search fix, I took real search results that my earlier test runs ha
 
 Running my old research through the new rules, 18 of the 22 companies I had already researched would have been skipped: 6 because they weren't companies at all, and 12 because they were the same company researched again.
 
-## Trying it for someone else's business
+## Real websites are messy
 
-To make sure it wasn't just tuned to my own business, I tried it for another company, Unifyr. Unifyr sells software for running partner programs, so its buyers are companies that have partner programs. A search found six: Channel Institute, Channeltivity, Front, Hitachi Energy, Lumen and NICE. (That search used Tavily, the other search service the app supports.) Then I researched them with a small Gemma model running on my own laptop.
+Testing on more real websites turned up more problems, each with its own fix:
 
-At first, only one of the six counted as a match. Every miss had a different, very specific cause:
+- **Invisible characters.** One site hides invisible spaces between its words, so a sentence the model copied didn't look like the same sentence to the app. Now the app ignores invisible characters, but every real word still has to match.
+- **Menus instead of content.** On some pages, most of the text was the list of countries and languages, so the model quoted the menu as proof. Long menus are now removed before the model reads the page.
+- **A menu link isn't proof.** One company counted as a match because of a single link in its menu. One or two words from a menu no longer count.
+- **"Suggests" isn't proof.** When the model says a page "suggests" or "may" show something, that no longer counts as a yes.
+- **Pages it couldn't open.** Some homepages send you on to another address, and some are very large. Both used to be skipped, and both can be read now.
+- **The best page was ignored.** Search often finds the exact page that proves the point, but research used to start from the homepage instead. Now it reads the page search found as well.
 
-**Invisible characters.** NICE's website hides invisible spaces between its words, so the sentence the model copied didn't look like the same sentence to the app. Now the app ignores invisible characters, but every real word still has to match.
+## A small model on my laptop vs a big one on DigitalOcean
 
-**Menus instead of content.** Most of the text the model got from Hitachi Energy's page was its list of countries and languages, so it quoted the menu as proof. Now long menus are removed before the model reads the page.
+After all those fixes, I wanted to know whether the list was finally useful for my own business. I took the 12 companies a saved web search had found for Eygentic on 13 October, looking for private AI software startups that sell to businesses, and researched them again with no new searches.
 
-**A menu link isn't proof.** Front was marked as a match because of a link in its menu that said "Channel Partnerships". One or two words from a menu no longer count.
+First I used small open models on my laptop: Gemma 4 E2B and Qwen 3.5 4B. With the fixes in, they stopped wasting money on pages that were never going to work, but they rarely copied the proof from a page, so **none of the product companies came out as a match**.
 
-**"Suggests" isn't proof.** When the model says a page "suggests" or "may" show something, that no longer counts as a yes.
+Then I used Gemma 4 31B, the bigger version of Gemma, on DigitalOcean. It took 18 AI calls for all 12:
 
-**Pages it couldn't open.** Lumen's homepage sends visitors on to another address, and Front's homepage was too big, so both were skipped. Both can be read now.
+- **DelegateZero: a match.** Its own site says "DelegateZero - AI Decision Proxy for B2B SaaS Founders", and its pricing page lists monthly plans.
+- **Prismatic: a match** ("Embedded iPaaS for B2B Software Companies"), after one more fix. The model sometimes answered a check with a word like "cleared" instead of yes or no, and the app threw the whole company away. It now reads those words properly, and re-reading the answer the model had already given turns Prismatic into a match.
+- **Smeron and BackOfficeBoss: set aside.** They build custom software for clients rather than selling a product, so they aren't buyers for me.
+- **Six others: need more checking.** The app couldn't find enough proof on their own websites, so it says so instead of guessing.
+- **Two: refused.** The app couldn't confirm who owns the website.
 
-**The best page was ignored.** Search had found each company's own partner-program page, but the research started from the homepage instead. Now it reads the page search found as well.
-
-After those fixes, **4 of the 6 are matches**, each backed by sentences from its own website: Channel Institute, NICE, Lumen and Hitachi Energy. NICE's proof is on its own partner page: "Our partners, including referral and resale partner, come from leading Carriers, UCaaS, CRM, VAR and System Integrators..." Channeltivity still needs more checking, and Front doesn't count because the only proof was a menu link. All of this ran on a small open model (Gemma 4 E2B) on my own laptop.
+So 2 of the 12 are real leads for Eygentic. It's a short list, but every name on it comes with its proof, and the small models couldn't get there at all.
 
 ## Demo
 
 **[eygentic.tech](https://eygentic.tech)**: type your company's website or name. Your first three companies are free and no card is needed.
 
-If you'd rather not sign up, you can install it from the code and choose **Try it with sample data**. It runs the whole thing on three made-up companies with no accounts or keys, and every screen says it's sample data.
+If you'd rather not sign up, tap **Try the demo** on the start page to watch it run on made-up companies, with no account. You can also install it from the code and choose **Try it with sample data**, which runs the whole thing on three made-up companies with no accounts or keys, and every screen says it's sample data.
 
 ## How I Built It
 
@@ -150,7 +157,7 @@ Here's what being open actually changed for me.
 
 **It's cheap enough for one person.** Run it yourself with a local model and you only pay for searches. At 4 searches a run, SerpApi's free plan covers dozens of lists a month. That's what "accessible to everyone" means to me.
 
-**I could check its work.** Every problem above was found by reading the saved pages and the model's saved answers, not by guessing. Because the model is open, the same one runs online and on my laptop.
+**I could check its work.** Every problem above was found by reading the saved pages and the model's saved answers, not by guessing. Because the model is open, I could try the small version on my laptop and the big version online on exactly the same pages, and see for myself that this job needs the big one.
 
 **The rules are visible.** What counts as a match, which pages get skipped and how quotes are checked are all in the code, so you can disagree with them and change them.
 
@@ -162,7 +169,7 @@ The first user is me. The first real shortlist was for Eygentic, the company I'm
 
 {% embed https://github.com/adkbbx/GTM_Shortlist %}
 
-Open source under the MIT licence and built during the challenge: the first commit was on 14 October, and there are 181 so far. 782 automated tests on the server side and 165 browser tests at phone and laptop sizes pass, and every real test I ran with paid services is written down in `docs/PROGRESS.md`, including the ones that failed.
+Open source under the MIT licence and built during the challenge: the first commit was on 14 October, and there are 188 so far. 838 automated tests on the server side and 173 browser tests at phone and laptop sizes pass, and every real test I ran with paid services is written down in `docs/PROGRESS.md`, including the ones that failed.
 
 ## How I built it with two agents
 
@@ -172,7 +179,7 @@ Same setup as last week. Claude Code wrote the plans, reviewed the changes and r
 
 **Best Use of SerpApi.** SerpApi is how the hosted app finds companies at all. The app sends short Google searches aimed at companies' own websites, skips results that aren't companies before opening them, and keeps every run to 4 searches. Each search is written down before it's sent, a slow search gets up to 60 seconds, and a failed one is never retried automatically, so the free plan's 250 searches a month go a long way.
 
-**Best Use of DigitalOcean.** Every AI call the hosted app makes goes to Gemma 4 31B (`gemma-4-31B-it`) on DigitalOcean's hosted AI service: describing the business, suggesting campaign ideas, finding quotes and double-checking each one. It got 30 of 30 on my double-check test cases, and the same code can switch to a model on your own laptop with one setting.
+**Best Use of DigitalOcean.** Every AI call the hosted app makes goes to Gemma 4 31B (`gemma-4-31B-it`) on DigitalOcean's hosted AI service: describing the business, suggesting campaign ideas, finding quotes and double-checking each one. On the same 12 saved companies for my own business, the small models on my laptop found no product company that matched, and Gemma 4 31B on DigitalOcean found two, each with proof from its own website, in 18 AI calls. It also got 30 of 30 on my double-check test cases, and the same code can switch to a model on your own laptop with one setting.
 
 **Best Use of Render.** Render runs the website and the background research worker from the same code, with passwords kept in the dashboard. When I released an update in the middle of a real run, the worker carried on from its notes with no repeated searches and no double charge, and restarting both afterwards left the results exactly the same.
 
