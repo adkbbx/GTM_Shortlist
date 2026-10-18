@@ -219,3 +219,21 @@ def test_dated_company_statements_keep_event_date_distinct_from_publication(cust
     assert "buying intent unverified" in text
     publication = signal_row.find("s:c[@r='I" + signal_row.attrib["r"] + "']", ns)
     assert publication is not None and not publication.findall("s:v", ns)
+
+
+def test_rejected_quote_diagnostics_never_enter_exports(customer_run):
+    from shortlist.customer_export import customer_tables
+
+    rejected = "Labelled fixture rejected passage that appears on no saved page."
+    customer_run["checkpoint"]["rejected_quotes"] = {"example.com": [{
+        "subject": "ai", "source_id": "source-one", "passage": rejected,
+        "claim": "Labelled fixture rejected claim", "issue": "quoted passage could not be found in source"}]}
+    before = deepcopy(customer_run)
+    for format in ("json", "csv"):
+        assert rejected not in export_run(customer_run, format)
+    package = workbook_xml(export_run(customer_run, "xlsx"))
+    assert rejected not in " ".join(" ".join(part.itertext()) for part in package.values())
+    tables = customer_tables(customer_run, customer_run["records"])
+    assert rejected not in json.dumps(tables)
+    assert "We build AI software for teams." in json.dumps(tables)
+    assert customer_run == before

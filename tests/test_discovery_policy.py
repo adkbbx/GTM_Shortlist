@@ -266,3 +266,144 @@ def test_research_stops_cleanly_at_the_runs_model_limit(tmp_path, monkeypatch):
     assert len(saved["records"]) == 2 and model.calls == 2
     assert saved["status"] == "partial"
     assert saved["error"].startswith("Research stopped at this run's provider limit with 2 of 3 companies")
+
+
+def journal_attempts(store, run_id):
+    with store.connection() as db:
+        return [dict(row) for row in db.execute(
+            "SELECT operation_key,state FROM attempts WHERE run_id=? ORDER BY operation_key", (run_id,))]
+
+
+class PartialVerifier(SkippingVerifier):
+    """Labelled fixture: the first audit keeps a company fact and omits the fit check."""
+
+    def __init__(self, fail_followup=False):
+        super().__init__()
+        self.fail_followup = fail_followup
+
+    def research(self, profile, candidate, sources):
+        record = super().research(profile, candidate, sources)
+        from shortlist.domain import CompanyFact
+        fact = CompanyFact(kind="description", evidence=record.findings[0].evidence[0])
+        return record.model_copy(update={"company_facts": (fact,)})
+
+    def verify(self, profile, record):
+        from shortlist.providers import ProviderError
+        from shortlist.verification import Judgment, Verification, assessments
+        asked = [a["assessment_id"] for a in assessments(profile, record)]
+        self.verified.append(asked)
+        if len(self.verified) == 1:
+            return Verification(judgments=[Judgment(assessment_id="company:description", verdict="entailed", reason="Fixture")])
+        if self.fail_followup:
+            raise ProviderError("Labelled fixture verifier unavailable")
+        return Verification(judgments=[Judgment(assessment_id=i, verdict="entailed", reason="Fixture") for i in asked])
+
+
+def test_policy_three_no_followup_without_model_room(tmp_path, monkeypatch):
+    monkeypatch.setitem(RUN_CAPS, "model", 2)
+    store, run_id = research_run(tmp_path, companies(1, deep_first=True), policy=3)
+    model = PartialVerifier()
+    execute_run(store, Settings(db_path=store.path), run_id, model=model, fetch=readable([]))
+    saved = store.get_run(run_id)
+    assert len(model.verified) == 1
+    assert len([a for a in saved["attempts"] if a["kind"] == "model"]) == 2
+    assert not any(a["operation_key"].endswith(":missing") for a in journal_attempts(store, run_id))
+    record = saved["records"][0]["research"]
+    assert record["findings"][0]["reason"] == "Semantic verification missing"
+    assert len(record["company_facts"]) == 1 and record["qualification"] == "needs_verification"
+
+
+def test_policy_three_failed_followup_preserves_first_audit_and_record(tmp_path):
+    store, run_id = research_run(tmp_path, companies(1, deep_first=True), policy=3)
+    model = PartialVerifier(fail_followup=True)
+    execute_run(store, Settings(db_path=store.path), run_id, model=model, fetch=readable([]))
+    saved = store.get_run(run_id)
+    assert model.verified == [["criterion:software", "company:description"], ["criterion:software"]]
+    attempt = next(a for a in journal_attempts(store, run_id) if a["operation_key"].endswith(":missing"))
+    assert attempt["state"] == "failed"
+    record = saved["records"][0]["research"]
+    assert record["findings"][0]["reason"] == "Semantic verification missing"
+    assert len(record["company_facts"]) == 1 and saved["status"] == "partial"
+    assert [j["assessment_id"] for j in saved["checkpoint"]["verification"][record["domain"]]["judgments"]] == ["company:description"]
+
+
+def test_policy_three_finished_run_dispatches_nothing_on_reexecution(tmp_path):
+    store = Store(tmp_path / "labelled-reexecution.sqlite3")
+    profile = Profile(seller_url="https://seller.example/", offer="Fixture research", target="Business software",
+                      criteria=(Criterion(id="software", description="Offers software"),))
+    run_id = store.create_run(profile, "labelled-reexecution")
+
+    class DeepSearch(Found):
+        def search(self, query, seller_url):
+            self.queries.append(query)
+            return companies(1, deep_first=True)
+
+    search, model, fetched = DeepSearch([]), PartialVerifier(), []
+    settings = Settings(db_path=store.path)
+    assert execute_run(store, settings, run_id, search=search, model=model, fetch=readable(fetched))
+    before = store.get_run(run_id)
+    assert before["status"] == "ready" and search.queries
+    assert {"fetch:company-0.example:found", "verify:company-0.example:missing"} <= {a["operation_key"] for a in journal_attempts(store, run_id)}
+    calls = (list(search.queries), model.calls, list(model.verified), list(fetched))
+    assert not execute_run(store, settings, run_id, search=search, model=model, fetch=readable(fetched))
+    assert (search.queries, model.calls, model.verified, fetched) == calls
+    assert store.get_run(run_id) == before
+
+
+def test_policy_two_never_dispatches_found_page_or_missing_verification(tmp_path):
+    store, run_id = research_run(tmp_path, companies(1, deep_first=True), policy=2)
+    fetched, model = [], PartialVerifier()
+    execute_run(store, Settings(db_path=store.path), run_id, model=model, fetch=readable(fetched))
+    saved = store.get_run(run_id)
+    assert fetched == ["https://company-0.example/"] and len(model.verified) == 1
+    assert not any(a["operation_key"].endswith((":found", ":missing")) for a in journal_attempts(store, run_id))
+    assert saved["records"][0]["research"]["findings"][0]["reason"] == "Semantic verification missing"
+
+
+@pytest.mark.parametrize("fail_followup", [False, True])
+def test_policy_three_journal_restores_followup_at_exhausted_cap(tmp_path, monkeypatch, fail_followup):
+    monkeypatch.setitem(RUN_CAPS, "model", 3)
+    store, run_id = research_run(tmp_path, companies(1, deep_first=True), policy=3)
+    model, fetched = PartialVerifier(fail_followup), []
+    save_record = store.save_record
+
+    def interrupted(*args, **kwargs):
+        raise RuntimeError("Labelled fixture crash before saving record")
+
+    monkeypatch.setattr(store, "save_record", interrupted)
+    with pytest.raises(RuntimeError, match="Labelled fixture crash"):
+        execute_run(store, Settings(db_path=store.path), run_id, model=model, fetch=readable(fetched))
+    before = store.get_run(run_id)
+    assert len([a for a in before["attempts"] if a["kind"] == "model"]) == 3
+    monkeypatch.setattr(store, "save_record", save_record)
+    with store.connection() as db:
+        db.execute("UPDATE runs SET lease_until=0 WHERE id=?", (run_id,))
+    execute_run(store, Settings(db_path=store.path), run_id, model=model, fetch=readable(fetched))
+    saved = store.get_run(run_id)
+    assert len(saved["records"]) == 1
+    record = saved["records"][0]["research"]
+    if fail_followup:
+        assert record["findings"][0]["reason"] == "Semantic verification missing"
+    else:
+        assert record["findings"][0]["status"] == "supported" and record["qualification"] == "fits"
+    assert len(record["company_facts"]) == 1
+    assert saved["attempts"] == before["attempts"]
+    assert model.calls == 1 and len(model.verified) == 2 and len(fetched) == 2
+
+
+def test_policy_three_found_page_keeps_three_page_company_bound(tmp_path):
+    store, run_id = research_run(tmp_path, companies(1, deep_first=True), policy=3)
+    fetched = []
+    fixture_fetch = readable(fetched)
+
+    def fetch(url, expected_domain=None):
+        source = fixture_fetch(url, expected_domain)
+        if url == "https://company-0.example/":
+            return source.model_copy(update={"research_links": ("https://company-0.example/about", "https://company-0.example/pricing")})
+        return source
+
+    execute_run(store, Settings(db_path=store.path), run_id, model=PartialVerifier(), fetch=fetch)
+    record = store.get_run(run_id)["records"][0]["research"]
+    assert fetched == ["https://company-0.example/", "https://company-0.example/partners/program", "https://company-0.example/about"]
+    assert [source["url"] for source in record["sources"]] == fetched
+    assert record["qualification"] == "fits"

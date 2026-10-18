@@ -119,6 +119,30 @@ Changes after the quote run:
 
 - **Offline verification.** Full backend suite: 665 passed, 48 skipped; Ruff passes. No provider calls were made.
 
+- **Failure audit.** `scripts/audit_failures.py` read all four requested saved databases with SQLite `mode=ro`: 31 runs, 28 records, 101 occurrences. Counts include 73 unknown findings, 24 candidate refusals, 3 deliberately skipped discovery queries and 1 rejected quote; page and activity failures were both 0. These are overlapping saved occurrences, not distinct failed calls or measured credit costs. Free-form model reasons stay separate from deterministic failures, with a real saved example and origin for every category.
+
+| Saved cause | Occurrences |
+|---|---:|
+| Other unknown finding, free-form model reason | 43 |
+| Fetch errors | 24 |
+| Page-gate refusals | 12 |
+| Company identity | 4 |
+| Model output/schema errors | 4 |
+| Quoted passage could not be found | 4 |
+| Discovery deliberately not run | 3 |
+| Semantic verification missing | 3 |
+| No supported observation returned | 2 |
+| Semantic verification unsupported/uncertain | 1 |
+| The claim is an inference | 1 |
+
+- **Robustness.** Labelled offline fixtures now prove no follow-up without model room, preservation of the first audit after a failed follow-up, no search/fetch/model dispatch when a finished run executes again, successful and failed journal restoration at an exhausted cap, isolation of rejected quotes from JSON/CSV/XLSX and customer tables, and no found-page fetch or follow-up verification for policy 2. The audit tests cover all six failure locations, stable grouping, real fixture examples, multiple runs/databases, missing files and read-only connections.
+- **Fixed during review: exhausted-cap recovery.** Policy 3's budget guards counted restored journal steps as new calls, so a crash after the final verification could leave the record unsaved. Guards now count only calls without an existing attempt; journal restore still validates the request and outcome, and provider reservation still enforces caps. Successful and failed follow-ups both replay with no new calls. Earlier policies keep their guards.
+- **Fixed during review: company page bound.** The found page plus two homepage research links could collect four pages. Policy 3 now stops at three saved company pages, including the found page. A fixture reproduced the fourth fetch before the fix and proves its absence afterward.
+- **Excerpt check.** `scripts/check_excerpts.py` completed on the same four read-only databases: 38 company page sets, 249,763 characters before and 241,970 after; content share 77.6036% before and 81.7543% after. The only omitted saved finding passage is Front's previously identified "Channel Partnerships" menu label.
+
+- **Verification.** Full backend suite: 699 passed, 48 skipped; Ruff passes. Both saved-evidence scripts complete on all four databases, read-only, with their SHA-256 hashes unchanged. No provider calls were made.
+- **Review.** Reviewed `058b824..HEAD` and the complete final diff for passage grounding, required fit checks, domain-tied identities, provider caps, checkpoint policy gates, immutable saved evidence and export isolation. The two fixes above are in `src/shortlist/worker.py:82` and `:395`; both have reproducing regression tests. No further findings.
+
 ## 18 October, drafts before signup (hosted, off by default)
 
 The last unbuilt item of `docs/planning/LOW_FRICTION_PATHS.md`. Operator steps are in `docs/anonymous-drafts.md`.

@@ -78,6 +78,14 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
     def room(kind: str, needed: int) -> bool:
         used = sum(attempt["kind"] == kind for attempt in store.get_run(run_id)["attempts"])
         return used + needed <= RUN_CAPS[kind]
+
+    def room_for(kind: str, *operations: str) -> bool:
+        # Restoring a journaled call needs no remaining provider allowance.
+        with store.connection() as db:
+            dispatched = {row["operation_key"] for row in db.execute(
+                "SELECT operation_key FROM attempts WHERE run_id=? AND kind=?", (run_id, kind))}
+        return room(kind, sum(operation not in dispatched for operation in operations))
+
     search = search or SearchProvider(settings)
     model = model or Gemma(settings)
 
@@ -362,7 +370,10 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 reject_candidate(candidate, issue, "research")
                 continue
             saved_sources = checkpoint.setdefault("sources", {})
-            if discovery_policy >= 2 and not (room("model", 2) and (candidate.domain in saved_sources or room("fetch", 1))):
+            model_room = (room_for("model", f"model:{candidate.domain}", f"verify:{candidate.domain}")
+                          if discovery_policy >= 3 else room("model", 2))
+            fetch_room = (room_for("fetch", f"fetch:{candidate.domain}") if discovery_policy >= 3 else room("fetch", 1))
+            if discovery_policy >= 2 and not (model_room and (candidate.domain in saved_sources or fetch_room)):
                 checkpoint["research_budget_reached"] = True
                 break
             billable = False
@@ -381,8 +392,8 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                 # Policy 3 also reads the page search found when research started from the homepage instead. The
                 # partner-programme pages that made NICE, Hitachi Energy and Lumen targets (18 October) were never read.
                 found = candidate.url
-                if (discovery_policy >= 3 and found != entry(candidate) and found not in completed_pages
-                        and found not in failures and room("fetch", 1)):
+                if (discovery_policy >= 3 and len(sources) < 3 and found != entry(candidate) and found not in completed_pages
+                        and found not in failures and room_for("fetch", f"fetch:{candidate.domain}:found")):
                     try:
                         found_page = page(found, candidate.domain, f"fetch:{candidate.domain}:found")
                         if found_page.url not in {s.url for s in sources}:
@@ -393,9 +404,12 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                         failures[found] = str(exc)
                     store.checkpoint(run_id, fence, "research", checkpoint)
                 for index, link in enumerate(sources[0].research_links):
+                    if discovery_policy >= 3 and len(sources) >= 3:
+                        break
                     if link in completed_pages or link in failures or link in {s.url for s in sources}:
                         continue
-                    if discovery_policy >= 2 and not room("fetch", 1):
+                    if discovery_policy >= 2 and not (room_for("fetch", f"fetch:{candidate.domain}:page:{index + 1}")
+                                                     if discovery_policy >= 3 else room("fetch", 1)):
                         break  # Research the pages already saved rather than stop the run on the fetch cap.
                     try:
                         if domain_of(link) != candidate.domain:
@@ -477,7 +491,7 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                     # Policy 3 asks once more about only the assessments the verifier left out, when the run can
                     # afford it; anything still unjudged stays unverified.
                     missed = unjudged(profile, record, audit)
-                    if missed and discovery_policy >= 3 and room("model", 1):
+                    if missed and discovery_policy >= 3 and room_for("model", f"verify:{candidate.domain}:missing"):
                         pending = narrowed(record, missed)
                         try:
                             extra = call("model", model.name, f"verify:{candidate.domain}:missing",
