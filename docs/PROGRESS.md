@@ -46,7 +46,20 @@ Verification:
 
 **Live entry-page check** (18 October, `scripts/check_entry_pages.py`, page fetches only, no search, model or enrichment credit). For all 21 labelled real companies, the page research starts from was fetched with the app's fetcher and checked with the strict identity gate on the page that actually came back. **Before: 16 of 21 researchable** (HappyFox, Actaa, impact.com, Salesforce and Widelly refused after download). **After: 21 of 21 researchable**, none unreadable. The output is in `examples/evaluation/entry-pages-2026-10-18.json`.
 
-Not verified, and needing your approval: the yield of the new queries on live search. The evidence is the saved natural experiment above, not a new run. A bounded check would be 2 searches for each of 3 saved targets (6 searches, 2.4% of the monthly SerpApi allowance), compared against the saved results.
+**Live search check** (approved by the user on 18 October: 6 Tavily searches, no fetch or model call; `scripts/evaluate_discovery_live.py`, journal in `data/evaluations/discovery-policy2-2026-10-18.json`). Real target companies found, compared with the saved old-query results for the same targets:
+
+| Target | Old queries | New queries |
+|---|---|---|
+| Channel partner programs | 0 | 5: partner-program pages of Hitachi Energy, Lumen, NICE and Front, plus Channel Institute |
+| B2B SaaS (generic growth target) | 0 | 0 (the phrase is generic; lists and glossaries either way) |
+| Private AI B2B SaaS startups | 12 of 12 company pages (13 October) | Fewer startups; "company pricing" returned pricing articles |
+
+What changed in response:
+- **Software targets.** They now use the anchors that worked ("software company official website", "startup platform pricing"). Other targets keep the new anchors that found the channel-partner targets.
+- **Admission leaks.** Admission now also refuses `/research/` and `/episodes/` pages and case-study, model and calculator slugs. Re-scoring the live results refused the 4 article leaks and kept every real target.
+- **Labelled set.** It is unchanged: 21 of 21 companies, 2 of 46 non-companies.
+
+The changed software anchors have not been searched live again (that would need another approval).
 
 ## 18 October, drafts before signup (hosted, off by default)
 

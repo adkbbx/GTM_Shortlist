@@ -39,7 +39,8 @@ CONTENT_SECTIONS = frozenset({"blog", "blogs", "article", "articles", "news", "n
                               "library", "libraries", "tech-hub", "knowledge-base", "kb", "market-reports",
                               "industry-reports", "statistics", "directory", "list", "investor-lists",
                               "funded-startups", "executive-biography", "biography", "courses", "course", "latest",
-                              "whatis", "matrices", "topics", "tag", "tags", "category", "author", "authors"})
+                              "whatis", "matrices", "topics", "tag", "tags", "category", "author", "authors",
+                              "research", "episodes"})
 # Count-led lists ("25,000+ Funded Startups", "16 of the Best ...") and research or job listings are about other companies.
 LISTING_TITLE = re.compile(
     r"^\d[\d,]*\+?\s+(?:[\w&-]+\s+){0,4}(?:companies|startups|businesses|agencies|firms|tools|apps|platforms|vendors|"
@@ -62,7 +63,7 @@ EDITORIAL_TITLE = re.compile(
     r"^(?:how|why|what|your guide|the ultimate guide)\b|\b(?:top|best)\s+\d+\b|"
     r"\b\d+\s+(?:top|best)\b|\b(?:playbook|framework|report|definition|roundup|explained)\b|"
     r"\b(?:guides?|strategies|statistics|trends|tips|ideas|benchmarks|checklist|mistakes)\b", re.IGNORECASE)
-EDITORIAL_SLUG = re.compile(r"(?:^|[-_])(?:guide|playbook|framework|report|definition|examples|roundup|best|top)(?:[-_]|$)", re.IGNORECASE)
+EDITORIAL_SLUG = re.compile(r"(?:^|[-_])(?:guide|playbook|framework|report|definition|examples|roundup|best|top|case-study|models|calculator)(?:[-_]|$)", re.IGNORECASE)
 
 
 def company_page_issue(url: str, title: str = "", *, strict: bool = False) -> str | None:

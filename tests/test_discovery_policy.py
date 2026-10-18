@@ -58,7 +58,8 @@ def test_policy_two_asks_for_companies_own_pages_and_policy_one_is_unchanged():
                       target="B2B and SaaS companies of any size or stage, seeking predictable growth",
                       criteria=(Criterion(id="software", description="Sells software to businesses"),))
     assert queries_for(profile, policy=2) == (
-        "B2B SaaS company official website", "B2B SaaS company pricing", "B2B SaaS company about us")
+        "B2B SaaS software company official website", "B2B SaaS startup platform pricing", "B2B SaaS software company about us")
+    assert queries_for(profile, "AI business software", policy=2)[0] == "AI business software company official website"
     assert queries_for(profile, "Dental clinics in Ontario", policy=2) == (
         "Dental clinics Ontario company official website", "Dental clinics Ontario company about us",
         "Dental clinics Ontario company products services")

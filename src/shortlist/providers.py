@@ -151,10 +151,15 @@ def queries_for(profile: Profile, discovery_terms: str | None = None, policy: in
         # Ask for the companies' own pages: an official site, and a pricing (software) or about page, which only the
         # company itself publishes. Long target sentences and event words returned articles, lists and job boards.
         phrase = search_phrase(discovery_terms or profile.target)
-        software = bool(SOFTWARE_WORDS & set(phrase.casefold().split()))
-        # The third query runs only when the first two leave too few companies (see worker.LOW_YIELD).
-        return (f"{phrase} company official website", f"{phrase} company {'pricing' if software else 'about us'}",
-                f"{phrase} company {'about us' if software else 'products services'}")
+        if SOFTWARE_WORDS & set(phrase.casefold().split()):
+            # Live 18 October: "... company pricing" returned pricing articles (1 of 15 kept), while these anchors returned
+            # 12 of 12 company pages for the same short target on 13 October.
+            software = "" if "software" in phrase.casefold().split() else " software"
+            return (f"{phrase}{software} company official website", f"{phrase} startup platform pricing",
+                    f"{phrase}{software} company about us")
+        # The third query runs only when the first two leave too few companies (see worker.LOW_YIELD). Live 18 October:
+        # these returned partner-program pages of real companies where the target sentence returned guides.
+        return (f"{phrase} company official website", f"{phrase} company about us", f"{phrase} company products services")
     target = (discovery_terms or profile.target)[:300]
     if discovery_terms:
         return (f'{target} company official website', f'{target} company (hiring OR expansion OR launch OR funding) official')
