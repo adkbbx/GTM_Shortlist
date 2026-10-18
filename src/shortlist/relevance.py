@@ -197,7 +197,8 @@ def identity_issue(identity: CompanyIdentity, sources: tuple[Source, ...], domai
         return "Company identity passage does not name the proposed company"
     brand = domain.split(".")[0].replace("-", "").casefold()
     words = re.findall(r"[a-z0-9]+", name)
-    aliases = [word for word in words if len(word) >= 3] + ["".join(word[0] for word in words)]
+    # The whole name joined up is an alias too: "B2B Hub" is b2bhub.ltd, refused in every saved Eygentic run on 19 October.
+    aliases = [word for word in words if len(word) >= 3] + ["".join(word[0] for word in words), "".join(words)]
     if not any(len(alias) >= 3 and (alias == brand or len(alias) >= 4 and alias in brand) for alias in aliases):
         return "Company name cannot be tied to the source website owner"
     return None

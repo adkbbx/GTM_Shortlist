@@ -165,6 +165,23 @@ def test_a_verifier_answering_in_research_words_is_read_against_the_proposed_sta
         Verification.model_validate(verdicts_as_judgments(data, items))
 
 
+@pytest.mark.parametrize("name,domain,tied", [
+    ("B2B Hub", "b2bhub.ltd", True),  # Refused in every saved Eygentic run on 19 October.
+    ("Back Office Boss", "backofficeboss.ai", True),
+    ("DelegateZero", "delegatezero.com", True),
+    ("Acme Analytics", "b2bhub.ltd", False),
+    ("Hub", "b2bhub.ltd", False),
+])
+def test_a_name_joined_up_can_tie_to_the_website_owner(name, domain, tied):
+    from shortlist.domain import CompanyIdentity
+    from shortlist.relevance import identity_issue
+    passage = f"{name} is the AI operating system for business teams."
+    page = Source(id="home", url=f"https://{domain}/", company_domain=domain, title=name, text=passage,
+                  content_hash=hashlib.sha256(passage.encode()).hexdigest())
+    issue = identity_issue(CompanyIdentity(name=name, domain=domain, source_id="home", passage=passage), (page,), domain)
+    assert (issue is None) is tied
+
+
 def test_identity_is_grounded_in_a_real_line_when_the_quote_is_loose():
     from shortlist.domain import CompanyIdentity
     from shortlist.relevance import ground_identity
