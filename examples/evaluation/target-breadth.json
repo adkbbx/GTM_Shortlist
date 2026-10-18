@@ -1,0 +1,58 @@
+[
+  {
+    "label": "AI startups",
+    "broad": false,
+    "target": "Private AI B2B SaaS startups",
+    "source_database": "shortlist.sqlite3",
+    "source_run": "4916be8efe824106921f620fb70712dc",
+    "basis": "AI names a technology."
+  },
+  {
+    "label": "Generic acquisition",
+    "broad": true,
+    "target": "B2B and SaaS companies of any size or stage, including specialized business software, seeking more predictable customer acquisition and evidence-based growth rather than volume-based activity.",
+    "source_database": "shortlist.sqlite3",
+    "source_run": "35249a4ea6a64dfa8222b208975867c8",
+    "basis": "The defining target contains only generic categories; acquisition is an intent clause."
+  },
+  {
+    "label": "Channel networks",
+    "broad": false,
+    "target": "Mid-market B2B companies with growing channel partner networks (50-500 partners) focused on rapid scaling and co-selling initiatives.",
+    "source_database": "research-run-2026-10-18-gaps.sqlite3",
+    "source_run": "9534c56e551d415aae4aa876b7949085",
+    "basis": "Channel partner networks name a programme."
+  },
+  {
+    "label": "Seed SaaS",
+    "broad": true,
+    "target": "Seed to Series A B2B SaaS companies with a launched product.",
+    "source_database": "eygentic-walkthrough.sqlite3",
+    "source_run": "9db93370fac6466183792a268aeebccf",
+    "basis": "Funding stage and launched product do not name an industry, buyer function or technology."
+  },
+  {
+    "label": "Generic brands with acquisition intent",
+    "broad": true,
+    "target": "Global Brands and Advertisers seeking to scale their marketing efforts through affiliate partnerships.",
+    "source_database": "shortlist.sqlite3",
+    "source_run": "dc95e0cf28384b77bd0ad208b67bf5bb",
+    "basis": "The defining target is generic brands and advertisers; affiliate marketing occurs in the intent clause."
+  },
+  {
+    "label": "Buyer function",
+    "broad": false,
+    "target": "Sales and Marketing Operations teams within technology companies focused on optimizing their Go-To-Market (GTM) processes and revenue generation.",
+    "source_database": "shortlist.sqlite3",
+    "source_run": "769505ed237d4fb5a0954502547a8f79",
+    "basis": "Sales and marketing operations name a buyer function."
+  },
+  {
+    "label": "Channel programme",
+    "broad": false,
+    "target": "Companies managing and scaling channel partner programs, from emerging to enterprise levels, that require tools to manage partner onboarding, co-selling, co-marketing, and performance tracking.",
+    "source_database": "shortlist.sqlite3",
+    "source_run": "98331456e88c4ee29b4efe3afbc5a7f9",
+    "basis": "Channel partner programmes name a programme."
+  }
+]

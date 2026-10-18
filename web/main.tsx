@@ -55,6 +55,16 @@ function TargetPartView({ title, editLabel, editing, onEdit, review, children }:
 function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & { seller_url: string }; wallet: Wallet | null; hostedAccount: boolean; onSaved: (run: Run) => void }) {
   const [offer, setOffer] = useState(run.draft?.offer ?? '');
   const [target, setTarget] = useState(run.draft?.target ?? '');
+  const [broadTarget, setBroadTarget] = useState(false);
+  const campaignContext = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    let current = true;
+    setBroadTarget(false);
+    const timer = window.setTimeout(() => {
+      void api.targetGuidance(target).then(broad => { if (current) setBroadTarget(broad); }).catch(() => undefined);
+    }, 200);
+    return () => { current = false; window.clearTimeout(timer); };
+  }, [target]);
   const [criteria, setCriteria] = useState<Confirmation['criteria']>(run.draft?.criteria.length ? run.draft.criteria : [{ id: 'criterion-1', description: '', required: true }]);
   const [exclusions, setExclusions] = useState((run.draft_exclusions ?? []).join('\n'));
   const [saving, setSaving] = useState(false);
@@ -97,9 +107,16 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
       <TargetPartView title="Who to look for" editLabel="Edit who to look for" editing={editing.target} onEdit={() => edit('target')}
         review={<><p className="target-text">{target}</p>{campaignName && <p className="hint">Campaign: {campaignName} · Search keywords: {discoveryTerms}</p>}</>}>
         <label htmlFor="target">Who should we look for?</label>
-        <textarea id="target" required minLength={5} maxLength={2000} rows={2} value={target} onChange={e => setTarget(e.target.value)} />
+        <textarea id="target" required minLength={5} maxLength={2000} rows={2} value={target} onChange={e => setTarget(e.target.value)} aria-describedby={broadTarget ? 'target-breadth-note' : undefined} />
         {campaignName && <><label htmlFor="discovery-terms">Search keywords</label><input id="discovery-terms" required minLength={5} maxLength={300} value={discoveryTerms} onChange={e => setDiscoveryTerms(e.target.value)} aria-describedby="discovery-help" /><p id="discovery-help" className="hint">Observable company terms, such as industry, product and public announcements. Private performance assumptions belong in hypotheses.</p></>}
       </TargetPartView>
+      {broadTarget && <p id="target-breadth-note" className="hint target-check-note" role="status">This target is broad. Web search mostly returns articles for targets like this. Add an industry, a buyer role or a programme{run.market?.campaigns.length ? <>, or <button type="button" className="text-button" onClick={() => {
+        if (campaignContext.current) {
+          campaignContext.current.open = true;
+          const choice = campaignContext.current.querySelector<HTMLButtonElement>('.campaign-choice');
+          choice?.focus(); choice?.scrollIntoView({ block: 'center' });
+        }
+      }}>Pick a suggested campaign</button>.</> : '.'}</p>}
       <TargetPartView title="Fit checks" editLabel="Edit fit checks" editing={editing.criteria} onEdit={() => edit('criteria')}
         review={<ul className="target-checks">{criteria.map(criterion => <li key={criterion.id}><span>{criterion.description}
           {rarelyPublicCheck(criterion.description) && (criterion.required
@@ -128,7 +145,7 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
         {unverifiableExclusions.length > 0 && <p className="hint target-check-note" role="status">Rarely on a company's own website: {unverifiableExclusions.map(line => `"${line}"`).join(', ')}. An exclusion that stays unknown keeps every company at Needs verification, so ask about it in conversation instead. <button type="button" className="text-button" onClick={() => setExclusions(exclusions.split('\n').filter(line => !rarelyPublicCheck(line.trim())).join('\n'))}>Remove {unverifiableExclusions.length === 1 ? 'it' : 'them'}</button></p>}</div>}
       {(!editing.exclusions || run.market) && <div className="target-optional">
         {!editing.exclusions && <button type="button" className="text-button" onClick={() => edit('exclusions')}>Add exclusions</button>}
-        {run.market && <details className="confirmation-context"><summary>Explore campaign ideas and source context</summary><MarketOverview run={run} selected={campaignName} onChoose={campaign => {
+        {run.market && <details className="confirmation-context" ref={campaignContext}><summary>Explore campaign ideas and source context</summary><MarketOverview run={run} selected={campaignName} onChoose={campaign => {
           setCampaignName(campaign.name); setTarget(campaign.target); setCriteria(campaign.criteria);
           setDiscoveryTerms(campaign.search_terms || run.draft?.target.slice(0, 300) || '');
           setEditing(old => ({ ...old, target: true, criteria: true }));
@@ -291,7 +308,7 @@ function ReuseOffer({ run, onSaved }: { run: Run; onSaved: (run: Run) => void })
     try { onSaved(await api.reuse(run.id, requestKey.current)); }
     catch (reason) { setError(describeError(reason)); setSaving(false); }
   };
-  return <div className="reuse-offer"><button className="secondary" disabled={saving} onClick={() => void reuse()}>{saving ? 'Copying offer…' : 'Reuse this offer'}<Arrow /></button><p className="hint">Skip website profiling. Review the target and batch cost before new research starts.</p>{error && <p className="notice" role="alert">{error}</p>}</div>;
+  return <div className="reuse-offer"><button className="secondary" disabled={saving} onClick={() => void reuse()}>{saving ? 'Copying offer…' : 'Reuse this offer'}<Arrow /></button><p className="hint">{run.low_yield_explanation ? 'A narrower target usually finds more companies. Reuse this offer to edit the target before new research starts.' : 'Skip website profiling. Review the target and batch cost before new research starts.'}</p>{error && <p className="notice" role="alert">{error}</p>}</div>;
 }
 
 function DeleteResearch({ run, onDeleted }: { run: Run; onDeleted: () => void }) {
@@ -479,12 +496,13 @@ function App({ account, identity }: { account: ReactNode; identity: string }) {
       {active && <ResearchProgress key={active.id} run={active} connected={!error} localResearch={health?.mode === 'local' && !previewWorkspace} />}{active && ['queued', 'running'].includes(active.status) && <ResearchStop key={`stop-${active.id}`} run={active} onStopped={stopped} />}{active?.credits && <p className="batch-credit-summary" role="status">{active.credits.used} {active.credits.used === 1 ? 'credit' : 'credits'} used · {active.credits.reserved} reserved · {active.credits.returned} returned</p>}
       {active && !pending && !active.termination && !active.seller_url && <WebsiteChoice key={`website-${active.id}`} run={active} onSaved={websiteChosen} />}{active?.status === 'awaiting_confirmation' && active.seller_url && <>{health && !health.search_ready && !active.sample && <p className="notice">Company search is not configured. Your target can be saved; configure search before discovery.</p>}<ConfirmationForm key={`offer-${active.id}`} run={{ ...active, seller_url: active.seller_url }} wallet={wallet} hostedAccount={account != null} onSaved={saved} /></>}{active?.status === 'awaiting_confirmation' && <ResearchStop key={`stop-${active.id}`} run={active} onStopped={stopped} />}
       {results && <><div className="results-toolbar"><div><h2>{eligibleRecords.length} {eligibleRecords.length === 1 ? 'company' : 'companies'} researched</h2><p>{active.status === 'partial' ? 'Some questions remain open. Review the unknowns before using these records.' : 'Model assessments are ready for your review.'}</p></div>{!!active.records.length && <div className="export-controls"><label className="checkbox-label"><input type="checkbox" checked={acceptedOnly} onChange={e => setAcceptedOnly(e.target.checked)} />Accepted only</label><div className="export-links">{(['xlsx', 'csv', 'json'] as const).map(format => <a className="secondary button-link" key={format} href={`/api/runs/${active.id}/export?format=${format}&accepted_only=${acceptedOnly}`} onClick={event => { event.preventDefault(); void api.download(active.id, format, acceptedOnly, active.sample).catch(reason => setError(describeError(reason))); }}>Export {format === 'xlsx' ? 'Excel' : format.toUpperCase()}</a>)}</div></div>}</div>
+        {active.low_yield_explanation && <section className="notice" aria-label="Discovery coverage"><p>{active.low_yield_explanation}</p>{active.profile && !active.sample && <ReuseOffer key={active.id} run={active} onSaved={run => { saved(run); select(run); }} />}</section>}
         {active.error && <p className="notice" role="status">{active.error}</p>}
         {!!withheldRecords.length && <section className="notice" aria-label="Excluded saved sources"><h3>{withheldRecords.length} saved {withheldRecords.length === 1 ? "source" : "sources"} excluded from the shortlist</h3><p>These historical entries do not establish an official company. Original evidence is preserved in research history and JSON export.</p><ul>{withheldRecords.map(record => <li key={record.research.id}>{record.research.domain}: {record.source_issue}</li>)}</ul></section>}
         {eligibleRecords.length ? <section className="company-shortlist" aria-label="Researched companies"><p className="shortlist-instruction">Compare the companies, then open a research sheet to inspect evidence and decide.</p>{eligibleRecords.map(record => <CompanyReview key={record.research.id} record={record} run={active} onSaved={saved} />)}</section> : <section className="sheet"><h3>{withheldRecords.length ? "No eligible company records" : "No company records yet"}</h3><p>{withheldRecords.length ? "The saved sources did not establish official company identities." : "The run stopped before usable research could be saved."} {active.profile ? 'Your confirmed target is preserved.' : 'Your saved seller inputs remain available.'}</p><button className="secondary" onClick={() => select(null)}>Start another shortlist</button></section>}
         <section className="results-context" aria-label="Research context">
         {active.profile && <details className="target-summary"><summary>Confirmed target and offer</summary><p>{active.profile.offer}</p><p>{active.profile.target}</p>{!!active.profile.exclusions.length && <p>Exclusions: {active.profile.exclusions.join('; ')}</p>}<p className="hint">Confirmed {date(active.profile.confirmed_at)}. Start a new run to change this target.</p></details>}
-        {active.profile && !active.sample && <ReuseOffer key={active.id} run={active} onSaved={run => { saved(run); select(run); }} />}
+        {active.profile && !active.sample && !active.low_yield_explanation && <ReuseOffer key={active.id} run={active} onSaved={run => { saved(run); select(run); }} />}
         </section>
       </>}
       {results && active.profile && eligibleRecords.length > 0 && service?.booking_url && <section className="setup-call" aria-labelledby="setup-heading"><div><h2 id="setup-heading">Discuss your shortlist</h2><p>Get help with your target, evidence and next steps. The setup call is optional.</p></div><a className="secondary button-link" href={service.booking_url} target="_blank" rel="noopener noreferrer" onClick={() => { if (navigator.doNotTrack !== '1') void api.bookingClick(active.id).catch(() => undefined); }}>Book an optional setup call<Arrow /></a></section>}

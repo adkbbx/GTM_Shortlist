@@ -7,7 +7,8 @@ for (const keepValid of [false, true]) {
     const before = await (await page.request.get(`/api/runs/${id}`)).json();
     const mutations: string[] = [];
     page.on('request', request => {
-      if (request.url().includes('/api/') && request.method() !== 'GET') mutations.push(request.url());
+      // Target guidance is a read-only POST; saved-run equality below still checks that nothing changed.
+      if (request.url().includes('/api/') && request.method() !== 'GET' && new URL(request.url()).pathname !== '/api/target-guidance') mutations.push(request.url());
     });
     await page.goto(`/?run=${id}`);
     const form = page.getByRole('region', { name: 'Confirm what a good fit means' });

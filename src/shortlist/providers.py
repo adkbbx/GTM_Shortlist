@@ -150,6 +150,20 @@ def search_phrase(text: str, limit: int = 6) -> str:
     return " ".join(words[:limit]) or " ".join(keep(text)[:limit]) or text[:80]
 
 
+BROAD_CATEGORIES = frozenset({"b2b", "saas", "software", "tech", "technology", "startup", "startups", "smb", "smbs",
+                              "enterprise", "ecommerce", "e-commerce", "digital", "business", "private", "privately",
+                              "held", "specialized", "product", "products"})
+TARGET_INTENT = re.compile(r"\b(?:seeking|looking|wanting|trying|struggling|aiming|requiring|needing)\b", re.IGNORECASE)
+
+
+def broad_target(text: str) -> bool:
+    """Advisory only: retain defining with/in clauses and buyer roles, unlike the search phrase."""
+    head = TARGET_INTENT.split(text, maxsplit=1)[0]
+    words = {word.casefold() for word in re.findall(r"[\w]+(?:-[\w]+)*", head) if not word.isdigit()}
+    words -= QUERY_FILLER | GENERIC_ENTITIES | GENERIC_QUALIFIERS | {"with", "within", "including", "specialised"}
+    return bool(head.strip()) and not words - BROAD_CATEGORIES
+
+
 def queries_for(profile: Profile, discovery_terms: str | None = None, policy: int = 1) -> tuple[str, ...]:
     # User-confirmed targeting, not a model allowed to invent network actions.
     if policy >= 2:

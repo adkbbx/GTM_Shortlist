@@ -115,6 +115,13 @@ function iconUrl(data: unknown) {
 }
 
 export const api = {
+  async targetGuidance(target: string) {
+    const data = await request('/api/target-guidance', { target });
+    if (typeof data !== 'object' || data === null || !('broad' in data) || typeof data.broad !== 'boolean') {
+      throw new Error('Target guidance is unavailable.');
+    }
+    return data.broad;
+  },
   async siteIcon(runId: string, domain: string) {
     return iconUrl(await request(`/api/runs/${encodeURIComponent(runId)}/site-icon/${encodeURIComponent(domain)}`));
   },

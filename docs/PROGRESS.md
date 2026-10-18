@@ -1,5 +1,12 @@
 # Progress and handoff
 
+## 18 October, broad targets and low-yield next steps
+
+- Added advisory target breadth guidance and a saved-checkpoint coverage explanation with offer reuse. Broad confirmation remains allowed; the campaign shortcut reveals and focuses a saved suggestion directly.
+- Seven labelled confirmed targets from read-only saved evidence agree with the breadth check. The generic acquisition target is broad; channel partner networks and private AI startups are specific. No live discovery improvement is claimed.
+- Verification (reviewer, normal Windows session): Ruff passes; schema export is repeatable and limited to intended changes; web build passes; full backend 782 passed, 48 skipped, 0 failed; full Playwright 165 passed, 3 intentional skips, 0 failed.
+- Temporary verification files and the GPU log were removed. No provider calls, saved-evidence writes, commits or deployments. Reviewer-owned backlog unchanged. Remaining verification is the named native credential cases in a normal user session.
+
 ## 18 October, product targets, review progress, and existing-account signup
 
 - **Admission.** Policy 4 sets aside explicit service providers for product targets. The labelled comparison admits 2 service providers before and 0 after, retaining all 8 annotated product companies. Existing evaluation labels are unchanged. [Report and exact entry audit](target-review-signup-verification.md).

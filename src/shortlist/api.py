@@ -37,8 +37,8 @@ from shortlist.local_credentials import (
 from shortlist.local_service import LocalResearchService, ServiceUnavailable
 from shortlist.market import MarketResearch, reviewed_market
 from shortlist.model_setup import LocalModels, ModelSetupError, available_models
-from shortlist.progress import RunProgress, public_events
-from shortlist.providers import SellerDraft, company_name_matches, recover_customer_draft
+from shortlist.progress import RunProgress, low_yield_explanation, public_events
+from shortlist.providers import SellerDraft, broad_target, company_name_matches, recover_customer_draft
 from shortlist.ranking import by_evidence
 from shortlist.relevance import record_issue
 from shortlist.sample import SAMPLE_SELLER_URL
@@ -128,6 +128,15 @@ class LocalKeyInput(BaseModel):
 class LocalServiceStart(BaseModel):
     model_config = ConfigDict(extra="forbid", hide_input_in_errors=True)
     confirmation: Literal["start_research_service"]
+
+
+class TargetGuidanceInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    target: str = Field(max_length=2000)
+
+
+class TargetGuidance(BaseModel):
+    broad: bool
 
 
 class Confirmation(Target):
@@ -234,6 +243,7 @@ class RunView(BaseModel):
     seller_source: Source | None = None
     experience_version: Literal[1, 2] = 1
     termination: Literal["user_stopped"] | None = None
+    low_yield_explanation: str | None = None
     can_retry_seller: bool = False
     can_continue_discovery: bool = False
     # Invented companies and pages from the local sample providers; never research.
@@ -398,12 +408,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                        seller_source=run["checkpoint"].get("seller_source"),
                        termination=run["checkpoint"].get("termination"),
                        draft_exclusions=run["checkpoint"].get("draft_exclusions", []),
+                       low_yield_explanation=low_yield_explanation(run),
                        can_retry_seller=seller_retry_available(run),
                        can_continue_discovery=saved_discovery_available(run), sample=run["checkpoint"].get("sample", False),
                        progress=RunProgress(
                            worker_online=store.worker_online(), candidates=len(run["checkpoint"].get("candidates", [])),
                            sources=len({s["id"] for pages in run["checkpoint"].get("sources", {}).values() for s in pages}),
                            companies=sum(not record["source_issue"] for record in records), events=public_events(run, records)))
+
+    @app.post("/api/target-guidance", response_model=TargetGuidance)
+    def target_guidance(body: TargetGuidanceInput, store: owned):
+        return TargetGuidance(broad=broad_target(body.target))
 
     @app.get("/api/health", response_model=Health)
     def health():

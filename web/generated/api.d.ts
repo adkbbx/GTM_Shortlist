@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/api/target-guidance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Target Guidance */
+        post: operations["target_guidance_api_target_guidance_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -1240,6 +1257,8 @@ export interface components {
             experience_version: 1 | 2;
             /** Termination */
             termination?: "user_stopped" | null;
+            /** Low Yield Explanation */
+            low_yield_explanation?: string | null;
             /**
              * Can Retry Seller
              * @default false
@@ -1389,6 +1408,16 @@ export interface components {
              */
             confirmation: "stop";
         };
+        /** TargetGuidance */
+        TargetGuidance: {
+            /** Broad */
+            broad: boolean;
+        };
+        /** TargetGuidanceInput */
+        TargetGuidanceInput: {
+            /** Target */
+            target: string;
+        };
         /** Unknown */
         Unknown: {
             /**
@@ -1451,6 +1480,39 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    target_guidance_api_target_guidance_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TargetGuidanceInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TargetGuidance"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     health_api_health_get: {
         parameters: {
             query?: never;

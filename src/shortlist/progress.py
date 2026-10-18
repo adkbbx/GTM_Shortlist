@@ -27,6 +27,42 @@ class RunProgress(Value):
     events: tuple[ProgressEvent, ...] = Field(max_length=100)
 
 
+def low_yield_explanation(run: dict) -> str | None:
+    """Use saved discovery facts only. Provider-side filtered results have no saved count."""
+    checkpoint = run["checkpoint"]
+    if run["status"] not in {"ready", "partial"} or checkpoint.get("termination") or not run.get("profile"):
+        return None
+    limit = checkpoint.get("company_limit", 3)
+    if len(run.get("records", [])) >= limit or "candidates" not in checkpoint:
+        return None
+    candidates = {candidate["domain"] for candidate in checkpoint["candidates"]}
+    if len(candidates) >= limit:
+        return None
+    searches = [attempt for attempt in run.get("attempts", []) if attempt["kind"] == "search"]
+    if not checkpoint.get("completed_queries") and not searches:
+        return None
+    count = len(candidates)
+    message = f"Discovery saved {count} company {'candidate' if count == 1 else 'candidates'} for this target."
+    failures = checkpoint.get("candidate_failures", {})
+    reasons = [failure.get("reason", "") for failure in failures.values()]
+    content = sum(reason.startswith(("Article,", "Editorial title", "List, market report", "Directory or reference",
+                                    "Filtered listing", "Video, social")) for reason in reasons)
+    services = sum(reason == "Sells services to this market rather than being in it" for reason in reasons)
+    details = []
+    if content:
+        details.append(f"{content} {'page was' if content == 1 else 'pages were'} set aside as articles, lists or reference pages")
+    if services:
+        details.append(f"{services} service {'provider was' if services == 1 else 'providers were'} set aside")
+    previous = len(set(checkpoint.get("previously_researched", [])))
+    if previous:
+        details.append(f"{previous} already researched {'company was' if previous == 1 else 'companies were'} set aside")
+    if details:
+        message += " " + "; ".join(details).capitalize() + "."
+    elif checkpoint.get("discovery_failures"):
+        message += " Some discovery searches could not finish."
+    return message
+
+
 def step_label(kind: str, operation: str, domain: str | None = None) -> str:
     if operation == "market:search":
         return "Exploring potential competitors"

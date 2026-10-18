@@ -5,6 +5,49 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/api/target-guidance": {
+      "post": {
+        "summary": "Target Guidance",
+        "operationId": "target_guidance_api_target_guidance_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TargetGuidanceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TargetGuidance"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/health": {
       "get": {
         "summary": "Health",
@@ -3311,6 +3354,17 @@
             ],
             "title": "Termination"
           },
+          "low_yield_explanation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Low Yield Explanation"
+          },
           "can_retry_seller": {
             "type": "boolean",
             "title": "Can Retry Seller",
@@ -3749,6 +3803,34 @@
           "confirmation"
         ],
         "title": "StopInput"
+      },
+      "TargetGuidance": {
+        "properties": {
+          "broad": {
+            "type": "boolean",
+            "title": "Broad"
+          }
+        },
+        "type": "object",
+        "required": [
+          "broad"
+        ],
+        "title": "TargetGuidance"
+      },
+      "TargetGuidanceInput": {
+        "properties": {
+          "target": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Target"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "target"
+        ],
+        "title": "TargetGuidanceInput"
       },
       "Unknown": {
         "properties": {

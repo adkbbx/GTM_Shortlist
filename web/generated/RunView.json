@@ -1655,6 +1655,18 @@
       "default": null,
       "title": "Termination"
     },
+    "low_yield_explanation": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Low Yield Explanation"
+    },
     "can_retry_seller": {
       "default": false,
       "title": "Can Retry Seller",

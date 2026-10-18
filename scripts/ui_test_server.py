@@ -133,6 +133,43 @@ if __name__ == "__main__":
             store.checkpoint(identity, fence, "discovery", checkpoint, "partial", "Labelled interrupted discovery")
         return {"id": identity}
 
+    @application.post("/__fixture_broad_target")
+    def broad_target_fixture(campaigns: bool = True):
+        from uuid import uuid4
+
+        from shortlist.market import MarketResearch
+        draft = FixtureModel().seller(None).model_copy(update={"target":
+            "B2B and SaaS companies seeking to make their customer acquisition more predictable."})
+        with held_lock:
+            identity = store.create_draft("https://seller.example/", "broad-target-" + uuid4().hex)
+            fence = store.claim(identity)
+            checkpoint = store.get_run(identity)["checkpoint"]
+            checkpoint["draft"] = draft.model_dump(mode="json")
+            if campaigns:
+                checkpoint["market"] = MarketResearch(competitors=(), campaigns=FixtureModel().market(draft, []).campaigns, status="saved").model_dump(mode="json")
+            store.checkpoint(identity, fence, "confirmation", checkpoint, "awaiting_confirmation")
+        return {"id": identity}
+
+    @application.post("/__fixture_low_yield")
+    def low_yield_fixture(empty: bool = False):
+        from uuid import uuid4
+        draft = FixtureModel().seller(None)
+        profile = Profile(seller_url="https://seller.example/", offer=draft.offer, target="B2B SaaS companies",
+                          criteria=tuple(draft.criteria))
+        with held_lock:
+            identity = store.create_run(profile, "low-yield-" + uuid4().hex)
+            fence = store.claim(identity)
+            candidate = FixtureSearch().search("labelled fixture", profile.seller_url)[1]
+            if not empty:
+                sources = tuple(fixture_fetch(url, candidate.domain) for url in (candidate.url, candidate.url + "about"))
+                store.save_record(identity, fence, FixtureModel().research(profile, candidate, sources))
+            checkpoint = store.get_run(identity)["checkpoint"]
+            checkpoint.update(company_limit=3, completed_queries=[0, 1, 2],
+                              candidates=[] if empty else [candidate.model_dump(mode="json")],
+                              candidate_failures={"service.example": {"reason": "Sells services to this market rather than being in it"}})
+            store.checkpoint(identity, fence, "review", checkpoint, "partial")
+        return {"id": identity}
+
     @application.post("/__fixture_corrupt_provider")
     def corrupt_provider():
         credentials = LocalCredentials(settings.db_path)
