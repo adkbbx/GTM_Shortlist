@@ -4,7 +4,7 @@
 
 This month I've shipped an app every week for these challenges, with two coding agents doing most of the typing. Building software isn't the hard part anymore. The hard part starts the day after you ship it: who do you sell it to?
 
-I run Eygentic, which runs customer-acquisition experiments for B2B and SaaS teams: which customers, messages and channels actually work, before anyone spends money on growth. Every one of those experiments starts with the same boring thing, a list of companies that might buy. Most prospecting tools I looked at sell you access to a big pre-built database of companies and contacts, and you trust that each row is right. That works if you already have a sales budget. A two-person AI startup that just shipped usually doesn't.
+I'm building [Eygentic](https://eygentic.com), a company that runs customer-acquisition experiments for B2B and SaaS teams: which customers, messages and channels actually work, before anyone spends money on growth. Every one of those experiments starts with the same boring thing, a list of companies that might buy. Most prospecting tools I looked at sell you access to a big pre-built database of companies and contacts, and you trust that each row is right. That works if you already have a sales budget. A two-person AI startup that just shipped usually doesn't.
 
 If distribution is now the hard part of starting a software company, I don't think it should only be available to companies that can already afford a sales stack. So I built the tool I wanted for my own first list, made it open source, and put it online.
 
@@ -26,13 +26,13 @@ If distribution is now the hard part of starting a software company, I don't thi
 
 ![Confirm your target: the offer GTM Shortlist drafted from eygentic.com ("Focused customer-acquisition experiments for B2B and SaaS teams...") and the target "B2B AI SaaS companies", both editable, with discovery waiting for confirmation](https://raw.githubusercontent.com/adkbbx/GTM_Shortlist/worktree-week2-post/docs/post/confirm-target.png)
 
-*The confirmation step on my own website. Gemma drafted the offer from eygentic.com. Nothing is searched until I confirm it.*
+*The confirmation step on my own website. Gemma drafted the offer from [eygentic.com](https://eygentic.com). Nothing is searched until I confirm it.*
 
 **Who would pay for this?** Founders of small B2B software and AI companies doing their own sales, and the GTM consultants and outbound agencies who build a new list for a new campaign every week. The hosted version gives you your first three companies free with no card. Research there runs on credits, one per researched company, and paid checkout isn't built yet. Self-hosting is free apart from your own search and model costs. The managed version I'm testing through Eygentic is a $99 reviewed pilot shortlist. Nobody has paid that yet, so treat it as a price I'm testing, not a business.
 
 ## The first real run, and what it got wrong
 
-On 16 October I ran the hosted app on my own website with the target "B2B AI SaaS companies". Three SerpApi searches, eight Gemma calls, 17 page reads. Two of the searches failed. The first time, the whole run stopped with nothing, because discovery wanted every query to succeed before it used any candidates, and all three credits came back. I changed that so a failed query is saved and the run carries on with the candidates it already has. The same run then finished from its saved candidates without searching again.
+On 16 October I ran the hosted app on my own website, [eygentic.com](https://eygentic.com), with the target "B2B AI SaaS companies". Three SerpApi searches, eight Gemma calls, 17 page reads. Two of the searches failed. The first time, the whole run stopped with nothing, because discovery wanted every query to succeed before it used any candidates, and all three credits came back. I changed that so a failed query is saved and the run carries on with the candidates it already has. The same run then finished from its saved candidates without searching again.
 
 ![Review your shortlist: three researched companies. NachoNacho needs verification, builtin.com has no company description established, and DealHub fits the required criteria. A notice says discovery was incomplete](https://raw.githubusercontent.com/adkbbx/GTM_Shortlist/worktree-week2-post/docs/post/first-hosted-run.png)
 
@@ -152,7 +152,7 @@ Here's what open actually changed for me.
 
 ## My First User
 
-The first user is me. The first hosted shortlist was for my own offer at Eygentic, and DealHub is the first company that met my required checks. I haven't sold GTM Shortlist to anyone yet. What I want to find out next is whether a founder who has just shipped will trust a list where most of the checks say "unknown" instead of a confident score.
+The first user is me. The first hosted shortlist was for Eygentic, the company I'm building, and DealHub is the first company that met my required checks. I haven't sold GTM Shortlist to anyone yet. What I want to find out next is whether a founder who has just shipped will trust a list where most of the checks say "unknown" instead of a confident score.
 
 ## Code
 
