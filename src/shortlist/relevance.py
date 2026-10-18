@@ -11,14 +11,18 @@ class CompanyPageError(ValueError):
 
 QUOTE_MARKS = str.maketrans({"‘": "'", "’": "'", "“": '"', "”": '"', "…": "...",
                              **dict.fromkeys("‐‑‒–—―−", "-")})
+ESCAPED_BREAK = re.compile(r"\\[nrt]")
+SOFT_STOP = re.compile(r"\.(?=\s|$)")
 
 
 def grounding_text(text: str) -> str:
     # Invisible format characters (zero-width spaces and joiners, soft hyphens, byte-order marks) and the style of
     # quote marks, dashes and ellipses are not words. nice.com (live, 18 October) puts zero-width spaces between words; the model's quote left them out
     # and the company was refused. 19 of 29 saved pages use typographic apostrophes a model may straighten.
-    visible = "".join(ch for ch in text if unicodedata.category(ch) != "Cf")
-    return " ".join(visible.translate(QUOTE_MARKS).split())
+    # Two more habits of small models on 19 October (Eygentic saved run, qwen3.5:4b): writing the two characters "\n"
+    # where the page breaks a line, and adding a full stop at a heading's line break. Neither changes a word.
+    visible = "".join(ch for ch in ESCAPED_BREAK.sub(" ", text) if unicodedata.category(ch) != "Cf")
+    return " ".join(SOFT_STOP.sub("", visible.translate(QUOTE_MARKS)).split())
 
 
 def quoted_in(passage: str, text: str) -> bool:
@@ -33,7 +37,11 @@ def verbatim_quote(passage: str, text: str) -> str | None:
     for index, char in enumerate(text):
         if unicodedata.category(char) == "Cf":
             continue
-        for visible in char.translate(QUOTE_MARKS):
+        translated = char.translate(QUOTE_MARKS)
+        stop = index + 1 == len(text) or text[index + 1].isspace()
+        for position, visible in enumerate(translated):
+            if visible == "." and stop and position == len(translated) - 1:
+                continue  # Mirrors SOFT_STOP in grounding_text.
             if visible.isspace():
                 if not characters or characters[-1] == " ":
                     continue
@@ -44,7 +52,10 @@ def verbatim_quote(passage: str, text: str) -> str | None:
     start = "".join(characters).find(quote)
     if not quote or start < 0:
         return None
-    return text[offsets[start]:offsets[start + len(quote) - 1] + 1]
+    end = offsets[start + len(quote) - 1] + 1
+    while end < len(text) and text[end] == ".":
+        end += 1  # Keep the page's own full stop, which matching ignored.
+    return text[offsets[start]:end]
 
 DIRECTORIES = frozenset({"linkedin.com", "crunchbase.com", "g2.com", "capterra.com", "ycombinator.com",
                          "techcrunch.com", "wellfound.com", "producthunt.com", "tracxn.com", "github.com",

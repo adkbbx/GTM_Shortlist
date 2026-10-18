@@ -274,6 +274,24 @@ def test_excerpt_gap_recovery_still_needs_independent_verification(gap_pages):
     assert apply_verification(profile, record, Verification(judgments=[])).findings[0].status == "unknown"
 
 
+@pytest.mark.parametrize("quote,page,saved", [
+    # qwen3.5:4b on the saved Eygentic run (19 October): a literal "\n" for a line break, and a full stop at a heading break.
+    ("The AI-enabled embedded iPaaS\\nIntegrations,\\nWorkflows, and Agents", "The AI-enabled embedded iPaaS\nIntegrations,\nWorkflows, and Agents built in.",
+     "The AI-enabled embedded iPaaS\nIntegrations,\nWorkflows, and Agents"),
+    ("AI that actually does the work. Not a chatbot.", "AI that actually does the work\nNot a chatbot.", "AI that actually does the work\nNot a chatbot."),
+])
+def test_model_line_break_habits_match_and_save_the_page_text(gap_pages, quote, page, saved):
+    from shortlist.domain import Evidence
+    from shortlist.providers import cited
+    _, home, _ = gap_pages
+    source = home.model_copy(update={"text": page})
+    result = cited(Evidence(source_id=source.id, passage=quote, claim="Labelled claim."), (source,), "example.com")
+    assert not isinstance(result, str) and result.passage == saved
+    # A changed word is still refused.
+    changed = Evidence(source_id=source.id, passage=quote.replace("AI", "ML", 1), claim="Labelled claim.")
+    assert isinstance(cited(changed, (source,), "example.com"), str)
+
+
 def test_excerpt_gap_keeps_real_sentence_ellipsis(gap_pages):
     from shortlist.domain import Evidence
     from shortlist.providers import cited
@@ -281,7 +299,8 @@ def test_excerpt_gap_keeps_real_sentence_ellipsis(gap_pages):
     page = home.model_copy(update={"text": "Our partners… receive AI software training."})
     evidence = Evidence(source_id=page.id, passage="Our partners... receive AI software training.",
                         claim="Partners receive training.")
-    assert cited(evidence, (page,), "example.com") == evidence
+    # The quote matches and is saved in the page's own characters.
+    assert cited(evidence, (page,), "example.com").passage == "Our partners… receive AI software training."
 
 
 @pytest.mark.parametrize("fragment,kept", [("Acme sells kit", False), ("Acme sells kits", True)])  # 14 and 15 characters.

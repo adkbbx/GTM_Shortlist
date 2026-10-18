@@ -469,10 +469,12 @@ def cited(evidence: Evidence, sources: tuple[Source, ...], domain: str) -> Evide
                 if quoted_in(fragment, page.text) and (passage := verbatim_quote(fragment, page.text)) is not None:
                     return evidence.model_copy(update={"source_id": page.id, "passage": passage})
     elif source is not None and quoted_in(evidence.passage, source.text):
-        return evidence
+        # Save the page's own characters, never the model's rendering of them (for example a literal "\n").
+        return evidence.model_copy(update={"passage": verbatim_quote(evidence.passage, source.text) or evidence.passage})
     holder = next((s for s in owned if len(fragments) == 1 and quoted_in(evidence.passage, s.text)), None)
     if holder is not None:
-        return evidence.model_copy(update={"source_id": holder.id})
+        return evidence.model_copy(update={"source_id": holder.id,
+                                           "passage": verbatim_quote(evidence.passage, holder.text) or evidence.passage})
     if source is None:
         return "citation belongs to an unavailable or different company source"
     return "quoted passage could not be found in source"
