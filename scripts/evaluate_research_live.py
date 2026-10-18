@@ -36,6 +36,7 @@ def main():
                         help="A new key in the same output database is a repeat run: it sets aside companies already saved")
     parser.add_argument("--discovery-policy", type=int, default=DISCOVERY_POLICY,
                         help="The first two runs of 18 October used 2; 3 also reads the page search found")
+    parser.add_argument("--only", nargs="*", default=(), help="Research only these saved company domains")
     args = parser.parse_args()
     if not args.allow_provider_calls:
         parser.error("Disabled without --allow-provider-calls and the user's approval.")
@@ -50,7 +51,8 @@ def main():
     for item in journal["searches"].values():
         if item["case"] == "channel-partner-programs":
             for candidate in item["admitted"]:
-                found.setdefault(candidate["domain"], candidate)
+                if not args.only or candidate["domain"] in args.only:
+                    found.setdefault(candidate["domain"], candidate)
     store = Store(args.output_db)
     run_id = store.create_run(profile, args.run_key)
     run = store.get_run(run_id)
@@ -74,6 +76,9 @@ def main():
     print("status", saved["status"], "| error", saved["error"])
     print("attempts", {kind: sum(a["kind"] == kind for a in saved["attempts"]) for kind in ("search", "fetch", "model")})
     print("set aside as already shortlisted", saved["checkpoint"].get("previously_researched", []))
+    for domain, quotes in saved["checkpoint"].get("rejected_quotes", {}).items():
+        for quote in quotes:
+            print("  rejected quote", domain, quote["subject"], "|", quote["passage"][:200].replace("\n", " / "))
     for reason in saved["checkpoint"].get("candidate_failures", {}).items():
         print("  refused", reason[0], "|", reason[1]["reason"][:120])
     for record in saved["records"]:

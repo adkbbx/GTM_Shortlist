@@ -99,6 +99,30 @@ def test_a_check_worded_as_a_hedge_can_be_restated_and_typographic_dashes_match(
     assert validate_extraction(raw, profile, "example.com", (page,)).findings[0].status == "supported"
 
 
+def test_an_exact_quote_cited_under_another_saved_page_is_re_attributed(example):
+    profile, home = example
+    text = "Stay ahead with continuous learning through our Partner Academy and AI software certification programs."
+    partners = Source(id="partners", url="https://example.com/partners", company_domain="example.com", title="Partners",
+                      text=text, content_hash=hashlib.sha256(text.encode()).hexdigest())
+    other_text = "Other Co sells AI software to partners through its own academy and certification programs."
+    other = Source(id="other", url="https://other.com/", company_domain="other.com", title="Other", text=other_text,
+                   content_hash=hashlib.sha256(other_text.encode()).hexdigest())
+
+    def finding(passage, source_id="source-1"):
+        return {"name": "Example", "findings": [{"status": "supported", "criterion_id": "ai", "evidence": [{
+            "source_id": source_id, "passage": passage, "claim": "Runs a partner academy for its AI software"}]}]}
+
+    rejected = []
+    record = validate_extraction(finding(text), profile, "example.com", (home, partners, other), rejected)
+    assert record.findings[0].status == "supported" and record.findings[0].evidence[0].source_id == "partners"
+    assert record.findings[0].evidence[0].passage == text and not rejected
+    # Never re-attributed to another company's page, and a quote on no page is kept for diagnosis only.
+    for passage, source_id in ((other_text, "source-1"), ("An academy that appears on none of the saved pages.", "partners")):
+        record = validate_extraction(finding(passage, source_id), profile, "example.com", (home, partners, other), rejected)
+        assert record.findings[0].status == "unknown"
+    assert [item["issue"] for item in rejected] == ["quoted passage could not be found in source"] * 2
+
+
 def test_identity_is_grounded_in_a_real_line_when_the_quote_is_loose():
     from shortlist.domain import CompanyIdentity
     from shortlist.relevance import ground_identity

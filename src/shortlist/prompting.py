@@ -22,6 +22,7 @@ FULL_CONTEXT = 32768
 # Measured about 3.25 characters per Gemma token for JSON page payloads; round down to stay inside the window.
 CHARS_PER_TOKEN = 3
 MINIMUM_SOURCE_CHARS = 1500
+MENU_RUN = 8  # Consecutive lines of at most three words treated as a menu rather than page content.
 
 
 @dataclass(frozen=True)
@@ -103,34 +104,65 @@ def source_budget(runtime: Runtime, fixed_chars: int, output_tokens: int, ceilin
     return min(ceiling, (int(runtime.context * 0.9) - output_tokens) * CHARS_PER_TOKEN - fixed_chars)
 
 
-def excerpts(sources: tuple[Source, ...], focus: str, budget: int, *, window: int = 400) -> list[dict]:
+def readable_spans(lines: list[str], menu_run: int = MENU_RUN) -> list[tuple[int, int]]:
+    """Spans of consecutive lines left once long runs of one-to-three-word lines (language, region and navigation
+    menus) are removed. On 18 October such menus filled most excerpts of NICE and Hitachi Energy, and the model quoted
+    a region list instead of the partner programme. Shorter lists, such as a few features, are kept."""
+    if menu_run == 0:
+        return [(0, len(lines))]
+    short = [len(line.split()) <= 3 for line in lines]
+    spans, start, index = [], 0, 0
+    while index < len(lines):
+        if not short[index]:
+            index += 1
+            continue
+        end = index
+        while end < len(lines) and short[end]:
+            end += 1
+        if end - index >= menu_run:
+            if start < index:
+                spans.append((start, index))
+            start = end
+        index = end
+    if start < len(lines):
+        spans.append((start, len(lines)))
+    return spans
+
+
+def excerpts(sources: tuple[Source, ...], focus: str, budget: int, *, window: int = 400,
+             menu_run: int = MENU_RUN) -> list[dict]:
     """Runs of consecutive page lines ranked by focus terms, returned in page order.
 
     Each run is verbatim page text, so a passage quoted from it passes the same grounding
-    check against the saved page as a passage quoted from the whole page.
+    check against the saved page as a passage quoted from the whole page. Runs never cross a removed menu.
+    Set menu_run=0 to keep menu lines for saved-evidence comparisons.
     """
     wanted = terms(focus)
     chunks = []
     for index, source in enumerate(sources):
         lines = source.text.splitlines()
-        start = 0
-        while start < len(lines):
-            end, size = start, 0
-            while end < len(lines) and (size < window or end == start):
-                size += len(lines[end]) + 1
-                end += 1
-            text = "\n".join(lines[start:end])
-            # The opening of the first page usually names the company and its offer.
-            chunks.append((index == 0 and start == 0, len(wanted & terms(text)), -index, -start, index, start, text))
-            start = end
+        spans = readable_spans(lines, menu_run) or [(0, len(lines))]  # A page that is all menu is sent as it is.
+        for first, last in spans:
+            start = first
+            while start < last:
+                end, size = start, 0
+                while end < last and (size < window or end == start):
+                    size += len(lines[end]) + 1
+                    end += 1
+                text = "\n".join(lines[start:end])
+                # The opening of the first page usually names the company and its offer.
+                chunks.append((index == 0 and start == spans[0][0], len(wanted & terms(text)), -index, -start, index,
+                               start, text))
+                start = end
     chosen, used = {}, 0
     for opening, score, _, _, index, start, text in sorted(chunks, reverse=True):
         if not opening and not score:
             break
-        if used + len(text) > budget:
+        cost = len(text) + (3 if index in chosen else 0)
+        if used + cost > budget:
             continue
         chosen.setdefault(index, []).append((start, text))
-        used += len(text) + 3
+        used += cost
     return [{"id": source.id, "url": source.url, "title": source.title,
              "text": "\n…\n".join(text for _, text in sorted(chosen[index]))}
             for index, source in enumerate(sources) if index in chosen]

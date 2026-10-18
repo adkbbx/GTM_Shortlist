@@ -71,6 +71,12 @@ def test_bad_exclusion_citations_become_unknown(setup, problem):
     record = validate_extraction({"name": "Labelled fixture", "findings": [finding.model_dump(mode="json")],
                                  "exclusion_findings": [{"status": "matched", "exclusion_id": "exclude-1",
                                                          "evidence": [raw_evidence]}]}, profile, "company.example", (source,))
+    if problem == "wrong_source":
+        # The exact quote is on the company's own saved page, so the match is re-attributed there and still blocks.
+        assert record.exclusion_findings[0].status == "matched"
+        assert record.exclusion_findings[0].evidence[0].source_id == source.id
+        assert record.qualification == "does_not_fit"
+        return
     assert all(f.status == "unknown" for f in record.exclusion_findings)
     assert record.qualification == "needs_verification"
     assert record.status == "partial"

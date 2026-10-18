@@ -99,9 +99,25 @@ Changes:
 | Lumen | Refused | Record. Partner check quoted from its English partner page ("Partner with Lumen / Grow your business…"); the verifier omitted that judgment, so it stays unknown |
 | Hitachi Energy | Refused | Record. Identity verified; its partner-page quote was not found on the page, so unknown |
 
-None qualifies as a fit: the second check (need for structured partner onboarding) is unestablished for all three. In this run, NICE's second check was withheld as hedged because its claim echoed the check's own wording ("suggesting"). The check-wording exemption above was added after this run.
+**Quote run** (local model, at most six model calls, no searches; database `data/evaluations/research-run-2026-10-18-quotes.sqlite3`, `--only nice.com hitachienergy.com lumen.com`). The worker used 11 fetches, 6 model calls and 0 searches.
 
-Not done: rerunning NICE's second check with the exemption; recovering the verifier's omitted judgment for Lumen (a repair call); keeping the rejected quote when a finding is refused, so misquotes like Hitachi Energy's can be diagnosed.
+| Company | Result | Saved evidence |
+|---|---|---|
+| NICE | Fits | Both required checks supported and verified from its partner page: "Our partners, including referral and resale partner, come from leading Carriers, UCaaS, CRM, VAR and System Integrators..." and "Partner enablement training and support / Help your team hit the ground running with e-learning programs and ongoing training." |
+| Lumen | Fits | "Partner with Lumen / Grow your business with a powerful global network and comprehensive portfolio of advanced IT solutions." and "Live and on-demand training / Stay up to date on the latest technology with product, program and industry training." Both required checks supported and verified. |
+| Hitachi Energy | Needs verification | The saved rejected quote shows the model quoted the region menu: "Channel Partner Program \| Hitachi Energy / Login / United States / EN / Choose your region and language / Region / Global / Algeria ...", instead of the partner programme text. |
+
+- **Business outcome.** For Unifyr's "Channel Scaling Accelerator" campaign, qualified fits from the live channel-partner search results went from 1 (Channel Institute) to 3 (Channel Institute, NICE, Lumen). Each has verified first-party quotes for both required checks.
+
+Changes after the quote run:
+- **Quote attribution.** An exact quote cited under the wrong saved page is reassigned to the same company's saved page that contains it.
+- **Rejected quotes.** Quotes found on no saved page are kept as diagnostics only.
+- **Omitted judgments.** Policy 3 allows one follow-up verification for assessments the verifier left out, within the run's model-call cap.
+- **Compact excerpts.** Long runs of short menu lines are removed without joining text across them. Measured on 38 saved company page sets, content share rose from 80% to 84%. Every verified passage in saved records is still sent except Front's "Channel Partnerships" menu label, the false-fit evidence. `scripts/check_excerpts.py` repeats the comparison on read-only saved databases without provider calls.
+
+**Not done:** Hitachi Energy re-run with menu removal, which needs model calls and the user's approval. Follow-up verification has only been tested with fixtures.
+
+- **Offline verification.** Full backend suite: 665 passed, 48 skipped; Ruff passes. No provider calls were made.
 
 ## 18 October, drafts before signup (hosted, off by default)
 

@@ -94,6 +94,27 @@ def apply_verification(profile: Profile, record: Research, audit: Verification) 
                                     "status": "partial" if unknowns else "complete", "unknowns": unknowns})
 
 
+def unjudged(profile: Profile, record: Research, audit: Verification) -> set[str]:
+    """Assessments the verifier left out. A small verifier skipped Lumen's quoted partner-programme finding on 18
+    October, which then counted as unverified."""
+    return {a["assessment_id"] for a in assessments(profile, record)} - {j.assessment_id for j in audit.judgments}
+
+
+def narrowed(record: Research, ids: set[str]) -> Research:
+    """The record reduced to the given assessments, so a follow-up verification judges only those."""
+    def keep(finding, prefix, identity, unknown_type):
+        if finding.status == "unknown" or prefix + identity in ids:
+            return finding
+        return unknown_type(**{("exclusion_id" if prefix == "exclusion:" else "criterion_id"): identity},
+                            reason="Judged in the first verification")
+    return record.model_copy(update={
+        "company_identity": record.company_identity if "company:identity" in ids else None,
+        "findings": tuple(keep(f, "criterion:", f.criterion_id, Unknown) for f in record.findings),
+        "exclusion_findings": tuple(keep(f, "exclusion:", f.exclusion_id, ExclusionUnknown) for f in record.exclusion_findings),
+        "company_facts": tuple(fact for fact in record.company_facts if "company:" + fact.kind in ids),
+        "people": tuple(person for person in record.people if "person:" + person.id in ids)})
+
+
 def unavailable(profile: Profile, record: Research, reason: str) -> Research:
     audit = Verification(judgments=[Judgment(assessment_id=a["assessment_id"], verdict="uncertain",
                                             reason=reason[:1000]) for a in assessments(profile, record)])

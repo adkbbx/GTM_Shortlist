@@ -54,7 +54,11 @@ def test_bad_fact_provenance_is_not_published(overview, defect):
     else:
         raw["company_facts"][0]["evidence"]["passage"] = "We run a spacecraft company."
     record = validate_extraction(raw, profile, "company.example", (source,))
-    assert record.company_facts == ()
+    if defect == "unknown_source":
+        # The exact quote is on the company's own saved page, so it is re-attributed there rather than lost.
+        assert [fact.evidence.source_id for fact in record.company_facts] == [source.id]
+    else:
+        assert record.company_facts == ()
 
 
 @pytest.mark.parametrize("verdict", ["unsupported", "uncertain", None])

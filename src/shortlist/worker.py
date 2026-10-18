@@ -47,7 +47,9 @@ from shortlist.verification import (
     Verification,
     apply_verification,
     assessments,
+    narrowed,
     unavailable,
+    unjudged,
 )
 
 # Fewer unique companies than one selection pool after the planned discovery searches: try one more query.
@@ -412,7 +414,9 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                                 "sources": [s.model_dump(mode="json") for s in sources],
                                 "model": settings.gemma_model, "endpoint": settings.gemma_base_url, "exclusion_policy": 1,
                                 **prompt_inputs(), **({"company_identity_policy": 1} if require_identity else {})}
-                identity_options = {"require_identity": require_identity} if isinstance(model, Gemma) else {}
+                # Quotes found on no saved page are kept for diagnosis only; they are never shown as evidence.
+                rejected = []
+                identity_options = {"require_identity": require_identity, "rejected": rejected} if isinstance(model, Gemma) else {}
                 if previous is None:
                     try:
                         record = call("model", model.name, f"model:{candidate.domain}",
@@ -435,6 +439,8 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                         diagnostics[candidate.domain]["repair_failure"] = exc.diagnostic()
                         store.checkpoint(run_id, fence, "research", checkpoint)
                         raise
+                if rejected:
+                    checkpoint.setdefault("rejected_quotes", {})[candidate.domain] = rejected[-12:]
                 billable = True
             except CompanyPageError as exc:
                 reject_candidate(candidate, str(exc), "research")
@@ -468,6 +474,23 @@ def execute_run(store: Store, settings: Settings, run_id: str, *, search: Search
                                       key for key in ("company_facts", "people") if not getattr(record, key)}),
                                   "model": settings.gemma_model, "endpoint": settings.gemma_base_url,
                                   "verification_policy": 2, **prompt_inputs()}, decode_verification)
+                    # Policy 3 asks once more about only the assessments the verifier left out, when the run can
+                    # afford it; anything still unjudged stays unverified.
+                    missed = unjudged(profile, record, audit)
+                    if missed and discovery_policy >= 3 and room("model", 1):
+                        pending = narrowed(record, missed)
+                        try:
+                            extra = call("model", model.name, f"verify:{candidate.domain}:missing",
+                                         lambda r=pending: model.verify(profile, r),
+                                         {"profile": profile.model_dump(mode="json"),
+                                          "research": pending.model_dump(mode="json", exclude={
+                                              key for key in ("company_facts", "people") if not getattr(pending, key)}),
+                                          "model": settings.gemma_model, "endpoint": settings.gemma_base_url,
+                                          "verification_policy": 2, **prompt_inputs()}, Verification.model_validate)
+                            audit = Verification(judgments=[*audit.judgments,
+                                                            *(j for j in extra.judgments if j.assessment_id in missed)])
+                        except (ProviderError, BudgetExceeded):
+                            pass  # The first verification stands; the skipped assessments stay unverified.
                     record = apply_verification(profile, record, audit)
                     checkpoint.setdefault("verification", {})[candidate.domain] = audit.model_dump(mode="json")
                 except CompanyPageError as exc:

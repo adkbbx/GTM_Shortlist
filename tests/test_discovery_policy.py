@@ -172,6 +172,40 @@ def test_research_continues_past_six_rejected_candidates_and_starts_from_entry_p
     assert "https://company-0.example/partners/program" not in fetched  # Policy 2 never reads the found page.
 
 
+class SkippingVerifier(Model):
+    """Labelled fixture: supports the software check, and the first verification leaves it out."""
+
+    def __init__(self):
+        super().__init__()
+        self.verified = []
+
+    def research(self, profile, candidate, sources):
+        self.calls += 1
+        return validate_extraction({"name": candidate.name, "findings": [{"status": "supported", "criterion_id": "software",
+            "evidence": [{"source_id": sources[0].id, "passage": sources[0].text, "claim": "Offers software"}]}]},
+            profile, candidate.domain, sources)
+
+    def verify(self, profile, record):
+        from shortlist.verification import Judgment, Verification, assessments
+        asked = [a["assessment_id"] for a in assessments(profile, record)]
+        self.verified.append(asked)
+        if len(self.verified) == 1:
+            return Verification(judgments=[])
+        return Verification(judgments=[Judgment(assessment_id=i, verdict="entailed", reason="Fixture") for i in asked])
+
+
+@pytest.mark.parametrize("policy", [2, 3])
+def test_policy_three_asks_once_more_about_assessments_the_verifier_left_out(tmp_path, policy):
+    store, run_id = research_run(tmp_path, companies(1), policy=policy)
+    model = SkippingVerifier()
+    execute_run(store, Settings(db_path=store.path), run_id, model=model, fetch=readable([]))
+    finding = store.get_run(run_id)["records"][0]["research"]["findings"][0]
+    if policy == 3:
+        assert model.verified == [["criterion:software"], ["criterion:software"]] and finding["status"] == "supported"
+    else:
+        assert len(model.verified) == 1 and finding["reason"] == "Semantic verification missing"
+
+
 def test_policy_three_also_reads_the_page_search_found(tmp_path):
     found = companies(2, deep_first=True)
     store, run_id = research_run(tmp_path, found, policy=3)

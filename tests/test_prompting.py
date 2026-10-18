@@ -15,7 +15,7 @@ from shortlist.worker import execute_run
 
 LOCAL = "http://localhost:11434/v1"
 EVIDENCE = "We supply AI software for business operations."
-TEXT = "\n".join(["Labelled fixture company", "Menu", "Close", *[f"Navigation link {i}" for i in range(400)],
+TEXT = "\n".join(["Labelled fixture company supplies business software", "Menu", "Close", *[f"Navigation link {i}" for i in range(400)],
                   EVIDENCE, "Founded by labelled fixture people.", *[f"Footer link {i}" for i in range(400)]])
 
 
@@ -93,14 +93,48 @@ def test_operator_override_wins(monkeypatch):
 
 
 def test_excerpts_keep_verbatim_ranked_windows_within_budget():
-    pages = (source(), source("Unrelated second page\n" + "\n".join(f"Filler {i}" for i in range(300)), 1))
+    pages = (source(), source("Unrelated second page\n" + "\n".join(f"Unrelated filler sentence with several words {i}" for i in range(300)), 1))
     chosen = excerpts(pages, "AI software business operations", 1200)
     assert sum(len(page["text"]) for page in chosen) <= 1200
     text = chosen[0]["text"]
     assert text.startswith("Labelled fixture company") and EVIDENCE in text
     assert [page["id"] for page in chosen] == ["fixture-source-0"]
-    normalized = " ".join(TEXT.split())
-    assert all(" ".join(part.split()) in normalized for part in text.split("\n…\n"))
+    assert all(part in TEXT for part in text.split("\n…\n"))
+
+
+def test_excerpts_leave_out_long_menus_and_never_join_text_across_them():
+    # Labelled page shaped like hitachienergy.com's partner page (18 October): a region menu before the programme.
+    regions = "Global\nAlgeria\nAngola\nArgentina\nAustralia\nAustria\nBahrain\nBelgium\nBrazil"
+    features = "Co-sell\nCo-market\nTraining"  # A short list of features is content, not a menu.
+    text = (f"Channel Partner Program | Acme\nLogin\n{regions}\nWe empower partners with tools, training and support.\n"
+            f"{features}\nStay ahead with our Partner Academy and certification programs.")
+    page = Source(id="partners", url="https://acme.example/partners", company_domain="acme.example", title="Partners",
+                  text=text, content_hash=hashlib.sha256(text.encode()).hexdigest())
+    sent = excerpts((page,), "partner training certification", 4000)[0]["text"]
+    assert "Algeria" not in sent and "Co-market" in sent and "Partner Academy" in sent
+    assert sent.startswith("Channel Partner Program | Acme\n…\nWe empower partners")
+    assert all(part in text for part in sent.split("\n…\n"))
+    assert "Login" not in sent
+    assert excerpts((page,), "partner training certification", 4000, menu_run=0)[0]["text"] == text
+
+
+@pytest.mark.parametrize("count", [7, 8])
+def test_menu_threshold_and_all_menu_fallback(count):
+    menu = "\n".join(f"Link {i}" for i in range(count))
+    opening = "Labelled fixture company sells business software."
+    closing = "Our partner training helps businesses sell software."
+    text = f"{opening}\n{menu}\n{closing}"
+    sent = excerpts((source(text),), "partner training", len(text))[0]["text"]
+    assert sent == (text if count < 8 else f"{opening}\n…\n{closing}")
+    assert excerpts((source(menu),), "Link", len(menu))[0]["text"] == menu
+
+
+def test_excerpt_budget_counts_only_separators_sent():
+    text = "Fixture company supplies software.\nPartner training helps businesses."
+    page = source(text)
+    assert excerpts((page,), "partner training", len(text) + 2, window=1)[0]["text"] == text.replace("\n", "\n…\n")
+    sent = excerpts((page,), "partner training", len(text) + 1, window=1)[0]["text"]
+    assert sent == text.splitlines()[0]
 
 
 def test_pinned_schema_limits_identifiers_in_nested_definitions():

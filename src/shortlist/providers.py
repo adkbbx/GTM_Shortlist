@@ -14,6 +14,7 @@ from shortlist.domain import (
     CompanyFact,
     CompanyIdentity,
     Criterion,
+    Evidence,
     ExclusionFinding,
     ExclusionUnknown,
     Finding,
@@ -397,15 +398,39 @@ def hedged(claim: str, check: str) -> str | None:
     return None
 
 
-def validate_extraction(raw: dict, profile: Profile, domain: str, sources: tuple[Source, ...]) -> Research:
-    """Syntactic grounding gate; semantic entailment still needs evaluation/human review."""
+def cited(evidence: Evidence, sources: tuple[Source, ...], domain: str) -> Evidence | str:
+    """The evidence as cited, or re-attributed to the company's own saved page that holds the exact quote: a small model
+    often quotes one page under another page's id. Otherwise the reason it cannot be used."""
+    owned = [s for s in sources if s.company_domain == domain and domain_of(s.url) == domain]
+    source = next((s for s in owned if s.id == evidence.source_id), None)
+    if source is not None and quoted_in(evidence.passage, source.text):
+        return evidence
+    holder = next((s for s in owned if quoted_in(evidence.passage, s.text)), None)
+    if holder is not None:
+        return evidence.model_copy(update={"source_id": holder.id})
+    if source is None:
+        return "citation belongs to an unavailable or different company source"
+    return "quoted passage could not be found in source"
+
+
+def validate_extraction(raw: dict, profile: Profile, domain: str, sources: tuple[Source, ...],
+                        rejected: list | None = None) -> Research:
+    """Syntactic grounding gate; semantic entailment still needs evaluation/human review. Quotes found on no saved page
+    are appended to `rejected`, when given, so a misquote can be diagnosed after the run."""
     extraction = Extraction.model_validate(raw)
     identity = extraction.company_identity
     if identity:
         identity, issue = ground_identity(identity, sources, domain)
         if issue:
             raise CompanyPageError(issue)
-    by_source = {s.id: s for s in sources}
+
+    def located(evidence: Evidence, subject: str) -> Evidence | str:
+        result = cited(evidence, sources, domain)
+        if isinstance(result, str) and rejected is not None:
+            rejected.append({"subject": subject, "source_id": evidence.source_id, "passage": evidence.passage[:600],
+                             "claim": evidence.claim[:300], "issue": result})
+        return result
+
     people = []
     seen_people = set()
     seen_person_ids = set()
@@ -415,23 +440,19 @@ def validate_extraction(raw: dict, profile: Profile, domain: str, sources: tuple
             raise ProviderError("Model returned duplicate people")
         seen_people.add(name)
         seen_person_ids.add(person.id)
-        source = by_source.get(person.evidence.source_id)
         passage = " ".join(person.evidence.passage.casefold().split())
         mentions = all(re.search(r"(?<!\w)" + re.escape(" ".join(value.casefold().split())) + r"(?!\w)", passage)
                        for value in (person.name, person.role))
-        if (source is not None and source.company_domain == domain and domain_of(source.url) == domain
-                and quoted_in(person.evidence.passage, source.text) and mentions):
-            people.append(person)
+        if mentions and not isinstance(evidence := located(person.evidence, "person"), str):
+            people.append(person.model_copy(update={"evidence": evidence}))
     facts = []
     seen_facts = set()
     for fact in extraction.company_facts:
         if fact.kind in seen_facts:
             raise ProviderError("Model returned duplicate company fact kinds")
         seen_facts.add(fact.kind)
-        source = by_source.get(fact.evidence.source_id)
-        if (source is not None and source.company_domain == domain and domain_of(source.url) == domain
-                and quoted_in(fact.evidence.passage, source.text)):
-            facts.append(fact)
+        if not isinstance(evidence := located(fact.evidence, f"fact:{fact.kind}"), str):
+            facts.append(fact.model_copy(update={"evidence": evidence}))
     by_criterion = {}
     issues = []
     criteria = {c.id: c.description for c in profile.criteria}
@@ -440,21 +461,18 @@ def validate_extraction(raw: dict, profile: Profile, domain: str, sources: tuple
         if finding.criterion_id not in valid_ids or finding.criterion_id in by_criterion:
             raise ProviderError("Model returned unknown or duplicate criterion IDs")
         if finding.status != "unknown":
+            kept = []
             for evidence in finding.evidence:
-                source = by_source.get(evidence.source_id)
-                if source is None or source.company_domain != domain or domain_of(source.url) != domain:
-                    issues.append(f"{finding.criterion_id}: citation belongs to an unavailable or different company source")
-                    finding = Unknown(criterion_id=finding.criterion_id, reason=issues[-1])
-                    break
-                if not quoted_in(evidence.passage, source.text):
-                    issues.append(f"{finding.criterion_id}: quoted passage could not be found in source")
-                    finding = Unknown(criterion_id=finding.criterion_id, reason=issues[-1])
+                if isinstance(evidence := located(evidence, finding.criterion_id), str):
+                    issues.append(f"{finding.criterion_id}: {evidence}")
                     break
                 if hedge := hedged(evidence.claim, criteria[finding.criterion_id]):
                     issues.append(f"{finding.criterion_id}: the claim is an inference ('{hedge}'), "
                                   "not something the passage states")
-                    finding = Unknown(criterion_id=finding.criterion_id, reason=issues[-1])
                     break
+                kept.append(evidence)
+            finding = (finding.model_copy(update={"evidence": tuple(kept)}) if len(kept) == len(finding.evidence)
+                       else Unknown(criterion_id=finding.criterion_id, reason=issues[-1]))
         by_criterion[finding.criterion_id] = finding
     findings = tuple(by_criterion.get(c.id, Unknown(criterion_id=c.id, reason="No supported observation returned"))
                      for c in profile.criteria)
@@ -465,20 +483,17 @@ def validate_extraction(raw: dict, profile: Profile, domain: str, sources: tuple
         if check.exclusion_id not in valid_exclusions or check.exclusion_id in by_exclusion:
             raise ProviderError("Model returned unknown or duplicate exclusion IDs")
         if check.status != "unknown":
+            kept, reason = [], None
             for evidence in check.evidence:
-                source = by_source.get(evidence.source_id)
-                if source is None or source.company_domain != domain or domain_of(source.url) != domain:
-                    check = ExclusionUnknown(exclusion_id=check.exclusion_id,
-                                             reason="Exclusion citation belongs to an unavailable or different company source")
-                    break
-                if not quoted_in(evidence.passage, source.text):
-                    check = ExclusionUnknown(exclusion_id=check.exclusion_id,
-                                             reason="Exclusion quoted passage could not be found in source")
+                if isinstance(evidence := located(evidence, check.exclusion_id), str):
+                    reason = "Exclusion " + evidence
                     break
                 if hedge := hedged(evidence.claim, exclusion_texts[check.exclusion_id]):
-                    check = ExclusionUnknown(exclusion_id=check.exclusion_id, reason=f"Exclusion claim is an inference "
-                                             f"('{hedge}'), not something the passage states")
+                    reason = f"Exclusion claim is an inference ('{hedge}'), not something the passage states"
                     break
+                kept.append(evidence)
+            check = (ExclusionUnknown(exclusion_id=check.exclusion_id, reason=reason) if reason
+                     else check.model_copy(update={"evidence": tuple(kept)}))
         by_exclusion[check.exclusion_id] = check
     exclusions = tuple(by_exclusion.get(exclusion_id(i), ExclusionUnknown(exclusion_id=exclusion_id(i),
                        reason="No supported exclusion assessment returned")) for i in range(len(profile.exclusions)))
@@ -732,7 +747,7 @@ class Gemma:
             raise ModelOutputError(json.dumps(data), [{"type": "verification_invalid"}]) from exc
 
     def research(self, profile: Profile, candidate: Candidate, sources: tuple[Source, ...],
-                 repair: dict | None = None, *, require_identity: bool = False) -> Research:
+                 repair: dict | None = None, *, require_identity: bool = False, rejected: list | None = None) -> Research:
         issue = candidate_issue(candidate) or (primary_source_issue(sources[0], strict=require_identity) if sources else None)
         if issue:
             raise CompanyPageError(issue)
@@ -833,7 +848,7 @@ class Gemma:
                 raise CompanyPageError(issue)
             data = {**data, "name": identity.name, "company_identity": identity.model_dump(mode="json")}
         try:
-            return validate_extraction(data, profile, candidate.domain, sources)
+            return validate_extraction(data, profile, candidate.domain, sources, rejected)
         except ValidationError as exc:
             raise ModelOutputError(json.dumps(data), exc.errors(include_input=False, include_url=False,
                                                               include_context=False)) from exc

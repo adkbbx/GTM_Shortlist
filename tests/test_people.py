@@ -56,7 +56,12 @@ def test_people_need_owned_exact_passage_and_explicit_name_and_role(observation,
         person["role"] = "Chief Technology Officer"
     else:
         person["name"] = "Ane Example"
-    assert not validate_extraction(raw, profile, "company.example", (source,)).people
+    people = validate_extraction(raw, profile, "company.example", (source,)).people
+    if defect == "unknown_source":
+        # The exact quote is on the company's own saved page, so it is re-attributed there rather than lost.
+        assert [p.evidence.source_id for p in people] == [source.id]
+    else:
+        assert not people
 
 
 @pytest.mark.parametrize("text", [
