@@ -303,7 +303,7 @@ def recover_customer_draft(data: dict) -> SellerDraft:
                           unknowns=[item for item in unknowns if isinstance(item, str)][:12]
                           if isinstance(unknowns, list) else [])
     raw = data.get("customer_criteria", [])
-    criteria, issues, seen = [], [], set()
+    criteria, issues, seen, drafted_required = [], [], set(), []
     for index, value in enumerate(raw[:6] if isinstance(raw, list) else []):
         text = value.get("customer_characteristic") if isinstance(value, dict) else value
         description = text[:500] if isinstance(text, str) and text.strip() else f"Suggestion {index + 1}"
@@ -323,11 +323,16 @@ def recover_customer_draft(data: dict) -> SellerDraft:
                 # checks they hold every company at Needs verification, so drafted ones start as nice to have.
                 criteria.append(Criterion(id=criterion.id, description=criterion.customer_characteristic,
                                           required=criterion.required and not rarely_public(criterion.customer_characteristic)))
+                drafted_required.append(criterion.required)
                 seen.add(criterion.id)
         except ValidationError:
             reason = "Not a valid target-customer criterion. Write a clear customer characteristic."
         if reason:
             issues.append(DraftCriterionIssue(description=description, reason=reason))
+    if criteria and not any(c.required for c in criteria):
+        # Every drafted check is rarely public: keep what the model marked required, because a target with no required
+        # check can never establish fit. The confirmation advice still explains the trade-off.
+        criteria = [c.model_copy(update={"required": required}) for c, required in zip(criteria, drafted_required, strict=True)]
     if isinstance(raw, list) and len(raw) > 6:
         issues.append(DraftCriterionIssue(description="Additional suggestions", reason="Only the first six model suggestions were reviewed."))
     if not criteria and not issues:

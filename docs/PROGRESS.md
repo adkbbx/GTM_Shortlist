@@ -32,6 +32,18 @@ Verification:
 - Backend: 639 passed, 48 skipped (Postgres-only, including the new workspace-scope check), and Ruff is clean. New tests: `tests/test_discovery_policy.py`, `tests/test_ranking.py` and `tests/test_criteria.py`. Journal and worker tests now expect the low-yield search where a fixture returns one company.
 - Browser: the full suite on laptop and phone, 151 passed and 3 skipped (hosted credit specs run in CI). Tests now find companies by name, since the order follows evidence, and count the low-yield search where fixtures return fewer than six companies. I inspected the confirmation and results screenshots.
 
+**Replay of the saved runs** (`scripts/replay_saved_runs.py`, read-only, no provider calls). Each saved company record went through today's rules using the same saved pages and verified findings:
+
+| Saved records | 22 |
+|---|---|
+| Research credits that would not be spent | 18 (6 on pages that aren't companies, 12 re-researching the same company for the same seller) |
+| Qualified fits before | 0 |
+| Qualified fits with the confirmation advice taken | 3: Prismatic in the three runs that assessed exclusions, with every observable required check supported by verified quotes from its own site |
+
+- **Exclusions block fits too.** The replay found that "Publicly listed companies", unknown on every page, held Prismatic back. Confirmation now names rarely-public exclusions, with one-click removal.
+- **Fixed during the replay: a fit with no evidence.** When every required check is made nice to have, nothing establishes fit, yet `qualify` returned "fits" for list pages. Now `qualify` needs at least one required check, a draft keeps its required checks if all are rarely public, and the "Make it nice to have" button is withheld for a target's only required check.
+- **Read-only database copies.** The replay ran on copies of the local databases; `tests/test_replay.py` repeats it on a small built database.
+
 Not verified, and needing your approval: the yield of the new queries on live search. The evidence is the saved natural experiment above, not a new run. A bounded check would be 2 searches for each of 3 saved targets (6 searches, 2.4% of the monthly SerpApi allowance), compared against the saved results.
 
 ## 18 October, drafts before signup (hosted, off by default)

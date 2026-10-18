@@ -73,6 +73,7 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
     setEditing(old => ({ ...old, ...Object.fromEntries(parts.map(part => [part, true])) }));
     window.requestAnimationFrame(() => document.getElementById(targetFields[parts[0]])?.focus());
   };
+  const unverifiableExclusions = exclusions.split('\n').map(line => line.trim()).filter(line => line && rarelyPublicCheck(line));
   const available = run.legacy_credit_exempt ? 3 : wallet?.available ?? 3;
   useEffect(() => { if (wallet?.mode === 'hosted' && available > 0) setCompanyLimit(old => Math.min(old, available)); }, [available, wallet?.mode]);
   const submit = async (event: FormEvent) => {
@@ -102,7 +103,9 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
       <TargetPartView title="Fit checks" editLabel="Edit fit checks" editing={editing.criteria} onEdit={() => edit('criteria')}
         review={<ul className="target-checks">{criteria.map(criterion => <li key={criterion.id}><span>{criterion.description}
           {rarelyPublicCheck(criterion.description) && (criterion.required
-            ? <span className="target-check-note">Rarely on a company's own website, so it usually stays unknown and keeps every company at Needs verification. <button type="button" className="text-button" onClick={() => setCriteria(criteria.map(c => c.id === criterion.id ? { ...c, required: false } : c))}>Make it nice to have</button></span>
+            ? <span className="target-check-note">Rarely on a company's own website, so it usually stays unknown and keeps every company at Needs verification. {criteria.filter(c => c.required).length > 1
+              ? <button type="button" className="text-button" onClick={() => setCriteria(criteria.map(c => c.id === criterion.id ? { ...c, required: false } : c))}>Make it nice to have</button>
+              : 'Add a required check a company website shows, then make this one nice to have.'}</span>
             : <span className="target-check-note">Rarely on a company's own website: it orders the shortlist when a page states it, and is a question for the conversation.</span>)}
         </span><span className="target-check-kind">{criterion.required ? 'Required' : 'Nice to have'}</span></li>)}</ul>}>
       <fieldset><legend>Fit criteria</legend><p className="hint">These checks guide company research and determine fit with your target customer. Use observable characteristics, such as industry or customers served. Required checks need supporting evidence; missing evidence stays unknown.</p>
@@ -121,7 +124,8 @@ function ConfirmationForm({ run, wallet, hostedAccount, onSaved }: { run: Run & 
       </TargetPartView>
       {editing.exclusions && <div className="target-part is-editing"><label htmlFor="exclusions">Exclude from consideration <span className="optional">Optional, one per line</span></label>
         <textarea id="exclusions" value={exclusions} rows={2} maxLength={6012} onChange={e => setExclusions(e.target.value)} aria-describedby="exclusions-help" />
-        <p id="exclusions-help" className="hint">Up to 12 conditions, 3–500 characters each. Each needs evidence; an unverified exclusion stays unknown.</p></div>}
+        <p id="exclusions-help" className="hint">Up to 12 conditions, 3–500 characters each. Each needs evidence; an unverified exclusion stays unknown.</p>
+        {unverifiableExclusions.length > 0 && <p className="hint target-check-note" role="status">Rarely on a company's own website: {unverifiableExclusions.map(line => `"${line}"`).join(', ')}. An exclusion that stays unknown keeps every company at Needs verification, so ask about it in conversation instead. <button type="button" className="text-button" onClick={() => setExclusions(exclusions.split('\n').filter(line => !rarelyPublicCheck(line.trim())).join('\n'))}>Remove {unverifiableExclusions.length === 1 ? 'it' : 'them'}</button></p>}</div>}
       {(!editing.exclusions || run.market) && <div className="target-optional">
         {!editing.exclusions && <button type="button" className="text-button" onClick={() => edit('exclusions')}>Add exclusions</button>}
         {run.market && <details className="confirmation-context"><summary>Explore campaign ideas and source context</summary><MarketOverview run={run} selected={campaignName} onChoose={campaign => {

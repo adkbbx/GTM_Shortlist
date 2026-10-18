@@ -215,7 +215,8 @@ def qualify(profile: Profile, findings: tuple[Finding, ...], exclusions: tuple[E
     checks = [by_exclusion.get(exclusion_id(i)) for i in range(len(profile.exclusions))]
     if any(f and f.status == "contradicted" for f in required) or any(f and f.status == "matched" for f in checks):
         return "does_not_fit"
-    if any(f is None or f.status == "unknown" for f in [*required, *checks]):
+    # Without a required check nothing establishes fit, however many optional ones are supported.
+    if not required or any(f is None or f.status == "unknown" for f in [*required, *checks]):
         return "needs_verification"
     return "fits"
 

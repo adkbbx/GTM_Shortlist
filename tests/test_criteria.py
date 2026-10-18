@@ -37,3 +37,23 @@ def test_drafted_ownership_and_funding_checks_start_as_nice_to_have():
         ], "unknowns": []})
     assert {c.id: c.required for c in draft.criteria} == {"software": True, "stage": False, "private": False}
     assert not draft.criteria_issues  # Kept for the shortlist order and the conversation, not removed.
+
+
+def test_a_draft_keeps_a_required_check_when_every_check_is_rarely_public():
+    draft = recover_customer_draft({
+        "seller_offer": "Customer acquisition experiments for software companies", "target_customer": "Funded startups",
+        "customer_criteria": [
+            {"id": "stage", "subject": "target_customer", "customer_characteristic": "Seed or Series A funding stage", "required": True},
+            {"id": "private", "subject": "target_customer", "customer_characteristic": "Privately held startup", "required": False},
+        ], "unknowns": []})
+    assert {c.id: c.required for c in draft.criteria} == {"stage": True, "private": False}
+
+
+def test_fit_needs_at_least_one_required_check():
+    from shortlist.domain import Criterion, Observed, Profile, qualify
+    profile = Profile(seller_url="https://seller.example/", offer="Customer acquisition research", target="Business software",
+                      criteria=(Criterion(id="team", description="Lists a customer success team", required=False),))
+    supported = Observed(status="supported", criterion_id="team", evidence=(
+        {"source_id": "s", "passage": "Our customer success team helps.", "claim": "Labelled claim"},))
+    # A supported nice-to-have check alone never makes a company a fit.
+    assert qualify(profile, (supported,)) == "needs_verification"
