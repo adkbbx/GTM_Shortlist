@@ -145,7 +145,9 @@ def test_redirect_and_byte_limit_use_actual_fetch_path(monkeypatch):
         status = 302
         def getheader(self, key, default=None):
             return {"Location": "https://127.1/secret", "Content-Type": "text/html"}.get(key, default)
+        read = 0
         def read1(self, size):
+            Response.read += size
             return b"x" * size
     class Connection:
         stream_socket = Stream()
@@ -163,6 +165,7 @@ def test_redirect_and_byte_limit_use_actual_fetch_path(monkeypatch):
     with pytest.raises(FetchError, match="Numeric"):
         fetch_page("https://example.com")
     Response.status = 200
-    with pytest.raises(FetchError, match="byte limit"):
-        fetch_page("https://example.com")
+    # An endless page is read up to the limit and no further, then kept rather than refused.
+    page = fetch_page("https://example.com")
+    assert Response.read == MAX_BYTES and page.text.startswith("x")
     assert MAX_BYTES == 1_000_000

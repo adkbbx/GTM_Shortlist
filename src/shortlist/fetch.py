@@ -223,13 +223,15 @@ def fetch_html(url: str, expected_domain: str | None = None, *, timeout: float =
                 if remaining <= 0:
                     raise FetchError("Website fetch deadline exceeded")
                 connection.stream_socket.settimeout(min(10, remaining))
-                chunk = response.read1(min(65536, max_bytes + 1 - size))
+                chunk = response.read1(min(65536, max_bytes - size))
                 if not chunk:
                     break
                 chunks.append(chunk)
                 size += len(chunk)
-                if size > max_bytes:
-                    raise FetchError("Website page exceeds byte limit")
+                if size >= max_bytes:
+                    # Read no further, but keep the page: a large homepage (front.com, live 18 October) still opens
+                    # with the company's own words. Refusing it lost a real target.
+                    break
             return current, b"".join(chunks)
         except (OSError, http.client.HTTPException) as exc:
             raise FetchError("Website connection failed") from exc

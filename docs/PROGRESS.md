@@ -59,7 +59,20 @@ What changed in response:
 - **Admission leaks.** Admission now also refuses `/research/` and `/episodes/` pages and case-study, model and calculator slugs. Re-scoring the live results refused the 4 article leaks and kept every real target.
 - **Labelled set.** It is unchanged: 21 of 21 companies, 2 of 46 non-companies.
 
-The changed software anchors have not been searched live again (that would need another approval).
+For the software target, the restored anchors produce exactly the queries saved runs sent live on 13 October (12 of 12 company pages), so that result already stands.
+
+**End-to-end research run** (approved by the user on 18 October: local `gemma4:e2b-it-qat`, at most six model calls, no searches; `scripts/evaluate_research_live.py`, database `data/evaluations/research-run-2026-10-18.sqlite3`).
+- **Inputs.** The six companies the live channel-partner searches admitted, with saved run 98331456's seller and its first campaign's checks.
+- **What ran.** The real worker: 0 searches, 15 fetches, 5 model calls.
+- **Qualified fit.** Channel Institute: both required checks are supported by verified quotes from its own site.
+- **Needs verification.** Channeltivity: its verification returned nothing usable.
+- **Refused: Lumen and Front.** Both run partner programs, so both are real targets.
+  - Lumen's homepage redirects to `/{locale}/home.html`, which the identity check did not accept as a homepage.
+  - Front's homepage is over 1 MB and was refused outright.
+  - Both are fixed: named home documents are accepted after a redirect, and a large page is read up to the limit instead of refused. Re-fetched live (free), both pass the identity check (Front reads 1,272 words).
+- **Refused: NICE.** The small model's identity quote was not word for word on the page.
+
+Not re-run: research on Lumen and Front after the fix, which would need model calls beyond the approved six.
 
 ## 18 October, drafts before signup (hosted, off by default)
 

@@ -93,7 +93,9 @@ def company_page_issue(url: str, title: str = "", *, strict: bool = False) -> st
         # recognisable business entry page instead of assuming an arbitrary slug is official.
         if parts and re.fullmatch(r"[a-z]{2}(?:-[a-z]{2})?", parts[0]):
             parts = parts[1:]
-        if parts and parts[0] not in BUSINESS_SECTIONS | {"home", "index.html", "index.htm", "index.php", "about-us"}:
+        # Homepages often redirect to a named home document (lumen.com -> /en-us/home.html, live 18 October).
+        if parts and parts[0] not in BUSINESS_SECTIONS | {"home", "index.html", "index.htm", "index.php", "about-us", "home.html",
+                                                          "home.htm", "home.aspx", "home.php", "default.aspx", "index.aspx"}:
             return "Page purpose is not established as an official company, product or service page"
     return None
 
