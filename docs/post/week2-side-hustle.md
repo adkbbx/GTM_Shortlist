@@ -38,7 +38,9 @@ A company is only marked as a fit when every must-have is backed by a sentence f
 
 ## The first real run, and what it got wrong
 
-On 16 October I tried the hosted app on my own website, [eygentic.com](https://eygentic.com), looking for "B2B AI SaaS companies". The first time, two of its searches failed and the whole run stopped with nothing. It gave my three credits back, but that's not useful. I changed it so a failed search doesn't throw away what the others found, and the same run then finished from the companies it already had.
+On 16 October I tried the hosted app on my own website, [eygentic.com](https://eygentic.com), looking for "B2B AI SaaS companies". To find companies, the app runs a few Google searches one after another. The first search worked and found 8 companies, but the next one failed. The app had a rule that every search had to work before it used any of the results, so it threw away all 8 and stopped with nothing. It gave my three credits back, but I still had no list.
+
+So I changed the rule: if one search fails, the app now keeps the companies the other searches already found and carries on. I picked the same run back up from where it stopped, and it researched three of the 8 companies it had saved, without searching again. That gave me my first real shortlist.
 
 ![Review your shortlist: three researched companies. NachoNacho needs verification, builtin.com has no company description established, and DealHub fits the required criteria. A notice says discovery was incomplete](https://raw.githubusercontent.com/adkbbx/GTM_Shortlist/worktree-week2-post/docs/post/first-hosted-run.png)
 
