@@ -1,6 +1,6 @@
 *This is a submission for the [Hacktoberfest Open-Source AI Challenge Week 2: Side Hustle](https://dev.to/challenges/hacktoberfest-week2-2026-10-12)*
 
-![The GTM Shortlist landing page at eygentic.tech: "Find who fits. Check why." Candidates flow through Offer, Target and Evidence into an illustrative shortlist, then the page scrolls to "Every row opens to its sources"](https://raw.githubusercontent.com/adkbbx/GTM_Shortlist/worktree-week2-post/docs/post/landing.gif)
+![The GTM Shortlist landing page at eygentic.tech: "Find who fits. Check why." Candidates flow through Offer, Target and Evidence into an illustrative shortlist, then the page scrolls to "Every row opens to its sources"](https://raw.githubusercontent.com/adkbbx/GTM_Shortlist/worktree-week2-post/docs/post/landing-v2.gif)
 
 *GTM Shortlist, live at [eygentic.tech](https://eygentic.tech).*
 
@@ -28,7 +28,7 @@ If finding customers is now the hard part of starting a software company, I don'
 4. **Gives you a short list.** Next to each company it shows the exact sentence from that company's site that backs up the match. If it can't find proof, it says "unknown" instead of guessing.
 5. **Lets you decide.** You mark each company yes or no, download the list as a spreadsheet, and can start a first email that points to what you found. It never sends anything for you.
 
-![The demo at eygentic.tech/?demo=1, with invented companies: the app understands the offer, explores the market, waits for the target to be confirmed, checks candidates, shows the exact passage behind a match, and ends with accept or reject](https://raw.githubusercontent.com/adkbbx/GTM_Shortlist/worktree-week2-post/docs/post/workflow.gif)
+![The demo at eygentic.tech/?demo=1, with invented companies: the app understands the offer, explores the market, waits for the target to be confirmed, checks candidates, shows the exact passage behind a match, and ends with accept or reject](https://raw.githubusercontent.com/adkbbx/GTM_Shortlist/worktree-week2-post/docs/post/workflow-v2.gif)
 
 *Every step, using the demo on eygentic.tech. The companies and sentences are made up for the demo, so you can try it without an account or spending anything.*
 
