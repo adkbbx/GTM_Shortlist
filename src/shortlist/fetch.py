@@ -242,6 +242,11 @@ def fetch_html(url: str, expected_domain: str | None = None, *, timeout: float =
 
 def fetch_page(url: str, expected_domain: str | None = None) -> Source:
     current, body = fetch_html(url, expected_domain)
+    return page_from_html(current, body, expected_domain)
+
+
+def page_from_html(current: str, body: bytes, expected_domain: str | None = None) -> Source:
+    """The readable page fetch_page saves, from the final URL and body fetch_html returned."""
     owner = expected_domain or domain_of(current)
     parsed = urlsplit(current)
     soup = BeautifulSoup(body, "html.parser")

@@ -1,0 +1,4 @@
+domain,expected_verdict,reason,competitor_used
+trailgear.example,shortlisted,SYNTHETIC TEST LABEL: online store with email and chat support hiring support agents three weeks ago,
+oakandpine.example,needs_look,SYNTHETIC TEST LABEL: fits but shows no dated need; it only integrates with RivalDesk,
+brightkettle.example,rejected,SYNTHETIC TEST LABEL: runs the RivalDesk support widget today,rival-desk.example

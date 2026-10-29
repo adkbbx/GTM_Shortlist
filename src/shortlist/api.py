@@ -718,6 +718,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         store.write_email_draft(run_id, record_id, input)
         return view(store, run_id)
 
+    if local_store is not None:
+        # Website-only agent (Meta hackathon, see HACKATHON.md): its own routes and agent_runs table, local mode only.
+        from shortlist.agent.api import register_agent_routes
+        register_agent_routes(app, settings.db_path)
+
     dist = ui_directory()
     if dist is not None:
         @app.get("/", response_class=HTMLResponse, include_in_schema=False)

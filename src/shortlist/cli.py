@@ -28,6 +28,9 @@ def internal_workspaces() -> set[UUID]:
 
 
 def main():
+    if sys.argv[1:2] == ["agent"]:
+        from shortlist.agent.cli import main as agent_main
+        raise SystemExit(agent_main(sys.argv[2:]))
     parser = argparse.ArgumentParser(description="GTM Shortlist evidence-first research")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("config")
@@ -69,6 +72,8 @@ def main():
     grant.add_argument("--plan", choices=tuple(PLAN_CREDITS), help="pro adds 50 credits; dev (internal accounts only) adds 500")
     grant.add_argument("--credits", type=int, choices=range(1, 10001), metavar="1-10000", help="Exact credits instead of a plan")
     grant.add_argument("--key", help="Operation key; repeating a key never grants twice (default: plan, credits and date)")
+    # Listed for help only; main() hands "agent ..." to shortlist.agent.cli before parsing.
+    sub.add_parser("agent", help="Website-only research agent: agent run <website> or agent eval <labels.csv>")
     args = parser.parse_args()
     settings = Settings.load()
     if args.command not in ("serve", "worker", "close-account"):
