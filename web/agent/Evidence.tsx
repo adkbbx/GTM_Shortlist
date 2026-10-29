@@ -18,6 +18,7 @@ export function QuoteBlock({ quote }: { quote: Quote }) {
       <span>{domainOf(quote.url)}{pathOf(quote.url)}</span>
       <span>{sourceLabel[quote.source_type]}{quote.location === 'html' ? ', found in the page code' : ''}</span>
       <span>{quote.published_date ? `Published ${day(quote.published_date)}` : 'Publication date not stated'}</span>
+      {quote.open_posting && <span>Job post open when read</span>}
       <span>Read {day(quote.fetched_at)}</span>
     </figcaption>
   </figure>;

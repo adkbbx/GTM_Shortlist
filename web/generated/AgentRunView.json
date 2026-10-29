@@ -1018,6 +1018,11 @@
           ],
           "title": "Location",
           "type": "string"
+        },
+        "open_posting": {
+          "default": false,
+          "title": "Open Posting",
+          "type": "boolean"
         }
       },
       "required": [
@@ -1026,7 +1031,8 @@
         "source_type",
         "published_date",
         "fetched_at",
-        "location"
+        "location",
+        "open_posting"
       ],
       "title": "Quote",
       "type": "object"

@@ -36,6 +36,8 @@ class Quote(Model):
     published_date: date | None = None
     fetched_at: datetime
     location: Literal["text", "html"] = "text"
+    # A job posting on an applicant-tracking system, read during the run and not marked closed (pages.open_posting).
+    open_posting: bool = False
 
 
 class Statement(Model):

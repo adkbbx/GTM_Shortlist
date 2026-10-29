@@ -1,9 +1,17 @@
 """Fixes for problems the first live run exposed (docs/PROGRESS.md, 30 October), over the SYNTHETIC providers."""
+import json
+from datetime import UTC, date, datetime
+
 from shortlist.agent import synthetic
-from shortlist.agent.discovery import SEARCH_RESULT_PAGE, admit
+from shortlist.agent.discovery import DISCOVERY_INSTRUCTIONS, SEARCH_RESULT_PAGE, admit
+from shortlist.agent.investigation import INSTRUCTIONS as INVESTIGATE_INSTRUCTIONS
+from shortlist.agent.models import EvidenceItem, Quote
+from shortlist.agent.pages import Page, open_posting
 from shortlist.agent.pipeline import AgentRunner
 from shortlist.agent.seller import private_signal
 from shortlist.agent.synthetic import SELLER
+from shortlist.agent.verdict import fresh
+from shortlist.domain import Source
 
 # Need and timing signals the live seller profile produced: internal states no public quote can show.
 LIVE_PRIVATE = [
@@ -52,6 +60,49 @@ def test_search_results_must_be_a_companys_own_page():
     # A company the model named is still admitted from any page of its own site; research starts at the homepage.
     ref, _ = admit("https://acme.example/customers/stories/2026-launch", "Acme", "named", excluded, "seller.example")
     assert ref is not None and ref.url == "https://acme.example/"
+
+
+def test_discovery_searches_by_signal_and_research_follows_the_lead(providers, monkeypatch):
+    """Third live run: category searches returned the largest brands. Discovery now gets the need and timing signals,
+    and each company's research brief carries how it was found."""
+    seen = []
+    respond = providers.investigator.respond
+
+    def recording(**kwargs):
+        seen.append((kwargs["instructions"], json.dumps(kwargs["input"])))
+        return respond(**kwargs)
+
+    monkeypatch.setattr(providers.investigator, "respond", recording)
+    AgentRunner(providers).run(SELLER)
+    discovery = next(text for instructions, text in seen if instructions == DISCOVERY_INSTRUCTIONS)
+    assert "Hiring customer support agents" in discovery and "household-name" in DISCOVERY_INSTRUCTIONS
+    brief = next(text for instructions, text in seen if instructions == INVESTIGATE_INSTRUCTIONS and "trailgear" in text)
+    assert "found_via" in brief and "online stores with email and chat support" in brief
+
+
+def posting(url: str, text: str, published=None, fetched=datetime(2026, 10, 30, 1, tzinfo=UTC)) -> tuple[Page, EvidenceItem]:
+    page = Page(source=Source(url=url, company_domain=url.split("/")[2], title="Job", text=text,
+                              content_hash="synthetic", retrieved_at=fetched), html="<html></html>", full_text=text)
+    quote = Quote(text=text[:40], url=url, source_type="job_post", published_date=published, fetched_at=fetched,
+                  open_posting=open_posting(page))
+    return page, EvidenceItem(claim_type="need", criterion_id="need-1", claim="Hiring SDRs", quote=quote)
+
+
+def test_an_open_ats_job_post_counts_as_current_without_a_stated_date():
+    """Fourth live run: SciLeads' SDR posting on Greenhouse had no date, so a strong prospect stayed at Needs a look."""
+    today = date(2026, 10, 30)
+    _, live = posting("https://job-boards.eu.greenhouse.io/scileads/jobs/4988676101",
+                      "Job Application for Sales Development Representative at SciLeads")
+    assert live.quote.open_posting and fresh(live, today)
+    _, closed = posting("https://jobs.lever.co/acme/123", "This job is no longer accepting applications. SDR at Acme")
+    assert not closed.quote.open_posting and not fresh(closed, today)
+    _, aggregator = posting("https://www.indeed.com/viewjob?jk=1", "Sales Development Representative at Acme")
+    assert not aggregator.quote.open_posting and not fresh(aggregator, today)
+    _, stale_read = posting("https://boards.greenhouse.io/acme/jobs/1", "SDR at Acme",
+                            fetched=datetime(2026, 10, 20, tzinfo=UTC))
+    assert not fresh(stale_read, today)  # open when read 10 days ago says nothing about today
+    _, dated = posting("https://acme.example/careers/sdr", "SDR at Acme", published=date(2026, 9, 1))
+    assert not dated.quote.open_posting and fresh(dated, today)
 
 
 def test_budget_reached_during_discovery_keeps_the_companies_already_found(providers):

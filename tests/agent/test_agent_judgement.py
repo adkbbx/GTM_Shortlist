@@ -56,7 +56,7 @@ def test_shortlisted_needs_fit_fresh_signal_and_completed_check():
     stale = item("need", "need-1", source="job_post", published=TODAY - timedelta(days=181))
     verdict = decide(company([fit, stale]), PROFILE, RULES, TODAY)
     assert verdict.kind == "needs_look"
-    assert verdict.missing == ["Need or timing evidence found, but none dated within 180 days"]
+    assert verdict.missing == ["Need or timing evidence found, but none current (dated within 180 days or an open job post)"]
     undone = decide(company([fit, need], disqualifier_check_completed=False), PROFILE, RULES, TODAY)
     assert undone.missing == ["Competitor check incomplete: no search for current competitor use was run"]
     unchecked = decide(company([fit, need], checked_places=[], disqualifier_check_completed=False), PROFILE, RULES, TODAY)

@@ -228,6 +228,27 @@ JOB_HOSTS = frozenset({"greenhouse.io", "lever.co", "ashbyhq.com", "workable.com
                        "recruitee.com", "teamtailor.com", "personio.de", "personio.com", "jobvite.com", "icims.com",
                        "myworkdayjobs.com", "indeed.com", "glassdoor.com", "wellfound.com", "ziprecruiter.com",
                        "welcometothejungle.com", "breezy.hr", "jobs.lever.co", "workforcenow.adp.com"})
+# Applicant-tracking systems take a posting's page down when the role closes, so one read during the run is open now
+# even without a stated date (fourth live run: an SDR posting on Greenhouse had no date). Job aggregators keep stale
+# copies and are not in this list.
+ATS_HOSTS = frozenset({"greenhouse.io", "lever.co", "ashbyhq.com", "workable.com", "bamboohr.com", "smartrecruiters.com",
+                       "recruitee.com", "teamtailor.com", "personio.de", "personio.com", "jobvite.com", "icims.com",
+                       "myworkdayjobs.com", "breezy.hr", "workforcenow.adp.com"})
+CLOSED_POSTING = re.compile(
+    r"no longer (?:open|available|accepting applications)|(?:position|role|job) (?:has been|is|was) filled|"
+    r"(?:job|posting|position|vacancy|role) (?:has )?(?:expired|closed)|applications? (?:are |is )?(?:now )?closed",
+    re.IGNORECASE)
+
+
+def open_posting(page: Page) -> bool:
+    """A job posting on an applicant-tracking system that does not say it is closed."""
+    try:
+        host = domain_of(page.url)
+    except FetchError:
+        return False
+    return listed_site(host, ATS_HOSTS) and not CLOSED_POSTING.search(page.full_text)
+
+
 REVIEW_HOSTS = frozenset({"g2.com", "capterra.com", "trustradius.com", "getapp.com", "softwareadvice.com",
                           "trustpilot.com", "gartner.com", "peerspot.com"})
 NEWS_HOSTS = frozenset({"techcrunch.com", "reuters.com", "bloomberg.com", "businesswire.com", "prnewswire.com",

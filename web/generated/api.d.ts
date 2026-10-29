@@ -1658,6 +1658,11 @@ export interface components {
              * @enum {string}
              */
             location: "text" | "html";
+            /**
+             * Open Posting
+             * @default false
+             */
+            open_posting: boolean;
         };
         /** Research */
         Research: {

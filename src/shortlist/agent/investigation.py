@@ -25,6 +25,7 @@ from shortlist.agent.pages import (
     Page,
     excerpt,
     ground,
+    open_posting,
     parse_date,
     place_name,
     signature,
@@ -48,8 +49,8 @@ Work in this order:
 2. Need and timing (spend most of your searches here): the company's own marketing cannot show need, so look
    beyond it. Search for its job posts (its careers page, or job boards such as Greenhouse, Lever, Workable or
    LinkedIn) for roles named in the need signals, and for news or press releases from the last six months for the
-   timing signals. Fetch the job post or article itself and quote it. Note a page's publication date only when the
-   page states it.
+   timing signals. If found_via names a job post or news item, find and fetch that page first. Fetch the job post or
+   article itself and quote it. Note a page's publication date only when the page states it.
 3. Competitor use: ONE search that names all listed competitors together, for example
    "<company> <competitor 1> <competitor 2>"; the company's own page code is already scanned for them. Fetch a
    competitor's customer or case-study page only if a result names the company. Evidence must show CURRENT use, not
@@ -204,6 +205,8 @@ class Investigation:
             "disqualifier_checks": [{"id": r.id, "text": r.text} for r in self.ctx.rules
                                     if r.enabled and r.rule not in ("is_competitor", "is_existing_customer")],
             "competitors": [{"name": c.name, "domain": c.domain} for c in self.ctx.direct],
+            # Discovery's lead (a job post or news item it saw); a lead to check, never evidence by itself.
+            "found_via": self.company.found_via or "",
         }
         home = f'\n<page url="{self.home.url}">\n{excerpt(self.home, 6000)}\n</page>' if self.home else ""
         return "Investigate this company.\n<data>\n" + json.dumps(data) + home + "\n</data>"
@@ -297,11 +300,12 @@ class Investigation:
                 drop.append(DroppedClaim(stage="investigation", company=self.company.domain, claim_type="date",
                                          quote=str(item.published_date)[:40], url=page.url,
                                          reason="Date not stated on the page; the date was removed"))
+            kind = source_type(page.url, self.company.domain, competitor_domains, item.source_type)
             evidence = EvidenceItem(
                 claim_type=item.claim_type, criterion_id=criterion, claim=(item.claim.strip() or text)[:600],
                 quote=Quote(text=text, url=page.url, published_date=published, fetched_at=page.fetched_at,
-                            source_type=source_type(page.url, self.company.domain, competitor_domains, item.source_type),
-                            location=location))
+                            source_type=kind, location=location,
+                            open_posting=kind == "job_post" and open_posting(page)))
             if all((e.criterion_id, e.quote.text) != (evidence.criterion_id, text) for e in self.result.evidence):
                 self.result.evidence.append(evidence)
 

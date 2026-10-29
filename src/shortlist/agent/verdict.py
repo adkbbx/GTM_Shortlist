@@ -30,6 +30,10 @@ def excluded_by(company: CompanyResult, exclusions: list[str]) -> str | None:
 
 
 def fresh(item: EvidenceItem, today: date) -> bool:
+    """Current: published within FRESH_DAYS, or a job posting found open on an applicant-tracking system during this
+    run (a role still being hired for is current whenever it was first posted)."""
+    if item.quote.open_posting and abs((item.quote.fetched_at.date() - today).days) <= 1:
+        return True
     published = item.quote.published_date
     return published is not None and today - timedelta(days=FRESH_DAYS) <= published <= today + timedelta(days=1)
 
@@ -63,15 +67,15 @@ def decide(company: CompanyResult, profile: SellerProfile, rules: list[Disqualif
     signals = [e for e in supported if e.claim_type in ("need", "timing")]
     if not any(fresh(e, today) for e in signals):
         if signals:
-            gaps.append(f"Need or timing evidence found, but none dated within {FRESH_DAYS} days")
+            gaps.append(f"Need or timing evidence found, but none current (dated within {FRESH_DAYS} days or an open job post)")
         else:
-            gaps.append(f"No supported need or timing evidence dated within {FRESH_DAYS} days")
+            gaps.append(f"No current need or timing evidence (none dated within {FRESH_DAYS} days, no open job post)")
     if not company.checked_places:
         gaps.append("Competitor check not run")
     elif not company.disqualifier_check_completed:
         gaps.append("Competitor check incomplete: no search for current competitor use was run")
     if not gaps:
         return Verdict(kind="shortlisted",
-                       summary="Required fit shown, dated need or timing evidence, and no current competitor use found")
+                       summary="Required fit shown, current need or timing evidence, and no current competitor use found")
     notes = [f"Could not read {page}" for page in company.blocked[:5]]
     return Verdict(kind="needs_look", summary="Needs a look", missing=gaps + notes)

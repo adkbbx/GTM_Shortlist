@@ -25,7 +25,7 @@ test('a website alone produces a live board with three verdicts and quoted evide
   const rejected = page.locator('.column-rejected');
   await expect(shortlisted.getByRole('heading', { name: 'Trailgear Outfitters' })).toBeVisible({ timeout: 30000 });
   await expect(needsLook.getByRole('heading', { name: 'Oak and Pine' })).toBeVisible();
-  await expect(needsLook).toContainText('No supported need or timing evidence dated within 180 days');
+  await expect(needsLook).toContainText('No current need or timing evidence (none dated within 180 days, no open job post)');
   await expect(rejected.getByRole('heading', { name: 'Bright Kettle' })).toBeVisible();
   const reason = rejected.locator('.agent-quote-text').first();
   await expect(reason).toHaveText('“Customer support powered by RivalDesk”');

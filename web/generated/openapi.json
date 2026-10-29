@@ -4367,6 +4367,11 @@
             ],
             "title": "Location",
             "default": "text"
+          },
+          "open_posting": {
+            "type": "boolean",
+            "title": "Open Posting",
+            "default": false
           }
         },
         "additionalProperties": false,
@@ -4377,7 +4382,8 @@
           "source_type",
           "published_date",
           "fetched_at",
-          "location"
+          "location",
+          "open_posting"
         ],
         "title": "Quote",
         "description": "Exact words from a fetched page: location text means the readable page, html means the page's own code."

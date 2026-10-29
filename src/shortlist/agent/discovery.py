@@ -13,12 +13,18 @@ from shortlist.fetch import FetchError, canonical_url
 from shortlist.relevance import candidate_issue, company_page_issue
 from shortlist.selection import discussion_page
 
-DISCOVERY_INSTRUCTIONS = f"""You find companies that could buy a seller's product, using web search. {UNTRUSTED}
-Search for companies that match the buyer and fit checks, and companies similar to the seller's named customers.
-Prefer each company's own website. Never return list articles, directories, review sites, news stories, the seller,
-its competitors, its existing customers, or people. At most 4 searches.
+DISCOVERY_INSTRUCTIONS = f"""You find companies that could buy a seller's product now, using web search. {UNTRUSTED}
+Search for the seller's need and timing signals happening now, not for a category: for example current job posts for
+a role named in the need signals (on job boards or careers pages), or news from the last six months about a launch,
+expansion or funding round named in the timing signals. Name the companies those results are about. You may also
+search for companies similar to the seller's named customers.
+Aim for companies this seller can realistically win: about the size and stage of its named customers, or small and
+mid-sized companies when none are named. Leave out household-name enterprises and category leaders unless the seller
+says it serves enterprises.
+Never return list articles, directories, review sites, news sites, job boards, the seller, its competitors, its
+existing customers, or people. At most 4 searches.
 Return only JSON: {{"companies": [{{"name": "company", "domain": "company.com", "url": "https://company.com/",
-"found_via": "the search, or 'similar to <customer>'"}}]}}"""
+"found_via": "the signal you saw and where, for example 'job post: SDR (Greenhouse, 12 Oct 2026)' or 'similar to <customer>'"}}]}}"""
 
 
 def excluded_domains(profile: SellerProfile, competitors: list[Competitor]) -> dict[str, str]:
@@ -71,6 +77,9 @@ def discover(profile: SellerProfile, competitors: list[Competitor], count: int, 
             break
         data = {"offer": profile.offer.value if profile.offer else "", "buyer": profile.buyer.value if profile.buyer else "",
                 "fit_checks": [c.text for c in profile.fit_criteria if c.enabled],
+                # Search by what a buying company does now; category searches returned lists of the largest brands.
+                "need_signals": [s.text for s in profile.need_signals],
+                "timing_signals": [s.text for s in profile.timing_signals],
                 "served": [f"{limit.kind}: {limit.value}" for limit in profile.stated_limits],
                 "named_customers": [c.domain or c.name for c in profile.existing_customers][:10],
                 "do_not_return": sorted(set(excluded) | set(pool))[:60], "how_many": wanted * 2}
