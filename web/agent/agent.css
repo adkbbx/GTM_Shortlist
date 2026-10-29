@@ -21,6 +21,7 @@
 .agent-start-options label{margin:0;font-weight:400;font-size:.875rem;color:var(--muted)}
 .agent-main select{font:inherit;font-size:.875rem;min-height:2.75rem;padding:.5rem .75rem;background:var(--surface);color:var(--ink);border:1px solid #c4c0b8;border-radius:var(--radius-control);max-width:100%}
 .agent-start-form .notice{margin:1rem 0 0}
+.agent-check:not(:empty){margin-top:1rem}
 .agent-hint{margin-top:1rem;font-size:.875rem;color:var(--muted)}
 .agent-recent{margin-top:2.5rem}
 .agent-recent h2{font-size:1rem}

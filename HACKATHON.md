@@ -2,7 +2,7 @@
 
 GTM Shortlist already existed before the event: an open-source tool that researches companies for a B2B seller and keeps the source passage behind every assessment. For the hackathon (Indie track) I built a new agent on top of it. You type your company website and nothing else. The agent works out what you sell and who buys it, proves who your competitors are, finds companies, investigates each one, and sorts them into **Shortlisted**, **Needs a look** and **Rejected**, with the exact quote and source link behind every verdict.
 
-Everything built during the event lives in its own places: `src/shortlist/agent/` (backend), `web/agent/` (UI), `tests/agent/` and `tests/ui/agent.spec.ts` (tests). The few wiring edits outside those folders are listed below.
+Everything built during the event lives in its own places: `src/shortlist/agent/` (backend), `web/agent/` (UI), `tests/agent/`, `tests/ui/agent.spec.ts` and `tests/ui/agent-public.spec.ts` (tests), and for the public demo `deploy/modal_agent.py`, `docs/agent-public-demo.md` and `scripts/public_demo_test_server.py`. The few wiring edits outside those places are listed below.
 
 Compare the event's work with the baseline: https://github.com/adkbbx/GTM_Shortlist/compare/pre-meta-hackathon...meta-hackathon
 
@@ -21,7 +21,8 @@ Compare the event's work with the baseline: https://github.com/adkbbx/GTM_Shortl
 | Storage | `runs`, `records` and related tables | New `agent_runs` table (id, created_at, status, payload JSON, events JSON) in the same local database |
 | Interface | Classic workspace, landing page and demo | New default start page with one field, and a live board: "What we assumed" panel, three verdict columns, quote popovers with text-fragment links, telemetry footer |
 | Command line and evaluation | `shortlist run`, `export` and earlier evaluation scripts | `shortlist agent run` and `shortlist agent eval` with agreement, shortlist precision, disqualifier recall, cost per company, p50/p95 latency and a no-skeptic ablation |
-| Tests | 838 backend tests and the existing browser journeys | 63 new backend tests in `tests/agent/` and 4 browser journeys in `tests/ui/agent.spec.ts` (laptop and phone) |
+| Public access | Hosted accounts with signup credits | A separate public demo app (`shortlist/agent/public.py`) that needs only a website: capped companies per search, an hourly limit per visitor, a cap on searches working at once, a daily dollar cap and optional Turnstile. Shareable read-only links; only the starting browser can correct a search. Runs are JSON files (`shortlist/agent/files.py`) on a Modal Volume, deployed with `deploy/modal_agent.py` |
+| Tests | 838 backend tests and the existing browser journeys | 73 new backend tests in `tests/agent/` and 5 browser journeys in `tests/ui/agent.spec.ts` and `tests/ui/agent-public.spec.ts` (laptop and phone) |
 
 Reused from before the event, unchanged in behaviour: the safe page fetcher in `shortlist/fetch.py` (HTTPS only, public addresses only, pinned TLS, same-site redirects), the quote matching in `relevance.quoted_in` and `relevance.verbatim_quote`, the page-type gates `relevance.company_page_issue` and `relevance.candidate_issue`, `selection.discussion_page`, and the existing design tokens.
 
@@ -58,6 +59,8 @@ shortlist agent eval labels.csv --website https://yourcompany.com --output repor
 
 **Browser.** `shortlist serve --port 8014 --open`. The start page is now the website-only agent. Saved classic runs still open from their links (`?run=...`), and `/?classic=1` opens the classic workspace.
 
+**Public demo.** See [docs/agent-public-demo.md](docs/agent-public-demo.md) for the limits, a local trial with synthetic data, and deploying on Modal.
+
 **API (local mode).** `POST /api/agent/runs` with `{"website": "...", "overrides": {...}}` returns the run id; `GET /api/agent/runs/{id}`; `GET /api/agent/runs/{id}/events` streams progress as Server-Sent Events; `POST /api/agent/runs/{id}/overrides` applies optional corrections. Corrections re-run only the skeptic and the verdict on saved evidence; adding a new fit check is the one change that researches the companies again.
 
 ## Wiring edits outside the new folders
@@ -67,8 +70,9 @@ This is the complete list.
 - `src/shortlist/api.py`: five lines that register the agent routes, in local mode only.
 - `src/shortlist/cli.py`: hands `shortlist agent ...` to `shortlist/agent/cli.py`, plus its help entry.
 - `src/shortlist/fetch.py`: `fetch_page` is split into `fetch_html` (unchanged) and a new `page_from_html`, so the agent keeps the raw page for its code scan without a second request. `fetch_page` behaves exactly as before and every check stays in `fetch_html`.
-- `.env.example`: the agent's settings. They are read in `src/shortlist/agent/settings.py`, so `config.py` is unchanged.
-- `web/main.tsx`: start-page routing. The agent is the default start; `?run=`, `?classic=1` and sign-in links keep the classic workspace, and hosted installations fall back to it.
+- `.env.example`: the agent's settings and the public demo's. They are read in `src/shortlist/agent/settings.py` and `src/shortlist/agent/public.py`, so `config.py` is unchanged.
+- `web/main.tsx`: start-page routing. The agent is the default start; `?run=`, `?classic=1` and sign-in links keep the classic workspace, and hosted installations fall back to it. A page marked `agent-only` (the public demo) always shows the agent.
+- `playwright.config.ts`: a second test web server on port 8017 for the public demo spec.
 - `scripts/export_schema.py`: also exports the agent's JSON schemas.
 - `scripts/ui_test_server.py`: the browser test server gives the agent the labelled synthetic providers and keeps the classic start for the existing journeys (the agent spec opens `/?flow=agent`).
 - `web/generated/`: regenerated `openapi.json` and `api.d.ts`, plus new `AgentRunView.json`, `AgentRunSummary.json` and `AgentStarted.json`. Existing schemas are unchanged in content.
@@ -80,5 +84,6 @@ One deliberate design departure: DESIGN.md asks not to compress research sheets 
 
 - **The live provider smoke test has not been run yet.** No API keys were available while building, and the rules forbid live calls in tests. Everything was verified against synthetic providers and recorded-shape HTTP fakes. Field names that need a live check are listed in `docs/PROGRESS.md`.
 - Built-in web search runs on the provider's side, so the agent cannot stop a single response from making more searches than asked. It removes the search tool once a company has used four.
-- Agent runs are stored in local SQLite. Hosted Postgres storage is a follow-up; the routes are not registered in hosted mode.
+- Agent runs are stored in local SQLite, or as JSON files in the public demo. The classic hosted app (accounts and Postgres) does not register the agent routes; the public demo is the hosted way to use the agent.
+- `deploy/modal_agent.py` has not been deployed yet; its first deploy is its check. The public demo's dollar limits use the agent's own estimates, so provider-side spend limits are still needed.
 - The synthetic evaluation proves the plumbing and the rules, not real-world accuracy. A labelled set of real companies is the next step.

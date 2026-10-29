@@ -21,6 +21,8 @@ export default defineConfig({
   ],
   webServer: [
     { command: `${python} scripts/ui_test_server.py`, env: fixtureEnvironment, url: 'http://127.0.0.1:8015/api/health', reuseExistingServer: false },
+    // Public agent demo (Meta hackathon) with synthetic providers, for tests/ui/agent-public.spec.ts.
+    { command: `${python} scripts/public_demo_test_server.py`, env: fixtureEnvironment, url: 'http://127.0.0.1:8017/api/health', reuseExistingServer: false },
     ...(hosted ? [{ command: `${python} scripts/hosted_ui_test_server.py`, env: fixtureEnvironment, url: 'http://127.0.0.1:8016/__fixture_ready', reuseExistingServer: false }] : []),
   ],
 });

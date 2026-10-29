@@ -681,6 +681,8 @@ export interface components {
             /** Website */
             website: string;
             overrides?: components["schemas"]["Overrides-Input"] | null;
+            /** Turnstile */
+            turnstile?: string | null;
         };
         /** AgentStarted */
         AgentStarted: {
@@ -691,6 +693,8 @@ export interface components {
              * @enum {string}
              */
             status: "queued" | "running" | "needs_choice" | "complete" | "failed";
+            /** Edit Token */
+            edit_token?: string | null;
         };
         /** AttemptView */
         AttemptView: {

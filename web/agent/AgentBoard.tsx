@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Assumptions } from './Assumptions';
 import { EvidenceList, QuoteBlock } from './Evidence';
-import { agentApi, domainOf, isActive } from './agent-api';
+import { agentApi, domainOf, editToken, isActive } from './agent-api';
+import { AgentConfigContext, countOptions, useAgentConfig } from './agent-config';
 import type { AgentEvent, AgentRun, AgentRunView, Company, EvidenceItem, Overrides, Profile } from './agent-api';
 
 const describe = (error: unknown) => error instanceof Error ? error.message : 'Something went wrong. Please try again.';
@@ -44,17 +45,18 @@ function CompanyCard({ company, run }: { company: Company; run: AgentRun }) {
 }
 
 function Columns({ run, apply, busy }: { run: AgentRun; apply: (overrides: Overrides) => void; busy: boolean }) {
+  const { editable, maxCompanies } = useAgentConfig();
   const decided = run.companies.filter(company => company.verdict);
   const working = run.companies.filter(company => !company.verdict);
   return <section className="agent-results" aria-labelledby="results-heading">
     <div className="agent-section-head agent-results-head">
       <div><h2 id="results-heading">Companies</h2>
         <p>{decided.length} of {run.companies.length} checked. Verdicts are decided by fixed rules over quotes the skeptic accepted.</p></div>
-      <label className="agent-count-control">Research up to
+      {editable && <label className="agent-count-control">Research up to
         <select value={run.company_count} disabled={busy || isActive(run.status)} onChange={event => apply({ company_count: Number(event.target.value) })}>
-          {[...new Set([5, 10, 15, 20, run.company_count])].sort((a, b) => a - b).map(count => <option key={count} value={count}>{count} companies</option>)}
+          {countOptions(maxCompanies, run.company_count).map(count => <option key={count} value={count}>{count} companies</option>)}
         </select>
-      </label>
+      </label>}
     </div>
     {working.length > 0 && <p className="agent-working" role="status"><span className="agent-pulse" aria-hidden="true" />Investigating {working.map(c => c.domain).join(', ')}</p>}
     <div className="agent-columns">
@@ -71,16 +73,17 @@ function Columns({ run, apply, busy }: { run: AgentRun; apply: (overrides: Overr
 }
 
 function ReadingChoice({ profile, apply, busy }: { profile: Profile; apply: (overrides: Overrides) => void; busy: boolean }) {
+  const { editable } = useAgentConfig();
   return <section className="agent-choice" aria-labelledby="choice-heading">
     <h2 id="choice-heading">Which reading is closest?</h2>
     <p>Your site can be read more than one way. Pick the closest; there is nothing to type.</p>
     <div className="agent-readings">
-      {profile.interpretations.map(reading => <button key={reading.id} type="button" className="agent-reading" disabled={busy}
+      {profile.interpretations.map(reading => <button key={reading.id} type="button" className="agent-reading" disabled={busy || !editable}
         onClick={() => apply({ interpretation: reading.id })}>
         <strong>{reading.offer}</strong><span>for {reading.buyer}</span><small>From your site: “{reading.quotes[0]?.text}”</small>
       </button>)}
     </div>
-    <Describe apply={apply} busy={busy} summary="None of these? Describe it yourself (optional)" />
+    {editable && <Describe apply={apply} busy={busy} summary="None of these? Describe it yourself (optional)" />}
   </section>;
 }
 
@@ -150,6 +153,9 @@ function Telemetry({ run }: { run: AgentRun }) {
 }
 
 export function AgentBoard({ runId, onNew }: { runId: string; onNew: () => void }) {
+  const config = useAgentConfig();
+  // In the public demo only the browser that started a search holds its edit token; a shared link is read-only.
+  const editable = !config.publicDemo || Boolean(editToken(runId));
   const [view, setView] = useState<AgentRunView | null>(null);
   const [events, setEvents] = useState<AgentEvent[]>([]);
   const [error, setError] = useState('');
@@ -198,21 +204,22 @@ export function AgentBoard({ runId, onNew }: { runId: string; onNew: () => void 
   if (!view) return <div className="agent-board">{error ? <p className="notice" role="alert">{error}</p> : <p className="agent-status" role="status">Loading the run</p>}</div>;
   const run = view.run;
   const busy = saving || active;
-  return <div className="agent-board">
+  return <AgentConfigContext.Provider value={{ ...config, editable }}><div className="agent-board">
     <div className="agent-board-head">
       <div><p className="agent-eyebrow">Shortlist for</p><h1 ref={heading} tabIndex={-1}>{domainOf(run.website)}</h1></div>
       <button type="button" className="secondary" onClick={onNew}>New search</button>
     </div>
+    {!editable && <p className="notice agent-shared" role="note">You are viewing a shared shortlist. Start your own search to change its assumptions.</p>}
     {run.synthetic && <p className="notice agent-synthetic" role="note"><strong>Synthetic test data.</strong> Invented companies on reserved .example domains. Nothing was searched or fetched.</p>}
     <StatusLine view={view} events={events} />
     {error && <p className="notice" role="alert">{error}</p>}
     {view.status === 'failed' && <section className="notice agent-failed" role="alert"><p>{run.error ?? 'The run stopped.'}</p>
-      {!run.profile?.offer && <Describe apply={apply} busy={busy} summary="Describe your offer and buyer (optional)" />}</section>}
+      {!run.profile?.offer && editable && <Describe apply={apply} busy={busy} summary="Describe your offer and buyer (optional)" />}</section>}
     {view.status === 'needs_choice' && run.profile && <ReadingChoice profile={run.profile} apply={apply} busy={busy} />}
     {run.profile && view.status !== 'needs_choice' && run.profile.offer && <Assumptions run={run} apply={apply} busy={busy} />}
     {run.companies.length > 0 && <Columns run={run} apply={apply} busy={busy} />}
     <Transparency run={run} />
     <Activity events={events} />
     <Telemetry run={run} />
-  </div>;
+  </div></AgentConfigContext.Provider>;
 }

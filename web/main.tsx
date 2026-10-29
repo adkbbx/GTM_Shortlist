@@ -524,5 +524,7 @@ const params = new URLSearchParams(window.location.search);
 const AgentApp = lazy(() => import('./agent/AgentApp').then(module => ({ default: module.AgentApp })));
 const startFlow = params.get('flow') ?? document.querySelector<HTMLMetaElement>('meta[name="shortlist-start-flow"]')?.content ?? 'agent';
 const agentStart = params.has('agent') || (startFlow === 'agent' && !['run', 'classic', 'auth', 'code', 'draft', 'error'].some(name => params.has(name)));
+// The public demo (shortlist.agent.public) serves only the agent and marks its page; no query can reach the classic workspace.
+const agentOnly = document.querySelector<HTMLMetaElement>('meta[name="shortlist-start-flow"]')?.content === 'agent-only';
 const classicWorkspace = <AuthGate workspace={(identity, account) => <App key={identity} identity={identity} account={account} />} />;
-createRoot(root).render(<StrictMode>{params.get('demo') === '1' ? <DemoPage /> : params.get('landing') === '1' ? <Suspense fallback={null}><LandingPreview /></Suspense> : agentStart ? <Suspense fallback={null}><AgentApp classic={classicWorkspace} /></Suspense> : classicWorkspace}</StrictMode>);
+createRoot(root).render(<StrictMode>{agentOnly ? <Suspense fallback={null}><AgentApp classic={null} /></Suspense> : params.get('demo') === '1' ? <DemoPage /> : params.get('landing') === '1' ? <Suspense fallback={null}><LandingPreview /></Suspense> : agentStart ? <Suspense fallback={null}><AgentApp classic={classicWorkspace} /></Suspense> : classicWorkspace}</StrictMode>);

@@ -22,9 +22,21 @@ export class AgentError extends Error {
   constructor(message: string, readonly status: number) { super(message); }
 }
 
-async function call(path: string, body?: unknown): Promise<unknown> {
+/** Server facts the start page needs. The public demo answers mode "public" with its limits. */
+export type AgentHealth = { mode?: string; max_companies?: number; turnstile_site_key?: string | null; synthetic?: boolean };
+
+/** The public demo returns an edit token to the browser that started a search; only that browser may correct it. */
+const tokenKey = (id: string) => `gtm-agent-edit:${id}`;
+export function editToken(id: string): string | null {
+  try { return window.localStorage.getItem(tokenKey(id)); } catch { return null; }
+}
+function keepEditToken(id: string, token: string) {
+  try { window.localStorage.setItem(tokenKey(id), token); } catch { /* without storage the search stays read-only here */ }
+}
+
+async function call(path: string, body?: unknown, headers: Record<string, string> = {}): Promise<unknown> {
   const response = await fetch(path, body === undefined ? {} : {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body),
   });
   let data: unknown = null;
   try { data = await response.json(); } catch { /* handled below */ }
@@ -44,12 +56,19 @@ function parseRun(data: unknown): AgentRunView {
 }
 
 export const agentApi = {
-  start: async (website: string, overrides?: Overrides) =>
-    await call('/api/agent/runs', overrides ? { website, overrides } : { website }) as { id: string; status: string },
+  health: async () => await call('/api/health') as AgentHealth,
+  start: async (website: string, overrides?: Overrides, turnstile?: string) => {
+    const started = await call('/api/agent/runs', { website, ...(overrides ? { overrides } : {}), ...(turnstile ? { turnstile } : {}) }) as
+      { id: string; status: string; edit_token?: string | null };
+    if (started.edit_token) keepEditToken(started.id, started.edit_token);
+    return started;
+  },
   run: async (id: string) => parseRun(await call(`/api/agent/runs/${encodeURIComponent(id)}`)),
   list: async () => await call('/api/agent/runs') as AgentRunSummary[],
-  override: async (id: string, overrides: Overrides) =>
-    parseRun(await call(`/api/agent/runs/${encodeURIComponent(id)}/overrides`, overrides)),
+  override: async (id: string, overrides: Overrides) => {
+    const token = editToken(id);
+    return parseRun(await call(`/api/agent/runs/${encodeURIComponent(id)}/overrides`, overrides, token ? { 'X-Agent-Edit-Token': token } : {}));
+  },
   /** Server-Sent Events for one run. Returns a function that closes the stream. */
   follow(id: string, after: number, onEvent: (event: AgentEvent) => void, onEnd: () => void): () => void {
     const source = new EventSource(`/api/agent/runs/${encodeURIComponent(id)}/events?after=${after}`);

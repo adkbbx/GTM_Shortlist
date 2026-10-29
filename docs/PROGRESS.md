@@ -1,5 +1,25 @@
 # Progress and handoff
 
+## 29 October, Meta hackathon: public agent demo for anyone with a website
+
+A separate app, `src/shortlist/agent/public.py`, lets visitors try the agent from a public link with no account. It serves only the agent and never the classic workspace. Limits:
+- companies per search (default 5)
+- searches per visitor per hour (3; the address is hashed with the demo secret, never stored raw)
+- searches working at once (3)
+- a daily estimated-dollar cap across visitors (10), which reserves a full run budget for every working search
+- optional Turnstile
+
+Search links are readable by anyone. Only the starting browser gets the edit token, so only it can correct a search; everyone else sees a read-only board. Runs are JSON files (`src/shortlist/agent/files.py`): atomic writes, a strict 32-hex id check, and a search cut off by a restart is marked failed. `deploy/modal_agent.py` deploys it on Modal: one container on a Volume, commits every few seconds. Setup is in [agent-public-demo.md](agent-public-demo.md).
+
+- **Verified without network or keys.**
+  - Backend: 911 passed, 48 skipped on Windows. That includes 10 new tests in `tests/agent/test_public_demo.py` covering: the company cap; edit tokens; read-only shared links; the hourly limit and its reset; forwarded addresses counted only behind a trusted proxy; the daily cap; the busy cap; Turnstile; cross-origin and wrong-host refusals; malformed run ids; the agent-only page marker; settings validation; the file store; restart recovery.
+  - Ruff passes. `npm run build` passes.
+  - Browser: the full Playwright suite ran 182 passed, 3 skipped, 1 failed. The failure was `company-search.spec.ts` "website entry closes suggestions" on laptop (suggestions did not appear within 5 s). That classic test is unrelated to this change and passed 6 of 6 reruns at both widths.
+  - The new `tests/ui/agent-public.spec.ts` passes at 1366px and 390px. It checks: "Find 5 companies" with only 3 or 5 offered; no "Earlier research" link; `?flow=classic` staying on the agent; the creator keeping corrections; a second browser seeing the read-only shared note with no edit controls; no horizontal overflow. Screenshots were inspected.
+  - `import shortlist.agent.public` loads none of `shortlist.api`, `config`, `store`, `worker` or `postgres`.
+  - `deploy/modal_agent.py` loads with Modal 1.6.3, with deprecation warnings treated as errors.
+- **Not yet run.** No Modal deploy has been made, and no live search, because there are no provider keys. The dollar limits use the agent's own estimates, so provider-side spend limits are still needed.
+
 ## 29 October, Meta hackathon: website-only research agent (branch `meta-hackathon`)
 
 New work for the Meta Global AI Developer Hackathon, separate from the research pipeline above; see [HACKATHON.md](../HACKATHON.md) for what is new, the model roles and every wiring edit. The website is the only input. Muse Spark 1.3 (Meta Model API, Responses with `web_search` and a `fetch_page` tool) investigates; Muse Spark Open on Baseten (`meta-models/muse-spark-open-1026`) judges each quote with no web access; `shortlist/agent/verdict.py` decides Shortlisted, Needs a look or Rejected. Code in `src/shortlist/agent/`, `web/agent/`, `tests/agent/` and `tests/ui/agent.spec.ts`.

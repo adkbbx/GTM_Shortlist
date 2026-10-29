@@ -1854,6 +1854,18 @@
                 "type": "null"
               }
             ]
+          },
+          "turnstile": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4096
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Turnstile"
           }
         },
         "additionalProperties": false,
@@ -1879,6 +1891,17 @@
               "failed"
             ],
             "title": "Status"
+          },
+          "edit_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edit Token"
           }
         },
         "type": "object",

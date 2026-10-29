@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent, MouseEvent } from 'react';
 import { Chip } from './Evidence';
+import { useAgentConfig } from './agent-config';
 import type { AgentRun, Overrides, Profile } from './agent-api';
 
 type Apply = (overrides: Overrides) => void;
@@ -46,13 +47,14 @@ function SmallForm({ label, placeholder, action, busy, onSubmit }: { label: stri
 const originNote = (origin: string) => origin === 'user' ? 'You described this.' : origin === 'interpretation' ? 'The reading you chose.' : undefined;
 
 export function Assumptions({ run, apply, busy }: { run: AgentRun; apply: Apply; busy: boolean }) {
+  const { editable } = useAgentConfig();
   const profile = run.profile!;
   const competitors = run.competitors.filter(c => c.classification !== 'not_competitor');
   const rules = run.disqualifiers.filter(rule => rule.rule !== 'uses_direct_competitor');
   return <section className="agent-assumptions" aria-labelledby="assumed-heading">
     <div className="agent-section-head">
       <h2 id="assumed-heading">What we assumed</h2>
-      <p>Read from your website. Open any item to see the exact words it rests on. Changes are optional.</p>
+      <p>Read from your website. Open any item to see the exact words it rests on.{editable ? ' Changes are optional.' : ''}</p>
     </div>
     <dl className="agent-assumption-list">
       {profile.offer && <div><dt>Offer</dt><dd><Chip label={profile.offer.value} quotes={profile.offer.quotes} note={originNote(profile.offer.origin)} /></dd></div>}
@@ -60,9 +62,9 @@ export function Assumptions({ run, apply, busy }: { run: AgentRun; apply: Apply;
       <div><dt>Fit checks</dt><dd>
         {profile.fit_criteria.map(criterion => <Chip key={criterion.id} label={criterion.text} off={!criterion.enabled}
           tag={criterion.required ? 'Required' : 'Nice to have'} quotes={criterion.quotes}>
-          <CriterionEdit criterion={criterion} apply={apply} busy={busy} /></Chip>)}
-        <SmallForm label="Add a fit check" placeholder="For example: sells through its own online store" action="Add" busy={busy}
-          onSubmit={text => apply({ criteria: [{ id: `user-${Date.now().toString(36)}`, text, required: true }] })} />
+          {editable && <CriterionEdit criterion={criterion} apply={apply} busy={busy} />}</Chip>)}
+        {editable && <SmallForm label="Add a fit check" placeholder="For example: sells through its own online store" action="Add" busy={busy}
+          onSubmit={text => apply({ criteria: [{ id: `user-${Date.now().toString(36)}`, text, required: true }] })} />}
       </dd></div>
       {(profile.need_signals.length > 0 || profile.timing_signals.length > 0) && <div><dt>Need and timing</dt><dd>
         {profile.need_signals.map(signal => <Chip key={signal.id} label={signal.text} tag="Need" quotes={signal.quotes} />)}
@@ -74,12 +76,12 @@ export function Assumptions({ run, apply, busy }: { run: AgentRun; apply: Apply;
           tag={competitor.classification === 'direct' ? 'Direct' : 'Adjacent'}
           quotes={[competitor.same_job, competitor.same_buyer].filter((quote): quote is NonNullable<typeof quote> => Boolean(quote))}
           note={competitor.origin === 'user' ? 'You marked this as a direct competitor.' : competitor.reason || undefined}>
-          <div className="agent-edit"><p className="agent-edit-title">{competitor.domain}</p><div className="agent-edit-row">
+          {editable && <div className="agent-edit"><p className="agent-edit-title">{competitor.domain}</p><div className="agent-edit-row">
             <button type="button" className="secondary" disabled={busy} onClick={event => { closing(event); apply({ remove_competitors: [competitor.domain] }); }}>Not a competitor</button>
             {competitor.classification !== 'direct' && <button type="button" className="secondary" disabled={busy} onClick={event => { closing(event); apply({ add_competitors: [competitor.domain] }); }}>Treat as direct</button>}
-          </div></div>
+          </div></div>}
         </Chip>)}
-        <SmallForm label="Add a competitor" placeholder="competitor.com" action="Add" busy={busy} onSubmit={value => apply({ add_competitors: [value] })} />
+        {editable && <SmallForm label="Add a competitor" placeholder="competitor.com" action="Add" busy={busy} onSubmit={value => apply({ add_competitors: [value] })} />}
       </dd></div>
       <div><dt>Disqualifiers</dt><dd>
         {run.disqualifiers.filter(rule => rule.rule === 'uses_direct_competitor').length > 0 && <Chip label="Uses a direct competitor" tone="bad" quotes={[]}
@@ -87,7 +89,7 @@ export function Assumptions({ run, apply, busy }: { run: AgentRun; apply: Apply;
         {rules.map(rule => <Chip key={rule.id} label={rule.text} tone="bad" quotes={[]}
           note={rule.rule === 'outside_stated_size_or_region' ? 'From what your site says you serve.' : 'Applied automatically. A company is rejected only when the skeptic agrees a quote shows it.'} />)}
         {run.overrides.exclusions.map(entry => <Chip key={entry} label={`Excluded: ${entry}`} tone="bad" quotes={[]} note="You excluded this." />)}
-        <SmallForm label="Exclude a company" placeholder="company.com or name" action="Exclude" busy={busy} onSubmit={value => apply({ exclusions: [value] })} />
+        {editable && <SmallForm label="Exclude a company" placeholder="company.com or name" action="Exclude" busy={busy} onSubmit={value => apply({ exclusions: [value] })} />}
       </dd></div>
       {profile.stated_limits.length > 0 && <div><dt>You serve</dt><dd>
         {profile.stated_limits.map(limit => <Chip key={limit.value} label={limit.value} tag={limit.kind === 'size' ? 'Size' : 'Region'} quotes={limit.quotes} />)}

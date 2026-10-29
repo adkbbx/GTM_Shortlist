@@ -1,0 +1,45 @@
+import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { mkdirSync } from 'node:fs';
+
+// The public agent demo (shortlist.agent.public) served by scripts/public_demo_test_server.py with LABELLED SYNTHETIC
+// providers: invented .example companies, no network, no spending.
+test.use({ baseURL: 'http://127.0.0.1:8017' });
+
+const noOverflow = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
+
+test('the public demo starts from a website alone, caps the size and shares a read-only link', async ({ page, browser }, info) => {
+  await page.goto('/?flow=classic');
+  await expect(page.getByLabel('Your company website')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Earlier research' })).toHaveCount(0);
+  await expect(page.getByText('Public demo: up to 5 companies per search.')).toBeVisible();
+  await expect(page.locator('#agent-count option')).toHaveText(['3', '5']);
+  await expect(page.getByText('Built with Muse Spark Open.')).toBeVisible();
+  expect(await noOverflow(page)).toBe(true);
+  mkdirSync('.impeccable/review', { recursive: true });
+  await page.screenshot({ path: `.impeccable/review/${info.project.name}-agent-public-start.png`, fullPage: true });
+
+  await page.getByLabel('Your company website').fill('seller.example');
+  await page.getByRole('button', { name: 'Find 5 companies' }).click();
+  await expect(page).toHaveURL(/[?&]agent=[0-9a-f]{32}/);
+  await expect(page.locator('.column-rejected').getByRole('heading', { name: 'Bright Kettle' })).toBeVisible({ timeout: 30000 });
+  await expect(page.getByRole('status').first()).toContainText('Done: 1 shortlisted, 1 needs a look, 1 rejected');
+  // The browser that started the search keeps its optional corrections.
+  await expect(page.locator('summary', { hasText: 'Add a competitor' })).toBeVisible();
+  await expect(page.locator('.agent-count-control select')).toBeVisible();
+  await expect(page.locator('.agent-shared')).toHaveCount(0);
+  expect(await noOverflow(page)).toBe(true);
+  await page.screenshot({ path: `.impeccable/review/${info.project.name}-agent-public-board.png`, fullPage: true });
+
+  // Anyone else with the link reads the same shortlist without edit controls.
+  const visitor = await browser.newContext({ viewport: page.viewportSize() ?? undefined });
+  const shared = await visitor.newPage();
+  await shared.goto(page.url());
+  await expect(shared.getByText('You are viewing a shared shortlist.')).toBeVisible();
+  await expect(shared.locator('.column-rejected').getByRole('heading', { name: 'Bright Kettle' })).toBeVisible();
+  await expect(shared.locator('summary', { hasText: 'Add a competitor' })).toHaveCount(0);
+  await expect(shared.locator('.agent-count-control')).toHaveCount(0);
+  expect(await noOverflow(shared)).toBe(true);
+  await shared.screenshot({ path: `.impeccable/review/${info.project.name}-agent-public-shared.png`, fullPage: true });
+  await visitor.close();
+});
