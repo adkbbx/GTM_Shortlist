@@ -1,0 +1,94 @@
+import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { mkdirSync } from 'node:fs';
+
+// The browser test server gives the agent LABELLED SYNTHETIC providers (shortlist.agent.synthetic): invented companies
+// on .example domains, scripted model answers and no network.
+
+const noOverflow = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
+
+async function startRun(page: Page, website: string) {
+  await page.goto('/?flow=agent');
+  const field = page.getByLabel('Your company website');
+  await expect(field).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Find 10 companies' })).toBeVisible();
+  await field.fill(website);
+  await page.getByRole('button', { name: 'Find 10 companies' }).click();
+  await expect(page).toHaveURL(/[?&]agent=[0-9a-f]{32}/);
+}
+
+test('a website alone produces a live board with three verdicts and quoted evidence', async ({ page }, info) => {
+  await startRun(page, 'seller.example');
+  await expect(page.getByText('Synthetic test data.')).toBeVisible();
+  const shortlisted = page.locator('.column-shortlisted');
+  const needsLook = page.locator('.column-needs_look');
+  const rejected = page.locator('.column-rejected');
+  await expect(shortlisted.getByRole('heading', { name: 'Trailgear Outfitters' })).toBeVisible({ timeout: 30000 });
+  await expect(needsLook.getByRole('heading', { name: 'Oak and Pine' })).toBeVisible();
+  await expect(needsLook).toContainText('No supported need or timing evidence dated within 180 days');
+  await expect(rejected.getByRole('heading', { name: 'Bright Kettle' })).toBeVisible();
+  const reason = rejected.locator('.agent-quote-text').first();
+  await expect(reason).toHaveText('“Customer support powered by RivalDesk”');
+  expect(await reason.getAttribute('href')).toBe('https://brightkettle.example/#:~:text=Customer%20support%20powered%20by%20RivalDesk');
+  await expect(page.getByRole('status').first()).toContainText('Done: 1 shortlisted, 1 needs a look, 1 rejected');
+
+  // What we assumed: every item opens its quote; nothing had to be typed.
+  const assumptions = page.locator('.agent-assumptions');
+  await expect(assumptions.getByRole('heading', { name: 'What we assumed' })).toBeVisible();
+  await assumptions.getByRole('button', { name: /^Help desk software for online stores/ }).click();
+  const popover = page.locator('.agent-popover:popover-open');
+  await expect(popover).toContainText('Northwind Desk is help desk software for online stores.');
+  expect(await popover.locator('.agent-quote-text').getAttribute('href')).toContain('https://seller.example/#:~:text=');
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.agent-popover:popover-open')).toHaveCount(0);
+
+  // Evidence chips on a card open the job post quote with its date.
+  await shortlisted.getByRole('button', { name: /Hiring customer support agents, Need/ }).click();
+  await expect(page.locator('.agent-popover:popover-open')).toContainText('We are hiring two customer support agents');
+  await expect(page.locator('.agent-popover:popover-open')).toContainText('Job post');
+  await page.keyboard.press('Escape');
+
+  await expect(page.locator('.agent-telemetry')).toContainText('model calls');
+  await expect(page.locator('.agent-telemetry')).toContainText('$');
+  expect(await noOverflow(page)).toBe(true);
+  mkdirSync('.impeccable/review', { recursive: true });
+  await page.screenshot({ path: `.impeccable/review/${info.project.name}-agent-board.png`, fullPage: true });
+});
+
+test('optional corrections re-check saved evidence: removing a competitor moves its user out of Rejected', async ({ page }) => {
+  await startRun(page, 'https://seller.example/');
+  const rejected = page.locator('.column-rejected');
+  await expect(rejected.getByRole('heading', { name: 'Bright Kettle' })).toBeVisible({ timeout: 30000 });
+  await page.locator('.agent-assumptions').getByRole('button', { name: /^RivalDesk, Direct/ }).click();
+  await page.locator('.agent-popover:popover-open').getByRole('button', { name: 'Not a competitor' }).click();
+  await expect(page.locator('.column-needs_look').getByRole('heading', { name: 'Bright Kettle' })).toBeVisible({ timeout: 30000 });
+  await expect(rejected.getByRole('heading', { name: 'Bright Kettle' })).toHaveCount(0);
+  await expect(page.locator('.agent-log')).toContainText('Activity');
+});
+
+test('a vague site offers clickable readings instead of a required text box', async ({ page }) => {
+  await startRun(page, 'vague.example');
+  const choice = page.locator('.agent-choice');
+  await expect(choice.getByRole('heading', { name: 'Which reading is closest?' })).toBeVisible({ timeout: 30000 });
+  await expect(choice.locator('.agent-reading')).toHaveCount(2);
+  await expect(choice.locator('input:visible')).toHaveCount(0);
+  await choice.getByRole('button', { name: /Workflow automation software/ }).click();
+  await expect(page.locator('.agent-assumptions').getByRole('button', { name: /^Workflow automation software/ })).toBeVisible({ timeout: 30000 });
+  expect(await noOverflow(page)).toBe(true);
+});
+
+test('the start page works from the keyboard and saved classic runs keep their own page', async ({ page }, info) => {
+  await page.goto('/?flow=agent');
+  await expect(page.getByLabel('Your company website')).toBeVisible();
+  expect(await noOverflow(page)).toBe(true);
+  mkdirSync('.impeccable/review', { recursive: true });
+  await page.screenshot({ path: `.impeccable/review/${info.project.name}-agent-start.png`, fullPage: true });
+  await page.getByLabel('Your company website').focus();
+  await page.keyboard.type('seller.example');
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/[?&]agent=/);
+  await expect(page.getByRole('heading', { name: 'seller.example' })).toBeFocused();
+  await page.goto('/?classic=1');
+  await expect(page.getByLabel('Company name or website', { exact: true })).toBeVisible();
+  expect(await noOverflow(page)).toBe(true);
+});

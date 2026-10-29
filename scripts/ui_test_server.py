@@ -76,7 +76,9 @@ if __name__ == "__main__":
     def fixture_home():
         # Never inherit an operator's live directory ID from built frontend assets.
         html = (Path(__file__).resolve().parents[1] / "dist" / "index.html").read_text(encoding="utf-8")
-        return html.replace("<head>", '<head><meta name="shortlist-company-suggestions-client-id" content="">')
+        # Existing journeys start from the classic workspace; agent specs open /?flow=agent.
+        return html.replace("<head>", '<head><meta name="shortlist-company-suggestions-client-id" content="">'
+                            '<meta name="shortlist-start-flow" content="classic">')
 
     @application.post("/__fixture_recoverable_offer")
     def recoverable_offer(keep_valid: bool = False):
@@ -277,7 +279,13 @@ if __name__ == "__main__":
         # Isolated browser fixture only; never exposed by the production API.
         return store.annotate(command)
 
-    application.mount("/", create_app(settings))
+    workspace = create_app(settings)
+    # Website-only agent: LABELLED SYNTHETIC providers (shortlist.agent.synthetic), no network and no keys.
+    from shortlist.agent.settings import AgentSettings
+    from shortlist.agent.synthetic import synthetic_providers
+    workspace.state.agent_service.settings = lambda: AgentSettings()
+    workspace.state.agent_service.providers = lambda agent_settings: synthetic_providers(pace=0.08)
+    application.mount("/", workspace)
     try:
         uvicorn.run(application, host="127.0.0.1", port=8015, log_level="warning")
     finally:

@@ -519,4 +519,10 @@ if (!root) throw new Error('Application root is missing');
 // ?landing=1 previews the hosted landing page in any mode; its Start research hands the company to this workspace.
 const LandingPreview = lazy(() => import('./landing/PublicLanding').then(module => ({ default: () => <module.PublicLanding directoryId={savedBrandfetchId() ?? configuredDirectoryId()} iconLookup onSignIn={() => window.location.assign('/?auth=signin')} onStart={company => { keepCompany(company); window.location.assign('/'); }} /> })));
 const params = new URLSearchParams(window.location.search);
-createRoot(root).render(<StrictMode>{params.get('demo') === '1' ? <DemoPage /> : params.get('landing') === '1' ? <Suspense fallback={null}><LandingPreview /></Suspense> : <AuthGate workspace={(identity, account) => <App key={identity} identity={identity} account={account} />} />}</StrictMode>);
+// Website-only agent (Meta hackathon, web/agent): the default start. Saved classic runs (?run=), ?classic=1 and
+// sign-in links keep the classic workspace; a page may set <meta name="shortlist-start-flow" content="classic">.
+const AgentApp = lazy(() => import('./agent/AgentApp').then(module => ({ default: module.AgentApp })));
+const startFlow = params.get('flow') ?? document.querySelector<HTMLMetaElement>('meta[name="shortlist-start-flow"]')?.content ?? 'agent';
+const agentStart = params.has('agent') || (startFlow === 'agent' && !['run', 'classic', 'auth', 'code', 'draft', 'error'].some(name => params.has(name)));
+const classicWorkspace = <AuthGate workspace={(identity, account) => <App key={identity} identity={identity} account={account} />} />;
+createRoot(root).render(<StrictMode>{params.get('demo') === '1' ? <DemoPage /> : params.get('landing') === '1' ? <Suspense fallback={null}><LandingPreview /></Suspense> : agentStart ? <Suspense fallback={null}><AgentApp classic={classicWorkspace} /></Suspense> : classicWorkspace}</StrictMode>);

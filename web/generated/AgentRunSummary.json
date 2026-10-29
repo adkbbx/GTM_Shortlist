@@ -1,0 +1,56 @@
+{
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "queued",
+        "running",
+        "needs_choice",
+        "complete",
+        "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "website": {
+      "title": "Website",
+      "type": "string"
+    },
+    "synthetic": {
+      "default": false,
+      "title": "Synthetic",
+      "type": "boolean"
+    },
+    "shortlisted": {
+      "default": 0,
+      "title": "Shortlisted",
+      "type": "integer"
+    },
+    "needs_look": {
+      "default": 0,
+      "title": "Needs Look",
+      "type": "integer"
+    },
+    "rejected": {
+      "default": 0,
+      "title": "Rejected",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "id",
+    "created_at",
+    "status",
+    "website"
+  ],
+  "title": "AgentRunSummary",
+  "type": "object"
+}

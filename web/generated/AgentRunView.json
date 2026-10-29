@@ -1,0 +1,1663 @@
+{
+  "$defs": {
+    "AgentEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "seq": {
+          "default": 0,
+          "title": "Seq",
+          "type": "integer"
+        },
+        "at": {
+          "format": "date-time",
+          "title": "At",
+          "type": "string"
+        },
+        "stage": {
+          "enum": [
+            "seller",
+            "competitors",
+            "discovery",
+            "investigation",
+            "skeptic",
+            "verdict",
+            "overrides",
+            "run"
+          ],
+          "title": "Stage",
+          "type": "string"
+        },
+        "message": {
+          "maxLength": 500,
+          "title": "Message",
+          "type": "string"
+        },
+        "company": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Company"
+        },
+        "level": {
+          "default": "info",
+          "enum": [
+            "info",
+            "warn",
+            "done"
+          ],
+          "title": "Level",
+          "type": "string"
+        }
+      },
+      "required": [
+        "seq",
+        "at",
+        "stage",
+        "message",
+        "company",
+        "level"
+      ],
+      "title": "AgentEvent",
+      "type": "object"
+    },
+    "Attribute": {
+      "additionalProperties": false,
+      "properties": {
+        "tag": {
+          "title": "Tag",
+          "type": "string"
+        },
+        "attr": {
+          "title": "Attr",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 2048,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tag",
+        "attr",
+        "value"
+      ],
+      "title": "Attribute",
+      "type": "object"
+    },
+    "CandidateRef": {
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "title": "Domain",
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "found_via": {
+          "default": "",
+          "title": "Found Via",
+          "type": "string"
+        }
+      },
+      "required": [
+        "domain",
+        "name",
+        "url",
+        "found_via"
+      ],
+      "title": "CandidateRef",
+      "type": "object"
+    },
+    "CompanyResult": {
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "title": "Domain",
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "title": "Name",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "found_via": {
+          "default": "",
+          "title": "Found Via",
+          "type": "string"
+        },
+        "status": {
+          "default": "pending",
+          "enum": [
+            "pending",
+            "investigating",
+            "done",
+            "budget_reached",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceItem"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "decisions": {
+          "items": {
+            "$ref": "#/$defs/SkepticDecision"
+          },
+          "title": "Decisions",
+          "type": "array"
+        },
+        "checked_places": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Checked Places",
+          "type": "array"
+        },
+        "disqualifier_check_completed": {
+          "default": false,
+          "title": "Disqualifier Check Completed",
+          "type": "boolean"
+        },
+        "blocked": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Blocked",
+          "type": "array"
+        },
+        "signatures": {
+          "items": {
+            "$ref": "#/$defs/PageSignature"
+          },
+          "title": "Signatures",
+          "type": "array"
+        },
+        "searches": {
+          "default": 0,
+          "title": "Searches",
+          "type": "integer"
+        },
+        "fetches": {
+          "default": 0,
+          "title": "Fetches",
+          "type": "integer"
+        },
+        "turns": {
+          "default": 0,
+          "title": "Turns",
+          "type": "integer"
+        },
+        "verdict": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Verdict"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "latency_ms": {
+          "default": 0,
+          "title": "Latency Ms",
+          "type": "integer"
+        },
+        "cost_usd": {
+          "default": 0.0,
+          "title": "Cost Usd",
+          "type": "number"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error"
+        }
+      },
+      "required": [
+        "domain",
+        "name",
+        "url",
+        "found_via",
+        "status",
+        "evidence",
+        "decisions",
+        "checked_places",
+        "disqualifier_check_completed",
+        "blocked",
+        "signatures",
+        "searches",
+        "fetches",
+        "turns",
+        "verdict",
+        "latency_ms",
+        "cost_usd",
+        "error"
+      ],
+      "title": "CompanyResult",
+      "type": "object"
+    },
+    "Competitor": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "domain": {
+          "title": "Domain",
+          "type": "string"
+        },
+        "classification": {
+          "enum": [
+            "direct",
+            "adjacent",
+            "not_competitor"
+          ],
+          "title": "Classification",
+          "type": "string"
+        },
+        "same_job": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Quote"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "same_buyer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Quote"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "reason": {
+          "default": "",
+          "maxLength": 600,
+          "title": "Reason",
+          "type": "string"
+        },
+        "found_via": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Found Via",
+          "type": "string"
+        },
+        "origin": {
+          "default": "agent",
+          "enum": [
+            "agent",
+            "user"
+          ],
+          "title": "Origin",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "domain",
+        "classification",
+        "same_job",
+        "same_buyer",
+        "reason",
+        "found_via",
+        "origin"
+      ],
+      "title": "Competitor",
+      "type": "object"
+    },
+    "CriterionOverride": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "minLength": 3,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        },
+        "required": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Required"
+        },
+        "enabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Enabled"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "required",
+        "enabled"
+      ],
+      "title": "CriterionOverride",
+      "type": "object"
+    },
+    "DisqualifierRule": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "rule": {
+          "enum": [
+            "uses_direct_competitor",
+            "is_competitor",
+            "is_existing_customer",
+            "outside_stated_size_or_region",
+            "inactive"
+          ],
+          "title": "Rule",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Text",
+          "type": "string"
+        },
+        "competitor_domain": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Competitor Domain"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "rule",
+        "text",
+        "competitor_domain",
+        "enabled"
+      ],
+      "title": "DisqualifierRule",
+      "type": "object"
+    },
+    "DroppedClaim": {
+      "additionalProperties": false,
+      "description": "A model claim whose quote was not found in the fetched page. Logged here, never shown as evidence.",
+      "properties": {
+        "stage": {
+          "title": "Stage",
+          "type": "string"
+        },
+        "company": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Company"
+        },
+        "claim_type": {
+          "default": "",
+          "title": "Claim Type",
+          "type": "string"
+        },
+        "quote": {
+          "default": "",
+          "maxLength": 1500,
+          "title": "Quote",
+          "type": "string"
+        },
+        "url": {
+          "default": "",
+          "title": "Url",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "stage",
+        "company",
+        "claim_type",
+        "quote",
+        "url",
+        "reason"
+      ],
+      "title": "DroppedClaim",
+      "type": "object"
+    },
+    "EvidenceItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "claim_type": {
+          "enum": [
+            "fit",
+            "need",
+            "timing",
+            "disqualifier"
+          ],
+          "title": "Claim Type",
+          "type": "string"
+        },
+        "criterion_id": {
+          "title": "Criterion Id",
+          "type": "string"
+        },
+        "claim": {
+          "maxLength": 600,
+          "minLength": 3,
+          "title": "Claim",
+          "type": "string"
+        },
+        "quote": {
+          "$ref": "#/$defs/Quote"
+        },
+        "found_by": {
+          "default": "model",
+          "enum": [
+            "model",
+            "scan",
+            "profile"
+          ],
+          "title": "Found By",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "claim_type",
+        "criterion_id",
+        "claim",
+        "quote",
+        "found_by"
+      ],
+      "title": "EvidenceItem",
+      "type": "object"
+    },
+    "ExistingCustomer": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "domain": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Domain"
+        },
+        "quotes": {
+          "items": {
+            "$ref": "#/$defs/Quote"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "title": "Quotes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "domain",
+        "quotes"
+      ],
+      "title": "ExistingCustomer",
+      "type": "object"
+    },
+    "FitCriterion": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Text",
+          "type": "string"
+        },
+        "required": {
+          "default": true,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "quotes": {
+          "items": {
+            "$ref": "#/$defs/Quote"
+          },
+          "maxItems": 4,
+          "title": "Quotes",
+          "type": "array"
+        },
+        "origin": {
+          "default": "agent",
+          "enum": [
+            "agent",
+            "user"
+          ],
+          "title": "Origin",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "text",
+        "required",
+        "enabled",
+        "quotes",
+        "origin"
+      ],
+      "title": "FitCriterion",
+      "type": "object"
+    },
+    "Interpretation": {
+      "additionalProperties": false,
+      "description": "One reading of a vague site, offered as a click; never a required text box.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "offer": {
+          "maxLength": 600,
+          "minLength": 3,
+          "title": "Offer",
+          "type": "string"
+        },
+        "buyer": {
+          "maxLength": 600,
+          "minLength": 3,
+          "title": "Buyer",
+          "type": "string"
+        },
+        "quotes": {
+          "items": {
+            "$ref": "#/$defs/Quote"
+          },
+          "maxItems": 3,
+          "minItems": 1,
+          "title": "Quotes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "offer",
+        "buyer",
+        "quotes"
+      ],
+      "title": "Interpretation",
+      "type": "object"
+    },
+    "ModelCall": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "operation": {
+          "title": "Operation",
+          "type": "string"
+        },
+        "company": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Company"
+        },
+        "input_tokens": {
+          "default": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "output_tokens": {
+          "default": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "searches": {
+          "default": 0,
+          "title": "Searches",
+          "type": "integer"
+        },
+        "latency_ms": {
+          "default": 0,
+          "title": "Latency Ms",
+          "type": "integer"
+        },
+        "usd": {
+          "default": 0.0,
+          "title": "Usd",
+          "type": "number"
+        },
+        "ok": {
+          "default": true,
+          "title": "Ok",
+          "type": "boolean"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error"
+        }
+      },
+      "required": [
+        "provider",
+        "model",
+        "operation",
+        "company",
+        "input_tokens",
+        "output_tokens",
+        "searches",
+        "latency_ms",
+        "usd",
+        "ok",
+        "error"
+      ],
+      "title": "ModelCall",
+      "type": "object"
+    },
+    "Overrides": {
+      "additionalProperties": false,
+      "description": "Optional corrections merged on top of what the agent inferred. None is required.",
+      "properties": {
+        "add_competitors": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10,
+          "title": "Add Competitors",
+          "type": "array"
+        },
+        "remove_competitors": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Remove Competitors",
+          "type": "array"
+        },
+        "exclusions": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Exclusions",
+          "type": "array"
+        },
+        "criteria": {
+          "items": {
+            "$ref": "#/$defs/CriterionOverride"
+          },
+          "maxItems": 12,
+          "title": "Criteria",
+          "type": "array"
+        },
+        "company_count": {
+          "anyOf": [
+            {
+              "maximum": 20,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Company Count"
+        },
+        "interpretation": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Interpretation"
+        },
+        "offer": {
+          "anyOf": [
+            {
+              "maxLength": 600,
+              "minLength": 3,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Offer"
+        },
+        "buyer": {
+          "anyOf": [
+            {
+              "maxLength": 600,
+              "minLength": 3,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Buyer"
+        }
+      },
+      "required": [
+        "add_competitors",
+        "remove_competitors",
+        "exclusions",
+        "criteria",
+        "company_count",
+        "interpretation",
+        "offer",
+        "buyer"
+      ],
+      "title": "Overrides",
+      "type": "object"
+    },
+    "PageRef": {
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "title": {
+          "default": "",
+          "title": "Title",
+          "type": "string"
+        },
+        "fetched_at": {
+          "format": "date-time",
+          "title": "Fetched At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "title",
+        "fetched_at"
+      ],
+      "title": "PageRef",
+      "type": "object"
+    },
+    "PageSignature": {
+      "additionalProperties": false,
+      "description": "Compact code-level observations of one fetched page, kept so competitors added later can be checked\nwithout fetching again.",
+      "properties": {
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "homepage",
+            "integrations",
+            "other"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "fetched_at": {
+          "format": "date-time",
+          "title": "Fetched At",
+          "type": "string"
+        },
+        "attributes": {
+          "items": {
+            "$ref": "#/$defs/Attribute"
+          },
+          "maxItems": 400,
+          "title": "Attributes",
+          "type": "array"
+        },
+        "powered_by": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Powered By",
+          "type": "array"
+        },
+        "lines": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 300,
+          "title": "Lines",
+          "type": "array"
+        }
+      },
+      "required": [
+        "url",
+        "kind",
+        "fetched_at",
+        "attributes",
+        "powered_by",
+        "lines"
+      ],
+      "title": "PageSignature",
+      "type": "object"
+    },
+    "Quote": {
+      "additionalProperties": false,
+      "description": "Exact words from a fetched page: location text means the readable page, html means the page's own code.",
+      "properties": {
+        "text": {
+          "maxLength": 1500,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "source_type": {
+          "enum": [
+            "own_site",
+            "job_post",
+            "news",
+            "review",
+            "competitor_site",
+            "other"
+          ],
+          "title": "Source Type",
+          "type": "string"
+        },
+        "published_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Published Date"
+        },
+        "fetched_at": {
+          "format": "date-time",
+          "title": "Fetched At",
+          "type": "string"
+        },
+        "location": {
+          "default": "text",
+          "enum": [
+            "text",
+            "html"
+          ],
+          "title": "Location",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "url",
+        "source_type",
+        "published_date",
+        "fetched_at",
+        "location"
+      ],
+      "title": "Quote",
+      "type": "object"
+    },
+    "RunResult": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "website": {
+          "title": "Website",
+          "type": "string"
+        },
+        "status": {
+          "default": "queued",
+          "enum": [
+            "queued",
+            "running",
+            "needs_choice",
+            "complete",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finished At"
+        },
+        "company_count": {
+          "default": 10,
+          "maximum": 20,
+          "minimum": 1,
+          "title": "Company Count",
+          "type": "integer"
+        },
+        "skeptic": {
+          "default": true,
+          "title": "Skeptic",
+          "type": "boolean"
+        },
+        "synthetic": {
+          "default": false,
+          "title": "Synthetic",
+          "type": "boolean"
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SellerProfile"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "competitors": {
+          "items": {
+            "$ref": "#/$defs/Competitor"
+          },
+          "title": "Competitors",
+          "type": "array"
+        },
+        "disqualifiers": {
+          "items": {
+            "$ref": "#/$defs/DisqualifierRule"
+          },
+          "title": "Disqualifiers",
+          "type": "array"
+        },
+        "overrides": {
+          "$ref": "#/$defs/Overrides"
+        },
+        "companies": {
+          "items": {
+            "$ref": "#/$defs/CompanyResult"
+          },
+          "title": "Companies",
+          "type": "array"
+        },
+        "candidate_pool": {
+          "items": {
+            "$ref": "#/$defs/CandidateRef"
+          },
+          "title": "Candidate Pool",
+          "type": "array"
+        },
+        "set_aside": {
+          "items": {
+            "$ref": "#/$defs/SetAside"
+          },
+          "title": "Set Aside",
+          "type": "array"
+        },
+        "dropped": {
+          "items": {
+            "$ref": "#/$defs/DroppedClaim"
+          },
+          "title": "Dropped",
+          "type": "array"
+        },
+        "telemetry": {
+          "$ref": "#/$defs/Telemetry"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error"
+        }
+      },
+      "required": [
+        "id",
+        "website",
+        "status",
+        "created_at",
+        "finished_at",
+        "company_count",
+        "skeptic",
+        "synthetic",
+        "profile",
+        "competitors",
+        "disqualifiers",
+        "overrides",
+        "companies",
+        "candidate_pool",
+        "set_aside",
+        "dropped",
+        "telemetry",
+        "error"
+      ],
+      "title": "RunResult",
+      "type": "object"
+    },
+    "SellerProfile": {
+      "additionalProperties": false,
+      "properties": {
+        "website": {
+          "title": "Website",
+          "type": "string"
+        },
+        "domain": {
+          "title": "Domain",
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "maxLength": 200,
+          "title": "Name",
+          "type": "string"
+        },
+        "offer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Statement"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "buyer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Statement"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "existing_customers": {
+          "items": {
+            "$ref": "#/$defs/ExistingCustomer"
+          },
+          "maxItems": 30,
+          "title": "Existing Customers",
+          "type": "array"
+        },
+        "fit_criteria": {
+          "items": {
+            "$ref": "#/$defs/FitCriterion"
+          },
+          "maxItems": 12,
+          "title": "Fit Criteria",
+          "type": "array"
+        },
+        "need_signals": {
+          "items": {
+            "$ref": "#/$defs/Signal"
+          },
+          "maxItems": 6,
+          "title": "Need Signals",
+          "type": "array"
+        },
+        "timing_signals": {
+          "items": {
+            "$ref": "#/$defs/Signal"
+          },
+          "maxItems": 6,
+          "title": "Timing Signals",
+          "type": "array"
+        },
+        "stated_limits": {
+          "items": {
+            "$ref": "#/$defs/StatedLimit"
+          },
+          "maxItems": 4,
+          "title": "Stated Limits",
+          "type": "array"
+        },
+        "interpretations": {
+          "items": {
+            "$ref": "#/$defs/Interpretation"
+          },
+          "maxItems": 3,
+          "title": "Interpretations",
+          "type": "array"
+        },
+        "pages": {
+          "items": {
+            "$ref": "#/$defs/PageRef"
+          },
+          "maxItems": 6,
+          "title": "Pages",
+          "type": "array"
+        }
+      },
+      "required": [
+        "website",
+        "domain",
+        "name",
+        "offer",
+        "buyer",
+        "existing_customers",
+        "fit_criteria",
+        "need_signals",
+        "timing_signals",
+        "stated_limits",
+        "interpretations",
+        "pages"
+      ],
+      "title": "SellerProfile",
+      "type": "object"
+    },
+    "SetAside": {
+      "additionalProperties": false,
+      "properties": {
+        "domain": {
+          "title": "Domain",
+          "type": "string"
+        },
+        "url": {
+          "default": "",
+          "title": "Url",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "domain",
+        "url",
+        "reason"
+      ],
+      "title": "SetAside",
+      "type": "object"
+    },
+    "Signal": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "need",
+            "timing"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 500,
+          "minLength": 3,
+          "title": "Text",
+          "type": "string"
+        },
+        "quotes": {
+          "items": {
+            "$ref": "#/$defs/Quote"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "title": "Quotes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "text",
+        "quotes"
+      ],
+      "title": "Signal",
+      "type": "object"
+    },
+    "SkepticDecision": {
+      "additionalProperties": false,
+      "properties": {
+        "evidence_id": {
+          "title": "Evidence Id",
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "supports",
+            "contradicts",
+            "insufficient"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "reason": {
+          "default": "",
+          "maxLength": 600,
+          "title": "Reason",
+          "type": "string"
+        },
+        "decided_by": {
+          "enum": [
+            "skeptic",
+            "rule",
+            "no_skeptic",
+            "budget"
+          ],
+          "title": "Decided By",
+          "type": "string"
+        }
+      },
+      "required": [
+        "evidence_id",
+        "decision",
+        "reason",
+        "decided_by"
+      ],
+      "title": "SkepticDecision",
+      "type": "object"
+    },
+    "StatedLimit": {
+      "additionalProperties": false,
+      "description": "Served size or region, only when the seller's own site states it.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "size",
+            "region"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 300,
+          "minLength": 2,
+          "title": "Value",
+          "type": "string"
+        },
+        "quotes": {
+          "items": {
+            "$ref": "#/$defs/Quote"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "title": "Quotes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "value",
+        "quotes"
+      ],
+      "title": "StatedLimit",
+      "type": "object"
+    },
+    "Statement": {
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        },
+        "quotes": {
+          "items": {
+            "$ref": "#/$defs/Quote"
+          },
+          "maxItems": 4,
+          "title": "Quotes",
+          "type": "array"
+        },
+        "origin": {
+          "default": "agent",
+          "enum": [
+            "agent",
+            "interpretation",
+            "user"
+          ],
+          "title": "Origin",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "quotes",
+        "origin"
+      ],
+      "title": "Statement",
+      "type": "object"
+    },
+    "Telemetry": {
+      "additionalProperties": false,
+      "properties": {
+        "budget_usd": {
+          "title": "Budget Usd",
+          "type": "number"
+        },
+        "budget_reached": {
+          "default": false,
+          "title": "Budget Reached",
+          "type": "boolean"
+        },
+        "cost_usd": {
+          "default": 0.0,
+          "title": "Cost Usd",
+          "type": "number"
+        },
+        "input_tokens": {
+          "default": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "output_tokens": {
+          "default": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "searches": {
+          "default": 0,
+          "title": "Searches",
+          "type": "integer"
+        },
+        "model_calls": {
+          "default": 0,
+          "title": "Model Calls",
+          "type": "integer"
+        },
+        "pages_fetched": {
+          "default": 0,
+          "title": "Pages Fetched",
+          "type": "integer"
+        },
+        "elapsed_ms": {
+          "default": 0,
+          "title": "Elapsed Ms",
+          "type": "integer"
+        },
+        "calls": {
+          "items": {
+            "$ref": "#/$defs/ModelCall"
+          },
+          "title": "Calls",
+          "type": "array"
+        }
+      },
+      "required": [
+        "budget_usd",
+        "budget_reached",
+        "cost_usd",
+        "input_tokens",
+        "output_tokens",
+        "searches",
+        "model_calls",
+        "pages_fetched",
+        "elapsed_ms",
+        "calls"
+      ],
+      "title": "Telemetry",
+      "type": "object"
+    },
+    "Verdict": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "shortlisted",
+            "needs_look",
+            "rejected"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "missing": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Missing",
+          "type": "array"
+        },
+        "disqualifier": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EvidenceItem"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "rule": {
+          "anyOf": [
+            {
+              "enum": [
+                "uses_direct_competitor",
+                "is_competitor",
+                "is_existing_customer",
+                "outside_stated_size_or_region",
+                "inactive"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rule"
+        }
+      },
+      "required": [
+        "kind",
+        "summary",
+        "missing",
+        "disqualifier",
+        "rule"
+      ],
+      "title": "Verdict",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "queued",
+        "running",
+        "needs_choice",
+        "complete",
+        "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    },
+    "run": {
+      "$ref": "#/$defs/RunResult"
+    },
+    "events": {
+      "items": {
+        "$ref": "#/$defs/AgentEvent"
+      },
+      "title": "Events",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "status",
+    "created_at",
+    "updated_at",
+    "run",
+    "events"
+  ],
+  "title": "AgentRunView",
+  "type": "object"
+}

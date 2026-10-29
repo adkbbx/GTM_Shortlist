@@ -24,7 +24,8 @@ DEFAULT_COMPANIES = 10
 
 
 class Model(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    # Saved fields always appear in responses, so the generated browser types treat them as present.
+    model_config = ConfigDict(extra="forbid", json_schema_serialization_defaults_required=True)
 
 
 class Quote(Model):

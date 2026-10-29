@@ -515,10 +515,183 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/agent/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Agent Runs */
+        get: operations["list_agent_runs_api_agent_runs_get"];
+        put?: never;
+        /** Start Agent Run */
+        post: operations["start_agent_run_api_agent_runs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/agent/runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read Agent Run */
+        get: operations["read_agent_run_api_agent_runs__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/agent/runs/{run_id}/overrides": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Override Agent Run */
+        post: operations["override_agent_run_api_agent_runs__run_id__overrides_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/agent/runs/{run_id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Agent Run Events */
+        get: operations["agent_run_events_api_agent_runs__run_id__events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AgentEvent */
+        AgentEvent: {
+            /**
+             * Seq
+             * @default 0
+             */
+            seq: number;
+            /**
+             * At
+             * Format: date-time
+             */
+            at: string;
+            /**
+             * Stage
+             * @enum {string}
+             */
+            stage: "seller" | "competitors" | "discovery" | "investigation" | "skeptic" | "verdict" | "overrides" | "run";
+            /** Message */
+            message: string;
+            /** Company */
+            company: string | null;
+            /**
+             * Level
+             * @default info
+             * @enum {string}
+             */
+            level: "info" | "warn" | "done";
+        };
+        /** AgentRunSummary */
+        AgentRunSummary: {
+            /** Id */
+            id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "queued" | "running" | "needs_choice" | "complete" | "failed";
+            /** Website */
+            website: string;
+            /**
+             * Synthetic
+             * @default false
+             */
+            synthetic: boolean;
+            /**
+             * Shortlisted
+             * @default 0
+             */
+            shortlisted: number;
+            /**
+             * Needs Look
+             * @default 0
+             */
+            needs_look: number;
+            /**
+             * Rejected
+             * @default 0
+             */
+            rejected: number;
+        };
+        /** AgentRunView */
+        AgentRunView: {
+            /** Id */
+            id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "queued" | "running" | "needs_choice" | "complete" | "failed";
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            run: components["schemas"]["RunResult"];
+            /** Events */
+            events: components["schemas"]["AgentEvent"][];
+        };
+        /** AgentStartInput */
+        AgentStartInput: {
+            /** Website */
+            website: string;
+            overrides?: components["schemas"]["Overrides-Input"] | null;
+        };
+        /** AgentStarted */
+        AgentStarted: {
+            /** Id */
+            id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "queued" | "running" | "needs_choice" | "complete" | "failed";
+        };
         /** AttemptView */
         AttemptView: {
             /** Provider */
@@ -532,6 +705,15 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /** Attribute */
+        Attribute: {
+            /** Tag */
+            tag: string;
+            /** Attr */
+            attr: string;
+            /** Value */
+            value: string;
         };
         /** BookingInput */
         BookingInput: {
@@ -587,6 +769,23 @@ export interface components {
              */
             excerpt: string;
         };
+        /** CandidateRef */
+        CandidateRef: {
+            /** Domain */
+            domain: string;
+            /**
+             * Name
+             * @default
+             */
+            name: string;
+            /** Url */
+            url: string;
+            /**
+             * Found Via
+             * @default
+             */
+            found_via: string;
+        };
         /** CompanyFact */
         CompanyFact: {
             /**
@@ -609,6 +808,72 @@ export interface components {
             source_id: string;
             /** Passage */
             passage: string;
+        };
+        /** CompanyResult */
+        CompanyResult: {
+            /** Domain */
+            domain: string;
+            /**
+             * Name
+             * @default
+             */
+            name: string;
+            /** Url */
+            url: string;
+            /**
+             * Found Via
+             * @default
+             */
+            found_via: string;
+            /**
+             * Status
+             * @default pending
+             * @enum {string}
+             */
+            status: "pending" | "investigating" | "done" | "budget_reached" | "failed";
+            /** Evidence */
+            evidence: components["schemas"]["EvidenceItem"][];
+            /** Decisions */
+            decisions: components["schemas"]["SkepticDecision"][];
+            /** Checked Places */
+            checked_places: string[];
+            /**
+             * Disqualifier Check Completed
+             * @default false
+             */
+            disqualifier_check_completed: boolean;
+            /** Blocked */
+            blocked: string[];
+            /** Signatures */
+            signatures: components["schemas"]["PageSignature"][];
+            /**
+             * Searches
+             * @default 0
+             */
+            searches: number;
+            /**
+             * Fetches
+             * @default 0
+             */
+            fetches: number;
+            /**
+             * Turns
+             * @default 0
+             */
+            turns: number;
+            verdict: components["schemas"]["Verdict"] | null;
+            /**
+             * Latency Ms
+             * @default 0
+             */
+            latency_ms: number;
+            /**
+             * Cost Usd
+             * @default 0
+             */
+            cost_usd: number;
+            /** Error */
+            error: string | null;
         };
         /** CompanySignal */
         CompanySignal: {
@@ -641,6 +906,36 @@ export interface components {
             basis: "Dated company statement";
             /** Campaign Relevant */
             campaign_relevant: boolean;
+        };
+        /** Competitor */
+        Competitor: {
+            /** Name */
+            name: string;
+            /** Domain */
+            domain: string;
+            /**
+             * Classification
+             * @enum {string}
+             */
+            classification: "direct" | "adjacent" | "not_competitor";
+            same_job: components["schemas"]["Quote"] | null;
+            same_buyer: components["schemas"]["Quote"] | null;
+            /**
+             * Reason
+             * @default
+             */
+            reason: string;
+            /**
+             * Found Via
+             * @default
+             */
+            found_via: string;
+            /**
+             * Origin
+             * @default agent
+             * @enum {string}
+             */
+            origin: "agent" | "user";
         };
         /** Confirmation */
         Confirmation: {
@@ -726,6 +1021,47 @@ export interface components {
              */
             required: boolean;
         };
+        /** CriterionOverride */
+        "CriterionOverride-Input": {
+            /** Id */
+            id: string;
+            /** Text */
+            text?: string | null;
+            /** Required */
+            required?: boolean | null;
+            /** Enabled */
+            enabled?: boolean | null;
+        };
+        /** CriterionOverride */
+        "CriterionOverride-Output": {
+            /** Id */
+            id: string;
+            /** Text */
+            text: string | null;
+            /** Required */
+            required: boolean | null;
+            /** Enabled */
+            enabled: boolean | null;
+        };
+        /** DisqualifierRule */
+        DisqualifierRule: {
+            /** Id */
+            id: string;
+            /**
+             * Rule
+             * @enum {string}
+             */
+            rule: "uses_direct_competitor" | "is_competitor" | "is_existing_customer" | "outside_stated_size_or_region" | "inactive";
+            /** Text */
+            text: string;
+            /** Competitor Domain */
+            competitor_domain: string | null;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+        };
         /** DraftCreated */
         DraftCreated: {
             /**
@@ -788,6 +1124,33 @@ export interface components {
             /** Events */
             events?: components["schemas"]["DraftEvent"][];
         };
+        /**
+         * DroppedClaim
+         * @description A model claim whose quote was not found in the fetched page. Logged here, never shown as evidence.
+         */
+        DroppedClaim: {
+            /** Stage */
+            stage: string;
+            /** Company */
+            company: string | null;
+            /**
+             * Claim Type
+             * @default
+             */
+            claim_type: string;
+            /**
+             * Quote
+             * @default
+             */
+            quote: string;
+            /**
+             * Url
+             * @default
+             */
+            url: string;
+            /** Reason */
+            reason: string;
+        };
         /** EditEmailDraft */
         EditEmailDraft: {
             /** Subject */
@@ -839,6 +1202,27 @@ export interface components {
             /** Claim */
             claim: string;
         };
+        /** EvidenceItem */
+        EvidenceItem: {
+            /** Id */
+            id: string;
+            /**
+             * Claim Type
+             * @enum {string}
+             */
+            claim_type: "fit" | "need" | "timing" | "disqualifier";
+            /** Criterion Id */
+            criterion_id: string;
+            /** Claim */
+            claim: string;
+            quote: components["schemas"]["Quote"];
+            /**
+             * Found By
+             * @default model
+             * @enum {string}
+             */
+            found_by: "model" | "scan" | "profile";
+        };
         /** ExclusionObserved */
         ExclusionObserved: {
             /**
@@ -862,6 +1246,40 @@ export interface components {
             exclusion_id: string;
             /** Reason */
             reason: string;
+        };
+        /** ExistingCustomer */
+        ExistingCustomer: {
+            /** Name */
+            name: string;
+            /** Domain */
+            domain: string | null;
+            /** Quotes */
+            quotes: components["schemas"]["Quote"][];
+        };
+        /** FitCriterion */
+        FitCriterion: {
+            /** Id */
+            id: string;
+            /** Text */
+            text: string;
+            /**
+             * Required
+             * @default true
+             */
+            required: boolean;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled: boolean;
+            /** Quotes */
+            quotes: components["schemas"]["Quote"][];
+            /**
+             * Origin
+             * @default agent
+             * @enum {string}
+             */
+            origin: "agent" | "user";
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -918,6 +1336,20 @@ export interface components {
             /** Assumptions */
             assumptions: string[];
         };
+        /**
+         * Interpretation
+         * @description One reading of a vague site, offered as a click; never a required text box.
+         */
+        Interpretation: {
+            /** Id */
+            id: string;
+            /** Offer */
+            offer: string;
+            /** Buyer */
+            buyer: string;
+            /** Quotes */
+            quotes: components["schemas"]["Quote"][];
+        };
         /** LocalAuth */
         LocalAuth: {
             /**
@@ -953,6 +1385,49 @@ export interface components {
              * @default []
              */
             issues: string[];
+        };
+        /** ModelCall */
+        ModelCall: {
+            /** Provider */
+            provider: string;
+            /** Model */
+            model: string;
+            /** Operation */
+            operation: string;
+            /** Company */
+            company: string | null;
+            /**
+             * Input Tokens
+             * @default 0
+             */
+            input_tokens: number;
+            /**
+             * Output Tokens
+             * @default 0
+             */
+            output_tokens: number;
+            /**
+             * Searches
+             * @default 0
+             */
+            searches: number;
+            /**
+             * Latency Ms
+             * @default 0
+             */
+            latency_ms: number;
+            /**
+             * Usd
+             * @default 0
+             */
+            usd: number;
+            /**
+             * Ok
+             * @default true
+             */
+            ok: boolean;
+            /** Error */
+            error: string | null;
         };
         /** Observed */
         Observed: {
@@ -1011,6 +1486,90 @@ export interface components {
              */
             outcome: "reviewed";
         };
+        /**
+         * Overrides
+         * @description Optional corrections merged on top of what the agent inferred. None is required.
+         */
+        "Overrides-Input": {
+            /** Add Competitors */
+            add_competitors?: string[];
+            /** Remove Competitors */
+            remove_competitors?: string[];
+            /** Exclusions */
+            exclusions?: string[];
+            /** Criteria */
+            criteria?: components["schemas"]["CriterionOverride-Input"][];
+            /** Company Count */
+            company_count?: number | null;
+            /** Interpretation */
+            interpretation?: string | null;
+            /** Offer */
+            offer?: string | null;
+            /** Buyer */
+            buyer?: string | null;
+        };
+        /**
+         * Overrides
+         * @description Optional corrections merged on top of what the agent inferred. None is required.
+         */
+        "Overrides-Output": {
+            /** Add Competitors */
+            add_competitors: string[];
+            /** Remove Competitors */
+            remove_competitors: string[];
+            /** Exclusions */
+            exclusions: string[];
+            /** Criteria */
+            criteria: components["schemas"]["CriterionOverride-Output"][];
+            /** Company Count */
+            company_count: number | null;
+            /** Interpretation */
+            interpretation: string | null;
+            /** Offer */
+            offer: string | null;
+            /** Buyer */
+            buyer: string | null;
+        };
+        /** PageRef */
+        PageRef: {
+            /** Url */
+            url: string;
+            /**
+             * Title
+             * @default
+             */
+            title: string;
+            /**
+             * Fetched At
+             * Format: date-time
+             */
+            fetched_at: string;
+        };
+        /**
+         * PageSignature
+         * @description Compact code-level observations of one fetched page, kept so competitors added later can be checked
+         *     without fetching again.
+         */
+        PageSignature: {
+            /** Url */
+            url: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "homepage" | "integrations" | "other";
+            /**
+             * Fetched At
+             * Format: date-time
+             */
+            fetched_at: string;
+            /** Attributes */
+            attributes: components["schemas"]["Attribute"][];
+            /** Powered By */
+            powered_by: string[];
+            /** Lines */
+            lines: string[];
+        };
         /** PersonObservation */
         PersonObservation: {
             /** Id */
@@ -1067,6 +1626,34 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+        };
+        /**
+         * Quote
+         * @description Exact words from a fetched page: location text means the readable page, html means the page's own code.
+         */
+        Quote: {
+            /** Text */
+            text: string;
+            /** Url */
+            url: string;
+            /**
+             * Source Type
+             * @enum {string}
+             */
+            source_type: "own_site" | "job_post" | "news" | "review" | "competitor_site" | "other";
+            /** Published Date */
+            published_date: string | null;
+            /**
+             * Fetched At
+             * Format: date-time
+             */
+            fetched_at: string;
+            /**
+             * Location
+             * @default text
+             * @enum {string}
+             */
+            location: "text" | "html";
         };
         /** Research */
         Research: {
@@ -1193,6 +1780,58 @@ export interface components {
             company_limit: number | null;
             /** Events */
             events: components["schemas"]["ProgressEvent"][];
+        };
+        /** RunResult */
+        RunResult: {
+            /** Id */
+            id: string;
+            /** Website */
+            website: string;
+            /**
+             * Status
+             * @default queued
+             * @enum {string}
+             */
+            status: "queued" | "running" | "needs_choice" | "complete" | "failed";
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Finished At */
+            finished_at: string | null;
+            /**
+             * Company Count
+             * @default 10
+             */
+            company_count: number;
+            /**
+             * Skeptic
+             * @default true
+             */
+            skeptic: boolean;
+            /**
+             * Synthetic
+             * @default false
+             */
+            synthetic: boolean;
+            profile: components["schemas"]["SellerProfile"] | null;
+            /** Competitors */
+            competitors: components["schemas"]["Competitor"][];
+            /** Disqualifiers */
+            disqualifiers: components["schemas"]["DisqualifierRule"][];
+            overrides: components["schemas"]["Overrides-Output"];
+            /** Companies */
+            companies: components["schemas"]["CompanyResult"][];
+            /** Candidate Pool */
+            candidate_pool: components["schemas"]["CandidateRef"][];
+            /** Set Aside */
+            set_aside: components["schemas"]["SetAside"][];
+            /** Dropped */
+            dropped: components["schemas"]["DroppedClaim"][];
+            telemetry: components["schemas"]["Telemetry"];
+            /** Error */
+            error: string | null;
         };
         /** RunView */
         RunView: {
@@ -1351,15 +1990,89 @@ export interface components {
              */
             experience_version: 1 | 2;
         };
+        /** SellerProfile */
+        SellerProfile: {
+            /** Website */
+            website: string;
+            /** Domain */
+            domain: string;
+            /**
+             * Name
+             * @default
+             */
+            name: string;
+            offer: components["schemas"]["Statement"] | null;
+            buyer: components["schemas"]["Statement"] | null;
+            /** Existing Customers */
+            existing_customers: components["schemas"]["ExistingCustomer"][];
+            /** Fit Criteria */
+            fit_criteria: components["schemas"]["FitCriterion"][];
+            /** Need Signals */
+            need_signals: components["schemas"]["Signal"][];
+            /** Timing Signals */
+            timing_signals: components["schemas"]["Signal"][];
+            /** Stated Limits */
+            stated_limits: components["schemas"]["StatedLimit"][];
+            /** Interpretations */
+            interpretations: components["schemas"]["Interpretation"][];
+            /** Pages */
+            pages: components["schemas"]["PageRef"][];
+        };
         /** ServiceView */
         ServiceView: {
             /** Booking Url */
             booking_url?: string | null;
         };
+        /** SetAside */
+        SetAside: {
+            /** Domain */
+            domain: string;
+            /**
+             * Url
+             * @default
+             */
+            url: string;
+            /** Reason */
+            reason: string;
+        };
+        /** Signal */
+        Signal: {
+            /** Id */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "need" | "timing";
+            /** Text */
+            text: string;
+            /** Quotes */
+            quotes: components["schemas"]["Quote"][];
+        };
         /** SiteIconInfo */
         SiteIconInfo: {
             /** Url */
             url?: string | null;
+        };
+        /** SkepticDecision */
+        SkepticDecision: {
+            /** Evidence Id */
+            evidence_id: string;
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "supports" | "contradicts" | "insufficient";
+            /**
+             * Reason
+             * @default
+             */
+            reason: string;
+            /**
+             * Decided By
+             * @enum {string}
+             */
+            decided_by: "skeptic" | "rule" | "no_skeptic" | "budget";
         };
         /** Source */
         Source: {
@@ -1402,6 +2115,34 @@ export interface components {
             /** Person Id */
             person_id?: string | null;
         };
+        /**
+         * StatedLimit
+         * @description Served size or region, only when the seller's own site states it.
+         */
+        StatedLimit: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "size" | "region";
+            /** Value */
+            value: string;
+            /** Quotes */
+            quotes: components["schemas"]["Quote"][];
+        };
+        /** Statement */
+        Statement: {
+            /** Value */
+            value: string;
+            /** Quotes */
+            quotes: components["schemas"]["Quote"][];
+            /**
+             * Origin
+             * @default agent
+             * @enum {string}
+             */
+            origin: "agent" | "interpretation" | "user";
+        };
         /** StopInput */
         StopInput: {
             /**
@@ -1419,6 +2160,53 @@ export interface components {
         TargetGuidanceInput: {
             /** Target */
             target: string;
+        };
+        /** Telemetry */
+        Telemetry: {
+            /** Budget Usd */
+            budget_usd: number;
+            /**
+             * Budget Reached
+             * @default false
+             */
+            budget_reached: boolean;
+            /**
+             * Cost Usd
+             * @default 0
+             */
+            cost_usd: number;
+            /**
+             * Input Tokens
+             * @default 0
+             */
+            input_tokens: number;
+            /**
+             * Output Tokens
+             * @default 0
+             */
+            output_tokens: number;
+            /**
+             * Searches
+             * @default 0
+             */
+            searches: number;
+            /**
+             * Model Calls
+             * @default 0
+             */
+            model_calls: number;
+            /**
+             * Pages Fetched
+             * @default 0
+             */
+            pages_fetched: number;
+            /**
+             * Elapsed Ms
+             * @default 0
+             */
+            elapsed_ms: number;
+            /** Calls */
+            calls: components["schemas"]["ModelCall"][];
         };
         /** Unknown */
         Unknown: {
@@ -1444,6 +2232,21 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** Verdict */
+        Verdict: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "shortlisted" | "needs_look" | "rejected";
+            /** Summary */
+            summary: string;
+            /** Missing */
+            missing: string[];
+            disqualifier: components["schemas"]["EvidenceItem"] | null;
+            /** Rule */
+            rule: ("uses_direct_competitor" | "is_competitor" | "is_existing_customer" | "outside_stated_size_or_region" | "inactive") | null;
         };
         /** WalletView */
         WalletView: {
@@ -2434,6 +3237,160 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_agent_runs_api_agent_runs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentRunSummary"][];
+                };
+            };
+        };
+    };
+    start_agent_run_api_agent_runs_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgentStartInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentStarted"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    read_agent_run_api_agent_runs__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentRunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    override_agent_run_api_agent_runs__run_id__overrides_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Overrides-Input"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentRunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    agent_run_events_api_agent_runs__run_id__events_get: {
+        parameters: {
+            query?: {
+                after?: number;
+            };
+            header?: {
+                "last-event-id"?: string | null;
+            };
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Server-Sent Events: progress events, then one end event */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/event-stream": unknown;
                 };
             };
             /** @description Validation Error */
