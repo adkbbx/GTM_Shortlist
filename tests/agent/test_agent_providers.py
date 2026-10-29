@@ -54,7 +54,8 @@ def test_responses_request_shape_and_parsing():
     assert seen["auth"] == f"Bearer {KEY}"
     body = seen["body"]
     assert body["model"] == "muse-spark-1.3"
-    assert body["tools"][0] == {"type": "web_search"}
+    # Search context defaults to low (META_SEARCH_CONTEXT); no stage limit was given, so no max_tool_calls.
+    assert body["tools"][0] == {"type": "web_search", "search_context_size": "low"} and "max_tool_calls" not in body
     assert body["tools"][1]["type"] == "function" and body["tools"][1]["name"] == "fetch_page"
     assert "function" not in body["tools"][1]  # Flat Responses format, not the Chat Completions nesting.
     assert body["include"] == ["web_search_call.results"] and body["parallel_tool_calls"] is True
@@ -70,6 +71,33 @@ def test_search_results_under_action_sources_are_read():
     body = {"output": [{"type": "web_search_call", "action": {"query": "q", "sources": [
         {"url": "https://a.example/", "title": "A", "content": "snippet"}]}}]}
     assert parse_response(body).searches[0].results[0].snippet == "snippet"
+
+
+def test_page_actions_are_not_searches_and_query_lists_are_read():
+    """The first live run had web_search_call items without a query, priced and logged as searches. SYNTHETIC body."""
+    body = {"output": [
+        {"type": "web_search_call", "action": {"type": "open_page", "url": "https://a.example/pricing"}},
+        {"type": "web_search_call", "action": {"type": "find", "pattern": "SOC 2", "url": "https://a.example/"}},
+        {"type": "web_search_call", "action": {"type": "search", "queries": ["acme pricing", "acme plans"]}},
+        {"type": "web_search_call", "action": {"type": "search"}}]}
+    turn = parse_response(body)
+    assert [search.query for search in turn.searches] == ["acme pricing", ""] and turn.search_count == 2
+    assert len(turn.output_items) == 4  # every item is still replayed to the model
+
+
+def test_stage_search_limit_and_context_reach_the_request():
+    seen = []
+
+    def handler(request):
+        seen.append(json.loads(request.content))
+        return httpx.Response(200, json={"output": [], "usage": {}})
+
+    MetaInvestigator(settings(), transport=httpx.MockTransport(handler)).respond(
+        instructions="x", input=[], tools=[WEB_SEARCH_TOOL, FETCH_TOOL], max_searches=2)
+    MetaInvestigator(settings(meta_search_context=None), transport=httpx.MockTransport(handler)).respond(
+        instructions="x", input=[], tools=[FETCH_TOOL], max_searches=2)
+    assert seen[0]["max_tool_calls"] == 2 and seen[0]["tools"][0]["search_context_size"] == "low"
+    assert "max_tool_calls" not in seen[1]  # without the search tool there is nothing for the cap to limit
 
 
 def test_no_include_without_web_search():

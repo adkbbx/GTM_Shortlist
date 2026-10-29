@@ -298,7 +298,8 @@ class SyntheticInvestigator:
         self.pace = pace
         self.requests: list[dict] = []
 
-    def respond(self, *, instructions, input, tools, previous_response_id=None, max_output_tokens=4000) -> ModelTurn:
+    def respond(self, *, instructions, input, tools, previous_response_id=None, max_output_tokens=4000,
+                max_searches=None) -> ModelTurn:
         if self.pace:
             time.sleep(self.pace)
         self.requests.append({"instructions": instructions[:60], "tools": [t.get("type") for t in tools]})

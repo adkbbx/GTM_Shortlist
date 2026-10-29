@@ -220,7 +220,8 @@ class Investigation:
                 history.append(note)
                 pending.append(note)
             turn = calls.respond("investigate", instructions=INSTRUCTIONS, input=pending if stateful and previous else history,
-                                 tools=tools, company=self.company.domain, previous_response_id=previous if stateful else None)
+                                 tools=tools, company=self.company.domain, previous_response_id=previous if stateful else None,
+                                 max_searches=MAX_SEARCHES - self.result.searches)
             self.result.turns += 1
             self.result.searches += turn.search_count
             for search in turn.searches:

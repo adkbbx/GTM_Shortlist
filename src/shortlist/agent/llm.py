@@ -80,23 +80,25 @@ class Calls:
 
     def respond(self, operation: str, *, instructions: str, input: list[dict], tools: list[dict] | None = None,
                 company: str | None = None, previous_response_id: str | None = None,
-                max_output_tokens: int = 4000) -> ModelTurn:
-        turn = self._respond(operation, instructions=instructions, input=input, tools=tools, company=company,
-                             previous_response_id=previous_response_id, max_output_tokens=max_output_tokens)
+                max_output_tokens: int = 4000, max_searches: int | None = None) -> ModelTurn:
+        """max_searches caps the provider's built-in web searches in this one response."""
+        ask = {"instructions": instructions, "input": input, "tools": tools, "company": company,
+               "previous_response_id": previous_response_id, "max_searches": max_searches}
+        turn = self._respond(operation, max_output_tokens=max_output_tokens, **ask)
         if truncated(turn, max_output_tokens) and max_output_tokens < MAX_OUTPUT_TOKENS:
             # Ask the same question once more with twice the room instead of "repairing" a cut-off answer.
-            turn = self._respond(operation + ":longer", instructions=instructions, input=input, tools=tools,
-                                 company=company, previous_response_id=previous_response_id,
-                                 max_output_tokens=min(max_output_tokens * 2, MAX_OUTPUT_TOKENS))
+            turn = self._respond(operation + ":longer", max_output_tokens=min(max_output_tokens * 2, MAX_OUTPUT_TOKENS), **ask)
         return turn
 
     def _respond(self, operation: str, *, instructions: str, input: list[dict], tools: list[dict] | None,
-                 company: str | None, previous_response_id: str | None, max_output_tokens: int) -> ModelTurn:
+                 company: str | None, previous_response_id: str | None, max_output_tokens: int,
+                 max_searches: int | None) -> ModelTurn:
         self.meter.check()
         model = self.investigator
+        limit = {} if max_searches is None else {"max_searches": max_searches}
         try:
             turn = model.respond(instructions=instructions, input=input, tools=tools or [],
-                                 previous_response_id=previous_response_id, max_output_tokens=max_output_tokens)
+                                 previous_response_id=previous_response_id, max_output_tokens=max_output_tokens, **limit)
         except AgentProviderError as exc:
             self.meter.record(ModelCall(provider=model.provider, model=model.model, operation=operation,
                                         company=company, ok=False, error=str(exc)[:300]))
@@ -110,9 +112,9 @@ class Calls:
 
     def investigator_json(self, operation: str, shape: type[T], *, instructions: str, input: list[dict],
                           tools: list[dict] | None = None, company: str | None = None,
-                          max_output_tokens: int = 4000) -> tuple[T, ModelTurn]:
+                          max_output_tokens: int = 4000, max_searches: int | None = None) -> tuple[T, ModelTurn]:
         turn = self.respond(operation, instructions=instructions, input=input, tools=tools, company=company,
-                            max_output_tokens=max_output_tokens)
+                            max_output_tokens=max_output_tokens, max_searches=max_searches)
         return self.repair_investigator(operation, shape, turn, instructions=instructions, company=company), turn
 
     def repair_investigator(self, operation: str, shape: type[T], turn: ModelTurn, *, instructions: str,

@@ -21,6 +21,13 @@ Approved by the owner: one company for https://eygentic.com, $0.25 cap. Total sp
   - **One investigation response ran 6 built-in searches** against a limit of 4, and carried 49,654 input tokens. Meta documents `max_tool_calls` for built-in tools and a `search_context_size` option.
   - **Three `web_search_call` items had no query.** They are probably page-open actions, but they are counted and priced as searches.
   - **Cost is higher than first estimated:** about $0.11 per run for seller, competitors and discovery, plus about $0.10 per company before these fixes.
+- **Fixed the same day.** Verified with synthetic providers only; not yet checked live.
+  - **Private signals.** The seller instructions now ask for need and timing signals a stranger can see on public pages, written as events. `seller.private_signal` drops internal-state signals and logs them in `dropped`. It still keeps "announced plans to ..." as a public event.
+  - **Discovery.** Raw search results become candidates only when the result is the company's own entry page (`company_page_issue(strict=True)`). Companies the model names are admitted as before.
+  - **Search limits.** Stages pass their search limit as `max_tool_calls`: competitors 3, discovery 4, and research whatever remains of 4 per company. `web_search` carries `search_context_size` from `META_SEARCH_CONTEXT` (default `low`).
+  - **Query-less search items.** `web_search_call` items with `open_page` or `find` actions are no longer counted or priced as searches. A query given only as `action.queries` is read.
+  - **Budget during discovery.** When the budget runs out on discovery's second pass, the companies already found are kept and shown as stopped by the budget. Before, they were lost.
+  - **Tests:** `tests/agent/test_agent_live_findings.py` and new cases in `test_agent_providers.py`. Backend: 920 passed, 48 skipped.
 
 ## 29 October, Meta hackathon: public agent demo for anyone with a website
 

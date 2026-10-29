@@ -13,7 +13,7 @@ from shortlist.agent.answers import (
 from shortlist.agent.llm import UNTRUSTED, Calls
 from shortlist.agent.models import Competitor, DisqualifierRule, DroppedClaim, SellerProfile
 from shortlist.agent.pages import JOB_HOSTS, NEWS_HOSTS, REVIEW_HOSTS, Fetcher, Page
-from shortlist.agent.providers import WEB_SEARCH_TOOL
+from shortlist.agent.providers import WEB_SEARCH_TOOL, search_label
 from shortlist.agent.scan import rule_id
 from shortlist.fetch import FetchError, canonical_url, domain_of
 from shortlist.relevance import DIRECTORIES, NON_COMPANY_SITES, listed_site
@@ -66,9 +66,10 @@ def find_competitors(profile: SellerProfile, seller_pages: list[str], calls: Cal
             "seller_comparison_pages": seller_pages}
     answer, turn = calls.investigator_json(
         "competitor_search", CandidatesAnswer, instructions=SEARCH_INSTRUCTIONS, tools=[WEB_SEARCH_TOOL],
-        input=[{"role": "user", "content": "<data>\n" + json.dumps(data) + "\n</data>"}], max_output_tokens=2000)
+        input=[{"role": "user", "content": "<data>\n" + json.dumps(data) + "\n</data>"}], max_output_tokens=2000,
+        max_searches=3)
     for search in turn.searches:
-        emit("competitors", f'Searched "{search.query}" ({len(search.results)} results)')
+        emit("competitors", f"Searched {search_label(search.query)} ({len(search.results)} results)")
     candidates: dict[str, tuple[str, str]] = {}
     for item in answer.candidates:
         domain = clean_domain(item.domain or item.url)

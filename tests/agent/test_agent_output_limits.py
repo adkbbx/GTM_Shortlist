@@ -27,7 +27,7 @@ class Scripted:
     def __init__(self, *turns: ModelTurn):
         self.turns, self.limits = list(turns), []
 
-    def respond(self, *, instructions, input, tools, previous_response_id=None, max_output_tokens=4000):
+    def respond(self, *, instructions, input, tools, previous_response_id=None, max_output_tokens=4000, max_searches=None):
         self.limits.append(max_output_tokens)
         return self.turns.pop(0)
 

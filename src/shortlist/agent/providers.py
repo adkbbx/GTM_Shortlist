@@ -87,7 +87,8 @@ class Investigator(Protocol):
     continuation: str
 
     def respond(self, *, instructions: str, input: list[dict], tools: list[dict],
-                previous_response_id: str | None = None, max_output_tokens: int = 4000) -> ModelTurn: ...
+                previous_response_id: str | None = None, max_output_tokens: int = 4000,
+                max_searches: int | None = None) -> ModelTurn: ...
 
 
 class SkepticModel(Protocol):
@@ -105,6 +106,15 @@ FETCH_TOOL = {
     "parameters": {"type": "object", "additionalProperties": False, "required": ["url"],
                    "properties": {"url": {"type": "string", "description": "Full https:// URL of the page"}}},
 }
+
+
+# web_search_call actions that read a page already found rather than run a new search query. In the first live run
+# three web_search_call items had no query; they were priced and logged as searches.
+PAGE_ACTIONS = frozenset({"open_page", "find", "find_in_page"})
+
+
+def search_label(query: str) -> str:
+    return f'"{query}"' if query else "(query not reported)"
 
 
 def _int(value) -> int:
@@ -136,7 +146,10 @@ def parse_response(data: dict) -> ModelTurn:
         kind = item.get("type")
         if kind == "web_search_call":
             action = item.get("action") if isinstance(item.get("action"), dict) else {}
-            query = action.get("query") or item.get("query") or ""
+            if action.get("type") in PAGE_ACTIONS:
+                continue
+            queries = action.get("queries") if isinstance(action.get("queries"), list) else []
+            query = action.get("query") or item.get("query") or next((q for q in queries if isinstance(q, str) and q), "")
             searches.append(SearchCall(query=str(query)[:500], results=_results(item)))
         elif kind == "function_call":
             arguments = item.get("arguments", "{}")
@@ -180,14 +193,21 @@ class MetaInvestigator:
         self.transport = transport
 
     def respond(self, *, instructions: str, input: list[dict], tools: list[dict],
-                previous_response_id: str | None = None, max_output_tokens: int = 4000) -> ModelTurn:
+                previous_response_id: str | None = None, max_output_tokens: int = 4000,
+                max_searches: int | None = None) -> ModelTurn:
         request: dict = {"model": self.model, "instructions": instructions, "input": input,
                          "max_output_tokens": max_output_tokens}
         if tools:
-            request["tools"] = tools
+            searching = any(tool.get("type") == "web_search" for tool in tools)
+            context = self.settings.meta_search_context
+            request["tools"] = [{**tool, "search_context_size": context} if tool.get("type") == "web_search" and context
+                                else tool for tool in tools]
             request["parallel_tool_calls"] = True
-            if any(tool.get("type") == "web_search" for tool in tools):
+            if searching:
                 request["include"] = ["web_search_call.results"]
+                if max_searches is not None:
+                    # max_tool_calls caps built-in tool calls only; our function tools are counted by the agent loop.
+                    request["max_tool_calls"] = max(1, max_searches)
         if self.settings.meta_reasoning_effort:
             request["reasoning"] = {"effort": self.settings.meta_reasoning_effort}
         if previous_response_id:

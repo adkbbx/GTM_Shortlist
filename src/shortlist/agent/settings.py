@@ -22,8 +22,14 @@ ReasoningEffort = Literal["minimal", "low", "medium", "high", "xhigh", "max"]
 META_REASONING_EFFORT = "low"
 
 
-def reasoning_effort(value: str | None) -> str | None:
-    """An empty value or "default" leaves the effort to the model."""
+# web_search `search_context_size`: how much of the found pages the model reads. In the first live run one research
+# step carried 49,654 input tokens, mostly search context; "low" keeps that down unless the operator chooses otherwise.
+SearchContext = Literal["low", "medium", "high"]
+META_SEARCH_CONTEXT = "low"
+
+
+def model_choice(value: str | None) -> str | None:
+    """An empty value or "default" leaves the choice to the model (used for reasoning effort and search context)."""
     value = (value or "").strip().lower()
     return None if value in ("", "default") else value
 
@@ -44,6 +50,7 @@ class AgentSettings(BaseModel):
     # previous: send only the tool results with previous_response_id.
     meta_continuation: Literal["replay", "previous"] = "replay"
     meta_reasoning_effort: ReasoningEffort | None = META_REASONING_EFFORT
+    meta_search_context: SearchContext | None = META_SEARCH_CONTEXT
     baseten_api_key: SecretStr = SecretStr("")
     baseten_base_url: str = BASETEN_BASE_URL
     baseten_model: str = Field(default=BASETEN_MODEL, min_length=1, max_length=200)
@@ -76,7 +83,8 @@ class AgentSettings(BaseModel):
             meta_base_url=env("META_MODEL_BASE_URL", META_BASE_URL) or META_BASE_URL,
             meta_model=env("META_MODEL", META_MODEL) or META_MODEL,
             meta_continuation=env("META_RESPONSES_CONTINUATION", "replay") or "replay",
-            meta_reasoning_effort=reasoning_effort(env("META_REASONING_EFFORT", META_REASONING_EFFORT)),
+            meta_reasoning_effort=model_choice(env("META_REASONING_EFFORT", META_REASONING_EFFORT)),
+            meta_search_context=model_choice(env("META_SEARCH_CONTEXT", META_SEARCH_CONTEXT)),
             baseten_api_key=env("BASETEN_API_KEY", ""),
             baseten_base_url=env("BASETEN_BASE_URL", BASETEN_BASE_URL) or BASETEN_BASE_URL,
             baseten_model=env("BASETEN_MODEL", BASETEN_MODEL) or BASETEN_MODEL,

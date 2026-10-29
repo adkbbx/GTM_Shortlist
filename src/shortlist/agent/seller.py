@@ -37,13 +37,36 @@ Rules:
 - Every quote is copied exactly, word for word, from one page's text, with that page's url. No paraphrase.
 - fit_criteria: 2 to 5 checks that can be observed on a target company's website (what it sells, how it sells,
   what it runs). Mark each required or not.
-- need_signals: 2 to 4, such as hiring a role the product replaces or using an older tool the product replaces.
-- timing_signals: up to 3, such as a launch, expansion or new funding.
+- need_signals: 2 to 4 things a stranger can see on a target company's public pages (its site, careers page, job
+  boards, press releases or news) that show it needs this, such as hiring a role the product helps or replaces,
+  using an older tool the product replaces, or selling in a way the product supports. Write each as an observable
+  fact, for example "Hiring SDRs or outbound sales reps". Never an internal state, belief, plan or performance
+  (not "does not know what works", "is not confident", "struggles with", "wants to", "before X is proven"): no
+  public quote can show those.
+- timing_signals: up to 3 dated public events that make now a good time, such as a launch, expansion into a new
+  market, new funding or hiring for a new team. The same rule applies: events, not states of mind.
 - existing_customers: only companies the site names as customers (logos, case studies, testimonials).
 - stated_limits: only a company size or region the site explicitly says it serves. Otherwise an empty list.
 - Describe companies only. Never name, describe or judge individual people.
 - If the site is too vague to tell the offer or the buyer, leave that field null and give up to 3 different
   interpretations, each with a quote it rests on."""
+
+
+# A need or timing signal must be something a public page can show. These describe a company's internal state
+# (knowledge, confidence, intent, performance), which no quote from a target's site can support, so nothing could
+# ever be Shortlisted on them. Found in the first live run ("does not know what is actually working").
+PRIVATE_SIGNAL = re.compile(
+    r"\b(?:does not|doesn't|do not|don't|is not|isn't|are not|aren't|not)\s+(?:yet\s+)?(?:know|sure|certain|confident|"
+    r"ready|proven|clear|aware|isolat\w*)|\bunsure\b|\bunclear\b|\bwithout knowing\b|\bstruggl\w*|"
+    # "Announced plans to expand" is a public event; "plans to expand" alone is an intention.
+    r"(?<!announced )(?<!announces )(?<!announcing )(?<!published )\b(?:wants?|hopes?|plans?|intends?) to\b|"
+    r"\black(?:s|ing)?\s+(?:a|an|the|any|clear|repeatable)\b|\bfrustrat\w*|\bworr\w*|"
+    r"\bunproven\b|\bbefore\b.{0,60}\b(?:is|are|has been|have been)\s+(?:proven|validated|clear)|\bwithout isolating\b",
+    re.IGNORECASE)
+
+
+def private_signal(text: str) -> bool:
+    return bool(PRIVATE_SIGNAL.search(text))
 
 
 def choose_pages(home: Page, extra: int = 5) -> list[str]:
@@ -102,6 +125,11 @@ def build_profile(website: str, answer: SellerAnswer, pages: dict[str, Page], dr
     for kind, items, cap in (("need", answer.need_signals, 4), ("timing", answer.timing_signals, 3)):
         kept = []
         for index, item in enumerate(items[:6]):
+            if private_signal(item.text):
+                dropped.append(DroppedClaim(stage="seller", claim_type=f"{kind} signal", quote=item.text.strip()[:1500],
+                                            reason="Not observable on public pages: it describes a company's internal "
+                                                   "state, so no quote could support it"))
+                continue
             found = quotes(item.quotes, f"{kind} signal")
             if len(item.text.strip()) >= 3 and found:
                 kept.append(Signal(id=_criterion_id(kind, item.id, index, used), kind=kind,
