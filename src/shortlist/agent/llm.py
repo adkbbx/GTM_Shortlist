@@ -9,7 +9,7 @@ from typing import TypeVar
 from pydantic import BaseModel, ValidationError
 
 from shortlist.agent.models import ModelCall
-from shortlist.agent.providers import AgentProviderError, Investigator, ModelTurn, SkepticModel
+from shortlist.agent.providers import AgentProviderError, ChatTurn, Investigator, ModelTurn, SkepticModel
 from shortlist.agent.telemetry import Meter
 
 T = TypeVar("T", bound=BaseModel)
@@ -136,7 +136,11 @@ class Calls:
                      max_tokens: int = 2000) -> T:
         if self.skeptic is None:
             raise AgentProviderError("No skeptic is configured")
-        answer = self._chat(operation, messages, company, max_tokens)
+        turn = self._chat(operation, messages, company, max_tokens)
+        if turn.truncated and max_tokens < MAX_OUTPUT_TOKENS:
+            # Same as the investigator: a cut-off answer is asked again with twice the room, not repaired.
+            turn = self._chat(operation + ":longer", messages, company, min(max_tokens * 2, MAX_OUTPUT_TOKENS))
+        answer = turn.text
         try:
             return parse_into(shape, answer)
         except (ValueError, ValidationError) as exc:
@@ -144,13 +148,13 @@ class Calls:
         repair = [*messages, {"role": "assistant", "content": answer[:12000]},
                   {"role": "user", "content": "That answer was not valid for the required JSON shape. Problem: "
                    + issue + "\nReturn only the corrected JSON object."}]
-        answer = self._chat(operation + ":repair", repair, company, max_tokens)
+        answer = self._chat(operation + ":repair", repair, company, max_tokens).text
         try:
             return parse_into(shape, answer)
         except (ValueError, ValidationError) as exc:
             raise AgentOutputError(f"{operation}: skeptic answer stayed invalid after one repair ({problem(exc)})") from exc
 
-    def _chat(self, operation: str, messages: list[dict], company: str | None, max_tokens: int) -> str:
+    def _chat(self, operation: str, messages: list[dict], company: str | None, max_tokens: int) -> ChatTurn:
         self.meter.check()
         model = self.skeptic
         try:
@@ -163,4 +167,4 @@ class Calls:
                                     input_tokens=turn.input_tokens, output_tokens=turn.output_tokens,
                                     latency_ms=turn.latency_ms,
                                     usd=round(model.pricing.cost(turn.input_tokens, turn.output_tokens), 6)))
-        return turn.text
+        return turn

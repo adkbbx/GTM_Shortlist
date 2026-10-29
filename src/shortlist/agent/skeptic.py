@@ -87,7 +87,9 @@ def judge(company: CompanyResult, profile: SellerProfile, rules: list[Disqualifi
         messages = [{"role": "system", "content": SYSTEM},
                     {"role": "user", "content": "<data>\n" + json.dumps({"items": payload}) + "\n</data>"}]
         try:
-            answer = calls.skeptic_json("skeptic", SkepticAnswer, messages, company=company.domain)
+            # The skeptic reasons before answering; give it room per quote (six quotes ran out of 2000 tokens live).
+            answer = calls.skeptic_json("skeptic", SkepticAnswer, messages, company=company.domain,
+                                        max_tokens=min(8000, 1500 + 500 * len(items)))
             known = {item.id for item in items}
             for row in answer.decisions:
                 if row.id in known and row.id not in decided:

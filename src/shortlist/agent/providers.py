@@ -78,6 +78,9 @@ class ChatTurn:
     input_tokens: int = 0
     output_tokens: int = 0
     latency_ms: int = 0
+    # Stopped at max_tokens (finish_reason "length"). Muse Spark Open's reasoning counts toward it, so a long answer
+    # can arrive with no text at all; in the second live run that silently turned six quotes into "insufficient".
+    truncated: bool = False
 
 
 class Investigator(Protocol):
@@ -253,16 +256,20 @@ class BasetenSkeptic:
                     "Authorization": "Bearer " + self.settings.baseten_api_key.get_secret_value()})
                 response.raise_for_status()
                 data = response.json()
-            content = data["choices"][0]["message"]["content"]
-            if not isinstance(content, str):
-                raise TypeError("Text required")
+            choice = data["choices"][0]
+            content, finish = choice["message"].get("content"), choice.get("finish_reason")
         except httpx.TimeoutException as exc:
             raise AgentProviderError("Skeptic request timed out; it may still be billed") from exc
         except httpx.HTTPStatusError as exc:
             raise AgentProviderError(f"Skeptic returned HTTP {exc.response.status_code}") from exc
-        except (httpx.HTTPError, ValueError, KeyError, IndexError, TypeError) as exc:
-            raise AgentProviderError("Skeptic request failed or returned no text") from exc
+        except (httpx.HTTPError, ValueError, KeyError, IndexError, TypeError, AttributeError) as exc:
+            raise AgentProviderError("Skeptic request failed or returned an unexpected response shape") from exc
+        truncated = finish == "length"
+        text = content if isinstance(content, str) else ""
+        if not text.strip() and not truncated:
+            raise AgentProviderError(f"Skeptic returned no text (finish reason: {str(finish)[:40]})")
         usage = data.get("usage") if isinstance(data.get("usage"), dict) else {}
-        return ChatTurn(text=content, input_tokens=_int(usage.get("prompt_tokens", usage.get("input_tokens"))),
+        return ChatTurn(text=text,
+                        input_tokens=_int(usage.get("prompt_tokens", usage.get("input_tokens"))),
                         output_tokens=_int(usage.get("completion_tokens", usage.get("output_tokens"))),
-                        latency_ms=int((time.monotonic() - started) * 1000))
+                        latency_ms=int((time.monotonic() - started) * 1000), truncated=truncated)

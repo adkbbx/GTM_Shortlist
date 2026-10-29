@@ -28,6 +28,13 @@ Approved by the owner: one company for https://eygentic.com, $0.25 cap. Total sp
   - **Query-less search items.** `web_search_call` items with `open_page` or `find` actions are no longer counted or priced as searches. A query given only as `action.queries` is read.
   - **Budget during discovery.** When the budget runs out on discovery's second pass, the companies already found are kept and shown as stopped by the budget. Before, they were lost.
   - **Tests:** `tests/agent/test_agent_live_findings.py` and new cases in `test_agent_providers.py`. Backend: 920 passed, 48 skipped.
+- **Second live run** (approved: eygentic.com, 3 companies, $0.60 cap). 15 calls, 18 searches, 22 pages, 88 s, $0.272. That is about $0.09 per run for seller, competitors and discovery, plus about $0.06 per company.
+  - **The earlier fixes held.** The need signals are observable ("Hiring SDRs or outbound sales reps"). All 6 candidates were software companies. Each company used at most 4 searches, and the largest input dropped from 49,654 to 30,872 tokens. The competitor-classification answer was cut off at 3000 tokens and the longer retry recovered it.
+  - **All three companies came out Needs a look.** None had dated need or timing evidence.
+  - **New problem: competitor searches crowded out need searches.** Three of each company's four searches were "<company> <competitor>", one per direct competitor. The instructions now ask for one combined competitor search, since the page-code scan already checks for competitors, and spend the rest on job posts and recent news.
+  - **New problem: the skeptic failed for one company.** Six quotes and `max_tokens=2000`: Muse Spark Open's reasoning used the allowance, so the answer arrived with no text, and all six quotes became "insufficient". `BasetenSkeptic` now marks `finish_reason: "length"` as cut off instead of failing. `skeptic_json` asks again with twice the room. The skeptic's allowance is `1500 + 500` per quote, up to 8000.
+  - **Fix verified live** on that company's saved quotes: 1 call, 2154 output tokens, $0.011. The decisions were precise: B2B fit supported, a bare "Affiliate Program" label and product features refused. Backend: 922 passed, 48 skipped.
+- **Live spend so far:** about $0.53.
 
 ## 29 October, Meta hackathon: public agent demo for anyone with a website
 

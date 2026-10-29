@@ -45,11 +45,15 @@ INSTRUCTIONS = f"""You investigate ONE company for a B2B seller and collect quot
 Work in this order:
 1. Fit: check each fit check against the company's own pages. The homepage text is supplied; call fetch_page for
    other pages on its site (product, pricing, about, careers).
-2. Need and timing: look for job posts, announcements and news about the company. Note a page's publication date
-   only when the page states it.
-3. Competitor use: for each listed competitor, search "<company> <competitor>" and look for the competitor's customer
-   or case-study pages that name the company. Evidence must show CURRENT use, not an integration, a comparison
-   article or past use.
+2. Need and timing (spend most of your searches here): the company's own marketing cannot show need, so look
+   beyond it. Search for its job posts (its careers page, or job boards such as Greenhouse, Lever, Workable or
+   LinkedIn) for roles named in the need signals, and for news or press releases from the last six months for the
+   timing signals. Fetch the job post or article itself and quote it. Note a page's publication date only when the
+   page states it.
+3. Competitor use: ONE search that names all listed competitors together, for example
+   "<company> <competitor 1> <competitor 2>"; the company's own page code is already scanned for them. Fetch a
+   competitor's customer or case-study page only if a result names the company. Evidence must show CURRENT use, not
+   an integration, a comparison article or past use.
 Limits: at most {MAX_SEARCHES} web searches and {MAX_FETCHES} fetch_page calls in total.
 
 Evidence rules:

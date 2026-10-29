@@ -5,11 +5,18 @@ import json
 
 import httpx
 import pytest
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from shortlist.agent.llm import MAX_OUTPUT_TOKENS, Calls
 from shortlist.agent.models import Telemetry
-from shortlist.agent.providers import FunctionCall, MetaInvestigator, ModelTurn
+from shortlist.agent.providers import (
+    AgentProviderError,
+    BasetenSkeptic,
+    ChatTurn,
+    FunctionCall,
+    MetaInvestigator,
+    ModelTurn,
+)
 from shortlist.agent.settings import AgentSettings
 from shortlist.agent.telemetry import Meter, Pricing
 
@@ -75,6 +82,52 @@ def test_a_cut_off_answer_is_asked_again_with_twice_the_room():
     incomplete = Scripted(ModelTurn(text="{", output_tokens=900, incomplete=True), ModelTurn(text="{}", output_tokens=20))
     calls(incomplete)[0].respond("discovery", instructions="x", input=[], max_output_tokens=3000)
     assert incomplete.limits == [3000, 6000]
+
+
+class Decision(BaseModel):
+    id: str
+    decision: str
+
+
+class Decisions(BaseModel):
+    decisions: list[Decision]
+
+
+class ScriptedSkeptic:
+    """A LABELLED SYNTHETIC skeptic returning fixed chat turns."""
+    provider, model = "baseten", "meta-models/muse-spark-open-1026"
+    pricing = Pricing(1.25, 4.25)
+
+    def __init__(self, *turns: ChatTurn):
+        self.turns, self.limits = list(turns), []
+
+    def chat(self, messages, *, max_tokens=2000):
+        self.limits.append(max_tokens)
+        return self.turns.pop(0)
+
+
+def test_a_cut_off_skeptic_answer_is_asked_again_with_twice_the_room():
+    """Second live run: six quotes, 2000 tokens, reasoning first, and the answer arrived with no text."""
+    skeptic = ScriptedSkeptic(ChatTurn(text="", output_tokens=2000, truncated=True),
+                              ChatTurn(text='{"decisions": [{"id": "e1", "decision": "supports"}]}', output_tokens=2600))
+    meter = Meter(Telemetry(budget_usd=1.0))
+    answer = Calls(meter, Scripted(), skeptic).skeptic_json("skeptic", Decisions, [], max_tokens=2000)
+    assert answer.decisions[0].decision == "supports" and skeptic.limits == [2000, 4000]
+    assert [call.operation for call in meter.telemetry.calls] == ["skeptic", "skeptic:longer"]
+
+
+def test_baseten_marks_length_stops_and_refuses_empty_answers():
+    def reply(content, finish):
+        body = {"choices": [{"message": {"content": content}, "finish_reason": finish}],
+                "usage": {"prompt_tokens": 900, "completion_tokens": 2000}}
+        return httpx.MockTransport(lambda request: httpx.Response(200, json=body))
+
+    settings = AgentSettings(baseten_api_key=KEY)
+    cut = BasetenSkeptic(settings, transport=reply(None, "length")).chat([])
+    assert cut.truncated and cut.text == "" and cut.output_tokens == 2000
+    assert BasetenSkeptic(settings, transport=reply('{"decisions": []}', "stop")).chat([]).truncated is False
+    with pytest.raises(AgentProviderError, match="no text"):
+        BasetenSkeptic(settings, transport=reply("", "stop")).chat([])
 
 
 def test_tool_calls_complete_answers_and_the_ceiling_are_not_retried():
