@@ -64,6 +64,14 @@ def problem(exc: Exception) -> str:
     return str(exc)[:300]
 
 
+MAX_OUTPUT_TOKENS = 16000
+
+
+def truncated(turn: ModelTurn, limit: int) -> bool:
+    """An answer cut off at the output limit (reasoning tokens count toward it). Its text cannot be repaired."""
+    return not turn.function_calls and (turn.incomplete or turn.output_tokens >= limit)
+
+
 class Calls:
     def __init__(self, meter: Meter, investigator: Investigator, skeptic: SkepticModel | None = None):
         self.meter = meter
@@ -73,6 +81,17 @@ class Calls:
     def respond(self, operation: str, *, instructions: str, input: list[dict], tools: list[dict] | None = None,
                 company: str | None = None, previous_response_id: str | None = None,
                 max_output_tokens: int = 4000) -> ModelTurn:
+        turn = self._respond(operation, instructions=instructions, input=input, tools=tools, company=company,
+                             previous_response_id=previous_response_id, max_output_tokens=max_output_tokens)
+        if truncated(turn, max_output_tokens) and max_output_tokens < MAX_OUTPUT_TOKENS:
+            # Ask the same question once more with twice the room instead of "repairing" a cut-off answer.
+            turn = self._respond(operation + ":longer", instructions=instructions, input=input, tools=tools,
+                                 company=company, previous_response_id=previous_response_id,
+                                 max_output_tokens=min(max_output_tokens * 2, MAX_OUTPUT_TOKENS))
+        return turn
+
+    def _respond(self, operation: str, *, instructions: str, input: list[dict], tools: list[dict] | None,
+                 company: str | None, previous_response_id: str | None, max_output_tokens: int) -> ModelTurn:
         self.meter.check()
         model = self.investigator
         try:

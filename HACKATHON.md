@@ -82,7 +82,7 @@ One deliberate design departure: DESIGN.md asks not to compress research sheets 
 
 ## Limits
 
-- **The live provider smoke test has not been run yet.** No API keys were available while building, and the rules forbid live calls in tests. Everything was verified against synthetic providers and recorded-shape HTTP fakes. Field names that need a live check are listed in `docs/PROGRESS.md`.
+- **Live runs so far are a smoke test, not an evaluation.** On 30 October one company was researched live for one seller, with both Meta models answering. The request and response shapes for both providers are now confirmed, and the problems that run exposed are listed in `docs/PROGRESS.md`. Tests still use synthetic providers and recorded-shape HTTP fakes only.
 - Built-in web search runs on the provider's side, so the agent cannot stop a single response from making more searches than asked. It removes the search tool once a company has used four.
 - Agent runs are stored in local SQLite, or as JSON files in the public demo. The classic hosted app (accounts and Postgres) does not register the agent routes; the public demo is the hosted way to use the agent.
 - `deploy/modal_agent.py` has not been deployed yet; its first deploy is its check. The public demo's dollar limits use the agent's own estimates, so provider-side spend limits are still needed.

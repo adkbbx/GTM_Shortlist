@@ -16,6 +16,16 @@ UNVERSIONED_BASETEN_MODEL = "meta-models/muse-spark-open"
 META_INPUT_USD_PER_M = 1.25
 META_OUTPUT_USD_PER_M = 4.25
 META_USD_PER_SEARCH = 2.50 / 1000
+# Responses `reasoning.effort` values Muse Spark accepts ("none" returns HTTP 400). Reasoning tokens count toward
+# max_output_tokens and are billed as output, so extraction steps use "low" unless the operator chooses otherwise.
+ReasoningEffort = Literal["minimal", "low", "medium", "high", "xhigh", "max"]
+META_REASONING_EFFORT = "low"
+
+
+def reasoning_effort(value: str | None) -> str | None:
+    """An empty value or "default" leaves the effort to the model."""
+    value = (value or "").strip().lower()
+    return None if value in ("", "default") else value
 
 
 def https_base(value: str) -> str:
@@ -33,6 +43,7 @@ class AgentSettings(BaseModel):
     # replay: resend the returned output items with each tool result (stateless).
     # previous: send only the tool results with previous_response_id.
     meta_continuation: Literal["replay", "previous"] = "replay"
+    meta_reasoning_effort: ReasoningEffort | None = META_REASONING_EFFORT
     baseten_api_key: SecretStr = SecretStr("")
     baseten_base_url: str = BASETEN_BASE_URL
     baseten_model: str = Field(default=BASETEN_MODEL, min_length=1, max_length=200)
@@ -65,6 +76,7 @@ class AgentSettings(BaseModel):
             meta_base_url=env("META_MODEL_BASE_URL", META_BASE_URL) or META_BASE_URL,
             meta_model=env("META_MODEL", META_MODEL) or META_MODEL,
             meta_continuation=env("META_RESPONSES_CONTINUATION", "replay") or "replay",
+            meta_reasoning_effort=reasoning_effort(env("META_REASONING_EFFORT", META_REASONING_EFFORT)),
             baseten_api_key=env("BASETEN_API_KEY", ""),
             baseten_base_url=env("BASETEN_BASE_URL", BASETEN_BASE_URL) or BASETEN_BASE_URL,
             baseten_model=env("BASETEN_MODEL", BASETEN_MODEL) or BASETEN_MODEL,

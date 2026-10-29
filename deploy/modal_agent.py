@@ -43,7 +43,7 @@ class VolumeCommits:
             self.pending.clear()
             try:
                 volume.commit()
-            except Exception as exc:  # a failed commit is retried with the next change; the run itself continues
+            except Exception as exc:  # noqa: BLE001 - thread boundary: retry with the next change, keep serving
                 print(f"Volume commit failed: {exc}")
                 self.pending.set()
             threading.Event().wait(every)

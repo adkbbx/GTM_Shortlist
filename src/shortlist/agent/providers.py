@@ -62,6 +62,8 @@ class ModelTurn:
     response_id: str | None = None
     input_tokens: int = 0
     output_tokens: int = 0
+    # Part of output_tokens: hidden reasoning, which also counts toward max_output_tokens.
+    reasoning_tokens: int = 0
     latency_ms: int = 0
     incomplete: bool = False
 
@@ -152,12 +154,15 @@ def parse_response(data: dict) -> ModelTurn:
                         citations.append(Citation(url=note["url"], title=str(note.get("title") or ""),
                                                   start=note.get("start_index"), end=note.get("end_index")))
     usage = data.get("usage") if isinstance(data.get("usage"), dict) else {}
+    details = usage.get("output_tokens_details") or usage.get("completion_tokens_details")
+    details = details if isinstance(details, dict) else {}
     return ModelTurn(
         text="\n".join(texts) if texts else str(data.get("output_text") or ""),
         function_calls=tuple(calls), searches=tuple(searches), citations=tuple(citations), output_items=items,
         response_id=data.get("id") if isinstance(data.get("id"), str) else None,
         input_tokens=_int(usage.get("input_tokens", usage.get("prompt_tokens"))),
         output_tokens=_int(usage.get("output_tokens", usage.get("completion_tokens"))),
+        reasoning_tokens=_int(details.get("reasoning_tokens")),
         incomplete=data.get("status") == "incomplete")
 
 
@@ -183,6 +188,8 @@ class MetaInvestigator:
             request["parallel_tool_calls"] = True
             if any(tool.get("type") == "web_search" for tool in tools):
                 request["include"] = ["web_search_call.results"]
+        if self.settings.meta_reasoning_effort:
+            request["reasoning"] = {"effort": self.settings.meta_reasoning_effort}
         if previous_response_id:
             request["previous_response_id"] = previous_response_id
         started = time.monotonic()

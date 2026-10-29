@@ -1,5 +1,27 @@
 # Progress and handoff
 
+## 30 October, Meta hackathon: first live runs with real Meta and Baseten models
+
+Approved by the owner: one company for https://eygentic.com, $0.25 cap. Total spent across the three calls below was about $0.251 estimated. The budget is checked before each call, so the last call ran about 0.1 cent past the cap.
+
+- **First attempt failed at the seller profile.** 2 calls, $0.032. The answer used exactly the 4000-token output limit: Muse Spark's reasoning tokens count toward `max_output_tokens`, according to Meta's reasoning docs. The repair then asked the model to return the same cut-off text as JSON, which cannot work.
+  - **Fix 1:** `Calls.respond` asks the same question once more with twice the room (up to 16,000 tokens) when an answer stops at its limit without calling a tool.
+  - **Fix 2:** Responses requests send `reasoning.effort` from `META_REASONING_EFFORT` (default `low`; `default` leaves it to the model). Reasoning tokens are read from `output_tokens_details`.
+  - **Tests:** `tests/agent/test_agent_output_limits.py`.
+- **Second attempt completed end to end.** 7 Meta calls, 15 searches, 16 pages, 70 s, $0.211.
+  - **Confirmed live:** Responses `POST /responses` with `instructions`, `input`, flat function tools, `{"type": "web_search"}`, `include: ["web_search_call.results"]` and `reasoning.effort`. Also confirmed: replaying output items with `function_call_output` (the default continuation), and the `input_tokens`/`output_tokens` usage fields.
+  - **Seller understanding was accurate** for Eygentic: offer, buyer, 3 fit checks, and 8 competitors with 2 direct.
+  - **The run's budget ran out** before the skeptic.
+- **Skeptic check on the saved evidence.** 1 Baseten call, 871 input and 1599 output tokens, 5.7 s, $0.008.
+  - **Confirmed live:** `https://inference.baseten.co/v1/chat/completions` with `meta-models/muse-spark-open-1026`, `response_format: {"type": "json_object"}`, and the `prompt_tokens`/`completion_tokens` usage fields.
+  - **The skeptic's decisions were sensible:** B2B fit supported by "Fueling 2500+ global businesses", and an SDR job post rejected for the need "hiring SDRs before its outbound motion is proven".
+- **Problems found, next to fix:**
+  - **Need and timing signals were private states** (for example "does not know what is actually working"). No public quote can support them, so no company can be Shortlisted. The pre-event `market.PRIVATE_CONDITION` rule covered this for the classic campaigns.
+  - **Discovery passed 6 media sites** (business news and an industry body) into the candidate pool as companies, because raw search-result URLs were added as candidates.
+  - **One investigation response ran 6 built-in searches** against a limit of 4, and carried 49,654 input tokens. Meta documents `max_tool_calls` for built-in tools and a `search_context_size` option.
+  - **Three `web_search_call` items had no query.** They are probably page-open actions, but they are counted and priced as searches.
+  - **Cost is higher than first estimated:** about $0.11 per run for seller, competitors and discovery, plus about $0.10 per company before these fixes.
+
 ## 29 October, Meta hackathon: public agent demo for anyone with a website
 
 A separate app, `src/shortlist/agent/public.py`, lets visitors try the agent from a public link with no account. It serves only the agent and never the classic workspace. Limits:
