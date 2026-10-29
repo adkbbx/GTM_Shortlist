@@ -103,6 +103,19 @@ def test_an_open_ats_job_post_counts_as_current_without_a_stated_date():
     assert not fresh(stale_read, today)  # open when read 10 days ago says nothing about today
     _, dated = posting("https://acme.example/careers/sdr", "SDR at Acme", published=date(2026, 9, 1))
     assert not dated.quote.open_posting and fresh(dated, today)
+    # Fifth live run: Greenhouse sends a closed posting's link to the company board with ?error=true.
+    _, board = posting("https://job-boards.greenhouse.io/acme?error=true", "Sales Development Representative")
+    _, root = posting("https://job-boards.greenhouse.io/acme", "Sales Development Representative")
+    assert not board.quote.open_posting and not root.quote.open_posting
+
+
+def test_at_most_two_fit_checks_are_required(providers, monkeypatch):
+    """Fifth live run: "sells via meetings, demos or sales conversations" was required and held back a company with
+    a dated SDR job post. Only the first two required checks stay required; the rest become nice to have."""
+    fits = [dict(item, required=True) for item in synthetic.SELLER_ANSWER["fit_criteria"]]
+    monkeypatch.setitem(synthetic.SELLER_ANSWER, "fit_criteria", fits)
+    profile = AgentRunner(providers).run(SELLER).profile
+    assert [c.required for c in profile.fit_criteria] == [True, True, False]
 
 
 def test_budget_reached_during_discovery_keeps_the_companies_already_found(providers):

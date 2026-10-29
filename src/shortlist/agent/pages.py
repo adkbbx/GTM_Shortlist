@@ -241,12 +241,15 @@ CLOSED_POSTING = re.compile(
 
 
 def open_posting(page: Page) -> bool:
-    """A job posting on an applicant-tracking system that does not say it is closed."""
+    """A specific job posting on an applicant-tracking system that does not say it is closed. A board page is not a
+    posting: Greenhouse sends a closed posting's link to its board with ?error=true (fifth live run)."""
     try:
         host = domain_of(page.url)
     except FetchError:
         return False
-    return listed_site(host, ATS_HOSTS) and not CLOSED_POSTING.search(page.full_text)
+    parts = urlsplit(page.url)
+    posting = len([part for part in parts.path.split("/") if part]) >= 2 and "error" not in parts.query.casefold()
+    return listed_site(host, ATS_HOSTS) and posting and not CLOSED_POSTING.search(page.full_text)
 
 
 REVIEW_HOSTS = frozenset({"g2.com", "capterra.com", "trustradius.com", "getapp.com", "softwareadvice.com",

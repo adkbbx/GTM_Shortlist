@@ -36,7 +36,8 @@ Return only one JSON object with this shape:
 Rules:
 - Every quote is copied exactly, word for word, from one page's text, with that page's url. No paraphrase.
 - fit_criteria: 2 to 5 checks that can be observed on a target company's website (what it sells, how it sells,
-  what it runs). Mark each required or not.
+  what it runs). Mark at most 2 as required, and only checks a company's own homepage normally states: what it sells
+  and who it sells to. Checks about how it sells or which tools it runs are nice to have (required: false).
 - need_signals: 2 to 4 things a stranger can see on a target company's public pages (its site, careers page, job
   boards, press releases or news) that show it needs this, such as hiring a role the product helps or replaces,
   using an older tool the product replaces, or selling in a way the product supports. Write each as an observable
@@ -51,6 +52,8 @@ Rules:
 - If the site is too vague to tell the offer or the buyer, leave that field null and give up to 3 different
   interpretations, each with a quote it rests on."""
 
+
+MAX_REQUIRED_FIT = 2
 
 # A need or timing signal must be something a public page can show. These describe a company's internal state
 # (knowledge, confidence, intent, performance), which no quote from a target's site can support, so nothing could
@@ -119,8 +122,12 @@ def build_profile(website: str, answer: SellerAnswer, pages: dict[str, Page], dr
     for index, item in enumerate(answer.fit_criteria[:8]):
         found = quotes(item.quotes, "fit criterion")
         if len(item.text.strip()) >= 3 and found:
+            # Every required check must be proven before Shortlisted; live runs marked hard-to-prove checks ("sells
+            # via meetings and demos") required, which held back companies with strong need evidence. You can still
+            # make any check required yourself.
+            required = item.required and sum(c.required for c in criteria) < MAX_REQUIRED_FIT
             criteria.append(FitCriterion(id=_criterion_id("fit", item.id, index, used), text=item.text.strip()[:500],
-                                         required=item.required, quotes=found))
+                                         required=required, quotes=found))
     signals = {}
     for kind, items, cap in (("need", answer.need_signals, 4), ("timing", answer.timing_signals, 3)):
         kept = []
