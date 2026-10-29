@@ -1,17 +1,19 @@
 """Fixes for problems the first live run exposed (docs/PROGRESS.md, 30 October), over the SYNTHETIC providers."""
 import json
 from datetime import UTC, date, datetime
+from urllib.parse import urlsplit
 
 from shortlist.agent import synthetic
 from shortlist.agent.discovery import DISCOVERY_INSTRUCTIONS, SEARCH_RESULT_PAGE, admit
 from shortlist.agent.investigation import INSTRUCTIONS as INVESTIGATE_INSTRUCTIONS
-from shortlist.agent.models import EvidenceItem, Quote
+from shortlist.agent.models import EvidenceItem, Overrides, Quote
 from shortlist.agent.pages import Page, open_posting
 from shortlist.agent.pipeline import AgentRunner
 from shortlist.agent.seller import private_signal
 from shortlist.agent.synthetic import SELLER
 from shortlist.agent.verdict import fresh
 from shortlist.domain import Source
+from shortlist.fetch import FetchError
 
 # Need and timing signals the live seller profile produced: internal states no public quote can show.
 LIVE_PRIVATE = [
@@ -116,6 +118,23 @@ def test_at_most_two_fit_checks_are_required(providers, monkeypatch):
     monkeypatch.setitem(synthetic.SELLER_ANSWER, "fit_criteria", fits)
     profile = AgentRunner(providers).run(SELLER).profile
     assert [c.required for c in profile.fit_criteria] == [True, True, False]
+
+
+def test_an_unreadable_homepage_is_set_aside_and_the_next_candidate_researched(providers):
+    """Sixth live run: two of three homepages redirected to another domain, so two slots held nothing."""
+    fetch = providers.fetcher
+
+    def fetcher(url, expected_domain=None):
+        if url.startswith("https://trailgear.example/") and urlsplit(url).path in ("", "/"):
+            raise FetchError("Redirect changed company identity; manual verification required")
+        return fetch(url, expected_domain)
+
+    providers.fetcher = fetcher
+    result = AgentRunner(providers).run(SELLER, Overrides(company_count=2))
+    assert [c.domain for c in result.companies] == ["oakandpine.example", "brightkettle.example"]
+    aside = next(a for a in result.set_aside if a.domain == "trailgear.example")
+    assert aside.reason == "Website could not be read: Redirect changed company identity; manual verification required"
+    assert all(c.error is None for c in result.companies)
 
 
 def test_budget_reached_during_discovery_keeps_the_companies_already_found(providers):

@@ -11,7 +11,7 @@ from urllib.parse import urlsplit
 from shortlist.agent import assumptions
 from shortlist.agent.competitors import find_competitors
 from shortlist.agent.discovery import discover
-from shortlist.agent.investigation import Context, Investigation
+from shortlist.agent.investigation import HOMEPAGE_UNREADABLE, Context, Investigation
 from shortlist.agent.llm import AgentOutputError, Calls
 from shortlist.agent.models import (
     DEFAULT_COMPANIES,
@@ -23,6 +23,7 @@ from shortlist.agent.models import (
     Overrides,
     RunResult,
     SellerProfile,
+    SetAside,
     Telemetry,
 )
 from shortlist.agent.pages import COMPARISON, Fetcher
@@ -158,6 +159,33 @@ class AgentRunner:
         self.research(result, calls, refs[:result.company_count])
 
     def research(self, result: RunResult, calls: Calls, refs: list[CandidateRef]):
+        """Research refs; a company whose homepage cannot be read (blocked, gone, or redirecting to another domain) is
+        set aside and the next untried candidate takes its place. Live runs lost up to two of three slots this way,
+        and an unreadable homepage stops before any model call, so a replacement costs only its own research."""
+        tried: set[str] = set()
+        while refs:
+            tried |= {ref.domain for ref in refs}
+            self._research(result, calls, refs)
+            batch = {ref.domain for ref in refs}
+            unreadable = [c for c in result.companies if c.domain in batch and c.error == HOMEPAGE_UNREADABLE]
+            if not unreadable or calls.meter.telemetry.budget_reached:
+                return
+            with self.lock:
+                gone = {c.domain for c in unreadable}
+                result.companies = [c for c in result.companies if c.domain not in gone]
+                for company in unreadable:
+                    reason = (company.blocked[0].split(": ", 1)[-1] if company.blocked else "no response")[:300]
+                    result.set_aside.append(SetAside(domain=company.domain, url=company.url,
+                                                     reason=f"Website could not be read: {reason}"))
+                taken = {c.domain for c in result.companies}
+                refs = [ref for ref in result.candidate_pool if ref.domain not in tried and ref.domain not in taken]
+                refs = refs[:len(unreadable)]
+            self.emit("investigation", f"{len(unreadable)} website(s) could not be read; "
+                      + (f"researching {len(refs)} more candidate(s) instead" if refs else "no more candidates to try"),
+                      level="warn")
+            self.save(result)
+
+    def _research(self, result: RunResult, calls: Calls, refs: list[CandidateRef]):
         with self.lock:
             known = {c.domain for c in result.companies}
             for ref in refs:

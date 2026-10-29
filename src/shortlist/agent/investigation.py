@@ -40,6 +40,8 @@ from shortlist.fetch import FetchError, canonical_url, domain_of
 MAX_SEARCHES = 4
 MAX_FETCHES = 6
 MAX_TURNS = 8
+# Before any model call: the run researches the next candidate instead (pipeline.AgentRunner.research).
+HOMEPAGE_UNREADABLE = "The homepage could not be read"
 
 INSTRUCTIONS = f"""You investigate ONE company for a B2B seller and collect quoted evidence. {UNTRUSTED}
 
@@ -326,7 +328,7 @@ class Investigation:
                 self.home = self.ctx.fetcher(self.company.url, self.company.domain)
             except FetchError as exc:
                 self.result.blocked.append(f"{self.company.url}: {exc}")
-                self.result.error = "The homepage could not be read"
+                self.result.error = HOMEPAGE_UNREADABLE
                 return self.result
             finally:
                 self.result.fetches += 1
