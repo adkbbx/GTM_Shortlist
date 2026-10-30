@@ -21,6 +21,20 @@ function checkNamer(run: AgentRun) {
   return (item: EvidenceItem) => names.get(item.criterion_id) ?? item.claim;
 }
 
+/** What keeps a company from Shortlisted, with unreadable pages folded into one line (a live card listed five 404s). */
+function Missing({ items }: { items: string[] }) {
+  const unread = items.filter(item => item.startsWith('Could not read '));
+  const gaps = items.filter(item => !item.startsWith('Could not read '));
+  return <div className="agent-missing">
+    <p>What is missing</p>
+    {gaps.length > 0 && <ul>{gaps.map(item => <li key={item}>{item}</li>)}</ul>}
+    {unread.length > 0 && <details className="agent-unread">
+      <summary>Could not read {unread.length} {unread.length === 1 ? 'page' : 'pages'}</summary>
+      <ul>{unread.map(item => <li key={item}>{item.replace(/^Could not read /, '')}</li>)}</ul>
+    </details>}
+  </div>;
+}
+
 function CompanyCard({ company, run }: { company: Company; run: AgentRun }) {
   const verdict = company.verdict!;
   const headingId = `company-${company.domain.replace(/\W+/g, '-')}`;
@@ -33,10 +47,7 @@ function CompanyCard({ company, run }: { company: Company; run: AgentRun }) {
       <p>{verdict.summary}</p>
       {verdict.disqualifier && <QuoteBlock quote={verdict.disqualifier.quote} />}
     </div>}
-    {verdict.kind === 'needs_look' && <div className="agent-missing">
-      <p>What is missing</p>
-      <ul>{verdict.missing.map(item => <li key={item}>{item}</li>)}</ul>
-    </div>}
+    {verdict.kind === 'needs_look' && <Missing items={verdict.missing} />}
     {verdict.kind === 'shortlisted' && <p className="agent-card-summary">{verdict.summary}</p>}
     <EvidenceList company={company} checkName={checkNamer(run)} />
     {company.checked_places.length > 0 && <p className="agent-checked"><span>Checked for competitors:</span> {company.checked_places.join(', ')}</p>}

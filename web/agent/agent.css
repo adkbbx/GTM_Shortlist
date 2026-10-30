@@ -112,6 +112,9 @@
 .agent-missing>p{font-size:.8125rem;font-weight:600;color:#2457a6}
 .agent-missing ul{margin:.375rem 0 0;padding-left:1.125rem;font-size:.875rem}
 .agent-missing li+li{margin-top:.25rem}
+.agent-unread{margin-top:.375rem}
+.agent-unread>summary{font-size:.875rem;color:var(--muted);cursor:pointer}
+.agent-unread li{overflow-wrap:anywhere;color:var(--muted)}
 .agent-evidence-chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.875rem}
 .agent-all-quotes{margin-top:.5rem}
 .agent-all-quotes>summary{font-size:.875rem;color:var(--orange)}

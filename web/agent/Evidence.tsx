@@ -58,10 +58,16 @@ const decisionLabel = { supports: 'Supports', contradicts: 'Contradicts', insuff
 export function EvidenceList({ company, checkName }: { company: Company; checkName: (item: EvidenceItem) => string }) {
   const decisions = new Map(company.decisions.map(decision => [decision.evidence_id, decision]));
   const supported = company.evidence.filter(item => decisions.get(item.id)?.decision === 'supports' && item.claim_type !== 'disqualifier');
+  // One chip per check: a check supported by several quotes showed up as repeated chips on a live board.
+  const byCheck = new Map<string, EvidenceItem[]>();
+  for (const item of supported) {
+    const key = `${item.claim_type}:${item.criterion_id}`;
+    byCheck.set(key, [...byCheck.get(key) ?? [], item]);
+  }
   return <>
-    {supported.length > 0 && <div className="agent-evidence-chips" aria-label="Supported evidence">
-      {supported.map(item => <Chip key={item.id} label={checkName(item)} tag={claimLabel[item.claim_type]} quotes={[item.quote]}
-        tone="good" note={`Skeptic: ${decisions.get(item.id)?.reason || 'supports'}`} />)}
+    {byCheck.size > 0 && <div className="agent-evidence-chips" aria-label="Supported evidence">
+      {[...byCheck.values()].map(items => <Chip key={items[0].id} label={checkName(items[0])} tag={claimLabel[items[0].claim_type]}
+        quotes={items.map(item => item.quote)} tone="good" note={`Skeptic: ${decisions.get(items[0].id)?.reason || 'supports'}`} />)}
     </div>}
     {company.evidence.length > 0 && <details className="agent-all-quotes">
       <summary>All checked quotes ({company.evidence.length})</summary>
