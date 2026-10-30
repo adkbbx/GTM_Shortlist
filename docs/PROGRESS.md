@@ -47,6 +47,14 @@ Approved by the owner: one company for https://eygentic.com, $0.25 cap. Total sp
     - **Gap:** Drata was missing from the competitors because its site blocks reading. Fix: a competitor that cannot be read stays listed as adjacent, "Not verified", with the reason. It is never a disqualifier on its own, and one click makes it direct.
   - **Typical cost now:** about $0.07 to $0.11 per run for seller, competitors and discovery, plus about $0.04 to $0.10 per company.
   - **Backend:** 927 passed, 48 skipped.
+- **Runs 9 to 12.**
+  - **Live browser run on the public demo app** (real providers, 3 companies, $0.25, 117 s). Socket.dev was Shortlisted, with no horizontal overflow at 1366px or 390px. The board repeated a check's chip once per quote and listed five "Could not read" lines on one card. Fixes: one chip per check, and unreadable pages folded into one expandable line.
+  - **Seller crisp.chat, run 1** ($0.21): lookalike discovery worked ("companies similar to Emma" found Simba and Eve Sleep). The profile had no need or timing signal, and Zendesk, Freshdesk and Front redirect to other domains; they stayed listed as unverified. Fix: the seller stage asks once more when a profile has no signals, keeping only the new signals.
+  - **Crisp, run 2** ($0.25): a required check every company passes ("operates a website or web app") held a company back. "Lists Intercom, Zendesk ... as its support stack" was proposed as a need signal, although competitor use rejects a company. Fix: the seller instructions require checks that tell buyers apart, and forbid competitor use as a need.
+  - **Crisp, run 3** ($0.33): Easyship was Shortlisted. It has an open support-hiring post ("Providing outstanding support via Live Chat, Email, and Phone to Easyship customers") and help-center fit quotes. Worth a human look: a 2022 post says "24/7 LiveChat support is now available!", and LiveChat is also a competitor's name. A four-year-old announcement is not proof of current use, so it is not a disqualifier.
+- **Shortlisted live so far:** Chili Piper and Socket.dev for eygentic.com, Supabase for vanta.com, Easyship for crisp.chat. No live run has produced Rejected yet; the page-code scan has not met a direct competitor's script on a prospect.
+- **Total live testing spend on 30 October:** $3.06 of the owner's $5.00 cap. The ledger is in the job directory.
+- **Not followed:** cross-domain homepage redirects (rebrands, regional domains). Following them would change a company's identity during research. Unreadable prospects are replaced instead, and unreadable competitors are listed as unverified.
 
 ## 29 October, Meta hackathon: public agent demo for anyone with a website
 
