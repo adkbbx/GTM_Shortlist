@@ -54,6 +54,13 @@ Approved by the owner: one company for https://eygentic.com, $0.25 cap. Total sp
   - **Crisp, run 3** ($0.33): Easyship was Shortlisted. It has an open support-hiring post ("Providing outstanding support via Live Chat, Email, and Phone to Easyship customers") and help-center fit quotes. Worth a human look: a 2022 post says "24/7 LiveChat support is now available!", and LiveChat is also a competitor's name. A four-year-old announcement is not proof of current use, so it is not a disqualifier.
 - **Shortlisted live so far:** Chili Piper and Socket.dev for eygentic.com, Supabase for vanta.com, Easyship for crisp.chat. No live run has produced Rejected yet; the page-code scan has not met a direct competitor's script on a prospect.
 - **Total live testing spend on 30 October:** $3.06 of the owner's $5.00 cap. The ledger is in the job directory.
+- **Scheduled continue at 13:21.**
+  - **Checks:** full backend runs gave 927 passed and 1 failed, then 928 and 928 passed. The one failure could not be reproduced in two full reruns or five runs of `tests/agent`, so it is an intermittent failure in the older suite. Ruff passes.
+  - **Why no run had produced Rejected:** the page-code scan read only `src`/`href` attributes and matched only a competitor's website domain. Chat widgets install with inline snippets and load from vendor domains. Fix (72e4308): third-party URLs in inline scripts are scanned, and hosts match through known widget domains (for example `widget.intercom.io`, `config.gorgias.chat`) or a brand-plus-suffix host label.
+  - **Run r1** (seller usepylon.com, $0.31): no Rejected. Its direct competitors were niche Slack-support tools. Replacing an unreadable homepage worked live (getcensus.com was replaced by nango.dev).
+  - **Run r2** (seller crisp.chat, $0.34): **the first live Rejected.** Dr. Squatch "Currently uses Gorgias (gorgias.com), a direct competitor", quoting `https://config.gorgias.chat/bundle-loader/...` from its homepage code. Skeptic: "Gorgias bundle-loader URL in page code indicating current Gorgias deployment". The signals retry also fired live: the first reading had no signals, and the second returned 4.
+  - **Still open:** Crisp's profile keeps proposing near-universal fit checks ("offers products ... through its website"), which hold companies at Needs a look.
+- **Total live testing spend on 30 October:** $3.71 of the owner's $5.00 cap; $1.29 is unused.
 - **Not followed:** cross-domain homepage redirects (rebrands, regional domains). Following them would change a company's identity during research. Unreadable prospects are replaced instead, and unreadable competitors are listed as unverified.
 
 ## 29 October, Meta hackathon: public agent demo for anyone with a website
