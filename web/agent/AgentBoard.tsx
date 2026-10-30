@@ -226,7 +226,8 @@ export function AgentBoard({ runId, onNew }: { runId: string; onNew: () => void 
     <StatusLine view={view} events={events} />
     {error && <p className="notice" role="alert">{error}</p>}
     {view.status === 'failed' && <section className="notice agent-failed" role="alert"><p>{run.error ?? 'The run stopped.'}</p>
-      {!run.profile?.offer && editable && <Describe apply={apply} busy={busy} summary="Describe your offer and buyer (optional)" />}</section>}
+      {/* Only a site too vague to read: a provider failure has no profile, and typing would not fix it. */}
+      {run.profile && !run.profile.offer && editable && <Describe apply={apply} busy={busy} summary="Describe your offer and buyer (optional)" />}</section>}
     {view.status === 'needs_choice' && run.profile && <ReadingChoice profile={run.profile} apply={apply} busy={busy} />}
     {run.profile && view.status !== 'needs_choice' && run.profile.offer && <Assumptions run={run} apply={apply} busy={busy} />}
     {run.companies.length > 0 && <Columns run={run} apply={apply} busy={busy} />}

@@ -5,6 +5,7 @@ fetch_page function tool. Skeptic: Muse Spark Open on Baseten through OpenAI-com
 Errors carry safe text only: never a key, a request body or a provider response body.
 """
 import json
+import re
 import time
 from dataclasses import dataclass, field
 from typing import Protocol
@@ -116,6 +117,21 @@ FETCH_TOOL = {
 PAGE_ACTIONS = frozenset({"open_page", "find", "find_in_page"})
 
 
+ERROR_CODE = re.compile(r"[a-z][a-z0-9_]{1,59}")
+
+
+def error_code(response: httpx.Response) -> str:
+    """The provider's machine-readable error code, for example "model_not_found", and nothing else from the body:
+    a deployed demo answered HTTP 404 and only the code told a wrong region apart from a wrong model."""
+    try:
+        body = response.json()
+    except ValueError:
+        return ""
+    error = body.get("error") if isinstance(body, dict) else None
+    code = error.get("code") or error.get("type") if isinstance(error, dict) else None
+    return f" ({code})" if isinstance(code, str) and ERROR_CODE.fullmatch(code) else ""
+
+
 def search_label(query: str) -> str:
     return f'"{query}"' if query else "(query not reported)"
 
@@ -182,6 +198,22 @@ def parse_response(data: dict) -> ModelTurn:
         incomplete=data.get("status") == "incomplete")
 
 
+def meta_model_listed(settings: AgentSettings, transport: httpx.BaseTransport | None = None) -> bool | None:
+    """Whether the Meta Model API offers the configured model to this server (GET /models, no generation). Model
+    availability varies by country, and a deployed demo got model_not_found where a laptop did not. None: unknown."""
+    if not settings.meta_api_key.get_secret_value():
+        return None
+    try:
+        with httpx.Client(timeout=10, trust_env=False, transport=transport) as client:
+            response = client.get(settings.meta_base_url + "/models", headers={
+                "Authorization": "Bearer " + settings.meta_api_key.get_secret_value()})
+            response.raise_for_status()
+            listed = {item.get("id") for item in response.json().get("data", []) if isinstance(item, dict)}
+    except (httpx.HTTPError, ValueError, AttributeError):
+        return None
+    return settings.meta_model in listed
+
+
 class MetaInvestigator:
     """Muse Spark through the Meta Model API Responses endpoint."""
     provider = "meta"
@@ -225,7 +257,7 @@ class MetaInvestigator:
         except httpx.TimeoutException as exc:
             raise AgentProviderError("Investigator request timed out; it may still be billed") from exc
         except httpx.HTTPStatusError as exc:
-            raise AgentProviderError(f"Investigator returned HTTP {exc.response.status_code}") from exc
+            raise AgentProviderError(f"Investigator returned HTTP {exc.response.status_code}{error_code(exc.response)}") from exc
         except (httpx.HTTPError, ValueError) as exc:
             raise AgentProviderError("Investigator request failed") from exc
         turn = parse_response(data)
@@ -261,7 +293,7 @@ class BasetenSkeptic:
         except httpx.TimeoutException as exc:
             raise AgentProviderError("Skeptic request timed out; it may still be billed") from exc
         except httpx.HTTPStatusError as exc:
-            raise AgentProviderError(f"Skeptic returned HTTP {exc.response.status_code}") from exc
+            raise AgentProviderError(f"Skeptic returned HTTP {exc.response.status_code}{error_code(exc.response)}") from exc
         except (httpx.HTTPError, ValueError, KeyError, IndexError, TypeError, AttributeError) as exc:
             raise AgentProviderError("Skeptic request failed or returned an unexpected response shape") from exc
         truncated = finish == "length"

@@ -29,6 +29,7 @@ from shortlist.agent.api import AgentStartInput, RoutePolicy, register_agent_rou
 from shortlist.agent.files import FileAgentRuns
 from shortlist.agent.models import Overrides, RunResult
 from shortlist.agent.pipeline import Providers
+from shortlist.agent.providers import meta_model_listed
 from shortlist.agent.service import AgentService, real_providers
 from shortlist.agent.settings import AgentSettings
 from shortlist.domain import utcnow
@@ -104,6 +105,9 @@ class PublicHealth(BaseModel):
     synthetic: bool
     investigator_ready: bool
     skeptic_ready: bool
+    # Whether Meta offers the configured model to this server (None: unknown or synthetic). False usually means the
+    # host's region: model availability varies by country.
+    investigator_model_available: bool | None = None
 
 
 class PublicPolicy(RoutePolicy):
@@ -181,7 +185,8 @@ def ui_directory(configured: Path | None) -> Path | None:
 
 def create_public_app(settings: PublicSettings | None = None, *, agent_settings: Callable[[], AgentSettings] | None = None,
                       providers: Callable[[AgentSettings], Providers] | None = None,
-                      after_write: Callable[[], None] | None = None) -> FastAPI:
+                      after_write: Callable[[], None] | None = None,
+                      model_check: Callable[[AgentSettings], bool | None] = meta_model_listed) -> FastAPI:
     settings = settings or PublicSettings.load()
     load_agent = agent_settings or AgentSettings.load
     if providers is None and settings.synthetic:
@@ -213,12 +218,23 @@ def create_public_app(settings: PublicSettings | None = None, *, agent_settings:
     async def not_found(request, exc):
         return JSONResponse({"detail": "This search was not found. Check the link or start a new search."}, status_code=404)
 
+    checked: dict[str, float | bool | None] = {"at": 0.0, "available": None}
+
+    def model_available(agent: AgentSettings) -> bool | None:
+        if settings.synthetic:
+            return None
+        if time.monotonic() - checked["at"] > 600:  # at most one /models request per ten minutes
+            checked["available"], checked["at"] = model_check(agent), time.monotonic()
+        return checked["available"]
+
     @app.get("/api/health", response_model=PublicHealth)
     def health():
-        ready = load_agent().readiness()
+        agent = load_agent()
+        ready = agent.readiness()
         return PublicHealth(max_companies=settings.max_companies, turnstile_site_key=settings.turnstile_site_key or None,
                             synthetic=settings.synthetic, investigator_ready=settings.synthetic or ready["investigator"],
-                            skeptic_ready=settings.synthetic or ready["skeptic"])
+                            skeptic_ready=settings.synthetic or ready["skeptic"],
+                            investigator_model_available=model_available(agent))
 
     register_agent_routes(app, None, service, policy)
 
