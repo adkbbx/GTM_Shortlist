@@ -58,7 +58,11 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--no-skeptic", action="store_true", help="Ablation: accept grounded quotes without the skeptic")
     run.add_argument("--synthetic", action="store_true", help="Use the labelled synthetic test world: no network")
     run.add_argument("--no-save", action="store_true", help="Do not save the run in the local database")
+    size_help = ("Optional: the size and stage of company you sell to, replacing what the agent infers from your site "
+                 "(the board's 'Change the company size')")
+    run.add_argument("--target-size", help=size_help)
     evaluate = sub.add_parser("eval", help="Score verdicts against a labelled CSV")
+    evaluate.add_argument("--target-size", help=size_help)
     evaluate.add_argument("labels", type=Path)
     source = evaluate.add_mutually_exclusive_group(required=True)
     source.add_argument("--website", help="Seller website: research exactly the labelled domains")
@@ -124,7 +128,8 @@ def execute(args, website: str, *, count: int | None = None, domains: list[str] 
         runner.on_event = lambda event: (print_event(event), events.append(event))
     # Saved runs remember what was researched for this seller; a labelled list (eval) is researched as given.
     history = store.researched(domain_of(url), utcnow() - timedelta(days=HISTORY_DAYS)) if store and not domains else None
-    result = runner.run(url, Overrides(company_count=count) if count else None, domains=domains, history=history)
+    overrides = Overrides(company_count=count, target_size=getattr(args, "target_size", None) or None)
+    result = runner.run(url, overrides, domains=domains, history=history)
     if store is not None:
         for event in events:
             store.append_event(result.id, event)

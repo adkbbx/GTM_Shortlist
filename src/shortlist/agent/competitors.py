@@ -1,5 +1,6 @@
 """Stage A3-A4: competitors proven by quotes, and the automatic disqualifier rules."""
 import json
+import re
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 
@@ -145,6 +146,9 @@ def find_competitors(profile: SellerProfile, seller_pages: list[str], calls: Cal
 
 
 TARGET_SIZE_RULE = "outside_target_size"
+# "Companies of any size or stage" (eygentic.com, 30 Oct) limits nothing, so it makes no size rule.
+ANY_SIZE = re.compile(r"\bany (?:company )?size\b|\ball (?:company )?sizes\b|\bof every size\b|\bregardless of size\b",
+                      re.IGNORECASE)
 
 
 def disqualifier_rules(profile: SellerProfile | None, competitors: list[Competitor]) -> list[DisqualifierRule]:
@@ -157,7 +161,8 @@ def disqualifier_rules(profile: SellerProfile | None, competitors: list[Competit
         served = "; ".join(f"{limit.kind}: {limit.value}" for limit in profile.stated_limits)
         rules.append(DisqualifierRule(id="outside_stated_size_or_region", rule="outside_stated_size_or_region",
                                       text=f"Outside the size or region you say you serve ({served})"[:500]))
-    if profile and profile.target_size and not any(limit.kind == "size" for limit in profile.stated_limits):
+    if profile and profile.target_size and not any(limit.kind == "size" for limit in profile.stated_limits) \
+            and not ANY_SIZE.search(profile.target_size.value):
         # Inferred unless the owner set it; a company is rejected only when a quote shows it is clearly bigger.
         rules.append(DisqualifierRule(id=TARGET_SIZE_RULE, rule="outside_stated_size_or_region",
                                       text=f"Much larger or later-stage than the companies you serve "

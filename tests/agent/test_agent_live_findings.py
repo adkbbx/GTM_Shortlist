@@ -203,6 +203,23 @@ def test_target_size_guides_discovery_and_rejects_clearly_bigger_companies(provi
     assert "5 to 50 people" in next(r.text for r in changed.disqualifiers if r.id == "outside_target_size")
 
 
+def test_an_any_size_target_makes_no_rule_and_the_cli_can_set_the_size(providers, monkeypatch, tmp_path, capsys):
+    """Live run, 30 Oct: eygentic.com says it serves "B2B and SaaS companies of any size or stage"."""
+    any_size = {"value": "Companies of any size or stage, from early startups to larger teams",
+                "quotes": synthetic.SELLER_ANSWER["target_size"]["quotes"]}
+    monkeypatch.setitem(synthetic.SELLER_ANSWER, "target_size", any_size)
+    assert "outside_target_size" not in {r.id for r in AgentRunner(providers).run(SELLER).disqualifiers}
+
+    from shortlist.agent import cli
+    output = tmp_path / "run.json"
+    assert cli.main(["run", "seller.example", "--synthetic", "--no-save", "--target-size",
+                     "Seed to Series A startups, 5 to 50 people", "--output", str(output)]) == 0
+    run = json.loads(output.read_text(encoding="utf-8"))
+    assert run["profile"]["target_size"] == {"value": "Seed to Series A startups, 5 to 50 people", "quotes": [],
+                                             "origin": "user"}
+    assert any(r["id"] == "outside_target_size" and "5 to 50 people" in r["text"] for r in run["disqualifiers"])
+
+
 def test_a_stated_size_replaces_the_inferred_size_rule(providers, monkeypatch):
     limits = synthetic.SELLER_ANSWER["stated_limits"] + [{"kind": "size", "value": "teams of 10 to 100 agents", "quotes": [
         synthetic._quote("Northwind Desk serves online retailers in North America and Europe.",
