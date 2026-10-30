@@ -35,6 +35,18 @@ Approved by the owner: one company for https://eygentic.com, $0.25 cap. Total sp
   - **New problem: the skeptic failed for one company.** Six quotes and `max_tokens=2000`: Muse Spark Open's reasoning used the allowance, so the answer arrived with no text, and all six quotes became "insufficient". `BasetenSkeptic` now marks `finish_reason: "length"` as cut off instead of failing. `skeptic_json` asks again with twice the room. The skeptic's allowance is `1500 + 500` per quote, up to 8000.
   - **Fix verified live** on that company's saved quotes: 1 call, 2154 output tokens, $0.011. The decisions were precise: B2B fit supported, a bare "Affiliate Program" label and product features refused. Backend: 922 passed, 48 skipped.
 - **Live spend so far:** about $0.53.
+- **Runs 3 to 8.** The owner authorised up to $5.00 of live testing in total. Spend is tracked in a ledger before every run. Each run researched 3 companies with a $0.50 budget.
+  - **Run 3** ($0.34): discovery searched by category and returned HubSpot, Salesforce and Asana. Fix: discovery searches for the need and timing signals happening now (job posts, recent news), aims at companies the seller can realistically win, and leaves out household names. Each company's brief carries how it was found.
+  - **Run 4** ($0.16): the candidates were companies hiring SDRs. SciLeads had every fit and need check supported, but its Greenhouse posting stated no date. Fix: a job post on an applicant-tracking system (Greenhouse, Lever, Ashby, Workable and similar; not aggregators) that was read during the run and does not say it is closed counts as current (`Quote.open_posting`). The board shows "Job post open when read".
+  - **Run 5** ($0.22): YipitData was held back by a required check few sites show ("sells via meetings, demos or sales conversations"). A Greenhouse board page with `?error=true`, where closed postings redirect, was counted as open. Fixes: at most two required fit checks, limited to what a homepage normally states. A posting needs a specific posting path and no error query.
+  - **Run 6** ($0.14): two of three homepages redirected to another domain (one a rebrand). Fix: an unreadable homepage is set aside with the reason, and the next untried candidate is researched. It costs no model call.
+  - **Run 7** ($0.30): **the first Shortlisted company, Chili Piper**, for $0.07. It was found through a dated SDR job post (14 October). Fit: "Chili Piper is a B2B SaaS company that helps GTM teams turn inbound leads into qualified meetings". Need: "Launch and test new outbound lead generation channels and determine how best to scale them".
+  - **Run 8** (seller vanta.com, $0.33; drata.com refused the agent with HTTP 403 at no cost):
+    - **It generalised to a second seller:** 8 named customers set aside, 5 direct competitors, and signal searches for GRC hiring and SOC 2 announcements.
+    - **Supabase was Shortlisted.** Fit: "Enterprise and Team customers can access our SOC 2 Type 2 report". Need: "answer customer and vendor security reviews quickly and accurately", from a GRC analyst post dated 21 October.
+    - **Gap:** Drata was missing from the competitors because its site blocks reading. Fix: a competitor that cannot be read stays listed as adjacent, "Not verified", with the reason. It is never a disqualifier on its own, and one click makes it direct.
+  - **Typical cost now:** about $0.07 to $0.11 per run for seller, competitors and discovery, plus about $0.04 to $0.10 per company.
+  - **Backend:** 927 passed, 48 skipped.
 
 ## 29 October, Meta hackathon: public agent demo for anyone with a website
 

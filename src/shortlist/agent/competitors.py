@@ -81,18 +81,28 @@ def find_competitors(profile: SellerProfile, seller_pages: list[str], calls: Cal
         emit("competitors", "No competitor candidates found", level="warn")
         return []
 
+    unread: dict[str, str] = {}
+
     def read(domain: str) -> tuple[str, Page | None]:
         try:
             return domain, fetcher(f"https://{domain}/", domain)
         except FetchError as exc:
             emit("competitors", f"Could not read {domain}: {exc}", level="warn")
+            unread[domain] = str(exc)[:200]
             return domain, None
 
     with ThreadPoolExecutor(max_workers=4) as pool:
         homepages = {domain: page for domain, page in pool.map(read, candidates) if page is not None}
     calls.meter.fetched(len(candidates))
+    # A candidate whose site blocks reading cannot be proven a competitor, but dropping it hid the best-known rival in
+    # a live run (drata.com, HTTP 403, for vanta.com). It stays listed as an unverified adjacent competitor: never a
+    # disqualifier on its own, never a prospect, and one click makes it direct.
+    unverified = [Competitor(name=candidates[domain][0], domain=domain, classification="adjacent",
+                             reason=f"Not verified: its site could not be read ({error}). Mark it as a direct competitor "
+                                    "if it sells the same thing to your buyers.", found_via=candidates[domain][1][:500])
+                  for domain, error in unread.items()]
     if not homepages:
-        return []
+        return unverified
     blocks = "\n\n".join(page_block(page, 3000) for page in homepages.values())
     request = {"seller_offer": data["offer"], "seller_buyer": data["buyer"]}
     answer, _ = calls.investigator_json(
@@ -126,6 +136,7 @@ def find_competitors(profile: SellerProfile, seller_pages: list[str], calls: Cal
         name, found_via = candidates[domain]
         competitors.append(Competitor(name=item.name.strip()[:200] or name, domain=domain, classification=kind,
                                       same_job=job, same_buyer=buyer, reason=reason[:600], found_via=found_via))
+    competitors += unverified
     order = {"direct": 0, "adjacent": 1, "not_competitor": 2}
     competitors.sort(key=lambda c: order[c.classification])
     direct = sum(c.classification == "direct" for c in competitors)

@@ -137,6 +137,24 @@ def test_an_unreadable_homepage_is_set_aside_and_the_next_candidate_researched(p
     assert all(c.error is None for c in result.companies)
 
 
+def test_a_competitor_whose_site_cannot_be_read_stays_listed_as_unverified(providers):
+    """Vanta run: drata.com answered HTTP 403 and disappeared from the competitor list."""
+    fetch = providers.fetcher
+
+    def fetcher(url, expected_domain=None):
+        if url == "https://metricsboard.example/":
+            raise FetchError("Website returned HTTP 403")
+        return fetch(url, expected_domain)
+
+    providers.fetcher = fetcher
+    result = AgentRunner(providers).run(SELLER)
+    blocked = next(c for c in result.competitors if c.domain == "metricsboard.example")
+    assert blocked.classification == "adjacent" and blocked.same_job is None
+    assert blocked.reason.startswith("Not verified: its site could not be read (Website returned HTTP 403)")
+    assert all("metricsboard" not in rule.id for rule in result.disqualifiers)
+    assert all(c.domain != "metricsboard.example" for c in result.companies)
+
+
 def test_budget_reached_during_discovery_keeps_the_companies_already_found(providers):
     result = AgentRunner(providers, budget_usd=0.012, concurrency=1).run(SELLER)
     assert result.telemetry.budget_reached and {c.domain for c in result.companies} >= {"trailgear.example"}
