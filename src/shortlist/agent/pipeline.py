@@ -9,7 +9,7 @@ from threading import Lock
 from urllib.parse import urlsplit
 
 from shortlist.agent import assumptions
-from shortlist.agent.competitors import find_competitors
+from shortlist.agent.competitors import TARGET_SIZE_RULE, find_competitors
 from shortlist.agent.discovery import discover
 from shortlist.agent.investigation import HOMEPAGE_UNREADABLE, Context, Investigation
 from shortlist.agent.llm import AgentOutputError, Calls
@@ -88,7 +88,10 @@ class AgentRunner:
 
     # Run -------------------------------------------------------------------------------------------------------
     def run(self, website: str, overrides: Overrides | None = None, *, run_id: str | None = None,
-            domains: list[str] | None = None, reading: Interpretation | None = None) -> RunResult:
+            domains: list[str] | None = None, reading: Interpretation | None = None,
+            history: dict[str, dict] | None = None) -> RunResult:
+        """history: companies already researched for this seller (storage.prior_research); discovery sets them aside."""
+        self.history = history or {}
         overrides = overrides or Overrides()
         result = RunResult(website=website, status="running", skeptic=self.use_skeptic,
                            synthetic=self.providers.synthetic, overrides=overrides,
@@ -153,7 +156,8 @@ class AgentRunner:
             refs = [CandidateRef(domain=domain, name=domain, url=f"https://{domain}/", found_via="your list")
                     for domain in domains]
         else:
-            refs, aside = discover(profile, result.competitors, result.company_count, calls, self.emit)
+            refs, aside = discover(profile, result.competitors, result.company_count, calls, self.emit,
+                                   prior=getattr(self, "history", {}))
             result.set_aside = aside
         result.candidate_pool = refs
         self.research(result, calls, refs[:result.company_count])
@@ -258,6 +262,8 @@ class AgentRunner:
                 company = company.model_copy(deep=True)
                 company.evidence = [e for e in company.evidence if e.criterion_id not in removed]
                 rejudge = {e.id for e in company.evidence if e.claim_type == "fit" and e.criterion_id in changes.edited_criteria}
+                if changes.target_size_changed:  # the size rule's text changed, so its quotes are judged again
+                    rejudge |= {e.id for e in company.evidence if e.criterion_id == TARGET_SIZE_RULE}
                 for competitor in direct:
                     for sig in company.signatures:
                         for item in scan(sig, [competitor], company.name or company.domain):

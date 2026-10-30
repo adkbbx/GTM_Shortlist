@@ -6,14 +6,36 @@ Hosted Postgres storage is a documented follow-up (HACKATHON.md); the API regist
 import json
 import sqlite3
 from contextlib import contextmanager
+from datetime import datetime
 from pathlib import Path
 from threading import Lock
 from typing import Protocol
 
 from shortlist.agent.models import AgentEvent, RunResult
 from shortlist.domain import utcnow
+from shortlist.fetch import FetchError, domain_of
 
 MAX_EVENTS = 1000
+HISTORY_DAYS = 30
+VERDICT_LABEL = {"shortlisted": "Shortlisted", "needs_look": "Needs a look", "rejected": "Rejected"}
+
+
+def prior_research(runs, seller_domain: str) -> dict[str, dict]:
+    """Companies already given a verdict for this seller, newest first: {domain: {run_id, date, verdict}}.
+    `runs` yields (run_id, created_at ISO text, payload dict). The same companies were paid for in three separate
+    runs on 30 October because each run started with no memory."""
+    found: dict[str, dict] = {}
+    for run_id, created_at, payload in sorted(runs, key=lambda run: run[1], reverse=True):
+        try:
+            if domain_of(payload.get("website", "")) != seller_domain:
+                continue
+        except FetchError:
+            continue
+        for company in payload.get("companies", []):
+            kind = (company.get("verdict") or {}).get("kind")
+            if kind in VERDICT_LABEL and company.get("domain") not in found:
+                found[company["domain"]] = {"run_id": run_id, "date": created_at[:10], "verdict": kind}
+    return found
 
 
 class AgentRunStore(Protocol):
@@ -105,6 +127,13 @@ class SQLiteAgentRuns:
         if row is None:
             raise KeyError(run_id)
         return row["status"], [AgentEvent.model_validate(e) for e in json.loads(row["events"]) if e["seq"] > after]
+
+    def researched(self, seller_domain: str, since: datetime) -> dict[str, dict]:
+        with self.connection() as db:
+            rows = db.execute("SELECT id, created_at, payload FROM agent_runs WHERE created_at >= ?",
+                              (since.isoformat(),)).fetchall()
+        return prior_research(((row["id"], row["created_at"], json.loads(row["payload"])) for row in rows),
+                              seller_domain)
 
     def list(self, limit: int = 20) -> list[dict]:
         with self.connection() as db:

@@ -72,6 +72,7 @@ class SellerAnswer(Answer):
     need_signals: list[SignalAnswer] = Field(default_factory=list)
     timing_signals: list[SignalAnswer] = Field(default_factory=list)
     stated_limits: list[LimitAnswer] = Field(default_factory=list)
+    target_size: StatementAnswer | None = None
     interpretations: list[InterpretationAnswer] = Field(default_factory=list)
 
 

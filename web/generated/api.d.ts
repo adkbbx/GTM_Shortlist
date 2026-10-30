@@ -1511,6 +1511,8 @@ export interface components {
             offer?: string | null;
             /** Buyer */
             buyer?: string | null;
+            /** Target Size */
+            target_size?: string | null;
         };
         /**
          * Overrides
@@ -1533,6 +1535,8 @@ export interface components {
             offer: string | null;
             /** Buyer */
             buyer: string | null;
+            /** Target Size */
+            target_size: string | null;
         };
         /** PageRef */
         PageRef: {
@@ -2022,6 +2026,7 @@ export interface components {
             timing_signals: components["schemas"]["Signal"][];
             /** Stated Limits */
             stated_limits: components["schemas"]["StatedLimit"][];
+            target_size: components["schemas"]["Statement"] | null;
             /** Interpretations */
             interpretations: components["schemas"]["Interpretation"][];
             /** Pages */
@@ -2043,6 +2048,8 @@ export interface components {
             url: string;
             /** Reason */
             reason: string;
+            /** Previous Run */
+            previous_run: string | null;
         };
         /** Signal */
         Signal: {

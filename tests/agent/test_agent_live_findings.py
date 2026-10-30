@@ -1,6 +1,6 @@
 """Fixes for problems the first live run exposed (docs/PROGRESS.md, 30 October), over the SYNTHETIC providers."""
 import json
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from urllib.parse import urlsplit
 
 from shortlist.agent import synthetic
@@ -10,9 +10,12 @@ from shortlist.agent.models import EvidenceItem, Overrides, Quote
 from shortlist.agent.pages import Page, open_posting
 from shortlist.agent.pipeline import AgentRunner
 from shortlist.agent.seller import private_signal
-from shortlist.agent.synthetic import SELLER
+from shortlist.agent.service import AgentService
+from shortlist.agent.settings import AgentSettings
+from shortlist.agent.storage import SQLiteAgentRuns
+from shortlist.agent.synthetic import SELLER, synthetic_providers
 from shortlist.agent.verdict import fresh
-from shortlist.domain import Source
+from shortlist.domain import Source, utcnow
 from shortlist.fetch import FetchError
 
 # Need and timing signals the live seller profile produced: internal states no public quote can show.
@@ -171,6 +174,65 @@ def test_a_profile_without_signals_is_asked_once_more(providers, monkeypatch):
     result = AgentRunner(providers).run(SELLER)
     assert [s.id for s in result.profile.need_signals] == ["need-1", "need-2"]
     assert [c.operation for c in result.telemetry.calls].count("seller_profile:signals") == 1
+
+
+def test_target_size_guides_discovery_and_rejects_clearly_bigger_companies(providers, monkeypatch):
+    """30 Oct: for a startup agency the agent researched HubSpot and Salesforce. The profile now always carries a
+    target size; discovery aims at it, and a size rule rejects a company only when a quote shows it is bigger."""
+    seen = []
+    respond = providers.investigator.respond
+
+    def recording(**kwargs):
+        seen.append((kwargs["instructions"], json.dumps(kwargs["input"])))
+        return respond(**kwargs)
+
+    monkeypatch.setattr(providers.investigator, "respond", recording)
+    runner = AgentRunner(providers)
+    result = runner.run(SELLER)
+    assert result.profile.target_size.value == "Small and mid-sized online stores, about 5 to 200 people"
+    rule = next(r for r in result.disqualifiers if r.id == "outside_target_size")
+    assert rule.rule == "outside_stated_size_or_region" and "about 5 to 200 people" in rule.text
+    discovery = next(text for instructions, text in seen if instructions == DISCOVERY_INSTRUCTIONS)
+    assert "about 5 to 200 people" in discovery
+    brief = next(text for instructions, text in seen if instructions == INVESTIGATE_INSTRUCTIONS)
+    assert "outside_target_size" in brief  # the investigator looks for size evidence too
+
+    # Your own size replaces the inferred one and re-judges only that rule's saved quotes.
+    changed = runner.reevaluate(result, Overrides(target_size="Seed to Series A startups, 5 to 50 people"))
+    assert changed.profile.target_size.origin == "user"
+    assert "5 to 50 people" in next(r.text for r in changed.disqualifiers if r.id == "outside_target_size")
+
+
+def test_a_stated_size_replaces_the_inferred_size_rule(providers, monkeypatch):
+    limits = synthetic.SELLER_ANSWER["stated_limits"] + [{"kind": "size", "value": "teams of 10 to 100 agents", "quotes": [
+        synthetic._quote("Northwind Desk serves online retailers in North America and Europe.",
+                         "https://seller.example/pricing")]}]
+    monkeypatch.setitem(synthetic.SELLER_ANSWER, "stated_limits", limits)
+    rules = {r.id for r in AgentRunner(providers).run(SELLER).disqualifiers}
+    assert "outside_stated_size_or_region" in rules and "outside_target_size" not in rules
+
+
+def test_a_company_researched_earlier_for_the_same_seller_is_set_aside(tmp_path):
+    """Chili Piper and Kovai.co were researched and paid for in several runs on 30 Oct."""
+    service = AgentService(SQLiteAgentRuns(tmp_path / "runs.sqlite3"), lambda: AgentSettings(),
+                           lambda settings: synthetic_providers(date(2026, 10, 30)))
+    first = service.start("seller.example")
+    service.wait(first.id, 20)
+    researched = {c.domain for c in service.store.get(first.id)["result"].companies}
+    assert researched == {"trailgear.example", "oakandpine.example", "brightkettle.example"}
+
+    second = service.start("seller.example")
+    service.wait(second.id, 20)
+    again = service.store.get(second.id)["result"]
+    assert again.companies == []
+    earlier = {a.domain: a for a in again.set_aside if a.previous_run}
+    assert set(earlier) == researched and all(a.previous_run == first.id for a in earlier.values())
+    assert earlier["trailgear.example"].reason.startswith("Already researched for you on ")
+    assert earlier["trailgear.example"].reason.endswith(": Shortlisted")
+
+    # Another seller has its own history, and the public demo keeps none at all.
+    assert service.store.researched("other.example", utcnow() - timedelta(days=30)) == {}
+    assert AgentService(service.store, history_days=None).history("https://seller.example/") == {}
 
 
 def test_budget_reached_during_discovery_keeps_the_companies_already_found(providers):

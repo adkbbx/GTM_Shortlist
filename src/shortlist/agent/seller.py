@@ -31,6 +31,7 @@ Return only one JSON object with this shape:
  "need_signals": [{{"id": "need-1", "text": "something a company does that shows it needs this", "quotes": [...]}}],
  "timing_signals": [{{"id": "timing-1", "text": "an event that makes now a good time", "quotes": [...]}}],
  "stated_limits": [{{"kind": "size or region", "value": "...", "quotes": [...]}}],
+ "target_size": {{"value": "the size and stage of company the offer is written for", "quotes": [...]}},
  "interpretations": [{{"offer": "...", "buyer": "...", "quotes": [...]}}]}}
 
 Rules:
@@ -51,6 +52,12 @@ Rules:
   market, new funding or hiring for a new team. The same rule applies: events, not states of mind.
 - existing_customers: only companies the site names as customers (logos, case studies, testimonials).
 - stated_limits: only a company size or region the site explicitly says it serves. Otherwise an empty list.
+- target_size: always give it, as a size and stage range, for example "early-stage startups, about 5 to 50 people,
+  seed to Series A" or "mid-market companies, about 200 to 2,000 people". Use what the site states; otherwise infer
+  it from who the offer speaks to (founders, "before you hire your first SDR", "enterprise teams", the size of its
+  named customers) and quote the words it rests on. A small seller rarely sells to the largest companies.
+- When target_size is early-stage, prefer early-stage signals: a first or founding sales hire, founder-led sales, a
+  recent seed or Series A round. Hiring many reps for an existing team is a later-stage signal.
 - Describe companies only. Never name, describe or judge individual people.
 - If the site is too vague to tell the offer or the buyer, leave that field null and give up to 3 different
   interpretations, each with a quote it rests on."""
@@ -176,7 +183,7 @@ def build_profile(website: str, answer: SellerAnswer, pages: dict[str, Page], dr
         website=website, domain=home.domain, name=answer.name.strip()[:200], offer=statement(answer.offer, "offer"),
         buyer=statement(answer.buyer, "buyer"), existing_customers=customers, fit_criteria=criteria[:5],
         need_signals=signals["need"], timing_signals=signals["timing"], stated_limits=limits,
-        interpretations=readings,
+        target_size=statement(answer.target_size, "target size"), interpretations=readings,
         pages=[PageRef(url=page.url, title=page.source.title[:300], fetched_at=page.fetched_at) for page in pages.values()])
 
 

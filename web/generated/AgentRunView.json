@@ -867,6 +867,20 @@
           ],
           "default": null,
           "title": "Buyer"
+        },
+        "target_size": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "minLength": 3,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Target Size"
         }
       },
       "required": [
@@ -877,7 +891,8 @@
         "company_count",
         "interpretation",
         "offer",
-        "buyer"
+        "buyer",
+        "target_size"
       ],
       "title": "Overrides",
       "type": "object"
@@ -1269,6 +1284,17 @@
           "title": "Stated Limits",
           "type": "array"
         },
+        "target_size": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Statement"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "interpretations": {
           "items": {
             "$ref": "#/$defs/Interpretation"
@@ -1297,6 +1323,7 @@
         "need_signals",
         "timing_signals",
         "stated_limits",
+        "target_size",
         "interpretations",
         "pages"
       ],
@@ -1318,12 +1345,25 @@
         "reason": {
           "title": "Reason",
           "type": "string"
+        },
+        "previous_run": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Previous Run"
         }
       },
       "required": [
         "domain",
         "url",
-        "reason"
+        "reason",
+        "previous_run"
       ],
       "title": "SetAside",
       "type": "object"

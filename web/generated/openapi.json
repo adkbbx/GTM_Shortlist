@@ -3966,6 +3966,19 @@
               }
             ],
             "title": "Buyer"
+          },
+          "target_size": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300,
+                "minLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Size"
           }
         },
         "additionalProperties": false,
@@ -4057,6 +4070,19 @@
               }
             ],
             "title": "Buyer"
+          },
+          "target_size": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300,
+                "minLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Size"
           }
         },
         "additionalProperties": false,
@@ -4069,7 +4095,8 @@
           "company_count",
           "interpretation",
           "offer",
-          "buyer"
+          "buyer",
+          "target_size"
         ],
         "title": "Overrides",
         "description": "Optional corrections merged on top of what the agent inferred. None is required."
@@ -5438,6 +5465,16 @@
             "maxItems": 4,
             "title": "Stated Limits"
           },
+          "target_size": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Statement"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "interpretations": {
             "items": {
               "$ref": "#/components/schemas/Interpretation"
@@ -5468,6 +5505,7 @@
           "need_signals",
           "timing_signals",
           "stated_limits",
+          "target_size",
           "interpretations",
           "pages"
         ],
@@ -5504,6 +5542,17 @@
           "reason": {
             "type": "string",
             "title": "Reason"
+          },
+          "previous_run": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Previous Run"
           }
         },
         "additionalProperties": false,
@@ -5511,7 +5560,8 @@
         "required": [
           "domain",
           "url",
-          "reason"
+          "reason",
+          "previous_run"
         ],
         "title": "SetAside"
       },

@@ -189,7 +189,8 @@ def create_public_app(settings: PublicSettings | None = None, *, agent_settings:
         providers = lambda agent: synthetic_providers(pace=0.08)
     store = FileAgentRuns(settings.data_dir, after_write=after_write)
     store.recover_interrupted()
-    service = AgentService(store, load_agent, providers or real_providers)
+    # No search history here: one visitor's searches must never appear in another's.
+    service = AgentService(store, load_agent, providers or real_providers, history_days=None)
     policy = PublicPolicy(settings, store, load_agent)
 
     app = FastAPI(title="GTM Shortlist agent demo", version="0.1.0", docs_url=None, redoc_url=None, openapi_url=None)

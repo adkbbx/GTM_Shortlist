@@ -1,5 +1,6 @@
 """Background execution of agent runs for the local API: one daemon thread per run or correction."""
 from collections.abc import Callable
+from datetime import timedelta
 from threading import Thread
 
 from shortlist.agent.assumptions import merge
@@ -8,8 +9,9 @@ from shortlist.agent.pages import fetch_document
 from shortlist.agent.pipeline import AgentRunner, Providers
 from shortlist.agent.providers import AgentProviderError, BasetenSkeptic, MetaInvestigator
 from shortlist.agent.settings import AgentSettings
-from shortlist.agent.storage import SQLiteAgentRuns
-from shortlist.fetch import FetchError, canonical_url
+from shortlist.agent.storage import HISTORY_DAYS, SQLiteAgentRuns
+from shortlist.domain import utcnow
+from shortlist.fetch import FetchError, canonical_url, domain_of
 
 ACTIVE = ("queued", "running")
 
@@ -39,11 +41,20 @@ def website_url(value: str) -> str:
 
 class AgentService:
     def __init__(self, store: SQLiteAgentRuns, settings: Callable[[], AgentSettings] = AgentSettings.load,
-                 providers: Callable[[AgentSettings], Providers] = real_providers):
+                 providers: Callable[[AgentSettings], Providers] = real_providers,
+                 history_days: int | None = HISTORY_DAYS):
+        """history_days: set aside companies already researched for the same seller within this many days. None turns
+        it off (the public demo: one visitor's searches must not show in another's)."""
         self.store = store
         self.settings = settings
         self.providers = providers
+        self.history_days = history_days
         self.threads: dict[str, Thread] = {}
+
+    def history(self, website: str) -> dict[str, dict]:
+        if self.history_days is None:
+            return {}
+        return self.store.researched(domain_of(website), utcnow() - timedelta(days=self.history_days))
 
     def runner(self, run_id: str, settings: AgentSettings, providers: Providers) -> AgentRunner:
         return AgentRunner(providers, budget_usd=settings.run_budget_usd, concurrency=settings.concurrency,
@@ -56,8 +67,10 @@ class AgentService:
         result = RunResult(website=website_url(website), status="queued", overrides=overrides,
                            company_count=overrides.company_count or 10, skeptic=settings.use_skeptic,
                            telemetry=Telemetry(budget_usd=settings.run_budget_usd))
+        history = self.history(result.website)
         self.store.create(result)
-        self._spawn(result.id, lambda runner: runner.run(result.website, overrides, run_id=result.id), settings, result)
+        self._spawn(result.id, lambda runner: runner.run(result.website, overrides, run_id=result.id, history=history),
+                    settings, result)
         return result
 
     def override(self, run_id: str, overrides: Overrides) -> RunResult:

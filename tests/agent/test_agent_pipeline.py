@@ -61,8 +61,9 @@ def test_competitors_need_same_job_and_same_buyer_quotes(run_result):
     rival = run_result.competitors[0]
     assert rival.same_job and rival.same_buyer
     rules = {r.id for r in run_result.disqualifiers}
+    # The site states a region but no size, so the inferred target size adds its own rule.
     assert rules == {"uses_direct_competitor:rival-desk.example", "is_competitor", "is_existing_customer",
-                     "outside_stated_size_or_region", "inactive"}
+                     "outside_stated_size_or_region", "outside_target_size", "inactive"}
 
 
 def test_discovery_sets_aside_lists_directories_self_competitors_and_customers(run_result):

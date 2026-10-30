@@ -144,6 +144,9 @@ def find_competitors(profile: SellerProfile, seller_pages: list[str], calls: Cal
     return competitors
 
 
+TARGET_SIZE_RULE = "outside_target_size"
+
+
 def disqualifier_rules(profile: SellerProfile | None, competitors: list[Competitor]) -> list[DisqualifierRule]:
     rules = [DisqualifierRule(id=rule_id(c.domain), rule="uses_direct_competitor", competitor_domain=c.domain,
                               text=f"Currently uses {c.name} ({c.domain}), a direct competitor")
@@ -154,6 +157,11 @@ def disqualifier_rules(profile: SellerProfile | None, competitors: list[Competit
         served = "; ".join(f"{limit.kind}: {limit.value}" for limit in profile.stated_limits)
         rules.append(DisqualifierRule(id="outside_stated_size_or_region", rule="outside_stated_size_or_region",
                                       text=f"Outside the size or region you say you serve ({served})"[:500]))
+    if profile and profile.target_size and not any(limit.kind == "size" for limit in profile.stated_limits):
+        # Inferred unless the owner set it; a company is rejected only when a quote shows it is clearly bigger.
+        rules.append(DisqualifierRule(id=TARGET_SIZE_RULE, rule="outside_stated_size_or_region",
+                                      text=f"Much larger or later-stage than the companies you serve "
+                                           f"({profile.target_size.value})"[:500]))
     rules.append(DisqualifierRule(id="inactive", rule="inactive",
                                   text="No longer operating: closed, acquired and shut, or the site is parked"))
     return rules

@@ -161,6 +161,8 @@ SELLER_ANSWER = {
         _quote("Opening a new store? Add it to Northwind Desk in one click.", "https://seller.example/features")]}],
     "stated_limits": [{"kind": "region", "value": "North America and Europe", "quotes": [
         _quote("Northwind Desk serves online retailers in North America and Europe.", "https://seller.example/pricing")]}],
+    "target_size": {"value": "Small and mid-sized online stores, about 5 to 200 people", "quotes": [
+        _quote("Built for customer support teams at online retailers.", SELLER)]},
     "interpretations": [],
 }
 

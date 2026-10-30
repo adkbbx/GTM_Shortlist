@@ -12,7 +12,7 @@ from pathlib import Path
 from threading import Lock
 
 from shortlist.agent.models import AgentEvent, RunResult
-from shortlist.agent.storage import MAX_EVENTS
+from shortlist.agent.storage import MAX_EVENTS, prior_research
 from shortlist.domain import utcnow
 
 RUN_ID = re.compile(r"[0-9a-f]{32}")
@@ -114,6 +114,10 @@ class FileAgentRuns:
                               "website": record["website"], "synthetic": bool(record["payload"].get("synthetic")),
                               **counts})
         return summaries
+
+    def researched(self, seller_domain: str, since: datetime) -> dict[str, dict]:
+        return prior_research(((r["id"], r["created_at"], r["payload"]) for r in self.records()
+                               if datetime.fromisoformat(r["created_at"]) >= since), seller_domain)
 
     def usage_since(self, since: datetime) -> tuple[float, int]:
         """Estimated dollars spent by runs created since `since`, and how many runs are working right now."""

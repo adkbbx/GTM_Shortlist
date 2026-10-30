@@ -1,6 +1,7 @@
 """`shortlist agent run <website>` and `shortlist agent eval <labels.csv>`."""
 import argparse
 import sys
+from datetime import timedelta
 from pathlib import Path
 
 from shortlist.agent.evaluation import batches, combine, describe, read_labels, score, without_skeptic
@@ -9,8 +10,9 @@ from shortlist.agent.pipeline import AgentRunner, Providers
 from shortlist.agent.providers import AgentProviderError
 from shortlist.agent.service import real_providers, website_url
 from shortlist.agent.settings import AgentSettings
-from shortlist.agent.storage import SQLiteAgentRuns
-from shortlist.fetch import FetchError
+from shortlist.agent.storage import HISTORY_DAYS, SQLiteAgentRuns
+from shortlist.domain import utcnow
+from shortlist.fetch import FetchError, domain_of
 
 LABEL = {"shortlisted": "Shortlisted", "needs_look": "Needs a look", "rejected": "Rejected"}
 
@@ -120,7 +122,9 @@ def execute(args, website: str, *, count: int | None = None, domains: list[str] 
     if store is not None:
         events = []
         runner.on_event = lambda event: (print_event(event), events.append(event))
-    result = runner.run(url, Overrides(company_count=count) if count else None, domains=domains)
+    # Saved runs remember what was researched for this seller; a labelled list (eval) is researched as given.
+    history = store.researched(domain_of(url), utcnow() - timedelta(days=HISTORY_DAYS)) if store and not domains else None
+    result = runner.run(url, Overrides(company_count=count) if count else None, domains=domains, history=history)
     if store is not None:
         for event in events:
             store.append_event(result.id, event)

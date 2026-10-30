@@ -285,6 +285,8 @@ if __name__ == "__main__":
     from shortlist.agent.synthetic import synthetic_providers
     workspace.state.agent_service.settings = lambda: AgentSettings()
     workspace.state.agent_service.providers = lambda agent_settings: synthetic_providers(pace=0.08)
+    # Journeys share one database but are independent, as for the classic flow above: no earlier-search history.
+    workspace.state.agent_service.history_days = None
     application.mount("/", workspace)
     try:
         uvicorn.run(application, host="127.0.0.1", port=8015, log_level="warning")

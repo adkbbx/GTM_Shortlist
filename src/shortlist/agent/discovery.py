@@ -7,6 +7,7 @@ from shortlist.agent.competitors import clean_domain, company_domain_issue
 from shortlist.agent.llm import UNTRUSTED, Calls
 from shortlist.agent.models import MAX_COMPANIES, CandidateRef, Competitor, SellerProfile, SetAside
 from shortlist.agent.providers import WEB_SEARCH_TOOL, search_label
+from shortlist.agent.storage import VERDICT_LABEL
 from shortlist.agent.telemetry import BudgetReached
 from shortlist.domain import Candidate
 from shortlist.fetch import FetchError, canonical_url
@@ -18,9 +19,9 @@ Search for the seller's need and timing signals happening now, not for a categor
 a role named in the need signals (on job boards or careers pages), or news from the last six months about a launch,
 expansion or funding round named in the timing signals. Name the companies those results are about. You may also
 search for companies similar to the seller's named customers.
-Aim for companies this seller can realistically win: about the size and stage of its named customers, or small and
-mid-sized companies when none are named. Leave out household-name enterprises and category leaders unless the seller
-says it serves enterprises.
+Aim for companies this seller can realistically win: within target_size (the size and stage the seller serves) and
+like its named customers. Leave out companies clearly bigger or later-stage than target_size, and household-name
+enterprises and category leaders unless the seller says it serves enterprises.
 Never return list articles, directories, review sites, news sites, job boards, the seller, its competitors, its
 existing customers, or people. At most 4 searches.
 Return only JSON: {{"companies": [{{"name": "company", "domain": "company.com", "url": "https://company.com/",
@@ -42,10 +43,15 @@ SEARCH_RESULT_PAGE = ("A search result about the company, not its own homepage o
                       "article); the publisher is not a candidate")
 
 
+def already_researched(entry: dict) -> str:
+    return f"Already researched for you on {entry['date']}: {VERDICT_LABEL[entry['verdict']]}"
+
+
 def admit(url: str, name: str, found_via: str, excluded: dict[str, str], seller_domain: str, *,
-          own_page: bool = False) -> tuple[CandidateRef | None, SetAside | None]:
+          own_page: bool = False, prior: dict[str, dict] | None = None) -> tuple[CandidateRef | None, SetAside | None]:
     """own_page: a raw search result is admitted only when it is the company's own entry page. In the first live run,
-    news articles that mentioned companies made their publishers candidates."""
+    news articles that mentioned companies made their publishers candidates. prior: companies researched for this
+    seller in an earlier run, set aside with a link to that run instead of being paid for again."""
     domain = clean_domain(url)
     if domain is None:
         return None, None
@@ -53,6 +59,9 @@ def admit(url: str, name: str, found_via: str, excluded: dict[str, str], seller_
         url = canonical_url(url if "://" in url else f"https://{domain}/")
     except FetchError:
         url = f"https://{domain}/"
+    if prior and domain in prior:
+        return None, SetAside(domain=domain, url=f"https://{domain}/", reason=already_researched(prior[domain]),
+                              previous_run=prior[domain]["run_id"])
     owner = next((reason for known, reason in excluded.items() if domain == known or domain.endswith("." + known)), None)
     for reason in (owner, company_domain_issue(domain, seller_domain),
                    "Discussion thread" if discussion_page(url) else None, company_page_issue(url, name),
@@ -66,9 +75,10 @@ def admit(url: str, name: str, found_via: str, excluded: dict[str, str], seller_
 
 
 def discover(profile: SellerProfile, competitors: list[Competitor], count: int, calls: Calls,
-             emit: Callable[..., None], known: list[CandidateRef] | None = None
+             emit: Callable[..., None], known: list[CandidateRef] | None = None, prior: dict[str, dict] | None = None
              ) -> tuple[list[CandidateRef], list[SetAside]]:
     excluded = excluded_domains(profile, competitors)
+    prior = prior or {}
     pool: dict[str, CandidateRef] = {c.domain: c for c in known or []}
     set_aside: dict[str, SetAside] = {}
     wanted = min(MAX_COMPANIES, max(count, 1))
@@ -78,11 +88,13 @@ def discover(profile: SellerProfile, competitors: list[Competitor], count: int, 
         data = {"offer": profile.offer.value if profile.offer else "", "buyer": profile.buyer.value if profile.buyer else "",
                 "fit_checks": [c.text for c in profile.fit_criteria if c.enabled],
                 # Search by what a buying company does now; category searches returned lists of the largest brands.
+                "target_size": profile.target_size.value if profile.target_size else "small and mid-sized companies",
                 "need_signals": [s.text for s in profile.need_signals],
                 "timing_signals": [s.text for s in profile.timing_signals],
                 "served": [f"{limit.kind}: {limit.value}" for limit in profile.stated_limits],
                 "named_customers": [c.domain or c.name for c in profile.existing_customers][:10],
-                "do_not_return": sorted(set(excluded) | set(pool))[:60], "how_many": wanted * 2}
+                # Companies researched for this seller before come last, so the newest exclusions are never cut off.
+                "do_not_return": (sorted(set(excluded) | set(pool)) + list(prior))[:80], "how_many": wanted * 2}
         try:
             answer, turn = calls.investigator_json(
                 "discovery", CompaniesAnswer, instructions=DISCOVERY_INSTRUCTIONS, tools=[WEB_SEARCH_TOOL],
@@ -100,7 +112,7 @@ def discover(profile: SellerProfile, competitors: list[Competitor], count: int, 
             emit("discovery", f"Searched {search_label(search.query)} ({len(search.results)} results)")
             found += [(result.url, result.title, f'search "{search.query}"', True) for result in search.results]
         for url, name, via, own_page in found:
-            ref, aside = admit(url, name or "", via, excluded, profile.domain, own_page=own_page)
+            ref, aside = admit(url, name or "", via, excluded, profile.domain, own_page=own_page, prior=prior)
             if ref and ref.domain not in pool and len(pool) < MAX_COMPANIES:
                 pool[ref.domain] = ref
             elif aside and aside.domain not in pool:
@@ -108,6 +120,8 @@ def discover(profile: SellerProfile, competitors: list[Competitor], count: int, 
         if not answer.companies and not turn.searches:
             break
     set_aside = {domain: aside for domain, aside in set_aside.items() if domain not in pool}
+    seen = sum(1 for aside in set_aside.values() if aside.previous_run)
     emit("discovery", f"Found {len(pool)} candidate companies; set aside {len(set_aside)} pages "
-                      "(lists, directories, competitors, customers)", level="done")
+                      "(lists, directories, competitors, customers"
+                      + (f", {seen} already researched for you" if seen else "") + ")", level="done")
     return list(pool.values()), list(set_aside.values())

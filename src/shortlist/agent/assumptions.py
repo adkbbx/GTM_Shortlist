@@ -12,6 +12,7 @@ class Changes:
     edited_criteria: set[str] = field(default_factory=set)
     added_criteria: set[str] = field(default_factory=set)
     count_changed: bool = False
+    target_size_changed: bool = False
 
     @property
     def needs_research(self) -> bool:
@@ -41,7 +42,8 @@ def merge(old: Overrides, new: Overrides) -> Overrides:
                      exclusions=unique(old.exclusions, new.exclusions)[:20], criteria=list(criteria.values())[:12],
                      company_count=new.company_count or old.company_count,
                      interpretation=new.interpretation or old.interpretation,
-                     offer=new.offer or old.offer, buyer=new.buyer or old.buyer)
+                     offer=new.offer or old.offer, buyer=new.buyer or old.buyer,
+                     target_size=new.target_size or old.target_size)
 
 
 def apply_competitors(result: RunResult, overrides: Overrides, changes: Changes):
@@ -111,10 +113,21 @@ def apply_reading(result: RunResult, overrides: Overrides, reading: Interpretati
         profile.buyer = Statement(value=overrides.buyer, origin="user")
 
 
+def apply_target_size(result: RunResult, overrides: Overrides, changes: Changes):
+    """The size you set replaces the inferred one; saved evidence for the size rule is judged again against it."""
+    profile = result.profile
+    if profile is None or not overrides.target_size:
+        return
+    if profile.target_size is None or profile.target_size.value != overrides.target_size:
+        profile.target_size = Statement(value=overrides.target_size, origin="user")
+        changes.target_size_changed = True
+
+
 def apply(result: RunResult, overrides: Overrides) -> Changes:
     changes = Changes()
     apply_competitors(result, overrides, changes)
     apply_criteria(result, overrides, changes)
+    apply_target_size(result, overrides, changes)
     result.disqualifiers = disqualifier_rules(result.profile, result.competitors)
     if overrides.company_count and overrides.company_count != result.company_count:
         result.company_count = overrides.company_count

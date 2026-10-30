@@ -35,6 +35,9 @@ test('a website alone produces a live board with three verdicts and quoted evide
   // What we assumed: every item opens its quote; nothing had to be typed.
   const assumptions = page.locator('.agent-assumptions');
   await expect(assumptions.getByRole('heading', { name: 'What we assumed' })).toBeVisible();
+  // The size the seller serves is always shown, marked as inferred, and can be changed without typing anything else.
+  await expect(assumptions.getByRole('button', { name: /^Small and mid-sized online stores, about 5 to 200 people, Inferred/ })).toBeVisible();
+  await expect(assumptions.locator('summary', { hasText: 'Change the company size' })).toBeVisible();
   await assumptions.getByRole('button', { name: /^Help desk software for online stores/ }).click();
   const popover = page.locator('.agent-popover:popover-open');
   await expect(popover).toContainText('Northwind Desk is help desk software for online stores.');

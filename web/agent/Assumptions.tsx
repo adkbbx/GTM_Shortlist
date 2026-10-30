@@ -59,6 +59,13 @@ export function Assumptions({ run, apply, busy }: { run: AgentRun; apply: Apply;
     <dl className="agent-assumption-list">
       {profile.offer && <div><dt>Offer</dt><dd><Chip label={profile.offer.value} quotes={profile.offer.quotes} note={originNote(profile.offer.origin)} /></dd></div>}
       {profile.buyer && <div><dt>Buyer</dt><dd><Chip label={profile.buyer.value} quotes={profile.buyer.quotes} note={originNote(profile.buyer.origin)} /></dd></div>}
+      {(profile.target_size || editable) && <div><dt>Company size</dt><dd>
+        {profile.target_size && <Chip label={profile.target_size.value} tag={profile.target_size.origin === 'user' ? 'You set' : 'Inferred'}
+          quotes={profile.target_size.quotes}
+          note={profile.target_size.origin === 'user' ? 'You set this.' : 'Inferred from who your site speaks to. A company is rejected only when a quote shows it is clearly bigger.'} />}
+        {editable && <SmallForm label="Change the company size" placeholder="For example: seed to Series A startups, 5 to 50 people" action="Save"
+          busy={busy} onSubmit={value => apply({ target_size: value })} />}
+      </dd></div>}
       <div><dt>Fit checks</dt><dd>
         {profile.fit_criteria.map(criterion => <Chip key={criterion.id} label={criterion.text} off={!criterion.enabled}
           tag={criterion.required ? 'Required' : 'Nice to have'} quotes={criterion.quotes}>
@@ -87,7 +94,9 @@ export function Assumptions({ run, apply, busy }: { run: AgentRun; apply: Apply;
         {run.disqualifiers.filter(rule => rule.rule === 'uses_direct_competitor').length > 0 && <Chip label="Uses a direct competitor" tone="bad" quotes={[]}
           note={run.disqualifiers.filter(rule => rule.rule === 'uses_direct_competitor').map(rule => rule.text).join('. ')} />}
         {rules.map(rule => <Chip key={rule.id} label={rule.text} tone="bad" quotes={[]}
-          note={rule.rule === 'outside_stated_size_or_region' ? 'From what your site says you serve.' : 'Applied automatically. A company is rejected only when the skeptic agrees a quote shows it.'} />)}
+          note={rule.id === 'outside_target_size' ? 'From the company size above; change it there if it is wrong.'
+            : rule.rule === 'outside_stated_size_or_region' ? 'From what your site says you serve.'
+              : 'Applied automatically. A company is rejected only when the skeptic agrees a quote shows it.'} />)}
         {run.overrides.exclusions.map(entry => <Chip key={entry} label={`Excluded: ${entry}`} tone="bad" quotes={[]} note="You excluded this." />)}
         {editable && <SmallForm label="Exclude a company" placeholder="company.com or name" action="Exclude" busy={busy} onSubmit={value => apply({ exclusions: [value] })} />}
       </dd></div>

@@ -146,7 +146,8 @@ function Transparency({ run }: { run: AgentRun }) {
     </details>}
     {run.set_aside.length > 0 && <details>
       <summary>{run.set_aside.length} search {run.set_aside.length === 1 ? 'result was' : 'results were'} set aside</summary>
-      <ul>{run.set_aside.map(item => <li key={item.domain}>{item.domain}: {item.reason}</li>)}</ul>
+      <ul>{run.set_aside.map(item => <li key={item.domain}>{item.domain}: {item.reason}
+        {item.previous_run && <> · <a href={`?agent=${item.previous_run}`}>open that search</a></>}</li>)}</ul>
     </details>}
   </section>;
 }

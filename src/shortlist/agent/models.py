@@ -101,6 +101,9 @@ class SellerProfile(Model):
     need_signals: list[Signal] = Field(default_factory=list, max_length=6)
     timing_signals: list[Signal] = Field(default_factory=list, max_length=6)
     stated_limits: list[StatedLimit] = Field(default_factory=list, max_length=4)
+    # The size and stage of company the offer is written for, stated or inferred from the site. Without it the agent
+    # researched HubSpot and Salesforce for a startup agency (30 Oct live runs).
+    target_size: Statement | None = None
     interpretations: list[Interpretation] = Field(default_factory=list, max_length=3)
     pages: list[PageRef] = Field(default_factory=list, max_length=6)
 
@@ -187,6 +190,8 @@ class SetAside(Model):
     domain: str
     url: str = ""
     reason: str
+    # Set when the company was researched for this seller in an earlier run: that run's id, to open it.
+    previous_run: str | None = None
 
 
 class CompanyResult(Model):
@@ -254,6 +259,7 @@ class Overrides(Model):
     interpretation: str | None = Field(default=None, max_length=80)
     offer: str | None = Field(default=None, min_length=3, max_length=600)
     buyer: str | None = Field(default=None, min_length=3, max_length=600)
+    target_size: str | None = Field(default=None, min_length=3, max_length=300)
 
 
 class AgentEvent(Model):
