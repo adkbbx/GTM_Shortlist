@@ -1,5 +1,14 @@
 # Progress and handoff
 
+## 31 October, Meta hackathon: public demo on Render, blocked by the model's region
+
+- **Hosted (4da3862):** `gtm-shortlist-agent` on Render runs the same Docker image with `python -m shortlist.container_entrypoint agent`. The page and the health check work at https://gtm-shortlist-agent.onrender.com.
+- **First search failed:** "Investigator returned HTTP 404". Free probes from the laptop showed a wrong key gives 401 `invalid_api_key` and an unknown model gives 404 `model_not_found`. The demo's own key is valid: its model list request succeeds.
+- **Error codes and a model check (c11a78e):** provider errors now end with the provider's error code, for example "Investigator returned HTTP 404 (model_not_found)", and nothing else from the body. The demo's `/api/health` reports `investigator_model_available` from `GET /models`, at most every ten minutes.
+- **Deployed health:** `investigator_model_available: false`. From the laptop the same key lists `muse-spark-1.3` among 9 models, so Meta withholds the model from the server's region. Render cannot move a service to another region.
+- **Region diagnostics (35b65e6):** health now also lists `investigator_models_offered` and `server_location` (country/data centre from Cloudflare's trace page, since Render does not tell a service its region). Checked locally against the real services: available, 9 models, location parsed. Not yet deployed: the service's Auto-Deploy is off.
+- **Next:** create the service again in Oregon (US West), as the deploy guide now says, and confirm `investigator_model_available: true` before any search. No generation or search credits were used for these checks.
+
 ## 30 October, Meta hackathon: first live runs with real Meta and Baseten models
 
 Approved by the owner: one company for https://eygentic.com, $0.25 cap. Total spent across the three calls below was about $0.251 estimated. The budget is checked before each call, so the last call ran about 0.1 cent past the cap.
