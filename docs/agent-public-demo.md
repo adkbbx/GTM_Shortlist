@@ -30,6 +30,20 @@ $env:AGENT_PUBLIC_SYNTHETIC="on"
 
 Open http://127.0.0.1:8020 and search for `seller.example`. Remove `AGENT_PUBLIC_SYNTHETIC` and put `META_MODEL_API_KEY` and `BASETEN_API_KEY` in `.env` to run live locally.
 
+## Deploy on Render (for now)
+
+The demo runs from the same Docker image as the `gtm-shortlist` web service, started with `python -m shortlist.container_entrypoint agent`. `render.yaml` defines it as `gtm-shortlist-agent`. Until this branch is merged, create it by hand so the existing Blueprint, which follows `main`, is not involved.
+
+1. Render dashboard → **New → Web Service** → the GTM_Shortlist repository.
+2. **Name** `gtm-shortlist-agent`, **Branch** `meta-hackathon`, **Language** Docker, **Dockerfile path** `./Dockerfile`, **Docker Command** `python -m shortlist.container_entrypoint agent`, **Instance** Free.
+3. **Advanced:** Health Check Path `/api/health`. Auto-Deploy Off matches the other services.
+4. **Environment → Add from .env:** paste the contents of the private, git-ignored `deploy/secrets/agent-demo.env`. It holds the Meta and Baseten keys, a generated `AGENT_PUBLIC_SECRET`, `AGENT_PUBLIC_URL=https://gtm-shortlist-agent.onrender.com` and the limits. Never commit it or paste it in chat.
+5. **Create Web Service** and wait for the Docker build.
+6. If Render assigns a different URL, set `AGENT_PUBLIC_URL` to that exact origin, then save and deploy. Until they match, every request is refused with "Invalid host header".
+7. Open the URL and run one search for your own website (about $0.30). Check the cost in the board's footer, and set spend limits on the Meta billing page and in Baseten.
+
+On the free instance, search pages are files in `/tmp`. A restart, a redeploy, or sleep after about 15 idle minutes loses them, so shared links do not last, and the first visit after sleep takes about a minute. For lasting links, use a paid instance with a persistent disk and set `AGENT_PUBLIC_DATA` to a folder on that disk (check it is writable by the image's non-root user), or move to Modal below.
+
 ## Deploy on Modal
 
 1. Install the Modal CLI and sign in once: `pip install modal`, then `modal setup`.

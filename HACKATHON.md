@@ -73,6 +73,9 @@ This is the complete list.
 - `.env.example`: the agent's settings and the public demo's. They are read in `src/shortlist/agent/settings.py` and `src/shortlist/agent/public.py`, so `config.py` is unchanged.
 - `web/main.tsx`: start-page routing. The agent is the default start; `?run=`, `?classic=1` and sign-in links keep the classic workspace, and hosted installations fall back to it. A page marked `agent-only` (the public demo) always shows the agent.
 - `playwright.config.ts`: a second test web server on port 8017 for the public demo spec.
+- `render.yaml`: a third web service, `gtm-shortlist-agent`, for the public demo on the same image.
+- `src/shortlist/container_entrypoint.py`: an `agent` choice that starts the public demo. The `api`, `worker` and `migrate` choices are unchanged.
+- `tests/test_render_startup.py`: test ids now use the service name, plus the expected command for the demo service.
 - `scripts/export_schema.py`: also exports the agent's JSON schemas.
 - `scripts/ui_test_server.py`: the browser test server gives the agent the labelled synthetic providers and keeps the classic start for the existing journeys (the agent spec opens `/?flow=agent`).
 - `web/generated/`: regenerated `openapi.json` and `api.d.ts`, plus new `AgentRunView.json`, `AgentRunSummary.json` and `AgentStarted.json`. Existing schemas are unchanged in content.

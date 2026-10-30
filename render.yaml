@@ -41,6 +41,30 @@
         {"key": "SHORTLIST_GLOBAL_SEARCH_CAP", "value": "200"},
         {"key": "SHORTLIST_SOURCE_CACHE_HOURS", "value": "24"}
       ]
+    },
+    {
+      "type": "web",
+      "name": "gtm-shortlist-agent",
+      "runtime": "docker",
+      "dockerfilePath": "./Dockerfile",
+      "dockerCommand": "python -m shortlist.container_entrypoint agent",
+      "plan": "free",
+      "autoDeployTrigger": "off",
+      "healthCheckPath": "/api/health",
+      "envVars": [
+        {"key": "PORT", "value": "8000"},
+        {"key": "AGENT_PUBLIC_URL", "sync": false},
+        {"key": "AGENT_PUBLIC_SECRET", "sync": false},
+        {"key": "META_MODEL_API_KEY", "sync": false},
+        {"key": "BASETEN_API_KEY", "sync": false},
+        {"key": "AGENT_PUBLIC_DATA", "value": "/tmp/agent-runs"},
+        {"key": "AGENT_PUBLIC_TRUST_PROXY", "value": "on"},
+        {"key": "AGENT_PUBLIC_MAX_COMPANIES", "value": "5"},
+        {"key": "AGENT_PUBLIC_RUNS_PER_HOUR", "value": "3"},
+        {"key": "AGENT_PUBLIC_MAX_ACTIVE", "value": "3"},
+        {"key": "AGENT_PUBLIC_DAILY_USD", "value": "10"},
+        {"key": "AGENT_RUN_BUDGET_USD", "value": "0.50"}
+      ]
     }
   ]
 }

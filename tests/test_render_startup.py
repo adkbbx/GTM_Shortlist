@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SERVICES = json.loads((ROOT / "render.yaml").read_text(encoding="utf-8"))["services"]
 
 
-@pytest.mark.parametrize("service", SERVICES, ids=lambda item: item["type"])
+@pytest.mark.parametrize("service", SERVICES, ids=lambda item: item["name"])
 def test_render_override_launches_and_selects_the_right_process(service, monkeypatch):
     command = shlex.split(service["dockerCommand"])
     # Run the configured complete command with ENTRYPOINT absent, just as Render does.
@@ -34,5 +34,8 @@ def test_render_override_launches_and_selects_the_right_process(service, monkeyp
     assert len(dispatched) == 1
     if service["type"] == "worker":
         assert dispatched[0] == [sys.executable, "-m", "shortlist.cli", "worker"]
+    elif service["name"] == "gtm-shortlist-agent":
+        # The public agent demo needs no hosted settings and serves its own app factory.
+        assert dispatched[0][1:5] == ["-m", "uvicorn", "--factory", "shortlist.agent.public:create_public_app"]
     else:
         assert dispatched[0][1:4] == ["-m", "uvicorn", "shortlist.api:app"]
