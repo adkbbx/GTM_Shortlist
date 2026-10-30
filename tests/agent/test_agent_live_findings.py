@@ -155,6 +155,24 @@ def test_a_competitor_whose_site_cannot_be_read_stays_listed_as_unverified(provi
     assert all(c.domain != "metricsboard.example" for c in result.companies)
 
 
+def test_a_profile_without_signals_is_asked_once_more(providers, monkeypatch):
+    """Crisp run: the seller profile came back with no need or timing signal, so nothing could be Shortlisted."""
+    original = synthetic.SELLER_ANSWER["need_signals"]
+    monkeypatch.setitem(synthetic.SELLER_ANSWER, "need_signals", [])
+    monkeypatch.setitem(synthetic.SELLER_ANSWER, "timing_signals", [])
+    respond = providers.investigator.respond
+
+    def answering_on_retry(**kwargs):
+        if "had no need_signals" in json.dumps(kwargs["input"]):
+            synthetic.SELLER_ANSWER["need_signals"] = original  # restored by monkeypatch after the test
+        return respond(**kwargs)
+
+    monkeypatch.setattr(providers.investigator, "respond", answering_on_retry)
+    result = AgentRunner(providers).run(SELLER)
+    assert [s.id for s in result.profile.need_signals] == ["need-1", "need-2"]
+    assert [c.operation for c in result.telemetry.calls].count("seller_profile:signals") == 1
+
+
 def test_budget_reached_during_discovery_keeps_the_companies_already_found(providers):
     result = AgentRunner(providers, budget_usd=0.012, concurrency=1).run(SELLER)
     assert result.telemetry.budget_reached and {c.domain for c in result.companies} >= {"trailgear.example"}

@@ -189,6 +189,18 @@ def understand_seller(website: str, calls: Calls, fetcher: Fetcher, emit: Callab
                                         input=[{"role": "user", "content": request + "<data>\n" + blocks + "\n</data>"}],
                                         max_output_tokens=4000)
     profile = build_profile(website, answer, pages, dropped)
+    if profile.offer and not profile.need_signals and not profile.timing_signals:
+        # Live run (crisp.chat): the answer had no need or timing signal, so no company could ever be Shortlisted.
+        # Ask once more and keep only the new signals; the offer, buyer and fit checks stay as first read.
+        emit("seller", "No need or timing signals in the first reading; asking once more", level="warn")
+        retry = (request + "Your earlier answer had no need_signals and no timing_signals. Return the full JSON object "
+                 "again with 2 to 4 need_signals and up to 3 timing_signals, following the rules.\n")
+        again, _ = calls.investigator_json("seller_profile:signals", SellerAnswer, instructions=SELLER_INSTRUCTIONS,
+                                           input=[{"role": "user", "content": retry + "<data>\n" + blocks + "\n</data>"}],
+                                           max_output_tokens=4000)
+        signals = build_profile(website, again, pages, dropped)
+        profile = profile.model_copy(update={"need_signals": signals.need_signals,
+                                             "timing_signals": signals.timing_signals})
     emit("seller", f"Understood the offer with {len(profile.fit_criteria)} fit checks, "
                    f"{len(profile.need_signals)} need signals and {len(profile.existing_customers)} named customers",
          level="done")
