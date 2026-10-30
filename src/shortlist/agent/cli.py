@@ -3,7 +3,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from shortlist.agent.evaluation import describe, read_labels, score, without_skeptic
+from shortlist.agent.evaluation import batches, combine, describe, read_labels, score, without_skeptic
 from shortlist.agent.models import MAX_COMPANIES, Overrides, RunResult
 from shortlist.agent.pipeline import AgentRunner, Providers
 from shortlist.agent.providers import AgentProviderError
@@ -76,9 +76,13 @@ def main(argv: list[str] | None = None) -> int:
             if args.no_skeptic:
                 result = without_skeptic(result)
         else:
-            result = execute(args, args.website, domains=[label.domain for label in labels], save=False)
-            if result is None:
-                return 2
+            parts = []
+            for batch in batches(labels, MAX_COMPANIES):
+                part = execute(args, args.website, domains=[label.domain for label in batch], save=False)
+                if part is None:
+                    return 2
+                parts.append(part)
+            result = combine(parts)
         report = score(result, labels)
         print(describe(report))
         if args.output:

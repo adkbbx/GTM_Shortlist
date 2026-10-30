@@ -136,6 +136,17 @@ def test_cli_run_and_eval(tmp_path, monkeypatch, capsys):
     assert "Agreement: 100%" in capsys.readouterr().out
 
 
+def test_cli_eval_researches_long_label_lists_in_batches(tmp_path, monkeypatch, capsys):
+    """A run researches at most MAX_COMPANIES; an eval sheet of 35 or more companies is researched in batches."""
+    monkeypatch.setattr(cli, "MAX_COMPANIES", 2)
+    report = tmp_path / "report.json"
+    assert cli.main(["eval", str(LABELS), "--website", "seller.example", "--synthetic", "--output", str(report)]) == 0
+    out = capsys.readouterr().out
+    assert "Labelled companies: 3 (researched 3)" in out and "Agreement: 100%" in out
+    scored = json.loads(report.read_text(encoding="utf-8"))
+    assert scored["model_calls"] > 0 and scored["total_cost_usd"] > 0
+
+
 def test_cli_explains_missing_keys(monkeypatch, capsys, tmp_path):
     for name in ("META_MODEL_API_KEY", "BASETEN_API_KEY"):
         monkeypatch.delenv(name, raising=False)

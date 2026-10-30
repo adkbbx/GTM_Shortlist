@@ -68,6 +68,28 @@ def read_labels(path: Path) -> list[Label]:
     return labels
 
 
+def batches(labels: list[Label], size: int) -> list[list[Label]]:
+    """A run researches at most MAX_COMPANIES companies, so a longer labelled list is researched in batches."""
+    return [labels[start:start + size] for start in range(0, len(labels), size)]
+
+
+def combine(results: list[RunResult]) -> RunResult:
+    """One result for scoring from several batch runs: every company, and telemetry summed across the runs. Each
+    batch re-reads the seller, so the profile shown is the first batch's."""
+    combined = results[0].model_copy(deep=True)
+    for part in results[1:]:
+        combined.companies += [c for c in part.companies if c.domain not in {k.domain for k in combined.companies}]
+        t, extra = combined.telemetry, part.telemetry
+        t.calls += extra.calls
+        for field in ("cost_usd", "budget_usd", "input_tokens", "output_tokens", "searches", "model_calls",
+                      "pages_fetched", "elapsed_ms"):
+            setattr(t, field, round(getattr(t, field) + getattr(extra, field), 6))
+        t.budget_reached = t.budget_reached or extra.budget_reached
+        combined.dropped += part.dropped
+        combined.set_aside += part.set_aside
+    return combined
+
+
 def percentile(values: list[int], share: float) -> int | None:
     if not values:
         return None
