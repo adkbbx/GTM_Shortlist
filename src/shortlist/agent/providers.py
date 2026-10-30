@@ -198,20 +198,46 @@ def parse_response(data: dict) -> ModelTurn:
         incomplete=data.get("status") == "incomplete")
 
 
-def meta_model_listed(settings: AgentSettings, transport: httpx.BaseTransport | None = None) -> bool | None:
-    """Whether the Meta Model API offers the configured model to this server (GET /models, no generation). Model
-    availability varies by country, and a deployed demo got model_not_found where a laptop did not. None: unknown."""
-    if not settings.meta_api_key.get_secret_value():
-        return None
+MODEL_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,79}")
+CLOUDFLARE_TRACE = "https://www.cloudflare.com/cdn-cgi/trace"
+TRACE_CODE = re.compile(r"[A-Z]{2,3}")
+
+
+@dataclass(frozen=True)
+class ModelCheck:
+    """What the Meta Model API offers this server (GET /models, no generation) and where the server is. Model
+    availability varies by country: a deployed demo got model_not_found where a laptop did not."""
+    available: bool | None = None  # None: unknown
+    offered: tuple[str, ...] = ()
+    location: str | None = None  # country/data centre as Cloudflare sees this server, e.g. "US/SEA"
+
+
+def server_location(client: httpx.Client) -> str | None:
+    """Render does not tell a service its region, so ask Cloudflare where this server's requests come from."""
     try:
-        with httpx.Client(timeout=10, trust_env=False, transport=transport) as client:
+        response = client.get(CLOUDFLARE_TRACE)
+        response.raise_for_status()
+    except httpx.HTTPError:
+        return None
+    fields = dict(line.split("=", 1) for line in response.text.splitlines() if "=" in line)
+    codes = [fields.get("loc", ""), fields.get("colo", "")]
+    return "/".join(codes) if all(TRACE_CODE.fullmatch(code) for code in codes) else None
+
+
+def meta_model_check(settings: AgentSettings, transport: httpx.BaseTransport | None = None) -> ModelCheck:
+    if not settings.meta_api_key.get_secret_value():
+        return ModelCheck()
+    with httpx.Client(timeout=10, trust_env=False, transport=transport) as client:
+        location = server_location(client)
+        try:
             response = client.get(settings.meta_base_url + "/models", headers={
                 "Authorization": "Bearer " + settings.meta_api_key.get_secret_value()})
             response.raise_for_status()
-            listed = {item.get("id") for item in response.json().get("data", []) if isinstance(item, dict)}
-    except (httpx.HTTPError, ValueError, AttributeError):
-        return None
-    return settings.meta_model in listed
+            listed = [item.get("id") for item in response.json().get("data", []) if isinstance(item, dict)]
+        except (httpx.HTTPError, ValueError, AttributeError):
+            return ModelCheck(location=location)
+    offered = tuple(sorted({model for model in listed if isinstance(model, str) and MODEL_ID.fullmatch(model)}))[:20]
+    return ModelCheck(available=settings.meta_model in listed, offered=offered, location=location)
 
 
 class MetaInvestigator:

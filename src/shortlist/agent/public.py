@@ -29,7 +29,7 @@ from shortlist.agent.api import AgentStartInput, RoutePolicy, register_agent_rou
 from shortlist.agent.files import FileAgentRuns
 from shortlist.agent.models import Overrides, RunResult
 from shortlist.agent.pipeline import Providers
-from shortlist.agent.providers import meta_model_listed
+from shortlist.agent.providers import ModelCheck, meta_model_check
 from shortlist.agent.service import AgentService, real_providers
 from shortlist.agent.settings import AgentSettings
 from shortlist.domain import utcnow
@@ -106,8 +106,11 @@ class PublicHealth(BaseModel):
     investigator_ready: bool
     skeptic_ready: bool
     # Whether Meta offers the configured model to this server (None: unknown or synthetic). False usually means the
-    # host's region: model availability varies by country.
+    # host's region: model availability varies by country. The models Meta does offer here and where the server is
+    # (country/data centre) say which.
     investigator_model_available: bool | None = None
+    investigator_models_offered: list[str] = Field(default_factory=list)
+    server_location: str | None = None
 
 
 class PublicPolicy(RoutePolicy):
@@ -186,7 +189,7 @@ def ui_directory(configured: Path | None) -> Path | None:
 def create_public_app(settings: PublicSettings | None = None, *, agent_settings: Callable[[], AgentSettings] | None = None,
                       providers: Callable[[AgentSettings], Providers] | None = None,
                       after_write: Callable[[], None] | None = None,
-                      model_check: Callable[[AgentSettings], bool | None] = meta_model_listed) -> FastAPI:
+                      model_check: Callable[[AgentSettings], ModelCheck] = meta_model_check) -> FastAPI:
     settings = settings or PublicSettings.load()
     load_agent = agent_settings or AgentSettings.load
     if providers is None and settings.synthetic:
@@ -218,23 +221,25 @@ def create_public_app(settings: PublicSettings | None = None, *, agent_settings:
     async def not_found(request, exc):
         return JSONResponse({"detail": "This search was not found. Check the link or start a new search."}, status_code=404)
 
-    checked: dict[str, float | bool | None] = {"at": 0.0, "available": None}
+    checked: dict = {"at": 0.0, "result": ModelCheck()}
 
-    def model_available(agent: AgentSettings) -> bool | None:
+    def model_state(agent: AgentSettings) -> ModelCheck:
         if settings.synthetic:
-            return None
+            return ModelCheck()
         if time.monotonic() - checked["at"] > 600:  # at most one /models request per ten minutes
-            checked["available"], checked["at"] = model_check(agent), time.monotonic()
-        return checked["available"]
+            checked["result"], checked["at"] = model_check(agent), time.monotonic()
+        return checked["result"]
 
     @app.get("/api/health", response_model=PublicHealth)
     def health():
         agent = load_agent()
         ready = agent.readiness()
+        model = model_state(agent)
         return PublicHealth(max_companies=settings.max_companies, turnstile_site_key=settings.turnstile_site_key or None,
                             synthetic=settings.synthetic, investigator_ready=settings.synthetic or ready["investigator"],
                             skeptic_ready=settings.synthetic or ready["skeptic"],
-                            investigator_model_available=model_available(agent))
+                            investigator_model_available=model.available,
+                            investigator_models_offered=list(model.offered), server_location=model.location)
 
     register_agent_routes(app, None, service, policy)
 

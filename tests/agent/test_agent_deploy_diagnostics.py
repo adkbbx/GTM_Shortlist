@@ -7,7 +7,13 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from shortlist.agent.providers import AgentProviderError, MetaInvestigator, error_code, meta_model_listed
+from shortlist.agent.providers import (
+    AgentProviderError,
+    MetaInvestigator,
+    ModelCheck,
+    error_code,
+    meta_model_check,
+)
 from shortlist.agent.public import PublicSettings, create_public_app
 from shortlist.agent.settings import AgentSettings
 from shortlist.agent.synthetic import synthetic_providers
@@ -32,13 +38,27 @@ def test_errors_carry_the_provider_code_and_nothing_else():
     assert error_code(httpx.Response(429, json={"error": {"type": "rate_limit_error"}})) == " (rate_limit_error)"
 
 
-def test_model_listing_says_whether_this_server_can_use_the_model():
-    listing = {"data": [{"id": "muse-spark-1.3"}, {"id": "muse-wonder-1.0"}]}
+TRACE = "fl=1f1\nh=www.cloudflare.com\nip=203.0.113.9\nloc=DE\ncolo=FRA\nhttp=http/1.1\n"
+
+
+def meta_and_cloudflare(models_status, models_body, trace=TRACE):
+    def handle(request):
+        if request.url.host == "www.cloudflare.com":
+            return httpx.Response(200, text=trace)
+        return httpx.Response(models_status, json=models_body)
+    return httpx.MockTransport(handle)
+
+
+def test_model_check_says_what_meta_offers_this_server_and_where_it_is():
+    listing = {"data": [{"id": "muse-spark-1.3"}, {"id": "muse-wonder-1.0"}, {"id": "<script>"}, {"name": "no id"}]}
     settings = AgentSettings(meta_api_key=KEY)
-    assert meta_model_listed(settings, transport=reply(200, listing)) is True
-    assert meta_model_listed(settings.model_copy(update={"meta_model": "muse-spark-9"}), transport=reply(200, listing)) is False
-    assert meta_model_listed(settings, transport=reply(503, text="down")) is None
-    assert meta_model_listed(AgentSettings(), transport=reply(200, listing)) is None  # no key, nothing to ask
+    check = meta_model_check(settings, transport=meta_and_cloudflare(200, listing))
+    assert check == ModelCheck(available=True, offered=("muse-spark-1.3", "muse-wonder-1.0"), location="DE/FRA")
+    other = settings.model_copy(update={"meta_model": "muse-spark-9"})
+    assert meta_model_check(other, transport=meta_and_cloudflare(200, listing)).available is False
+    down = meta_model_check(settings, transport=meta_and_cloudflare(503, {"error": "down"}, trace="loc=<b>\ncolo=FRA"))
+    assert down == ModelCheck()  # unknown, and a trace that is not plain codes is dropped
+    assert meta_model_check(AgentSettings(), transport=meta_and_cloudflare(200, listing)) == ModelCheck()  # no key
 
 
 def test_demo_health_reports_model_availability_at_most_every_ten_minutes(tmp_path, monkeypatch):
@@ -46,14 +66,16 @@ def test_demo_health_reports_model_availability_at_most_every_ten_minutes(tmp_pa
 
     def check(settings):
         calls.append(settings.meta_model)
-        return False
+        return ModelCheck(available=False, offered=("muse-wonder-1.0",), location="DE/FRA")
 
     settings = PublicSettings(app_url="https://demo.example", secret="public-demo-test-secret-0123456789abcdef",
                               data_dir=tmp_path / "runs", dist_dir=tmp_path / "missing")
     app = create_public_app(settings, agent_settings=lambda: AgentSettings(meta_api_key=KEY),
                             providers=lambda agent: synthetic_providers(), model_check=check)
     with TestClient(app, base_url="https://demo.example") as client:
-        assert client.get("/api/health").json()["investigator_model_available"] is False
+        health = client.get("/api/health").json()
+        assert (health["investigator_model_available"], health["investigator_models_offered"],
+                health["server_location"]) == (False, ["muse-wonder-1.0"], "DE/FRA")
         assert client.get("/api/health").json()["investigator_model_available"] is False
         assert calls == ["muse-spark-1.3"]
         later = time.monotonic() + 601
