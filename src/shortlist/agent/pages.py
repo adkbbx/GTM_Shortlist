@@ -179,6 +179,23 @@ POWERED = re.compile(r"\b(?:powered by|built (?:with|on)|support by|chat by|runs
                      re.IGNORECASE)
 SCANNED_ATTRIBUTES = {"script": ("src",), "link": ("href",), "iframe": ("src",), "img": ("src", "alt", "title"),
                       "a": ("href", "title"), "source": ("src",), "embed": ("src",)}
+# Third-party addresses inside inline <script> code. Chat and support widgets (Intercom, LiveChat, Drift, Crisp)
+# install with inline snippets that build their script URL in JavaScript, so a src-only scan never saw them.
+INLINE_URL = re.compile(r"(?:https?:)?//[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+[^\s'\"`<>)]{0,120}",
+                        re.IGNORECASE)
+
+
+def inline_urls(soup: BeautifulSoup, page_url: str, owner: str) -> list[str]:
+    found = []
+    for element in soup.find_all("script"):
+        if element.get("src"):
+            continue
+        for match in INLINE_URL.finditer(element.string or ""):
+            value = match.group(0)
+            host = (urlsplit(urljoin(page_url, value)).hostname or "").casefold()
+            if host and host != owner and not host.endswith("." + owner) and value not in found:
+                found.append(value)
+    return found[:100]
 
 
 def signature(page: Page, homepage: bool = False) -> PageSignature:
@@ -201,6 +218,8 @@ def signature(page: Page, homepage: bool = False) -> PageSignature:
             if key not in seen:
                 seen.add(key)
                 attributes.append(Attribute(tag=element.name, attr=attr, value=value))
+    for value in inline_urls(soup, page.url, owner):
+        attributes.append(Attribute(tag="script", attr="inline", value=value))
     lines = page.full_text.splitlines()
     kind = page_kind(page.url, homepage)
     return PageSignature(url=page.url, kind=kind, fetched_at=page.fetched_at, attributes=attributes[:400],

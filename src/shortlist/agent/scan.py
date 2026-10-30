@@ -30,12 +30,35 @@ def _named(text: str, competitor: Competitor) -> bool:
                for name in brand_names(competitor))
 
 
-def _host_matches(value: str, domain: str) -> bool:
+# Vendors serve their widgets from other domains than their website; a scan by website domain alone missed them.
+VENDOR_HOSTS = {
+    "intercom.com": ("intercom.io", "intercomcdn.com"), "zendesk.com": ("zdassets.com", "zopim.com", "zendesk.co.jp"),
+    "drift.com": ("driftt.com",), "livechat.com": ("livechatinc.com",), "tidio.com": ("tidio.co",),
+    "hubspot.com": ("hs-scripts.com", "hsforms.net", "hs-analytics.net", "hubspot.net", "usemessages.com"),
+    "freshdesk.com": ("freshworks.com", "freshchat.com"), "gorgias.com": ("gorgias.chat", "gorgias.io"),
+    "helpscout.com": ("helpscout.net",), "frontapp.com": ("front.com",),
+}
+# A host label that is the brand plus a common hosting suffix ("intercomcdn", "livechatinc") is the vendor's own.
+HOST_SUFFIXES = ("", "cdn", "inc", "app", "hq", "static", "assets", "js")
+
+
+def _host(value: str) -> str:
     try:
-        host = (urlsplit(value if "//" in value else "https://" + value).hostname or "").casefold()
+        return (urlsplit(value if "//" in value else "https://" + value).hostname or "").casefold()
     except ValueError:
+        return ""
+
+
+def _vendor_host(value: str, competitor: Competitor) -> bool:
+    """The competitor's website domain, a known widget domain of that vendor, or a host label that is its brand."""
+    host = _host(value)
+    if not host:
         return False
-    return host == domain or host.endswith("." + domain)
+    domains = (competitor.domain, *VENDOR_HOSTS.get(competitor.domain, ()))
+    if any(host == domain or host.endswith("." + domain) for domain in domains):
+        return True
+    stem = competitor.domain.split(".")[0].casefold()
+    return len(stem) >= 5 and any(label == stem + suffix for label in host.split(".")[:-1] for suffix in HOST_SUFFIXES)
 
 
 def scan(signature: PageSignature, competitors: list[Competitor], company: str) -> list[EvidenceItem]:
@@ -57,8 +80,11 @@ def scan(signature: PageSignature, competitors: list[Competitor], company: str) 
 
     for competitor in competitors:
         for attribute in signature.attributes:
-            if attribute.attr in ("src", "href"):
-                if _host_matches(attribute.value, competitor.domain):
+            if attribute.attr == "inline":
+                if _vendor_host(attribute.value, competitor):
+                    hit(competitor, "inline script", attribute.value, "html")
+            elif attribute.attr in ("src", "href"):
+                if _vendor_host(attribute.value, competitor):
                     hit(competitor, PLACE.get(attribute.tag, "code"), attribute.value, "html")
             elif _named(attribute.value, competitor):
                 hit(competitor, PLACE.get(attribute.tag, "code") + " text", attribute.value, "html")

@@ -96,6 +96,31 @@ def test_scan_finds_script_badges_powered_by_and_integrations_pages():
     assert [h.quote.text for h in scan(sig, [RIVAL], "Shop")] == ["Connect RivalDesk in a click"]
 
 
+def test_scan_reads_inline_widget_snippets_and_vendor_hosts():
+    """Live runs never produced a Rejected verdict: widgets install with inline snippets and load from vendor domains
+    (widget.intercom.io for intercom.com), which a src-only, website-domain-only scan missed. SYNTHETIC pages."""
+    intercom = Competitor(name="Intercom", domain="intercom.com", classification="direct")
+    livechat = Competitor(name="LiveChat", domain="livechat.com", classification="direct")
+    front = Competitor(name="Front", domain="frontapp.com", classification="direct")
+    snippet = page("https://shop.example/", "<p>SYNTHETIC shop homepage text.</p><script>(function(){var d=document;"
+                   "var s=d.createElement('script');s.src='https://widget.intercom.io/widget/' + APP_ID;"
+                   "d.head.appendChild(s);var own='https://shop.example/x.js';})();</script>"
+                   "<script>window.__lc={license:1};var l=document.createElement('script');"
+                   "l.src='https://cdn.livechatinc.com/tracking.js';</script>")
+    sig = signature(snippet, homepage=True)
+    assert not any("shop.example" in a.value for a in sig.attributes if a.attr == "inline")
+    hits = scan(sig, [intercom, livechat], "Shop")
+    assert {(h.criterion_id, h.quote.text) for h in hits} == {
+        ("uses_direct_competitor:intercom.com", "https://widget.intercom.io/widget/"),
+        ("uses_direct_competitor:livechat.com", "https://cdn.livechatinc.com/tracking.js")}
+    assert all(h.quote.location == "html" and "inline script" in h.claim for h in hits)
+    cdn = page("https://shop.example/", '<p>SYNTHETIC shop homepage text for the CDN case.</p>'
+               '<script src="https://js.intercomcdn.com/frame.js"></script>'
+               '<script src="https://frontend-cdn.example/app.js"></script>')
+    assert [h.quote.text for h in scan(signature(cdn, homepage=True), [intercom, front], "Shop")] == [
+        "https://js.intercomcdn.com/frame.js"]
+
+
 def test_scan_ignores_unrelated_words_and_first_party_code():
     other = page("https://shop.example/", "<p>SYNTHETIC: our rival desk chairs are sturdy and our app is fast.</p>"
                  '<script src="https://shop.example/rival-desk.js"></script>')
