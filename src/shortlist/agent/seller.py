@@ -37,13 +37,16 @@ Rules:
 - Every quote is copied exactly, word for word, from one page's text, with that page's url. No paraphrase.
 - fit_criteria: 2 to 5 checks that can be observed on a target company's website (what it sells, how it sells,
   what it runs). Mark at most 2 as required, and only checks a company's own homepage normally states: what it sells
-  and who it sells to. Checks about how it sells or which tools it runs are nice to have (required: false).
+  and who it sells to. Checks about how it sells or which tools it runs are nice to have (required: false). Every
+  check must tell likely buyers apart from other companies: never one nearly every company passes, such as having a
+  website or serving customers online.
 - need_signals: 2 to 4 things a stranger can see on a target company's public pages (its site, careers page, job
   boards, press releases or news) that show it needs this, such as hiring a role the product helps or replaces,
   using an older tool the product replaces, or selling in a way the product supports. Write each as an observable
   fact, for example "Hiring SDRs or outbound sales reps". Never an internal state, belief, plan or performance
   (not "does not know what works", "is not confident", "struggles with", "wants to", "before X is proven"): no
-  public quote can show those.
+  public quote can show those. Never use a competitor's product as a need signal: using a competitor is checked
+  separately and rejects the company.
 - timing_signals: up to 3 dated public events that make now a good time, such as a launch, expansion into a new
   market, new funding or hiring for a new team. The same rule applies: events, not states of mind.
 - existing_customers: only companies the site names as customers (logos, case studies, testimonials).
