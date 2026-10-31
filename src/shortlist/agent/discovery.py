@@ -4,6 +4,7 @@ from collections.abc import Callable
 
 from shortlist.agent.answers import CompaniesAnswer
 from shortlist.agent.competitors import clean_domain, company_domain_issue
+from shortlist.agent.jobboards import JobBoards
 from shortlist.agent.llm import UNTRUSTED, Calls
 from shortlist.agent.models import MAX_COMPANIES, CandidateRef, Competitor, SellerProfile, SetAside
 from shortlist.agent.providers import WEB_SEARCH_TOOL, search_label
@@ -15,17 +16,21 @@ from shortlist.relevance import candidate_issue, company_page_issue
 from shortlist.selection import discussion_page
 
 DISCOVERY_INSTRUCTIONS = f"""You find companies that could buy a seller's product now, using web search. {UNTRUSTED}
-Search for the seller's need and timing signals happening now, not for a category: for example current job posts for
-a role named in the need signals (on job boards or careers pages), or news from the last six months about a launch,
-expansion or funding round named in the timing signals. Name the companies those results are about. You may also
-search for companies similar to the seller's named customers.
+Search for the seller's need and timing signals happening now, not for a category. When a signal is about hiring a
+role, start with companies' own job boards: search for that role on jobs.lever.co, boards.greenhouse.io,
+job-boards.greenhouse.io or jobs.ashbyhq.com (for example: site:jobs.lever.co "founding account executive"). A posting
+there is open now and names the company that posted it. For other signals, search news from the last six months
+about a launch, expansion or funding round named in the timing signals. Name the companies those results are about,
+with each company's own website domain, never the job board's. You may also search for companies similar to the
+seller's named customers.
 Aim for companies this seller can realistically win: within target_size (the size and stage the seller serves) and
 like its named customers. Leave out companies clearly bigger or later-stage than target_size, and household-name
 enterprises and category leaders unless the seller says it serves enterprises.
 Never return list articles, directories, review sites, news sites, job boards, the seller, its competitors, its
 existing customers, or people. At most 4 searches.
 Return only JSON: {{"companies": [{{"name": "company", "domain": "company.com", "url": "https://company.com/",
-"found_via": "the signal you saw and where, for example 'job post: SDR (Greenhouse, 12 Oct 2026)' or 'similar to <customer>'"}}]}}"""
+"found_via": "the signal you saw and where, for example 'job post: SDR (Greenhouse, 12 Oct 2026)' or 'similar to <customer>'",
+"posting_url": "the job posting's own url when found_via is a job post, else empty"}}]}}"""
 
 
 def excluded_domains(profile: SellerProfile, competitors: list[Competitor]) -> dict[str, str]:
@@ -74,9 +79,25 @@ def admit(url: str, name: str, found_via: str, excluded: dict[str, str], seller_
     return CandidateRef(domain=domain, name=name[:200], url=f"https://{domain}/", found_via=found_via[:500]), None
 
 
+def lead(item, boards: JobBoards | None, emit: Callable[..., None]) -> str:
+    """found_via for a named company. A job posting still listed on the company's own board becomes an open job post
+    lead with its url, which the investigation fetches and quotes first."""
+    found_via = item.found_via or "web search"
+    if boards is None or not item.posting_url:
+        return found_via
+    names = [n for n in (item.name, (clean_domain(item.url or item.domain) or "").split(".")[0]) if n]
+    match = boards.posting(item.posting_url, names)
+    if match is None:
+        return f"{found_via} (posting {item.posting_url[:200]} not confirmed open on the company's board)"
+    board, opening = match
+    emit("discovery", f"Confirmed open on {board.label}: {opening.title} ({item.name or item.domain})")
+    when = f", posted {opening.posted.isoformat()}" if opening.posted else ""
+    return f"open job post on its {board.label} board: {opening.title}{when} ({opening.url})"
+
+
 def discover(profile: SellerProfile, competitors: list[Competitor], count: int, calls: Calls,
-             emit: Callable[..., None], known: list[CandidateRef] | None = None, prior: dict[str, dict] | None = None
-             ) -> tuple[list[CandidateRef], list[SetAside]]:
+             emit: Callable[..., None], known: list[CandidateRef] | None = None, prior: dict[str, dict] | None = None,
+             boards: JobBoards | None = None) -> tuple[list[CandidateRef], list[SetAside]]:
     excluded = excluded_domains(profile, competitors)
     prior = prior or {}
     pool: dict[str, CandidateRef] = {c.domain: c for c in known or []}
@@ -107,7 +128,7 @@ def discover(profile: SellerProfile, competitors: list[Competitor], count: int, 
             emit("discovery", "Run budget reached; keeping the companies already found", level="warn")
             break
         # Companies the model named come first; raw search results only when they are a company's own page.
-        found = [(item.url or item.domain, item.name, item.found_via or "web search", False) for item in answer.companies]
+        found = [(item.url or item.domain, item.name, lead(item, boards, emit), False) for item in answer.companies]
         for search in turn.searches:
             emit("discovery", f"Searched {search_label(search.query)} ({len(search.results)} results)")
             found += [(result.url, result.title, f'search "{search.query}"', True) for result in search.results]

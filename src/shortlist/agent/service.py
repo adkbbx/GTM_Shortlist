@@ -4,6 +4,7 @@ from datetime import timedelta
 from threading import Thread
 
 from shortlist.agent.assumptions import merge
+from shortlist.agent.jobboards import JobBoards
 from shortlist.agent.models import Overrides, RunResult, Telemetry
 from shortlist.agent.pages import fetch_document
 from shortlist.agent.pipeline import AgentRunner, Providers
@@ -23,7 +24,7 @@ class RunConflict(ValueError):
 def real_providers(settings: AgentSettings) -> Providers:
     investigator = MetaInvestigator(settings)
     skeptic = BasetenSkeptic(settings) if settings.use_skeptic else None
-    return Providers(investigator=investigator, skeptic=skeptic, fetcher=fetch_document)
+    return Providers(investigator=investigator, skeptic=skeptic, fetcher=fetch_document, job_boards=JobBoards())
 
 
 def website_url(value: str) -> str:

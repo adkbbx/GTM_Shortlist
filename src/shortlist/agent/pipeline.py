@@ -12,6 +12,7 @@ from shortlist.agent import assumptions
 from shortlist.agent.competitors import TARGET_SIZE_RULE, find_competitors
 from shortlist.agent.discovery import discover
 from shortlist.agent.investigation import HOMEPAGE_UNREADABLE, Context, Investigation
+from shortlist.agent.jobboards import JobBoards
 from shortlist.agent.llm import AgentOutputError, Calls
 from shortlist.agent.models import (
     DEFAULT_COMPANIES,
@@ -45,6 +46,7 @@ class Providers:
     skeptic: SkepticModel | None
     fetcher: Fetcher
     synthetic: bool = False
+    job_boards: JobBoards | None = None
     clock: Callable[[], datetime] = utcnow
 
 
@@ -157,7 +159,7 @@ class AgentRunner:
                     for domain in domains]
         else:
             refs, aside = discover(profile, result.competitors, result.company_count, calls, self.emit,
-                                   prior=getattr(self, "history", {}))
+                                   prior=getattr(self, "history", {}), boards=self.providers.job_boards)
             result.set_aside = aside
         result.candidate_pool = refs
         self.research(result, calls, refs[:result.company_count])
@@ -198,7 +200,8 @@ class AgentRunner:
                                                           found_via=ref.found_via))
         self.save(result)
         ctx = Context(calls=calls, fetcher=self.providers.fetcher, profile=result.profile, competitors=result.competitors,
-                      rules=result.disqualifiers, emit=self.emit, dropped=result.dropped)
+                      rules=result.disqualifiers, emit=self.emit, dropped=result.dropped,
+                      job_boards=self.providers.job_boards)
         self.emit("investigation", f"Investigating {len(refs)} companies, {self.concurrency} at a time")
         with ThreadPoolExecutor(max_workers=self.concurrency) as pool:
             for _ in pool.map(lambda ref: self.process(result, calls, ctx, ref), refs):

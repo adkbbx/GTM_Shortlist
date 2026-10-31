@@ -1,0 +1,194 @@
+"""A company's own job board, read through the boards' public job lists: no key and no model call.
+
+Hiring is the most common public sign that a company needs something now, and the live runs lost it twice: job sites
+blocked the fetch (HTTP 403) or had dropped a posting (404, 410) that was still open on the company's own Lever
+board. Boards are found only from links on the company's own site, never by guessing from its name: Greenhouse's
+"socket" board belongs to Socket Labs, not socket.dev.
+"""
+import html
+import re
+from collections.abc import Callable
+from dataclasses import dataclass
+from datetime import UTC, date, datetime
+from urllib.parse import urlsplit
+
+import httpx
+
+from shortlist.agent.pages import Page
+from shortlist.fetch import FetchError
+
+SLUG = r"([A-Za-z0-9][A-Za-z0-9_.-]{0,80})"
+BOARD_PATTERNS = (
+    ("lever", re.compile(r"https?://jobs\.lever\.co/" + SLUG, re.IGNORECASE)),
+    ("lever", re.compile(r"https?://api\.lever\.co/v0/postings/" + SLUG, re.IGNORECASE)),
+    ("greenhouse", re.compile(r"https?://boards\.greenhouse\.io/embed/job_board(?:/js)?\?for=" + SLUG, re.IGNORECASE)),
+    ("greenhouse", re.compile(r"https?://(?:job-)?boards\.greenhouse\.io/(?!embed\b)" + SLUG, re.IGNORECASE)),
+    ("greenhouse", re.compile(r"https?://boards-api\.greenhouse\.io/v1/boards/" + SLUG, re.IGNORECASE)),
+    ("ashby", re.compile(r"https?://jobs\.ashbyhq\.com/" + SLUG, re.IGNORECASE)),
+    ("ashby", re.compile(r"https?://api\.ashbyhq\.com/posting-api/job-board/" + SLUG, re.IGNORECASE)),
+)
+BOARD_PAGE = {"lever": "https://jobs.lever.co/{}", "greenhouse": "https://job-boards.greenhouse.io/{}",
+              "ashby": "https://jobs.ashbyhq.com/{}"}
+POSTING_HOSTS = {"lever": ("jobs.lever.co",), "greenhouse": ("job-boards.greenhouse.io", "boards.greenhouse.io"),
+                 "ashby": ("jobs.ashbyhq.com",)}
+CAREERS_PATH = re.compile(r"/(?:careers?|jobs|join(?:-us)?|work-with-us|hiring|open-positions)(?:/|$)", re.IGNORECASE)
+MAX_OPENINGS = 25  # shown to the investigator
+MAX_BYTES = 3_000_000
+
+
+@dataclass(frozen=True)
+class Opening:
+    title: str
+    url: str
+    location: str = ""
+    posted: date | None = None
+
+
+@dataclass(frozen=True)
+class Board:
+    platform: str
+    slug: str
+    openings: tuple[Opening, ...]
+    text: str = ""  # the postings' own words, to check whose board this is
+
+    @property
+    def url(self) -> str:
+        return BOARD_PAGE[self.platform].format(self.slug)
+
+    @property
+    def label(self) -> str:
+        return {"lever": "Lever", "greenhouse": "Greenhouse", "ashby": "Ashby"}[self.platform]
+
+
+def board_refs(text: str) -> list[tuple[str, str]]:
+    """Job boards linked or embedded in a page, in the order they appear."""
+    found: list[tuple[int, str, str]] = []
+    for platform, pattern in BOARD_PATTERNS:
+        found += [(match.start(), platform, match.group(1).rstrip(".").lower()) for match in pattern.finditer(text or "")]
+    refs: list[tuple[str, str]] = []
+    for _, platform, slug in sorted(found):
+        if (platform, slug) not in refs:
+            refs.append((platform, slug))
+    return refs
+
+
+def _date(value) -> date | None:
+    try:
+        if isinstance(value, int | float):
+            return datetime.fromtimestamp(value / 1000, UTC).date()
+        if isinstance(value, str) and value:
+            return datetime.fromisoformat(value).date()
+    except (ValueError, OverflowError, OSError):
+        return None
+    return None
+
+
+def _posting_url(platform: str, url) -> str | None:
+    if not isinstance(url, str):
+        return None
+    parts = urlsplit(url)
+    return url if parts.scheme == "https" and parts.hostname in POSTING_HOSTS[platform] else None
+
+
+def _text(value) -> str:
+    return html.unescape(re.sub(r"<[^>]+>", " ", html.unescape(value))) if isinstance(value, str) else ""
+
+
+class JobBoards:
+    """Reads public job lists from Lever, Greenhouse and Ashby. Every answer is untrusted data, like page text."""
+
+    def __init__(self, transport: httpx.BaseTransport | None = None, timeout: float = 10):
+        self.transport = transport
+        self.timeout = timeout
+
+    def _get(self, url: str):
+        try:
+            with httpx.Client(timeout=self.timeout, trust_env=False, follow_redirects=False,
+                              transport=self.transport) as client:
+                response = client.get(url, headers={"Accept": "application/json"})
+            if response.status_code != 200 or len(response.content) > MAX_BYTES:
+                return None
+            return response.json()
+        except (httpx.HTTPError, ValueError):
+            return None
+
+    def _redirect(self, url: str) -> str:
+        """Where a same-site https link redirects, from its Location header only."""
+        if urlsplit(url).scheme != "https":
+            return ""
+        try:
+            with httpx.Client(timeout=self.timeout, trust_env=False, follow_redirects=False,
+                              transport=self.transport) as client:
+                response = client.get(url)
+        except httpx.HTTPError:
+            return ""
+        return response.headers.get("location", "")[:500] if response.is_redirect else ""
+
+    def read(self, platform: str, slug: str) -> Board | None:
+        """The board's open postings, or None when there is no such board or it cannot be read."""
+        if platform == "lever":
+            data = self._get(f"https://api.lever.co/v0/postings/{slug}?mode=json")
+            items = data if isinstance(data, list) else None
+            fields = lambda j: (j.get("text"), j.get("hostedUrl"), (j.get("categories") or {}).get("location"),
+                                j.get("createdAt"), (j.get("descriptionPlain") or "") + " " + (j.get("additionalPlain") or ""))
+        elif platform == "greenhouse":
+            data = self._get(f"https://boards-api.greenhouse.io/v1/boards/{slug}/jobs?content=true")
+            items = data.get("jobs") if isinstance(data, dict) else None
+            fields = lambda j: (j.get("title"), j.get("absolute_url"), (j.get("location") or {}).get("name"),
+                                j.get("first_published") or j.get("updated_at"), j.get("content"))
+        elif platform == "ashby":
+            data = self._get(f"https://api.ashbyhq.com/posting-api/job-board/{slug}")
+            items = [j for j in data.get("jobs") or [] if isinstance(j, dict) and j.get("isListed", True)] \
+                if isinstance(data, dict) else None
+            fields = lambda j: (j.get("title"), j.get("jobUrl"), j.get("location"), j.get("publishedAt"),
+                                j.get("descriptionPlain"))
+        else:
+            return None
+        if not isinstance(items, list):
+            return None
+        openings, words = [], []
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            title, url, location, posted, text = fields(item)
+            url = _posting_url(platform, url)
+            if not isinstance(title, str) or not title.strip() or url is None:
+                continue
+            openings.append(Opening(title=title.strip()[:200], url=url, posted=_date(posted),
+                                    location=location.strip()[:120] if isinstance(location, str) else ""))
+            words.append(_text(text)[:4000])
+        return Board(platform=platform, slug=slug, openings=tuple(openings[:300]), text=" ".join(words)[:40000])
+
+    def own(self, home: Page, fetch: Callable[[str], Page]) -> Board | None:
+        """The board the company's own homepage, or else its careers page, links to or embeds."""
+        refs = board_refs(home.html)
+        if not refs:
+            careers = next((link for link in home.links if CAREERS_PATH.search(urlsplit(link).path)), None)
+            if careers is None:
+                return None
+            try:
+                refs = board_refs(fetch(careers).html)
+            except FetchError:  # an unreadable careers page means no board, never a failed investigation
+                # letterdrop.com/jobs redirects to its board, which the page fetcher refuses as another site. The
+                # redirect's target is read, never fetched, and kept only when it is a job board.
+                refs = board_refs(self._redirect(careers))
+        for platform, slug in refs[:3]:
+            board = self.read(platform, slug)
+            if board is not None:
+                return board
+        return None
+
+    def posting(self, url: str, names: list[str]) -> tuple[Board, Opening] | None:
+        """The board behind a posting URL and that posting, when it is still listed and the board's postings name
+        the company. None: not a board posting, no longer listed, or another company's board."""
+        refs = board_refs(url)
+        if not refs:
+            return None
+        board = self.read(*refs[0])
+        if board is None:
+            return None
+        key = url.split("?")[0].rstrip("/").lower()
+        opening = next((o for o in board.openings if o.url.split("?")[0].rstrip("/").lower() == key), None)
+        named = any(re.search(r"(?<![\w-])" + re.escape(name.casefold()) + r"(?![\w-])", board.text.casefold())
+                    for name in names if len(name) >= 3)
+        return (board, opening) if opening and named else None

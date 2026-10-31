@@ -81,6 +81,7 @@ class CandidateAnswer(Answer):
     domain: str = ""
     url: str = ""
     found_via: str = ""
+    posting_url: str = ""
 
 
 class CandidatesAnswer(Answer):

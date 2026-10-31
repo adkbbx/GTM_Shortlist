@@ -9,6 +9,7 @@ from dataclasses import dataclass, field
 from urllib.parse import urlsplit
 
 from shortlist.agent.answers import InvestigationAnswer, page_for
+from shortlist.agent.jobboards import MAX_OPENINGS, Board, JobBoards
 from shortlist.agent.llm import UNTRUSTED, AgentOutputError, Calls
 from shortlist.agent.models import (
     CandidateRef,
@@ -51,7 +52,9 @@ Work in this order:
 2. Need and timing (spend most of your searches here): the company's own marketing cannot show need, so look
    beyond it. Search for its job posts (its careers page, or job boards such as Greenhouse, Lever, Workable or
    LinkedIn) for roles named in the need signals, and for news or press releases from the last six months for the
-   timing signals. If found_via names a job post or news item, find and fetch that page first. Fetch the job post or
+   timing signals. own_job_board, when present, lists the company's open roles read just now from its own job
+   board: if a role there matches a need signal, fetch that role's url and quote it, because it beats a copy on a
+   job site. If found_via names a job post or news item, find and fetch that page first. Fetch the job post or
    article itself and quote it. Note a page's publication date only when the page states it.
 3. Competitor use: ONE search that names all listed competitors together, for example
    "<company> <competitor 1> <competitor 2>"; the company's own page code is already scanned for them. Fetch a
@@ -83,6 +86,7 @@ class Context:
     rules: list[DisqualifierRule]
     emit: Callable[..., None]
     dropped: list[DroppedClaim] = field(default_factory=list)
+    job_boards: JobBoards | None = None
 
     @property
     def direct(self) -> list[Competitor]:
@@ -132,6 +136,7 @@ class Investigation:
         self.queries: list[str] = []
         self.home: Page | None = None
         self.names: list[str] = []
+        self.board: Board | None = None
 
     # Pages -----------------------------------------------------------------------------------------------------
     def fetch(self, url: str) -> Page:
@@ -194,6 +199,17 @@ class Investigation:
         note = f"\nThe page declares publication date(s): {dates}" if dates else ""
         return f'<page url="{page.url}">\n{excerpt(page, 6000)}\n</page>{note}'
 
+    def read_board(self):
+        """The company's own job board, found from its own site (no model call)."""
+        if self.ctx.job_boards is None or self.home is None:
+            return
+        self.board = self.ctx.job_boards.own(self.home, self.fetch)
+        if self.board is not None:
+            self.places.append(f"own job board on {self.board.label}")
+            self.ctx.emit("investigation", f"Read its own job board on {self.board.label}: "
+                          f"{len(self.board.openings)} open role{'' if len(self.board.openings) == 1 else 's'}",
+                          company=self.company.domain)
+
     # Loop ------------------------------------------------------------------------------------------------------
     def brief(self) -> str:
         profile = self.ctx.profile
@@ -210,6 +226,10 @@ class Investigation:
             # Discovery's lead (a job post or news item it saw); a lead to check, never evidence by itself.
             "found_via": self.company.found_via or "",
         }
+        if self.board is not None:
+            data["own_job_board"] = {"url": self.board.url, "open_roles": [
+                {"title": o.title, "location": o.location, "url": o.url,
+                 "posted": o.posted.isoformat() if o.posted else None} for o in self.board.openings[:MAX_OPENINGS]]}
         home = f'\n<page url="{self.home.url}">\n{excerpt(self.home, 6000)}\n</page>' if self.home else ""
         return "Investigate this company.\n<data>\n" + json.dumps(data) + home + "\n</data>"
 
@@ -338,6 +358,7 @@ class Investigation:
             if len(self.company.name) >= 4 and self.company.name not in self.names and "." not in self.company.name:
                 self.names.append(self.company.name)
             self.observe(self.home)
+            self.read_board()
             if not self.result.name:
                 self.result.name = self.names[-1] if self.names else self.company.domain
             try:
