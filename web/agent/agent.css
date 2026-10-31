@@ -179,3 +179,6 @@
  .agent-log li{grid-template-columns:minmax(0,1fr);gap:.125rem}
 }
 @media(prefers-reduced-motion:reduce){.agent-pulse{animation:none}}
+.agent-board-actions{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem}
+.agent-share{display:inline-flex;align-items:center;min-height:2.75rem;padding:.5rem .875rem;font-size:.875rem;font-weight:600;color:var(--ink);background:var(--surface);border:1px solid #c4c0b8;border-radius:var(--radius-control);text-decoration:none}
+.agent-share:hover{border-color:var(--ink)}

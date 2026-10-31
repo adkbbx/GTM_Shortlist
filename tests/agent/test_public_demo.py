@@ -210,6 +210,18 @@ def test_shipped_examples_are_real_finished_searches_that_open_read_only(tmp_pat
         assert refused.status_code == 403
 
 
+def test_a_shared_finished_board_has_a_link_preview(tmp_path):
+    with make_client(tmp_path) as client:
+        example = next(e for e in client.get("/api/health").json()["examples"] if e["shortlisted"] == 2)
+        page = client.get(f"/?agent={example['id']}").text
+        assert '<meta property="og:title" content="2 companies that need what eygentic.com sells">' in page
+        description = page.split('property="og:description" content="', 1)[1].split('"', 1)[0]
+        assert description.startswith("Shortlisted: ") and "checked by Muse Spark Open" in description
+        assert 'name="twitter:card" content="summary"' in page
+        assert "og:title" not in client.get("/?agent=" + "0" * 32).text  # unknown run: no preview
+        assert "og:title" not in client.get("/?agent=../etc").text
+
+
 def test_examples_can_be_turned_off(tmp_path):
     with make_client(tmp_path, showcase_dir=None) as client:
         assert client.get("/api/health").json()["examples"] == []

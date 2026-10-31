@@ -1,5 +1,16 @@
 # Progress and handoff
 
+## 1 November (later), Meta hackathon: what to say, examples, sharing
+
+- **Why now and an opening line (14951ae, 984b183):** for each Shortlisted company, Muse Spark writes from the quotes the skeptic supported (need and timing first). Muse Spark Open checks every statement against those quotes, with each quote's source, so a job post counts as hiring. A rejected note is rewritten once with the checker's reason, then dropped and logged. Live: the first check rejected Brellium's note, because a job-post title alone did not say Brellium was hiring. After the fix, Brellium, ContactMonkey, Middesk and Pipe17 all passed. For example: "Saw you're hiring four Sales Development Representatives to run your Account-Based Strategy playbook and A/B test outbound cadences. We run focused acquisition experiments...". About $0.02 to $0.03 a company.
+- **Required fit checks stay provable (849f76a):** a required check may no longer be a demand of the company's own customers. Live re-read of vanta.com: the required checks are now "Sells software, SaaS, or internet-delivered services to other businesses" and "Offers a cloud-hosted product that stores, processes, or hosts business customer data", and the security-review check is nice to have ($0.05).
+- **Examples (849f76a):** two real eygentic.com searches from today ship in `src/shortlist/agent/showcase/`. They are loaded at startup, so they survive a free-plan restart, and they are read-only. The start page offers them under "See a finished search first".
+- **Postings from the board's own list (bdb1f6d):** when a posting page cannot be read (Ashby renders with script), the posting is built from the board's public list with its date, and only while it is still listed. Free real check: Decagon's, Middesk's and Portcast's postings came back with full text and dates.
+- **Sharing:** a finished board's link carries an Open Graph and X preview ("2 companies that need what eygentic.com sells", with the Shortlisted names), and the board has a Share on X link.
+- **Owner review sheet:** `data/eval/gtm-shortlist-review-2026-11-01.xlsx` (git-ignored), 21 companies from five live runs, with key quotes and opening lines. The 31 October five are pre-filled as Needs a look from the owner's own words. Summary formulas give agreement, shortlist precision and recall, and the share of lines the owner would send.
+- **Checks:** 953 backend tests, Ruff, the TypeScript build and 10 phone and laptop browser journeys passed. Screenshots of the example board and start page were inspected, with no horizontal overflow.
+- **Spend:** $2.15 of the owner's $10 approval so far ($6.47 total since 30 October).
+
 ## 1 November, Meta hackathon: job boards first
 
 The owner's review of the 31 October run: the five companies fit, but with no intent signal they are weak leads. A manual check found Portcast hiring a "first US-based commercial team member" on its own Lever board, which the agent had missed because job sites blocked or had dropped the copies it found (HTTP 403, 404, 410).

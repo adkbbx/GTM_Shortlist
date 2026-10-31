@@ -35,6 +35,16 @@ function Missing({ items }: { items: string[] }) {
   </div>;
 }
 
+/** A post about a finished board, with its read-only link; nothing is posted until the visitor does it on X. */
+function ShareLink({ run }: { run: AgentRun }) {
+  const count = run.companies.filter(c => c.verdict?.kind === 'shortlisted').length;
+  const link = `${window.location.origin}${window.location.pathname}?agent=${run.id}`;
+  const text = `An agent found ${count} ${count === 1 ? 'company' : 'companies'} that need what ${domainOf(run.website)} sells, `
+    + 'each with the exact quote behind it. Built with Muse Spark and Muse Spark Open.';
+  const href = `https://x.com/intent/post?${new URLSearchParams({ text, url: link })}`;
+  return <a className="agent-share" href={href} target="_blank" rel="noopener noreferrer">Share on X</a>;
+}
+
 /** Why now and an opening line, written only from supported quotes and checked against them. */
 function PitchBlock({ pitch }: { pitch: NonNullable<Company['pitch']> }) {
   const [copied, setCopied] = useState(false);
@@ -244,7 +254,10 @@ export function AgentBoard({ runId, onNew }: { runId: string; onNew: () => void 
   return <AgentConfigContext.Provider value={{ ...config, editable }}><div className="agent-board">
     <div className="agent-board-head">
       <div><p className="agent-eyebrow">Shortlist for</p><h1 ref={heading} tabIndex={-1}>{domainOf(run.website)}</h1></div>
-      <button type="button" className="secondary" onClick={onNew}>New search</button>
+      <div className="agent-board-actions">
+        {run.status === 'complete' && <ShareLink run={run} />}
+        <button type="button" className="secondary" onClick={onNew}>New search</button>
+      </div>
     </div>
     {!editable && <p className="notice agent-shared" role="note">You are viewing a shared shortlist. Start your own search to change its assumptions.</p>}
     {run.synthetic && <p className="notice agent-synthetic" role="note"><strong>Synthetic test data.</strong> Invented companies on reserved .example domains. Nothing was searched or fetched.</p>}

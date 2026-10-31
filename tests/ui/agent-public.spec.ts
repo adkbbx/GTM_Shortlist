@@ -24,6 +24,8 @@ test('the public demo starts from a website alone, caps the size and shares a re
   await expect(page).toHaveURL(/[?&]agent=[0-9a-f]{32}/);
   await expect(page.locator('.column-rejected').getByRole('heading', { name: 'Bright Kettle' })).toBeVisible({ timeout: 30000 });
   await expect(page.getByRole('status').first()).toContainText('Done: 1 shortlisted, 1 needs a look, 1 rejected');
+  const share = page.getByRole('link', { name: 'Share on X' });
+  expect(await share.getAttribute('href')).toMatch(/^https:\/\/x\.com\/intent\/post\?text=An\+agent\+found\+1\+company.*&url=.*agent%3D[0-9a-f]{32}$/);
   // The browser that started the search keeps its optional corrections.
   await expect(page.locator('summary', { hasText: 'Add a competitor' })).toBeVisible();
   await expect(page.locator('.agent-count-control select')).toBeVisible();

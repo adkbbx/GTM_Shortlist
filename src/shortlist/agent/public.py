@@ -14,6 +14,7 @@ import time
 from collections import defaultdict, deque
 from collections.abc import Callable
 from datetime import UTC, datetime
+from html import escape
 from pathlib import Path
 from threading import Lock
 from urllib.parse import urlsplit
@@ -284,9 +285,29 @@ def create_public_app(settings: PublicSettings | None = None, *, agent_settings:
     if dist is not None:
         @app.get("/", response_class=HTMLResponse, include_in_schema=False)
         @app.get("/index.html", response_class=HTMLResponse, include_in_schema=False)
-        def ui_index():
+        def ui_index(agent: str | None = None):
             html = (dist / "index.html").read_text(encoding="utf-8")
-            return HTMLResponse(html.replace("<head>", "<head>" + START_FLOW, 1))
+            return HTMLResponse(html.replace("<head>", "<head>" + START_FLOW + preview(agent), 1))
+
+        def preview(run_id: str | None) -> str:
+            """Link preview for a shared, finished board: what was found, never who looked."""
+            try:
+                result = store.get(run_id)["result"] if run_id else None
+            except KeyError:
+                result = None
+            if result is None or result.status != "complete":
+                return ""
+            seller = urlsplit(result.website).hostname or result.website
+            shortlisted = [c.name or c.domain for c in result.companies if c.verdict and c.verdict.kind == "shortlisted"]
+            title = f"{len(shortlisted)} {'company' if len(shortlisted) == 1 else 'companies'} that need what {seller} sells"
+            text = (f"Shortlisted: {', '.join(shortlisted[:4])}. " if shortlisted else "") + \
+                "Each verdict shows the exact quote behind it. Found by an agent on Muse Spark; every quote checked " \
+                "by Muse Spark Open."
+            tags = {"og:title": title, "og:description": text, "og:type": "website",
+                    "og:url": f"{settings.app_url}/?agent={result.id}", "twitter:card": "summary",
+                    "twitter:title": title, "twitter:description": text}
+            return "".join(f'<meta {"name" if key.startswith("twitter") else "property"}="{key}" '
+                           f'content="{escape(value, quote=True)}">' for key, value in tags.items())
 
         app.mount("/", StaticFiles(directory=dist, html=True), name="ui")
     return app
