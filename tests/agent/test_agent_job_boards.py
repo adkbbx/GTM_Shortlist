@@ -122,6 +122,8 @@ def test_a_posting_missing_from_the_answer_is_taken_from_the_search_results():
     results = ["https://jobs.lever.co/othergear/x-1", "https://jobs.lever.co/TrailGear/aaa-111", "https://trailgear.example/"]
     assert with_posting(item, results).posting_url == "https://jobs.lever.co/TrailGear/aaa-111"
     assert with_posting(item, ["https://jobs.lever.co/othergear/x-1"]).posting_url == ""
+    several = ["https://jobs.lever.co/trailgear/data-1", "https://jobs.lever.co/trailgear/aaa-111"]
+    assert with_posting(item, several).posting_url == "https://jobs.lever.co/trailgear"  # chosen by title later
 
 
 def test_a_bare_board_url_finds_the_matching_role_and_old_greenhouse_links_are_rewritten():

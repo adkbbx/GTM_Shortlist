@@ -6,7 +6,7 @@ from urllib.parse import urlsplit
 
 from shortlist.agent.answers import CompaniesAnswer
 from shortlist.agent.competitors import clean_domain, company_domain_issue
-from shortlist.agent.jobboards import JobBoards, board_refs
+from shortlist.agent.jobboards import BOARD_PAGE, JobBoards, board_refs
 from shortlist.agent.llm import UNTRUSTED, Calls
 from shortlist.agent.models import MAX_COMPANIES, CandidateRef, Competitor, SellerProfile, SetAside
 from shortlist.agent.providers import WEB_SEARCH_TOOL, search_label
@@ -87,13 +87,20 @@ def compact(text: str) -> str:
 
 def with_posting(item, postings: list[str]):
     """The model often names the board ("on jobs.lever.co") but not the posting; the search results hold it. A
-    posting is matched only when its board's name is the company's name or domain stem."""
+    posting is matched only when its board's name is the company's name or domain stem. When the results hold several
+    postings from that board, the board itself is kept so the open role is chosen by title: taking the first one gave
+    Middesk "Lead Data Scientist" for an SDR lead."""
     if (item.posting_url and len([p for p in urlsplit(item.posting_url).path.split("/") if p]) >= 2) \
             or not postings:
         return item
     keys = {compact(item.name), compact((clean_domain(item.url or item.domain) or "").split(".")[0])} - {""}
-    match = next((url for url in postings if compact(board_refs(url)[0][1]) in keys), None)
-    return item.model_copy(update={"posting_url": match}) if match else item
+    matches = [url for url in postings if any(compact(slug) in keys for _, slug in board_refs(url)[:1])]
+    if not matches:
+        return item
+    if len(matches) > 1:
+        platform, slug = board_refs(matches[0])[0]
+        return item.model_copy(update={"posting_url": BOARD_PAGE[platform].format(slug)})
+    return item.model_copy(update={"posting_url": matches[0]})
 
 
 def lead(item, boards: JobBoards | None, emit: Callable[..., None]) -> str:

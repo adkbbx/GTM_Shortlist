@@ -1,5 +1,18 @@
 # Progress and handoff
 
+## 1 November, Meta hackathon: job boards first
+
+The owner's review of the 31 October run: the five companies fit, but with no intent signal they are weak leads. A manual check found Portcast hiring a "first US-based commercial team member" on its own Lever board, which the agent had missed because job sites blocked or had dropped the copies it found (HTTP 403, 404, 410).
+
+- **Job boards first (1ef4cff, d3cee14, 5227137, this commit):** when a signal is about hiring, discovery searches Lever, Greenhouse and Ashby postings (`site:` filters work in Meta's web search). Each posting is checked against the board's public job list: still listed, on a board whose postings name the company. If the answer gives only the board, the open role is chosen by title. The posting becomes the lead the investigation fetches first.
+- **Own board in every investigation:** `jobboards.JobBoards.own` finds the board only from links on the company's own homepage or careers page, or a careers link's redirect. It never guesses from the name, because Greenhouse's `socket` board belongs to Socket Labs, not socket.dev. Its open roles go to the investigator before its first model call. Free checks found boards for Portcast, Reach Industries (a new open Sales Representative role), Socket, Chili Piper and Vanta. Letterdrop's jobs are on Y Combinator's site, which is not read.
+- **Old Greenhouse links** (`boards.greenhouse.io/...`) now go straight to `job-boards.greenhouse.io`. The page fetcher refused their redirect as a change of site.
+- **Live, eygentic.com, owner's size** ($0.45, 80 s): Pipe17 Shortlisted ("This is a pure outbound hunting role ... You build the pipeline from nothing", open on its Greenhouse board). Gushwork Rejected as too big ("a team of about 90 people"). Three Needs a look.
+- **Live, vanta.com** ($0.47, 154 s): discovery searched for "SOC 2 compliance manager" postings and for funding and ISO 27001 news with no seller-specific code. 0 Shortlisted: Field Nation has an open GRC role to "lead and scale Field Nation's compliance program (SOC 2, ISO 27001)", but Vanta's inferred required fit check "sells to buyers that require security reviews" was not shown for any company. Turning that check off on the board re-judges without new research.
+- **Live, eygentic.com again** ($0.29, 88 s; earlier companies set aside by history): three postings confirmed open on the companies' boards. ContactMonkey Shortlisted ("hiring four talented, driven Sales Development Representatives", open on Greenhouse). Middesk Shortlisted from the SDR posting on its own Ashby board (23 Sep), although discovery had attached a data-science posting from the same board. That mix-up is fixed: several postings from one board now keep the board, and the role is chosen by title. Overbond and Weave could not be reached.
+- **Still open:** Middesk is probably bigger than 50 people, but no quote said so, and the size rule rejects only with a quote. Ashby posting pages are rendered by script, so their text often cannot be read (Decagon).
+- **Spend:** $1.65 of the owner's $10 approval on 31 October and 1 November ($5.97 total since 30 October).
+
 ## 31 October, Meta hackathon: public demo on Render, blocked by the model's region
 
 - **Hosted (4da3862):** `gtm-shortlist-agent` on Render runs the same Docker image with `python -m shortlist.container_entrypoint agent`. The page and the health check work at https://gtm-shortlist-agent.onrender.com.
