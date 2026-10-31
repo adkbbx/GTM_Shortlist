@@ -21,13 +21,14 @@ Use only the numbered quotes in the data. Every fact you state must be in one of
 dates, names, products or reasons that are not there. Describe the company, never a person: no names, no "Hi <name>".
 - why_now: one sentence, at most 35 words, on what the company is doing now that makes the seller relevant.
 - opener: the first one or two sentences of a cold email from the seller to the company's team, at most 50 words.
-  Start from the company's own situation in the quotes, then connect it to the seller's offer in plain words.
-  No flattery, no hype, no questions about "a quick call".
+  Start from the need or timing quote (what the company is doing now), then connect it to the seller's offer in
+  plain words. Do not restate the company's product claims or numbers. No flattery, no hype, no "quick call".
+A quote whose source is job_post is an open job post: it shows the company is hiring for that role.
 Reply with only JSON: {{"why_now": "...", "opener": "...", "quote_ids": ["q1", "..."]}}"""
 
 CHECK = f"""You check a short sales note against quotes. You have no web access; judge only the text given. {UNTRUSTED}
 The note is supported only if every factual statement about the company in it is stated or directly implied by the
-quotes. Statements about the seller's own offer are allowed if they match seller_offer. Anything else, including
+quotes. A quote from a job_post source is an open job post, so it shows the company is hiring for that role. Statements about the seller's own offer are allowed if they match seller_offer. Anything else, including
 invented numbers, dates, names, products, pains or intentions, makes it unsupported.
 Reply with only JSON: {{"decision": "supported|unsupported", "reason": "one sentence"}}"""
 
@@ -59,33 +60,41 @@ def write_pitch(company: CompanyResult, profile: SellerProfile, calls: Calls, *,
             "quotes": [{"id": key, "kind": item.claim_type, "quote": item.quote.text, "source": item.quote.source_type,
                         "date": item.quote.published_date.isoformat() if item.quote.published_date else None}
                        for key, item in quotes.items()]}
-    try:
-        answer, _ = calls.investigator_json("pitch", PitchAnswer, instructions=INSTRUCTIONS, max_output_tokens=2000,
-                                            input=[{"role": "user", "content": "<data>\n" + json.dumps(data) + "\n</data>"}])
-    except (AgentOutputError, AgentProviderError):
-        return None
-    why_now, opener = answer.why_now.strip()[:400], answer.opener.strip()[:600]
-    used = [quotes[key].id for key in dict.fromkeys(answer.quote_ids) if key in quotes]
-    if not why_now or not opener or not used:
-        return None
-    if not use_skeptic or calls.skeptic is None:
-        return Pitch(why_now=why_now, opener=opener, evidence_ids=used, checked=False)
-    note = {"seller_offer": data["seller_offer"], "quotes": [quotes[key].quote.text for key in quotes
-                                                              if quotes[key].id in used],
-            "note": f"{why_now}\n{opener}"}
-    try:
-        check = calls.skeptic_json("pitch_check", PitchCheck, [
-            {"role": "system", "content": CHECK},
-            {"role": "user", "content": "<data>\n" + json.dumps(note) + "\n</data>"}], company=company.domain,
-            max_tokens=1500)
-    except (AgentOutputError, AgentProviderError):
-        return None
-    if check.decision != "supported":
+    feedback = ""
+    for attempt in range(2):  # a note the checker rejects is rewritten once with its reason, then checked again
+        content = "<data>\n" + json.dumps(data) + "\n</data>" + (
+            f"\nYour previous note was rejected by a checker: {feedback}\nWrite it again using only the quotes."
+            if feedback else "")
+        try:
+            answer, _ = calls.investigator_json("pitch" + (":rewrite" if attempt else ""), PitchAnswer,
+                                                instructions=INSTRUCTIONS, max_output_tokens=2000,
+                                                input=[{"role": "user", "content": content}])
+        except (AgentOutputError, AgentProviderError):
+            return None
+        why_now, opener = answer.why_now.strip()[:400], answer.opener.strip()[:600]
+        used = [quotes[key].id for key in dict.fromkeys(answer.quote_ids) if key in quotes]
+        if not why_now or not opener or not used:
+            return None
+        if not use_skeptic or calls.skeptic is None:
+            return Pitch(why_now=why_now, opener=opener, evidence_ids=used, checked=False)
+        note = {"seller_offer": data["seller_offer"],
+                "quotes": [{"quote": item.quote.text, "source": item.quote.source_type}
+                           for item in quotes.values() if item.id in used],
+                "note": f"{why_now}\n{opener}"}
+        try:
+            check = calls.skeptic_json("pitch_check", PitchCheck, [
+                {"role": "system", "content": CHECK},
+                {"role": "user", "content": "<data>\n" + json.dumps(note) + "\n</data>"}], company=company.domain,
+                max_tokens=1500)
+        except (AgentOutputError, AgentProviderError):
+            return None
+        if check.decision == "supported":
+            return Pitch(why_now=why_now, opener=opener, evidence_ids=used, checked=True,
+                         reason=check.reason.strip()[:600])
+        feedback = check.reason.strip()[:600] or "an unsupported claim"
         dropped.append(DroppedClaim(stage="pitch", company=company.domain, claim_type="pitch",
-                                    quote=f"{why_now} | {opener}"[:1500],
-                                    reason=f"Skeptic: {check.reason.strip()}"[:600] or "Skeptic found an unsupported claim"))
-        return None
-    return Pitch(why_now=why_now, opener=opener, evidence_ids=used, checked=True, reason=check.reason.strip()[:600])
+                                    quote=f"{why_now} | {opener}"[:1500], reason=f"Skeptic: {feedback}"[:600]))
+    return None
 
 
 def pitch_or_none(company: CompanyResult, profile: SellerProfile, calls: Calls, *, use_skeptic: bool,
