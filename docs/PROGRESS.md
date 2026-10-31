@@ -8,7 +8,8 @@
 - **Deployed health:** `investigator_model_available: false`. From the laptop the same key lists `muse-spark-1.3` among 9 models, so Meta withholds the model from the server's region. Render cannot move a service to another region.
 - **Region diagnostics (35b65e6):** health now also lists `investigator_models_offered` and `server_location` (country/data centre from Cloudflare's trace page, since Render does not tell a service its region). Checked locally against the real services: available, 9 models, location parsed.
 - **After the owner deployed 35b65e6:** health reports `investigator_model_available: true`, the same 9 models, and `server_location: "US/PDX"` (Oregon). Why the earlier check said `false` is not confirmed. The deploy guide now names Oregon (US West) for new services, and step 7 checks health before the first search.
-- **Next:** one real search on the demo to confirm it end to end (about $0.30). No generation or search credits were used for these checks.
+- **First search on the deployed demo** (owner approved up to $10 of new spend): Meta answered, then the run stopped at the seller profile with "Expecting ',' delimiter" after one repair ($0.03). The likely cause is quotation marks copied unescaped from the page into a quote. **Fix (16bdaa4):** inside a JSON string, a quotation mark now ends the string only when a delimiter follows. Not yet deployed to Render (Auto-Deploy is off).
+- **Same search from the laptop with the fix** (eygentic.com, 5 companies, owner's size; $0.415, 164 s, 23 searches, 32 pages): seller profile parsed. Result: 0 Shortlisted, 5 Needs a look (letterdrop.com, facets.cloud, portcast.io, gallabox.com, reach.industries). Letterdrop kept no evidence at all. Several job-post pages could not be read (HTTP 403, 404, 410). The owner is reviewing it in the git-ignored `data/eval/eygentic-review-2026-10-31.xlsx`.
 
 ## 30 October, Meta hackathon: first live runs with real Meta and Baseten models
 
