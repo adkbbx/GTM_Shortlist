@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from urllib.parse import urlsplit
 
 from shortlist.agent.answers import InvestigationAnswer, page_for
-from shortlist.agent.jobboards import MAX_OPENINGS, Board, JobBoards, posting_page
+from shortlist.agent.jobboards import MAX_OPENINGS, Board, JobBoards, board_refs, posting_page
 from shortlist.agent.llm import UNTRUSTED, AgentOutputError, Calls
 from shortlist.agent.models import (
     CandidateRef,
@@ -145,7 +145,15 @@ class Investigation:
         self.result.fetches += 1
         self.ctx.calls.meter.fetched()
         expected = self.company.domain if domain_of(url) == self.company.domain else None
-        page = self.ctx.fetcher(url, expected)
+        try:
+            page = self.ctx.fetcher(url, expected)
+        except FetchError:
+            listed = self.ctx.job_boards.page_for(url) if self.ctx.job_boards is not None and board_refs(url) else None
+            if listed is None:
+                raise
+            page = listed
+            self.ctx.emit("investigation", f"Read the posting from its job board's list: {url[:120]}",
+                          company=self.company.domain)
         self.pages[page.url] = page
         try:
             self.pages.setdefault(canonical_url(url), page)

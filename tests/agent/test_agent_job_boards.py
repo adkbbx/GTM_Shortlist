@@ -126,6 +126,21 @@ def test_a_posting_missing_from_the_answer_is_taken_from_the_search_results():
     assert with_posting(item, several).posting_url == "https://jobs.lever.co/trailgear"  # chosen by title later
 
 
+def test_a_posting_page_that_cannot_be_read_is_built_from_the_boards_own_text():
+    ashby = {"jobs": [{"title": "Founding SDR", "jobUrl": "https://jobs.ashbyhq.com/trailgear/abc-1", "isListed": True,
+                       "location": "Remote", "publishedAt": "2026-10-20T09:00:00.000+00:00",
+                       "descriptionHtml": "<p>Trailgear is hiring its first SDR to build outbound from zero.</p>"}]}
+
+    def handle(request):
+        if request.url.host == "api.ashbyhq.com" and request.url.path.endswith("/trailgear"):
+            return httpx.Response(200, json=ashby)
+        return httpx.Response(404)
+    built = JobBoards(transport=httpx.MockTransport(handle)).page_for("https://jobs.ashbyhq.com/trailgear/abc-1")
+    assert "hiring its first SDR to build outbound from zero" in built.full_text
+    assert built.url == "https://jobs.ashbyhq.com/trailgear/abc-1" and built.dates == (date(2026, 10, 20),)
+    assert JobBoards(transport=httpx.MockTransport(handle)).page_for("https://jobs.ashbyhq.com/trailgear/gone") is None
+
+
 def test_a_bare_board_url_finds_the_matching_role_and_old_greenhouse_links_are_rewritten():
     from shortlist.agent.jobboards import posting_page
 

@@ -6,15 +6,16 @@ board. Boards are found only from links on the company's own site, never by gues
 "socket" board belongs to Socket Labs, not socket.dev.
 """
 import html
+import json
 import re
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
 from urllib.parse import urlsplit
 
 import httpx
 
-from shortlist.agent.pages import Page
+from shortlist.agent.pages import Page, page_from_document
 from shortlist.fetch import FetchError
 
 SLUG = r"([A-Za-z0-9][A-Za-z0-9_.-]{0,80})"
@@ -42,6 +43,7 @@ class Opening:
     url: str
     location: str = ""
     posted: date | None = None
+    body: str = field(default="", compare=False, repr=False)  # the posting's own HTML from the board's job list
 
 
 @dataclass(frozen=True)
@@ -90,6 +92,13 @@ def _posting_url(platform: str, url) -> str | None:
     return url if parts.scheme == "https" and parts.hostname in POSTING_HOSTS[platform] else None
 
 
+def lever_body(item: dict) -> str:
+    """A Lever posting's description, its lists (responsibilities, requirements) and closing text, as HTML."""
+    lists = "".join(f"<h3>{html.escape(str(entry.get('text') or ''))}</h3><ul>{entry.get('content') or ''}</ul>"
+                    for entry in item.get("lists") or [] if isinstance(entry, dict))
+    return (item.get("description") or "") + lists + (item.get("additional") or "")
+
+
 def _text(value) -> str:
     return html.unescape(re.sub(r"<[^>]+>", " ", html.unescape(value))) if isinstance(value, str) else ""
 
@@ -130,18 +139,20 @@ class JobBoards:
             data = self._get(f"https://api.lever.co/v0/postings/{slug}?mode=json")
             items = data if isinstance(data, list) else None
             fields = lambda j: (j.get("text"), j.get("hostedUrl"), (j.get("categories") or {}).get("location"),
-                                j.get("createdAt"), (j.get("descriptionPlain") or "") + " " + (j.get("additionalPlain") or ""))
+                                j.get("createdAt"), (j.get("descriptionPlain") or "") + " " + (j.get("additionalPlain") or ""),
+                                lever_body(j))
         elif platform == "greenhouse":
             data = self._get(f"https://boards-api.greenhouse.io/v1/boards/{slug}/jobs?content=true")
             items = data.get("jobs") if isinstance(data, dict) else None
             fields = lambda j: (j.get("title"), j.get("absolute_url"), (j.get("location") or {}).get("name"),
-                                j.get("first_published") or j.get("updated_at"), j.get("content"))
+                                j.get("first_published") or j.get("updated_at"), j.get("content"),
+                                html.unescape(j.get("content") or ""))
         elif platform == "ashby":
             data = self._get(f"https://api.ashbyhq.com/posting-api/job-board/{slug}")
             items = [j for j in data.get("jobs") or [] if isinstance(j, dict) and j.get("isListed", True)] \
                 if isinstance(data, dict) else None
             fields = lambda j: (j.get("title"), j.get("jobUrl"), j.get("location"), j.get("publishedAt"),
-                                j.get("descriptionPlain"))
+                                j.get("descriptionPlain"), j.get("descriptionHtml") or html.escape(j.get("descriptionPlain") or ""))
         else:
             return None
         if not isinstance(items, list):
@@ -150,12 +161,13 @@ class JobBoards:
         for item in items:
             if not isinstance(item, dict):
                 continue
-            title, url, location, posted, text = fields(item)
+            title, url, location, posted, text, body = fields(item)
             url = _posting_url(platform, url)
             if not isinstance(title, str) or not title.strip() or url is None:
                 continue
             openings.append(Opening(title=title.strip()[:200], url=url, posted=_date(posted),
-                                    location=location.strip()[:120] if isinstance(location, str) else ""))
+                                    location=location.strip()[:120] if isinstance(location, str) else "",
+                                    body=body[:60000] if isinstance(body, str) else ""))
             words.append(_text(text)[:4000])
         return Board(platform=platform, slug=slug, openings=tuple(openings[:300]), text=" ".join(words)[:40000])
 
@@ -177,6 +189,28 @@ class JobBoards:
             if board is not None:
                 return board
         return None
+
+    def page_for(self, url: str) -> Page | None:
+        """A posting page built from the board's own job list, for a posting the page fetcher could not read: Ashby
+        renders its pages with script (Decagon's posting had "insufficient readable text"). Only a posting still
+        listed on its board; the posting date comes from the board."""
+        refs = board_refs(url)
+        board = self.read(*refs[0]) if refs else None
+        if board is None:
+            return None
+        key = url.split("?")[0].rstrip("/").lower()
+        opening = next((o for o in board.openings if o.url.split("?")[0].rstrip("/").lower() == key), None)
+        if opening is None or not opening.body.strip():
+            return None
+        posted = json.dumps({"@type": "JobPosting", "datePosted": opening.posted.isoformat()}) if opening.posted else ""
+        document = (f"<html><head><title>{html.escape(opening.title)}</title>"
+                    + (f'<script type="application/ld+json">{posted}</script>' if posted else "")
+                    + f"</head><body><h1>{html.escape(opening.title)}</h1><p>{html.escape(opening.location)}</p>"
+                    + f"{opening.body}</body></html>")
+        try:
+            return page_from_document(opening.url, document.encode("utf-8"), None)
+        except FetchError:
+            return None
 
     def posting(self, url: str, names: list[str], role: str = "") -> tuple[Board, Opening] | None:
         """The board behind a posting URL and that posting, when it is still listed and the board's postings name
