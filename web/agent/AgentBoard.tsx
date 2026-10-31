@@ -36,6 +36,10 @@ function Missing({ items }: { items: string[] }) {
 }
 
 /** A post about a finished board, with its read-only link; nothing is posted until the visitor does it on X. */
+function ExportLink({ run }: { run: AgentRun }) {
+  return <a className="agent-share" href={`/api/agent/runs/${run.id}/shortlist.csv`} download>Download CSV</a>;
+}
+
 function ShareLink({ run }: { run: AgentRun }) {
   const count = run.companies.filter(c => c.verdict?.kind === 'shortlisted').length;
   const link = `${window.location.origin}${window.location.pathname}?agent=${run.id}`;
@@ -83,6 +87,10 @@ function CompanyCard({ company, run }: { company: Company; run: AgentRun }) {
     </div>}
     {verdict.kind === 'needs_look' && <Missing items={verdict.missing} />}
     {verdict.kind === 'shortlisted' && <p className="agent-card-summary">{verdict.summary}</p>}
+    {verdict.kind === 'shortlisted' && (verdict.unconfirmed ?? []).length > 0 && <div className="agent-unconfirmed">
+      <p>Check before you reach out</p>
+      <ul>{verdict.unconfirmed!.map(item => <li key={item}>{item}</li>)}</ul>
+    </div>}
     {verdict.kind === 'shortlisted' && company.pitch && <PitchBlock pitch={company.pitch} />}
     <EvidenceList company={company} checkName={checkNamer(run)} />
     {company.checked_places.length > 0 && <p className="agent-checked"><span>Checked for competitors:</span> {company.checked_places.join(', ')}</p>}
@@ -255,6 +263,7 @@ export function AgentBoard({ runId, onNew }: { runId: string; onNew: () => void 
     <div className="agent-board-head">
       <div><p className="agent-eyebrow">Shortlist for</p><h1 ref={heading} tabIndex={-1}>{domainOf(run.website)}</h1></div>
       <div className="agent-board-actions">
+        {run.status === 'complete' && <ExportLink run={run} />}
         {run.status === 'complete' && <ShareLink run={run} />}
         <button type="button" className="secondary" onClick={onNew}>New search</button>
       </div>

@@ -222,6 +222,26 @@ def test_a_shared_finished_board_has_a_link_preview(tmp_path):
         assert "og:title" not in client.get("/?agent=../etc").text
 
 
+def test_a_finished_board_downloads_as_csv_with_quotes_and_opening_lines(tmp_path):
+    import csv
+    import io
+
+    from shortlist.agent.export import cell
+
+    with make_client(tmp_path) as client:
+        example = next(e for e in client.get("/api/health").json()["examples"] if e["shortlisted"] == 2)
+        response = client.get(f"/api/agent/runs/{example['id']}/shortlist.csv")
+        assert response.status_code == 200 and response.headers["content-type"].startswith("text/csv")
+        assert response.headers["content-disposition"].startswith('attachment; filename="shortlist-eygentic.com-')
+        rows = list(csv.DictReader(io.StringIO(response.text.removeprefix("\ufeff"))))
+        shortlisted = [r for r in rows if r["verdict"] == "Shortlisted"]
+        assert len(shortlisted) == 2 and rows[0]["verdict"] == "Shortlisted"
+        assert all(r["opening_line"] and r["opening_line_checked"] == "yes" and '" (http' in r["supporting_quotes"]
+                   for r in shortlisted)
+        assert client.get("/api/agent/runs/" + "0" * 32 + "/shortlist.csv").status_code == 404
+    assert cell("=HYPERLINK(1)") == "'=HYPERLINK(1)" and cell("@SUM") == "'@SUM" and cell("plain\ntext") == "plain text"
+
+
 def test_examples_can_be_turned_off(tmp_path):
     with make_client(tmp_path, showcase_dir=None) as client:
         assert client.get("/api/health").json()["examples"] == []

@@ -2,15 +2,17 @@
 shortlist.agent.public for the public demo, which passes a RoutePolicy with its limits."""
 import asyncio
 import json
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Annotated
 
 from fastapi import FastAPI, Header, HTTPException, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.concurrency import run_in_threadpool
 
+from shortlist.agent.export import shortlist_csv
 from shortlist.agent.models import AgentEvent, Overrides, RunResult, RunStatus
 from shortlist.agent.service import ACTIVE, AgentService, RunConflict
 from shortlist.agent.storage import SQLiteAgentRuns
@@ -93,6 +95,15 @@ def register_agent_routes(app: FastAPI, db_path: Path | None, service: AgentServ
     @app.get("/api/agent/runs/{run_id}", response_model=AgentRunView, tags=["agent"])
     def read_agent_run(run_id: str):
         return view(run_id)
+
+    @app.get("/api/agent/runs/{run_id}/shortlist.csv", tags=["agent"], response_class=Response,
+             responses={200: {"content": {"text/csv": {}}, "description": "One row per decided company"}})
+    def export_agent_run(run_id: str):
+        result: RunResult = service.store.get(run_id)["result"]
+        domain = re.sub(r"[^a-z0-9.-]", "", result.website.split("//")[-1].split("/")[0].lower().removeprefix("www."))
+        name = f"shortlist-{domain or 'search'}-{result.created_at:%Y-%m-%d}.csv"
+        return Response("\ufeff" + shortlist_csv(result), media_type="text/csv; charset=utf-8",
+                        headers={"Content-Disposition": f'attachment; filename="{name}"'})
 
     @app.post("/api/agent/runs/{run_id}/overrides", response_model=AgentRunView, status_code=202, tags=["agent"])
     def override_agent_run(run_id: str, body: Overrides, request: Request):

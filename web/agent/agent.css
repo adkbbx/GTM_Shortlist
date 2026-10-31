@@ -119,6 +119,9 @@
 .agent-missing>p{font-size:.8125rem;font-weight:600;color:#2457a6}
 .agent-missing ul{margin:.375rem 0 0;padding-left:1.125rem;font-size:.875rem}
 .agent-missing li+li{margin-top:.25rem}
+.agent-unconfirmed{margin-top:.625rem;padding:.5rem .75rem;border-left:3px solid #b7791f;background:#fbf4e6;border-radius:.25rem}
+.agent-unconfirmed>p{font-size:.8125rem;font-weight:600;color:#8a5a12}
+.agent-unconfirmed ul{margin:.25rem 0 0;padding-left:1.125rem;font-size:.8125rem;overflow-wrap:anywhere}
 .agent-unread{margin-top:.375rem}
 .agent-unread>summary{font-size:.875rem;color:var(--muted);cursor:pointer}
 .agent-unread li{overflow-wrap:anywhere;color:var(--muted)}

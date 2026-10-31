@@ -1672,6 +1672,13 @@
           "title": "Missing",
           "type": "array"
         },
+        "unconfirmed": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unconfirmed",
+          "type": "array"
+        },
         "disqualifier": {
           "anyOf": [
             {
@@ -1707,6 +1714,7 @@
         "kind",
         "summary",
         "missing",
+        "unconfirmed",
         "disqualifier",
         "rule"
       ],

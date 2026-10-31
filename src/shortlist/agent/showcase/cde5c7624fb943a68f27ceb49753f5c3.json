@@ -1281,6 +1281,9 @@
     "kind": "shortlisted",
     "summary": "Required fit shown, current need or timing evidence, and no current competitor use found",
     "missing": [],
+    "unconfirmed": [
+     "Not shown by a quote either way: Much larger or later-stage than the companies you serve (Seed to Series A B2B startups, about 5 to 50 people, founder still doing sales)"
+    ],
     "disqualifier": null,
     "rule": null
    },
@@ -4211,6 +4214,9 @@
     "kind": "shortlisted",
     "summary": "Required fit shown, current need or timing evidence, and no current competitor use found",
     "missing": [],
+    "unconfirmed": [
+     "Not shown by a quote either way: Much larger or later-stage than the companies you serve (Seed to Series A B2B startups, about 5 to 50 people, founder still doing sales)"
+    ],
     "disqualifier": null,
     "rule": null
    },
@@ -6022,6 +6028,7 @@
      "Could not read https://decagon.ai/customers: Website returned HTTP 404",
      "Could not read https://wellfound.com/jobs/3148664-sales-development-representative-sdr: Website returned HTTP 410"
     ],
+    "unconfirmed": [],
     "disqualifier": null,
     "rule": null
    },

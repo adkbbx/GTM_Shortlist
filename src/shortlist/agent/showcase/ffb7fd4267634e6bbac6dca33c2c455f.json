@@ -1595,6 +1595,7 @@
      "No current need or timing evidence (none dated within 180 days, no open job post)",
      "Could not read https://jobs.lever.co/docsumo: Website returned HTTP 404"
     ],
+    "unconfirmed": [],
     "disqualifier": null,
     "rule": null
    },
@@ -2185,6 +2186,7 @@
     "kind": "rejected",
     "summary": "Much larger or later-stage than the companies you serve (Seed to Series A B2B startups, about 5 to 50 people, founder still doing sales)",
     "missing": [],
+    "unconfirmed": [],
     "disqualifier": {
      "id": "90022c6b476e45a4a869bf4228551ddd",
      "claim_type": "disqualifier",
@@ -2953,6 +2955,9 @@
     "kind": "shortlisted",
     "summary": "Required fit shown, current need or timing evidence, and no current competitor use found",
     "missing": [],
+    "unconfirmed": [
+     "Not shown by a quote either way: Much larger or later-stage than the companies you serve (Seed to Series A B2B startups, about 5 to 50 people, founder still doing sales)"
+    ],
     "disqualifier": null,
     "rule": null
    },
@@ -3286,6 +3291,7 @@
     "missing": [
      "No current need or timing evidence (none dated within 180 days, no open job post)"
     ],
+    "unconfirmed": [],
     "disqualifier": null,
     "rule": null
    },
@@ -3780,6 +3786,7 @@
      "Could not read https://app.joinrise.co/jobs/routethis-senior-sales-development-representative-m686: Redirect changed company identity; manual verification required",
      "Could not read https://dynamic.jobgether.com/offer/67081d3eefea0fa3d95898fb-senior-sales-development-representative: Website returned HTTP 403"
     ],
+    "unconfirmed": [],
     "disqualifier": null,
     "rule": null
    },

@@ -175,6 +175,8 @@ class Verdict(Model):
     kind: VerdictKind
     summary: str
     missing: list[str] = Field(default_factory=list)
+    # Shortlisted, but a size or region rule that no quote addressed either way: shown so a reader checks it.
+    unconfirmed: list[str] = Field(default_factory=list)
     disqualifier: EvidenceItem | None = None
     rule: RuleKind | None = None
 

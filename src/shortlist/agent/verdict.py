@@ -75,7 +75,12 @@ def decide(company: CompanyResult, profile: SellerProfile, rules: list[Disqualif
     elif not company.disqualifier_check_completed:
         gaps.append("Competitor check incomplete: no search for current competitor use was run")
     if not gaps:
+        judged = {e.criterion_id for e in company.evidence
+                  if (d := decisions.get(e.id)) is not None and d.decision in ("supports", "contradicts")}
+        unconfirmed = [f"Not shown by a quote either way: {rule.text}" for rule in enabled.values()
+                       if rule.rule == "outside_stated_size_or_region" and rule.id not in judged]
         return Verdict(kind="shortlisted",
-                       summary="Required fit shown, current need or timing evidence, and no current competitor use found")
+                       summary="Required fit shown, current need or timing evidence, and no current competitor use found",
+                       unconfirmed=unconfirmed)
     notes = [f"Could not read {page}" for page in company.blocked[:5]]
     return Verdict(kind="needs_look", summary="Needs a look", missing=gaps + notes)

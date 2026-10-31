@@ -88,6 +88,23 @@ def test_supported_disqualifier_rejects_with_its_quote():
     assert decide(company([fit, need, uses]), PROFILE, disabled, TODAY).kind == "shortlisted"
 
 
+def test_shortlisted_flags_a_size_rule_no_quote_addressed():
+    fit = item("fit", "fit-1")
+    need = item("need", "need-1", source="job_post", published=TODAY)
+    size = DisqualifierRule(id="outside_target_size", rule="outside_stated_size_or_region",
+                            text="Much larger or later-stage than the companies you serve (seed to Series A)")
+    verdict = decide(company([fit, need]), PROFILE, [*RULES, size], TODAY)
+    assert verdict.kind == "shortlisted"
+    assert verdict.unconfirmed == ["Not shown by a quote either way: " + size.text]
+    small = item("disqualifier", "outside_target_size", text="SYNTHETIC: a team of 12 people")
+    shown = company([fit, need, small], decisions=[
+        SkepticDecision(evidence_id=fit.id, decision="supports", decided_by="skeptic"),
+        SkepticDecision(evidence_id=need.id, decision="supports", decided_by="skeptic"),
+        SkepticDecision(evidence_id=small.id, decision="contradicts", decided_by="skeptic")])
+    assert decide(shown, PROFILE, [*RULES, size], TODAY).unconfirmed == []
+    assert decide(company([fit, need]), PROFILE, RULES, TODAY).unconfirmed == []
+
+
 def test_user_exclusions_and_budget():
     fit = item("fit", "fit-1")
     assert decide(company([fit]), PROFILE, RULES, TODAY, ["shop.example"]).summary == "Excluded by you (shop.example)"

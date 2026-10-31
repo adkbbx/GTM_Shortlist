@@ -550,6 +550,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/agent/runs/{run_id}/shortlist.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export Agent Run */
+        get: operations["export_agent_run_api_agent_runs__run_id__shortlist_csv_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/agent/runs/{run_id}/overrides": {
         parameters: {
             query?: never;
@@ -2283,6 +2300,8 @@ export interface components {
             summary: string;
             /** Missing */
             missing: string[];
+            /** Unconfirmed */
+            unconfirmed: string[];
             disqualifier: components["schemas"]["EvidenceItem"] | null;
             /** Rule */
             rule: ("uses_direct_competitor" | "is_competitor" | "is_existing_customer" | "outside_stated_size_or_region" | "inactive") | null;
@@ -3360,6 +3379,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AgentRunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    export_agent_run_api_agent_runs__run_id__shortlist_csv_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One row per decided company */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": unknown;
                 };
             };
             /** @description Validation Error */

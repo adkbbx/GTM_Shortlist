@@ -60,6 +60,9 @@ Work in this order:
    "<company> <competitor 1> <competitor 2>"; the company's own page code is already scanned for them. Fetch a
    competitor's customer or case-study page only if a result names the company. Evidence must show CURRENT use, not
    an integration, a comparison article or past use.
+4. Size: if a disqualifier check is about size or stage, quote the company's own words about its team size, headcount
+   or funding stage (about, team or careers page, or a funding announcement), using that check's id with claim_type
+   "disqualifier", whether the words show it is within the size or outside it. The reviewer decides which.
 Limits: at most {MAX_SEARCHES} web searches and {MAX_FETCHES} fetch_page calls in total.
 
 Evidence rules:
