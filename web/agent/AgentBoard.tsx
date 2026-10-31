@@ -35,6 +35,30 @@ function Missing({ items }: { items: string[] }) {
   </div>;
 }
 
+/** Why now and an opening line, written only from supported quotes and checked against them. */
+function PitchBlock({ pitch }: { pitch: NonNullable<Company['pitch']> }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(pitch.opener);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  };
+  return <section className="agent-pitch" aria-label="Why now and an opening line">
+    <p className="agent-pitch-label">Why now</p>
+    <p className="agent-pitch-why">{pitch.why_now}</p>
+    <p className="agent-pitch-label">Opening line</p>
+    <blockquote className="agent-pitch-opener">{pitch.opener}</blockquote>
+    <div className="agent-pitch-foot">
+      <button type="button" className="agent-small-button" onClick={copy}>{copied ? 'Copied' : 'Copy opening line'}</button>
+      <span>{pitch.checked ? 'Checked against the quotes by Muse Spark Open' : 'Not checked against the quotes'}</span>
+    </div>
+  </section>;
+}
+
 function CompanyCard({ company, run }: { company: Company; run: AgentRun }) {
   const verdict = company.verdict!;
   const headingId = `company-${company.domain.replace(/\W+/g, '-')}`;
@@ -49,6 +73,7 @@ function CompanyCard({ company, run }: { company: Company; run: AgentRun }) {
     </div>}
     {verdict.kind === 'needs_look' && <Missing items={verdict.missing} />}
     {verdict.kind === 'shortlisted' && <p className="agent-card-summary">{verdict.summary}</p>}
+    {verdict.kind === 'shortlisted' && company.pitch && <PitchBlock pitch={company.pitch} />}
     <EvidenceList company={company} checkName={checkNamer(run)} />
     {company.checked_places.length > 0 && <p className="agent-checked"><span>Checked for competitors:</span> {company.checked_places.join(', ')}</p>}
     {company.found_via && <p className="agent-checked"><span>Found by:</span> {company.found_via}</p>}

@@ -14,6 +14,8 @@ from datetime import UTC, date, datetime, timedelta
 from shortlist.agent.competitors import CLASSIFY_INSTRUCTIONS, SEARCH_INSTRUCTIONS
 from shortlist.agent.discovery import DISCOVERY_INSTRUCTIONS
 from shortlist.agent.investigation import INSTRUCTIONS as INVESTIGATE_INSTRUCTIONS
+from shortlist.agent.outreach import CHECK as PITCH_CHECK
+from shortlist.agent.outreach import INSTRUCTIONS as PITCH_INSTRUCTIONS
 from shortlist.agent.pages import Page, page_from_document
 from shortlist.agent.pipeline import Providers
 from shortlist.agent.providers import ChatTurn, FunctionCall, ModelTurn, SearchCall, SearchResult
@@ -336,6 +338,12 @@ class SyntheticInvestigator:
                 answer = ""
             else:
                 answer = json.dumps({"company_name": "", "evidence": plan.get("evidence", [])})
+        elif instructions == PITCH_INSTRUCTIONS:
+            data = json.loads(re.search(r"<data>\n(.*)\n</data>", first, re.DOTALL).group(1))
+            lead = next(q for q in data["quotes"] if q["kind"] in ("need", "timing"))
+            answer = json.dumps({"why_now": f"{data['company']} says: {lead['quote'][:150]}",
+                                 "opener": f"Saw this on your site: \"{lead['quote'][:150]}\". {data['seller_offer'][:150]}",
+                                 "quote_ids": [lead["id"]]})
         else:
             answer = "{}"
         items = [{"type": "web_search_call", "status": "completed", "action": {"type": "search", "query": s.query}}
@@ -363,6 +371,9 @@ class SyntheticSkeptic:
         if self.pace:
             time.sleep(self.pace)
         self.requests.append(messages)
+        if messages[0]["content"] == PITCH_CHECK:
+            text = json.dumps({"decision": "supported", "reason": "SYNTHETIC: the note repeats the quote."})
+            return ChatTurn(text=text, input_tokens=_tokens(messages), output_tokens=_tokens(text), latency_ms=1)
         data = json.loads(re.search(r"<data>\n(.*)\n</data>", messages[-1]["content"], re.DOTALL).group(1))
         decisions = []
         for item in data["items"]:

@@ -604,7 +604,7 @@ export interface components {
              * Stage
              * @enum {string}
              */
-            stage: "seller" | "competitors" | "discovery" | "investigation" | "skeptic" | "verdict" | "overrides" | "run";
+            stage: "seller" | "competitors" | "discovery" | "investigation" | "skeptic" | "verdict" | "outreach" | "overrides" | "run";
             /** Message */
             message: string;
             /** Company */
@@ -866,6 +866,7 @@ export interface components {
              */
             turns: number;
             verdict: components["schemas"]["Verdict"] | null;
+            pitch: components["schemas"]["Pitch"] | null;
             /**
              * Latency Ms
              * @default 0
@@ -1587,6 +1588,28 @@ export interface components {
             /** Role */
             role: string;
             evidence: components["schemas"]["Evidence"];
+        };
+        /**
+         * Pitch
+         * @description Why now and an opening line for a Shortlisted company, written only from quotes the skeptic supported.
+         */
+        Pitch: {
+            /** Why Now */
+            why_now: string;
+            /** Opener */
+            opener: string;
+            /** Evidence Ids */
+            evidence_ids: string[];
+            /**
+             * Checked
+             * @default false
+             */
+            checked: boolean;
+            /**
+             * Reason
+             * @default
+             */
+            reason: string;
         };
         /** Profile */
         Profile: {

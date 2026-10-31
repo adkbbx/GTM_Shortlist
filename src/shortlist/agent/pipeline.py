@@ -27,6 +27,7 @@ from shortlist.agent.models import (
     SetAside,
     Telemetry,
 )
+from shortlist.agent.outreach import pitch_or_none
 from shortlist.agent.pages import COMPARISON, Fetcher
 from shortlist.agent.providers import AgentProviderError, Investigator, SkepticModel
 from shortlist.agent.scan import scan
@@ -222,9 +223,24 @@ class AgentRunner:
         company.decisions = judge(company, result.profile, result.disqualifiers, calls, use_skeptic=self.use_skeptic)
         company.verdict = decide(company, result.profile, result.disqualifiers, self.providers.clock().date(),
                                  result.overrides.exclusions)
+        self.add_pitch(result, company, calls)
         company.cost_usd = calls.meter.company_cost(ref.domain)
         self.replace(result, company)
         self.emit("verdict", f"{ref.domain}: {VERDICT_LABEL[company.verdict.kind]}", company=ref.domain, level="done")
+
+    def add_pitch(self, result: RunResult, company: CompanyResult, calls: Calls):
+        """Why now and an opening line for a Shortlisted company; any other verdict has none."""
+        if company.verdict is None or company.verdict.kind != "shortlisted":
+            company.pitch = None
+            return
+        if company.pitch is not None:
+            return
+        self.emit("outreach", "Writing why now and an opening line from the supported quotes", company=company.domain)
+        company.pitch = pitch_or_none(company, result.profile, calls, use_skeptic=self.use_skeptic,
+                                      dropped=result.dropped)
+        if company.pitch is None:
+            self.emit("outreach", "No opening line kept: nothing it said could be checked against the quotes",
+                      company=company.domain, level="warn")
 
     def replace(self, result: RunResult, company: CompanyResult):
         with self.lock:
@@ -287,6 +303,9 @@ class AgentRunner:
                     company.decisions = [d for d in company.decisions if any(e.id == d.evidence_id for e in company.evidence)]
                 company.verdict = decide(company, result.profile, result.disqualifiers, self.providers.clock().date(),
                                          merged.exclusions)
+                if company.pitch is not None and rejudge & set(company.pitch.evidence_ids):
+                    company.pitch = None  # a quote it was written from was judged again
+                self.add_pitch(result, company, calls)
                 company.cost_usd = calls.meter.company_cost(company.domain)
                 result.companies[index] = company
             self.save(result)

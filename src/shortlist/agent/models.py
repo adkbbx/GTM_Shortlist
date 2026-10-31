@@ -179,6 +179,15 @@ class Verdict(Model):
     rule: RuleKind | None = None
 
 
+class Pitch(Model):
+    """Why now and an opening line for a Shortlisted company, written only from quotes the skeptic supported."""
+    why_now: str = Field(max_length=400)
+    opener: str = Field(max_length=600)
+    evidence_ids: list[str] = Field(default_factory=list)
+    checked: bool = False  # Muse Spark Open found every statement in the quotes
+    reason: str = ""
+
+
 class CandidateRef(Model):
     domain: str
     name: str = ""
@@ -210,6 +219,7 @@ class CompanyResult(Model):
     fetches: int = 0
     turns: int = 0
     verdict: Verdict | None = None
+    pitch: Pitch | None = None
     latency_ms: int = 0
     cost_usd: float = 0.0
     error: str | None = None
@@ -265,7 +275,7 @@ class Overrides(Model):
 class AgentEvent(Model):
     seq: int = 0
     at: datetime = Field(default_factory=utcnow)
-    stage: Literal["seller", "competitors", "discovery", "investigation", "skeptic", "verdict", "overrides", "run"]
+    stage: Literal["seller", "competitors", "discovery", "investigation", "skeptic", "verdict", "outreach", "overrides", "run"]
     message: str = Field(max_length=500)
     company: str | None = None
     level: Literal["info", "warn", "done"] = "info"

@@ -107,6 +107,13 @@
 .agent-card-head h3{font-size:1.0625rem;line-height:1.35}
 .agent-card-head a{display:inline-flex;align-items:center;min-height:2.75rem;font-size:.875rem}
 .agent-card-summary{font-size:.875rem;color:var(--muted)}
+.agent-pitch{margin-top:.75rem;padding:.875rem 1rem;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius-control)}
+.agent-pitch-label{font-size:.75rem;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--muted)}
+.agent-pitch-label+p,.agent-pitch-label+blockquote{margin-top:.25rem}
+.agent-pitch-why{font-size:.875rem;margin-bottom:.625rem}
+.agent-pitch-opener{margin:0;padding-left:.75rem;border-left:3px solid var(--line);font-size:.875rem;overflow-wrap:anywhere}
+.agent-pitch-foot{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .875rem;margin-top:.75rem;font-size:.75rem;color:var(--muted)}
+.agent-main .agent-small-button{min-height:2.75rem;padding:.5rem .875rem;font-size:.8125rem;background:var(--surface);color:var(--ink);border:1px solid #c4c0b8;box-shadow:none}
 .agent-reason{margin-top:.25rem}
 .agent-reason>p{font-size:.875rem;font-weight:600;color:#b3261e}
 .agent-missing>p{font-size:.8125rem;font-weight:600;color:#2457a6}

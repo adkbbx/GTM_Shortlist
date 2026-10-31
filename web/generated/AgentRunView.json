@@ -21,6 +21,7 @@
             "investigation",
             "skeptic",
             "verdict",
+            "outreach",
             "overrides",
             "run"
           ],
@@ -221,6 +222,17 @@
           ],
           "default": null
         },
+        "pitch": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Pitch"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "latency_ms": {
           "default": 0,
           "title": "Latency Ms",
@@ -260,6 +272,7 @@
         "fetches",
         "turns",
         "verdict",
+        "pitch",
         "latency_ms",
         "cost_usd",
         "error"
@@ -979,6 +992,48 @@
         "lines"
       ],
       "title": "PageSignature",
+      "type": "object"
+    },
+    "Pitch": {
+      "additionalProperties": false,
+      "description": "Why now and an opening line for a Shortlisted company, written only from quotes the skeptic supported.",
+      "properties": {
+        "why_now": {
+          "maxLength": 400,
+          "title": "Why Now",
+          "type": "string"
+        },
+        "opener": {
+          "maxLength": 600,
+          "title": "Opener",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "checked": {
+          "default": false,
+          "title": "Checked",
+          "type": "boolean"
+        },
+        "reason": {
+          "default": "",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "why_now",
+        "opener",
+        "evidence_ids",
+        "checked",
+        "reason"
+      ],
+      "title": "Pitch",
       "type": "object"
     },
     "Quote": {

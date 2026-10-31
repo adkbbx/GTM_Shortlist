@@ -32,6 +32,13 @@ test('a website alone produces a live board with three verdicts and quoted evide
   expect(await reason.getAttribute('href')).toBe('https://brightkettle.example/#:~:text=Customer%20support%20powered%20by%20RivalDesk');
   await expect(page.getByRole('status').first()).toContainText('Done: 1 shortlisted, 1 needs a look, 1 rejected');
 
+  // A Shortlisted company carries why now and an opening line, checked against its quotes; others carry none.
+  const pitch = shortlisted.getByRole('region', { name: 'Why now and an opening line' });
+  await expect(pitch).toContainText('We are hiring two customer support agents');
+  await expect(pitch).toContainText('Checked against the quotes by Muse Spark Open');
+  await expect(pitch.getByRole('button', { name: 'Copy opening line' })).toBeVisible();
+  await expect(page.locator('.column-needs_look, .column-rejected').locator('.agent-pitch')).toHaveCount(0);
+
   // What we assumed: every item opens its quote; nothing had to be typed.
   const assumptions = page.locator('.agent-assumptions');
   await expect(assumptions.getByRole('heading', { name: 'What we assumed' })).toBeVisible();

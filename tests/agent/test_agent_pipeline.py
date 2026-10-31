@@ -106,10 +106,10 @@ def test_needs_a_look_lists_what_is_missing(run_result):
 
 def test_telemetry_records_every_call(run_result):
     t = run_result.telemetry
-    assert t.model_calls == len(t.calls) == 14
+    assert t.model_calls == len(t.calls) == 16  # includes the Shortlisted company's pitch and its check
     assert {c.provider for c in t.calls} == {"synthetic-meta", "synthetic-baseten"}
     assert {c.operation for c in t.calls} >= {"seller_profile", "competitor_search", "competitor_classify", "discovery",
-                                              "investigate", "skeptic"}
+                                              "investigate", "skeptic", "pitch", "pitch_check"}
     assert all(c.input_tokens > 0 and c.output_tokens > 0 and c.latency_ms >= 0 for c in t.calls)
     assert t.searches == sum(c.searches for c in t.calls) > 0
     assert abs(t.cost_usd - sum(c.usd for c in t.calls)) < 1e-6
