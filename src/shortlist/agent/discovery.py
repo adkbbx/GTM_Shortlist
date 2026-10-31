@@ -2,6 +2,7 @@
 import json
 import re
 from collections.abc import Callable
+from urllib.parse import urlsplit
 
 from shortlist.agent.answers import CompaniesAnswer
 from shortlist.agent.competitors import clean_domain, company_domain_issue
@@ -87,7 +88,8 @@ def compact(text: str) -> str:
 def with_posting(item, postings: list[str]):
     """The model often names the board ("on jobs.lever.co") but not the posting; the search results hold it. A
     posting is matched only when its board's name is the company's name or domain stem."""
-    if item.posting_url or not postings:
+    if (item.posting_url and len([p for p in urlsplit(item.posting_url).path.split("/") if p]) >= 2) \
+            or not postings:
         return item
     keys = {compact(item.name), compact((clean_domain(item.url or item.domain) or "").split(".")[0])} - {""}
     match = next((url for url in postings if compact(board_refs(url)[0][1]) in keys), None)
@@ -101,7 +103,7 @@ def lead(item, boards: JobBoards | None, emit: Callable[..., None]) -> str:
     if boards is None or not item.posting_url:
         return found_via
     names = [n for n in (item.name, (clean_domain(item.url or item.domain) or "").split(".")[0]) if n]
-    match = boards.posting(item.posting_url, names)
+    match = boards.posting(item.posting_url, names, role=found_via)
     if match is None:
         return f"{found_via} (posting {item.posting_url[:200]} not confirmed open on the company's board)"
     board, opening = match

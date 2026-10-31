@@ -122,3 +122,15 @@ def test_a_posting_missing_from_the_answer_is_taken_from_the_search_results():
     results = ["https://jobs.lever.co/othergear/x-1", "https://jobs.lever.co/TrailGear/aaa-111", "https://trailgear.example/"]
     assert with_posting(item, results).posting_url == "https://jobs.lever.co/TrailGear/aaa-111"
     assert with_posting(item, ["https://jobs.lever.co/othergear/x-1"]).posting_url == ""
+
+
+def test_a_bare_board_url_finds_the_matching_role_and_old_greenhouse_links_are_rewritten():
+    from shortlist.agent.jobboards import posting_page
+
+    item = CandidateAnswer(name="Trailgear", domain="trailgear.example", posting_url="https://jobs.lever.co/trailgear",
+                           found_via="job post: Sales Manager (US) to build the US market (Lever, Oct 2026)")
+    assert "Sales Manager (US)" in lead(item, boards(), lambda *a, **k: None)
+    vague = item.model_copy(update={"found_via": "job post: Data Engineer (Lever)"})
+    assert "not confirmed open" in lead(vague, boards(), lambda *a, **k: None)
+    assert posting_page("https://boards.greenhouse.io/acme/jobs/12") == "https://job-boards.greenhouse.io/acme/jobs/12"
+    assert posting_page("https://jobs.lever.co/acme/1") == "https://jobs.lever.co/acme/1"

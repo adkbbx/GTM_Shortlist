@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from urllib.parse import urlsplit
 
 from shortlist.agent.answers import InvestigationAnswer, page_for
-from shortlist.agent.jobboards import MAX_OPENINGS, Board, JobBoards
+from shortlist.agent.jobboards import MAX_OPENINGS, Board, JobBoards, posting_page
 from shortlist.agent.llm import UNTRUSTED, AgentOutputError, Calls
 from shortlist.agent.models import (
     CandidateRef,
@@ -190,7 +190,7 @@ class Investigation:
         if not isinstance(url, str) or not url:
             return "Invalid arguments: give {\"url\": \"https://...\"}."
         try:
-            page = self.fetch(url)
+            page = self.fetch(posting_page(url))
         except FetchError as exc:
             if "limit" not in str(exc):
                 self.result.blocked.append(f"{url[:300]}: {exc}")

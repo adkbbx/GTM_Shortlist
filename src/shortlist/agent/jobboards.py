@@ -178,9 +178,10 @@ class JobBoards:
                 return board
         return None
 
-    def posting(self, url: str, names: list[str]) -> tuple[Board, Opening] | None:
+    def posting(self, url: str, names: list[str], role: str = "") -> tuple[Board, Opening] | None:
         """The board behind a posting URL and that posting, when it is still listed and the board's postings name
-        the company. None: not a board posting, no longer listed, or another company's board."""
+        the company. A bare board URL (the vanta.com run got "https://jobs.lever.co/qloo") gives the open role whose
+        title best matches role. None: no longer listed, no matching role, or another company's board."""
         refs = board_refs(url)
         if not refs:
             return None
@@ -189,6 +190,30 @@ class JobBoards:
             return None
         key = url.split("?")[0].rstrip("/").lower()
         opening = next((o for o in board.openings if o.url.split("?")[0].rstrip("/").lower() == key), None)
+        if opening is None and len([p for p in urlsplit(url).path.split("/") if p]) <= 1:
+            opening = best_role(board.openings, role)
         named = any(re.search(r"(?<![\w-])" + re.escape(name.casefold()) + r"(?![\w-])", board.text.casefold())
                     for name in names if len(name) >= 3)
         return (board, opening) if opening and named else None
+
+
+WORD = re.compile(r"[a-z0-9]{3,}")
+COMMON = frozenset({"job", "post", "posting", "lever", "greenhouse", "ashby", "the", "and", "for", "with", "remote",
+                    "oct", "sep", "nov", "2026", "senior", "manager", "lead"})
+
+
+def best_role(openings: tuple[Opening, ...], role: str) -> Opening | None:
+    """The opening sharing the most distinctive words with the lead's description, needing at least two."""
+    wanted = set(WORD.findall(role.casefold())) - COMMON
+    scored = [(len(wanted & (set(WORD.findall(o.title.casefold())) - COMMON)), o) for o in openings]
+    score, opening = max(scored, key=lambda pair: pair[0], default=(0, None))
+    return opening if score >= 2 else None
+
+
+def posting_page(url: str) -> str:
+    """Greenhouse moved postings from boards.greenhouse.io to job-boards.greenhouse.io and redirects the old links,
+    which the page fetcher refuses as a change of site (vanta.com run). Ask for the new address directly."""
+    parts = urlsplit(url)
+    if parts.hostname == "boards.greenhouse.io" and not parts.path.startswith("/embed"):
+        return url.replace("://boards.greenhouse.io/", "://job-boards.greenhouse.io/", 1)
+    return url
