@@ -113,3 +113,12 @@ def test_the_investigation_reads_the_companys_own_board_before_its_first_model_c
     trailgear = next(c for c in result.companies if c.domain == "trailgear.example")
     assert "own job board on Lever" in trailgear.checked_places
     assert any(e.message == "Read its own job board on Lever: 1 open role" for e in events)
+
+
+def test_a_posting_missing_from_the_answer_is_taken_from_the_search_results():
+    from shortlist.agent.discovery import with_posting
+
+    item = CandidateAnswer(name="Trail Gear", domain="trailgear.example", found_via="job post on jobs.lever.co")
+    results = ["https://jobs.lever.co/othergear/x-1", "https://jobs.lever.co/TrailGear/aaa-111", "https://trailgear.example/"]
+    assert with_posting(item, results).posting_url == "https://jobs.lever.co/TrailGear/aaa-111"
+    assert with_posting(item, ["https://jobs.lever.co/othergear/x-1"]).posting_url == ""

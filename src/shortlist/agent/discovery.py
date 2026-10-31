@@ -1,10 +1,11 @@
 """Stage B: find companies that match the buyer and criteria, plus lookalikes of named customers."""
 import json
+import re
 from collections.abc import Callable
 
 from shortlist.agent.answers import CompaniesAnswer
 from shortlist.agent.competitors import clean_domain, company_domain_issue
-from shortlist.agent.jobboards import JobBoards
+from shortlist.agent.jobboards import JobBoards, board_refs
 from shortlist.agent.llm import UNTRUSTED, Calls
 from shortlist.agent.models import MAX_COMPANIES, CandidateRef, Competitor, SellerProfile, SetAside
 from shortlist.agent.providers import WEB_SEARCH_TOOL, search_label
@@ -79,6 +80,20 @@ def admit(url: str, name: str, found_via: str, excluded: dict[str, str], seller_
     return CandidateRef(domain=domain, name=name[:200], url=f"https://{domain}/", found_via=found_via[:500]), None
 
 
+def compact(text: str) -> str:
+    return re.sub(r"[^a-z0-9]", "", text.casefold())
+
+
+def with_posting(item, postings: list[str]):
+    """The model often names the board ("on jobs.lever.co") but not the posting; the search results hold it. A
+    posting is matched only when its board's name is the company's name or domain stem."""
+    if item.posting_url or not postings:
+        return item
+    keys = {compact(item.name), compact((clean_domain(item.url or item.domain) or "").split(".")[0])} - {""}
+    match = next((url for url in postings if compact(board_refs(url)[0][1]) in keys), None)
+    return item.model_copy(update={"posting_url": match}) if match else item
+
+
 def lead(item, boards: JobBoards | None, emit: Callable[..., None]) -> str:
     """found_via for a named company. A job posting still listed on the company's own board becomes an open job post
     lead with its url, which the investigation fetches and quotes first."""
@@ -128,7 +143,9 @@ def discover(profile: SellerProfile, competitors: list[Competitor], count: int, 
             emit("discovery", "Run budget reached; keeping the companies already found", level="warn")
             break
         # Companies the model named come first; raw search results only when they are a company's own page.
-        found = [(item.url or item.domain, item.name, lead(item, boards, emit), False) for item in answer.companies]
+        postings = [result.url for search in turn.searches for result in search.results if board_refs(result.url)]
+        found = [(item.url or item.domain, item.name, lead(with_posting(item, postings), boards, emit), False)
+                 for item in answer.companies]
         for search in turn.searches:
             emit("discovery", f"Searched {search_label(search.query)} ({len(search.results)} results)")
             found += [(result.url, result.title, f'search "{search.query}"', True) for result in search.results]
