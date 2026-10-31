@@ -30,7 +30,10 @@ def extract_json(text: str) -> dict:
     start = text.find("{")
     if start < 0:
         raise ValueError("No JSON object in the answer")
-    depth, in_string, escape = 0, False, False
+    # Verbatim quotes copy the page's own quotation marks, and the model does not always escape them: the first search
+    # on the deployed demo stopped at "Expecting ',' delimiter". Inside a string, a quotation mark ends it only when a
+    # JSON delimiter follows; any other one is escaped. Valid JSON parses exactly as before.
+    depth, in_string, escape, out = 0, False, False, []
     for index in range(start, len(text)):
         char = text[index]
         if in_string:
@@ -39,19 +42,26 @@ def extract_json(text: str) -> dict:
             elif char == "\\":
                 escape = True
             elif char == '"':
-                in_string = False
+                if STRING_END.match(text, index + 1):
+                    in_string = False
+                else:
+                    char = '\\"'
         elif char == '"':
             in_string = True
         elif char == "{":
             depth += 1
         elif char == "}":
             depth -= 1
-            if depth == 0:
-                value = json.loads(text[start:index + 1])
-                if not isinstance(value, dict):
-                    raise ValueError("Answer is not a JSON object")
-                return value
+        out.append(char)
+        if depth == 0 and not in_string and char == "}":
+            value = json.loads("".join(out))
+            if not isinstance(value, dict):
+                raise ValueError("Answer is not a JSON object")
+            return value
     raise ValueError("Unfinished JSON object in the answer")
+
+
+STRING_END = re.compile(r"\s*(?:[,:}\]]|$)")
 
 
 def parse_into(model: type[T], text: str) -> T:

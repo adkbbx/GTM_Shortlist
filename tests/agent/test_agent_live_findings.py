@@ -3,9 +3,12 @@ import json
 from datetime import UTC, date, datetime, timedelta
 from urllib.parse import urlsplit
 
+import pytest
+
 from shortlist.agent import synthetic
 from shortlist.agent.discovery import DISCOVERY_INSTRUCTIONS, SEARCH_RESULT_PAGE, admit
 from shortlist.agent.investigation import INSTRUCTIONS as INVESTIGATE_INSTRUCTIONS
+from shortlist.agent.llm import extract_json
 from shortlist.agent.models import EvidenceItem, Overrides, Quote
 from shortlist.agent.pages import Page, open_posting
 from shortlist.agent.pipeline import AgentRunner
@@ -256,3 +259,14 @@ def test_budget_reached_during_discovery_keeps_the_companies_already_found(provi
     result = AgentRunner(providers, budget_usd=0.012, concurrency=1).run(SELLER)
     assert result.telemetry.budget_reached and {c.domain for c in result.companies} >= {"trailgear.example"}
     assert all(c.status == "budget_reached" for c in result.companies)
+
+
+def test_unescaped_quotation_marks_inside_a_quote_still_parse():
+    """31 October, deployed demo: the seller profile stopped at "Expecting ',' delimiter" twice. The answer below is
+    SYNTHETIC, shaped like a verbatim quote that copied the page's own quotation marks."""
+    answer = '{"offer": {"text": "We test "one variable at a time" for founders", "n": [1]}}'
+    assert extract_json(answer) == {"offer": {"text": 'We test "one variable at a time" for founders', "n": [1]}}
+    valid = {"a": 'say "hi"', "b": ["x", {"c": "}"}], "d": ""}
+    assert extract_json("Here it is:\n" + json.dumps(valid) + "\ntrailing") == valid
+    with pytest.raises(ValueError):  # a stray mark right before a delimiter still looks like the end: model repair
+        extract_json('{"quote": "No "growth hacks", ever"}')
