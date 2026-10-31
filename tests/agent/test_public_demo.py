@@ -205,7 +205,10 @@ def test_shipped_examples_are_real_finished_searches_that_open_read_only(tmp_pat
         examples = client.get("/api/health").json()["examples"]
         assert {e["id"] for e in examples} == {p.stem for p in files}
         example = examples[0]
-        assert client.get(f"/api/agent/runs/{example['id']}").json()["run"]["status"] == "complete"
+        shown = client.get(f"/api/agent/runs/{example['id']}").json()
+        assert shown["run"]["status"] == "complete"
+        assert len(shown["events"]) > 20 and shown["events"][-1]["message"].startswith("Done: ")
+        assert [e["seq"] for e in shown["events"]] == list(range(1, len(shown["events"]) + 1))
         refused = client.post(f"/api/agent/runs/{example['id']}/overrides", json={"exclusions": ["x.example"]})
         assert refused.status_code == 403
 

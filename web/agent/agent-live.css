@@ -1,0 +1,93 @@
+/* Live board: the pinned monitor, the activity rail and cards for companies still being researched. Status always
+   pairs colour with words. */
+.agent-monitor{position:sticky;top:.5rem;z-index:20;margin:1.25rem 0 1.5rem;background:#1c1a17;color:#f4efe7;border-radius:1rem;padding:1rem 1.25rem .875rem;box-shadow:0 12px 32px -18px rgba(28,26,23,.55),0 0 0 1px #2e2a25}
+.agent-monitor-row{display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap}
+.agent-monitor-now{flex:1 1 20rem;min-width:0}
+.agent-monitor-label{display:flex;align-items:center;gap:.5rem;font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#efa779}
+.agent-monitor-company{text-transform:none;letter-spacing:0;font-weight:500;color:#c9c1b5;padding:.0625rem .5rem;border-radius:999px;background:#2b2722;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:16rem}
+.agent-monitor .agent-status{margin:.25rem 0 0;font-size:1.0625rem;font-weight:600;line-height:1.4;color:#fff9f0;max-width:none;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.agent-monitor.status-complete .agent-monitor-label{color:#8fd1a8}
+.agent-monitor.status-failed .agent-monitor-label{color:#f19a8f}
+.agent-monitor-stats{display:flex;gap:1.5rem;margin:0;flex:none}
+.agent-monitor-stats div{min-width:0}
+.agent-monitor-stats dt{font-size:.6875rem;color:#a39b8f;letter-spacing:.02em}
+.agent-monitor-stats dd{margin:.125rem 0 0;font-size:1.125rem;font-weight:600;font-variant-numeric:tabular-nums;color:#fff9f0;white-space:nowrap}
+.agent-monitor-stats dd span{color:#857d72;font-weight:500}
+.agent-live-dot{width:.5rem;height:.5rem;border-radius:50%;background:#ef7f3e;flex:none;box-shadow:0 0 0 0 rgba(239,127,62,.6);animation:agent-live 1.6s ease-out infinite}
+@keyframes agent-live{0%{box-shadow:0 0 0 0 rgba(239,127,62,.55)}80%,100%{box-shadow:0 0 0 .5rem rgba(239,127,62,0)}}
+.agent-feed-toggle{display:none;min-height:2.75rem;padding:.5rem .875rem;font-size:.8125rem;background:#2b2722;color:#f4efe7;border:1px solid #403a33}
+.agent-feed-toggle:hover{background:#38322b}
+
+.agent-stepper{list-style:none;margin:.875rem 0 0;padding:.875rem 0 0;border-top:1px solid #2f2b26;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:.5rem}
+.agent-stepper li{display:flex;align-items:flex-start;gap:.5rem;min-width:0;position:relative;color:#857d72}
+.agent-step-dot{flex:none;display:grid;place-items:center;width:1.5rem;height:1.5rem;border-radius:50%;font-size:.6875rem;font-weight:700;border:1px solid #4a433b;color:#a39b8f;background:#1c1a17}
+.agent-step-text{display:flex;flex-direction:column;min-width:0;font-size:.8125rem;line-height:1.25}
+.agent-step-text>span{font-weight:600;overflow-wrap:anywhere}
+.agent-step-text small{font-size:.6875rem;color:#6f685e;margin-top:.125rem}
+.agent-stepper .step-done{color:#d9d1c4}
+.agent-stepper .step-done .agent-step-dot{background:#b4501c;border-color:#b4501c;color:#fff}
+.agent-stepper .step-active{color:#fff9f0}
+.agent-stepper .step-active .agent-step-dot{border-color:#ef7f3e;color:#ef7f3e;animation:agent-live 1.6s ease-out infinite}
+.agent-stepper .step-active small{color:#efa779}
+.agent-stepper.is-compact{border-top:0;padding-top:0}
+
+/* Results beside the activity rail */
+.agent-board-grid{display:grid;grid-template-columns:minmax(0,1fr) 20rem;gap:1.75rem;align-items:start}
+.agent-board-main{min-width:0}
+.agent-rail{position:sticky;top:10.5rem;max-height:calc(100vh - 11.5rem);display:flex;flex-direction:column;min-width:0}
+.agent-log{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sheet);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.agent-log-head{display:flex;align-items:baseline;gap:.5rem;padding:.875rem 1rem;border-bottom:1px solid var(--line)}
+.agent-log-head h2{font-size:.9375rem}
+.agent-log-head>span{font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.agent-feed-close{display:none;margin-left:auto;min-height:2.5rem;padding:.375rem .75rem;font-size:.8125rem}
+.agent-log ol{list-style:none;margin:0;padding:.25rem 0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.agent-log li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.125rem .5rem;padding:.625rem 1rem;border-bottom:1px solid #f0eee9}
+.agent-log li:first-child{animation:agent-in .35s ease-out}
+@keyframes agent-in{from{opacity:0;transform:translateY(-.25rem)}to{opacity:1;transform:none}}
+.agent-log li p{grid-column:1/-1;font-size:.8125rem;line-height:1.45;overflow-wrap:anywhere;max-width:none}
+.agent-log li strong{font-weight:600}
+.agent-log time{grid-row:1;grid-column:2;font-size:.6875rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.agent-log li.level-done p::before{content:'✓ ';color:#1f7a4d;font-weight:700}
+.agent-log li.level-warn p{color:#8a5a12}
+.agent-log-tag{justify-self:start;font-size:.625rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.125rem .4375rem;border-radius:.25rem;background:#f0eee8;color:var(--muted)}
+.agent-log-tag.stage-skeptic{background:#e8eef9;color:#2457a6}
+.agent-log-tag.stage-verdict,.agent-log-tag.stage-outreach{background:#e6f1eb;color:#1f7a4d}
+.agent-log-tag.stage-discovery,.agent-log-tag.stage-investigation{background:#f6e0d3;color:#8a3b12}
+.agent-log-empty{padding:1rem;font-size:.875rem;color:var(--muted)}
+
+/* Companies still being researched */
+.agent-working-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(14rem,1fr));gap:.75rem;margin-bottom:1.25rem}
+.agent-working-card{background:var(--surface);border:1px dashed #d4b49c;border-radius:.75rem;padding:.875rem 1rem;min-width:0;position:relative;overflow:hidden}
+.agent-working-card::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,transparent,#ef7f3e,transparent);background-size:50% 100%;background-repeat:no-repeat;animation:agent-scan 1.8s linear infinite}
+@keyframes agent-scan{from{background-position:-50% 0}to{background-position:150% 0}}
+.agent-working-card header{display:flex;align-items:center;gap:.5rem}
+.agent-working-card h4{font-size:.9375rem;overflow-wrap:anywhere}
+.agent-working-step{margin-top:.5rem;font-size:.6875rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#b4501c}
+.agent-working-message{margin-top:.25rem;font-size:.8125rem;line-height:1.45;color:var(--ink);overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.agent-working-count{margin-top:.375rem;font-size:.75rem;color:var(--muted)}
+
+@media(max-width:1100px){
+  .agent-board-grid{display:block}
+  .agent-feed-toggle{display:inline-flex}
+  .agent-rail{display:none;position:fixed;top:auto;left:0;right:0;bottom:0;max-height:70vh;z-index:40;padding:0 .5rem .5rem}
+  .agent-rail.is-open{display:flex}
+  .agent-rail .agent-log{box-shadow:0 -12px 40px -12px rgba(28,26,23,.45);border-radius:1rem 1rem .75rem .75rem}
+  .agent-feed-close{display:inline-flex}
+}
+@media(max-width:700px){
+  .agent-monitor{top:.25rem;margin:1rem 0 1.25rem;padding:.75rem .875rem .625rem;border-radius:.875rem}
+  .agent-monitor-row{gap:.625rem}
+  .agent-monitor-now{flex-basis:100%}
+  .agent-monitor .agent-status{font-size:.9375rem}
+  .agent-monitor-stats{gap:1rem;flex:1}
+  .agent-monitor-stats div:nth-child(4),.agent-monitor-stats div:nth-child(5){display:none}
+  .agent-monitor-stats dd{font-size:1rem}
+  .agent-feed-toggle{min-height:2.5rem}
+  .agent-stepper{gap:.25rem;margin-top:.625rem;padding-top:.625rem}
+  .agent-stepper li{flex-direction:column;align-items:center;text-align:center;gap:.25rem}
+  .agent-stepper li::after{content:'';position:absolute;top:.75rem;left:calc(50% + .875rem);right:calc(-50% + .875rem);height:1px;background:#3a352f}
+  .agent-stepper li:last-child::after{display:none}
+  .agent-stepper .step-done::after{background:#b4501c}
+  .agent-step-text{display:none}
+}
+@media(prefers-reduced-motion:reduce){.agent-live-dot,.agent-stepper .step-active .agent-step-dot,.agent-working-card::after,.agent-log li:first-child{animation:none}}

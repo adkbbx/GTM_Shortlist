@@ -1,0 +1,274 @@
+[
+ {
+  "seq": 1,
+  "at": "2026-10-31T15:51:54.724290Z",
+  "stage": "run",
+  "message": "Started research for https://eygentic.com/",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 2,
+  "at": "2026-10-31T15:51:55.859163Z",
+  "stage": "seller",
+  "message": "Read your homepage (https://eygentic.com/)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 3,
+  "at": "2026-10-31T15:51:56.476470Z",
+  "stage": "seller",
+  "message": "Read https://eygentic.com/hire-sdrs-vs-acquisition-experiments/",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 4,
+  "at": "2026-10-31T15:52:08.414067Z",
+  "stage": "seller",
+  "message": "Understood the offer with 3 fit checks, 3 need signals and 0 named customers",
+  "company": null,
+  "level": "done"
+ },
+ {
+  "seq": 5,
+  "at": "2026-10-31T15:52:16.350409Z",
+  "stage": "competitors",
+  "message": "Searched \"Eygentic alternatives\" (11 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 6,
+  "at": "2026-10-31T15:52:16.350409Z",
+  "stage": "competitors",
+  "message": "Searched \"B2B SaaS customer acquisition experiments agency growth\" (10 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 7,
+  "at": "2026-10-31T15:52:30.622188Z",
+  "stage": "competitors",
+  "message": "Found 2 direct competitors among 8 candidates",
+  "company": null,
+  "level": "done"
+ },
+ {
+  "seq": 8,
+  "at": "2026-10-31T15:52:41.620816Z",
+  "stage": "discovery",
+  "message": "Confirmed open on Greenhouse: Sales Development Representative (ContactMonkey)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 9,
+  "at": "2026-10-31T15:52:41.878515Z",
+  "stage": "discovery",
+  "message": "Confirmed open on Ashby: Lead Data Scientist (Middesk)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 10,
+  "at": "2026-10-31T15:52:42.189376Z",
+  "stage": "discovery",
+  "message": "Confirmed open on Ashby: Strategic Finance (Decagon)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 11,
+  "at": "2026-10-31T15:52:42.189376Z",
+  "stage": "discovery",
+  "message": "Searched \"site:jobs.lever.co SDR B2B SaaS\" (11 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 12,
+  "at": "2026-10-31T15:52:42.189376Z",
+  "stage": "discovery",
+  "message": "Searched \"site:boards.greenhouse.io SDR outbound sales SaaS\" (10 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 13,
+  "at": "2026-10-31T15:52:42.189376Z",
+  "stage": "discovery",
+  "message": "Searched \"site:jobs.ashbyhq.com SDR B2B SaaS\" (12 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 14,
+  "at": "2026-10-31T15:52:42.189376Z",
+  "stage": "discovery",
+  "message": "Searched \"site:job-boards.greenhouse.io SDR SaaS outbound\" (10 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 15,
+  "at": "2026-10-31T15:52:42.198558Z",
+  "stage": "discovery",
+  "message": "Found 5 candidate companies; set aside 4 pages (lists, directories, competitors, customers)",
+  "company": null,
+  "level": "done"
+ },
+ {
+  "seq": 16,
+  "at": "2026-10-31T15:52:42.209793Z",
+  "stage": "investigation",
+  "message": "Investigating 5 companies, 5 at a time",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 17,
+  "at": "2026-10-31T15:52:42.209793Z",
+  "stage": "investigation",
+  "message": "Investigating overbond.com",
+  "company": "overbond.com",
+  "level": "info"
+ },
+ {
+  "seq": 18,
+  "at": "2026-10-31T15:52:42.211820Z",
+  "stage": "investigation",
+  "message": "Investigating contactmonkey.com",
+  "company": "contactmonkey.com",
+  "level": "info"
+ },
+ {
+  "seq": 19,
+  "at": "2026-10-31T15:52:42.211820Z",
+  "stage": "investigation",
+  "message": "Investigating weave.dev",
+  "company": "weave.dev",
+  "level": "info"
+ },
+ {
+  "seq": 20,
+  "at": "2026-10-31T15:52:42.211820Z",
+  "stage": "investigation",
+  "message": "Investigating middesk.com",
+  "company": "middesk.com",
+  "level": "info"
+ },
+ {
+  "seq": 21,
+  "at": "2026-10-31T15:52:42.211820Z",
+  "stage": "investigation",
+  "message": "Investigating decagon.ai",
+  "company": "decagon.ai",
+  "level": "info"
+ },
+ {
+  "seq": 22,
+  "at": "2026-10-31T15:52:42.382210Z",
+  "stage": "verdict",
+  "message": "weave.dev: Needs a look",
+  "company": "weave.dev",
+  "level": "done"
+ },
+ {
+  "seq": 23,
+  "at": "2026-10-31T15:52:42.794231Z",
+  "stage": "verdict",
+  "message": "overbond.com: Needs a look",
+  "company": "overbond.com",
+  "level": "done"
+ },
+ {
+  "seq": 24,
+  "at": "2026-10-31T15:52:43.531515Z",
+  "stage": "investigation",
+  "message": "Read its own job board on Ashby: 133 open roles",
+  "company": "decagon.ai",
+  "level": "info"
+ },
+ {
+  "seq": 25,
+  "at": "2026-10-31T15:52:45.023198Z",
+  "stage": "investigation",
+  "message": "Read its own job board on Ashby: 18 open roles",
+  "company": "middesk.com",
+  "level": "info"
+ },
+ {
+  "seq": 26,
+  "at": "2026-10-31T15:52:47.100467Z",
+  "stage": "investigation",
+  "message": "Read its own job board on Greenhouse: 5 open roles",
+  "company": "contactmonkey.com",
+  "level": "info"
+ },
+ {
+  "seq": 27,
+  "at": "2026-10-31T15:53:10.768070Z",
+  "stage": "skeptic",
+  "message": "Skeptic checking 8 quotes",
+  "company": "contactmonkey.com",
+  "level": "info"
+ },
+ {
+  "seq": 28,
+  "at": "2026-10-31T15:53:14.017080Z",
+  "stage": "skeptic",
+  "message": "Skeptic checking 9 quotes",
+  "company": "middesk.com",
+  "level": "info"
+ },
+ {
+  "seq": 29,
+  "at": "2026-10-31T15:53:19.105626Z",
+  "stage": "skeptic",
+  "message": "Skeptic checking 3 quotes",
+  "company": "decagon.ai",
+  "level": "info"
+ },
+ {
+  "seq": 30,
+  "at": "2026-10-31T15:53:21.256272Z",
+  "stage": "verdict",
+  "message": "contactmonkey.com: Shortlisted",
+  "company": "contactmonkey.com",
+  "level": "done"
+ },
+ {
+  "seq": 31,
+  "at": "2026-10-31T15:53:22.224308Z",
+  "stage": "verdict",
+  "message": "middesk.com: Shortlisted",
+  "company": "middesk.com",
+  "level": "done"
+ },
+ {
+  "seq": 32,
+  "at": "2026-10-31T15:53:23.126818Z",
+  "stage": "verdict",
+  "message": "decagon.ai: Needs a look",
+  "company": "decagon.ai",
+  "level": "done"
+ },
+ {
+  "seq": 33,
+  "at": "2026-10-31T15:53:23.127819Z",
+  "stage": "investigation",
+  "message": "2 website(s) could not be read; no more candidates to try",
+  "company": null,
+  "level": "warn"
+ },
+ {
+  "seq": 34,
+  "at": "2026-10-31T15:53:23.160537Z",
+  "stage": "run",
+  "message": "Done: 2 shortlisted, 1 need a look, 0 rejected",
+  "company": null,
+  "level": "done"
+ }
+]

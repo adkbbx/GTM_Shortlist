@@ -1,5 +1,14 @@
 # Progress and handoff
 
+## 1 November (night), Meta hackathon: size from quotes, CSV, a live monitor and a new landing page
+
+- Size: the investigator now quotes a company's own words about its headcount or stage when a size check exists. Live run (eygentic.com, 5 companies, $0.42): storable.com Rejected on "Storable proudly employs over 800 employees" from its about page; vague team text was judged insufficient. A Shortlisted company whose size no quote addressed shows "Check before you reach out" (`Verdict.unconfirmed`); the three Shortlisted examples carry it.
+- Export: `GET /api/agent/runs/{id}/shortlist.csv` and a Download CSV button. Cells a spreadsheet would run as formulas are kept as text.
+- Board: a pinned monitor shows the current step in plain words, a six-step tracker (with which model does each step), time, companies decided, quotes kept, searches and cost. The activity log is a side rail on laptops and a sheet from the Steps button on phones. Companies still being researched get live cards with their last step. Assumptions moved below the results.
+- Landing: a dark hero in the hosted landing page's type and orange that replays a real finished search's recorded activity, then real Shortlisted cards with their quote and opening line. The three examples now ship with their real event logs (`agent/showcase/events/`), exported from the local run database.
+- Verified: 955 backend tests, Ruff, TypeScript build, 10 Playwright journeys on phone and laptop, screenshots of the landing, a live synthetic run, an example board and the phone steps sheet, no horizontal overflow.
+- Unfinished: Render needs a manual deploy of this commit. The review sheet still needs labels before any accuracy number is quoted.
+
 ## 1 November (later), Meta hackathon: what to say, examples, sharing
 
 - **Why now and an opening line (14951ae, 984b183):** for each Shortlisted company, Muse Spark writes from the quotes the skeptic supported (need and timing first). Muse Spark Open checks every statement against those quotes, with each quote's source, so a job post counts as hiring. A rejected note is rewritten once with the checker's reason, then dropped and logged. Live: the first check rejected Brellium's note, because a job-post title alone did not say Brellium was hiring. After the fix, Brellium, ContactMonkey, Middesk and Pipe17 all passed. For example: "Saw you're hiring four Sales Development Representatives to run your Account-Based Strategy playbook and A/B test outbound cadences. We run focused acquisition experiments...". About $0.02 to $0.03 a company.

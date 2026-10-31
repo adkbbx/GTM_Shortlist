@@ -1,0 +1,4159 @@
+{
+ "id": "ddb51670fc004142b90bce02f42447f9",
+ "website": "https://eygentic.com/",
+ "status": "complete",
+ "created_at": "2026-10-31T20:13:26.685130Z",
+ "finished_at": "2026-10-31T20:16:04.338672Z",
+ "company_count": 5,
+ "skeptic": true,
+ "synthetic": false,
+ "profile": {
+  "website": "https://eygentic.com/",
+  "domain": "eygentic.com",
+  "name": "Eygentic",
+  "offer": {
+   "value": "Runs focused customer-acquisition experiments for B2B and SaaS teams to find what works before scaling it.",
+   "quotes": [
+    {
+     "text": "We run focused customer-acquisition experiments to find what works before you scale it.",
+     "url": "https://eygentic.com/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-10-31T20:13:27.597681Z",
+     "location": "text",
+     "open_posting": false
+    },
+    {
+     "text": "We design the experiment, build the lists and messages, run the outreach or campaign, handle replies and report the evidence.",
+     "url": "https://eygentic.com/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-10-31T20:13:27.597681Z",
+     "location": "text",
+     "open_posting": false
+    }
+   ],
+   "origin": "agent"
+  },
+  "buyer": {
+   "value": "B2B and SaaS companies, including specialized business software, that want to make customer acquisition more predictable.",
+   "quotes": [
+    {
+     "text": "B2B and SaaS companies of any size or stage, including specialized business software, that want customer acquisition to be more predictable.",
+     "url": "https://eygentic.com/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-10-31T20:13:27.597681Z",
+     "location": "text",
+     "open_posting": false
+    },
+    {
+     "text": "Eygentic (eygentic.com) runs focused customer-acquisition experiments for B2B and SaaS teams so you know what deserves that capacity before you hire.",
+     "url": "https://eygentic.com/hire-sdrs-vs-acquisition-experiments/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-10-31T20:13:28.214950Z",
+     "location": "text",
+     "open_posting": false
+    }
+   ],
+   "origin": "agent"
+  },
+  "existing_customers": [],
+  "fit_criteria": [
+   {
+    "id": "fit-1",
+    "text": "Sells products or services to other businesses (B2B)",
+    "required": true,
+    "enabled": true,
+    "quotes": [
+     {
+      "text": "B2B and SaaS companies of any size or stage, including specialized business software, that want customer acquisition to be more predictable.",
+      "url": "https://eygentic.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:13:27.597681Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "origin": "agent"
+   },
+   {
+    "id": "fit-2",
+    "text": "Sells software, SaaS or specialized business software",
+    "required": false,
+    "enabled": true,
+    "quotes": [
+     {
+      "text": "B2B and SaaS companies of any size or stage, including specialized business software, that want customer acquisition to be more predictable.",
+      "url": "https://eygentic.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:13:27.597681Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "origin": "agent"
+   },
+   {
+    "id": "fit-3",
+    "text": "Sells an offer that requires sales conversations, meetings or demos to convert",
+    "required": false,
+    "enabled": true,
+    "quotes": [
+     {
+      "text": "Does the channel produce conversations?",
+      "url": "https://eygentic.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:13:27.597681Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "Live outreach or campaign",
+      "url": "https://eygentic.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:13:27.597681Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "origin": "agent"
+   },
+   {
+    "id": "fit-4",
+    "text": "Acquires customers via measurable channels such as outbound email, LinkedIn, paid channels or partnerships",
+    "required": false,
+    "enabled": true,
+    "quotes": [
+     {
+      "text": "Outbound email, LinkedIn, paid channels, partnerships and other channels where results can be measured.",
+      "url": "https://eygentic.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:13:27.597681Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "origin": "agent"
+   }
+  ],
+  "need_signals": [
+   {
+    "id": "need-1",
+    "kind": "need",
+    "text": "Hiring SDRs, outbound sales reps or growth marketers to add outreach capacity",
+    "quotes": [
+     {
+      "text": "SDRs add outreach capacity. We find out which customer, message, offer and channel deserve that capacity.",
+      "url": "https://eygentic.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:13:27.597681Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "You can use the results to brief SDRs or decide who to hire.",
+      "url": "https://eygentic.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:13:27.597681Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   },
+   {
+    "id": "need-2",
+    "kind": "need",
+    "text": "Announcing a new product, offer, messaging, positioning or target segment",
+    "quotes": [
+     {
+      "text": "We keep changing several things at once.",
+      "url": "https://eygentic.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:13:27.597681Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "You are changing ICP, offer, and channel at the same time",
+      "url": "https://eygentic.com/hire-sdrs-vs-acquisition-experiments/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:13:28.214950Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   },
+   {
+    "id": "need-3",
+    "kind": "need",
+    "text": "Running outbound, LinkedIn or paid acquisition campaigns and publishing funnel or channel results",
+    "quotes": [
+     {
+      "text": "Run more outreach",
+      "url": "https://eygentic.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:13:27.597681Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "Test a specific hypothesis",
+      "url": "https://eygentic.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:13:27.597681Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   }
+  ],
+  "timing_signals": [
+   {
+    "id": "timing-1",
+    "kind": "timing",
+    "text": "Launching a new product, offer, segment or market expansion that needs testing",
+    "quotes": [
+     {
+      "text": "A launch succeeds when every system is tested.",
+      "url": "https://eygentic.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:13:27.597681Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   },
+   {
+    "id": "timing-2",
+    "kind": "timing",
+    "text": "Preparing to hire first SDRs or add outbound capacity after early meetings",
+    "quotes": [
+     {
+      "text": "Hire SDRs when your outbound motion is already proven. Run customer acquisition experiments first when you are still unsure which ICP, message, offer, or channel will convert.",
+      "url": "https://eygentic.com/hire-sdrs-vs-acquisition-experiments/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:13:28.214950Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "You need a playbook to brief new SDRs",
+      "url": "https://eygentic.com/hire-sdrs-vs-acquisition-experiments/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:13:28.214950Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   },
+   {
+    "id": "timing-3",
+    "kind": "timing",
+    "text": "Announcing new funding to spend on growth and scale acquisition",
+    "quotes": [
+     {
+      "text": "We want to scale, but we are not confident the system is ready.",
+      "url": "https://eygentic.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:13:27.597681Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   }
+  ],
+  "stated_limits": [],
+  "target_size": {
+   "value": "Seed to Series A B2B startups, about 5 to 50 people, founder still doing sales",
+   "quotes": [],
+   "origin": "user"
+  },
+  "interpretations": [],
+  "pages": [
+   {
+    "url": "https://eygentic.com/",
+    "title": "Eygentic | Customer-acquisition experiments for B2B and SaaS teams",
+    "fetched_at": "2026-10-31T20:13:27.597681Z"
+   },
+   {
+    "url": "https://eygentic.com/hire-sdrs-vs-acquisition-experiments/",
+    "title": "Hire SDRs vs run customer acquisition experiments",
+    "fetched_at": "2026-10-31T20:13:28.214950Z"
+   }
+  ]
+ },
+ "competitors": [
+  {
+   "name": "Northpeak",
+   "domain": "northpeak.io",
+   "classification": "direct",
+   "same_job": {
+    "text": "We help you craft intelligent ad campaigns and experiment rapidly to minimize your cost per acquisition and maximize your ROAS.",
+    "url": "https://northpeak.io/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T20:13:45.303975Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": {
+    "text": "We partner with SaaS, eCommerce, and B2B companies to accelerate growth by optimizing for your northstar.",
+    "url": "https://northpeak.io/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T20:13:45.303975Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Sells rapid acquisition experimentation to SaaS and B2B companies.",
+   "found_via": "B2B customer acquisition experiments agency SaaS search",
+   "origin": "agent"
+  },
+  {
+   "name": "ConversionLab",
+   "domain": "conversionlab.no",
+   "classification": "direct",
+   "same_job": {
+    "text": "CRO retainer – ongoing A/B testing that builds on itself.",
+    "url": "https://www.conversionlab.no/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T20:13:46.133677Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": {
+    "text": "I help Nordic B2B SaaS companies turn traffic into customers, and customers into revenue that keeps growing.",
+    "url": "https://www.conversionlab.no/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T20:13:46.133677Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Runs systematic A/B testing for acquisition for B2B SaaS companies.",
+   "found_via": "B2B customer acquisition experiments agency SaaS search",
+   "origin": "agent"
+  },
+  {
+   "name": "Tuff",
+   "domain": "tuffgrowth.com",
+   "classification": "adjacent",
+   "same_job": {
+    "text": "rapid message testing, building amazingly effective web pages, usability testing, ad optimization, A/B testing, and multivariate testing.",
+    "url": "https://tuffgrowth.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T20:13:45.526921Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": null,
+   "reason": "Shows experimentation-led acquisition work but no specific B2B SaaS buyer focus.",
+   "found_via": "B2B customer acquisition experiments agency SaaS search via perceptric.com list of SaaS growth agencies",
+   "origin": "agent"
+  },
+  {
+   "name": "TripleDart",
+   "domain": "tripledart.com",
+   "classification": "adjacent",
+   "same_job": null,
+   "same_buyer": {
+    "text": "AI-native marketing agency for B2B SaaS and tech",
+    "url": "https://www.tripledart.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T20:13:45.083138Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Targets B2B SaaS buyers but sells full GTM engine, not focused acquisition experiments.",
+   "found_via": "B2B customer acquisition experiments agency SaaS search",
+   "origin": "agent"
+  },
+  {
+   "name": "Refine Labs",
+   "domain": "refinelabs.com",
+   "classification": "adjacent",
+   "same_job": null,
+   "same_buyer": {
+    "text": "We work with B2B tech companies at Series B and beyond",
+    "url": "https://www.refinelabs.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T20:13:44.899912Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Targets B2B tech buyers but sells brand-demand-expand system, not experiment-to-scale acquisition.",
+   "found_via": "B2B customer acquisition experiments agency SaaS search via onemetrik.com Best B2B Growth Marketing Agency list",
+   "origin": "agent"
+  },
+  {
+   "name": "NoGood",
+   "domain": "nogood.io",
+   "classification": "adjacent",
+   "same_job": {
+    "text": "We maximize lead volume and quality with hyper-targeted campaigns and high-impact keyword strategies.",
+    "url": "https://nogood.io/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T20:13:45.687998Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": null,
+   "reason": "Does paid acquisition work but targets startups and Fortune 100 broadly, not B2B SaaS specifically.",
+   "found_via": "B2B customer acquisition experiments agency SaaS search via onemetrik.com Best B2B Growth Marketing Agency list",
+   "origin": "agent"
+  },
+  {
+   "name": "Kalungi",
+   "domain": "kalungi.com",
+   "classification": "adjacent",
+   "same_job": null,
+   "same_buyer": {
+    "text": "B2B SaaS Marketing Agency for Predictable Pipeline and Growth",
+    "url": "https://www.kalungi.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T20:13:46.048020Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Targets B2B SaaS for predictable growth but sells outsourced department, not focused experiments.",
+   "found_via": "B2B customer acquisition experiments agency SaaS search via onemetrik.com Best B2B Growth Marketing Agency list",
+   "origin": "agent"
+  },
+  {
+   "name": "Advance B2B",
+   "domain": "advanceb2b.com",
+   "classification": "adjacent",
+   "same_job": null,
+   "same_buyer": null,
+   "reason": "Not verified: its site could not be read (Redirect changed company identity; manual verification required). Mark it as a direct competitor if it sells the same thing to your buyers.",
+   "found_via": "B2B customer acquisition experiments agency SaaS search via thehub.io result",
+   "origin": "agent"
+  }
+ ],
+ "disqualifiers": [
+  {
+   "id": "uses_direct_competitor:northpeak.io",
+   "rule": "uses_direct_competitor",
+   "text": "Currently uses Northpeak (northpeak.io), a direct competitor",
+   "competitor_domain": "northpeak.io",
+   "enabled": true
+  },
+  {
+   "id": "uses_direct_competitor:conversionlab.no",
+   "rule": "uses_direct_competitor",
+   "text": "Currently uses ConversionLab (conversionlab.no), a direct competitor",
+   "competitor_domain": "conversionlab.no",
+   "enabled": true
+  },
+  {
+   "id": "is_competitor",
+   "rule": "is_competitor",
+   "text": "Is itself a direct competitor",
+   "competitor_domain": null,
+   "enabled": true
+  },
+  {
+   "id": "is_existing_customer",
+   "rule": "is_existing_customer",
+   "text": "Is already your customer",
+   "competitor_domain": null,
+   "enabled": true
+  },
+  {
+   "id": "outside_target_size",
+   "rule": "outside_stated_size_or_region",
+   "text": "Much larger or later-stage than the companies you serve (Seed to Series A B2B startups, about 5 to 50 people, founder still doing sales)",
+   "competitor_domain": null,
+   "enabled": true
+  },
+  {
+   "id": "inactive",
+   "rule": "inactive",
+   "text": "No longer operating: closed, acquired and shut, or the site is parked",
+   "competitor_domain": null,
+   "enabled": true
+  }
+ ],
+ "overrides": {
+  "add_competitors": [],
+  "remove_competitors": [],
+  "exclusions": [],
+  "criteria": [],
+  "company_count": 5,
+  "interpretation": null,
+  "offer": null,
+  "buyer": null,
+  "target_size": "Seed to Series A B2B startups, about 5 to 50 people, founder still doing sales"
+ },
+ "companies": [
+  {
+   "domain": "scraperapi.com",
+   "name": "scraperapi.com",
+   "url": "https://scraperapi.com/",
+   "found_via": "job post: Sales Development Representative on job-boards.greenhouse.io",
+   "status": "done",
+   "evidence": [
+    {
+     "id": "f2e4a8a7eb9845f9a894f5d511f09b4f",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "ScraperAPI sells to other businesses, used by data-focused companies.",
+     "quote": {
+      "text": "Join the\n10,000+\ndata-focused companies using ScraperAPI",
+      "url": "https://www.scraperapi.com/",
+      "source_type": "own_site",
+      "published_date": "2024-03-14",
+      "fetched_at": "2026-10-31T20:14:10.807518Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "d337edf243d04d1fb70ebf68e45cbfc8",
+     "claim_type": "fit",
+     "criterion_id": "fit-2",
+     "claim": "ScraperAPI sells a web scraping API and software tools.",
+     "quote": {
+      "text": "Collect data from any public website with our web scraping API, without worrying about proxies, browsers, or CAPTCHA handling.",
+      "url": "https://www.scraperapi.com/",
+      "source_type": "own_site",
+      "published_date": "2024-03-14",
+      "fetched_at": "2026-10-31T20:14:10.807518Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    }
+   ],
+   "decisions": [
+    {
+     "evidence_id": "f2e4a8a7eb9845f9a894f5d511f09b4f",
+     "decision": "supports",
+     "reason": "Quote states 10,000+ companies use ScraperAPI, directly indicating B2B customers.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "d337edf243d04d1fb70ebf68e45cbfc8",
+     "decision": "supports",
+     "reason": "Quote describes offering a web scraping API, which is software/SaaS.",
+     "decided_by": "skeptic"
+    }
+   ],
+   "checked_places": [
+    "homepage code",
+    "search \"ScraperAPI Sales Development Representative greenhouse job\"",
+    "search \"ScraperAPI new product launch expansion 2026\"",
+    "search \"ScraperAPI funding growth\"",
+    "search \"scraperapi.com northpeak.io conversionlab.no\""
+   ],
+   "disqualifier_check_completed": true,
+   "blocked": [],
+   "signatures": [
+    {
+     "url": "https://www.scraperapi.com/",
+     "kind": "homepage",
+     "fetched_at": "2026-10-31T20:14:10.807518Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//ka-p.fontawesome.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://ka-p.fontawesome.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://dev.visualwebsiteoptimizer.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://tr.capterra.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://a.quora.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://connect.facebook.net"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://www.redditstatic.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://snap.licdn.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://static.hotjar.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://bat.bing.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://www.googletagmanager.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://web.cmp.usercentrics.eu"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://plugin.sopro.io"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://js.hs-scripts.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://kit.fontawesome.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://js-na1.hs-scripts.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://ds360.co"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://j.6sc.co"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//js.hs-scripts.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//app.usercentrics.eu"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//api.usercentrics.eu"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//web.cmp.usercentrics.eu/ui/loader.js"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://web.cmp.usercentrics.eu/ui/loader.js"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-K4CBW6S"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ScraperAPI"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ScraperAPI geotargeting"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ScraperAPI Affiliate Program"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "http://www.capterra.com/p/238595/Scraper-API/"
+      },
+      {
+       "tag": "a",
+       "attr": "title",
+       "value": "Capterra"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Capterra Badge"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Cristina Saavedra"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Ilya Sukhar"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Alexander Zharkov"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "BigCommerce"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/ScraperAPI"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/scraperapi/"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://js.hs-scripts.com/6840215.js?integration=WordPress&ver=11.3.75"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://kit.fontawesome.com/f5e03c8317.js?ver=4.3.2"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://dev.visualwebsiteoptimizer.com/ee.gif?a="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://dev.visualwebsiteoptimizer.com/j.php?"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.jsdelivr.com/using-sri-with-dynamic-files"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://t.firstpromoter.com/track/signup"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://t.firstpromoter.com/track/sale"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://t.firstpromoter.com/track/new"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.algolia.com/?utm_source=WordPress&utm_medium=extension&utm_content="
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    }
+   ],
+   "searches": 4,
+   "fetches": 1,
+   "turns": 1,
+   "verdict": {
+    "kind": "needs_look",
+    "summary": "Needs a look",
+    "missing": [
+     "No current need or timing evidence (none dated within 180 days, no open job post)"
+    ],
+    "unconfirmed": [],
+    "disqualifier": null,
+    "rule": null
+   },
+   "pitch": null,
+   "latency_ms": 7641,
+   "cost_usd": 0.037359,
+   "error": null
+  },
+  {
+   "domain": "thrivecart.com",
+   "name": "thrivecart.com",
+   "url": "https://thrivecart.com/",
+   "found_via": "open job post on its Greenhouse board: Sales Development Representative (SDR) – ThriveCart, posted 2026-09-30 (https://job-boards.greenhouse.io/thrivecart/jobs/5439511008)",
+   "status": "done",
+   "evidence": [
+    {
+     "id": "8de24848aff34e79ba603c4b46a42d16",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "ThriveCart sells its platform to businesses worldwide",
+     "quote": {
+      "text": "ThriveCart powers more than 75,000 businesses worldwide, has processed over $8 billion in sales across more than 70 million transactions",
+      "url": "https://job-boards.greenhouse.io/thrivecart/jobs/5439511008",
+      "source_type": "job_post",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:14:30.789156Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "b910982c72404314829a975e84ec6cff",
+     "claim_type": "fit",
+     "criterion_id": "fit-2",
+     "claim": "ThriveCart sells software combining checkout, subscriptions and course platform",
+     "quote": {
+      "text": "ThriveCart is a creator commerce and community management platform designed for\ncourse creators,\ncoaches,\nmembership businesses, and\ndigital entrepreneurs.",
+      "url": "https://job-boards.greenhouse.io/thrivecart/jobs/5439511008",
+      "source_type": "job_post",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:14:30.789156Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "1b948bbdc5724186801066c49524de82",
+     "claim_type": "need",
+     "criterion_id": "need-1",
+     "claim": "Hiring SDRs for pure outbound hunting role",
+     "quote": {
+      "text": "This is a pure hunting role built for individuals who love the challenge of outbound prospecting and creating opportunities from scratch.",
+      "url": "https://job-boards.greenhouse.io/thrivecart/jobs/5439511008",
+      "source_type": "job_post",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:14:30.789156Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "bdc49719bd6a4ae4913b1f27f86b4f34",
+     "claim_type": "need",
+     "criterion_id": "need-1",
+     "claim": "SDR role requires daily cold-calling and targeted email sequences",
+     "quote": {
+      "text": "High-Volume Outbound Outreach: Execute consistent daily cold-calling and highly targeted email sequences to connect with enterprise decision-makers.",
+      "url": "https://job-boards.greenhouse.io/thrivecart/jobs/5439511008",
+      "source_type": "job_post",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:14:30.789156Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "76409253cfcc4492ac89ad01e5d13b5d",
+     "claim_type": "need",
+     "criterion_id": "need-2",
+     "claim": "Announcing Fall 2026 release with new ThrivePages and pricing features",
+     "quote": {
+      "text": "today announced its Fall 2026 product release, introducing major new features designed to help creators and businesses improve the customer journey, increase sales, and retain more recurring revenue.",
+      "url": "https://www.martechcube.com/thrivecart-fall-2026-release-boosts-sales-and-subscription-management/",
+      "source_type": "news",
+      "published_date": "2026-10-15",
+      "fetched_at": "2026-10-31T20:14:44.598135Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "d114e5db0ac4439b95f34c02d595e2b7",
+     "claim_type": "timing",
+     "criterion_id": "timing-1",
+     "claim": "Launching new product features needing testing and adoption",
+     "quote": {
+      "text": "The release includes Advanced Adaptive Pricing, which reinvents how businesses sell internationally in local currencies, allowing for market-specific pricing and custom regional fulfillment",
+      "url": "https://www.martechcube.com/thrivecart-fall-2026-release-boosts-sales-and-subscription-management/",
+      "source_type": "news",
+      "published_date": "2026-10-15",
+      "fetched_at": "2026-10-31T20:14:44.598135Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "ae011b668db241b9ae7df651fe03ea6b",
+     "claim_type": "timing",
+     "criterion_id": "timing-2",
+     "claim": "Building first enterprise SDR team to add outbound capacity",
+     "quote": {
+      "text": "As one of the first three SDRs in this enterprise initiative, your contributions will directly influence our long-term enterprise sales playbook.",
+      "url": "https://job-boards.greenhouse.io/thrivecart/jobs/5439511008",
+      "source_type": "job_post",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:14:30.789156Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    }
+   ],
+   "decisions": [
+    {
+     "evidence_id": "8de24848aff34e79ba603c4b46a42d16",
+     "decision": "supports",
+     "reason": "Quote states company powers 75,000 businesses, showing B2B customers.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "b910982c72404314829a975e84ec6cff",
+     "decision": "supports",
+     "reason": "Quote describes company as a commerce and community management platform, indicating business software.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "1b948bbdc5724186801066c49524de82",
+     "decision": "supports",
+     "reason": "Quote describes pure hunting role focused on outbound prospecting and creating opportunities.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "bdc49719bd6a4ae4913b1f27f86b4f34",
+     "decision": "supports",
+     "reason": "Quote lists high-volume cold-calling and targeted email sequences to enterprise decision-makers.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "76409253cfcc4492ac89ad01e5d13b5d",
+     "decision": "supports",
+     "reason": "Quote announces Fall 2026 product release introducing major new features.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "d114e5db0ac4439b95f34c02d595e2b7",
+     "decision": "supports",
+     "reason": "Quote describes release includes Advanced Adaptive Pricing for international local-currency selling.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "ae011b668db241b9ae7df651fe03ea6b",
+     "decision": "supports",
+     "reason": "Quote states role is one of first three SDRs in enterprise initiative, indicating first SDR hires.",
+     "decided_by": "skeptic"
+    }
+   ],
+   "checked_places": [
+    "homepage code",
+    "own job board on Greenhouse",
+    "search \"ThriveCart Northpeak ConversionLab\"",
+    "search \"ThriveCart new product launch 2026\"",
+    "job post page on job-boards.greenhouse.io",
+    "2 signin pages",
+    "other page on martechcube.com"
+   ],
+   "disqualifier_check_completed": true,
+   "blocked": [
+    "https://www.globenewswire.com/news-release/2026/10/14/3381021/0/en/thrivecart-s-fall-2026-release-better-sales-recurring-revenue-subscription-management-global-selling.html: Website returned HTTP 403"
+   ],
+   "signatures": [
+    {
+     "url": "https://thrivecart.com/",
+     "kind": "homepage",
+     "fetched_at": "2026-10-31T20:14:24.481120Z",
+     "attributes": [
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://cdn-4.convertexperiments.com/v1/js/10019450-10019798.js"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://cdn-cookieyes.com/client_data/d1947a2fe1b28e285ba15c26b6501feb/script.js"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-TLGZ778Z"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ThriveCart"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Trustpilot"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "G2"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Product Hunt"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Capterra"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Designrr"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Dow Janes"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Erika"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Gold City Ventures"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "HelloSeven"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Herbalism Conference"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Impact Bundles"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Indie Music Academy"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Kevin Fiedler"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Kevin Nations"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Kindlepreneur"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Marketplace Superheroes"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Onfolio"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "The Rise to the Top"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Gemma Bonham-Carter"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Chris Huntley"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Keith E."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Dom Wells"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Christina"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Darrel-Lynne Thieson"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Michael Ippersiel"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Matt Wolfe"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Barry Goss"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Onder Hassan"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Kevin Fielder"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Digital Products example"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Afterpay"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Affirm"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Klarna"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Select currencies in ThriveCart's Advanced Adaptive Pricing"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Subscription payment options in ThriveCart"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ThrivePages visual page editor"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Subscription bump setup in ThriveCart"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Special discount retention offer in ThriveCart"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.simpleicons.org/stripe"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Stripe"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.simpleicons.org/paypal"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "PayPal"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ActiveCampaign"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ConvertKit"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.simpleicons.org/zapier"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Zapier"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.simpleicons.org/mailchimp"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mailchimp"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Drip"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.simpleicons.org/hubspot"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "HubSpot"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "GetResponse"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Webhooks"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "AWeber"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Infusionsoft"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Kajabi"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Teachable"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/thrivecart"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.facebook.com/ThriveCartOfficial/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.instagram.com/thrivecartofficial/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/thrivecart"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/ThriveCart"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.youtube.com/@ThriveCartPlatform"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.convertbox.com/convertbox/js/embed.js"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    },
+    {
+     "url": "https://thrivecart.com/signin/",
+     "kind": "other",
+     "fetched_at": "2026-10-31T20:14:32.679472Z",
+     "attributes": [
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ThriveCart"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    },
+    {
+     "url": "https://thrivecart.com/signin/",
+     "kind": "other",
+     "fetched_at": "2026-10-31T20:14:38.519424Z",
+     "attributes": [
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ThriveCart"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    }
+   ],
+   "searches": 2,
+   "fetches": 6,
+   "turns": 4,
+   "verdict": {
+    "kind": "shortlisted",
+    "summary": "Required fit shown, current need or timing evidence, and no current competitor use found",
+    "missing": [],
+    "unconfirmed": [
+     "Not shown by a quote either way: Much larger or later-stage than the companies you serve (Seed to Series A B2B startups, about 5 to 50 people, founder still doing sales)"
+    ],
+    "disqualifier": null,
+    "rule": null
+   },
+   "pitch": {
+    "why_now": "ThriveCart is staffing its first three SDRs for an enterprise initiative built on outbound prospecting to enterprise decision-makers while shaping its long-term enterprise sales playbook.",
+    "opener": "Your team is hiring its first enterprise SDRs to create opportunities from scratch with enterprise decision-makers — we run focused acquisition experiments to find what converts before you lock in the long-term playbook.",
+    "evidence_ids": [
+     "1b948bbdc5724186801066c49524de82",
+     "bdc49719bd6a4ae4913b1f27f86b4f34",
+     "ae011b668db241b9ae7df651fe03ea6b"
+    ],
+    "checked": true,
+    "reason": "Every company claim in the note — first three SDRs in enterprise initiative, outbound prospecting creating opportunities from scratch with enterprise decision-makers, and shaping long-term enterprise sales playbook — is directly stated in the quotes, and the seller-offer sentence matches the provided seller_offer."
+   },
+   "latency_ms": 27844,
+   "cost_usd": 0.07703,
+   "error": null
+  },
+  {
+   "domain": "storable.com",
+   "name": "storable.com",
+   "url": "https://storable.com/",
+   "found_via": "job post: Sales Development Representative (SDR) - Marine Division outbound on boards.greenhouse.io (posting https://boards.greenhouse.io/storable/jobs/5411097004 not confirmed open on the company's board)",
+   "status": "done",
+   "evidence": [
+    {
+     "id": "6a1ad531ba774f34b363ae6dd74a19d4",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "Storable sells to self-storage operators and facilities, which are businesses",
+     "quote": {
+      "text": "Storable helps self-storage operators of all sizes move faster with a platform that increases occupancy, grows revenue, scales portfolios, and reduces repetitive work through intelligent automation and connected data.",
+      "url": "https://www.storable.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:14:24.218607Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "44ce7587b39242cf8f3ab01d3f36d373",
+     "claim_type": "fit",
+     "criterion_id": "fit-2",
+     "claim": "Storable sells property management software and AI platform",
+     "quote": {
+      "text": "Drive revenue, simplify your workflows and reduce costs with our cutting edge property management software.",
+      "url": "https://www.storable.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:14:24.218607Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "4c0a53b9ea5b4542a085e6babeabc15b",
+     "claim_type": "fit",
+     "criterion_id": "fit-4",
+     "claim": "Storable acquires customers via SEO websites and digital marketing services",
+     "quote": {
+      "text": "Reach more potential customers and grow occupancy with SEO-optimized websites, lead management tools, and digital marketing services.",
+      "url": "https://www.storable.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:14:24.218607Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "ac136f93545942028d2703f42ee43bca",
+     "claim_type": "disqualifier",
+     "criterion_id": "outside_target_size",
+     "claim": "Storable has over 800 employees, far larger than 5 to 50 people",
+     "quote": {
+      "text": "Storable proudly employs over 800 employees, or as we like to call them, Storriors",
+      "url": "https://www.storable.com/about-us/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:14:29.179676Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    }
+   ],
+   "decisions": [
+    {
+     "evidence_id": "6a1ad531ba774f34b363ae6dd74a19d4",
+     "decision": "supports",
+     "reason": "Quote shows platform sold to self-storage operators, which are businesses, indicating B2B.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "44ce7587b39242cf8f3ab01d3f36d373",
+     "decision": "supports",
+     "reason": "Quote explicitly offers cutting edge property management software.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "4c0a53b9ea5b4542a085e6babeabc15b",
+     "decision": "insufficient",
+     "reason": "Quote describes marketing services offered to customers, not Storable's own acquisition channels.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "ac136f93545942028d2703f42ee43bca",
+     "decision": "supports",
+     "reason": "Quote states over 800 employees, far exceeding 5-50 person range.",
+     "decided_by": "skeptic"
+    }
+   ],
+   "checked_places": [
+    "homepage code",
+    "own job board on Greenhouse",
+    "about us page",
+    "search \"Storable SDR sales development representative hiring\"",
+    "search \"Storable new product launch 2026\"",
+    "search \"Storable funding acquisition news 2026\"",
+    "search \"Storable Northpeak ConversionLab\""
+   ],
+   "disqualifier_check_completed": true,
+   "blocked": [
+    "https://job-boards.greenhouse.io/storable: Redirect changed company identity; manual verification required",
+    "https://boards.greenhouse.io/storable/jobs/5411097004: Redirect changed company identity; manual verification required"
+   ],
+   "signatures": [
+    {
+     "url": "https://www.storable.com/",
+     "kind": "homepage",
+     "fetched_at": "2026-10-31T20:14:24.218607Z",
+     "attributes": [
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://cmp.osano.com/wapV4usL16/1e24ddfc-c0f0-4782-ab9e-5148348d0a1b/osano.js"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://gmpg.org/xfn/11"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cmp.osano.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://boards.greenhouse.io"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//js.hs-scripts.com"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-NCB9QGC"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.storablemarine.com/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.newbook.cloud/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://myhub.smdservers.net/Account/Login?ReturnUrl=%2f"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.storedgefms.com/users/sign_in"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://my.sparefoot.com/login"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://storageforum.sitelink.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Storable logo, back to homepage"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://bit.ly/4y8d5vh"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "A brochure titled \"AI and Data for Self Storage Operators\" with geometric blue graphics and a photo of storage units on the cover."
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.storageunitsoftware.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Self-storage industry report for Q3 2026, featuring summary analysis, occupancy rates, rental rate trends, and regional performance data."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Man Standing in the middle of a row of storage units from a high drone angle with a city in the background"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Hexagonal image of blue storage unit doors numbered 11 to 14 with a geometric pattern on the right side."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Winner ISS 2025 Best of Business logo with colorful circular design and blue text on a white background."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Diamond-shaped badge with \"GetApp Best Functionality & Features 2025\" written on it in white and teal text against a gray background."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "A hexagonal badge with the text \"Software Advice Best Customer Support 2025\" in white and orange on a dark blue background."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "A blue shield-shaped badge with the Capterra logo and text stating \"Best Ease of Use 2025."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo for SecureSpace Self Storage, featuring a stylized blue padlock icon."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo for \"national storage\" with a garage icon on the left and the tagline \"Here when life moves you.\" written below."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Price Self Storage logo."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo of \"MyPlace Self-Storage\" with an icon of a house and garage door in a blue square, accompanied by the text in gray and yellow colors."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mayflower Properties logo."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo with the word \"Universal\" in bold purple and gray letters, and the text \"crypto processing platform\" below in smaller gray font."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo of White Label Storage featuring stylized vertical bars in navy and a red square, with the name in navy and red text."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo for West Coast Self-Storage with a blue and gray compass graphic. Text below reads: \"The neighborhood expert!\" in yellow."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo for Value Store It Self Storage, featuring an orange square with a large white \"V,\" the words \"store it\" in yellow on a blue banner, and \"SELF STORAGE\" below in white on a blue background."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Acorn Mini Storage logo."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo of A-American Self Storage featuring a stylized letter 'A' in blue with a star and red stripes, resembling an American flag, above the text \"A-American Self Storage."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo reading \"SAM inc\" in red and black with \"Storage Asset Management\" below. An upward arrow forms part of the logo design."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo of American Self Storage featuring a cube with the American flag design and the text \"American Self Storage."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo of IncaAztec Self Storage featuring a red and gray cubic design with company name in bold black and red letters."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo of HAN Capital featuring a stylized design in a square with blue curved lines on the left and the company name in blue and gray text on the right."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "A green circular logo with white text that reads \"The Space Shop Storage\" in bold uppercase letters."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "truSTORAGE Property Management by StorageMart Logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo of Cubix Asset Management features a blue hexagon with a keyhole padlock icon next to the company name in bold blue letters."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "1-800-PACK-RAT logo featuring the company name and an icon of a storage container."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo of Columbia Self Storage with a padlock icon on the left, featuring a person silhouette inside a lock design. The text \"Columbia Self Storage\" is written in bold, dark letters."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "StorQuest Self Storage logo with a geometric, symmetrical icon on the left and \"StorQuest Self Storage\" text to the right, separated by a horizontal red line."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Blue logo featuring \"KO Storage\" with a stylized box icon to the left."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Argus Self Storage Advisors logo with \"EST. 1994\" written below."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Red \"10 Federal Storage\" logo with a red circle surrounding the number 10 on the left side."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "A man in a golf cart at a storage unit is looking at a tablet with software on it."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "A red circular icon with two overlapping white squares inside, resembling a chain link or connection symbol."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "An orange circle icon featuring a white open book in the center."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "A circular icon with a white ribbon symbol in the center, set against a dark teal background."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Blue and green Atlantic Self Storage sign with white text."
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://8278919.fs1.hubspotusercontent-na1.net/hubfs/8278919/Storable_Case-Study_Atlantic_Final.pdf"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "A digital report titled “Q3 2026 Self-Storage Industry Trends: Retention” showing data charts and analysis."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Blog header titled “Industry Trends: KPIs for the self-storage industry: 11 metrics every operator should track.”"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Blog post titled “Scaling your self-storage business: 5 signs you need a purpose-built CRM.”"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "A man working at a storage unit is reviewing information on a tablet while walking down a hall surrounded by units."
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/storableinc"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/storableinc/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.facebook.com/storableinc/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.youtube.com/channel/UCEpwyh8wAiBo9fXvy6ZxB4Q"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.instagram.com/storableinc/"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://boards.greenhouse.io/embed/job_board/js?for=storable"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.clarity.ms/tag/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.facebook.com/storableinc/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.instagram.com/storableinc/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.youtube.com/channel/UCEpwyh8wAiBo9fXvy6ZxB4Q"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://x.com/storableinc"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/storableinc/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.storageunitsoftware.com/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "//www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://wiki.lexisnexis.com/academic/images/f/fb/Itunes_podcast_icon_300.jpg\\"
+      }
+     ],
+     "powered_by": [
+      "Explore the latest storage trends and tech insights, powered by Storable’s industry expertise.",
+      "Experience a culture built on innovation, collaboration, and a passion to Win More.",
+      "Run your business with an end-to-end solution powered by AI. Storable helps self-storage operators of all sizes move faster with a platform that increases occupancy, grows revenue, scales portfolios, and reduces repetitive work through intelligent automation and connected data.",
+      "Built on decades of operational data and continuously improving, our AI self-storage software executes real work inside existing workflows, enabling operators to run their business with greater speed and confidence.",
+      "Make faster decisions, capture more revenue, operate more efficiently. Powered by connected data across your business."
+     ],
+     "lines": []
+    },
+    {
+     "url": "https://www.storable.com/about-us/",
+     "kind": "other",
+     "fetched_at": "2026-10-31T20:14:29.179676Z",
+     "attributes": [
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://cmp.osano.com/wapV4usL16/1e24ddfc-c0f0-4782-ab9e-5148348d0a1b/osano.js"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://gmpg.org/xfn/11"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cmp.osano.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://boards.greenhouse.io"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//js.hs-scripts.com"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-NCB9QGC"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.storablemarine.com/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.newbook.cloud/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://myhub.smdservers.net/Account/Login?ReturnUrl=%2f"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.storedgefms.com/users/sign_in"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://my.sparefoot.com/login"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://storageforum.sitelink.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Storable logo, back to homepage"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://bit.ly/4y8d5vh"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "A brochure titled \"AI and Data for Self Storage Operators\" with geometric blue graphics and a photo of storage units on the cover."
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.storageunitsoftware.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Self-storage industry report for Q3 2026, featuring summary analysis, occupancy rates, rental rate trends, and regional performance data."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "A group of people stand in a circle with their hands joined in the center, looking upwards and smiling against a blue sky background."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Modern building with large glass windows and solar panels extended from the roof, set against a clear blue sky."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Person standing on a sailing boat, adjusting the sail, with calm ocean and distant hills under a bright sky."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "A camper van with an extended awning and folding chair is parked on a grassy area near rocks. The sun is setting over a lake and silhouetted trees in the background."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "A person works on a laptop inside a van parked by the ocean. Bright sunlight illuminates the scene, and waves crash against a rocky shore visible outside the open side door."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Interior view of a modern storage facility with a long corridor lined with closed green roll-up doors on either side, and bright overhead lighting."
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/storableinc"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/storableinc/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.facebook.com/storableinc/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.youtube.com/channel/UCEpwyh8wAiBo9fXvy6ZxB4Q"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.instagram.com/storableinc/"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://boards.greenhouse.io/embed/job_board/js?for=storable"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.clarity.ms/tag/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.storageunitsoftware.com/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "//www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://wiki.lexisnexis.com/academic/images/f/fb/Itunes_podcast_icon_300.jpg\\"
+      }
+     ],
+     "powered_by": [
+      "Explore the latest storage trends and tech insights, powered by Storable’s industry expertise.",
+      "Experience a culture built on innovation, collaboration, and a passion to Win More.",
+      "The storage industry runs on Storable. We're proud to help over 33,000 self-storage facilities who rely on our technology to Do More every day."
+     ],
+     "lines": []
+    }
+   ],
+   "searches": 4,
+   "fetches": 4,
+   "turns": 2,
+   "verdict": {
+    "kind": "rejected",
+    "summary": "Much larger or later-stage than the companies you serve (Seed to Series A B2B startups, about 5 to 50 people, founder still doing sales)",
+    "missing": [],
+    "unconfirmed": [],
+    "disqualifier": {
+     "id": "ac136f93545942028d2703f42ee43bca",
+     "claim_type": "disqualifier",
+     "criterion_id": "outside_target_size",
+     "claim": "Storable has over 800 employees, far larger than 5 to 50 people",
+     "quote": {
+      "text": "Storable proudly employs over 800 employees, or as we like to call them, Storriors",
+      "url": "https://www.storable.com/about-us/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:14:29.179676Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    "rule": "outside_stated_size_or_region"
+   },
+   "pitch": null,
+   "latency_ms": 13937,
+   "cost_usd": 0.045955,
+   "error": null
+  },
+  {
+   "domain": "tenstreet.com",
+   "name": "Tenstreet",
+   "url": "https://tenstreet.com/",
+   "found_via": "open job post on its Greenhouse board: Sales Development Representative, posted 2026-04-06 (https://job-boards.greenhouse.io/tenstreet/jobs/7782880)",
+   "status": "done",
+   "evidence": [
+    {
+     "id": "54075a03d3034c39bbbbf720366bb2cb",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "Tenstreet sells B2B software to trucking carriers and private fleets",
+     "quote": {
+      "text": "Since 2006, we have helped thousands of carriers and private fleets to market, recruit, onboard, manage and retain drivers and are the industry-leading software platform in the transportation space.",
+      "url": "https://www.tenstreet.com/careers",
+      "source_type": "job_post",
+      "published_date": "2022-11-14",
+      "fetched_at": "2026-10-31T20:14:43.184274Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "460a415cbd98442f96f76764827e515f",
+     "claim_type": "fit",
+     "criterion_id": "fit-2",
+     "claim": "Tenstreet is a SaaS business",
+     "quote": {
+      "text": "is a growing, fast-paced, Software as a Service (SaaS) business providing solutions for the transportation industry.",
+      "url": "https://job-boards.greenhouse.io/tenstreet/jobs/7782880",
+      "source_type": "job_post",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:14:30.867432Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "8740098b2d684419b73298fbc0e76711",
+     "claim_type": "fit",
+     "criterion_id": "fit-3",
+     "claim": "Tenstreet sales require booking and conducting demos",
+     "quote": {
+      "text": "(The Salesperson will conduct a demo online via Zoom/GoToMeeting)",
+      "url": "https://job-boards.greenhouse.io/tenstreet/jobs/7782880",
+      "source_type": "job_post",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:14:30.867432Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "176617d2561b4acead65c9411daae716",
+     "claim_type": "fit",
+     "criterion_id": "fit-4",
+     "claim": "Tenstreet acquires customers via cold calling outbound",
+     "quote": {
+      "text": "Being\nthe first point of contact for new business prospects, primarily thru cold calling via the telephone.",
+      "url": "https://job-boards.greenhouse.io/tenstreet/jobs/7782880",
+      "source_type": "job_post",
+      "published_date": null,
+      "fetched_at": "2026-10-31T20:14:30.867432Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "e80f87241a174c49b81b8a310dce5d7a",
+     "claim_type": "disqualifier",
+     "criterion_id": "outside_target_size",
+     "claim": "Tenstreet is an established 20-year industry leader, larger than Seed to Series A",
+     "quote": {
+      "text": "Since 2006, we have helped thousands of carriers and private fleets to market, recruit, onboard, manage and retain drivers and are the industry-leading software platform in the transportation space.",
+      "url": "https://www.tenstreet.com/careers",
+      "source_type": "job_post",
+      "published_date": "2022-11-14",
+      "fetched_at": "2026-10-31T20:14:43.184274Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    }
+   ],
+   "decisions": [
+    {
+     "evidence_id": "54075a03d3034c39bbbbf720366bb2cb",
+     "decision": "supports",
+     "reason": "Quote states company provides software platform to carriers and private fleets, which are business customers.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "460a415cbd98442f96f76764827e515f",
+     "decision": "supports",
+     "reason": "Quote explicitly describes the business as a SaaS business providing solutions for the transportation industry.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "8740098b2d684419b73298fbc0e76711",
+     "decision": "supports",
+     "reason": "Quote confirms salesperson conducts a demo online via Zoom/GoToMeeting, showing a demo-based sales process.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "176617d2561b4acead65c9411daae716",
+     "decision": "supports",
+     "reason": "Quote shows new business acquisition primarily through cold calling via telephone, a measurable outbound channel.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "e80f87241a174c49b81b8a310dce5d7a",
+     "decision": "insufficient",
+     "reason": "Quote is promotional about customers and market leadership since 2006 but gives no headcount, funding stage, or size to prove larger than 5-50 person Seed-Series A.",
+     "decided_by": "skeptic"
+    }
+   ],
+   "checked_places": [
+    "homepage code",
+    "2 job posts",
+    "own job board on Greenhouse",
+    "job post page on job-boards.greenhouse.io",
+    "pricing page",
+    "search \"Tenstreet new product launch funding 2026\"",
+    "search \"Tenstreet Northpeak ConversionLab\""
+   ],
+   "disqualifier_check_completed": true,
+   "blocked": [
+    "https://www.tenstreet.com/about/: Website returned HTTP 404"
+   ],
+   "signatures": [
+    {
+     "url": "https://www.tenstreet.com/",
+     "kind": "homepage",
+     "fetched_at": "2026-10-31T20:14:24.796425Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//js.hs-scripts.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//www.googletagmanager.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com/css?family=Oswald:100,100italic,200,200italic,300,300italic,400,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic&display=swap"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com/css?family=Trocchi:100,100italic,200,200italic,300,300italic,400,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic&display=swap"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com/css?family=Arimo:100,100italic,200,200italic,300,300italic,400,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic&display=swap"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/gtag/js?id=G-K368WJVMEL"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-WTH99W8"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Tenstreet - software for trucking business screenshot"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "NA-Tenstreet Logo - White (1)"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "NA-Tenstreet Logo – White (1)"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/tenstreet-llc"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.facebook.com/tenstreetllc"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://twitter.com/tenstreet"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.youtube.com/@tenstreetllc"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://js.hs-scripts.com/45521917.js?integration=WordPress&ver=11.3.75"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://twitter.com/tenstreet"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/tenstreet-llc"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.facebook.com/tenstreetllc"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://wiki.lexisnexis.com/academic/images/f/fb/Itunes_podcast_icon_300.jpg\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s.w.org/images/core/emoji/17.0.2/72x72/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s.w.org/images/core/emoji/17.0.2/svg/"
+      }
+     ],
+     "powered_by": [
+      "Show You're Powered By Tenstreet",
+      "Show You’re Powered By Tenstreet",
+      "Show You’re Powered By Tenstreet"
+     ],
+     "lines": []
+    },
+    {
+     "url": "https://www.tenstreet.com/careers",
+     "kind": "other",
+     "fetched_at": "2026-10-31T20:14:26.777773Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//js.hs-scripts.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//www.googletagmanager.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com/css?family=Oswald:100,100italic,200,200italic,300,300italic,400,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic&display=swap"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com/css?family=Trocchi:100,100italic,200,200italic,300,300italic,400,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic&display=swap"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com/css?family=Arimo:100,100italic,200,200italic,300,300italic,400,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic&display=swap"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com/css?family=Poppins:100,100italic,200,200italic,300,300italic,400,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic&display=swap"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/gtag/js?id=G-K368WJVMEL"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-WTH99W8"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/7504965"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/7505010"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/1346497"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/8173903"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/8178168"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/7553461"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/7782880"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/8136311"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/8141617"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/8141629"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "NA-Tenstreet Logo - White (1)"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "NA-Tenstreet Logo – White (1)"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/tenstreet-llc"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.facebook.com/tenstreetllc"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://twitter.com/tenstreet"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.youtube.com/@tenstreetllc"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://js.hs-scripts.com/45521917.js?integration=WordPress&ver=11.3.75"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://wiki.lexisnexis.com/academic/images/f/fb/Itunes_podcast_icon_300.jpg\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s.w.org/images/core/emoji/17.0.2/72x72/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s.w.org/images/core/emoji/17.0.2/svg/"
+      }
+     ],
+     "powered_by": [
+      "Show You're Powered By Tenstreet",
+      "Show You’re Powered By Tenstreet",
+      "Show You’re Powered By Tenstreet"
+     ],
+     "lines": []
+    },
+    {
+     "url": "https://www.tenstreet.com/pricing",
+     "kind": "other",
+     "fetched_at": "2026-10-31T20:14:40.660208Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//js.hs-scripts.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//www.googletagmanager.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com/css?family=Oswald:100,100italic,200,200italic,300,300italic,400,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic&display=swap"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com/css?family=Trocchi:100,100italic,200,200italic,300,300italic,400,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic&display=swap"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com/css?family=Arimo:100,100italic,200,200italic,300,300italic,400,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic&display=swap"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/gtag/js?id=G-K368WJVMEL"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-WTH99W8"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "NA-Tenstreet Logo - White (1)"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "NA-Tenstreet Logo – White (1)"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/tenstreet-llc"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.facebook.com/tenstreetllc"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://twitter.com/tenstreet"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.youtube.com/@tenstreetllc"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://js.hs-scripts.com/45521917.js?integration=WordPress&ver=11.3.75"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://wiki.lexisnexis.com/academic/images/f/fb/Itunes_podcast_icon_300.jpg\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s.w.org/images/core/emoji/17.0.2/72x72/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s.w.org/images/core/emoji/17.0.2/svg/"
+      }
+     ],
+     "powered_by": [
+      "Show You're Powered By Tenstreet",
+      "Show You’re Powered By Tenstreet",
+      "Show You’re Powered By Tenstreet"
+     ],
+     "lines": []
+    },
+    {
+     "url": "https://www.tenstreet.com/careers",
+     "kind": "other",
+     "fetched_at": "2026-10-31T20:14:43.184274Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//js.hs-scripts.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//www.googletagmanager.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com/css?family=Oswald:100,100italic,200,200italic,300,300italic,400,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic&display=swap"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com/css?family=Trocchi:100,100italic,200,200italic,300,300italic,400,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic&display=swap"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com/css?family=Arimo:100,100italic,200,200italic,300,300italic,400,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic&display=swap"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com/css?family=Poppins:100,100italic,200,200italic,300,300italic,400,400italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic&display=swap"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/gtag/js?id=G-K368WJVMEL"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-WTH99W8"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/7504965"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/7505010"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/1346497"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/8173903"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/8178168"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/7553461"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/7782880"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/8136311"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/8141617"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/tenstreet/jobs/8141629"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "NA-Tenstreet Logo - White (1)"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "NA-Tenstreet Logo – White (1)"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/tenstreet-llc"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.facebook.com/tenstreetllc"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://twitter.com/tenstreet"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.youtube.com/@tenstreetllc"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://js.hs-scripts.com/45521917.js?integration=WordPress&ver=11.3.75"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://wiki.lexisnexis.com/academic/images/f/fb/Itunes_podcast_icon_300.jpg\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s.w.org/images/core/emoji/17.0.2/72x72/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s.w.org/images/core/emoji/17.0.2/svg/"
+      }
+     ],
+     "powered_by": [
+      "Show You're Powered By Tenstreet",
+      "Show You’re Powered By Tenstreet",
+      "Show You’re Powered By Tenstreet"
+     ],
+     "lines": []
+    }
+   ],
+   "searches": 2,
+   "fetches": 6,
+   "turns": 4,
+   "verdict": {
+    "kind": "needs_look",
+    "summary": "Needs a look",
+    "missing": [
+     "No current need or timing evidence (none dated within 180 days, no open job post)",
+     "Could not read https://www.tenstreet.com/about/: Website returned HTTP 404"
+    ],
+    "unconfirmed": [],
+    "disqualifier": null,
+    "rule": null
+   },
+   "pitch": null,
+   "latency_ms": 33000,
+   "cost_usd": 0.101292,
+   "error": null
+  },
+  {
+   "domain": "setsales.co",
+   "name": "setsales.co",
+   "url": "https://setsales.co/",
+   "found_via": "job post: SDR at SetSales outbound sales on boards.greenhouse.io (posting https://boards.greenhouse.io/setsales/jobs/5805859003 not confirmed open on the company's board)",
+   "status": "done",
+   "evidence": [
+    {
+     "id": "f5b9a919f8564bbc9fb82606e3c3baa3",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "SetSales sells coaching and sales systems to companies, founders and sales leaders.",
+     "quote": {
+      "text": "SetSales partners with company founders and sales leaders to build repeatable sales systems, train high-performing teams, and unlock sustainable revenue.",
+      "url": "https://setsales.co/",
+      "source_type": "own_site",
+      "published_date": "2025-05-07",
+      "fetched_at": "2026-10-31T20:15:23.749703Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "1084a4fae3f74fd5b441578df23d2ab0",
+     "claim_type": "fit",
+     "criterion_id": "fit-3",
+     "claim": "Its offer converts through a free sales consultation meeting.",
+     "quote": {
+      "text": "Book a free 30-minute sales consultation",
+      "url": "https://setsales.co/",
+      "source_type": "own_site",
+      "published_date": "2025-05-07",
+      "fetched_at": "2026-10-31T20:15:23.749703Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "23cce748789543db8cbff952c126cb86",
+     "claim_type": "disqualifier",
+     "criterion_id": "outside_target_size",
+     "claim": "SetSales describes itself as a small founder-led team, not a large later-stage company.",
+     "quote": {
+      "text": "The SetSales team is made up of people who’ve been in the trenches—from bootstrapped startups to high-growth scale-ups.",
+      "url": "https://setsales.co/about/",
+      "source_type": "own_site",
+      "published_date": "2025-05-20",
+      "fetched_at": "2026-10-31T20:15:50.889784Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "445a9b3aeab3405d91154cb63071597b",
+     "claim_type": "disqualifier",
+     "criterion_id": "inactive",
+     "claim": "The site is active offering services to help companies grow.",
+     "quote": {
+      "text": "We help companies grow faster, smarter, & stronger.",
+      "url": "https://setsales.co/",
+      "source_type": "own_site",
+      "published_date": "2025-05-07",
+      "fetched_at": "2026-10-31T20:15:23.749703Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    }
+   ],
+   "decisions": [
+    {
+     "evidence_id": "f5b9a919f8564bbc9fb82606e3c3baa3",
+     "decision": "supports",
+     "reason": "Quote explicitly states they partner with founders and sales leaders to build sales systems, indicating B2B services.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "1084a4fae3f74fd5b441578df23d2ab0",
+     "decision": "supports",
+     "reason": "Quote offers a 30-minute sales consultation, showing sales conversations are used to convert.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "23cce748789543db8cbff952c126cb86",
+     "decision": "insufficient",
+     "reason": "Quote describes team members' past experience, not the company's current size or stage.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "445a9b3aeab3405d91154cb63071597b",
+     "decision": "contradicts",
+     "reason": "Quote uses present-tense active service language, indicating the company is still operating.",
+     "decided_by": "skeptic"
+    }
+   ],
+   "checked_places": [
+    "homepage code",
+    "search \"setsales.co northpeak.io conversionlab.no\"",
+    "search \"SetSales SDR outbound sales hiring\"",
+    "job post page on job-boards.greenhouse.io",
+    "search \"setsales.co Kevin Baumgart funding expansion new product\"",
+    "sales coaching reviews page",
+    "about page"
+   ],
+   "disqualifier_check_completed": true,
+   "blocked": [
+    "https://setsales.co/about-us/: Website returned HTTP 404",
+    "https://setsales.co/about-us/: Website returned HTTP 404"
+   ],
+   "signatures": [
+    {
+     "url": "https://setsales.co/",
+     "kind": "homepage",
+     "fetched_at": "2026-10-31T20:15:23.749703Z",
+     "attributes": [
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/gtag/js?id=G-Y7L0QVVGC5"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "SetSales | Sales Coaching to Boost Your Revenue"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "BIZZYCAR"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Campus•Ink"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Clarity"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Croux"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "SetSales"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "SetSales | Sales Coaching to Boost Your Revenue"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://firststationmedia.com/"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://api.leadconnectorhq.com/widget/form/D3KNBV6Bi8CgqwwXboz7"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://link.msgsndr.com/js/form_embed.js"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://salesink.online/academy"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://wsv3cdn.audioeye-services.com/aem.js"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.facebook.com/SetSalesCo/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://secure.gravatar.com/avatar/5b504456a61a42d6302621a934f2751a5b23876a752325f782bdfde9d8f58a2c?s=96&amp;d=mm&amp;r=g"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "//x.com"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/2000/svg"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/1999/xlink"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://maps.googleapis.com/maps/api/js"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://example.invalid/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "//i.test(t"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s3-us-west-2.amazonaws.com/b2bjsstore/b/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.facebook.com/sharer.php?u={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://x.com/intent/post?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://reddit.com/submit?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/sharing/share-offsite/?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://api.whatsapp.com/send?text={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://t.me/share/url?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.tumblr.com/share/link?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://pinterest.com/pin/create/button/?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://vk.com/share.php?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.xing.com/social/share/spi?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://embed.tawk.to/68269db8d4ac681917c38579/1irbdg5oo"
+      }
+     ],
+     "powered_by": [
+      "| Powered by",
+      "| Powered by",
+      "SetSales was built on one belief: Nothing happens until someone sells something."
+     ],
+     "lines": []
+    },
+    {
+     "url": "https://setsales.co/sales-coaching-reviews/",
+     "kind": "other",
+     "fetched_at": "2026-10-31T20:15:44.804623Z",
+     "attributes": [
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/gtag/js?id=G-Y7L0QVVGC5"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "SetSales | Sales Coaching to Boost Your Revenue"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://hireology.com/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.carepool.us/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.viatechnik.com/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://lotlinx.com/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://campus.ink/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.parkerlabs.com/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.bizzycar.com/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.croux.co/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.printavo.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "SetSales | Sales Coaching to Boost Your Revenue"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://firststationmedia.com/"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://api.leadconnectorhq.com/widget/form/D3KNBV6Bi8CgqwwXboz7"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://link.msgsndr.com/js/form_embed.js"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://salesink.online/academy"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://wsv3cdn.audioeye-services.com/aem.js"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.facebook.com/SetSalesCo/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://secure.gravatar.com/avatar/5b504456a61a42d6302621a934f2751a5b23876a752325f782bdfde9d8f58a2c?s=96&amp;d=mm&amp;r=g"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "//x.com"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/2000/svg"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/1999/xlink"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://maps.googleapis.com/maps/api/js"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://example.invalid/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "//i.test(t"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s3-us-west-2.amazonaws.com/b2bjsstore/b/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.facebook.com/sharer.php?u={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://x.com/intent/post?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://reddit.com/submit?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/sharing/share-offsite/?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://api.whatsapp.com/send?text={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://t.me/share/url?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.tumblr.com/share/link?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://pinterest.com/pin/create/button/?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://vk.com/share.php?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.xing.com/social/share/spi?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://embed.tawk.to/68269db8d4ac681917c38579/1irbdg5oo"
+      }
+     ],
+     "powered_by": [
+      "Our work is rooted in clarity, driven by results, and powered by people who take full ownership of what they do. Read our sales coaching reviews to see what we’ve accomplished and what we can do for you.",
+      "| Powered by",
+      "| Powered by",
+      "SetSales was built on one belief: Nothing happens until someone sells something."
+     ],
+     "lines": []
+    },
+    {
+     "url": "https://setsales.co/about/",
+     "kind": "other",
+     "fetched_at": "2026-10-31T20:15:50.889784Z",
+     "attributes": [
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/gtag/js?id=G-Y7L0QVVGC5"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "SetSales | Sales Coaching to Boost Your Revenue"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Viatechnik"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Talent Growth"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Quantum"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Printavo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Lotlinx"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Hireology"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "BIZZYCAR"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Campus•Ink"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Clarity"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Croux"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Our Track Record"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "SetSales"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://hireology.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Hologram"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "Hologram"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.hologram.io/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.impactmybiz.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Kevin Baumgart | SetSales"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "Kevin Baumgart"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/setsales/"
+      },
+      {
+       "tag": "a",
+       "attr": "title",
+       "value": "LinkedIn"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Waldemar van Heerden | SetSales"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "Waldemar van Heerden"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://uk.linkedin.com/in/waldemar-van-heeden"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "SetSales | Sales Coaching to Boost Your Revenue"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://firststationmedia.com/"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://api.leadconnectorhq.com/widget/form/D3KNBV6Bi8CgqwwXboz7"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://link.msgsndr.com/js/form_embed.js"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://salesink.online/academy"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://wsv3cdn.audioeye-services.com/aem.js"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.facebook.com/SetSalesCo/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "//x.com"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/2000/svg"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/1999/xlink"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://maps.googleapis.com/maps/api/js"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://example.invalid/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "//i.test(t"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s3-us-west-2.amazonaws.com/b2bjsstore/b/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.facebook.com/sharer.php?u={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://x.com/intent/post?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://reddit.com/submit?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/sharing/share-offsite/?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://api.whatsapp.com/send?text={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://t.me/share/url?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.tumblr.com/share/link?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://pinterest.com/pin/create/button/?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://vk.com/share.php?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.xing.com/social/share/spi?url={URL}"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://embed.tawk.to/68269db8d4ac681917c38579/1irbdg5oo"
+      }
+     ],
+     "powered_by": [
+      "| Powered by",
+      "| Powered by",
+      "SetSales was built on one belief: Nothing happens until someone sells something."
+     ],
+     "lines": []
+    }
+   ],
+   "searches": 3,
+   "fetches": 6,
+   "turns": 4,
+   "verdict": {
+    "kind": "needs_look",
+    "summary": "Needs a look",
+    "missing": [
+     "No current need or timing evidence (none dated within 180 days, no open job post)",
+     "Could not read https://setsales.co/about-us/: Website returned HTTP 404",
+     "Could not read https://setsales.co/about-us/: Website returned HTTP 404"
+    ],
+    "unconfirmed": [],
+    "disqualifier": null,
+    "rule": null
+   },
+   "pitch": null,
+   "latency_ms": 39467,
+   "cost_usd": 0.058994,
+   "error": null
+  }
+ ],
+ "candidate_pool": [
+  {
+   "domain": "overbond.com",
+   "name": "Overbond",
+   "url": "https://overbond.com/",
+   "found_via": "job post: Sales Development Representative (Fintech Saas) on jobs.lever.co (posting https://jobs.lever.co/overbond/72ac4736-c97c-4f5f-a152-da4b6b5ec65c?utm_source=Work+In+Tech+job+board&utm_medium=getro.com&gh_src=Work+In+Tech+job+board not confirmed open on the company's board)"
+  },
+  {
+   "domain": "scraperapi.com",
+   "name": "ScraperAPI",
+   "url": "https://scraperapi.com/",
+   "found_via": "job post: Sales Development Representative on job-boards.greenhouse.io"
+  },
+  {
+   "domain": "weave.dev",
+   "name": "Weave",
+   "url": "https://weave.dev/",
+   "found_via": "job post: Founding Business Development Representative - first BDR on jobs.ashbyhq.com"
+  },
+  {
+   "domain": "iru.ai",
+   "name": "Iru",
+   "url": "https://iru.ai/",
+   "found_via": "open job post on its Lever board: Sales Development Representative, posted 2026-09-30 (https://jobs.lever.co/iru/167ef712-6fb2-40a8-9a75-762edac80d6b)"
+  },
+  {
+   "domain": "z1.tech",
+   "name": "Z1 Tech",
+   "url": "https://z1.tech/",
+   "found_via": "open job post on its Lever board: Sales Development Representative, posted 2026-09-10 (https://jobs.lever.co/z1tech/c88e2e39-84b8-4ddb-98ce-21cd5449f3e0)"
+  },
+  {
+   "domain": "thrivecart.com",
+   "name": "ThriveCart",
+   "url": "https://thrivecart.com/",
+   "found_via": "open job post on its Greenhouse board: Sales Development Representative (SDR) – ThriveCart, posted 2026-09-30 (https://job-boards.greenhouse.io/thrivecart/jobs/5439511008)"
+  },
+  {
+   "domain": "storable.com",
+   "name": "Storable",
+   "url": "https://storable.com/",
+   "found_via": "job post: Sales Development Representative (SDR) - Marine Division outbound on boards.greenhouse.io (posting https://boards.greenhouse.io/storable/jobs/5411097004 not confirmed open on the company's board)"
+  },
+  {
+   "domain": "muckrack.com",
+   "name": "Muck Rack",
+   "url": "https://muckrack.com/",
+   "found_via": "open job post on its Greenhouse board: Outbound Sales Development Representative (SDR), posted 2026-10-16 (https://job-boards.greenhouse.io/muckrack/jobs/8895495002)"
+  },
+  {
+   "domain": "tenstreet.com",
+   "name": "Tenstreet",
+   "url": "https://tenstreet.com/",
+   "found_via": "open job post on its Greenhouse board: Sales Development Representative, posted 2026-04-06 (https://job-boards.greenhouse.io/tenstreet/jobs/7782880)"
+  },
+  {
+   "domain": "setsales.co",
+   "name": "SetSales",
+   "url": "https://setsales.co/",
+   "found_via": "job post: SDR at SetSales outbound sales on boards.greenhouse.io (posting https://boards.greenhouse.io/setsales/jobs/5805859003 not confirmed open on the company's board)"
+  }
+ ],
+ "set_aside": [
+  {
+   "domain": "jobs.lever.co",
+   "url": "https://jobs.lever.co/docsumo/09c59c27-4d7a-48cf-b5ad-a213b5409643",
+   "reason": "Review site, directory, job board or news site, not a company",
+   "previous_run": null
+  },
+  {
+   "domain": "boards.greenhouse.io",
+   "url": "https://boards.greenhouse.io/blueground/jobs/4373378006",
+   "reason": "Review site, directory, job board or news site, not a company",
+   "previous_run": null
+  },
+  {
+   "domain": "jobs.ashbyhq.com",
+   "url": "https://jobs.ashbyhq.com/weave-os/96f15576-124e-498b-a71f-d94912d33b80",
+   "reason": "Review site, directory, job board or news site, not a company",
+   "previous_run": null
+  },
+  {
+   "domain": "job-boards.greenhouse.io",
+   "url": "https://job-boards.greenhouse.io/tenstreet/jobs/7782880",
+   "reason": "Review site, directory, job board or news site, not a company",
+   "previous_run": null
+  },
+  {
+   "domain": "overbond.com",
+   "url": "https://overbond.com/",
+   "reason": "Website could not be read: Website connection failed",
+   "previous_run": null
+  },
+  {
+   "domain": "weave.dev",
+   "url": "https://weave.dev/",
+   "reason": "Website could not be read: Website DNS is unavailable",
+   "previous_run": null
+  },
+  {
+   "domain": "iru.ai",
+   "url": "https://iru.ai/",
+   "reason": "Website could not be read: Use a public HTTPS website without credentials",
+   "previous_run": null
+  },
+  {
+   "domain": "z1.tech",
+   "url": "https://z1.tech/",
+   "reason": "Website could not be read: Website DNS is unavailable",
+   "previous_run": null
+  },
+  {
+   "domain": "muckrack.com",
+   "url": "https://muckrack.com/",
+   "reason": "Website could not be read: Website returned HTTP 403",
+   "previous_run": null
+  }
+ ],
+ "dropped": [
+  {
+   "stage": "seller",
+   "company": null,
+   "claim_type": "timing signal",
+   "quote": "Launch",
+   "url": "https://eygentic.com/",
+   "reason": "Quote not found in the fetched page"
+  },
+  {
+   "stage": "seller",
+   "company": null,
+   "claim_type": "timing signal",
+   "quote": "Scale",
+   "url": "https://eygentic.com/",
+   "reason": "Quote not found in the fetched page"
+  },
+  {
+   "stage": "investigation",
+   "company": "storable.com",
+   "claim_type": "fit",
+   "quote": "Book a Demo",
+   "url": "https://www.storable.com/",
+   "reason": "Quote not found in any page fetched for this company"
+  },
+  {
+   "stage": "investigation",
+   "company": "tenstreet.com",
+   "claim_type": "need",
+   "quote": "As an SDR at Tenstreet , you’ll generate leads, call potential clients, lead the discovery process, and book demos for the Sales Team.",
+   "url": "https://job-boards.greenhouse.io/tenstreet/jobs/7782880",
+   "reason": "Quote not found in any page fetched for this company"
+  }
+ ],
+ "telemetry": {
+  "budget_usd": 0.7,
+  "budget_reached": false,
+  "cost_usd": 0.418938,
+  "input_tokens": 167775,
+  "output_tokens": 36875,
+  "searches": 21,
+  "model_calls": 27,
+  "pages_fetched": 38,
+  "elapsed_ms": 157640,
+  "calls": [
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "seller_profile",
+    "company": null,
+    "input_tokens": 3293,
+    "output_tokens": 2923,
+    "searches": 0,
+    "latency_ms": 9625,
+    "usd": 0.016539,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "competitor_search",
+    "company": null,
+    "input_tokens": 6553,
+    "output_tokens": 1300,
+    "searches": 2,
+    "latency_ms": 5890,
+    "usd": 0.018716,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "competitor_classify",
+    "company": null,
+    "input_tokens": 4970,
+    "output_tokens": 2047,
+    "searches": 0,
+    "latency_ms": 8171,
+    "usd": 0.014912,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "discovery",
+    "company": null,
+    "input_tokens": 8588,
+    "output_tokens": 2471,
+    "searches": 4,
+    "latency_ms": 10593,
+    "usd": 0.031237,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "scraperapi.com",
+    "input_tokens": 11935,
+    "output_tokens": 1289,
+    "searches": 4,
+    "latency_ms": 6295,
+    "usd": 0.030397,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "skeptic",
+    "company": "scraperapi.com",
+    "input_tokens": 674,
+    "output_tokens": 1440,
+    "searches": 0,
+    "latency_ms": 5358,
+    "usd": 0.006962,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "storable.com",
+    "input_tokens": 3583,
+    "output_tokens": 517,
+    "searches": 0,
+    "latency_ms": 2640,
+    "usd": 0.006676,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "tenstreet.com",
+    "input_tokens": 4226,
+    "output_tokens": 541,
+    "searches": 0,
+    "latency_ms": 3390,
+    "usd": 0.007582,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "thrivecart.com",
+    "input_tokens": 4257,
+    "output_tokens": 941,
+    "searches": 2,
+    "latency_ms": 5500,
+    "usd": 0.01432,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "tenstreet.com",
+    "input_tokens": 5375,
+    "output_tokens": 335,
+    "searches": 0,
+    "latency_ms": 3265,
+    "usd": 0.008143,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "thrivecart.com",
+    "input_tokens": 6695,
+    "output_tokens": 432,
+    "searches": 0,
+    "latency_ms": 3952,
+    "usd": 0.010205,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "storable.com",
+    "input_tokens": 14025,
+    "output_tokens": 1377,
+    "searches": 4,
+    "latency_ms": 7422,
+    "usd": 0.033384,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "tenstreet.com",
+    "input_tokens": 5492,
+    "output_tokens": 269,
+    "searches": 0,
+    "latency_ms": 3422,
+    "usd": 0.008008,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "skeptic",
+    "company": "storable.com",
+    "input_tokens": 911,
+    "output_tokens": 1119,
+    "searches": 0,
+    "latency_ms": 3312,
+    "usd": 0.005895,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "thrivecart.com",
+    "input_tokens": 6978,
+    "output_tokens": 363,
+    "searches": 0,
+    "latency_ms": 5219,
+    "usd": 0.010265,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "thrivecart.com",
+    "input_tokens": 8458,
+    "output_tokens": 1350,
+    "searches": 0,
+    "latency_ms": 5921,
+    "usd": 0.01631,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "tenstreet.com",
+    "input_tokens": 41288,
+    "output_tokens": 2296,
+    "searches": 2,
+    "latency_ms": 12422,
+    "usd": 0.066368,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "skeptic",
+    "company": "tenstreet.com",
+    "input_tokens": 1044,
+    "output_tokens": 2326,
+    "searches": 0,
+    "latency_ms": 7483,
+    "usd": 0.011191,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "skeptic",
+    "company": "thrivecart.com",
+    "input_tokens": 1275,
+    "output_tokens": 4278,
+    "searches": 0,
+    "latency_ms": 15125,
+    "usd": 0.019775,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "pitch",
+    "company": null,
+    "input_tokens": 779,
+    "output_tokens": 2000,
+    "searches": 0,
+    "latency_ms": 6218,
+    "usd": 0.009474,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "pitch:longer",
+    "company": null,
+    "input_tokens": 779,
+    "output_tokens": 1519,
+    "searches": 0,
+    "latency_ms": 4922,
+    "usd": 0.00743,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "pitch_check",
+    "company": "thrivecart.com",
+    "input_tokens": 545,
+    "output_tokens": 1288,
+    "searches": 0,
+    "latency_ms": 3687,
+    "usd": 0.006155,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "setsales.co",
+    "input_tokens": 3169,
+    "output_tokens": 929,
+    "searches": 2,
+    "latency_ms": 5297,
+    "usd": 0.01291,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "setsales.co",
+    "input_tokens": 5457,
+    "output_tokens": 535,
+    "searches": 1,
+    "latency_ms": 5968,
+    "usd": 0.011595,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "setsales.co",
+    "input_tokens": 7540,
+    "output_tokens": 141,
+    "searches": 0,
+    "latency_ms": 2859,
+    "usd": 0.010024,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "setsales.co",
+    "input_tokens": 8966,
+    "output_tokens": 1531,
+    "searches": 0,
+    "latency_ms": 9125,
+    "usd": 0.017714,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "skeptic",
+    "company": "setsales.co",
+    "input_tokens": 920,
+    "output_tokens": 1318,
+    "searches": 0,
+    "latency_ms": 4204,
+    "usd": 0.006751,
+    "ok": true,
+    "error": null
+   }
+  ]
+ },
+ "error": null
+}

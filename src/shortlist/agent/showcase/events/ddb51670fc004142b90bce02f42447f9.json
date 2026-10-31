@@ -1,0 +1,426 @@
+[
+ {
+  "seq": 1,
+  "at": "2026-10-31T20:13:26.685130Z",
+  "stage": "run",
+  "message": "Started research for https://eygentic.com/",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 2,
+  "at": "2026-10-31T20:13:27.617308Z",
+  "stage": "seller",
+  "message": "Read your homepage (https://eygentic.com/)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 3,
+  "at": "2026-10-31T20:13:28.221455Z",
+  "stage": "seller",
+  "message": "Read https://eygentic.com/hire-sdrs-vs-acquisition-experiments/",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 4,
+  "at": "2026-10-31T20:13:37.948398Z",
+  "stage": "seller",
+  "message": "Understood the offer with 4 fit checks, 3 need signals and 0 named customers",
+  "company": null,
+  "level": "done"
+ },
+ {
+  "seq": 5,
+  "at": "2026-10-31T20:13:43.849175Z",
+  "stage": "competitors",
+  "message": "Searched \"Eygentic alternatives\" (12 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 6,
+  "at": "2026-10-31T20:13:43.849175Z",
+  "stage": "competitors",
+  "message": "Searched \"B2B customer acquisition experiments agency SaaS\" (11 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 7,
+  "at": "2026-10-31T20:13:44.275831Z",
+  "stage": "competitors",
+  "message": "Could not read advanceb2b.com: Redirect changed company identity; manual verification required",
+  "company": null,
+  "level": "warn"
+ },
+ {
+  "seq": 8,
+  "at": "2026-10-31T20:13:54.411725Z",
+  "stage": "competitors",
+  "message": "Found 2 direct competitors among 8 candidates",
+  "company": null,
+  "level": "done"
+ },
+ {
+  "seq": 9,
+  "at": "2026-10-31T20:14:07.085153Z",
+  "stage": "discovery",
+  "message": "Confirmed open on Lever: Sales Development Representative (Iru)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 10,
+  "at": "2026-10-31T20:14:08.071734Z",
+  "stage": "discovery",
+  "message": "Confirmed open on Lever: Sales Development Representative (Z1 Tech)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 11,
+  "at": "2026-10-31T20:14:08.353893Z",
+  "stage": "discovery",
+  "message": "Confirmed open on Greenhouse: Sales Development Representative (SDR) \u2013 ThriveCart (ThriveCart)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 12,
+  "at": "2026-10-31T20:14:08.999735Z",
+  "stage": "discovery",
+  "message": "Confirmed open on Greenhouse: Outbound Sales Development Representative (SDR) (Muck Rack)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 13,
+  "at": "2026-10-31T20:14:09.193495Z",
+  "stage": "discovery",
+  "message": "Confirmed open on Greenhouse: Sales Development Representative (Tenstreet)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 14,
+  "at": "2026-10-31T20:14:09.695543Z",
+  "stage": "discovery",
+  "message": "Searched \"site:jobs.lever.co SDR B2B SaaS\" (12 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 15,
+  "at": "2026-10-31T20:14:09.695543Z",
+  "stage": "discovery",
+  "message": "Searched \"site:boards.greenhouse.io SDR outbound B2B\" (11 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 16,
+  "at": "2026-10-31T20:14:09.695543Z",
+  "stage": "discovery",
+  "message": "Searched \"site:jobs.ashbyhq.com SDR B2B SaaS\" (12 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 17,
+  "at": "2026-10-31T20:14:09.695543Z",
+  "stage": "discovery",
+  "message": "Searched \"site:job-boards.greenhouse.io \"SDR\" SaaS startup\" (11 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 18,
+  "at": "2026-10-31T20:14:09.704108Z",
+  "stage": "discovery",
+  "message": "Found 10 candidate companies; set aside 4 pages (lists, directories, competitors, customers)",
+  "company": null,
+  "level": "done"
+ },
+ {
+  "seq": 19,
+  "at": "2026-10-31T20:14:09.715545Z",
+  "stage": "investigation",
+  "message": "Investigating 5 companies, 5 at a time",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 20,
+  "at": "2026-10-31T20:14:09.715545Z",
+  "stage": "investigation",
+  "message": "Investigating overbond.com",
+  "company": "overbond.com",
+  "level": "info"
+ },
+ {
+  "seq": 21,
+  "at": "2026-10-31T20:14:09.716701Z",
+  "stage": "investigation",
+  "message": "Investigating scraperapi.com",
+  "company": "scraperapi.com",
+  "level": "info"
+ },
+ {
+  "seq": 22,
+  "at": "2026-10-31T20:14:09.716701Z",
+  "stage": "investigation",
+  "message": "Investigating weave.dev",
+  "company": "weave.dev",
+  "level": "info"
+ },
+ {
+  "seq": 23,
+  "at": "2026-10-31T20:14:09.718717Z",
+  "stage": "investigation",
+  "message": "Investigating iru.ai",
+  "company": "iru.ai",
+  "level": "info"
+ },
+ {
+  "seq": 24,
+  "at": "2026-10-31T20:14:09.718717Z",
+  "stage": "investigation",
+  "message": "Investigating z1.tech",
+  "company": "z1.tech",
+  "level": "info"
+ },
+ {
+  "seq": 25,
+  "at": "2026-10-31T20:14:09.781702Z",
+  "stage": "verdict",
+  "message": "z1.tech: Needs a look",
+  "company": "z1.tech",
+  "level": "done"
+ },
+ {
+  "seq": 26,
+  "at": "2026-10-31T20:14:09.891668Z",
+  "stage": "verdict",
+  "message": "weave.dev: Needs a look",
+  "company": "weave.dev",
+  "level": "done"
+ },
+ {
+  "seq": 27,
+  "at": "2026-10-31T20:14:10.303113Z",
+  "stage": "verdict",
+  "message": "overbond.com: Needs a look",
+  "company": "overbond.com",
+  "level": "done"
+ },
+ {
+  "seq": 28,
+  "at": "2026-10-31T20:14:10.913479Z",
+  "stage": "verdict",
+  "message": "iru.ai: Needs a look",
+  "company": "iru.ai",
+  "level": "done"
+ },
+ {
+  "seq": 29,
+  "at": "2026-10-31T20:14:17.371600Z",
+  "stage": "skeptic",
+  "message": "Skeptic checking 2 quotes",
+  "company": "scraperapi.com",
+  "level": "info"
+ },
+ {
+  "seq": 30,
+  "at": "2026-10-31T20:14:22.747293Z",
+  "stage": "verdict",
+  "message": "scraperapi.com: Needs a look",
+  "company": "scraperapi.com",
+  "level": "done"
+ },
+ {
+  "seq": 31,
+  "at": "2026-10-31T20:14:22.747293Z",
+  "stage": "investigation",
+  "message": "4 website(s) could not be read; researching 4 more candidate(s) instead",
+  "company": null,
+  "level": "warn"
+ },
+ {
+  "seq": 32,
+  "at": "2026-10-31T20:14:22.767121Z",
+  "stage": "investigation",
+  "message": "Investigating 4 companies, 5 at a time",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 33,
+  "at": "2026-10-31T20:14:22.767121Z",
+  "stage": "investigation",
+  "message": "Investigating thrivecart.com",
+  "company": "thrivecart.com",
+  "level": "info"
+ },
+ {
+  "seq": 34,
+  "at": "2026-10-31T20:14:22.767121Z",
+  "stage": "investigation",
+  "message": "Investigating storable.com",
+  "company": "storable.com",
+  "level": "info"
+ },
+ {
+  "seq": 35,
+  "at": "2026-10-31T20:14:22.771368Z",
+  "stage": "investigation",
+  "message": "Investigating muckrack.com",
+  "company": "muckrack.com",
+  "level": "info"
+ },
+ {
+  "seq": 36,
+  "at": "2026-10-31T20:14:22.775552Z",
+  "stage": "investigation",
+  "message": "Investigating tenstreet.com",
+  "company": "tenstreet.com",
+  "level": "info"
+ },
+ {
+  "seq": 37,
+  "at": "2026-10-31T20:14:22.939482Z",
+  "stage": "verdict",
+  "message": "muckrack.com: Needs a look",
+  "company": "muckrack.com",
+  "level": "done"
+ },
+ {
+  "seq": 38,
+  "at": "2026-10-31T20:14:25.013251Z",
+  "stage": "investigation",
+  "message": "Read its own job board on Greenhouse: 6 open roles",
+  "company": "thrivecart.com",
+  "level": "info"
+ },
+ {
+  "seq": 39,
+  "at": "2026-10-31T20:14:25.022915Z",
+  "stage": "investigation",
+  "message": "Read its own job board on Greenhouse: 0 open roles",
+  "company": "storable.com",
+  "level": "info"
+ },
+ {
+  "seq": 40,
+  "at": "2026-10-31T20:14:27.128387Z",
+  "stage": "investigation",
+  "message": "Read its own job board on Greenhouse: 10 open roles",
+  "company": "tenstreet.com",
+  "level": "info"
+ },
+ {
+  "seq": 41,
+  "at": "2026-10-31T20:14:36.720341Z",
+  "stage": "skeptic",
+  "message": "Skeptic checking 4 quotes",
+  "company": "storable.com",
+  "level": "info"
+ },
+ {
+  "seq": 42,
+  "at": "2026-10-31T20:14:40.042982Z",
+  "stage": "verdict",
+  "message": "storable.com: Rejected",
+  "company": "storable.com",
+  "level": "done"
+ },
+ {
+  "seq": 43,
+  "at": "2026-10-31T20:14:50.621774Z",
+  "stage": "skeptic",
+  "message": "Skeptic checking 7 quotes",
+  "company": "thrivecart.com",
+  "level": "info"
+ },
+ {
+  "seq": 44,
+  "at": "2026-10-31T20:14:55.805508Z",
+  "stage": "skeptic",
+  "message": "Skeptic checking 5 quotes",
+  "company": "tenstreet.com",
+  "level": "info"
+ },
+ {
+  "seq": 45,
+  "at": "2026-10-31T20:15:03.339219Z",
+  "stage": "verdict",
+  "message": "tenstreet.com: Needs a look",
+  "company": "tenstreet.com",
+  "level": "done"
+ },
+ {
+  "seq": 46,
+  "at": "2026-10-31T20:15:05.750089Z",
+  "stage": "outreach",
+  "message": "Writing why now and an opening line from the supported quotes",
+  "company": "thrivecart.com",
+  "level": "info"
+ },
+ {
+  "seq": 47,
+  "at": "2026-10-31T20:15:20.599799Z",
+  "stage": "verdict",
+  "message": "thrivecart.com: Shortlisted",
+  "company": "thrivecart.com",
+  "level": "done"
+ },
+ {
+  "seq": 48,
+  "at": "2026-10-31T20:15:20.599799Z",
+  "stage": "investigation",
+  "message": "1 website(s) could not be read; researching 1 more candidate(s) instead",
+  "company": null,
+  "level": "warn"
+ },
+ {
+  "seq": 49,
+  "at": "2026-10-31T20:15:20.626009Z",
+  "stage": "investigation",
+  "message": "Investigating 1 companies, 5 at a time",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 50,
+  "at": "2026-10-31T20:15:20.627522Z",
+  "stage": "investigation",
+  "message": "Investigating setsales.co",
+  "company": "setsales.co",
+  "level": "info"
+ },
+ {
+  "seq": 51,
+  "at": "2026-10-31T20:16:00.115369Z",
+  "stage": "skeptic",
+  "message": "Skeptic checking 4 quotes",
+  "company": "setsales.co",
+  "level": "info"
+ },
+ {
+  "seq": 52,
+  "at": "2026-10-31T20:16:04.336165Z",
+  "stage": "verdict",
+  "message": "setsales.co: Needs a look",
+  "company": "setsales.co",
+  "level": "done"
+ },
+ {
+  "seq": 53,
+  "at": "2026-10-31T20:16:04.350011Z",
+  "stage": "run",
+  "message": "Done: 1 shortlisted, 3 need a look, 1 rejected",
+  "company": null,
+  "level": "done"
+ }
+]

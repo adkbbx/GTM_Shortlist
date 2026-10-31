@@ -32,6 +32,22 @@ test('a website alone produces a live board with three verdicts and quoted evide
   expect(await reason.getAttribute('href')).toBe('https://brightkettle.example/#:~:text=Customer%20support%20powered%20by%20RivalDesk');
   await expect(page.getByRole('status').first()).toContainText('Done: 1 shortlisted, 1 needs a look, 1 rejected');
 
+  // The pinned monitor shows every step done and the run's numbers; the activity log lists each step.
+  const monitor = page.getByRole('region', { name: 'What the agent is doing' });
+  await expect(monitor).toContainText('Finished');
+  await expect(monitor.locator('.agent-stepper .step-done')).toHaveCount(6);
+  await expect(monitor.locator('.agent-monitor-stats')).toContainText('3/');
+  await expect(page.locator('.agent-log li').first()).toContainText('Done: 1 shortlisted');
+  const steps = page.getByRole('button', { name: /^Steps \(\d+\)$/ });
+  if (await steps.isVisible()) {  // phone: the log opens as a sheet from the monitor
+    await steps.click();
+    await expect(page.locator('#agent-feed')).toBeVisible();
+    await page.getByRole('button', { name: 'Close steps' }).click();
+    await expect(page.locator('#agent-feed')).toBeHidden();
+  } else {
+    await expect(page.locator('#agent-feed')).toBeVisible();
+  }
+
   // A Shortlisted company carries why now and an opening line, checked against its quotes; others carry none.
   const pitch = shortlisted.getByRole('region', { name: 'Why now and an opening line' });
   await expect(pitch).toContainText('We are hiring two customer support agents');

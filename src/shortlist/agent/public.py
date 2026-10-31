@@ -9,6 +9,7 @@ Run with `uvicorn --factory shortlist.agent.public:create_public_app`, or deploy
 """
 import hashlib
 import hmac
+import json
 import os
 import time
 from collections import defaultdict, deque
@@ -28,7 +29,7 @@ from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator, m
 
 from shortlist.agent.api import AgentStartInput, RoutePolicy, register_agent_routes
 from shortlist.agent.files import FileAgentRuns
-from shortlist.agent.models import Overrides, RunResult
+from shortlist.agent.models import AgentEvent, Overrides, RunResult
 from shortlist.agent.pipeline import Providers
 from shortlist.agent.providers import ModelCheck, meta_model_check
 from shortlist.agent.service import AgentService, real_providers
@@ -214,9 +215,15 @@ def load_showcase(store: FileAgentRuns, directory: Path | None) -> list[Example]
         if result.status != "complete" or result.synthetic:
             continue
         try:
-            store.read(result.id)
+            known = bool(store.read(result.id)["events"])
         except KeyError:
             store.create(result)
+            known = False
+        # The run's real activity log, as recorded when it ran, so the board and the landing replay show each step.
+        log = Path(directory) / "events" / path.name
+        if not known and log.is_file():
+            for event in json.loads(log.read_text(encoding="utf-8")):
+                store.append_event(result.id, AgentEvent.model_validate(event))
         examples.append(Example(id=result.id, website=result.website, created_at=result.created_at,
                                 shortlisted=sum(1 for c in result.companies if c.verdict and c.verdict.kind == "shortlisted")))
     return examples

@@ -28,7 +28,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 # The built UI, copied in by scripts/package_ui.py before a release build. Contributors use dist/ directly.
-shortlist = ["web_dist/**/*", "agent/showcase/*.json"]
+shortlist = ["web_dist/**/*", "agent/showcase/*.json", "agent/showcase/events/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

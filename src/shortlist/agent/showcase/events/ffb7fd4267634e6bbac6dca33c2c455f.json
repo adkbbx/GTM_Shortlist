@@ -1,0 +1,250 @@
+[
+ {
+  "seq": 1,
+  "at": "2026-10-31T15:45:44.453642Z",
+  "stage": "run",
+  "message": "Started research for https://eygentic.com/",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 2,
+  "at": "2026-10-31T15:45:45.185304Z",
+  "stage": "seller",
+  "message": "Read your homepage (https://eygentic.com/)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 3,
+  "at": "2026-10-31T15:45:45.776235Z",
+  "stage": "seller",
+  "message": "Read https://eygentic.com/hire-sdrs-vs-acquisition-experiments/",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 4,
+  "at": "2026-10-31T15:45:56.787586Z",
+  "stage": "seller",
+  "message": "Understood the offer with 3 fit checks, 2 need signals and 0 named customers",
+  "company": null,
+  "level": "done"
+ },
+ {
+  "seq": 5,
+  "at": "2026-10-31T15:46:03.987383Z",
+  "stage": "competitors",
+  "message": "Searched \"Eygentic alternatives\" (11 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 6,
+  "at": "2026-10-31T15:46:03.987383Z",
+  "stage": "competitors",
+  "message": "Searched \"B2B customer acquisition experiments agency SaaS\" (10 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 7,
+  "at": "2026-10-31T15:46:15.548665Z",
+  "stage": "competitors",
+  "message": "Found 3 direct competitors among 8 candidates",
+  "company": null,
+  "level": "done"
+ },
+ {
+  "seq": 8,
+  "at": "2026-10-31T15:46:24.758972Z",
+  "stage": "discovery",
+  "message": "Searched \"site:jobs.lever.co SDR B2B SaaS\" (12 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 9,
+  "at": "2026-10-31T15:46:24.758972Z",
+  "stage": "discovery",
+  "message": "Searched \"site:boards.greenhouse.io SDR outbound sales representative SaaS\" (11 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 10,
+  "at": "2026-10-31T15:46:24.758972Z",
+  "stage": "discovery",
+  "message": "Searched \"site:jobs.ashbyhq.com SDR B2B SaaS\" (12 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 11,
+  "at": "2026-10-31T15:46:24.760945Z",
+  "stage": "discovery",
+  "message": "Found 6 candidate companies; set aside 3 pages (lists, directories, competitors, customers)",
+  "company": null,
+  "level": "done"
+ },
+ {
+  "seq": 12,
+  "at": "2026-10-31T15:46:24.774611Z",
+  "stage": "investigation",
+  "message": "Investigating 5 companies, 5 at a time",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 13,
+  "at": "2026-10-31T15:46:24.774611Z",
+  "stage": "investigation",
+  "message": "Investigating docsumo.com",
+  "company": "docsumo.com",
+  "level": "info"
+ },
+ {
+  "seq": 14,
+  "at": "2026-10-31T15:46:24.783617Z",
+  "stage": "investigation",
+  "message": "Investigating gushwork.ai",
+  "company": "gushwork.ai",
+  "level": "info"
+ },
+ {
+  "seq": 15,
+  "at": "2026-10-31T15:46:24.787326Z",
+  "stage": "investigation",
+  "message": "Investigating pipe17.com",
+  "company": "pipe17.com",
+  "level": "info"
+ },
+ {
+  "seq": 16,
+  "at": "2026-10-31T15:46:24.788880Z",
+  "stage": "investigation",
+  "message": "Investigating arena.im",
+  "company": "arena.im",
+  "level": "info"
+ },
+ {
+  "seq": 17,
+  "at": "2026-10-31T15:46:24.788880Z",
+  "stage": "investigation",
+  "message": "Investigating routethis.com",
+  "company": "routethis.com",
+  "level": "info"
+ },
+ {
+  "seq": 18,
+  "at": "2026-10-31T15:46:27.287942Z",
+  "stage": "investigation",
+  "message": "Read its own job board on Ashby: 10 open roles",
+  "company": "routethis.com",
+  "level": "info"
+ },
+ {
+  "seq": 19,
+  "at": "2026-10-31T15:46:27.371266Z",
+  "stage": "investigation",
+  "message": "Read its own job board on Greenhouse: 5 open roles",
+  "company": "pipe17.com",
+  "level": "info"
+ },
+ {
+  "seq": 20,
+  "at": "2026-10-31T15:46:27.529083Z",
+  "stage": "investigation",
+  "message": "Read its own job board on Lever: 12 open roles",
+  "company": "gushwork.ai",
+  "level": "info"
+ },
+ {
+  "seq": 21,
+  "at": "2026-10-31T15:46:34.977231Z",
+  "stage": "skeptic",
+  "message": "Skeptic checking 3 quotes",
+  "company": "arena.im",
+  "level": "info"
+ },
+ {
+  "seq": 22,
+  "at": "2026-10-31T15:46:39.370248Z",
+  "stage": "verdict",
+  "message": "arena.im: Needs a look",
+  "company": "arena.im",
+  "level": "done"
+ },
+ {
+  "seq": 23,
+  "at": "2026-10-31T15:46:49.652298Z",
+  "stage": "skeptic",
+  "message": "Skeptic checking 7 quotes",
+  "company": "gushwork.ai",
+  "level": "info"
+ },
+ {
+  "seq": 24,
+  "at": "2026-10-31T15:46:54.103343Z",
+  "stage": "skeptic",
+  "message": "Skeptic checking 1 quotes",
+  "company": "docsumo.com",
+  "level": "info"
+ },
+ {
+  "seq": 25,
+  "at": "2026-10-31T15:46:54.401419Z",
+  "stage": "skeptic",
+  "message": "Skeptic checking 5 quotes",
+  "company": "pipe17.com",
+  "level": "info"
+ },
+ {
+  "seq": 26,
+  "at": "2026-10-31T15:46:57.964975Z",
+  "stage": "verdict",
+  "message": "docsumo.com: Needs a look",
+  "company": "docsumo.com",
+  "level": "done"
+ },
+ {
+  "seq": 27,
+  "at": "2026-10-31T15:47:01.572504Z",
+  "stage": "verdict",
+  "message": "pipe17.com: Shortlisted",
+  "company": "pipe17.com",
+  "level": "done"
+ },
+ {
+  "seq": 28,
+  "at": "2026-10-31T15:47:02.049122Z",
+  "stage": "skeptic",
+  "message": "Skeptic checking 2 quotes",
+  "company": "routethis.com",
+  "level": "info"
+ },
+ {
+  "seq": 29,
+  "at": "2026-10-31T15:47:02.593582Z",
+  "stage": "verdict",
+  "message": "gushwork.ai: Rejected",
+  "company": "gushwork.ai",
+  "level": "done"
+ },
+ {
+  "seq": 30,
+  "at": "2026-10-31T15:47:04.250290Z",
+  "stage": "verdict",
+  "message": "routethis.com: Needs a look",
+  "company": "routethis.com",
+  "level": "done"
+ },
+ {
+  "seq": 31,
+  "at": "2026-10-31T15:47:04.265914Z",
+  "stage": "run",
+  "message": "Done: 1 shortlisted, 3 need a look, 1 rejected",
+  "company": null,
+  "level": "done"
+ }
+]

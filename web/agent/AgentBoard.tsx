@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Assumptions } from './Assumptions';
+import { Feed, Monitor, Working } from './AgentLive';
 import { EvidenceList, QuoteBlock } from './Evidence';
 import { agentApi, domainOf, editToken, isActive } from './agent-api';
 import { AgentConfigContext, countOptions, useAgentConfig } from './agent-config';
@@ -98,7 +99,7 @@ function CompanyCard({ company, run }: { company: Company; run: AgentRun }) {
   </article>;
 }
 
-function Columns({ run, apply, busy }: { run: AgentRun; apply: (overrides: Overrides) => void; busy: boolean }) {
+function Columns({ run, events, apply, busy }: { run: AgentRun; events: AgentEvent[]; apply: (overrides: Overrides) => void; busy: boolean }) {
   const { editable, maxCompanies } = useAgentConfig();
   const decided = run.companies.filter(company => company.verdict);
   const working = run.companies.filter(company => !company.verdict);
@@ -112,7 +113,7 @@ function Columns({ run, apply, busy }: { run: AgentRun; apply: (overrides: Overr
         </select>
       </label>}
     </div>
-    {working.length > 0 && <p className="agent-working" role="status"><span className="agent-pulse" aria-hidden="true" />Investigating {working.map(c => c.domain).join(', ')}</p>}
+    <Working companies={working} events={events} />
     <div className="agent-columns">
       {COLUMNS.map(column => {
         const companies = decided.filter(company => company.verdict!.kind === column.kind);
@@ -156,30 +157,6 @@ function Describe({ apply, busy, summary }: { apply: (overrides: Overrides) => v
   </details>;
 }
 
-function StatusLine({ view, events }: { view: AgentRunView; events: AgentEvent[] }) {
-  const run = view.run;
-  const latest = events.at(-1);
-  const counts = COLUMNS.map(column => `${run.companies.filter(c => c.verdict?.kind === column.kind).length} ${column.title.toLowerCase()}`);
-  const text = isActive(view.status) ? latest?.message ?? 'Starting'
-    : view.status === 'needs_choice' ? 'Waiting for your choice'
-      : view.status === 'failed' ? 'Stopped' : `Done: ${counts.join(', ')}`;
-  return <p className={`agent-status status-${view.status}`} role="status" aria-live="polite">
-    {isActive(view.status) && <span className="agent-pulse" aria-hidden="true" />}
-    <span>{text}</span>
-  </p>;
-}
-
-function Activity({ events }: { events: AgentEvent[] }) {
-  if (!events.length) return null;
-  return <details className="agent-log">
-    <summary>Activity ({events.length} steps)</summary>
-    <ol>{[...events].reverse().slice(0, 60).map(event => <li key={event.seq} className={`level-${event.level}`}>
-      <time dateTime={event.at}>{new Intl.DateTimeFormat(undefined, { timeStyle: 'medium' }).format(new Date(event.at))}</time>
-      <span>{event.company ? `${event.company}: ` : ''}{event.message}</span>
-    </li>)}</ol>
-  </details>;
-}
-
 function Transparency({ run }: { run: AgentRun }) {
   if (!run.dropped.length && !run.set_aside.length) return null;
   return <section className="agent-transparency" aria-label="What was left out">
@@ -216,6 +193,7 @@ export function AgentBoard({ runId, onNew }: { runId: string; onNew: () => void 
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const [retry, setRetry] = useState(0);
+  const [feedOpen, setFeedOpen] = useState(false);
   const lastSeq = useRef(0);
   const heading = useRef<HTMLHeadingElement>(null);
   const load = useCallback(async () => {
@@ -270,16 +248,17 @@ export function AgentBoard({ runId, onNew }: { runId: string; onNew: () => void 
     </div>
     {!editable && <p className="notice agent-shared" role="note">You are viewing a shared shortlist. Start your own search to change its assumptions.</p>}
     {run.synthetic && <p className="notice agent-synthetic" role="note"><strong>Synthetic test data.</strong> Invented companies on reserved .example domains. Nothing was searched or fetched.</p>}
-    <StatusLine view={view} events={events} />
+    <Monitor view={view} events={events} feedOpen={feedOpen} onFeed={() => setFeedOpen(open => !open)} />
     {error && <p className="notice" role="alert">{error}</p>}
+    <div className="agent-board-grid"><div className="agent-board-main">
     {view.status === 'failed' && <section className="notice agent-failed" role="alert"><p>{run.error ?? 'The run stopped.'}</p>
       {/* Only a site too vague to read: a provider failure has no profile, and typing would not fix it. */}
       {run.profile && !run.profile.offer && editable && <Describe apply={apply} busy={busy} summary="Describe your offer and buyer (optional)" />}</section>}
     {view.status === 'needs_choice' && run.profile && <ReadingChoice profile={run.profile} apply={apply} busy={busy} />}
+    {run.companies.length > 0 && <Columns run={run} events={events} apply={apply} busy={busy} />}
     {run.profile && view.status !== 'needs_choice' && run.profile.offer && <Assumptions run={run} apply={apply} busy={busy} />}
-    {run.companies.length > 0 && <Columns run={run} apply={apply} busy={busy} />}
     <Transparency run={run} />
-    <Activity events={events} />
     <Telemetry run={run} />
+    </div><Feed events={events} open={feedOpen} onClose={() => setFeedOpen(false)} /></div>
   </div></AgentConfigContext.Provider>;
 }
