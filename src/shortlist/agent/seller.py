@@ -38,7 +38,10 @@ Rules:
 - Every quote is copied exactly, word for word, from one page's text, with that page's url. No paraphrase.
 - fit_criteria: 2 to 5 checks that can be observed on a target company's website (what it sells, how it sells,
   what it runs). Mark at most 2 as required, and only checks a company's own homepage normally states: what it sells
-  and who it sells to. Checks about how it sells or which tools it runs are nice to have (required: false). Every
+  and who it sells to, in words a homepage would use ("sells software to businesses"). Never require what the
+  company's own customers demand of it, a certification, an audit or a process (not "sells to buyers that require
+  security reviews"): those are nice to have. Checks about how it sells or which tools it runs are nice to have
+  (required: false). Every
   check must tell likely buyers apart from other companies: never one nearly every company passes, such as having a
   website or serving customers online.
 - need_signals: 2 to 4 things a stranger can see on a target company's public pages (its site, careers page, job

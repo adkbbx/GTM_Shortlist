@@ -36,6 +36,8 @@ from shortlist.domain import utcnow
 from shortlist.turnstile import verify_turnstile
 
 LOCAL_HOSTS = ("localhost", "127.0.0.1")
+# Real searches saved from live runs, shipped with the app so an example opens even after a restart wipes /tmp.
+SHOWCASE = Path(__file__).parent / "showcase"
 START_FLOW = '<meta name="shortlist-start-flow" content="agent-only">'
 
 
@@ -60,6 +62,8 @@ class PublicSettings(BaseModel):
     trust_proxy: bool = False
     # LABELLED SYNTHETIC providers (shortlist.agent.synthetic): invented companies, no keys, no spending.
     synthetic: bool = False
+    # Saved real searches offered as read-only examples; None for none.
+    showcase_dir: Path | None = SHOWCASE
 
     @field_validator("app_url")
     @classmethod
@@ -95,7 +99,9 @@ class PublicSettings(BaseModel):
                    max_active=env("AGENT_PUBLIC_MAX_ACTIVE", "3"), daily_usd=env("AGENT_PUBLIC_DAILY_USD", "10"),
                    turnstile_site_key=env("AGENT_PUBLIC_TURNSTILE_SITE_KEY", ""),
                    turnstile_secret=env("AGENT_PUBLIC_TURNSTILE_SECRET", ""),
-                   trust_proxy=env_flag("AGENT_PUBLIC_TRUST_PROXY"), synthetic=env_flag("AGENT_PUBLIC_SYNTHETIC"))
+                   trust_proxy=env_flag("AGENT_PUBLIC_TRUST_PROXY"), synthetic=env_flag("AGENT_PUBLIC_SYNTHETIC"),
+                   showcase_dir=None if env("AGENT_PUBLIC_SHOWCASE", "").lower() == "off"
+                   else env("AGENT_PUBLIC_SHOWCASE") or SHOWCASE)
 
 
 class PublicHealth(BaseModel):
@@ -111,6 +117,17 @@ class PublicHealth(BaseModel):
     investigator_model_available: bool | None = None
     investigator_models_offered: list[str] = Field(default_factory=list)
     server_location: str | None = None
+    examples: list["Example"] = Field(default_factory=list)
+
+
+class Example(BaseModel):
+    id: str
+    website: str
+    shortlisted: int
+    created_at: datetime
+
+
+PublicHealth.model_rebuild()
 
 
 class PublicPolicy(RoutePolicy):
@@ -186,6 +203,24 @@ def ui_directory(configured: Path | None) -> Path | None:
     return next((folder for folder in folders if folder and (folder / "index.html").is_file()), None)
 
 
+def load_showcase(store: FileAgentRuns, directory: Path | None) -> list[Example]:
+    """Copy saved example runs into the store when missing. No browser holds their edit token, so they are read-only."""
+    if directory is None or not Path(directory).is_dir():
+        return []
+    examples = []
+    for path in sorted(Path(directory).glob("*.json")):
+        result = RunResult.model_validate_json(path.read_text(encoding="utf-8"))
+        if result.status != "complete" or result.synthetic:
+            continue
+        try:
+            store.read(result.id)
+        except KeyError:
+            store.create(result)
+        examples.append(Example(id=result.id, website=result.website, created_at=result.created_at,
+                                shortlisted=sum(1 for c in result.companies if c.verdict and c.verdict.kind == "shortlisted")))
+    return examples
+
+
 def create_public_app(settings: PublicSettings | None = None, *, agent_settings: Callable[[], AgentSettings] | None = None,
                       providers: Callable[[AgentSettings], Providers] | None = None,
                       after_write: Callable[[], None] | None = None,
@@ -197,6 +232,7 @@ def create_public_app(settings: PublicSettings | None = None, *, agent_settings:
         providers = lambda agent: synthetic_providers(pace=0.08)
     store = FileAgentRuns(settings.data_dir, after_write=after_write)
     store.recover_interrupted()
+    examples = load_showcase(store, settings.showcase_dir) if not settings.synthetic else []
     # No search history here: one visitor's searches must never appear in another's.
     service = AgentService(store, load_agent, providers or real_providers, history_days=None)
     policy = PublicPolicy(settings, store, load_agent)
@@ -239,7 +275,8 @@ def create_public_app(settings: PublicSettings | None = None, *, agent_settings:
                             synthetic=settings.synthetic, investigator_ready=settings.synthetic or ready["investigator"],
                             skeptic_ready=settings.synthetic or ready["skeptic"],
                             investigator_model_available=model.available,
-                            investigator_models_offered=list(model.offered), server_location=model.location)
+                            investigator_models_offered=list(model.offered), server_location=model.location,
+                            examples=examples)
 
     register_agent_routes(app, None, service, policy)
 

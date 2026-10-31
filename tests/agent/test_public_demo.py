@@ -186,3 +186,30 @@ def test_file_store_round_trip_usage_and_restart_recovery(tmp_path):
     assert store.get(done.id)["events"][-1].message == "three"
     with pytest.raises(KeyError):
         store.get("../" + done.id)
+
+
+def test_shipped_examples_are_real_finished_searches_that_open_read_only(tmp_path):
+    from shortlist.agent.public import SHOWCASE
+
+    files = sorted(SHOWCASE.glob("*.json"))
+    assert files  # real live runs, saved 1 November; see docs/PROGRESS.md
+    for path in files:
+        run = RunResult.model_validate_json(path.read_text(encoding="utf-8"))
+        assert run.status == "complete" and not run.synthetic
+        assert all(aside.previous_run is None for aside in run.set_aside)  # no links to runs the demo does not have
+        for company in run.companies:
+            supported = {d.evidence_id for d in company.decisions if d.decision == "supports"}
+            assert company.pitch is None or (company.verdict.kind == "shortlisted"
+                                             and set(company.pitch.evidence_ids) <= supported)
+    with make_client(tmp_path) as client:
+        examples = client.get("/api/health").json()["examples"]
+        assert {e["id"] for e in examples} == {p.stem for p in files}
+        example = examples[0]
+        assert client.get(f"/api/agent/runs/{example['id']}").json()["run"]["status"] == "complete"
+        refused = client.post(f"/api/agent/runs/{example['id']}/overrides", json={"exclusions": ["x.example"]})
+        assert refused.status_code == 403
+
+
+def test_examples_can_be_turned_off(tmp_path):
+    with make_client(tmp_path, showcase_dir=None) as client:
+        assert client.get("/api/health").json()["examples"] == []

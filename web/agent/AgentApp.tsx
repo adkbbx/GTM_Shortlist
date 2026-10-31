@@ -56,6 +56,13 @@ function AgentStart({ onOpen }: { onOpen: (id: string) => void }) {
     <p className="agent-hint">Nothing else to fill in. You can correct any assumption on the next screen, but you never have to.</p>
     {config.publicDemo && <p className="agent-hint">Public demo: up to {config.maxCompanies} companies per search. Anyone with a
       search's link can read it; only this browser can change it.</p>}
+    {config.examples.length > 0 && <section className="agent-recent" aria-labelledby="agent-examples-heading">
+      <h2 id="agent-examples-heading">See a finished search first</h2>
+      <ul>{config.examples.map(item => <li key={item.id}>
+        <a href={`?agent=${item.id}`} onClick={event => { event.preventDefault(); onOpen(item.id); }}>{domainOf(item.website)}</a>
+        <span>{item.shortlisted} shortlisted, real search from {new Date(item.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+      </li>)}</ul>
+    </section>}
     {recent.length > 0 && <section className="agent-recent" aria-labelledby="agent-recent-heading">
       <h2 id="agent-recent-heading">Recent searches</h2>
       <ul>{recent.map(item => <li key={item.id}>
@@ -79,7 +86,7 @@ export function AgentApp({ classic }: { classic: ReactNode }) {
       if (cancelled) return;
       if (health?.mode === 'hosted' && classic !== null) { setMode('classic'); return; }
       setConfig({ ...localConfig, publicDemo: health?.mode === 'public', maxCompanies: health?.max_companies ?? localConfig.maxCompanies,
-        turnstileSiteKey: health?.turnstile_site_key ?? null });
+        turnstileSiteKey: health?.turnstile_site_key ?? null, examples: health?.examples ?? [] });
       setMode('agent');
     }).catch(() => { if (!cancelled) setMode('agent'); });
     return () => { cancelled = true; };

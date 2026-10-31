@@ -1,0 +1,4268 @@
+{
+ "id": "ffb7fd4267634e6bbac6dca33c2c455f",
+ "website": "https://eygentic.com/",
+ "status": "complete",
+ "created_at": "2026-10-31T15:45:44.453642Z",
+ "finished_at": "2026-10-31T15:47:04.250290Z",
+ "company_count": 5,
+ "skeptic": true,
+ "synthetic": false,
+ "profile": {
+  "website": "https://eygentic.com/",
+  "domain": "eygentic.com",
+  "name": "Eygentic",
+  "offer": {
+   "value": "Runs focused customer-acquisition experiments for B2B and SaaS teams to find what works before scaling it.",
+   "quotes": [
+    {
+     "text": "We run focused customer-acquisition experiments to find what works before you scale it.",
+     "url": "https://eygentic.com/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-10-31T15:45:45.155732Z",
+     "location": "text",
+     "open_posting": false
+    }
+   ],
+   "origin": "agent"
+  },
+  "buyer": {
+   "value": "B2B and SaaS companies that want customer acquisition to be more predictable.",
+   "quotes": [
+    {
+     "text": "B2B and SaaS companies of any size or stage, including specialized business software, that want customer acquisition to be more predictable.",
+     "url": "https://eygentic.com/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-10-31T15:45:45.155732Z",
+     "location": "text",
+     "open_posting": false
+    }
+   ],
+   "origin": "agent"
+  },
+  "existing_customers": [],
+  "fit_criteria": [
+   {
+    "id": "fit-1",
+    "text": "Sells products or services to other businesses (B2B)",
+    "required": true,
+    "enabled": true,
+    "quotes": [
+     {
+      "text": "B2B and SaaS companies of any size or stage, including specialized business software, that want customer acquisition to be more predictable.",
+      "url": "https://eygentic.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T15:45:45.155732Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "origin": "agent"
+   },
+   {
+    "id": "fit-3",
+    "text": "Sells via measurable acquisition channels such as outbound, LinkedIn, paid, or partnerships",
+    "required": false,
+    "enabled": true,
+    "quotes": [
+     {
+      "text": "Outbound email, LinkedIn, paid channels, partnerships and other channels where results can be measured.",
+      "url": "https://eygentic.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T15:45:45.155732Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "origin": "agent"
+   },
+   {
+    "id": "fit-4",
+    "text": "Operates a CRM or paid ad accounts used for acquisition",
+    "required": false,
+    "enabled": true,
+    "quotes": [
+     {
+      "text": "Some channels also need access to tools such as your CRM or ad accounts.",
+      "url": "https://eygentic.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T15:45:45.155732Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "origin": "agent"
+   }
+  ],
+  "need_signals": [
+   {
+    "id": "need-1",
+    "kind": "need",
+    "text": "Hiring SDRs or outbound sales reps to add outreach capacity",
+    "quotes": [
+     {
+      "text": "SDRs add outreach capacity. We find out which customer, message, offer and channel deserve that capacity. You can use the results to brief SDRs or decide who to hire.",
+      "url": "https://eygentic.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T15:45:45.155732Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   },
+   {
+    "id": "need-3",
+    "kind": "need",
+    "text": "Changing ICP, offer, and channel at the same time or testing new segments and messages",
+    "quotes": [
+     {
+      "text": "You are changing ICP, offer, and channel at the same time",
+      "url": "https://eygentic.com/hire-sdrs-vs-acquisition-experiments/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T15:45:45.770692Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "New segments and messages",
+      "url": "https://eygentic.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T15:45:45.155732Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   }
+  ],
+  "timing_signals": [
+   {
+    "id": "timing-1",
+    "kind": "timing",
+    "text": "Planning to hire SDRs and needs a playbook to brief new SDRs",
+    "quotes": [
+     {
+      "text": "You need a playbook to brief new SDRs",
+      "url": "https://eygentic.com/hire-sdrs-vs-acquisition-experiments/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T15:45:45.770692Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "Run the experiment, then hire against the evidence",
+      "url": "https://eygentic.com/hire-sdrs-vs-acquisition-experiments/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T15:45:45.770692Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   }
+  ],
+  "stated_limits": [],
+  "target_size": {
+   "value": "Seed to Series A B2B startups, about 5 to 50 people, founder still doing sales",
+   "quotes": [],
+   "origin": "user"
+  },
+  "interpretations": [],
+  "pages": [
+   {
+    "url": "https://eygentic.com/",
+    "title": "Eygentic | Customer-acquisition experiments for B2B and SaaS teams",
+    "fetched_at": "2026-10-31T15:45:45.155732Z"
+   },
+   {
+    "url": "https://eygentic.com/hire-sdrs-vs-acquisition-experiments/",
+    "title": "Hire SDRs vs run customer acquisition experiments",
+    "fetched_at": "2026-10-31T15:45:45.770692Z"
+   }
+  ]
+ },
+ "competitors": [
+  {
+   "name": "Bounty Hunter agency",
+   "domain": "bountyhunter.agency",
+   "classification": "direct",
+   "same_job": {
+    "text": "We aim to find profitable customer acquisition channels and use them as your main growth levers.",
+    "url": "https://bountyhunter.agency/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T15:46:04.712979Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": {
+    "text": "built to support any B2B SaaS growth model",
+    "url": "https://bountyhunter.agency/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T15:46:04.712979Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Runs acquisition-channel experiments for B2B SaaS teams to find scalable levers.",
+   "found_via": "Search: B2B customer acquisition experiments agency SaaS",
+   "origin": "agent"
+  },
+  {
+   "name": "Northpeak",
+   "domain": "northpeak.io",
+   "classification": "direct",
+   "same_job": {
+    "text": "We help you craft intelligent ad campaigns and experiment rapidly to minimize your cost per acquisition and maximize your ROAS.",
+    "url": "https://northpeak.io/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T15:46:05.246363Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": {
+    "text": "We partner with SaaS, eCommerce, and B2B companies to accelerate growth",
+    "url": "https://northpeak.io/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T15:46:05.246363Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Does rapid acquisition experimentation for SaaS and B2B companies.",
+   "found_via": "Search: B2B customer acquisition experiments agency SaaS",
+   "origin": "agent"
+  },
+  {
+   "name": "ConversionLab",
+   "domain": "conversionlab.no",
+   "classification": "direct",
+   "same_job": {
+    "text": "CRO retainer – ongoing A/B testing that builds on itself.",
+    "url": "https://www.conversionlab.no/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T15:46:04.451627Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": {
+    "text": "I help Nordic B2B SaaS companies turn traffic into customers, and customers into revenue that keeps growing.",
+    "url": "https://www.conversionlab.no/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T15:46:04.451627Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Runs ongoing A/B tests to improve acquisition for B2B SaaS companies.",
+   "found_via": "Search: B2B customer acquisition experiments agency SaaS",
+   "origin": "agent"
+  },
+  {
+   "name": "Kalungi",
+   "domain": "kalungi.com",
+   "classification": "adjacent",
+   "same_job": null,
+   "same_buyer": {
+    "text": "Outsource an expert SaaS marketing department to install a proven demand generation engine into your business.",
+    "url": "https://www.kalungi.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T15:46:04.554792Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Serves same SaaS buyer but sells full outsourced department, not focused experiments.",
+   "found_via": "Search: B2B customer acquisition experiments agency SaaS - Best B2B Growth Marketing Agency for SaaS: 11 Picks (2026) on onemetrik.com",
+   "origin": "agent"
+  },
+  {
+   "name": "Refine Labs",
+   "domain": "refinelabs.com",
+   "classification": "adjacent",
+   "same_job": null,
+   "same_buyer": {
+    "text": "We work with B2B tech companies at Series B and beyond",
+    "url": "https://www.refinelabs.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T15:46:05.354660Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Serves B2B tech buyer but sells brand-demand-expand engine, not focused experiments.",
+   "found_via": "Search: B2B customer acquisition experiments agency SaaS - Best B2B Growth Marketing Agency for SaaS: 11 Picks (2026) on onemetrik.com",
+   "origin": "agent"
+  },
+  {
+   "name": "NoGood",
+   "domain": "nogood.io",
+   "classification": "adjacent",
+   "same_job": {
+    "text": "We maximize lead volume and quality with hyper-targeted campaigns and high-impact keyword strategies.",
+    "url": "https://nogood.io/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T15:46:05.694040Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": null,
+   "reason": "Does acquisition campaigns but for startups and Fortune 100 broadly, not B2B SaaS specifically.",
+   "found_via": "Search: B2B customer acquisition experiments agency SaaS - Best B2B Growth Marketing Agency for SaaS: 11 Picks (2026) on onemetrik.com",
+   "origin": "agent"
+  },
+  {
+   "name": "Directive",
+   "domain": "directiveconsulting.com",
+   "classification": "adjacent",
+   "same_job": null,
+   "same_buyer": {
+    "text": "Technology buyers evaluate many solutions before deciding.",
+    "url": "https://directiveconsulting.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T15:46:05.491754Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Serves B2B technology buyers but sells always-on demand capture, not test-before-scale experiments.",
+   "found_via": "Search: B2B customer acquisition experiments agency SaaS - Best B2B Growth Marketing Agency for SaaS: 11 Picks (2026) on onemetrik.com",
+   "origin": "agent"
+  },
+  {
+   "name": "Single Grain",
+   "domain": "singlegrain.com",
+   "classification": "adjacent",
+   "same_job": null,
+   "same_buyer": {
+    "text": "SaaS Marketing Agency",
+    "url": "https://www.singlegrain.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-10-31T15:46:06.393239Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Serves SaaS buyers but sells SEO and paid media services, not focused acquisition experiments.",
+   "found_via": "Search: B2B customer acquisition experiments agency SaaS - Best B2B Growth Marketing Agency for SaaS: 11 Picks (2026) on onemetrik.com",
+   "origin": "agent"
+  }
+ ],
+ "disqualifiers": [
+  {
+   "id": "uses_direct_competitor:bountyhunter.agency",
+   "rule": "uses_direct_competitor",
+   "text": "Currently uses Bounty Hunter agency (bountyhunter.agency), a direct competitor",
+   "competitor_domain": "bountyhunter.agency",
+   "enabled": true
+  },
+  {
+   "id": "uses_direct_competitor:northpeak.io",
+   "rule": "uses_direct_competitor",
+   "text": "Currently uses Northpeak (northpeak.io), a direct competitor",
+   "competitor_domain": "northpeak.io",
+   "enabled": true
+  },
+  {
+   "id": "uses_direct_competitor:conversionlab.no",
+   "rule": "uses_direct_competitor",
+   "text": "Currently uses ConversionLab (conversionlab.no), a direct competitor",
+   "competitor_domain": "conversionlab.no",
+   "enabled": true
+  },
+  {
+   "id": "is_competitor",
+   "rule": "is_competitor",
+   "text": "Is itself a direct competitor",
+   "competitor_domain": null,
+   "enabled": true
+  },
+  {
+   "id": "is_existing_customer",
+   "rule": "is_existing_customer",
+   "text": "Is already your customer",
+   "competitor_domain": null,
+   "enabled": true
+  },
+  {
+   "id": "outside_target_size",
+   "rule": "outside_stated_size_or_region",
+   "text": "Much larger or later-stage than the companies you serve (Seed to Series A B2B startups, about 5 to 50 people, founder still doing sales)",
+   "competitor_domain": null,
+   "enabled": true
+  },
+  {
+   "id": "inactive",
+   "rule": "inactive",
+   "text": "No longer operating: closed, acquired and shut, or the site is parked",
+   "competitor_domain": null,
+   "enabled": true
+  }
+ ],
+ "overrides": {
+  "add_competitors": [],
+  "remove_competitors": [],
+  "exclusions": [],
+  "criteria": [],
+  "company_count": 5,
+  "interpretation": null,
+  "offer": null,
+  "buyer": null,
+  "target_size": "Seed to Series A B2B startups, about 5 to 50 people, founder still doing sales"
+ },
+ "companies": [
+  {
+   "domain": "docsumo.com",
+   "name": "Docsumo",
+   "url": "https://docsumo.com/",
+   "found_via": "job post: Sales Development Representative (B2B SaaS) on jobs.lever.co",
+   "status": "done",
+   "evidence": [
+    {
+     "id": "8d31f1dece5f4f538c395e1e08c8b9f0",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "Docsumo sells B2B document AI to lenders, insurers and other business teams",
+     "quote": {
+      "text": "Lenders, insurers, debt settlement firms, healthcare and AP teams use it to read, check and act on documents, so their people review only what needs a decision.",
+      "url": "https://www.docsumo.com/about",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T15:46:30.037162Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    }
+   ],
+   "decisions": [
+    {
+     "evidence_id": "8d31f1dece5f4f538c395e1e08c8b9f0",
+     "decision": "supports",
+     "reason": "Quote lists business customer types (lenders, insurers, firms, AP teams) as users of the product, indicating B2B sales.",
+     "decided_by": "skeptic"
+    }
+   ],
+   "checked_places": [
+    "homepage code",
+    "2 job posts",
+    "about page",
+    "pricing page",
+    "search \"Docsumo Sales Development Representative jobs.lever.co\"",
+    "search \"Docsumo hiring SDR outbound sales\"",
+    "search \"docsumo bountyhunter.agency northpeak.io conversionlab.no\""
+   ],
+   "disqualifier_check_completed": true,
+   "blocked": [
+    "https://jobs.lever.co/docsumo: Website returned HTTP 404"
+   ],
+   "signatures": [
+    {
+     "url": "https://www.docsumo.com/",
+     "kind": "homepage",
+     "fetched_at": "2026-10-31T15:46:25.616093Z",
+     "attributes": [
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Docsumo AI agents turning loan, insurance and eligibility documents into structured data"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/docsumoai"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/docsumoai"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.youtube.com/channel/UCwgXhcMbnMxqjlxxL5NoB5A"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.g2.com/products/docsumo-docsumo/reviews"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/docsumoai"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://x.com/docsumoai"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.capterra.com/p/192218/Docsumo/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.gartner.com/reviews/product/docsumo-983353829"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/2000/svg\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/docsumoai\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://x.com/docsumoai\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.youtube.com/channel/UCwgXhcMbnMxqjlxxL5NoB5A\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://your-app.example.com/hooks/docsumo\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.docsumo.com\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.g2.com/products/docsumo-docsumo/reviews\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.capterra.com/p/192218/Docsumo/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.gartner.com/reviews/product/docsumo-983353829\\"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    },
+    {
+     "url": "https://www.docsumo.com/careers",
+     "kind": "other",
+     "fetched_at": "2026-10-31T15:46:26.581446Z",
+     "attributes": [
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Common Ocean"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Fifth Wall"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Better Capital"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Barclays Accelerator, powered by Techstars"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/samip-timalsena-b9a21a1ab/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/akash-nawal/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/aniket-tatipamula-b81a5a25/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/janardan-banjara-351660176/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/vishal-arya-03a3b1100/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/aayush-shah-kanu/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/yasheshpatel555"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/rishabhrao1/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "The Docsumo team outdoors, together in one group"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Docsumo team members river rafting"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Docsumo team members on quad bikes in Chitlang"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Docsumo team members in matching Docsumo shirts"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/docsumoai"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/docsumoai"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.youtube.com/channel/UCwgXhcMbnMxqjlxxL5NoB5A"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/docsumoai"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://x.com/docsumoai"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.youtube.com/channel/UCwgXhcMbnMxqjlxxL5NoB5A"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.g2.com/products/docsumo-docsumo/reviews"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.capterra.com/p/192218/Docsumo/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.gartner.com/reviews/product/docsumo-983353829"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/2000/svg\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/docsumoai\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://x.com/docsumoai\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.youtube.com/channel/UCwgXhcMbnMxqjlxxL5NoB5A\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/samip-timalsena-b9a21a1ab/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/akash-nawal/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/aniket-tatipamula-b81a5a25/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/janardan-banjara-351660176/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/vishal-arya-03a3b1100/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/aayush-shah-kanu/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/yasheshpatel555\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/rishabhrao1/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.docsumo.com\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.g2.com/products/docsumo-docsumo/reviews\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.capterra.com/p/192218/Docsumo/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.gartner.com/reviews/product/docsumo-983353829\\"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    },
+    {
+     "url": "https://www.docsumo.com/about",
+     "kind": "other",
+     "fetched_at": "2026-10-31T15:46:30.037162Z",
+     "attributes": [
+      {
+       "tag": "a",
+       "attr": "title",
+       "value": "Read the National Debt Relief story"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "National Debt Relief"
+      },
+      {
+       "tag": "a",
+       "attr": "title",
+       "value": "Read the Arbor story"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Arbor"
+      },
+      {
+       "tag": "a",
+       "attr": "title",
+       "value": "Read the ClearOne Advantage story"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ClearOne Advantage"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Riskonnect"
+      },
+      {
+       "tag": "a",
+       "attr": "title",
+       "value": "Read the Grid Finance story"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Grid Finance"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Brevet Capital"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Cassena Care"
+      },
+      {
+       "tag": "a",
+       "attr": "title",
+       "value": "Read the Valtatech story"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Valtatech"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Rushabh Sheth, Co-founder and CEO of Docsumo"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/rushabhasheth/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Bikram Dahal, Co-founder and CTO of Docsumo"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/bikramdahal/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Common Ocean"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Fifth Wall"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Better Capital"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Barclays Accelerator, powered by Techstars"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.globaltechtimes.com/article/799786486-docsumo-publishes-ocr-benchmark-comes-ahead-of-mistral-and-landing-ai"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.marketforecastreports.com/article/790545428-50-key-statistics-and-trends-in-intelligent-document-processing-idp-for-2025"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.ukbusinessreporter.com/article/767421489-grid-finance-joins-forces-with-docsumo-document-ai-to-accelerate-small-business-funding"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.techtimesnewyork.com/article/764352449-docsumo-arbor-realty-trust-have-partnered-to-leverage-ai-to-automate-document-workflows"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.forbes.com/councils/forbestechcouncil/2024/01/25/how-to-use-cognitive-automation-to-optimize-operational-workflows/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.forbes.com/councils/forbestechcouncil/2023/08/15/the-dawn-of-ai-interfaces-how-ai-is-rewriting-human-technology-interaction/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.forbes.com/councils/forbestechcouncil/2023/07/24/unleashing-the-power-of-unstructured-data-the-rise-of-large-ai-models/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://equip.co/blog/founder-stories-rushabh-sheth-docsumo/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.marktechpost.com/2022/03/10/this-document-ai-startup-helps-enterprises-to-make-automated-decisions-from-unstructured-documents/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.techinasia.com/sg-document-ai-firm-bags-35m-seed-raise"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://entrackr.com/2022/03/document-ai-startup-docsumo-raises-3-5-mn-in-seed-round/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://theamericangenius.com/tired-of-transcribing-screenshots-put-chrome-extension-to-work/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "The Docsumo team outdoors, together in one group"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Docsumo team members in matching Docsumo shirts"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Docsumo team members river rafting"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Docsumo team members on quad bikes in Chitlang"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "The Docsumo team at a lake house"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/docsumoai"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/docsumoai"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.youtube.com/channel/UCwgXhcMbnMxqjlxxL5NoB5A"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/docsumoai"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://x.com/docsumoai"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.youtube.com/channel/UCwgXhcMbnMxqjlxxL5NoB5A"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.g2.com/products/docsumo-docsumo/reviews"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.capterra.com/p/192218/Docsumo/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.gartner.com/reviews/product/docsumo-983353829"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/rushabhasheth/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/bikramdahal/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/2000/svg\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/docsumoai\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://x.com/docsumoai\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.youtube.com/channel/UCwgXhcMbnMxqjlxxL5NoB5A\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/rushabhasheth/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/bikramdahal/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.globaltechtimes.com/article/799786486-docsumo-publishes-ocr-benchmark-comes-ahead-of-mistral-and-landing-ai\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.marketforecastreports.com/article/790545428-50-key-statistics-and-trends-in-intelligent-document-processing-idp-for-2025\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.ukbusinessreporter.com/article/767421489-grid-finance-joins-forces-with-docsumo-document-ai-to-accelerate-small-business-funding\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.techtimesnewyork.com/article/764352449-docsumo-arbor-realty-trust-have-partnered-to-leverage-ai-to-automate-document-workflows\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.docsumo.com\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.g2.com/products/docsumo-docsumo/reviews\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.capterra.com/p/192218/Docsumo/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.gartner.com/reviews/product/docsumo-983353829\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.forbes.com/councils/forbestechcouncil/2024/01/25/how-to-use-cognitive-automation-to-optimize-operational-workflows/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.forbes.com/councils/forbestechcouncil/2023/08/15/the-dawn-of-ai-interfaces-how-ai-is-rewriting-human-technology-interaction/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.forbes.com/councils/forbestechcouncil/2023/07/24/unleashing-the-power-of-unstructured-data-the-rise-of-large-ai-models/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://equip.co/blog/founder-stories-rushabh-sheth-docsumo/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.marktechpost.com/2022/03/10/this-document-ai-startup-helps-enterprises-to-make-automated-decisions-from-unstructured-documents/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.techinasia.com/sg-document-ai-firm-bags-35m-seed-raise\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://entrackr.com/2022/03/document-ai-startup-docsumo-raises-3-5-mn-in-seed-round/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://theamericangenius.com/tired-of-transcribing-screenshots-put-chrome-extension-to-work/\\"
+      }
+     ],
+     "powered_by": [
+      "Common Ocean led Docsumo's $3.5M seed round in 2022, with Fifth Wall and Better Capital. Before that, Docsumo raised a pre-seed round in 2020 from Techstars, Barclays (through the Barclays Accelerator, powered by Techstars), Better Capital and angel investors."
+     ],
+     "lines": []
+    },
+    {
+     "url": "https://www.docsumo.com/pricing",
+     "kind": "other",
+     "fetched_at": "2026-10-31T15:46:31.028471Z",
+     "attributes": [
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ClearOne Advantage"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Orla Kane, VP of Settlement Operations, ClearOne Advantage"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Valtatech"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Jussi Karjalainen, Founder & Managing Partner, Valtatech"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Arbor"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Howard Leiner, CTO, Arbor"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Grid Finance"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mark Bentley, Head of Credit, Grid Finance"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "SOC 2 Type 2 independently audited controls"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "HIPAA for protected health data"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "GDPR for EU personal data"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/docsumoai"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/docsumoai"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.youtube.com/channel/UCwgXhcMbnMxqjlxxL5NoB5A"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/docsumoai"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://x.com/docsumoai"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.youtube.com/channel/UCwgXhcMbnMxqjlxxL5NoB5A"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.g2.com/products/docsumo-docsumo/reviews"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.capterra.com/p/192218/Docsumo/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.gartner.com/reviews/product/docsumo-983353829"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/2000/svg\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/docsumoai\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://x.com/docsumoai\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.youtube.com/channel/UCwgXhcMbnMxqjlxxL5NoB5A\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.docsumo.com\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.g2.com/products/docsumo-docsumo/reviews\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.capterra.com/p/192218/Docsumo/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.gartner.com/reviews/product/docsumo-983353829\\"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    },
+    {
+     "url": "https://www.docsumo.com/careers",
+     "kind": "other",
+     "fetched_at": "2026-10-31T15:46:31.667846Z",
+     "attributes": [
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Common Ocean"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Fifth Wall"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Better Capital"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Barclays Accelerator, powered by Techstars"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/samip-timalsena-b9a21a1ab/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/akash-nawal/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/aniket-tatipamula-b81a5a25/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/janardan-banjara-351660176/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/vishal-arya-03a3b1100/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/aayush-shah-kanu/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/yasheshpatel555"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/rishabhrao1/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "The Docsumo team outdoors, together in one group"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Docsumo team members river rafting"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Docsumo team members on quad bikes in Chitlang"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Docsumo team members in matching Docsumo shirts"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/docsumoai"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/docsumoai"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.youtube.com/channel/UCwgXhcMbnMxqjlxxL5NoB5A"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/docsumoai"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://x.com/docsumoai"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.youtube.com/channel/UCwgXhcMbnMxqjlxxL5NoB5A"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.g2.com/products/docsumo-docsumo/reviews"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.capterra.com/p/192218/Docsumo/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.gartner.com/reviews/product/docsumo-983353829"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/2000/svg\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/docsumoai\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://x.com/docsumoai\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.youtube.com/channel/UCwgXhcMbnMxqjlxxL5NoB5A\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/samip-timalsena-b9a21a1ab/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/akash-nawal/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/aniket-tatipamula-b81a5a25/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/janardan-banjara-351660176/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/vishal-arya-03a3b1100/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/aayush-shah-kanu/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/yasheshpatel555\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/in/rishabhrao1/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.docsumo.com\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.g2.com/products/docsumo-docsumo/reviews\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.capterra.com/p/192218/Docsumo/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.gartner.com/reviews/product/docsumo-983353829\\"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    }
+   ],
+   "searches": 3,
+   "fetches": 6,
+   "turns": 3,
+   "verdict": {
+    "kind": "needs_look",
+    "summary": "Needs a look",
+    "missing": [
+     "No current need or timing evidence (none dated within 180 days, no open job post)",
+     "Could not read https://jobs.lever.co/docsumo: Website returned HTTP 404"
+    ],
+    "disqualifier": null,
+    "rule": null
+   },
+   "pitch": null,
+   "latency_ms": 29327,
+   "cost_usd": 0.090739,
+   "error": null
+  },
+  {
+   "domain": "gushwork.ai",
+   "name": "gushwork.ai",
+   "url": "https://gushwork.ai/",
+   "found_via": "job post: Outbound Sales Development Representative - B2B on jobs.lever.co",
+   "status": "done",
+   "evidence": [
+    {
+     "id": "163ef783045c42c39839686bd975b5bc",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "Gushwork sells AI agents to other businesses to generate leads",
+     "quote": {
+      "text": "Gushwork’s AI agents help your business get discovered by your buyers, across AI search, Google, and paid channels, then turn that interest into marketing-qualified leads.",
+      "url": "https://www.gushwork.ai/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T15:46:25.374461Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "e549c2c0859f4063a3d8da80cc30d32b",
+     "claim_type": "fit",
+     "criterion_id": "fit-3",
+     "claim": "Gushwork uses paid campaigns as an acquisition channel",
+     "quote": {
+      "text": "Paid Boost Agent\nRuns paid campaigns so your pipeline keeps moving while your organic presence builds.",
+      "url": "https://www.gushwork.ai/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T15:46:25.374461Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "3e78b4c251df48cabf9983c8237ba6a0",
+     "claim_type": "fit",
+     "criterion_id": "fit-4",
+     "claim": "Gushwork SDRs log work in a CRM and use HubSpot and Salesforce",
+     "quote": {
+      "text": "Logging structured notes in CRM",
+      "url": "https://jobs.lever.co/gushwork/8b3a6b04-26e1-4d4a-a815-e150f36c9f12",
+      "source_type": "job_post",
+      "published_date": "2026-05-01",
+      "fetched_at": "2026-10-31T15:46:34.167680Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "5b9dc0c61867418a86c0b2b728d4db9f",
+     "claim_type": "need",
+     "criterion_id": "need-1",
+     "claim": "Gushwork is hiring outbound SDRs for US prospecting",
+     "quote": {
+      "text": "As a Senior BDR, you'll own outbound prospecting and qualified meeting generation for Gushwork, focusing exclusively on commercial and mid-market businesses in the United States.",
+      "url": "https://jobs.lever.co/gushwork/55bf8b22-b6fb-497e-a698-2bad090e2fc1",
+      "source_type": "job_post",
+      "published_date": "2026-10-27",
+      "fetched_at": "2026-10-31T15:46:33.117287Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "900a585352bc4c14a276c4338f48541d",
+     "claim_type": "need",
+     "criterion_id": "need-1",
+     "claim": "Outbound SDR role requires 150 cold calls daily to book meetings",
+     "quote": {
+      "text": "150 outbound cold calls daily to U.S companies",
+      "url": "https://jobs.lever.co/gushwork/8b3a6b04-26e1-4d4a-a815-e150f36c9f12",
+      "source_type": "job_post",
+      "published_date": "2026-05-01",
+      "fetched_at": "2026-10-31T15:46:34.167680Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "e7a34a1eac294a76ab49e806ed486b9d",
+     "claim_type": "timing",
+     "criterion_id": "timing-1",
+     "claim": "New Mid-Market SDR role posted recently to build outbound pipeline",
+     "quote": {
+      "text": "Own pipeline-generation targets: Deliver against monthly and quarterly goals for qualified meetings, opportunities created, and outbound-sourced pipeline.",
+      "url": "https://jobs.lever.co/gushwork/55bf8b22-b6fb-497e-a698-2bad090e2fc1",
+      "source_type": "job_post",
+      "published_date": "2026-10-27",
+      "fetched_at": "2026-10-31T15:46:33.117287Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "90022c6b476e45a4a869bf4228551ddd",
+     "claim_type": "disqualifier",
+     "criterion_id": "outside_target_size",
+     "claim": "Gushwork reports a team of about 90 people, above the 5 to 50 range",
+     "quote": {
+      "text": "We are a team of about 90 people based in Bengaluru, backed by Lightspeed and SIG.",
+      "url": "https://jobs.lever.co/gushwork/55bf8b22-b6fb-497e-a698-2bad090e2fc1",
+      "source_type": "job_post",
+      "published_date": "2026-10-27",
+      "fetched_at": "2026-10-31T15:46:33.117287Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    }
+   ],
+   "decisions": [
+    {
+     "evidence_id": "163ef783045c42c39839686bd975b5bc",
+     "decision": "supports",
+     "reason": "Quote describes AI agents helping businesses get discovered by buyers and generating marketing-qualified leads, indicating B2B sales.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "e549c2c0859f4063a3d8da80cc30d32b",
+     "decision": "supports",
+     "reason": "Quote states Paid Boost Agent runs paid campaigns to drive pipeline, showing use of paid acquisition channel.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "3e78b4c251df48cabf9983c8237ba6a0",
+     "decision": "supports",
+     "reason": "Quote mentions logging structured notes in CRM, indicating active CRM operation for acquisition.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "5b9dc0c61867418a86c0b2b728d4db9f",
+     "decision": "supports",
+     "reason": "Quote describes Senior BDR role owning outbound prospecting and qualified meeting generation for Gushwork.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "900a585352bc4c14a276c4338f48541d",
+     "decision": "supports",
+     "reason": "Quote specifies 150 outbound cold calls daily, indicating outbound SDR capacity requirement.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "e7a34a1eac294a76ab49e806ed486b9d",
+     "decision": "insufficient",
+     "reason": "Quote describes pipeline targets but does not mention hiring SDRs or needing a playbook.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "90022c6b476e45a4a869bf4228551ddd",
+     "decision": "supports",
+     "reason": "Quote states current team is about 90 people, exceeding the 5-50 person Seed to Series A range.",
+     "decided_by": "skeptic"
+    }
+   ],
+   "checked_places": [
+    "homepage code",
+    "job post",
+    "own job board on Lever",
+    "2 job post page on jobs.lever.cos",
+    "search \"gushwork.ai bountyhunter.agency northpeak.io conversionlab.no\"",
+    "pricing page"
+   ],
+   "disqualifier_check_completed": true,
+   "blocked": [
+    "https://www.gushwork.ai/about: Website returned HTTP 404"
+   ],
+   "signatures": [
+    {
+     "url": "https://www.gushwork.ai/",
+     "kind": "homepage",
+     "fetched_at": "2026-10-31T15:46:25.374461Z",
+     "attributes": [
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Source Equipment"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Fraxtional"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Respect Manufacturing"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Softrol"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Sedona"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Powell Systems"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Narco"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ePortID"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "MD Plastics"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Fannon Products"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Sedona Technologies"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Two competitor listings side by side; AI search recommends one of them to your buyer"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "The Gushwork system at the centre of its Research, Design, Content, Developer, Authority and Lead Conversion agents"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Midwest Power Products"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "A phone notification from Gushwork: You’ve got 8 new leads"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/gushwork"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/gushwork"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.instagram.com/gushwork.ai/"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/gushwork"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://x.com/gushwork"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.instagram.com/gushwork.ai/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://vz-66d9f760-943.b-cdn.net/0d1623f2-8f1c-4713-b5a7-655a49f2da78/play_1080p.mp4"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id=GTM-M98SVTQH"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.menoinfra.com/p/8c461bac-1c63-4039-a08e-c7ec80863147.js"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    },
+    {
+     "url": "https://www.gushwork.ai/careers",
+     "kind": "other",
+     "fetched_at": "2026-10-31T15:46:26.335629Z",
+     "attributes": [
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://jobs.lever.co/gushwork/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/sushmita-jha-data-analyst/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/yasharma2301/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/nitin-daniel-093060112/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/ameyjain1027999/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/sana2608/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/krcpr007/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/swapnilsinha07/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/in/bigrah/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "The Gushwork team raising a toast, with the Great Place To Work Certified badge"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "SIG (Susquehanna)"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Lightspeed"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "BEENEXT"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "B Capital"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Seaborne Capital Partners"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Sparrow"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/gushwork"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/gushwork"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.instagram.com/gushwork.ai/"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/gushwork"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://x.com/gushwork"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.instagram.com/gushwork.ai/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id=GTM-M98SVTQH"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.menoinfra.com/p/8c461bac-1c63-4039-a08e-c7ec80863147.js"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    },
+    {
+     "url": "https://www.gushwork.ai/pricing",
+     "kind": "other",
+     "fetched_at": "2026-10-31T15:46:40.258725Z",
+     "attributes": [
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Source Equipment"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Fraxtional"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Respect Manufacturing"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Softrol"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Sedona"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Powell Systems"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Narco"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ePortID"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "MD Plastics"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Fannon Products"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Sedona Technologies"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Midwest Power Products"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/gushwork"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/gushwork"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.instagram.com/gushwork.ai/"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/gushwork"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://x.com/gushwork"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.instagram.com/gushwork.ai/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id=GTM-M98SVTQH"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.menoinfra.com/p/8c461bac-1c63-4039-a08e-c7ec80863147.js"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    }
+   ],
+   "searches": 1,
+   "fetches": 6,
+   "turns": 3,
+   "verdict": {
+    "kind": "rejected",
+    "summary": "Much larger or later-stage than the companies you serve (Seed to Series A B2B startups, about 5 to 50 people, founder still doing sales)",
+    "missing": [],
+    "disqualifier": {
+     "id": "90022c6b476e45a4a869bf4228551ddd",
+     "claim_type": "disqualifier",
+     "criterion_id": "outside_target_size",
+     "claim": "Gushwork reports a team of about 90 people, above the 5 to 50 range",
+     "quote": {
+      "text": "We are a team of about 90 people based in Bengaluru, backed by Lightspeed and SIG.",
+      "url": "https://jobs.lever.co/gushwork/55bf8b22-b6fb-497e-a698-2bad090e2fc1",
+      "source_type": "job_post",
+      "published_date": "2026-10-27",
+      "fetched_at": "2026-10-31T15:46:33.117287Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    "rule": "outside_stated_size_or_region"
+   },
+   "pitch": null,
+   "latency_ms": 24858,
+   "cost_usd": 0.05422,
+   "error": null
+  },
+  {
+   "domain": "pipe17.com",
+   "name": "pipe17.com",
+   "url": "https://pipe17.com/",
+   "found_via": "job post: Sales Development Representative (Ecommerce - Outbound SDR) Remote on boards.greenhouse.io",
+   "status": "done",
+   "evidence": [
+    {
+     "id": "71f90ce845dc4251b75b87c9b89cc56a",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "Pipe17 sells an order management platform to brands and 3PLs",
+     "quote": {
+      "text": "Pipe17 is the connected order management system (OMS) for brands and 3PLs: order management and pre-configured, maintained integrations in one enterprise-grade platform.",
+      "url": "https://pipe17.com/about-us/",
+      "source_type": "own_site",
+      "published_date": "2023-02-27",
+      "fetched_at": "2026-10-31T15:46:33.491296Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "2d2f5f544ac94c07a22f56b89d0dea6b",
+     "claim_type": "fit",
+     "criterion_id": "fit-3",
+     "claim": "Pipe17 sells via measurable outbound channels including cold calls, email and LinkedIn",
+     "quote": {
+      "text": "Develop creative, multi-channel outbound strategies. Cold calls, targeted emails, LinkedIn, events, industry communities - whatever works.",
+      "url": "https://job-boards.greenhouse.io/pipe17/jobs/4676042005",
+      "source_type": "job_post",
+      "published_date": null,
+      "fetched_at": "2026-10-31T15:46:31.714855Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "81b3d5882ca94d3591ec2b35fd1d7381",
+     "claim_type": "need",
+     "criterion_id": "need-1",
+     "claim": "Pipe17 is hiring an outbound hunter to build pipeline from scratch",
+     "quote": {
+      "text": "This is a pure outbound hunting role. You find the accounts. You open the doors. You build the pipeline from nothing - and you close it.",
+      "url": "https://job-boards.greenhouse.io/pipe17/jobs/4676042005",
+      "source_type": "job_post",
+      "published_date": null,
+      "fetched_at": "2026-10-31T15:46:31.714855Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "124c96bcecb1470482bd27dcdbe4c764",
+     "claim_type": "need",
+     "criterion_id": "need-3",
+     "claim": "Pipe17 is testing new verticals and market patterns for pipeline",
+     "quote": {
+      "text": "Identify patterns in the market - replatforming waves, Shopify migrations, brands outgrowing their middleware - and turn those patterns into pipeline",
+      "url": "https://job-boards.greenhouse.io/pipe17/jobs/4676042005",
+      "source_type": "job_post",
+      "published_date": null,
+      "fetched_at": "2026-10-31T15:46:31.714855Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "2b0cb95973ce4c44b2446807e321de9e",
+     "claim_type": "timing",
+     "criterion_id": "timing-1",
+     "claim": "New outbound hire is expected to share what outreach is working as a playbook",
+     "quote": {
+      "text": "If a new outreach angle is working, share the playbook.",
+      "url": "https://job-boards.greenhouse.io/pipe17/jobs/4676042005",
+      "source_type": "job_post",
+      "published_date": null,
+      "fetched_at": "2026-10-31T15:46:31.714855Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    }
+   ],
+   "decisions": [
+    {
+     "evidence_id": "71f90ce845dc4251b75b87c9b89cc56a",
+     "decision": "supports",
+     "reason": "Quote states OMS is for brands and 3PLs, which are business customers, showing B2B sales.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "2d2f5f544ac94c07a22f56b89d0dea6b",
+     "decision": "supports",
+     "reason": "Quote explicitly lists outbound acquisition channels including cold calls, targeted emails, and LinkedIn.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "81b3d5882ca94d3591ec2b35fd1d7381",
+     "decision": "supports",
+     "reason": "Quote describes a pure outbound hunting role focused on finding accounts and building pipeline from nothing.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "124c96bcecb1470482bd27dcdbe4c764",
+     "decision": "insufficient",
+     "reason": "Quote mentions identifying market patterns for pipeline but does not show changing ICP, offer, and channel together or testing new segments.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "2b0cb95973ce4c44b2446807e321de9e",
+     "decision": "insufficient",
+     "reason": "Quote mentions sharing a playbook for outreach angles but does not mention planning to hire SDRs.",
+     "decided_by": "skeptic"
+    }
+   ],
+   "checked_places": [
+    "homepage code",
+    "job post",
+    "own job board on Greenhouse",
+    "3 job post page on job-boards.greenhouse.ios",
+    "about us page",
+    "search \"pipe17 bountyhunter.agency northpeak.io conversionlab.no\"",
+    "search \"Pipe17 Sales Development Representative Ecommerce Outbound SDR Greenhouse\"",
+    "search \"Pipe17 brands 3PLs customers solutions\""
+   ],
+   "disqualifier_check_completed": true,
+   "blocked": [],
+   "signatures": [
+    {
+     "url": "https://pipe17.com/",
+     "kind": "homepage",
+     "fetched_at": "2026-10-31T15:46:25.899689Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://gmpg.org/xfn/11"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://scout-cdn.salesloft.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://www.googletagmanager.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdn.vector.co"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdn.segment.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://www.clarity.ms"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://s3-us-west-2.amazonaws.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://tag.demandbase.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://js.hs-scripts.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdn.propensity.com"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-TS5WST7"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Pipe17 horizontal logo green icon white name"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Allbirds"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "e.l.f. Beauty"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "FedEx"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Wyze"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "SACHEU Beauty"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Radial"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Ryder"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Dude Wipes"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "OLLY"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Shopify"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Amazon"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "TikTok Shop"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Domaine"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Maze Group"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Teifi Digital"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "CQL"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "RunDTC"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Publicis Sapient"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Disconnected commerce systems create manual work and operational complexity"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Tablet displaying a dashboard in the Pipe17 Order Operations Platform"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "BigCommerce"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Snowflake"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logiwa"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "NetSuite"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "UNIS"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Acumatica"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "eBay"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Loop"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "SAP"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Stripe"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Walmart Marketplace"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Google Cloud Storage"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ShipBob"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Temu"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Pippen turns order questions into approved operational actions"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Pipe17_green_icon_white_copy_logo"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/pipe17/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/Pipe17Inc"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.facebook.com/gopipe17"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://cookiedatabase.org/tcf/purposes/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s3-us-west-2.amazonaws.com/b2bjsstore/b/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.clarity.ms/tag/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.segment.com/analytics.js/v1/"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    },
+    {
+     "url": "https://pipe17.com/careers/",
+     "kind": "other",
+     "fetched_at": "2026-10-31T15:46:27.035692Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://gmpg.org/xfn/11"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://d2mvefebd70kbz.cloudfront.net/scripts/019e3c4d-2744-7595-be52-9444aaac65e0.js"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-TS5WST7"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Pipe17 horizontal logo green icon white name"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "2 tone green and black icon of a 4 square grid with a flag planted in the grid"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "2 tone green and black icon of a rocket ship"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "2 tone green and black icon of 3 stacked boxes"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "2 tone green and black icon of a seedling"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Two-tone question mark icon in a circle, representing curiosity, inquiry, and continuous learning"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://boards.greenhouse.io/embed/job_board/js?for=pipe17"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Photo of Tiffany Johnson, Pipe17 Head of Sales"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Pipe17_green_icon_white_copy_logo"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/pipe17/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/Pipe17Inc"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.facebook.com/gopipe17"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://cookiedatabase.org/tcf/purposes/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s3-us-west-2.amazonaws.com/b2bjsstore/b/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.clarity.ms/tag/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.segment.com/analytics.js/v1/"
+      }
+     ],
+     "powered_by": [
+      "We’re like a championship team—one built on trust, clear communication, and alignment—where everyone knows their role, works together, and brings their best to win big."
+     ],
+     "lines": []
+    },
+    {
+     "url": "https://pipe17.com/about-us/",
+     "kind": "other",
+     "fetched_at": "2026-10-31T15:46:33.491296Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://gmpg.org/xfn/11"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-TS5WST7"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Pipe17 horizontal logo green icon white name"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Shopify Premier Partner Badge"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Amazon technology partner of the year award winner"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Best Enterprise TikTok Shop Integration Award for Pipe17"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "G2 logo representing Pipe17's Omnichannel Commerce High Performer position on the G2 Grid"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Commerce Operations Foundation horizontal logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "The Lead, The Leading 100 svg logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mo Afshar photo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Anand Kothari photo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Brad Habansky photo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Kristina Dudley photo"
+      },
+      {
+       "tag": "a",
+       "attr": "title",
+       "value": "Discover how Pipe17 helps brands connect channels, automate order flows, and reduce fulfillment errors by up to 99%."
+      },
+      {
+       "tag": "a",
+       "attr": "title",
+       "value": "Learn how Pipe17 helps fulfillment providers streamline onboarding, reduce errors, and strengthen client relationships."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "TechCrunch horizontal logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Retail Customer Experience horizontal logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Associated Press vertical logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Sales Tech Star horizontal logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Retail Dive horizontal logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Business Insider horizontal logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Morningstar horizontal logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Retail IT Insights horizontal logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Axios horizontal svg logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "GeekWire horizontal logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Yahoo Finance horizontal logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Supplychain Dive horizontal logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Fortune Magazine horizontal svg logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Digital Commerce 360 horizontal svg logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "PYMNTS horizontal svg logo black"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Pipe17_green_icon_white_copy_logo"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/pipe17/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/Pipe17Inc"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.facebook.com/gopipe17"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://cookiedatabase.org/tcf/purposes/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s3-us-west-2.amazonaws.com/b2bjsstore/b/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.clarity.ms/tag/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.segment.com/analytics.js/v1/"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    }
+   ],
+   "searches": 3,
+   "fetches": 6,
+   "turns": 4,
+   "verdict": {
+    "kind": "shortlisted",
+    "summary": "Required fit shown, current need or timing evidence, and no current competitor use found",
+    "missing": [],
+    "disqualifier": null,
+    "rule": null
+   },
+   "pitch": {
+    "why_now": "The company is hiring for a pure outbound hunting role to build pipeline from nothing while testing multi-channel outbound strategies to see whatever works.",
+    "opener": "You're building pipeline from nothing and testing multi-channel outbound to find whatever works. We run focused acquisition experiments for B2B teams to find what works before you scale it.",
+    "evidence_ids": [
+     "81b3d5882ca94d3591ec2b35fd1d7381",
+     "2d2f5f544ac94c07a22f56b89d0dea6b"
+    ],
+    "checked": true,
+    "reason": "Every company-facing claim (pure outbound hunting role, build pipeline from nothing, multi-channel outbound strategies/whatever works) is directly stated in the job_post quotes, and the seller's own offer sentence paraphrases the seller_offer without adding new facts."
+   },
+   "latency_ms": 29592,
+   "cost_usd": 0.08978,
+   "error": null
+  },
+  {
+   "domain": "arena.im",
+   "name": "arena.im",
+   "url": "https://arena.im/",
+   "found_via": "job post: Business Development Representative [BDR Brazil] outbound cold calling and email on boards.greenhouse.io",
+   "status": "done",
+   "evidence": [
+    {
+     "id": "f2073f85fdcb4610846023f07ef2c5b3",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "Arena sells to organizations including publishers, media, sports and e-commerce brands",
+     "quote": {
+      "text": "Join 10K+ organizations growing powered by Arena.",
+      "url": "https://arena.im/",
+      "source_type": "own_site",
+      "published_date": "2023-06-24",
+      "fetched_at": "2026-10-31T15:46:25.024005Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "7d9f75a167ea40e68b84c688594c0f04",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "Arena offers solutions tailored for business teams across industries",
+     "quote": {
+      "text": "Tailored for Teams Like Yours",
+      "url": "https://arena.im/",
+      "source_type": "own_site",
+      "published_date": "2023-06-24",
+      "fetched_at": "2026-10-31T15:46:25.024005Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "6ca54f27d0ee4cd7aa686a9e34ded004",
+     "claim_type": "fit",
+     "criterion_id": "fit-4",
+     "claim": "Arena integrates with ads to monetize audience",
+     "quote": {
+      "text": "Integrate with ads seamlessly and monetize your audience.",
+      "url": "https://arena.im/",
+      "source_type": "own_site",
+      "published_date": "2023-06-24",
+      "fetched_at": "2026-10-31T15:46:25.024005Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    }
+   ],
+   "decisions": [
+    {
+     "evidence_id": "f2073f85fdcb4610846023f07ef2c5b3",
+     "decision": "supports",
+     "reason": "Quote states product powers 10K+ organizations, showing sales to businesses.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "7d9f75a167ea40e68b84c688594c0f04",
+     "decision": "insufficient",
+     "reason": "Vague promotional phrase does not clearly show B2B sales.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "6ca54f27d0ee4cd7aa686a9e34ded004",
+     "decision": "insufficient",
+     "reason": "Quote describes ad integration feature, not operation of CRM or paid ad accounts.",
+     "decided_by": "skeptic"
+    }
+   ],
+   "checked_places": [
+    "homepage code",
+    "job post",
+    "search \"arena.im Business Development Representative BDR Brazil greenhouse\"",
+    "search \"arena.im pricing B2B publishers brands\"",
+    "search \"arena.im bountyhunter.agency northpeak.io conversionlab.no\""
+   ],
+   "disqualifier_check_completed": true,
+   "blocked": [],
+   "signatures": [
+    {
+     "url": "https://arena.im/",
+     "kind": "homepage",
+     "fetched_at": "2026-10-31T15:46:25.024005Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//kit.fontawesome.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//fonts.googleapis.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//www.googletagmanager.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//ka-p.fontawesome.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://ka-p.fontawesome.com"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-M3WTTRS2"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Arena"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Example of Comments displayed on a page"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Example of Polls displayed on a page"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Live Blog page example"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Example of Group Chat displayed on a page"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Example of Ads displayed on a page"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "client"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Vans Logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Sony Logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Rogers Logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Nubank Logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Microsoft Logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Globo Logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Fox Logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Forbes Logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Reuters Logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ESPN Logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "NFL Logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "RedBull Logo"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://secure.gravatar.com/avatar/8d99ade7501b7555d5ce5c04e884a077?s=96&amp;d=mm&amp;r=g"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      }
+     ],
+     "powered_by": [
+      "Join 10K+ organizations growing powered by Arena."
+     ],
+     "lines": []
+    },
+    {
+     "url": "https://arena.im/careers/",
+     "kind": "other",
+     "fetched_at": "2026-10-31T15:46:26.141991Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//kit.fontawesome.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//fonts.googleapis.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//www.googletagmanager.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//ka-p.fontawesome.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://ka-p.fontawesome.com"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-M3WTTRS2"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Arena"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://secure.gravatar.com/avatar/8d99ade7501b7555d5ce5c04e884a077?s=96&amp;d=mm&amp;r=g"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    }
+   ],
+   "searches": 3,
+   "fetches": 2,
+   "turns": 1,
+   "verdict": {
+    "kind": "needs_look",
+    "summary": "Needs a look",
+    "missing": [
+     "No current need or timing evidence (none dated within 180 days, no open job post)"
+    ],
+    "disqualifier": null,
+    "rule": null
+   },
+   "pitch": null,
+   "latency_ms": 10155,
+   "cost_usd": 0.043184,
+   "error": null
+  },
+  {
+   "domain": "routethis.com",
+   "name": "routethis.com",
+   "url": "https://routethis.com/",
+   "found_via": "job post: Senior Sales Development Representative on jobs.lever.co",
+   "status": "done",
+   "evidence": [
+    {
+     "id": "667c0ee5a5f743329d6c46a806c07bc8",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "RouteThis sells software to service providers and smart home brands",
+     "quote": {
+      "text": "WiFi installation, troubleshooting and support software for Service Providers, IoT and Smart Home",
+      "url": "https://www.routethis.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T15:46:26.217830Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "a0dff0dd2f7d4b5ca8587b68eac4e773",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "RouteThis mission is helping service providers and brands serve customers",
+     "quote": {
+      "text": "we’ve made it our mission to help service providers and IoT/smart home brands deliver flawless WiFi connectivity to their customers.",
+      "url": "https://www.routethis.com/about",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-10-31T15:46:31.374631Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    }
+   ],
+   "decisions": [
+    {
+     "evidence_id": "667c0ee5a5f743329d6c46a806c07bc8",
+     "decision": "supports",
+     "reason": "Quote states software is for Service Providers, indicating business customers.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "a0dff0dd2f7d4b5ca8587b68eac4e773",
+     "decision": "supports",
+     "reason": "Quote says mission is to help service providers and brands serve their customers, indicating B2B sales.",
+     "decided_by": "skeptic"
+    }
+   ],
+   "checked_places": [
+    "homepage code",
+    "job post",
+    "own job board on Ashby",
+    "about page",
+    "search \"RouteThis Senior Sales Development Representative jobs.lever.co\"",
+    "search \"RouteThis careers SDR sales development hiring\"",
+    "search \"routethis.com bountyhunter.agency northpeak.io conversionlab.no\"",
+    "search \"RouteThis news press release 2026\""
+   ],
+   "disqualifier_check_completed": true,
+   "blocked": [
+    "https://jobs.lever.co/RouteThis/94e05404-5b23-4f3a-9336-0b313fa20af5: Website returned HTTP 404",
+    "https://app.joinrise.co/jobs/routethis-senior-sales-development-representative-m686: Redirect changed company identity; manual verification required",
+    "https://dynamic.jobgether.com/offer/67081d3eefea0fa3d95898fb-senior-sales-development-representative: Website returned HTTP 403"
+   ],
+   "signatures": [
+    {
+     "url": "https://www.routethis.com/",
+     "kind": "homepage",
+     "fetched_at": "2026-10-31T15:46:26.217830Z",
+     "attributes": [
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://play.vidyard.com/embed/v4.js"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;1,100;1,300;1,400;1,500&display=swap"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/gtag/js?id=G-BGWMNR5F02"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/gtag/js?id=AW-16450537529"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://t.contentsquare.net/uxa/899c215cd9de6.js"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-N375QK3"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "routethis"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "routethis"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://cta-redirect.hubspot.com/cta/redirect/2361295/91703a92-2124-4421-af58-476966837053"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://no-cache.hubspot.com/cta/default/2361295/91703a92-2124-4421-af58-476966837053.png"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Contact us"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "RAVA_ConnectionTest"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "RT_AnalyzeScan_Bezel"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ui_icon_implement_quickly"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Gather actionable insights to drive growth"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Empower your customers"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Scale with your business"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://app.hubspot.com"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cp.hubspot.com"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://scout-cdn.salesloft.com/sl.js"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    },
+    {
+     "url": "https://www.routethis.com/careers",
+     "kind": "other",
+     "fetched_at": "2026-10-31T15:46:26.881309Z",
+     "attributes": [
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://play.vidyard.com/embed/v4.js"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;1,100;1,300;1,400;1,500&display=swap"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/gtag/js?id=G-BGWMNR5F02"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/gtag/js?id=AW-16450537529"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://t.contentsquare.net/uxa/899c215cd9de6.js"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-N375QK3"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "routethis"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "routethis"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://cta-redirect.hubspot.com/cta/redirect/2361295/91703a92-2124-4421-af58-476966837053"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://no-cache.hubspot.com/cta/default/2361295/91703a92-2124-4421-af58-476966837053.png"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Contact us"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "We've got you fully covered"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Everyone is welcome here"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "We're flexible"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "You can work and play"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://app.hubspot.com"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cp.hubspot.com"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://scout-cdn.salesloft.com/sl.js"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://routethis-jobs.onrender.com/widget.js"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://jobs.ashbyhq.com/HighlightTA"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    },
+    {
+     "url": "https://www.routethis.com/about",
+     "kind": "other",
+     "fetched_at": "2026-10-31T15:46:31.374631Z",
+     "attributes": [
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://play.vidyard.com/embed/v4.js"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;1,100;1,300;1,400;1,500&display=swap"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/gtag/js?id=G-BGWMNR5F02"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/gtag/js?id=AW-16450537529"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://t.contentsquare.net/uxa/899c215cd9de6.js"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-N375QK3"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "routethis"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "routethis"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://cta-redirect.hubspot.com/cta/redirect/2361295/91703a92-2124-4421-af58-476966837053"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://no-cache.hubspot.com/cta/default/2361295/91703a92-2124-4421-af58-476966837053.png"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Contact us"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "RT_Mission_Image-2"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "RT_Mission_Image-2"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "RT_Vision_Image"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "RT_Vision_Image"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "RT_Values_CustomerFirst-1"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "RT_Values_WeInnovate-1"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "RT_Values_WeOwnIt-2"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "RT_Values_WereOneTeam-1"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "RouteThis_AboutUs_Careers"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "RouteThis_AboutUs_Resources"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "RouteThis_AboutUs_Resources_Press"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "green-line"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://app.hubspot.com"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cp.hubspot.com"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://scout-cdn.salesloft.com/sl.js"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    }
+   ],
+   "searches": 4,
+   "fetches": 6,
+   "turns": 6,
+   "verdict": {
+    "kind": "needs_look",
+    "summary": "Needs a look",
+    "missing": [
+     "No current need or timing evidence (none dated within 180 days, no open job post)",
+     "Could not read https://jobs.lever.co/RouteThis/94e05404-5b23-4f3a-9336-0b313fa20af5: Website returned HTTP 404",
+     "Could not read https://app.joinrise.co/jobs/routethis-senior-sales-development-representative-m686: Redirect changed company identity; manual verification required",
+     "Could not read https://dynamic.jobgether.com/offer/67081d3eefea0fa3d95898fb-senior-sales-development-representative: Website returned HTTP 403"
+    ],
+    "disqualifier": null,
+    "rule": null
+   },
+   "pitch": null,
+   "latency_ms": 37219,
+   "cost_usd": 0.086369,
+   "error": null
+  }
+ ],
+ "candidate_pool": [
+  {
+   "domain": "docsumo.com",
+   "name": "Docsumo",
+   "url": "https://docsumo.com/",
+   "found_via": "job post: Sales Development Representative (B2B SaaS) on jobs.lever.co"
+  },
+  {
+   "domain": "gushwork.ai",
+   "name": "Gushwork",
+   "url": "https://gushwork.ai/",
+   "found_via": "job post: Outbound Sales Development Representative - B2B on jobs.lever.co"
+  },
+  {
+   "domain": "pipe17.com",
+   "name": "Pipe17",
+   "url": "https://pipe17.com/",
+   "found_via": "job post: Sales Development Representative (Ecommerce - Outbound SDR) Remote on boards.greenhouse.io"
+  },
+  {
+   "domain": "arena.im",
+   "name": "Arena",
+   "url": "https://arena.im/",
+   "found_via": "job post: Business Development Representative [BDR Brazil] outbound cold calling and email on boards.greenhouse.io"
+  },
+  {
+   "domain": "routethis.com",
+   "name": "RouteThis",
+   "url": "https://routethis.com/",
+   "found_via": "job post: Senior Sales Development Representative on jobs.lever.co"
+  },
+  {
+   "domain": "overbond.com",
+   "name": "Overbond",
+   "url": "https://overbond.com/",
+   "found_via": "job post: Sales Development Representative (Fintech SaaS) on jobs.lever.co"
+  }
+ ],
+ "set_aside": [
+  {
+   "domain": "jobs.lever.co",
+   "url": "https://jobs.lever.co/docsumo/09c59c27-4d7a-48cf-b5ad-a213b5409643",
+   "reason": "Review site, directory, job board or news site, not a company",
+   "previous_run": null
+  },
+  {
+   "domain": "boards.greenhouse.io",
+   "url": "https://boards.greenhouse.io/saasgroup/jobs/4474536101",
+   "reason": "Review site, directory, job board or news site, not a company",
+   "previous_run": null
+  },
+  {
+   "domain": "jobs.ashbyhq.com",
+   "url": "https://jobs.ashbyhq.com/weave-os/96f15576-124e-498b-a71f-d94912d33b80",
+   "reason": "Review site, directory, job board or news site, not a company",
+   "previous_run": null
+  }
+ ],
+ "dropped": [
+  {
+   "stage": "seller",
+   "company": null,
+   "claim_type": "fit criterion",
+   "quote": "We run focused customer-acquisition experiments for B2B and SaaS teams",
+   "url": "https://eygentic.com/hire-sdrs-vs-acquisition-experiments/",
+   "reason": "Quote not found in the fetched page"
+  },
+  {
+   "stage": "seller",
+   "company": null,
+   "claim_type": "need signal",
+   "quote": "Spending on growth across outreach or campaigns while results across ICP, message, offer or channel are unclear",
+   "url": "",
+   "reason": "Not observable on public pages: it describes a company's internal state, so no quote could support it"
+  },
+  {
+   "stage": "seller",
+   "company": null,
+   "claim_type": "timing signal",
+   "quote": "Preparing to scale after testing but not yet confident the system is ready",
+   "url": "",
+   "reason": "Not observable on public pages: it describes a company's internal state, so no quote could support it"
+  },
+  {
+   "stage": "investigation",
+   "company": "docsumo.com",
+   "claim_type": "fit",
+   "quote": "Maintain and update CRM with accurate lead and activity details.",
+   "url": "https://jobs.lever.co/docsumo/09c59c27-4d7a-48cf-b5ad-a213b5409643",
+   "reason": "Quote not found in any page fetched for this company"
+  },
+  {
+   "stage": "investigation",
+   "company": "docsumo.com",
+   "claim_type": "fit",
+   "quote": "Proficiency in using Hubspot and prospecting platforms (e.g., LinkedIn Sales Navigator, etc.).",
+   "url": "https://jobs.lever.co/docsumo/09c59c27-4d7a-48cf-b5ad-a213b5409643",
+   "reason": "Quote not found in any page fetched for this company"
+  },
+  {
+   "stage": "investigation",
+   "company": "docsumo.com",
+   "claim_type": "fit",
+   "quote": "Rolling out weekly newsletters, email and drip campaigns.",
+   "url": "https://jobs.lever.co/docsumo/09c59c27-4d7a-48cf-b5ad-a213b5409643",
+   "reason": "Quote not found in any page fetched for this company"
+  },
+  {
+   "stage": "investigation",
+   "company": "docsumo.com",
+   "claim_type": "need",
+   "quote": "Join Docsumo as a Sales Development Representative (SDR) and play a key role in revolutionizing document processing and data extraction.",
+   "url": "https://jobs.lever.co/docsumo/09c59c27-4d7a-48cf-b5ad-a213b5409643",
+   "reason": "Quote not found in any page fetched for this company"
+  },
+  {
+   "stage": "investigation",
+   "company": "docsumo.com",
+   "claim_type": "timing",
+   "quote": "Comprehensive training in Document AI technology and our product suite",
+   "url": "https://jobs.lever.co/docsumo/09c59c27-4d7a-48cf-b5ad-a213b5409643",
+   "reason": "Quote not found in any page fetched for this company"
+  }
+ ],
+ "telemetry": {
+  "budget_usd": 0.7,
+  "budget_reached": false,
+  "cost_usd": 0.448516,
+  "input_tokens": 222339,
+  "output_tokens": 28963,
+  "searches": 19,
+  "model_calls": 26,
+  "pages_fetched": 36,
+  "elapsed_ms": 79797,
+  "calls": [
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "seller_profile",
+    "company": null,
+    "input_tokens": 3237,
+    "output_tokens": 2690,
+    "searches": 0,
+    "latency_ms": 10937,
+    "usd": 0.015479,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "competitor_search",
+    "company": null,
+    "input_tokens": 6409,
+    "output_tokens": 1532,
+    "searches": 2,
+    "latency_ms": 7186,
+    "usd": 0.019522,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "competitor_classify",
+    "company": null,
+    "input_tokens": 5403,
+    "output_tokens": 2481,
+    "searches": 0,
+    "latency_ms": 8984,
+    "usd": 0.017298,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "discovery",
+    "company": null,
+    "input_tokens": 13648,
+    "output_tokens": 1733,
+    "searches": 3,
+    "latency_ms": 9187,
+    "usd": 0.031925,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "docsumo.com",
+    "input_tokens": 3676,
+    "output_tokens": 501,
+    "searches": 0,
+    "latency_ms": 2500,
+    "usd": 0.006724,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "routethis.com",
+    "input_tokens": 3643,
+    "output_tokens": 439,
+    "searches": 0,
+    "latency_ms": 3391,
+    "usd": 0.006419,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "pipe17.com",
+    "input_tokens": 3779,
+    "output_tokens": 559,
+    "searches": 0,
+    "latency_ms": 3875,
+    "usd": 0.007099,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "gushwork.ai",
+    "input_tokens": 4024,
+    "output_tokens": 815,
+    "searches": 0,
+    "latency_ms": 5266,
+    "usd": 0.008494,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "arena.im",
+    "input_tokens": 18909,
+    "output_tokens": 1492,
+    "searches": 3,
+    "latency_ms": 8796,
+    "usd": 0.037477,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "routethis.com",
+    "input_tokens": 21072,
+    "output_tokens": 604,
+    "searches": 2,
+    "latency_ms": 7170,
+    "usd": 0.033907,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "docsumo.com",
+    "input_tokens": 19605,
+    "output_tokens": 355,
+    "searches": 2,
+    "latency_ms": 6827,
+    "usd": 0.031015,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "skeptic",
+    "company": "arena.im",
+    "input_tokens": 754,
+    "output_tokens": 1121,
+    "searches": 0,
+    "latency_ms": 4375,
+    "usd": 0.005707,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "gushwork.ai",
+    "input_tokens": 6061,
+    "output_tokens": 416,
+    "searches": 1,
+    "latency_ms": 5343,
+    "usd": 0.011844,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "pipe17.com",
+    "input_tokens": 16746,
+    "output_tokens": 650,
+    "searches": 2,
+    "latency_ms": 7469,
+    "usd": 0.028695,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "routethis.com",
+    "input_tokens": 6073,
+    "output_tokens": 79,
+    "searches": 0,
+    "latency_ms": 3953,
+    "usd": 0.007927,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "pipe17.com",
+    "input_tokens": 8134,
+    "output_tokens": 240,
+    "searches": 0,
+    "latency_ms": 3530,
+    "usd": 0.011187,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "routethis.com",
+    "input_tokens": 6181,
+    "output_tokens": 310,
+    "searches": 1,
+    "latency_ms": 5718,
+    "usd": 0.011544,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "gushwork.ai",
+    "input_tokens": 7602,
+    "output_tokens": 1782,
+    "searches": 0,
+    "latency_ms": 9327,
+    "usd": 0.017076,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "docsumo.com",
+    "input_tokens": 31911,
+    "output_tokens": 1521,
+    "searches": 1,
+    "latency_ms": 14545,
+    "usd": 0.048853,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "pipe17.com",
+    "input_tokens": 18584,
+    "output_tokens": 1572,
+    "searches": 1,
+    "latency_ms": 9327,
+    "usd": 0.032411,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "routethis.com",
+    "input_tokens": 6801,
+    "output_tokens": 333,
+    "searches": 1,
+    "latency_ms": 6265,
+    "usd": 0.012417,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "skeptic",
+    "company": "docsumo.com",
+    "input_tokens": 570,
+    "output_tokens": 808,
+    "searches": 0,
+    "latency_ms": 3844,
+    "usd": 0.004147,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "skeptic",
+    "company": "pipe17.com",
+    "input_tokens": 1031,
+    "output_tokens": 2141,
+    "searches": 0,
+    "latency_ms": 7141,
+    "usd": 0.010388,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "routethis.com",
+    "input_tokens": 6551,
+    "output_tokens": 580,
+    "searches": 0,
+    "latency_ms": 5906,
+    "usd": 0.010654,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "skeptic",
+    "company": "gushwork.ai",
+    "input_tokens": 1266,
+    "output_tokens": 3582,
+    "searches": 0,
+    "latency_ms": 12922,
+    "usd": 0.016806,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "skeptic",
+    "company": "routethis.com",
+    "input_tokens": 669,
+    "output_tokens": 627,
+    "searches": 0,
+    "latency_ms": 2171,
+    "usd": 0.003501,
+    "ok": true,
+    "error": null
+   }
+  ]
+ },
+ "error": null
+}

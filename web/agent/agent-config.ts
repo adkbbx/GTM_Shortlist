@@ -2,9 +2,12 @@ import { createContext, useContext } from 'react';
 
 /** What the server allows: the public demo caps companies, may ask for a browser check, and lets only the browser
  *  that started a search edit it. Locally everything is open. */
-export type AgentConfig = { publicDemo: boolean; maxCompanies: number; turnstileSiteKey: string | null; editable: boolean };
+export type AgentExample = { id: string; website: string; shortlisted: number; created_at: string };
+export type AgentConfig = { publicDemo: boolean; maxCompanies: number; turnstileSiteKey: string | null; editable: boolean;
+  examples: AgentExample[] };
 
-export const localConfig: AgentConfig = { publicDemo: false, maxCompanies: 20, turnstileSiteKey: null, editable: true };
+export const localConfig: AgentConfig = { publicDemo: false, maxCompanies: 20, turnstileSiteKey: null, editable: true,
+  examples: [] };
 export const AgentConfigContext = createContext<AgentConfig>(localConfig);
 export const useAgentConfig = () => useContext(AgentConfigContext);
 
