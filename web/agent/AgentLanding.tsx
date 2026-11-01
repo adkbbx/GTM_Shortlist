@@ -12,7 +12,7 @@ import { turnstileToken } from '../landing/turnstile';
 import { useLenis, usePrefersReducedMotion } from '../landing/useLenis';
 import '../landing/landing.css';
 import { STAGES, Stepper, prefixOf, stageOf, stepStates } from './AgentLive';
-import { agentApi, domainOf } from './agent-api';
+import { agentApi, domainOf, ownSearches } from './agent-api';
 import type { AgentRunSummary, AgentRunView, Company } from './agent-api';
 import { countOptions, useAgentConfig } from './agent-config';
 import './agent-landing.css';
@@ -269,8 +269,24 @@ export function AgentLanding({ onOpen }: { onOpen: (id: string) => void }) {
   useLenis(!reduced);
   const [recent, setRecent] = useState<AgentRunSummary[]>([]);
   const [examples, setExamples] = useState<AgentRunView[]>([]);
-  // The public demo never lists other visitors' searches.
-  useEffect(() => { if (!config.publicDemo) agentApi.list().then(setRecent).catch(() => undefined); }, [config.publicDemo]);
+  // Locally: every saved search. Public demo: only searches this browser started (it holds their edit tokens), never
+  // other visitors'.
+  useEffect(() => {
+    let cancelled = false;
+    if (!config.publicDemo) { agentApi.list().then(found => { if (!cancelled) setRecent(found); }).catch(() => undefined); }
+    else {
+      Promise.all(ownSearches().map(own => agentApi.run(own.id).catch(() => null))).then(views => {
+        if (cancelled) return;
+        const count = (view: AgentRunView, kind: string) => view.run.companies.filter(c => c.verdict?.kind === kind).length;
+        setRecent(views.filter((view): view is AgentRunView => view !== null)
+          .sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 10)
+          .map(view => ({ id: view.id, created_at: view.created_at, status: view.status, website: view.run.website,
+            synthetic: view.run.synthetic, shortlisted: count(view, 'shortlisted'), needs_look: count(view, 'needs_look'),
+            rejected: count(view, 'rejected') })));
+      });
+    }
+    return () => { cancelled = true; };
+  }, [config.publicDemo]);
   useEffect(() => {
     let cancelled = false;
     const ordered = [...config.examples].sort((a, b) => b.shortlisted - a.shortlisted);
@@ -304,10 +320,10 @@ export function AgentLanding({ onOpen }: { onOpen: (id: string) => void }) {
       </li>)}</ul>
     </section>}
     {recent.length > 0 && <section className="al-section pl-wrap agent-recent" aria-labelledby="agent-recent-heading">
-      <h2 id="agent-recent-heading">Recent searches</h2>
+      <h2 id="agent-recent-heading">{config.publicDemo ? 'Your searches' : 'Recent searches'}</h2>
       <ul>{recent.map(item => <li key={item.id}>
         <a href={`?agent=${item.id}`} onClick={event => { event.preventDefault(); onOpen(item.id); }}>{domainOf(item.website)}</a>
-        <span>{item.status === 'complete' ? `${item.shortlisted} shortlisted, ${item.needs_look} need a look, ${item.rejected} rejected` : item.status.replace('_', ' ')}</span>
+        <span>{day(item.created_at)} · {item.status === 'complete' ? `${item.shortlisted} shortlisted, ${item.needs_look} need a look, ${item.rejected} rejected` : item.status.replace('_', ' ')}</span>
         {item.synthetic && <span className="agent-tag">Synthetic</span>}
       </li>)}</ul>
     </section>}

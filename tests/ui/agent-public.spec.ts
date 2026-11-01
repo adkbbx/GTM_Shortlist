@@ -46,6 +46,13 @@ test('the public demo starts from a website alone, caps the size and shares a re
   expect(await noOverflow(page)).toBe(true);
   await page.screenshot({ path: `.impeccable/review/${info.project.name}-agent-public-board.png`, fullPage: true });
 
+  // The start page lists this browser's own searches; another visitor's browser lists none.
+  await page.getByRole('link', { name: 'GTM Shortlist' }).click();
+  const yours = page.getByRole('region', { name: 'Your searches' });
+  await expect(yours.getByRole('link', { name: 'seller.example' })).toBeVisible();
+  await yours.getByRole('link', { name: 'seller.example' }).click();
+  await expect(page.locator('.column-rejected').getByRole('heading', { name: 'Bright Kettle' })).toBeVisible();
+
   // Anyone else with the link reads the same shortlist without edit controls.
   const visitor = await browser.newContext({ viewport: page.viewportSize() ?? undefined });
   const shared = await visitor.newPage();
@@ -57,6 +64,9 @@ test('the public demo starts from a website alone, caps the size and shares a re
   await shared.locator('.column-shortlisted').getByRole('button', { name: 'Details' }).click();
   await expect(shared.getByRole('region', { name: 'Outreach email' })).toContainText('Hi Trailgear Outfitters team,');
   await expect(shared.locator('.agent-count-control')).toHaveCount(0);
+  await shared.goto('/');
+  await expect(shared.getByRole('region', { name: 'Your searches' })).toHaveCount(0);
+  await shared.goto(page.url());
   expect(await noOverflow(shared)).toBe(true);
   await shared.screenshot({ path: `.impeccable/review/${info.project.name}-agent-public-shared.png`, fullPage: true });
   await visitor.close();
