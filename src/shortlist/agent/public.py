@@ -34,10 +34,9 @@ from shortlist.agent.pipeline import Providers
 from shortlist.agent.providers import ModelCheck, meta_model_check
 from shortlist.agent.service import AgentService, real_providers
 from shortlist.agent.settings import AgentSettings
-from shortlist.api import PUBLIC_HOST, SiteIconInfo
 from shortlist.domain import utcnow
 from shortlist.fetch import canonical_url
-from shortlist.site_icons import SiteIcons
+from shortlist.site_icons import PUBLIC_HOST, SiteIconInfo, SiteIcons
 from shortlist.turnstile import verify_turnstile
 
 LOCAL_HOSTS = ("localhost", "127.0.0.1")

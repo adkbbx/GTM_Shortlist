@@ -292,6 +292,18 @@ def test_brandfetch_public_id_reaches_the_page_only_when_set(tmp_path):
         PublicSettings(app_url=ORIGIN, secret=SECRET, brandfetch_client_id='x"><script>')
 
 
+def test_the_demo_starts_without_the_main_app_or_its_settings():
+    """The demo host has no Supabase settings; importing it must not build the main app (a Render deploy failed so)."""
+    import os
+    import subprocess
+    import sys
+
+    env = {**os.environ, "SUPABASE_URL": "not a url"}
+    code = "import sys, shortlist.agent.public; assert 'shortlist.api' not in sys.modules"
+    done = subprocess.run([sys.executable, "-c", code], check=False, env=env, capture_output=True, text=True, timeout=60)
+    assert done.returncode == 0, done.stderr[-2000:]
+
+
 def test_site_icon_lookup_checks_the_domain_and_stays_offline_in_synthetic_mode(client):
     assert client.get("/api/site-icon/seller.example").json() == {"url": None}
     assert client.get("/api/site-icon/localhost").status_code == 404

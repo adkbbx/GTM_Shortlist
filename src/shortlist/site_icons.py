@@ -1,12 +1,20 @@
 """Read declared icons without research providers or changes to saved research."""
+import re
 import time
 from collections import OrderedDict
 from threading import BoundedSemaphore, Lock
 from urllib.parse import urljoin, urlsplit
 
 from bs4 import BeautifulSoup
+from pydantic import BaseModel
 
 from shortlist.fetch import FetchError, canonical_url, domain_of, fetch_html, resolve_public
+
+PUBLIC_HOST = re.compile(r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}")
+
+
+class SiteIconInfo(BaseModel):
+    url: str | None = None
 
 
 def declared_icon(page_url: str, body: bytes) -> str | None:

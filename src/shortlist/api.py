@@ -43,7 +43,7 @@ from shortlist.ranking import by_evidence
 from shortlist.relevance import record_issue
 from shortlist.sample import SAMPLE_SELLER_URL
 from shortlist.selection import Selection
-from shortlist.site_icons import SiteIcons
+from shortlist.site_icons import PUBLIC_HOST, SiteIconInfo, SiteIcons
 from shortlist.store import BudgetExceeded, Conflict, Store, saved_discovery_available, seller_retry_available
 from shortlist.turnstile import verify_turnstile
 
@@ -248,13 +248,6 @@ class RunView(BaseModel):
     can_continue_discovery: bool = False
     # Invented companies and pages from the local sample providers; never research.
     sample: bool = False
-
-
-PUBLIC_HOST = re.compile(r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}")
-
-
-class SiteIconInfo(BaseModel):
-    url: str | None = None
 
 
 class Health(BaseModel):
