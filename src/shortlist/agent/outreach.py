@@ -10,7 +10,14 @@ from pydantic import Field
 
 from shortlist.agent.answers import Answer
 from shortlist.agent.llm import UNTRUSTED, AgentOutputError, Calls
-from shortlist.agent.models import CompanyResult, DroppedClaim, Pitch, SellerProfile
+from shortlist.agent.models import (
+    CompanyResult,
+    DroppedClaim,
+    EvidenceItem,
+    OutreachEmail,
+    Pitch,
+    SellerProfile,
+)
 from shortlist.agent.providers import AgentProviderError
 from shortlist.agent.telemetry import BudgetReached
 
@@ -44,57 +51,115 @@ class PitchCheck(Answer):
     reason: str = ""
 
 
-def write_pitch(company: CompanyResult, profile: SellerProfile, calls: Calls, *, use_skeptic: bool,
-                dropped: list[DroppedClaim]) -> Pitch | None:
-    """None when there is nothing current to say, the writer fails, or the check finds an unsupported claim."""
+EMAIL = f"""You write a short cold email from a B2B seller to ONE company's team. {UNTRUSTED}
+Use only the numbered quotes in the data. Every fact you state about the company must be in one of those quotes; do not
+add numbers, dates, names, products or reasons that are not there. Write to the team, never a person: greet
+"Hi <company> team,".
+- subject: at most 8 words, about what the company is doing now (a need or timing quote). Plain and specific: no
+  clickbait, no "quick question", no exclamation marks.
+- body: 60 to 110 words in three short paragraphs. 1) What you noticed, from the need or timing quote. 2) How the
+  seller's offer helps with exactly that, in plain words. 3) One small ask the team can answer by replying. No
+  flattery, no hype, no invented customers or results. End with "Best," and the seller's name on its own line.
+A quote whose source is job_post is an open job post: it shows the company is hiring for that role.
+Reply with only JSON: {{"subject": "...", "body": "...", "quote_ids": ["q1", "..."]}}"""
+
+
+class EmailAnswer(Answer):
+    subject: str = ""
+    body: str = ""
+    quote_ids: list[str] = Field(default_factory=list)
+
+
+def supported_quotes(company: CompanyResult) -> dict[str, EvidenceItem] | None:
+    """Up to MAX_QUOTES supported need, timing and fit quotes, need and timing first; None without a current reason."""
     supported = {d.evidence_id for d in company.decisions if d.decision == "supports"}
     items = [e for e in company.evidence if e.id in supported and e.claim_type in ("need", "timing", "fit")]
     items.sort(key=lambda e: e.claim_type == "fit")  # need and timing first: they are the reason to write now
     items = items[:MAX_QUOTES]
     if not any(e.claim_type in ("need", "timing") for e in items):
         return None
-    quotes = {f"q{index + 1}": item for index, item in enumerate(items)}
+    return {f"q{index + 1}": item for index, item in enumerate(items)}
+
+
+def checked_note(operation: str, instructions: str, schema: type[Answer], text_of, company: CompanyResult,
+                 profile: SellerProfile, calls: Calls, *, use_skeptic: bool, dropped: list[DroppedClaim]):
+    """Write a note from the supported quotes, then have Muse Spark Open check it; a rejected note is rewritten once
+    with the checker's reason. Returns (answer, quote ids used, checked, reason) or None. text_of(answer) gives the
+    note's text, or "" when the answer is incomplete."""
+    quotes = supported_quotes(company)
+    if quotes is None:
+        return None
     data = {"seller_offer": profile.offer.value if profile.offer else "",
             "seller_buyer": profile.buyer.value if profile.buyer else "",
+            "seller_name": profile.name or profile.domain,
             "company": company.name or company.domain,
             "quotes": [{"id": key, "kind": item.claim_type, "quote": item.quote.text, "source": item.quote.source_type,
                         "date": item.quote.published_date.isoformat() if item.quote.published_date else None}
                        for key, item in quotes.items()]}
     feedback = ""
-    for attempt in range(2):  # a note the checker rejects is rewritten once with its reason, then checked again
+    for attempt in range(2):
         content = "<data>\n" + json.dumps(data) + "\n</data>" + (
             f"\nYour previous note was rejected by a checker: {feedback}\nWrite it again using only the quotes."
             if feedback else "")
         try:
-            answer, _ = calls.investigator_json("pitch" + (":rewrite" if attempt else ""), PitchAnswer,
-                                                instructions=INSTRUCTIONS, max_output_tokens=2000,
+            answer, _ = calls.investigator_json(operation + (":rewrite" if attempt else ""), schema,
+                                                instructions=instructions, max_output_tokens=2000,
                                                 input=[{"role": "user", "content": content}])
         except (AgentOutputError, AgentProviderError):
             return None
-        why_now, opener = answer.why_now.strip()[:400], answer.opener.strip()[:600]
+        text = text_of(answer)
         used = [quotes[key].id for key in dict.fromkeys(answer.quote_ids) if key in quotes]
-        if not why_now or not opener or not used:
+        if not text or not used:
             return None
         if not use_skeptic or calls.skeptic is None:
-            return Pitch(why_now=why_now, opener=opener, evidence_ids=used, checked=False)
+            return answer, used, False, ""
         note = {"seller_offer": data["seller_offer"],
                 "quotes": [{"quote": item.quote.text, "source": item.quote.source_type}
                            for item in quotes.values() if item.id in used],
-                "note": f"{why_now}\n{opener}"}
+                "note": text}
         try:
-            check = calls.skeptic_json("pitch_check", PitchCheck, [
+            check = calls.skeptic_json(operation + "_check", PitchCheck, [
                 {"role": "system", "content": CHECK},
                 {"role": "user", "content": "<data>\n" + json.dumps(note) + "\n</data>"}], company=company.domain,
                 max_tokens=1500)
         except (AgentOutputError, AgentProviderError):
             return None
         if check.decision == "supported":
-            return Pitch(why_now=why_now, opener=opener, evidence_ids=used, checked=True,
-                         reason=check.reason.strip()[:600])
+            return answer, used, True, check.reason.strip()[:600]
         feedback = check.reason.strip()[:600] or "an unsupported claim"
-        dropped.append(DroppedClaim(stage="pitch", company=company.domain, claim_type="pitch",
-                                    quote=f"{why_now} | {opener}"[:1500], reason=f"Skeptic: {feedback}"[:600]))
+        dropped.append(DroppedClaim(stage=operation, company=company.domain, claim_type=operation,
+                                    quote=text.replace("\n", " | ")[:1500], reason=f"Skeptic: {feedback}"[:600]))
     return None
+
+
+def write_pitch(company: CompanyResult, profile: SellerProfile, calls: Calls, *, use_skeptic: bool,
+                dropped: list[DroppedClaim]) -> Pitch | None:
+    """None when there is nothing current to say, the writer fails, or the check finds an unsupported claim."""
+    def text_of(answer: PitchAnswer) -> str:
+        why_now, opener = answer.why_now.strip()[:400], answer.opener.strip()[:600]
+        return f"{why_now}\n{opener}" if why_now and opener else ""
+    done = checked_note("pitch", INSTRUCTIONS, PitchAnswer, text_of, company, profile, calls,
+                        use_skeptic=use_skeptic, dropped=dropped)
+    if done is None:
+        return None
+    answer, used, checked, reason = done
+    return Pitch(why_now=answer.why_now.strip()[:400], opener=answer.opener.strip()[:600], evidence_ids=used,
+                 checked=checked, reason=reason)
+
+
+def write_email(company: CompanyResult, profile: SellerProfile, calls: Calls, *, use_skeptic: bool,
+                dropped: list[DroppedClaim]) -> OutreachEmail | None:
+    """A subject line and a short cold email, held to the same quotes and check as the opening line."""
+    def text_of(answer: EmailAnswer) -> str:
+        subject, body = answer.subject.strip()[:120], answer.body.strip()[:1500]
+        return f"Subject: {subject}\n\n{body}" if subject and body else ""
+    done = checked_note("email", EMAIL, EmailAnswer, text_of, company, profile, calls,
+                        use_skeptic=use_skeptic, dropped=dropped)
+    if done is None:
+        return None
+    answer, used, checked, reason = done
+    return OutreachEmail(subject=answer.subject.strip()[:120], body=answer.body.strip()[:1500], evidence_ids=used,
+                         checked=checked, reason=reason)
 
 
 def pitch_or_none(company: CompanyResult, profile: SellerProfile, calls: Calls, *, use_skeptic: bool,

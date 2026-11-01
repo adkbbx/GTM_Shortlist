@@ -99,6 +99,28 @@ def test_a_new_search_skips_only_companies_this_browser_already_researched(clien
     assert not any(a["reason"].startswith("Already researched") for a in other["run"]["set_aside"])
 
 
+def test_draft_outreach_email_for_a_shortlisted_company_only_from_the_starting_browser(client):
+    started = client.post("/api/agent/runs", json={"website": "seller.example"}).json()
+    done = finished(client, started["id"])
+    shortlisted = next(c for c in done["run"]["companies"] if c["verdict"]["kind"] == "shortlisted")
+    other = next(c for c in done["run"]["companies"] if c["verdict"]["kind"] != "shortlisted")
+    path = f"/api/agent/runs/{started['id']}/companies/{{}}/outreach"
+    headers = {"X-Agent-Edit-Token": started["edit_token"]}
+    assert client.post(path.format(shortlisted["domain"])).status_code == 403
+    drafted = client.post(path.format(shortlisted["domain"]), headers=headers)
+    assert drafted.status_code == 200
+    company = next(c for c in drafted.json()["run"]["companies"] if c["domain"] == shortlisted["domain"])
+    email = company["outreach"]
+    assert email["subject"] and email["body"].startswith("Hi ") and email["checked"]
+    assert set(email["evidence_ids"]) <= {d["evidence_id"] for d in company["decisions"] if d["decision"] == "supports"}
+    operations = [call["operation"] for call in drafted.json()["run"]["telemetry"]["calls"]]
+    assert operations.count("email") == 1 and operations.count("email_check") == 1
+    again = client.post(path.format(shortlisted["domain"]), headers=headers).json()  # saved: no new model calls
+    assert [call["operation"] for call in again["run"]["telemetry"]["calls"]] == operations
+    assert client.post(path.format(other["domain"]), headers=headers).status_code == 409
+    assert client.post(path.format("missing.example"), headers=headers).status_code == 404
+
+
 def test_hourly_limit_per_visitor(tmp_path):
     with make_client(tmp_path, runs_per_hour=2, max_active=10) as client:
         ids = [client.post("/api/agent/runs", json={"website": "seller.example"}).json()["id"] for _ in range(2)]

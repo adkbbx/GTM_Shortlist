@@ -567,6 +567,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/agent/runs/{run_id}/companies/{domain}/outreach": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Draft Agent Email */
+        post: operations["draft_agent_email_api_agent_runs__run_id__companies__domain__outreach_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/agent/runs/{run_id}/overrides": {
         parameters: {
             query?: never;
@@ -886,6 +903,7 @@ export interface components {
             turns: number;
             verdict: components["schemas"]["Verdict"] | null;
             pitch: components["schemas"]["Pitch"] | null;
+            outreach: components["schemas"]["OutreachEmail"] | null;
             /**
              * Latency Ms
              * @default 0
@@ -1509,6 +1527,28 @@ export interface components {
              * @enum {string}
              */
             outcome: "reviewed";
+        };
+        /**
+         * OutreachEmail
+         * @description A cold email for a Shortlisted company, drafted on request from quotes the skeptic supported.
+         */
+        OutreachEmail: {
+            /** Subject */
+            subject: string;
+            /** Body */
+            body: string;
+            /** Evidence Ids */
+            evidence_ids: string[];
+            /**
+             * Checked
+             * @default false
+             */
+            checked: boolean;
+            /**
+             * Reason
+             * @default
+             */
+            reason: string;
         };
         /**
          * Overrides
@@ -3419,6 +3459,38 @@ export interface operations {
                 };
                 content: {
                     "text/csv": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    draft_agent_email_api_agent_runs__run_id__companies__domain__outreach_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+                domain: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentRunView"];
                 };
             };
             /** @description Validation Error */

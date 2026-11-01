@@ -27,7 +27,7 @@ from shortlist.agent.models import (
     SetAside,
     Telemetry,
 )
-from shortlist.agent.outreach import pitch_or_none
+from shortlist.agent.outreach import pitch_or_none, write_email
 from shortlist.agent.pages import COMPARISON, Fetcher
 from shortlist.agent.providers import AgentProviderError, Investigator, SkepticModel
 from shortlist.agent.scan import scan
@@ -266,6 +266,28 @@ class AgentRunner:
             items.append(EvidenceItem(claim_type="disqualifier", criterion_id="is_existing_customer", found_by="profile",
                                       claim=f"Your site names {customer.name} as a customer", quote=customer.quotes[0]))
         return items
+
+    # Outreach email, on request -----------------------------------------------------------------------------------
+    def draft_email(self, result: RunResult, domain: str) -> RunResult:
+        """A subject line and short email for one Shortlisted company, from its supported quotes only."""
+        company = next(c for c in result.companies if c.domain == domain)
+        calls = self.calls(result)
+        started = time.monotonic()
+        self.emit("outreach", "Drafting an outreach email from the supported quotes", company=domain)
+        try:
+            company.outreach = write_email(company, result.profile, calls, use_skeptic=self.use_skeptic,
+                                        dropped=result.dropped)
+        except BudgetReached:
+            company.outreach = None
+        finally:
+            result.telemetry.elapsed_ms += int((time.monotonic() - started) * 1000)
+        if company.outreach is None:
+            self.emit("outreach", "No email kept: nothing it said could be checked against the quotes", company=domain,
+                      level="warn")
+        else:
+            self.emit("outreach", f"Drafted an email: {company.outreach.subject}", company=domain, level="done")
+        self.save(result)
+        return result
 
     # Overrides -------------------------------------------------------------------------------------------------
     def reevaluate(self, result: RunResult, overrides: Overrides) -> RunResult:

@@ -233,6 +233,17 @@
           ],
           "default": null
         },
+        "outreach": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OutreachEmail"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "latency_ms": {
           "default": 0,
           "title": "Latency Ms",
@@ -273,6 +284,7 @@
         "turns",
         "verdict",
         "pitch",
+        "outreach",
         "latency_ms",
         "cost_usd",
         "error"
@@ -788,6 +800,48 @@
         "error"
       ],
       "title": "ModelCall",
+      "type": "object"
+    },
+    "OutreachEmail": {
+      "additionalProperties": false,
+      "description": "A cold email for a Shortlisted company, drafted on request from quotes the skeptic supported.",
+      "properties": {
+        "subject": {
+          "maxLength": 120,
+          "title": "Subject",
+          "type": "string"
+        },
+        "body": {
+          "maxLength": 1500,
+          "title": "Body",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "checked": {
+          "default": false,
+          "title": "Checked",
+          "type": "boolean"
+        },
+        "reason": {
+          "default": "",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "subject",
+        "body",
+        "evidence_ids",
+        "checked",
+        "reason"
+      ],
+      "title": "OutreachEmail",
       "type": "object"
     },
     "Overrides": {

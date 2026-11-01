@@ -7,6 +7,10 @@ import { mkdirSync } from 'node:fs';
 
 const noOverflow = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
 
+async function openAssumptions(page: Page) {
+  if (await page.locator('.agent-assumed[open]').count() === 0) await page.locator('.agent-assumed > summary').click();
+}
+
 async function startRun(page: Page, website: string) {
   await page.goto('/?flow=agent');
   const field = page.getByLabel('Your company website');
@@ -28,6 +32,9 @@ test('a website alone produces a live board with three verdicts and quoted evide
   await expect(needsLook.getByRole('heading', { name: 'Oak and Pine' })).toBeVisible();
   await expect(needsLook).toContainText('No current need or timing evidence (none dated within 180 days, no open job post)');
   await expect(rejected.getByRole('heading', { name: 'Bright Kettle' })).toBeVisible();
+  // Each company is one row; its quotes and checks open on request.
+  await expect(rejected.locator('.agent-row-panel').first()).toBeHidden();
+  await rejected.getByRole('button', { name: 'Details' }).click();
   const reason = rejected.locator('.agent-quote-text').first();
   await expect(reason).toHaveText('“Customer support powered by RivalDesk”');
   expect(await reason.getAttribute('href')).toBe('https://brightkettle.example/#:~:text=Customer%20support%20powered%20by%20RivalDesk');
@@ -50,6 +57,7 @@ test('a website alone produces a live board with three verdicts and quoted evide
   }
 
   // A Shortlisted company carries why now and an opening line, checked against its quotes; others carry none.
+  await shortlisted.getByRole('button', { name: 'Details' }).click();
   const pitch = shortlisted.getByRole('region', { name: 'Why now and an opening line' });
   await expect(pitch).toContainText('We are hiring two customer support agents');
   await expect(pitch).toContainText('Checked against the quotes by Muse Spark Open');
@@ -57,6 +65,7 @@ test('a website alone produces a live board with three verdicts and quoted evide
   await expect(page.locator('.column-needs_look, .column-rejected').locator('.agent-pitch')).toHaveCount(0);
 
   // What we assumed: every item opens its quote; nothing had to be typed.
+  await openAssumptions(page);
   const assumptions = page.locator('.agent-assumptions');
   await expect(assumptions.getByRole('heading', { name: 'What we assumed' })).toBeVisible();
   // The size the seller serves is always shown, marked as inferred, and can be changed without typing anything else.
@@ -86,6 +95,7 @@ test('optional corrections re-check saved evidence: removing a competitor moves 
   await startRun(page, 'https://seller.example/');
   const rejected = page.locator('.column-rejected');
   await expect(rejected.getByRole('heading', { name: 'Bright Kettle' })).toBeVisible({ timeout: 30000 });
+  await openAssumptions(page);
   await page.locator('.agent-assumptions').getByRole('button', { name: /^RivalDesk, Direct/ }).click();
   await page.locator('.agent-popover:popover-open').getByRole('button', { name: 'Not a competitor' }).click();
   await expect(page.locator('.column-needs_look').getByRole('heading', { name: 'Bright Kettle' })).toBeVisible({ timeout: 30000 });
@@ -100,6 +110,8 @@ test('a vague site offers clickable readings instead of a required text box', as
   await expect(choice.locator('.agent-reading')).toHaveCount(2);
   await expect(choice.locator('input:visible')).toHaveCount(0);
   await choice.getByRole('button', { name: /Workflow automation software/ }).click();
+  await expect(page.locator('.agent-monitor.status-complete')).toBeVisible({ timeout: 30000 });
+  await openAssumptions(page);
   await expect(page.locator('.agent-assumptions').getByRole('button', { name: /^Workflow automation software/ })).toBeVisible({ timeout: 30000 });
   expect(await noOverflow(page)).toBe(true);
 });

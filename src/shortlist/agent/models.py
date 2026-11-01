@@ -181,6 +181,15 @@ class Verdict(Model):
     rule: RuleKind | None = None
 
 
+class OutreachEmail(Model):
+    """A cold email for a Shortlisted company, drafted on request from quotes the skeptic supported."""
+    subject: str = Field(max_length=120)
+    body: str = Field(max_length=1500)
+    evidence_ids: list[str] = Field(default_factory=list)
+    checked: bool = False  # Muse Spark Open found every statement in the quotes
+    reason: str = ""
+
+
 class Pitch(Model):
     """Why now and an opening line for a Shortlisted company, written only from quotes the skeptic supported."""
     why_now: str = Field(max_length=400)
@@ -222,6 +231,7 @@ class CompanyResult(Model):
     turns: int = 0
     verdict: Verdict | None = None
     pitch: Pitch | None = None
+    outreach: OutreachEmail | None = None
     latency_ms: int = 0
     cost_usd: float = 0.0
     error: str | None = None

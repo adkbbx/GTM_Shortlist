@@ -85,6 +85,21 @@ class AgentService:
                     settings, result)
         return result
 
+    def draft_email(self, run_id: str, domain: str) -> RunResult:
+        """Runs in the caller's thread: one writer call and one check, a few seconds."""
+        result: RunResult = self.store.get(run_id)["result"]
+        if result.status in ACTIVE:
+            raise RunConflict("This run is still working; wait for it to finish before drafting an email")
+        company = next((c for c in result.companies if c.domain == domain), None)
+        if company is None:
+            raise KeyError(domain)
+        if company.verdict is None or company.verdict.kind != "shortlisted":
+            raise RunConflict("Only a Shortlisted company gets an outreach email")
+        if company.outreach is not None:
+            return result
+        settings = self.settings()
+        return self.runner(run_id, settings, self.providers(settings)).draft_email(result, domain)
+
     def override(self, run_id: str, overrides: Overrides) -> RunResult:
         record = self.store.get(run_id)
         result: RunResult = record["result"]

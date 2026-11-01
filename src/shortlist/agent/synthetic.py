@@ -15,6 +15,7 @@ from shortlist.agent.competitors import CLASSIFY_INSTRUCTIONS, SEARCH_INSTRUCTIO
 from shortlist.agent.discovery import DISCOVERY_INSTRUCTIONS
 from shortlist.agent.investigation import INSTRUCTIONS as INVESTIGATE_INSTRUCTIONS
 from shortlist.agent.outreach import CHECK as PITCH_CHECK
+from shortlist.agent.outreach import EMAIL as EMAIL_INSTRUCTIONS
 from shortlist.agent.outreach import INSTRUCTIONS as PITCH_INSTRUCTIONS
 from shortlist.agent.pages import Page, page_from_document
 from shortlist.agent.pipeline import Providers
@@ -343,6 +344,13 @@ class SyntheticInvestigator:
             lead = next(q for q in data["quotes"] if q["kind"] in ("need", "timing"))
             answer = json.dumps({"why_now": f"{data['company']} says: {lead['quote'][:150]}",
                                  "opener": f"Saw this on your site: \"{lead['quote'][:150]}\". {data['seller_offer'][:150]}",
+                                 "quote_ids": [lead["id"]]})
+        elif instructions == EMAIL_INSTRUCTIONS:
+            data = json.loads(re.search(r"<data>\n(.*)\n</data>", first, re.DOTALL).group(1))
+            lead = next(q for q in data["quotes"] if q["kind"] in ("need", "timing"))
+            answer = json.dumps({"subject": f"SYNTHETIC: {data['company']} and {lead['kind']}",
+                                 "body": f"Hi {data['company']} team,\n\nSaw this: \"{lead['quote'][:150]}\".\n\n"
+                                         f"{data['seller_offer'][:150]}\n\nWorth a reply?\n\nBest,\n{data['seller_name']}",
                                  "quote_ids": [lead["id"]]})
         else:
             answer = "{}"

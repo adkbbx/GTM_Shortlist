@@ -70,7 +70,7 @@ export function Monitor({ view, events, feedOpen, onFeed }: { view: AgentRunView
   const supported = run.companies.reduce((sum, c) => sum + c.decisions.filter(d => d.decision === 'supports').length, 0);
   const checked = run.companies.reduce((sum, c) => sum + c.decisions.length, 0);
   const elapsed = running ? now - new Date(view.created_at).getTime() : run.telemetry.elapsed_ms;
-  return <section className={`agent-monitor status-${view.status}`} aria-label="What the agent is doing">
+  return <section className={`agent-monitor status-${view.status}${running ? ' is-live' : ''}`} aria-label="What the agent is doing">
     <div className="agent-monitor-row">
       <div className="agent-monitor-now">
         <p className="agent-monitor-label">{running ? <><span className="agent-live-dot" aria-hidden="true" />Working now</> : view.status === 'complete' ? 'Finished' : 'Paused'}
@@ -97,17 +97,22 @@ export const prefixOf = (event: AgentEvent) => event.company && !event.message.s
 const time = (value: string) => new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date(value));
 
 /** Every step, newest first. A side rail on wide screens; a sheet from the monitor's Steps button on small ones. */
-export function Feed({ events, open, onClose }: { events: AgentEvent[]; open: boolean; onClose: () => void }) {
+export function Feed({ events, open, onClose, live }: { events: AgentEvent[]; open: boolean; onClose: () => void; live: boolean }) {
+  // A finished search shows its last few steps; everything is one click away.
+  const [all, setAll] = useState(false);
+  const shown = all || live ? 150 : 8;
   return <aside id="agent-feed" className={`agent-rail${open ? ' is-open' : ''}`} aria-label="Activity">
     <section className="agent-log">
       <div className="agent-log-head"><h2>Activity</h2><span>{events.length} steps</span>
         <button type="button" className="agent-feed-close" aria-label="Close steps" onClick={onClose}>Close</button></div>
       {events.length === 0 ? <p className="agent-log-empty">Waiting for the first step.</p>
-        : <ol>{[...events].reverse().slice(0, 150).map(event => <li key={event.seq} className={`level-${event.level}`}>
+        : <ol>{[...events].reverse().slice(0, shown).map(event => <li key={event.seq} className={`level-${event.level}`}>
           <span className={`agent-log-tag stage-${event.stage}`}>{STAGE_TAG[event.stage] ?? event.stage}</span>
           <p>{prefixOf(event) && <strong>{prefixOf(event)} </strong>}{event.message}</p>
           <time dateTime={event.at}>{time(event.at)}</time>
         </li>)}</ol>}
+      {!live && !all && events.length > shown && <button type="button" className="agent-log-more" onClick={() => setAll(true)}>
+        Show all {events.length} steps</button>}
     </section>
   </aside>;
 }

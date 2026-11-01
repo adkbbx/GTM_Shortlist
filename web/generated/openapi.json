@@ -1586,6 +1586,57 @@
         }
       }
     },
+    "/api/agent/runs/{run_id}/companies/{domain}/outreach": {
+      "post": {
+        "tags": [
+          "agent"
+        ],
+        "summary": "Draft Agent Email",
+        "operationId": "draft_agent_email_api_agent_runs__run_id__companies__domain__outreach_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "domain",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Domain"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRunView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/agent/runs/{run_id}/overrides": {
       "post": {
         "tags": [
@@ -2341,6 +2392,16 @@
               }
             ]
           },
+          "outreach": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/OutreachEmail"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "latency_ms": {
             "type": "integer",
             "title": "Latency Ms",
@@ -2382,6 +2443,7 @@
           "turns",
           "verdict",
           "pitch",
+          "outreach",
           "latency_ms",
           "cost_usd",
           "error"
@@ -3939,6 +4001,48 @@
           "outcome"
         ],
         "title": "OperatorReviewed"
+      },
+      "OutreachEmail": {
+        "properties": {
+          "subject": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Subject"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 1500,
+            "title": "Body"
+          },
+          "evidence_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Ids"
+          },
+          "checked": {
+            "type": "boolean",
+            "title": "Checked",
+            "default": false
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "subject",
+          "body",
+          "evidence_ids",
+          "checked",
+          "reason"
+        ],
+        "title": "OutreachEmail",
+        "description": "A cold email for a Shortlisted company, drafted on request from quotes the skeptic supported."
       },
       "Overrides-Input": {
         "properties": {

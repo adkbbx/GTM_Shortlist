@@ -193,6 +193,11 @@ class PublicPolicy(RoutePolicy):
     def started(self, result: RunResult) -> str:
         return self.token(result.id)
 
+    def before_email(self, request: Request, run_id: str) -> None:
+        if not hmac.compare_digest(request.headers.get("x-agent-edit-token", ""), self.token(run_id)):
+            raise HTTPException(403, "Only the browser that started this search can draft emails for it.")
+        self.spending()
+
     def history_runs(self, body: AgentStartInput) -> list[str]:
         """Only searches this browser proves it started: one visitor's searches never shape another's."""
         return [run.id for run in body.previous if hmac.compare_digest(run.token, self.token(run.id))]

@@ -29,7 +29,17 @@ test('the public demo starts from a website alone, caps the size and shares a re
   expect(await page.getByRole('link', { name: 'Download CSV' }).getAttribute('href')).toMatch(/^\/api\/agent\/runs\/[0-9a-f]{32}\/shortlist\.csv$/);
   const share = page.getByRole('link', { name: 'Share on X' });
   expect(await share.getAttribute('href')).toMatch(/^https:\/\/x\.com\/intent\/post\?text=An\+agent\+found\+1\+company.*&url=.*agent%3D[0-9a-f]{32}$/);
-  // The browser that started the search keeps its optional corrections.
+  // The browser that started the search drafts outreach for a Shortlisted company: subject and email, checked.
+  const shortlisted = page.locator('.column-shortlisted');
+  await shortlisted.getByRole('button', { name: 'Draft outreach' }).click();
+  const email = shortlisted.getByRole('region', { name: 'Outreach email' });
+  await expect(email).toBeVisible({ timeout: 15000 });
+  await expect(email.locator('.agent-email-subject')).not.toBeEmpty();
+  await expect(email).toContainText('Hi Trailgear Outfitters team,');
+  await expect(email).toContainText('checked against the quotes by Muse Spark Open');
+  await expect(shortlisted.getByRole('button', { name: 'Draft outreach' })).toHaveCount(0);
+  // It keeps its optional corrections.
+  await page.locator('.agent-assumed > summary').click();
   await expect(page.locator('summary', { hasText: 'Add a competitor' })).toBeVisible();
   await expect(page.locator('.agent-count-control select')).toBeVisible();
   await expect(page.locator('.agent-shared')).toHaveCount(0);
@@ -43,6 +53,9 @@ test('the public demo starts from a website alone, caps the size and shares a re
   await expect(shared.getByText('You are viewing a shared shortlist.')).toBeVisible();
   await expect(shared.locator('.column-rejected').getByRole('heading', { name: 'Bright Kettle' })).toBeVisible();
   await expect(shared.locator('summary', { hasText: 'Add a competitor' })).toHaveCount(0);
+  await expect(shared.getByRole('button', { name: 'Draft outreach' })).toHaveCount(0);
+  await shared.locator('.column-shortlisted').getByRole('button', { name: 'Details' }).click();
+  await expect(shared.getByRole('region', { name: 'Outreach email' })).toContainText('Hi Trailgear Outfitters team,');
   await expect(shared.locator('.agent-count-control')).toHaveCount(0);
   expect(await noOverflow(shared)).toBe(true);
   await shared.screenshot({ path: `.impeccable/review/${info.project.name}-agent-public-shared.png`, fullPage: true });

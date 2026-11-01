@@ -86,6 +86,11 @@ export const agentApi = {
     const token = editToken(id);
     return parseRun(await call(`/api/agent/runs/${encodeURIComponent(id)}/overrides`, overrides, token ? { 'X-Agent-Edit-Token': token } : {}));
   },
+  outreach: async (id: string, domain: string) => {
+    const token = editToken(id);
+    return parseRun(await call(`/api/agent/runs/${encodeURIComponent(id)}/companies/${encodeURIComponent(domain)}/outreach`, {},
+      token ? { 'X-Agent-Edit-Token': token } : {}));
+  },
   /** Server-Sent Events for one run. Returns a function that closes the stream. */
   follow(id: string, after: number, onEvent: (event: AgentEvent) => void, onEnd: () => void): () => void {
     const source = new EventSource(`/api/agent/runs/${encodeURIComponent(id)}/events?after=${after}`);

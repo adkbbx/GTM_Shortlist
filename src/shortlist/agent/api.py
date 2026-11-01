@@ -14,6 +14,7 @@ from starlette.concurrency import run_in_threadpool
 
 from shortlist.agent.export import shortlist_csv
 from shortlist.agent.models import AgentEvent, Overrides, RunResult, RunStatus
+from shortlist.agent.providers import AgentProviderError
 from shortlist.agent.service import ACTIVE, AgentService, RunConflict
 from shortlist.agent.storage import SQLiteAgentRuns
 from shortlist.fetch import FetchError
@@ -73,6 +74,9 @@ class RoutePolicy:
     def started(self, result: RunResult) -> str | None:
         return None
 
+    def before_email(self, request: Request, run_id: str) -> None:
+        return None
+
     def history_runs(self, body: AgentStartInput) -> list[str] | None:
         """Runs whose companies a new search sets aside; None uses the whole store's history (local mode)."""
         return None
@@ -117,6 +121,19 @@ def register_agent_routes(app: FastAPI, db_path: Path | None, service: AgentServ
         name = f"shortlist-{domain or 'search'}-{result.created_at:%Y-%m-%d}.csv"
         return Response("\ufeff" + shortlist_csv(result), media_type="text/csv; charset=utf-8",
                         headers={"Content-Disposition": f'attachment; filename="{name}"'})
+
+    @app.post("/api/agent/runs/{run_id}/companies/{domain}/outreach", response_model=AgentRunView, tags=["agent"])
+    def draft_agent_email(run_id: str, domain: str, request: Request):
+        policy.before_email(request, run_id)
+        try:
+            service.draft_email(run_id, domain)
+        except KeyError as exc:
+            raise HTTPException(404, "This company is not in this search.") from exc
+        except RunConflict as exc:
+            raise HTTPException(409, str(exc)) from exc
+        except AgentProviderError as exc:
+            raise HTTPException(503, str(exc)) from exc
+        return view(run_id)
 
     @app.post("/api/agent/runs/{run_id}/overrides", response_model=AgentRunView, status_code=202, tags=["agent"])
     def override_agent_run(run_id: str, body: Overrides, request: Request):
