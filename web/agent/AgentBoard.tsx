@@ -194,7 +194,7 @@ function Columns({ run, events, apply, busy, onUpdate }: { run: AgentRun; events
   return <section className="agent-results" aria-labelledby="results-heading">
     <div className="agent-section-head agent-results-head">
       <div><h2 id="results-heading">Companies</h2></div>
-      {editable && <CountPicker label="Companies" value={run.company_count} options={countOptions(maxCompanies, run.company_count)}
+      {editable && <CountPicker label="Shortlist" value={run.company_count} options={countOptions(maxCompanies, run.company_count)}
         disabled={busy || isActive(run.status)} onChange={count => apply({ company_count: count })} />}
     </div>
     <Working companies={working} events={events} />

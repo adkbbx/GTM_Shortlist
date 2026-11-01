@@ -93,7 +93,8 @@ export function Monitor({ view, events, feedOpen, onFeed }: { view: AgentRunView
       </div>
       <dl className="agent-monitor-stats">
         <div><dt>Time</dt><dd>{clock(elapsed)}</dd></div>
-        <div><dt>Companies</dt><dd>{decided}<span>/{run.company_count}</span></dd></div>
+        <div><dt>Shortlisted</dt><dd>{run.companies.filter(c => c.verdict?.kind === 'shortlisted').length}<span>/{run.company_count}</span></dd></div>
+        <div><dt>Checked</dt><dd>{decided}</dd></div>
         <div><dt>Quotes kept</dt><dd>{supported}<span>/{checked}</span></dd></div>
         <div><dt>Searches</dt><dd>{run.telemetry.searches}</dd></div>
         <div><dt>Cost</dt><dd>${run.telemetry.cost_usd.toFixed(2)}</dd></div>

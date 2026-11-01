@@ -190,11 +190,14 @@ def test_meter_blocks_calls_once_the_budget_is_spent():
 
 
 def test_budget_stops_new_calls_and_marks_remaining_companies(providers):
-    result = AgentRunner(providers, budget_usd=0.012, concurrency=1).run(SELLER)
+    events = []
+    result = AgentRunner(providers, budget_usd=0.012, concurrency=1, on_event=events.append).run(SELLER)
     t = result.telemetry
     assert t.budget_reached and result.status == "complete"
     # The call that crossed the line finished; none started after it.
     crossed = next(i for i, _ in enumerate(t.calls) if sum(c.usd for c in t.calls[:i + 1]) >= 0.012)
     assert len(t.calls) == crossed + 1
+    # Research stops at the budget; a company it reached unfinished says so, and the run says why it stopped.
     stopped = [c for c in result.companies if c.status == "budget_reached"]
-    assert stopped and all(c.verdict.kind == "needs_look" and BUDGET_REACHED in c.verdict.missing for c in stopped)
+    assert all(c.verdict.kind == "needs_look" and BUDGET_REACHED in c.verdict.missing for c in stopped)
+    assert any(e.message.startswith("Run budget reached: 0 of 10 shortlisted") for e in events)

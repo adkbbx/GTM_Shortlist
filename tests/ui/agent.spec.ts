@@ -44,7 +44,7 @@ test('a website alone produces a live board with three verdicts and quoted evide
   const monitor = page.getByRole('region', { name: 'What the agent is doing' });
   await expect(monitor).toContainText('Finished');
   await expect(monitor.locator('.agent-stepper .step-done')).toHaveCount(6);
-  await expect(monitor.locator('.agent-monitor-stats')).toContainText('3/');
+  await expect(monitor.locator('.agent-monitor-stats')).toContainText('Shortlisted1/5');  // the goal: Shortlisted companies
   await expect(page.locator('.agent-log li').first()).toContainText('Done: 1 shortlisted');
   const steps = page.getByRole('button', { name: /^Steps \(\d+\)$/ });
   if (await steps.isVisible()) {  // phone: the log opens as a sheet from the monitor

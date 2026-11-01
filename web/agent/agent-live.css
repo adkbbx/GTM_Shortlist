@@ -80,7 +80,7 @@
   .agent-monitor-now{flex-basis:100%}
   .agent-monitor .agent-status{font-size:.9375rem}
   .agent-monitor-stats{gap:1rem;flex:1}
-  .agent-monitor-stats div:nth-child(4),.agent-monitor-stats div:nth-child(5){display:none}
+  .agent-monitor-stats div:nth-child(n+4){display:none}
   .agent-monitor-stats dd{font-size:1rem}
   .agent-feed-toggle{min-height:2.5rem}
   .agent-stepper{gap:.25rem;margin-top:.625rem;padding-top:.625rem}

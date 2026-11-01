@@ -104,9 +104,23 @@ def test_needs_a_look_lists_what_is_missing(run_result):
     assert decisions[own_need.id].decision == "insufficient"
 
 
+def test_the_count_is_how_many_shortlisted_companies_and_research_stops_there(providers):
+    """Needs a look and Rejected do not count: the run keeps researching until one company is Shortlisted, then stops."""
+    from shortlist.agent.models import Overrides
+
+    events = []
+    result = AgentRunner(providers, concurrency=1, on_event=events.append).run(SELLER, Overrides(company_count=1))
+    kinds = [c.verdict.kind for c in result.companies]
+    assert kinds.count("shortlisted") == 1 and kinds[-1] == "shortlisted"  # stopped right after the first one
+    assert any(e.message == "Reached 1 shortlisted" for e in events)
+    assert not any(e.message.startswith("Still ") for e in events)  # enough candidates: no extra discovery round
+
+
 def test_telemetry_records_every_call(run_result):
     t = run_result.telemetry
-    assert t.model_calls == len(t.calls) == 16  # includes the Shortlisted company's pitch and its check
+    # Includes the Shortlisted company's pitch and its check, and a second discovery round: the run wants 10
+    # Shortlisted companies and the SYNTHETIC world holds 3 candidates.
+    assert t.model_calls == len(t.calls) == 18
     assert {c.provider for c in t.calls} == {"synthetic-meta", "synthetic-baseten"}
     assert {c.operation for c in t.calls} >= {"seller_profile", "competitor_search", "competitor_classify", "discovery",
                                               "investigate", "skeptic", "pitch", "pitch_check"}

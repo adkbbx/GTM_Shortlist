@@ -16,6 +16,7 @@ from shortlist.agent.jobboards import JobBoards
 from shortlist.agent.llm import AgentOutputError, Calls
 from shortlist.agent.models import (
     DEFAULT_COMPANIES,
+    MAX_COMPANIES,
     AgentEvent,
     CandidateRef,
     CompanyResult,
@@ -159,17 +160,68 @@ class AgentRunner:
             refs = [CandidateRef(domain=domain, name=domain, url=f"https://{domain}/", found_via="your list")
                     for domain in domains]
         else:
-            refs, aside = discover(profile, result.competitors, result.company_count, calls, self.emit,
+            # company_count is how many Shortlisted companies you want; most candidates do not make it, so find more.
+            refs, aside = discover(profile, result.competitors, candidates_for(result.company_count), calls, self.emit,
                                    prior=getattr(self, "history", {}), boards=self.providers.job_boards)
             result.set_aside = aside
         result.candidate_pool = refs
-        self.research(result, calls, refs[:result.company_count])
+        if domains:
+            self.research(result, calls, refs[:result.company_count])
+        else:
+            self.research_until(result, calls, discover_more=True)
 
-    def research(self, result: RunResult, calls: Calls, refs: list[CandidateRef]):
+    def shortlisted(self, result: RunResult) -> int:
+        return sum(1 for c in result.companies if c.verdict and c.verdict.kind == "shortlisted")
+
+    def research_until(self, result: RunResult, calls: Calls, *, discover_more: bool):
+        """Research candidates in small batches until company_count of them are Shortlisted. Needs a look and Rejected
+        stay on the board but do not count. Stops at the run budget, at MAX_COMPANIES researched, or when no
+        candidate is left after one more discovery round."""
+        target = result.company_count
+        tried = {c.domain for c in result.companies}
+        while True:
+            need = target - self.shortlisted(result)
+            if need <= 0:
+                self.emit("run", f"Reached {target} shortlisted", level="done")
+                return
+            if calls.meter.telemetry.budget_reached:
+                if not result.companies:  # stopped during discovery: show what it found as stopped, at no cost
+                    waiting = [ref for ref in result.candidate_pool if ref.domain not in tried][:target]
+                    if waiting:
+                        self._research(result, calls, waiting)
+                self.emit("run", f"Run budget reached: {self.shortlisted(result)} of {target} shortlisted", level="warn")
+                return
+            if len(tried) >= MAX_COMPANIES:
+                self.emit("run", f"Stopped after researching {len(tried)} companies: "
+                                 f"{self.shortlisted(result)} of {target} shortlisted", level="warn")
+                return
+            pool = [ref for ref in result.candidate_pool if ref.domain not in tried]
+            if not pool and discover_more:
+                discover_more = False
+                self.emit("discovery", f"Still {need} to find: searching for more candidates")
+                prior = {**getattr(self, "history", {}),
+                         **{c.domain: {"run_id": result.id, "date": self.providers.clock().date().isoformat(), "verdict": c.verdict.kind}
+                            for c in result.companies if c.verdict}}
+                more, aside = discover(result.profile, result.competitors, candidates_for(need), calls, self.emit,
+                                       prior=prior, boards=self.providers.job_boards)
+                known = {ref.domain for ref in result.candidate_pool}
+                result.candidate_pool += [ref for ref in more if ref.domain not in known and ref.domain not in tried]
+                # Companies this run already researched are simply skipped, not listed as set aside.
+                listed = {s.domain for s in result.set_aside} | tried
+                result.set_aside += [a for a in aside if a.domain not in listed]
+                pool = [ref for ref in result.candidate_pool if ref.domain not in tried]
+            if not pool:
+                self.emit("run", f"No more candidates: {self.shortlisted(result)} of {target} shortlisted", level="warn")
+                return
+            batch = pool[:max(1, min(self.concurrency, need + 1, MAX_COMPANIES - len(tried)))]
+            tried |= {ref.domain for ref in batch}
+            self.research(result, calls, batch, tried=tried)
+
+    def research(self, result: RunResult, calls: Calls, refs: list[CandidateRef], tried: set[str] | None = None):
         """Research refs; a company whose homepage cannot be read (blocked, gone, or redirecting to another domain) is
         set aside and the next untried candidate takes its place. Live runs lost up to two of three slots this way,
         and an unreadable homepage stops before any model call, so a replacement costs only its own research."""
-        tried: set[str] = set()
+        tried = tried if tried is not None else set()
         while refs:
             tried |= {ref.domain for ref in refs}
             self._research(result, calls, refs)
@@ -341,11 +393,9 @@ class AgentRunner:
                         for c in result.companies]
                 result.companies = []
                 self.research(result, calls, refs)
-            elif len(result.companies) < result.company_count:
-                more = [r for r in result.candidate_pool if r.domain not in {c.domain for c in result.companies}]
-                more = more[:result.company_count - len(result.companies)]
-                if more:
-                    self.research(result, calls, more)
+            elif self.shortlisted(result) < result.company_count:
+                if [r for r in result.candidate_pool if r.domain not in {c.domain for c in result.companies}]:
+                    self.research_until(result, calls, discover_more=False)
                 else:
                     self.emit("overrides", "No more saved candidates to research; start a new run to search again",
                               level="warn")
@@ -360,6 +410,11 @@ class AgentRunner:
             self.save(result)
         self.emit("overrides", "Changes applied", level="done")
         return result
+
+
+def candidates_for(wanted: int) -> int:
+    """Candidates to find for `wanted` Shortlisted companies: most candidates end as Needs a look or Rejected."""
+    return min(MAX_COMPANIES, max(5, wanted * 3))
 
 
 def comparison_pages(profile: SellerProfile) -> list[str]:
