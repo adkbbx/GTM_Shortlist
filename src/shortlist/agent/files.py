@@ -36,7 +36,7 @@ class FileAgentRuns:
     def read(self, run_id: str) -> dict:
         path = self.path(run_id)
         # Windows briefly denies access while a writer replaces the file (see write); retry rather than fail the request.
-        for wait in (0.01, 0.03, 0.1, 0.3, 0.6, None):
+        for wait in (0.01, 0.03, 0.1, 0.2, 0.4, 0.8, 1.5, None):
             try:
                 return json.loads(path.read_text(encoding="utf-8"))
             except FileNotFoundError:
@@ -52,7 +52,7 @@ class FileAgentRuns:
         temporary = target.with_suffix(".tmp")
         temporary.write_text(json.dumps(record), encoding="utf-8")
         # Windows refuses to replace a file another thread has open for reading; that reader finishes within moments.
-        for wait in (0.01, 0.03, 0.1, 0.3, 0.6):
+        for wait in (0.01, 0.03, 0.1, 0.2, 0.4, 0.8, 1.5):
             try:
                 os.replace(temporary, target)
                 break

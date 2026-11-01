@@ -261,7 +261,7 @@ function Hero({ reduced, onOpen }: { reduced: boolean; onOpen: (id: string) => v
   </section>;
 }
 
-export function AgentLanding({ onOpen }: { onOpen: (id: string) => void }) {
+export function AgentLanding({ onOpen }: { onOpen: (id: string | null) => void }) {
   const config = useAgentConfig();
   const reduced = usePrefersReducedMotion();
   useLenis(!reduced);

@@ -4,12 +4,14 @@ import { BrandfetchContext } from '../BrandfetchSettings';
 import { configuredDirectoryId } from '../company-suggestions';
 import { AgentBoard } from './AgentBoard';
 import { AgentLanding } from './AgentLanding';
+import { YourShortlist } from './YourShortlist';
 import { agentApi } from './agent-api';
 import { AgentConfigContext, localConfig } from './agent-config';
 import type { AgentConfig } from './agent-config';
 import './agent.css';
 
 const currentRun = () => new URLSearchParams(window.location.search).get('agent');
+const onShortlist = () => new URLSearchParams(window.location.search).get('shortlist') === '1';
 
 /** The website-only start flow and live board. Hosted installations keep the classic workspace; the public demo
  *  (classic is null) is agent-only. */
@@ -17,6 +19,7 @@ export function AgentApp({ classic }: { classic: ReactNode }) {
   const [mode, setMode] = useState<'loading' | 'agent' | 'classic'>('loading');
   const [config, setConfig] = useState<AgentConfig>(localConfig);
   const [runId, setRunId] = useState(currentRun);
+  const [shortlist, setShortlist] = useState(onShortlist);
   useEffect(() => {
     let cancelled = false;
     agentApi.health().then(health => {
@@ -29,17 +32,19 @@ export function AgentApp({ classic }: { classic: ReactNode }) {
     return () => { cancelled = true; };
   }, [classic]);
   useEffect(() => {
-    const changed = () => setRunId(currentRun());
+    const changed = () => { setRunId(currentRun()); setShortlist(onShortlist()); };
     window.addEventListener('popstate', changed);
     return () => window.removeEventListener('popstate', changed);
   }, []);
-  const open = (id: string | null) => {
+  const open = (id: string | null, list = false) => {
     const flow = new URLSearchParams(window.location.search).get('flow');
     const query = new URLSearchParams();
     if (flow) query.set('flow', flow);
     if (id) query.set('agent', id);
+    if (list) query.set('shortlist', '1');
     window.history.pushState(null, '', query.toString() ? `?${query}` : window.location.pathname);
     setRunId(id);
+    setShortlist(list);
     window.scrollTo({ top: 0 });
   };
   if (mode === 'loading') return null;
@@ -48,10 +53,15 @@ export function AgentApp({ classic }: { classic: ReactNode }) {
     <a className="skip-link" href="#agent-main">Skip to content</a>
     <header className="agent-header">
       <a className="agent-brand" href="/" onClick={event => { event.preventDefault(); open(null); }}>GTM Shortlist</a>
-      {!config.publicDemo && classic !== null && <a className="agent-header-link" href="/?classic=1">Earlier research</a>}
+      <nav className="agent-header-nav" aria-label="Main">
+        <a className="agent-header-link" href="?shortlist=1" aria-current={shortlist ? 'page' : undefined}
+          onClick={event => { event.preventDefault(); open(null, true); }}>Your shortlist</a>
+        {!config.publicDemo && classic !== null && <a className="agent-header-link" href="/?classic=1">Earlier research</a>}
+      </nav>
     </header>
-    <main id="agent-main" className={`agent-main${runId ? '' : ' is-landing'}`} tabIndex={-1}>
-      {runId ? <AgentBoard key={runId} runId={runId} onNew={() => open(null)} /> : <AgentLanding onOpen={open} />}
+    <main id="agent-main" className={`agent-main${runId || shortlist ? '' : ' is-landing'}`} tabIndex={-1}>
+      {runId ? <AgentBoard key={runId} runId={runId} onNew={() => open(null)} />
+        : shortlist ? <YourShortlist onOpen={id => open(id)} onNew={() => open(null)} /> : <AgentLanding onOpen={open} />}
       <p className="agent-footer">GTM Shortlist · Muse Spark investigates, Muse Spark Open checks every quote, fixed rules decide.
         Built with Muse Spark Open.</p>
     </main>

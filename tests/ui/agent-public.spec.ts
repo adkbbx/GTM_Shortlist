@@ -51,6 +51,16 @@ test('the public demo starts from a website alone, caps the size and shares a re
   expect(await noOverflow(page)).toBe(true);
   await page.screenshot({ path: `.impeccable/review/${info.project.name}-agent-public-board.png`, fullPage: true });
 
+  // Your shortlist gathers Shortlisted companies from this browser's searches, with the drafted email.
+  await page.getByRole('link', { name: 'Your shortlist' }).click();
+  await expect(page.getByRole('heading', { name: 'Your shortlist' })).toBeVisible();
+  await expect(page.locator('.ys-list').getByRole('heading', { name: 'Trailgear Outfitters' })).toBeVisible();
+  await page.locator('.ys-list').getByRole('button', { name: 'View email' }).click();
+  await expect(page.getByRole('dialog', { name: 'Outreach email' })).toContainText('Hi Trailgear Outfitters team,');
+  await page.keyboard.press('Escape');
+  expect(await noOverflow(page)).toBe(true);
+  await page.screenshot({ path: `.impeccable/review/${info.project.name}-agent-your-shortlist.png`, fullPage: true });
+
   // The start page lists this browser's own searches; another visitor's browser lists none.
   await page.getByRole('link', { name: 'GTM Shortlist' }).click();
   const yours = page.getByRole('region', { name: 'Your searches' });
@@ -72,6 +82,8 @@ test('the public demo starts from a website alone, caps the size and shares a re
   await expect(shared.locator('.count-picker')).toHaveCount(0);
   await shared.goto('/');
   await expect(shared.getByRole('region', { name: 'Your searches' })).toHaveCount(0);
+  await shared.getByRole('link', { name: 'Your shortlist' }).click();
+  await expect(shared.getByText('No Shortlisted companies yet.')).toBeVisible();
   await shared.goto(page.url());
   expect(await noOverflow(shared)).toBe(true);
   await shared.screenshot({ path: `.impeccable/review/${info.project.name}-agent-public-shared.png`, fullPage: true });

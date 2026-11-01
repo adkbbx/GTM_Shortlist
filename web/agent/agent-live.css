@@ -232,3 +232,15 @@
 
 .agent-title{display:flex;align-items:center;gap:.75rem;min-width:0}
 .agent-title-logo.site-icon{width:clamp(2.25rem,3vw,2.75rem);height:clamp(2.25rem,3vw,2.75rem);border-radius:.625rem;font-size:1.125rem}
+
+/* Header navigation and Your shortlist */
+.agent-header-nav{display:flex;align-items:center;gap:1.25rem}
+.agent-header-link[aria-current=page]{color:#1b1b1b;text-decoration:none;font-weight:600}
+.ys{max-width:60rem}
+.ys h1{font-size:clamp(1.875rem,3.2vw,2.75rem);line-height:1.12;letter-spacing:-.045em}
+.ys-count{margin:1.5rem 0 .75rem;font-size:.875rem;font-weight:600;color:var(--muted)}
+.ys-list{list-style:none;margin:0;padding:0}
+.ys-for{font-size:.75rem;color:var(--muted)}
+.ys-empty{margin-top:2rem;padding:2rem;border:1px dashed #d4d1ca;border-radius:.875rem;text-align:center;color:var(--muted)}
+.ys-empty p:first-child{font-weight:600;color:var(--ink);margin-bottom:.375rem}
+.ys-empty p{max-width:none}

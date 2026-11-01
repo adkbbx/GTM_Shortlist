@@ -67,7 +67,7 @@ function PitchBlock({ pitch }: { pitch: NonNullable<Company['pitch']> }) {
 }
 
 /** The outreach email in a dialog: opens at once on Draft outreach, shows that it is writing, then the email. */
-function EmailDialog({ company, open, drafting, error, onClose }: { company: Company; open: boolean; drafting: boolean; error: string;
+export function EmailDialog({ company, open, drafting, error, onClose }: { company: Company; open: boolean; drafting: boolean; error: string;
   onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const { copied, copy } = useCopy();
