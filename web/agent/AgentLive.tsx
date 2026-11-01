@@ -125,9 +125,14 @@ export function WorkingCard({ company, events }: { company: Company; events: Age
   return <article className="agent-working-card" aria-label={`${company.domain}, in progress`}>
     <header><SiteIcon domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="agent-logo" />
       <h4>{company.name || company.domain}</h4><span className="agent-live-dot" aria-hidden="true" /></header>
+    <ol className="agent-track" aria-hidden="true">{['Investigate', 'Skeptic', 'Verdict'].map((label, index) => {
+      const at = latest ? Math.max(0, stageOf(latest) - 3) : -1;
+      return <li key={label} className={index < at ? 'is-done' : index === at ? 'is-now' : ''}><span />{label}</li>;
+    })}</ol>
     <p className="agent-working-step">{stage ? stage.label : 'Queued'}</p>
     <p className="agent-working-message">{latest?.message ?? 'Waiting for its turn.'}</p>
-    {mine.length > 0 && <p className="agent-working-count">{mine.length} {mine.length === 1 ? 'step' : 'steps'} so far</p>}
+    {mine.length > 0 && <p className="agent-working-count">
+      <b>{mine.filter(e => e.message.startsWith('Read ')).length}</b> pages read · <b>{mine.filter(e => e.message.startsWith('Searched ')).length}</b> searches</p>}
   </article>;
 }
 
@@ -135,5 +140,67 @@ export function Working({ companies, events }: { companies: Company[]; events: A
   if (!companies.length) return null;
   return <section className="agent-working-grid" aria-label="Being researched now">
     {companies.map(company => <WorkingCard key={company.domain} company={company} events={events} />)}
+  </section>;
+}
+
+
+type Tile = { key: string; kind: 'page' | 'search' | 'hiring' | 'rival'; domain?: string; title: string; detail?: string; board?: string };
+const BOARDS: [RegExp, string][] = [[/lever\.co/i, 'Lever'], [/greenhouse\.io/i, 'Greenhouse'], [/ashbyhq\.com/i, 'Ashby']];
+const hostOf = (url: string) => { try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return ''; } };
+const pathOf = (url: string) => { try { const path = new URL(url).pathname; return path === '/' ? 'homepage' : path; } catch { return url; } };
+
+/** What the agent has touched so far, as tiles, read from its own step messages and the run's saved competitors. */
+export function tilesOf(run: AgentRun, events: AgentEvent[]): Tile[] {
+  const tiles: Tile[] = [];
+  for (const event of events) {
+    const read = /^Read (?:your homepage \()?(https?:\/\/[^\s)]+)/.exec(event.message);
+    const searched = /^Searched "(.+)"/.exec(event.message);
+    const hiring = /^Confirmed open on (\w+): (.+) \(([^()]+)\)$/.exec(event.message);
+    if (read) tiles.push({ key: `p${event.seq}`, kind: 'page', domain: hostOf(read[1]), title: pathOf(read[1]), detail: hostOf(read[1]) });
+    else if (searched) tiles.push({ key: `s${event.seq}`, kind: 'search', title: searched[1].replace(/site:\S+\s*/g, '').trim() || searched[1],
+      board: BOARDS.find(([pattern]) => pattern.test(searched[1]))?.[1] });
+    else if (hiring) tiles.push({ key: `h${event.seq}`, kind: 'hiring', title: hiring[3], detail: hiring[2], board: hiring[1] });
+  }
+  for (const rival of run.competitors.filter(c => c.classification === 'direct'))
+    tiles.push({ key: `r${rival.domain}`, kind: 'rival', domain: rival.domain, title: rival.name, detail: 'competitor' });
+  return tiles;
+}
+
+const KIND_LABEL = { page: 'Read', search: 'Searched', hiring: 'Hiring now', rival: 'Competitor' } as const;
+
+function Wall({ tiles }: { tiles: Tile[] }) {
+  if (!tiles.length) return null;
+  return <ul className="agent-wall" aria-label="Found so far">
+    {tiles.slice(-12).map(tile => <li key={tile.key} className={`agent-tile tile-${tile.kind}`}>
+      {tile.domain ? <SiteIcon domain={tile.domain} fallback={(tile.domain ?? tile.title).slice(0, 1).toUpperCase()} className="agent-logo agent-tile-logo" />
+        : <span className="agent-tile-glyph" aria-hidden="true">{tile.kind === 'hiring' ? '●' : '⌕'}</span>}
+      <span className="agent-tile-text"><small>{KIND_LABEL[tile.kind]}{tile.board ? ` · ${tile.board}` : ''}</small>
+        <strong>{tile.title}</strong>{tile.detail && tile.kind !== 'page' && <em>{tile.detail}</em>}</span>
+    </li>)}
+  </ul>;
+}
+
+const EARLY = new Set(['run', 'seller', 'competitors', 'discovery']);
+const HEADLINE = ['Reading your site', 'Mapping your competitors', 'Finding companies with hiring signals'];
+
+/** Before the first company arrives: what the agent is doing right now and what it has learned so far, at the top of
+ *  the page, so the early minutes never look stuck. */
+export function EarlySteps({ run, events }: { run: AgentRun; events: AgentEvent[] }) {
+  const steps = events.filter(event => EARLY.has(event.stage)).slice(-7);
+  const current = [...events].reverse().map(stageOf).find(index => index >= 0) ?? 0;
+  const profile = run.profile;
+  const competitors = run.competitors.filter(c => c.classification === 'direct');
+  return <section className="agent-early" aria-label="Working now" aria-live="polite">
+    <div className="agent-early-head"><span className="agent-spinner" aria-hidden="true" />
+      <h2>{HEADLINE[Math.min(current, 2)]}</h2><span className="agent-early-step">Step {Math.min(current, 2) + 1} of 6</span></div>
+    <ol className="agent-early-list">{steps.map((event, index) => <li key={event.seq} className={index === steps.length - 1 ? 'is-now' : 'is-done'}>
+      <span className="agent-early-mark" aria-hidden="true" />{event.message}</li>)}</ol>
+    <Wall tiles={tilesOf(run, events)} />
+    {(profile?.offer || competitors.length > 0) && <div className="agent-early-learned">
+      <p className="agent-pitch-label">What it has learned so far</p>
+      {profile?.offer && <p><span>You sell</span> {profile.offer.value}</p>}
+      {profile?.buyer && <p><span>To</span> {profile.buyer.value}</p>}
+      {competitors.length > 0 && <p><span>Competitors</span> {competitors.slice(0, 6).map(c => <b key={c.domain} className="agent-early-chip">{c.name}</b>)}</p>}
+    </div>}
   </section>;
 }

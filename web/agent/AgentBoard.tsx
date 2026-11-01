@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SiteIcon } from '../SiteIcon';
 import { Assumptions } from './Assumptions';
-import { Feed, Monitor, Working } from './AgentLive';
+import { EarlySteps, Feed, Monitor, Working } from './AgentLive';
 import { EvidenceList, QuoteBlock } from './Evidence';
 import { agentApi, domainOf, editToken, isActive } from './agent-api';
 import { AgentConfigContext, countOptions, useAgentConfig } from './agent-config';
@@ -336,6 +336,7 @@ export function AgentBoard({ runId, onNew }: { runId: string; onNew: () => void 
     <Monitor view={view} events={events} feedOpen={feedOpen} onFeed={() => setFeedOpen(open => !open)} />
     {error && <p className="notice" role="alert">{error}</p>}
     <div className="agent-board-grid"><div className="agent-board-main">
+    {active && run.companies.length === 0 && <EarlySteps run={run} events={events} />}
     {view.status === 'failed' && <section className="notice agent-failed" role="alert"><p>{run.error ?? 'The run stopped.'}</p>
       {/* Only a site too vague to read: a provider failure has no profile, and typing would not fix it. */}
       {run.profile && !run.profile.offer && editable && <Describe apply={apply} busy={busy} summary="Describe your offer and buyer (optional)" />}</section>}
