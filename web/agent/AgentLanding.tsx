@@ -23,37 +23,43 @@ const day = (value: string) => new Date(value).toLocaleDateString(undefined, { d
 const verticalQuery = '(max-width: 1180px)';
 function Arrow() { return <span className="pl-arrow" aria-hidden="true">→</span>; }
 
-/** Plays a finished run's real activity log back, step by step, then shows its result and starts again. */
-function useReplay(total: number, reduced: boolean, playing: boolean) {
-  const [shown, setShown] = useState(0);
+const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
+
+/** How far the page has scrolled through a pinned section, 0 to 1. Lenis drives the native scroll, so this stays smooth. */
+function useScrollProgress(ref: RefObject<HTMLElement | null>, enabled: boolean) {
+  const [progress, setProgress] = useState(enabled ? 0 : 1);
   useEffect(() => {
-    if (!total) return;
-    if (reduced) { setShown(total); return; }
-    if (!playing) return;
-    let step = 0;
-    let timer = 0;
-    const tick = () => {
-      step = step >= total ? 0 : step + 1;
-      setShown(step);
-      timer = window.setTimeout(tick, step >= total ? 7000 : step === 0 ? 500 : 260);
+    if (!enabled) { setProgress(1); return; }
+    let frame = 0;
+    const measure = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const node = ref.current;
+        if (!node) return;
+        const range = node.offsetHeight - window.innerHeight;
+        setProgress(clamp01(-node.getBoundingClientRect().top / Math.max(1, range)));
+      });
     };
-    timer = window.setTimeout(tick, 400);
-    return () => window.clearTimeout(timer);
-  }, [total, reduced, playing]);
-  return shown;
+    measure();
+    window.addEventListener('scroll', measure, { passive: true });
+    window.addEventListener('resize', measure);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener('scroll', measure); window.removeEventListener('resize', measure); };
+  }, [ref, enabled]);
+  return progress;
 }
 
-/** True once the element has scrolled into view, so the replay starts where it can be seen. */
-function useSeen(ref: RefObject<HTMLElement | null>) {
-  const [seen, setSeen] = useState(false);
+/** Children marked .al-rise fade up, one after another, when their section scrolls into view. */
+function useRise(ref: RefObject<HTMLElement | null>, reduced: boolean) {
   useEffect(() => {
     const node = ref.current;
-    if (!node || seen) return;
-    const observer = new IntersectionObserver(entries => { if (entries[0].isIntersecting) { setSeen(true); observer.disconnect(); } }, { threshold: 0.3 });
+    if (!node) return;
+    if (reduced) { node.classList.add('is-in'); return; }
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) { node.classList.add('is-in'); observer.disconnect(); }
+    }, { threshold: 0.15 });
     observer.observe(node);
     return () => observer.disconnect();
-  }, [ref, seen]);
-  return seen;
+  }, [ref, reduced]);
 }
 
 const TAG: Record<string, string> = { seller: 'Site', competitors: 'Rivals', discovery: 'Discover', investigation: 'Read',
@@ -65,17 +71,14 @@ function supportedQuote(company: Company) {
   return items.find(e => e.claim_type === 'need' || e.claim_type === 'timing') ?? items[0];
 }
 
-function ReplayConsole({ view, onOpen, reduced }: { view: AgentRunView; onOpen: (id: string) => void; reduced: boolean }) {
-  const root = useRef<HTMLElement>(null);
-  const seen = useSeen(root);
+function ReplayConsole({ view, onOpen, shown }: { view: AgentRunView; onOpen: (id: string) => void; shown: number }) {
   const events = view.events;
-  const shown = useReplay(events.length, reduced, seen);
   const played = events.slice(0, shown);
   const finished = shown >= events.length;
   const decided = new Set(played.filter(e => e.stage === 'verdict' && e.company).map(e => e.company)).size;
   const shortlisted = view.run.companies.filter(c => c.verdict?.kind === 'shortlisted');
   const current = played.at(-1);
-  return <figure ref={root} className="al-console" aria-label={`Replay of a real search for ${domainOf(view.run.website)}`}>
+  return <figure className="al-console" aria-label={`Replay of a real search for ${domainOf(view.run.website)}`}>
     <div className="al-console-bar">
       <span className="al-chip"><span className="agent-live-dot" aria-hidden="true" />Replay of a real run</span>
       <span className="al-console-title">{domainOf(view.run.website)} · {day(view.run.created_at)}</span>
@@ -110,6 +113,30 @@ function Logo({ company }: { company: Company }) {
   return <SiteIcon domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="agent-logo" />;
 }
 
+/** The real run's recorded steps, played by scrolling: the section stays pinned while each scroll advances the agent. */
+function Story({ view, onOpen, reduced }: { view: AgentRunView; onOpen: (id: string) => void; reduced: boolean }) {
+  const root = useRef<HTMLElement>(null);
+  const progress = useScrollProgress(root, !reduced);
+  const total = view.events.length;
+  // The last eighth of the scroll holds the finished result on screen.
+  const shown = reduced ? total : Math.min(total, Math.round(clamp01(progress / 0.86) * total));
+  const states = stepStates(view.events.slice(0, shown), shown < total);
+  return <section id="al-replay" ref={root} className={`al-story${reduced ? ' is-static' : ''}`} aria-labelledby="al-replay-heading">
+    <div className="al-story-pin pl-wrap">
+      <div className="al-replay-copy">
+        <p className="al-kicker">Watch it work</p>
+        <Reveal id="al-replay-heading" className="pl-h2" reduced={reduced} lead="A real search," accent="step by step." />
+        <p className="al-replay-text">The recorded activity of a real search for {domainOf(view.run.website)}. Scroll to play it.</p>
+        <ol className="al-story-steps">{STAGES.map((stage, index) => <li key={stage.label} className={`is-${states[index]}`}>
+          <span className="al-story-dot" aria-hidden="true" /><span>{stage.label}</span><small>{stage.by}</small>
+        </li>)}</ol>
+        <div className="al-story-bar" aria-hidden="true"><span style={{ transform: `scaleX(${reduced ? 1 : clamp01(progress / 0.86)})` }} /></div>
+      </div>
+      <ReplayConsole view={view} onOpen={onOpen} shown={shown} />
+    </div>
+  </section>;
+}
+
 const HOW = [
   { n: '01', title: 'Reads your site', by: 'Muse Spark', text: 'Works out what you sell, who buys it, your competitors and the size of company you serve. Nothing to fill in.' },
   { n: '02', title: 'Hunts for buying signals', by: 'Muse Spark + job boards', text: 'Searches Lever, Greenhouse and Ashby for open roles that mean a company needs you now, and confirms each is still open on its own board.' },
@@ -118,15 +145,17 @@ const HOW = [
 ];
 
 function ResultCards({ runs, onOpen, reduced }: { runs: AgentRunView[]; onOpen: (id: string) => void; reduced: boolean }) {
+  const root = useRef<HTMLElement>(null);
+  useRise(root, reduced);
   const cards = runs.flatMap(view => view.run.companies.filter(c => c.verdict?.kind === 'shortlisted').map(company => ({ view, company }))).slice(0, 3);
   if (!cards.length) return null;
-  return <section className="al-section pl-wrap" aria-labelledby="al-results-heading">
+  return <section ref={root} className="al-section pl-wrap" aria-labelledby="al-results-heading">
     <p className="al-kicker">Real output</p>
     <Reveal id="al-results-heading" className="pl-h2" reduced={reduced} lead="Not a score. A reason you can check," accent="and a line you can send." />
     <div className="al-cards">
-      {cards.map(({ view, company }) => {
+      {cards.map(({ view, company }, index) => {
         const quote = supportedQuote(company);
-        return <article key={view.run.id + company.domain} className="al-card">
+        return <article key={view.run.id + company.domain} className="al-card al-rise" style={{ ['--rise' as string]: index }}>
           <header><span className="al-verdict">Shortlisted</span><span className="al-for">for {domainOf(view.run.website)}</span></header>
           <h3><Logo company={company} />{company.name || company.domain}</h3>
           {quote && <blockquote>“{quote.quote.text}”<cite>{domainOf(quote.quote.url)}</cite></blockquote>}
@@ -250,23 +279,17 @@ export function AgentLanding({ onOpen }: { onOpen: (id: string) => void }) {
     return () => { cancelled = true; };
   }, [config.examples]);
   const replay = examples[0];
+  const how = useRef<HTMLElement>(null);
+  useRise(how, reduced);
   return <div className="pl al">
     <Hero reduced={reduced} onOpen={onOpen} />
 
-    {replay && <section id="al-replay" className="al-section al-replay pl-wrap" aria-labelledby="al-replay-heading">
-      <div className="al-replay-copy">
-        <p className="al-kicker">Watch it work</p>
-        <Reveal id="al-replay-heading" className="pl-h2" reduced={reduced} lead="A real search," accent="step by step." />
-        <p className="al-replay-text">This is the recorded activity of a real search for {domainOf(replay.run.website)}: every job board it
-          searched, every page it read, every quote the skeptic kept or threw out. Your search shows the same steps live.</p>
-      </div>
-      <ReplayConsole view={replay} onOpen={onOpen} reduced={reduced} />
-    </section>}
+    {replay && <Story view={replay} onOpen={onOpen} reduced={reduced} />}
 
-    <section className="al-section pl-wrap" aria-labelledby="al-how-heading">
+    <section ref={how} className="al-section pl-wrap" aria-labelledby="al-how-heading">
       <p className="al-kicker">How it works</p>
       <Reveal id="al-how-heading" className="pl-h2" reduced={reduced} lead="Two models and a rulebook." accent="Nothing to trust blindly." />
-      <ol className="al-how">{HOW.map(step => <li key={step.n}>
+      <ol className="al-how">{HOW.map((step, index) => <li key={step.n} className="al-rise" style={{ ['--rise' as string]: index }}>
         <span className="al-how-n">{step.n}</span><h3>{step.title}</h3><p className="al-how-by">{step.by}</p><p>{step.text}</p>
       </li>)}</ol>
     </section>
