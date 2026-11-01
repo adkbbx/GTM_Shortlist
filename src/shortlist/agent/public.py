@@ -130,6 +130,10 @@ class Example(BaseModel):
     website: str
     shortlisted: int
     created_at: datetime
+    # What the example shows, so the start page can tell examples apart: company names by verdict, and the rule
+    # behind each rejection.
+    shortlisted_names: list[str] = Field(default_factory=list)
+    rejected: list[str] = Field(default_factory=list)
 
 
 PublicHealth.model_rebuild()
@@ -237,8 +241,13 @@ def load_showcase(store: FileAgentRuns, directory: Path | None) -> list[Example]
         if not known and log.is_file():
             for event in json.loads(log.read_text(encoding="utf-8")):
                 store.append_event(result.id, AgentEvent.model_validate(event))
-        examples.append(Example(id=result.id, website=result.website, created_at=result.created_at,
-                                shortlisted=sum(1 for c in result.companies if c.verdict and c.verdict.kind == "shortlisted")))
+        decided = [c for c in result.companies if c.verdict]
+        examples.append(Example(
+            id=result.id, website=result.website, created_at=result.created_at,
+            shortlisted=sum(c.verdict.kind == "shortlisted" for c in decided),
+            shortlisted_names=[c.name or c.domain for c in decided if c.verdict.kind == "shortlisted"],
+            rejected=[(f"{c.name or c.domain}: “{c.verdict.disqualifier.quote.text[:110]}”" if c.verdict.disqualifier
+                      else f"{c.name or c.domain}: {c.verdict.summary}")[:200] for c in decided if c.verdict.kind == "rejected"]))
     return examples
 
 

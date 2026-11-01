@@ -240,6 +240,8 @@ def test_shipped_examples_are_real_finished_searches_that_open_read_only(tmp_pat
     with make_client(tmp_path) as client:
         examples = client.get("/api/health").json()["examples"]
         assert {e["id"] for e in examples} == {p.stem for p in files}
+        assert all(len(e["shortlisted_names"]) == e["shortlisted"] for e in examples)
+        assert any("Storable proudly employs over 800 employees" in r for e in examples for r in e["rejected"])
         example = examples[0]
         shown = client.get(f"/api/agent/runs/{example['id']}").json()
         assert shown["run"]["status"] == "complete"

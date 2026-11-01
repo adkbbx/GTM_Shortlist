@@ -49,7 +49,7 @@ function useScrollProgress(ref: RefObject<HTMLElement | null>, enabled: boolean)
 }
 
 /** Children marked .al-rise fade up, one after another, when their section scrolls into view. */
-function useRise(ref: RefObject<HTMLElement | null>, reduced: boolean) {
+function useRise(ref: RefObject<HTMLElement | null>, reduced: boolean, ready = true) {
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
@@ -59,7 +59,8 @@ function useRise(ref: RefObject<HTMLElement | null>, reduced: boolean) {
     }, { threshold: 0.15 });
     observer.observe(node);
     return () => observer.disconnect();
-  }, [ref, reduced]);
+  // ready: the section may mount after its data loads; watch it once it exists.
+  }, [ref, reduced, ready]);
 }
 
 const TAG: Record<string, string> = { seller: 'Site', competitors: 'Rivals', discovery: 'Discover', investigation: 'Read',
@@ -146,8 +147,8 @@ const HOW = [
 
 function ResultCards({ runs, onOpen, reduced }: { runs: AgentRunView[]; onOpen: (id: string) => void; reduced: boolean }) {
   const root = useRef<HTMLElement>(null);
-  useRise(root, reduced);
   const cards = runs.flatMap(view => view.run.companies.filter(c => c.verdict?.kind === 'shortlisted').map(company => ({ view, company }))).slice(0, 3);
+  useRise(root, reduced, cards.length > 0);
   if (!cards.length) return null;
   return <section ref={root} className="al-section pl-wrap" aria-labelledby="al-results-heading">
     <p className="al-kicker">Real output</p>
@@ -312,11 +313,18 @@ export function AgentLanding({ onOpen }: { onOpen: (id: string) => void }) {
 
     <ResultCards runs={examples} onOpen={onOpen} reduced={reduced} />
 
-    {config.examples.length > 0 && <section className="al-section pl-wrap agent-recent" aria-labelledby="agent-examples-heading">
-      <h2 id="agent-examples-heading">See a finished search first</h2>
-      <ul>{config.examples.map(item => <li key={item.id}>
-        <a href={`?agent=${item.id}`} onClick={event => { event.preventDefault(); onOpen(item.id); }}>{domainOf(item.website)}</a>
-        <span>{item.shortlisted} shortlisted, real search from {day(item.created_at)}</span>
+    {config.examples.length > 0 && <section className="al-section pl-wrap" aria-labelledby="agent-examples-heading">
+      <p className="al-kicker">Real searches</p>
+      <h2 id="agent-examples-heading" className="al-examples-title">Open a finished search</h2>
+      <p className="al-examples-note">Real searches run on {[...new Set(config.examples.map(item => day(item.created_at)))].join(', ')}, with every quote
+        and verdict as recorded. Nothing is re-run when you open one.</p>
+      <ul className="al-examples">{config.examples.map(item => <li key={item.id}>
+        <a href={`?agent=${item.id}`} onClick={event => { event.preventDefault(); onOpen(item.id); }}>
+          <span className="al-example-for">Seller: {domainOf(item.website)}</span>
+          <strong>{item.shortlisted_names?.length ? `${item.shortlisted_names.join(' and ')} shortlisted` : 'Nothing shortlisted'}</strong>
+          {item.rejected?.[0] && <span className="al-example-rejected">Rejected {item.rejected[0]}</span>}
+          <span className="al-example-open">Open <span aria-hidden="true">→</span></span>
+        </a>
       </li>)}</ul>
     </section>}
     {recent.length > 0 && <section className="al-section pl-wrap agent-recent" aria-labelledby="agent-recent-heading">

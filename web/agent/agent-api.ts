@@ -24,7 +24,7 @@ export class AgentError extends Error {
 
 /** Server facts the start page needs. The public demo answers mode "public" with its limits. */
 export type AgentHealth = { mode?: string; max_companies?: number; turnstile_site_key?: string | null; synthetic?: boolean;
-  examples?: { id: string; website: string; shortlisted: number; created_at: string }[] };
+  examples?: { id: string; website: string; shortlisted: number; created_at: string; shortlisted_names?: string[]; rejected?: string[] }[] };
 
 /** The public demo returns an edit token to the browser that started a search; only that browser may correct it. */
 const tokenKey = (id: string) => `gtm-agent-edit:${id}`;
