@@ -93,6 +93,17 @@ test('a suggestion without a directory logo uses the icon its own website declar
   expect(lookups).toEqual(['/api/site-icon/declared.example']);
 });
 
+test('a directory lettermark is not a logo: the suggestion uses the icon its website declares', async ({ page }) => {
+  const declared = 'https://declared.example/assets/logo.png';
+  await installIconFixtures(page, { [declared]: syntheticIcon('#1f7a4d') });
+  const lettermark = 'https://cdn.brandfetch.io/idSynthetic/w/128/h/128/fallback/lettermark/icon.webp?c=synthetic';
+  await page.route('https://api.brandfetch.io/**', route => route.fulfill({ json: [{ name: 'Declared (synthetic)', domain: 'declared.example', icon: lettermark }] }));
+  await page.route('**/api/site-icon/**', route => route.fulfill({ json: { url: declared } }));
+  await page.goto('/');
+  await page.getByRole('combobox', { name: 'Company name or website' }).fill('declared');
+  await expect(page.locator('.company-suggestion img')).toHaveAttribute('data-requested-icon', declared);
+});
+
 test('website entry closes suggestions and does not query the company directory', async ({ page }) => {
   const lookups: string[] = [];
   await page.route('https://api.brandfetch.io/**', route => {

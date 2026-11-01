@@ -18,7 +18,9 @@ export function parseSuggestions(value: unknown): CompanySuggestion[] {
     if ('icon' in item && typeof item.icon === 'string') {
       try {
         const url = new URL(item.icon);
-        if (url.protocol === 'https:' && !url.username && !url.password && (url.hostname === 'brandfetch.io' || url.hostname.endsWith('.brandfetch.io'))) icon = url.href;
+        // A lettermark is Brandfetch's drawn initial for a brand it has no logo for: the site's own icon is better.
+        const lettermark = /\/fallback\/lettermark(?:\/|$)/.test(url.pathname);
+        if (url.protocol === 'https:' && !url.username && !url.password && !lettermark && (url.hostname === 'brandfetch.io' || url.hostname.endsWith('.brandfetch.io'))) icon = url.href;
       } catch { /* Use the site's favicon instead. */ }
     }
     if (!companies.has(domain)) companies.set(domain, { domain, name: name || domain, icon });
