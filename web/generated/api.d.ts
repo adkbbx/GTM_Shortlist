@@ -700,6 +700,8 @@ export interface components {
             overrides?: components["schemas"]["Overrides-Input"] | null;
             /** Turnstile */
             turnstile?: string | null;
+            /** Previous */
+            previous?: components["schemas"]["PreviousRun"][];
         };
         /** AgentStarted */
         AgentStarted: {
@@ -1627,6 +1629,13 @@ export interface components {
              * @default
              */
             reason: string;
+        };
+        /** PreviousRun */
+        PreviousRun: {
+            /** Id */
+            id: string;
+            /** Token */
+            token: string;
         };
         /** Profile */
         Profile: {

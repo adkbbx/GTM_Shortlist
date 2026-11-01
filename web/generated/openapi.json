@@ -1905,6 +1905,14 @@
               }
             ],
             "title": "Turnstile"
+          },
+          "previous": {
+            "items": {
+              "$ref": "#/components/schemas/PreviousRun"
+            },
+            "type": "array",
+            "maxItems": 30,
+            "title": "Previous"
           }
         },
         "additionalProperties": false,
@@ -4309,6 +4317,27 @@
         ],
         "title": "Pitch",
         "description": "Why now and an opening line for a Shortlisted company, written only from quotes the skeptic supported."
+      },
+      "PreviousRun": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{32}$",
+            "title": "Id"
+          },
+          "token": {
+            "type": "string",
+            "maxLength": 128,
+            "title": "Token"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "token"
+        ],
+        "title": "PreviousRun"
       },
       "Profile": {
         "properties": {

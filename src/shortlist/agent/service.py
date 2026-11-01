@@ -10,7 +10,7 @@ from shortlist.agent.pages import fetch_document
 from shortlist.agent.pipeline import AgentRunner, Providers
 from shortlist.agent.providers import AgentProviderError, BasetenSkeptic, MetaInvestigator
 from shortlist.agent.settings import AgentSettings
-from shortlist.agent.storage import HISTORY_DAYS, SQLiteAgentRuns
+from shortlist.agent.storage import HISTORY_DAYS, SQLiteAgentRuns, prior_research
 from shortlist.domain import utcnow
 from shortlist.fetch import FetchError, canonical_url, domain_of
 
@@ -57,18 +57,29 @@ class AgentService:
             return {}
         return self.store.researched(domain_of(website), utcnow() - timedelta(days=self.history_days))
 
+    def history_of(self, website: str, run_ids: list[str]) -> dict[str, dict]:
+        """Companies already researched for this seller in the given runs only."""
+        runs = []
+        for run_id in dict.fromkeys(run_ids):
+            try:
+                record = self.store.get(run_id)
+            except KeyError:
+                continue
+            runs.append((run_id, str(record["created_at"]), record["result"].model_dump(mode="json")))
+        return prior_research(runs, domain_of(website))
+
     def runner(self, run_id: str, settings: AgentSettings, providers: Providers) -> AgentRunner:
         return AgentRunner(providers, budget_usd=settings.run_budget_usd, concurrency=settings.concurrency,
                            use_skeptic=settings.use_skeptic,
                            on_event=lambda event: self.store.append_event(run_id, event), on_save=self.store.save)
 
-    def start(self, website: str, overrides: Overrides | None = None) -> RunResult:
+    def start(self, website: str, overrides: Overrides | None = None, history_runs: list[str] | None = None) -> RunResult:
         settings = self.settings()
         overrides = overrides or Overrides()
         result = RunResult(website=website_url(website), status="queued", overrides=overrides,
                            company_count=overrides.company_count or 10, skeptic=settings.use_skeptic,
                            telemetry=Telemetry(budget_usd=settings.run_budget_usd))
-        history = self.history(result.website)
+        history = self.history(result.website) if history_runs is None else self.history_of(result.website, history_runs)
         self.store.create(result)
         self._spawn(result.id, lambda runner: runner.run(result.website, overrides, run_id=result.id, history=history),
                     settings, result)

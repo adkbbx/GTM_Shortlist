@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+import { BrandfetchContext } from '../BrandfetchSettings';
+import { configuredDirectoryId } from '../company-suggestions';
 import { AgentBoard } from './AgentBoard';
 import { AgentLanding } from './AgentLanding';
 import { agentApi } from './agent-api';
@@ -42,7 +44,7 @@ export function AgentApp({ classic }: { classic: ReactNode }) {
   };
   if (mode === 'loading') return null;
   if (mode === 'classic') return <>{classic}</>;
-  return <AgentConfigContext.Provider value={config}>
+  return <BrandfetchContext.Provider value={configuredDirectoryId()}><AgentConfigContext.Provider value={config}>
     <a className="skip-link" href="#agent-main">Skip to content</a>
     <header className="agent-header">
       <a className="agent-brand" href="/" onClick={event => { event.preventDefault(); open(null); }}>GTM Shortlist</a>
@@ -53,5 +55,5 @@ export function AgentApp({ classic }: { classic: ReactNode }) {
       <p className="agent-footer">GTM Shortlist · Muse Spark investigates, Muse Spark Open checks every quote, fixed rules decide.
         Built with Muse Spark Open.</p>
     </main>
-  </AgentConfigContext.Provider>;
+  </AgentConfigContext.Provider></BrandfetchContext.Provider>;
 }

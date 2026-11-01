@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import type { FormEvent, RefObject } from 'react';
 import '@fontsource/schibsted-grotesk/500.css';
 import '@fontsource/schibsted-grotesk/800.css';
+import { CompanySearch } from '../CompanySearch';
+import { SiteIcon } from '../SiteIcon';
+import { configuredDirectoryId } from '../company-suggestions';
 import { clearKeptCompany, peekKeptCompany } from '../landing/kept-company';
 import { Reveal } from '../landing/Reveal';
 import { SignalStream } from '../landing/signal-stream';
@@ -84,7 +87,7 @@ function ReplayConsole({ view, onOpen, reduced }: { view: AgentRunView; onOpen: 
         {shortlisted.slice(0, 2).map(company => {
           const quote = supportedQuote(company);
           return <div key={company.domain} className="al-result-row">
-            <span className="al-verdict">Shortlisted</span><strong>{company.name || company.domain}</strong>
+            <span className="al-verdict">Shortlisted</span><Logo company={company} /><strong>{company.name || company.domain}</strong>
             {quote && <q>{quote.quote.text.length > 140 ? `${quote.quote.text.slice(0, 137)}...` : quote.quote.text}</q>}
           </div>;
         })}
@@ -101,6 +104,10 @@ function ReplayConsole({ view, onOpen, reduced }: { view: AgentRunView; onOpen: 
       <a href={`?agent=${view.run.id}`} onClick={event => { event.preventDefault(); onOpen(view.run.id); }}>Open this search <Arrow /></a>
     </figcaption>
   </figure>;
+}
+
+function Logo({ company }: { company: Company }) {
+  return <SiteIcon domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="agent-logo" />;
 }
 
 const HOW = [
@@ -121,7 +128,7 @@ function ResultCards({ runs, onOpen, reduced }: { runs: AgentRunView[]; onOpen: 
         const quote = supportedQuote(company);
         return <article key={view.run.id + company.domain} className="al-card">
           <header><span className="al-verdict">Shortlisted</span><span className="al-for">for {domainOf(view.run.website)}</span></header>
-          <h3>{company.name || company.domain}</h3>
+          <h3><Logo company={company} />{company.name || company.domain}</h3>
           {quote && <blockquote>“{quote.quote.text}”<cite>{domainOf(quote.quote.url)}</cite></blockquote>}
           {company.pitch && <div className="al-opener"><p>Opening line</p><span>{company.pitch.opener}</span></div>}
           <a href={`?agent=${view.run.id}`} onClick={event => { event.preventDefault(); onOpen(view.run.id); }}>See every quote <Arrow /></a>
@@ -138,7 +145,8 @@ function Hero({ reduced, onOpen }: { reduced: boolean; onOpen: (id: string) => v
   // A website typed on the landing page only prefills the field; research waits for the visitor's click.
   const [website, setWebsite] = useState(peekKeptCompany);
   useEffect(() => { clearKeptCompany(); }, []);
-  const [count, setCount] = useState(Math.min(10, config.maxCompanies));
+  // One company by default: quick and cheap; run again for the next one, which skips companies already researched.
+  const [count, setCount] = useState(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [invite, setInvite] = useState(true);
@@ -169,11 +177,11 @@ function Hero({ reduced, onOpen }: { reduced: boolean; onOpen: (id: string) => v
   const start = async (event: FormEvent) => {
     event.preventDefault();
     const value = website.trim();
-    if (!value) { document.getElementById('agent-website')?.focus(); setShake(n => n + 1); return; }
+    if (!value) { document.getElementById('website')?.focus(); setShake(n => n + 1); return; }
     setBusy(true); setError(''); stream.current?.burst();
     try {
       const token = config.turnstileSiteKey && check.current ? await turnstileToken(config.turnstileSiteKey, check.current) : undefined;
-      const { id } = await agentApi.start(value, count === 10 ? undefined : { company_count: count }, token);
+      const { id } = await agentApi.start(value, { company_count: count }, token);
       onOpen(id);
     } catch (reason) { setError(describe(reason)); setBusy(false); }
   };
@@ -189,13 +197,13 @@ function Hero({ reduced, onOpen }: { reduced: boolean; onOpen: (id: string) => v
       <div className={`pl-instrument${on ? ' on' : ''}`} ref={instrument}>
         <canvas ref={canvas} aria-hidden="true" />
         <form ref={cardIn} className={`pl-card pl-intake${invite ? ' invite' : ''}`} onSubmit={start} autoComplete="off" noValidate
-          onPointerEnter={() => stream.current?.setHover(true)} onPointerLeave={() => stream.current?.setHover(document.activeElement?.id === 'agent-website')}>
-          <label className="pl-label" htmlFor="agent-website">Your company website</label>
+          onPointerEnter={() => stream.current?.setHover(true)} onPointerLeave={() => stream.current?.setHover(document.activeElement?.id === 'website')}>
+          <label className="pl-label" htmlFor="website">Your company website</label>
           <div className="pl-controls">
             <div className={`pl-field${shake % 2 ? ' shake' : shake ? ' shake-b' : ''}`} onFocus={() => { setInvite(false); stream.current?.setHover(true); }} onBlur={() => stream.current?.setHover(false)}>
-              <input id="agent-website" name="website" inputMode="url" autoComplete="url" placeholder="yourcompany.com" required
-                value={website} disabled={busy} onChange={event => { setInvite(false); setWebsite(event.target.value); stream.current?.boost(1100); }} /></div>
-            <button className="pl-btn pl-btn-primary pl-btn-block" type="submit" disabled={busy} aria-busy={busy}>{busy ? 'Starting' : `Find ${count} companies`} <Arrow /></button>
+              <CompanySearch value={website} clientId={configuredDirectoryId()} iconLookup={false} disabled={busy} label="Your company website"
+                placeholder="Company name or website" onChange={value => { setInvite(false); setWebsite(value); stream.current?.boost(1100); }} /></div>
+            <button className="pl-btn pl-btn-primary pl-btn-block" type="submit" disabled={busy} aria-busy={busy}>{busy ? 'Starting' : `Find ${count} ${count === 1 ? 'company' : 'companies'}`} <Arrow /></button>
           </div>
           <div className="al-count">
             <label htmlFor="agent-count">How many companies <span className="optional">optional</span></label>

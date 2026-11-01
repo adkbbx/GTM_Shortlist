@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+import { SiteIcon } from '../SiteIcon';
 import { isActive } from './agent-api';
 import type { AgentEvent, AgentRun, AgentRunView, Company } from './agent-api';
 import './agent-live.css';
@@ -117,7 +118,8 @@ export function WorkingCard({ company, events }: { company: Company; events: Age
   const latest = mine.at(-1);
   const stage = latest ? STAGES[Math.max(0, stageOf(latest))] : null;
   return <article className="agent-working-card" aria-label={`${company.domain}, in progress`}>
-    <header><span className="agent-live-dot" aria-hidden="true" /><h4>{company.name || company.domain}</h4></header>
+    <header><SiteIcon domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="agent-logo" />
+      <h4>{company.name || company.domain}</h4><span className="agent-live-dot" aria-hidden="true" /></header>
     <p className="agent-working-step">{stage ? stage.label : 'Queued'}</p>
     <p className="agent-working-message">{latest?.message ?? 'Waiting for its turn.'}</p>
     {mine.length > 0 && <p className="agent-working-count">{mine.length} {mine.length === 1 ? 'step' : 'steps'} so far</p>}

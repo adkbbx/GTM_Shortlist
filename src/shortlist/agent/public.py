@@ -66,6 +66,8 @@ class PublicSettings(BaseModel):
     synthetic: bool = False
     # Saved real searches offered as read-only examples; None for none.
     showcase_dir: Path | None = SHOWCASE
+    # Brandfetch public client ID (never a secret key): company suggestions and logos in the browser; empty for none.
+    brandfetch_client_id: str = Field(default="", max_length=200, pattern=r"^[A-Za-z0-9_-]*$")
 
     @field_validator("app_url")
     @classmethod
@@ -103,7 +105,8 @@ class PublicSettings(BaseModel):
                    turnstile_secret=env("AGENT_PUBLIC_TURNSTILE_SECRET", ""),
                    trust_proxy=env_flag("AGENT_PUBLIC_TRUST_PROXY"), synthetic=env_flag("AGENT_PUBLIC_SYNTHETIC"),
                    showcase_dir=None if env("AGENT_PUBLIC_SHOWCASE", "").lower() == "off"
-                   else env("AGENT_PUBLIC_SHOWCASE") or SHOWCASE)
+                   else env("AGENT_PUBLIC_SHOWCASE") or SHOWCASE,
+                   brandfetch_client_id=env("SHORTLIST_BRANDFETCH_CLIENT_ID", "").strip())
 
 
 class PublicHealth(BaseModel):
@@ -184,10 +187,15 @@ class PublicPolicy(RoutePolicy):
             raise HTTPException(403, "The browser check did not pass. Reload the page and try again.")
         self.spending()
         self.hourly(request)
-        return body.model_copy(update={"overrides": self.capped(body.overrides or Overrides()), "turnstile": None})
+        return body.model_copy(update={"overrides": self.capped(body.overrides or Overrides()), "turnstile": None,
+                                       "previous": body.previous})
 
     def started(self, result: RunResult) -> str:
         return self.token(result.id)
+
+    def history_runs(self, body: AgentStartInput) -> list[str]:
+        """Only searches this browser proves it started: one visitor's searches never shape another's."""
+        return [run.id for run in body.previous if hmac.compare_digest(run.token, self.token(run.id))]
 
     def before_override(self, request: Request, run_id: str, overrides: Overrides, current: RunResult) -> Overrides:
         if not hmac.compare_digest(request.headers.get("x-agent-edit-token", ""), self.token(run_id)):
@@ -294,7 +302,10 @@ def create_public_app(settings: PublicSettings | None = None, *, agent_settings:
         @app.get("/index.html", response_class=HTMLResponse, include_in_schema=False)
         def ui_index(agent: str | None = None):
             html = (dist / "index.html").read_text(encoding="utf-8")
-            return HTMLResponse(html.replace("<head>", "<head>" + START_FLOW + preview(agent), 1))
+            # Public ID only; the settings pattern allows letters, digits, _ and - before it reaches the HTML.
+            brand = (f'<meta name="shortlist-company-suggestions-client-id" content="{settings.brandfetch_client_id}">'
+                     if settings.brandfetch_client_id else "")
+            return HTMLResponse(html.replace("<head>", "<head>" + START_FLOW + brand + preview(agent), 1))
 
         def preview(run_id: str | None) -> str:
             """Link preview for a shared, finished board: what was found, never who looked."""

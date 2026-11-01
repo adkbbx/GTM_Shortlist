@@ -85,6 +85,20 @@ def test_shared_link_reads_but_only_the_starter_can_correct(client):
     finished(client, started["id"])
 
 
+def test_a_new_search_skips_only_companies_this_browser_already_researched(client):
+    first = client.post("/api/agent/runs", json={"website": "seller.example"}).json()
+    done = finished(client, first["id"])
+    researched = {c["domain"] for c in done["run"]["companies"]}
+    assert researched
+    previous = [{"id": first["id"], "token": first["edit_token"]}]
+    again = finished(client, client.post("/api/agent/runs", json={"website": "seller.example", "previous": previous}).json()["id"])
+    skipped = {a["domain"] for a in again["run"]["set_aside"] if a["reason"].startswith("Already researched")}
+    assert researched <= skipped and not researched & {c["domain"] for c in again["run"]["companies"]}
+    forged = [{"id": first["id"], "token": "0" * 64}]  # another visitor's run without its token: not used
+    other = finished(client, client.post("/api/agent/runs", json={"website": "seller.example", "previous": forged}).json()["id"])
+    assert not any(a["reason"].startswith("Already researched") for a in other["run"]["set_aside"])
+
+
 def test_hourly_limit_per_visitor(tmp_path):
     with make_client(tmp_path, runs_per_hour=2, max_active=10) as client:
         ids = [client.post("/api/agent/runs", json={"website": "seller.example"}).json()["id"] for _ in range(2)]
@@ -243,6 +257,15 @@ def test_a_finished_board_downloads_as_csv_with_quotes_and_opening_lines(tmp_pat
                    for r in shortlisted)
         assert client.get("/api/agent/runs/" + "0" * 32 + "/shortlist.csv").status_code == 404
     assert cell("=HYPERLINK(1)") == "'=HYPERLINK(1)" and cell("@SUM") == "'@SUM" and cell("plain\ntext") == "plain text"
+
+
+def test_brandfetch_public_id_reaches_the_page_only_when_set(tmp_path):
+    with make_client(tmp_path, brandfetch_client_id="public-Client_1") as client:
+        assert '<meta name="shortlist-company-suggestions-client-id" content="public-Client_1">' in client.get("/").text
+    with make_client(tmp_path / "none") as client:
+        assert "company-suggestions-client-id" not in client.get("/").text
+    with pytest.raises(ValidationError):
+        PublicSettings(app_url=ORIGIN, secret=SECRET, brandfetch_client_id='x"><script>')
 
 
 def test_examples_can_be_turned_off(tmp_path):

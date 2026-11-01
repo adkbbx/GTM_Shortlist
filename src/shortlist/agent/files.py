@@ -6,6 +6,7 @@ Writes are atomic (temporary file, then rename) and serialised by one lock. Run 
 import json
 import os
 import re
+import time
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
@@ -33,16 +34,32 @@ class FileAgentRuns:
         return self.directory / f"{run_id}.json"
 
     def read(self, run_id: str) -> dict:
-        try:
-            return json.loads(self.path(run_id).read_text(encoding="utf-8"))
-        except FileNotFoundError:
-            raise KeyError(run_id) from None
+        path = self.path(run_id)
+        # Windows briefly denies access while a writer replaces the file (see write); retry rather than fail the request.
+        for wait in (0.01, 0.03, 0.1, 0.3, 0.6, None):
+            try:
+                return json.loads(path.read_text(encoding="utf-8"))
+            except FileNotFoundError:
+                raise KeyError(run_id) from None
+            except PermissionError:
+                if wait is None:
+                    raise
+                time.sleep(wait)
+        raise KeyError(run_id)
 
     def write(self, record: dict) -> None:
         target = self.path(record["id"])
         temporary = target.with_suffix(".tmp")
         temporary.write_text(json.dumps(record), encoding="utf-8")
-        os.replace(temporary, target)
+        # Windows refuses to replace a file another thread has open for reading; that reader finishes within moments.
+        for wait in (0.01, 0.03, 0.1, 0.3, 0.6):
+            try:
+                os.replace(temporary, target)
+                break
+            except PermissionError:
+                time.sleep(wait)
+        else:
+            os.replace(temporary, target)
         if self.after_write is not None:
             self.after_write()
 

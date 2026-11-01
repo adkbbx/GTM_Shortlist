@@ -31,6 +31,19 @@ const tokenKey = (id: string) => `gtm-agent-edit:${id}`;
 export function editToken(id: string): string | null {
   try { return window.localStorage.getItem(tokenKey(id)); } catch { return null; }
 }
+/** Searches this browser started (it holds their edit tokens), newest last, at most 30. */
+export function ownSearches(): { id: string; token: string }[] {
+  try {
+    const found: { id: string; token: string }[] = [];
+    for (let index = 0; index < window.localStorage.length; index++) {
+      const key = window.localStorage.key(index) ?? '';
+      const id = key.startsWith('gtm-agent-edit:') ? key.slice('gtm-agent-edit:'.length) : '';
+      const token = id ? window.localStorage.getItem(key) : null;
+      if (/^[0-9a-f]{32}$/.test(id) && token) found.push({ id, token });
+    }
+    return found.slice(-30);
+  } catch { return []; }
+}
 function keepEditToken(id: string, token: string) {
   try { window.localStorage.setItem(tokenKey(id), token); } catch { /* without storage the search stays read-only here */ }
 }
@@ -59,7 +72,10 @@ function parseRun(data: unknown): AgentRunView {
 export const agentApi = {
   health: async () => await call('/api/health') as AgentHealth,
   start: async (website: string, overrides?: Overrides, turnstile?: string) => {
-    const started = await call('/api/agent/runs', { website, ...(overrides ? { overrides } : {}), ...(turnstile ? { turnstile } : {}) }) as
+    // This browser's earlier searches, so the new one skips companies already researched for the same website.
+    const previous = ownSearches();
+    const started = await call('/api/agent/runs', { website, ...(overrides ? { overrides } : {}), ...(turnstile ? { turnstile } : {}),
+      ...(previous.length ? { previous } : {}) }) as
       { id: string; status: string; edit_token?: string | null };
     if (started.edit_token) keepEditToken(started.id, started.edit_token);
     return started;

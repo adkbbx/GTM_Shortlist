@@ -13,6 +13,6 @@ export const useAgentConfig = () => useContext(AgentConfigContext);
 
 /** Company counts to offer: the usual steps up to the server's cap, always including the cap and the current value. */
 export function countOptions(max: number, current?: number): number[] {
-  const steps = (max >= 10 ? [5, 10, 15, 20] : [3, 5]).filter(value => value <= max);
+  const steps = (max >= 10 ? [1, 5, 10, 15, 20] : [1, 3, 5]).filter(value => value <= max);
   return [...new Set([...steps, max, ...(current ? [current] : [])])].sort((a, b) => a - b);
 }

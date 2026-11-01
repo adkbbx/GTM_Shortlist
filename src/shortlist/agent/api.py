@@ -19,12 +19,21 @@ from shortlist.agent.storage import SQLiteAgentRuns
 from shortlist.fetch import FetchError
 
 
+class PreviousRun(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    id: str = Field(pattern=r"^[0-9a-f]{32}$")
+    token: str = Field(max_length=128)
+
+
 class AgentStartInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
     website: str = Field(min_length=3, max_length=300)
     overrides: Overrides | None = None
     # Cloudflare Turnstile token; only the public demo asks for one.
     turnstile: str | None = Field(default=None, max_length=4096)
+    # Public demo: this browser's earlier searches with their edit tokens, so a new search skips companies it already
+    # researched for the same website without seeing anyone else's searches.
+    previous: list[PreviousRun] = Field(default_factory=list, max_length=30)
 
 
 class AgentStarted(BaseModel):
@@ -64,6 +73,10 @@ class RoutePolicy:
     def started(self, result: RunResult) -> str | None:
         return None
 
+    def history_runs(self, body: AgentStartInput) -> list[str] | None:
+        """Runs whose companies a new search sets aside; None uses the whole store's history (local mode)."""
+        return None
+
     def before_override(self, request: Request, run_id: str, overrides: Overrides, current: RunResult) -> Overrides:
         return overrides
 
@@ -83,7 +96,7 @@ def register_agent_routes(app: FastAPI, db_path: Path | None, service: AgentServ
     def start_agent_run(body: AgentStartInput, request: Request):
         body = policy.before_start(request, body)
         try:
-            result = service.start(body.website, body.overrides)
+            result = service.start(body.website, body.overrides, history_runs=policy.history_runs(body))
         except FetchError as exc:
             raise HTTPException(422, str(exc)) from exc
         return AgentStarted(id=result.id, status=result.status, edit_token=policy.started(result))

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { SiteIcon } from '../SiteIcon';
 import { Assumptions } from './Assumptions';
 import { Feed, Monitor, Working } from './AgentLive';
 import { EvidenceList, QuoteBlock } from './Evidence';
@@ -79,7 +80,8 @@ function CompanyCard({ company, run }: { company: Company; run: AgentRun }) {
   const headingId = `company-${company.domain.replace(/\W+/g, '-')}`;
   return <article className={`agent-card verdict-${verdict.kind}`} aria-labelledby={headingId}>
     <header className="agent-card-head">
-      <h3 id={headingId}>{company.name || company.domain}</h3>
+      <div className="agent-card-title"><SiteIcon domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="agent-logo" />
+        <h3 id={headingId}>{company.name || company.domain}</h3></div>
       <a href={company.url} target="_blank" rel="noopener noreferrer">{company.domain}</a>
     </header>
     {verdict.kind === 'rejected' && <div className="agent-reason">

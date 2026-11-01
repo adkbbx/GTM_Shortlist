@@ -13,13 +13,15 @@ test('the public demo starts from a website alone, caps the size and shares a re
   await expect(page.getByLabel('Your company website')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Earlier research' })).toHaveCount(0);
   await expect(page.getByText('Public demo: up to 5 companies per search.')).toBeVisible();
-  await expect(page.locator('#agent-count option')).toHaveText(['3', '5']);
+  await expect(page.locator('#agent-count option')).toHaveText(['1', '3', '5']);
+  await expect(page.getByRole('button', { name: 'Find 1 company' })).toBeVisible();  // one company by default
   await expect(page.getByText('Built with Muse Spark Open.')).toBeVisible();
   expect(await noOverflow(page)).toBe(true);
   mkdirSync('.impeccable/review', { recursive: true });
   await page.screenshot({ path: `.impeccable/review/${info.project.name}-agent-public-start.png`, fullPage: true });
 
   await page.getByLabel('Your company website').fill('seller.example');
+  await page.locator('#agent-count').selectOption('5');
   await page.getByRole('button', { name: 'Find 5 companies' }).click();
   await expect(page).toHaveURL(/[?&]agent=[0-9a-f]{32}/);
   await expect(page.locator('.column-rejected').getByRole('heading', { name: 'Bright Kettle' })).toBeVisible({ timeout: 30000 });

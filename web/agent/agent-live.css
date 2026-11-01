@@ -91,3 +91,11 @@
   .agent-step-text{display:none}
 }
 @media(prefers-reduced-motion:reduce){.agent-live-dot,.agent-stepper .step-active .agent-step-dot,.agent-working-card::after,.agent-log li:first-child{animation:none}}
+
+/* Company logos: the site's own favicon, then Brandfetch when a public client ID is set, else the first letter. */
+.agent-logo.site-icon{flex:none;display:inline-grid;place-items:center;width:1.75rem;height:1.75rem;border-radius:.4375rem;border:1px solid var(--line,#e1dfd9);background:#fff;font-size:.75rem;font-weight:700;color:#5c5853}
+.agent-logo.site-icon img{width:1.25rem;height:1.25rem}
+.agent-card-title{display:flex;align-items:center;gap:.625rem;min-width:0}
+.agent-working-card header .agent-live-dot{margin-left:auto}
+.al-card h3,.al-result-row{display:flex;align-items:center;gap:.625rem}
+
