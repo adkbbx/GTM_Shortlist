@@ -221,6 +221,10 @@ class AgentRunner:
         if company.evidence and company.status != "budget_reached":
             self.emit("skeptic", f"Skeptic checking {len(company.evidence)} quotes", company=ref.domain)
         company.decisions = judge(company, result.profile, result.disqualifiers, calls, use_skeptic=self.use_skeptic)
+        if company.decisions:
+            kept = sum(d.decision == "supports" for d in company.decisions)
+            self.emit("skeptic", f"Kept {kept} of {len(company.decisions)} quotes; the rest were contradicted or too weak",
+                      company=ref.domain)
         company.verdict = decide(company, result.profile, result.disqualifiers, self.providers.clock().date(),
                                  result.overrides.exclusions)
         self.add_pitch(result, company, calls)

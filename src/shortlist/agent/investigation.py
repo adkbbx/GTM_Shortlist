@@ -205,7 +205,9 @@ class Investigation:
         except FetchError as exc:
             if "limit" not in str(exc):
                 self.result.blocked.append(f"{url[:300]}: {exc}")
+                self.ctx.emit("investigation", f"Could not read {url[:160]}", company=self.company.domain, level="warn")
             return f"Could not fetch this page: {exc}"
+        self.ctx.emit("investigation", f"Read {page.url[:200]}", company=self.company.domain)
         dates = ", ".join(d.isoformat() for d in page.dates[:3])
         note = f"\nThe page declares publication date(s): {dates}" if dates else ""
         return f'<page url="{page.url}">\n{excerpt(page, 6000)}\n</page>{note}'
@@ -268,6 +270,7 @@ class Investigation:
                 if search.query:
                     self.queries.append(search.query)
                     self.places.append(f'search "{search.query[:120]}"')
+                    self.ctx.emit("investigation", f'Searched "{search.query[:160]}"', company=self.company.domain)
             if turn.function_calls and tools:
                 outputs = [{"type": "function_call_output", "call_id": call.call_id, "output": self.tool(call)}
                            for call in turn.function_calls]
