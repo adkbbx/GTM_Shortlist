@@ -31,7 +31,7 @@ export function Stepper({ states, compact = false }: { states: StepState[]; comp
   return <ol className={`agent-stepper${compact ? ' is-compact' : ''}`}>
     {STAGES.map((stage, index) => <li key={stage.label} className={`step-${states[index]}`} aria-current={states[index] === 'active' ? 'step' : undefined}>
       <span className="agent-step-dot" aria-hidden="true">{states[index] === 'done' ? '✓' : index + 1}</span>
-      <span className="agent-step-text"><span>{stage.label}</span><small>{stage.by}</small></span>
+      <span className="agent-step-text"><span>{stage.label}</span></span>
       <span className="sr-only">{states[index] === 'done' ? ', done' : states[index] === 'active' ? ', working now' : ', not started'}</span>
     </li>)}
   </ol>;

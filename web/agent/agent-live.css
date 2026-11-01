@@ -203,3 +203,29 @@
 @media(prefers-reduced-motion:reduce){.agent-tile,.tile-hiring .agent-tile-glyph,.agent-track li.is-now span::after{animation:none}}
 @media(max-width:700px){.agent-wall{grid-template-columns:repeat(2,minmax(0,1fr))}.agent-wall .agent-tile:nth-last-child(n+7){display:none}.agent-early-list li:nth-last-child(n+5){display:none}.agent-tile{padding:.4375rem .5rem;gap:.5rem}.agent-tile-logo.site-icon,.agent-tile-glyph{width:1.5rem;height:1.5rem}}
 @media(max-width:700px){.agent-early-learned p span{display:block;min-width:0;margin-bottom:.125rem}}
+
+/* Outreach email dialog */
+.agent-dialog{width:min(36rem,calc(100vw - 2rem));max-height:calc(100dvh - 2rem);padding:0;border:0;border-radius:1rem;background:var(--surface);color:var(--ink);box-shadow:0 30px 80px -30px rgba(27,27,27,.55)}
+.agent-dialog::backdrop{background:rgba(27,27,27,.35);backdrop-filter:blur(3px)}
+.agent-dialog[open]{animation:agent-dialog-in .25s cubic-bezier(.2,.7,.2,1)}
+@keyframes agent-dialog-in{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.agent-dialog-head{display:flex;align-items:center;gap:.875rem;padding:1.125rem 1.25rem;border-bottom:1px solid #f0eee9}
+.agent-dialog-head>div{flex:1;min-width:0}
+.agent-dialog-head p{font-size:.75rem;font-weight:600;color:var(--muted)}
+.agent-dialog-head h2{font-size:1.125rem;overflow-wrap:anywhere}
+.agent-dialog-close{min-height:2.5rem;width:2.5rem;padding:0;background:transparent;border:0;color:var(--muted);box-shadow:none}
+.agent-dialog-close:hover{background:#f0eee9;color:var(--ink);transform:none}
+.agent-dialog-close path{stroke:currentColor;stroke-width:1.8;fill:none}
+.agent-dialog-body{padding:1.125rem 1.25rem 1.25rem}
+.agent-dialog-label{font-size:.6875rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.agent-dialog .agent-email-subject{margin-top:.25rem;font-size:1.0625rem;font-weight:600}
+.agent-dialog .agent-email-body{margin-top:1rem;padding-top:1rem;border-top:1px solid #f0eee9;font-size:.9375rem;line-height:1.65}
+.agent-dialog-foot{display:flex;align-items:center;flex-wrap:wrap;gap:.75rem;margin-top:1.25rem}
+.agent-dialog-foot>button{min-height:2.75rem;padding:.5rem 1.125rem;font-size:.875rem}
+.agent-dialog-link{font-size:.875rem;font-weight:600;min-height:2.75rem;display:inline-flex;align-items:center}
+.agent-dialog-checked{margin-left:auto;font-size:.75rem;font-weight:600;color:#1f7a4d}
+.agent-dialog-wait p{display:flex;align-items:center;gap:.625rem;font-size:.9375rem;font-weight:600}
+.agent-skeleton{display:block;height:.75rem;margin-top:.875rem;border-radius:.375rem;background:linear-gradient(90deg,#f0eee9 25%,#f8f6f2 50%,#f0eee9 75%);background-size:200% 100%;animation:agent-shimmer 1.2s linear infinite}
+.agent-skeleton.short{width:60%}
+@keyframes agent-shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+@media(prefers-reduced-motion:reduce){.agent-dialog[open],.agent-skeleton{animation:none}}

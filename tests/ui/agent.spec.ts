@@ -60,7 +60,7 @@ test('a website alone produces a live board with three verdicts and quoted evide
   await shortlisted.getByRole('button', { name: 'Details' }).click();
   const pitch = shortlisted.getByRole('region', { name: 'Why now and an opening line' });
   await expect(pitch).toContainText('We are hiring two customer support agents');
-  await expect(pitch).toContainText('Checked against the quotes by Muse Spark Open');
+  await expect(pitch).toContainText('Checked against the quotes');
   await expect(pitch.getByRole('button', { name: 'Copy opening line' })).toBeVisible();
   await expect(page.locator('.column-needs_look, .column-rejected').locator('.agent-pitch')).toHaveCount(0);
 
@@ -84,8 +84,7 @@ test('a website alone produces a live board with three verdicts and quoted evide
   await expect(page.locator('.agent-popover:popover-open')).toContainText('Job post');
   await page.keyboard.press('Escape');
 
-  await expect(page.locator('.agent-telemetry')).toContainText('model calls');
-  await expect(page.locator('.agent-telemetry')).toContainText('$');
+  await expect(page.locator('.agent-telemetry')).toHaveCount(0);  // the monitor carries time, searches and cost
   expect(await noOverflow(page)).toBe(true);
   mkdirSync('.impeccable/review', { recursive: true });
   await page.screenshot({ path: `.impeccable/review/${info.project.name}-agent-board.png`, fullPage: true });

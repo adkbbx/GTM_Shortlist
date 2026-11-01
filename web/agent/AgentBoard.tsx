@@ -69,26 +69,47 @@ function PitchBlock({ pitch }: { pitch: NonNullable<Company['pitch']> }) {
     <blockquote className="agent-pitch-opener">{pitch.opener}</blockquote>
     <div className="agent-pitch-foot">
       <button type="button" className="agent-small-button" onClick={() => copy('opener', pitch.opener)}>{copied ? 'Copied' : 'Copy opening line'}</button>
-      <span>{pitch.checked ? 'Checked against the quotes by Muse Spark Open' : 'Not checked against the quotes'}</span>
+      {pitch.checked && <span>✓ Checked against the quotes</span>}
     </div>
   </section>;
 }
 
-/** A drafted outreach email: subject and body, checked against the same quotes as the opening line. */
-function EmailBlock({ email }: { email: NonNullable<Company['outreach']> }) {
+/** The outreach email in a dialog: opens at once on Draft outreach, shows that it is writing, then the email. */
+function EmailDialog({ company, open, drafting, error, onClose }: { company: Company; open: boolean; drafting: boolean; error: string;
+  onClose: () => void }) {
+  const dialog = useRef<HTMLDialogElement>(null);
   const { copied, copy } = useCopy();
-  const mail = `mailto:?${new URLSearchParams({ subject: email.subject, body: email.body }).toString().replace(/\+/g, '%20')}`;
-  return <section className="agent-email" aria-label="Outreach email">
-    <p className="agent-pitch-label">Subject</p>
-    <p className="agent-email-subject">{email.subject}</p>
-    <p className="agent-pitch-label">Email</p>
-    <div className="agent-email-body">{email.body}</div>
-    <div className="agent-pitch-foot">
-      <button type="button" className="agent-small-button" onClick={() => copy('email', `Subject: ${email.subject}\n\n${email.body}`)}>{copied ? 'Copied' : 'Copy email'}</button>
-      <a className="agent-small-button" href={mail}>Open in mail app</a>
-      <span>{email.checked ? 'Every statement checked against the quotes by Muse Spark Open' : 'Not checked against the quotes'}</span>
-    </div>
-  </section>;
+  useEffect(() => {
+    const node = dialog.current;
+    if (!node) return;
+    if (open && !node.open) node.showModal();
+    if (!open && node.open) node.close();
+  }, [open]);
+  const email = company.outreach;
+  const mail = email ? `mailto:?${new URLSearchParams({ subject: email.subject, body: email.body }).toString().replace(/\+/g, '%20')}` : '';
+  return <dialog ref={dialog} className="agent-dialog" aria-label="Outreach email" onClose={onClose}
+    onClick={event => { if (event.target === dialog.current) onClose(); }}>
+    <header className="agent-dialog-head">
+      <SiteIcon domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="agent-logo agent-row-logo" />
+      <div><p>Outreach email</p><h2>{company.name || company.domain}</h2></div>
+      <button type="button" className="agent-dialog-close" aria-label="Close" onClick={onClose}>
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" /></svg></button>
+    </header>
+    {email ? <div className="agent-dialog-body">
+      <p className="agent-dialog-label">Subject</p>
+      <p className="agent-email-subject">{email.subject}</p>
+      <div className="agent-email-body">{email.body}</div>
+      <footer className="agent-dialog-foot">
+        <button type="button" onClick={() => copy('email', `Subject: ${email.subject}\n\n${email.body}`)}>{copied ? 'Copied' : 'Copy email'}</button>
+        <a className="agent-dialog-link" href={mail}>Open in mail app</a>
+        {email.checked && <span className="agent-dialog-checked">✓ Checked against the quotes</span>}
+      </footer>
+    </div> : error ? <div className="agent-dialog-body"><p className="notice" role="alert">{error}</p></div>
+      : <div className="agent-dialog-body agent-dialog-wait" role="status">
+        <p><span className="agent-spinner" aria-hidden="true" />{drafting ? 'Writing from the quotes the skeptic accepted' : 'Starting'}</p>
+        <span className="agent-skeleton" /><span className="agent-skeleton" /><span className="agent-skeleton short" />
+      </div>}
+  </dialog>;
 }
 
 const VERDICT = { shortlisted: 'Shortlisted', needs_look: 'Needs a look', rejected: 'Rejected' } as const;
@@ -120,16 +141,18 @@ function CompanyRow({ company, run, events, runId, onUpdate }: { company: Compan
   const [open, setOpen] = useState(false);
   const [drafting, setDrafting] = useState(false);
   const [error, setError] = useState('');
+  const [mailOpen, setMailOpen] = useState(false);
   const headingId = `company-${company.domain.replace(/\W+/g, '-')}`;
   const panelId = `${headingId}-details`;
   const draft = async () => {
+    setMailOpen(true);
+    if (company.outreach || drafting) return;
     setDrafting(true); setError('');
     try {
       const next = await agentApi.outreach(runId, company.domain);
       onUpdate(next);
-      const updated = next.run.companies.find(c => c.domain === company.domain);
-      if (updated?.outreach) setOpen(true);
-      else setError('No email kept: nothing it wrote could be checked against the quotes.');
+      if (!next.run.companies.find(c => c.domain === company.domain)?.outreach)
+        setError('No email this time: nothing it wrote could be checked against the quotes.');
     } catch (reason) { setError(describe(reason)); } finally { setDrafting(false); }
   };
   const mine = events.filter(event => event.company === company.domain);
@@ -142,16 +165,15 @@ function CompanyRow({ company, run, events, runId, onUpdate }: { company: Compan
         <p className="agent-row-reason">{reasonOf(company)}</p>
       </div>
       <div className="agent-row-actions">
+        {verdict.kind === 'shortlisted' && company.outreach && <button type="button" className="agent-expand" onClick={draft}>View email</button>}
         {verdict.kind === 'shortlisted' && editable && !company.outreach && <button type="button" className="agent-draft" onClick={draft}
-          disabled={drafting} aria-busy={drafting}>{drafting ? 'Drafting' : 'Draft outreach'}</button>}
+          aria-busy={drafting}>{drafting ? 'Drafting' : 'Draft outreach'}</button>}
         <button type="button" className="agent-expand" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen(value => !value)}>
           {open ? 'Hide' : 'Details'}<span aria-hidden="true" className="agent-expand-mark" /></button>
       </div>
     </div>
-    {error && <p className="notice agent-row-error" role="alert">{error}</p>}
     <div id={panelId} className="agent-row-panel" hidden={!open}>
       <p className="agent-row-site"><a href={company.url} target="_blank" rel="noopener noreferrer">{company.domain}</a></p>
-      {company.outreach && <EmailBlock email={company.outreach} />}
       {verdict.kind === 'shortlisted' && company.pitch && <PitchBlock pitch={company.pitch} />}
       {verdict.kind === 'shortlisted' && (verdict.unconfirmed ?? []).length > 0 && <div className="agent-unconfirmed">
         <p>Check before you reach out</p>
@@ -168,6 +190,7 @@ function CompanyRow({ company, run, events, runId, onUpdate }: { company: Compan
       {company.found_via && <p className="agent-checked"><span>Found by:</span> {company.found_via}</p>}
       <Trace events={mine} />
     </div>
+    <EmailDialog company={company} open={mailOpen} drafting={drafting} error={error} onClose={() => setMailOpen(false)} />
   </article>;
 }
 
@@ -178,8 +201,7 @@ function Columns({ run, events, apply, busy, onUpdate }: { run: AgentRun; events
   const working = run.companies.filter(company => !company.verdict);
   return <section className="agent-results" aria-labelledby="results-heading">
     <div className="agent-section-head agent-results-head">
-      <div><h2 id="results-heading">Companies</h2>
-        <p>{decided.length} of {run.companies.length} checked. Fixed rules decide each verdict from quotes the skeptic accepted.</p></div>
+      <div><h2 id="results-heading">Companies</h2></div>
       {editable && <label className="agent-count-control">Research up to
         <select value={run.company_count} disabled={busy || isActive(run.status)} onChange={event => apply({ company_count: Number(event.target.value) })}>
           {countOptions(maxCompanies, run.company_count).map(count => <option key={count} value={count}>{count} {count === 1 ? 'company' : 'companies'}</option>)}
@@ -240,33 +262,6 @@ function Describe({ apply, busy, summary }: { apply: (overrides: Overrides) => v
       <button type="submit" disabled={busy || offer.trim().length < 3 || buyer.trim().length < 3}>Continue</button>
     </form>
   </details>;
-}
-
-function Transparency({ run }: { run: AgentRun }) {
-  if (!run.dropped.length && !run.set_aside.length) return null;
-  return <section className="agent-transparency" aria-label="What was left out">
-    {run.dropped.length > 0 && <details>
-      <summary>{run.dropped.length} model {run.dropped.length === 1 ? 'claim was' : 'claims were'} left out: the quote was not on the page</summary>
-      <ul>{run.dropped.map((item, index) => <li key={index}>{item.company ? `${item.company}, ` : ''}{item.stage} ({item.claim_type}): {item.reason}</li>)}</ul>
-    </details>}
-    {run.set_aside.length > 0 && <details>
-      <summary>{run.set_aside.length} search {run.set_aside.length === 1 ? 'result was' : 'results were'} set aside</summary>
-      <ul>{run.set_aside.map(item => <li key={item.domain}>{item.domain}: {item.reason}
-        {item.previous_run && <> · <a href={`?agent=${item.previous_run}`}>open that search</a></>}</li>)}</ul>
-    </details>}
-  </section>;
-}
-
-function Telemetry({ run }: { run: AgentRun }) {
-  const t = run.telemetry;
-  const models = [...new Set(t.calls.map(call => `${call.provider} ${call.model}`))];
-  return <footer className="agent-telemetry">
-    <p><strong>${t.cost_usd.toFixed(3)}</strong> estimated of ${t.budget_usd.toFixed(2)} budget
-      <span>{(t.elapsed_ms / 1000).toFixed(1)} s</span><span>{t.model_calls} model calls</span>
-      <span>{t.searches} searches</span><span>{t.pages_fetched} pages read</span>
-      {t.budget_reached && <span className="agent-budget">Budget reached</span>}</p>
-    {models.length > 0 && <p className="agent-models">Models: {models.join(' · ')}{run.skeptic ? '' : ' · run without the skeptic'}</p>}
-  </footer>;
 }
 
 export function AgentBoard({ runId, onNew }: { runId: string; onNew: () => void }) {
@@ -343,8 +338,6 @@ export function AgentBoard({ runId, onNew }: { runId: string; onNew: () => void 
     {view.status === 'needs_choice' && run.profile && <ReadingChoice profile={run.profile} apply={apply} busy={busy} />}
     {run.companies.length > 0 && <Columns run={run} events={events} apply={apply} busy={busy} onUpdate={next => { setView(next); setEvents(next.events); lastSeq.current = next.events.at(-1)?.seq ?? 0; }} />}
     {run.profile && view.status !== 'needs_choice' && run.profile.offer && <Assumed run={run} apply={apply} busy={busy} />}
-    <Transparency run={run} />
-    <Telemetry run={run} />
     </div><Feed events={events} open={feedOpen} onClose={() => setFeedOpen(false)} live={active} /></div>
   </div></AgentConfigContext.Provider>;
 }
