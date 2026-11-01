@@ -81,13 +81,14 @@ function ReplayConsole({ view, onOpen, shown }: { view: AgentRunView; onOpen: (i
   const finished = shown >= events.length;
   const decided = new Set(played.filter(e => e.stage === 'verdict' && e.company).map(e => e.company)).size;
   const shortlisted = view.run.companies.filter(c => c.verdict?.kind === 'shortlisted');
-  const current = played.at(-1);
+  const states = stepStates(played, !finished);
+  const active = states.indexOf('active');
   return <figure className="al-console" aria-label={`Replay of a real search for ${domainOf(view.run.website)}`}>
     <div className="al-console-bar">
       <span className="al-chip"><span className="agent-live-dot" aria-hidden="true" />Replay of a real run</span>
       <span className="al-console-title">{domainOf(view.run.website)} · {day(view.run.created_at)}</span>
     </div>
-    <Stepper states={stepStates(played, !finished)} compact />
+    <Stepper states={states} compact />
     <div className="al-console-body" aria-hidden="true">
       {finished ? <div className="al-result">
         <p className="al-result-head">{shortlisted.length} shortlisted of {view.run.companies.length} researched</p>
@@ -107,7 +108,7 @@ function ReplayConsole({ view, onOpen, shown }: { view: AgentRunView; onOpen: (i
     </div>
     <figcaption className="al-console-foot">
       <span>{finished ? 'Every verdict links to the exact sentence it rests on.'
-        : current ? `${STAGES[Math.max(0, stageOf(current))].label} · ${decided}/${view.run.company_count} companies decided` : 'Starting'}</span>
+        : played.length ? `${STAGES[Math.max(0, active)].label} · ${decided}/${view.run.company_count} companies decided` : 'Starting'}</span>
       <a href={`?agent=${view.run.id}`} onClick={event => { event.preventDefault(); onOpen(view.run.id); }}>Open this search <Arrow /></a>
     </figcaption>
   </figure>;

@@ -22,9 +22,23 @@ const STAGE_TAG: Record<string, string> = { seller: 'Site', competitors: 'Compet
 
 type StepState = 'done' | 'active' | 'todo';
 export function stepStates(events: AgentEvent[], running: boolean): StepState[] {
-  const seen = new Set(events.map(stageOf).filter(index => index >= 0));
-  const current = running ? [...events].reverse().map(stageOf).find(index => index >= 0) ?? 0 : -1;
-  return STAGES.map((_, index) => index === current ? 'active' : seen.has(index) ? 'done' : 'todo');
+  if (!running) {
+    const seen = new Set(events.map(stageOf).filter(index => index >= 0));
+    return STAGES.map((_, index) => seen.has(index) ? 'done' : 'todo');
+  }
+  // Companies run in parallel and some finish early (an unreadable site goes straight to a verdict), so a step is done
+  // only when every company still in progress is past it: the frontier is the furthest-behind company's step.
+  const latest = new Map<string, number>();
+  const decided = new Set<string>();
+  for (const event of events) {
+    if (!event.company) continue;
+    if (event.stage === 'verdict') decided.add(event.company);
+    const index = stageOf(event);
+    if (index >= 3) latest.set(event.company, index);
+  }
+  const working = [...latest].filter(([company]) => !decided.has(company)).map(([, index]) => index);
+  const frontier = working.length ? Math.min(...working) : [...events].reverse().map(stageOf).find(index => index >= 0) ?? 0;
+  return STAGES.map((_, index) => index < frontier ? 'done' : index === frontier ? 'active' : 'todo');
 }
 
 export function Stepper({ states, compact = false }: { states: StepState[]; compact?: boolean }) {

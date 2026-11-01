@@ -244,3 +244,9 @@
 .ys-empty{margin-top:2rem;padding:2rem;border:1px dashed #d4d1ca;border-radius:.875rem;text-align:center;color:var(--muted)}
 .ys-empty p:first-child{font-weight:600;color:var(--ink);margin-bottom:.375rem}
 .ys-empty p{max-width:none}
+
+/* Brand: the checked-doorway mark, a sibling of the Eygentic arch */
+.agent-brand{gap:.625rem}
+.agent-brand-mark{width:1.75rem;height:1.75rem;flex:none}
+.agent-brand small{font-size:.75rem;font-weight:500;color:#5c5853;letter-spacing:0;padding-left:.625rem;border-left:1px solid rgba(27,27,27,.16)}
+@media(max-width:420px){.agent-brand small{display:none}}

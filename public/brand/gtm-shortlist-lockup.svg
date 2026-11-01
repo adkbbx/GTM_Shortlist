@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 302 64">
+  <path fill="#e0692c" fill-rule="evenodd" d="M18 4H46Q48 4 48 6V20Q60 25 60 38V58Q60 60 58 60H48Q46 60 46 58V36Q46 32 42 32H22Q18 32 18 36V58Q18 60 16 60H6Q4 60 4 58V38Q4 25 16 20V6Q16 4 18 4ZM24 12V20H30V12ZM36 12V20H42V12Z"/>
+  <path fill="#e0692c" d="M22 46L27 41L31 45L39 37L44 42L31 55Z"/>
+  <text x="76" y="42" fill="#1b1b1b" font-family="'Schibsted Grotesk', system-ui, sans-serif" font-size="30" font-weight="700">GTM Shortlist</text>
+</svg>
