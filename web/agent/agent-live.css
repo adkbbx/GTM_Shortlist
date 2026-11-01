@@ -229,3 +229,6 @@
 .agent-skeleton.short{width:60%}
 @keyframes agent-shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
 @media(prefers-reduced-motion:reduce){.agent-dialog[open],.agent-skeleton{animation:none}}
+
+.agent-title{display:flex;align-items:center;gap:.75rem;min-width:0}
+.agent-title-logo.site-icon{width:clamp(2.25rem,3vw,2.75rem);height:clamp(2.25rem,3vw,2.75rem);border-radius:.625rem;font-size:1.125rem}

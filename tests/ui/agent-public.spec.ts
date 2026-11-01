@@ -13,7 +13,8 @@ test('the public demo starts from a website alone, caps the size and shares a re
   await expect(page.getByLabel('Your company website')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Earlier research' })).toHaveCount(0);
   await expect(page.getByText('Public demo: up to 5 companies per search.')).toBeVisible();
-  await expect(page.locator('#agent-count option')).toHaveText(['1', '3', '5']);
+  await expect(page.getByRole('group', { name: 'Companies to find' }).getByRole('radio')).toHaveCount(3);
+  await expect(page.getByRole('radio', { name: '1', exact: true })).toBeChecked();
   await expect(page.getByRole('button', { name: 'Find 1 company' })).toBeVisible();  // one company by default
   await expect(page.getByText('Built with Muse Spark Open.')).toBeVisible();
   expect(await noOverflow(page)).toBe(true);
@@ -21,14 +22,13 @@ test('the public demo starts from a website alone, caps the size and shares a re
   await page.screenshot({ path: `.impeccable/review/${info.project.name}-agent-public-start.png`, fullPage: true });
 
   await page.getByLabel('Your company website').fill('seller.example');
-  await page.locator('#agent-count').selectOption('5');
+  await page.getByRole('radio', { name: '5', exact: true }).check();
   await page.getByRole('button', { name: 'Find 5 companies' }).click();
   await expect(page).toHaveURL(/[?&]agent=[0-9a-f]{32}/);
   await expect(page.locator('.column-rejected').getByRole('heading', { name: 'Bright Kettle' })).toBeVisible({ timeout: 30000 });
   await expect(page.getByRole('status').first()).toContainText('Done: 1 shortlisted, 1 needs a look, 1 rejected');
   expect(await page.getByRole('link', { name: 'Download CSV' }).getAttribute('href')).toMatch(/^\/api\/agent\/runs\/[0-9a-f]{32}\/shortlist\.csv$/);
-  const share = page.getByRole('link', { name: 'Share on X' });
-  expect(await share.getAttribute('href')).toMatch(/^https:\/\/x\.com\/intent\/post\?text=An\+agent\+found\+1\+company.*&url=.*agent%3D[0-9a-f]{32}$/);
+  await expect(page.getByRole('link', { name: 'Share on X' })).toHaveCount(0);
   // The browser that started the search drafts outreach for a Shortlisted company: subject and email, checked.
   const shortlisted = page.locator('.column-shortlisted');
   await shortlisted.getByRole('button', { name: 'Draft outreach' }).click();
@@ -46,7 +46,7 @@ test('the public demo starts from a website alone, caps the size and shares a re
   // It keeps its optional corrections.
   await page.locator('.agent-assumed > summary').click();
   await expect(page.locator('summary', { hasText: 'Add a competitor' })).toBeVisible();
-  await expect(page.locator('.agent-count-control select')).toBeVisible();
+  await expect(page.locator('.agent-results .count-picker')).toBeVisible();
   await expect(page.locator('.agent-shared')).toHaveCount(0);
   expect(await noOverflow(page)).toBe(true);
   await page.screenshot({ path: `.impeccable/review/${info.project.name}-agent-public-board.png`, fullPage: true });
@@ -69,7 +69,7 @@ test('the public demo starts from a website alone, caps the size and shares a re
   await shared.locator('.column-shortlisted').getByRole('button', { name: 'View email' }).click();
   await expect(shared.getByRole('dialog', { name: 'Outreach email' })).toContainText('Hi Trailgear Outfitters team,');
   await shared.keyboard.press('Escape');
-  await expect(shared.locator('.agent-count-control')).toHaveCount(0);
+  await expect(shared.locator('.count-picker')).toHaveCount(0);
   await shared.goto('/');
   await expect(shared.getByRole('region', { name: 'Your searches' })).toHaveCount(0);
   await shared.goto(page.url());

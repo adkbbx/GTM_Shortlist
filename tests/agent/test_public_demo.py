@@ -292,6 +292,12 @@ def test_brandfetch_public_id_reaches_the_page_only_when_set(tmp_path):
         PublicSettings(app_url=ORIGIN, secret=SECRET, brandfetch_client_id='x"><script>')
 
 
+def test_site_icon_lookup_checks_the_domain_and_stays_offline_in_synthetic_mode(client):
+    assert client.get("/api/site-icon/seller.example").json() == {"url": None}
+    assert client.get("/api/site-icon/localhost").status_code == 404
+    assert client.get("/api/site-icon/127.0.0.1").status_code == 404
+
+
 def test_examples_can_be_turned_off(tmp_path):
     with make_client(tmp_path, showcase_dir=None) as client:
         assert client.get("/api/health").json()["examples"] == []

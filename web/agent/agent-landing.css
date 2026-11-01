@@ -130,3 +130,16 @@
 .al-examples strong{font-size:1rem;line-height:1.35}
 .al-example-rejected{font-size:.8125rem;line-height:1.45;color:var(--pl-fail);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .al-example-open{margin-top:auto;padding-top:.375rem;font-size:.8125rem;font-weight:600;color:var(--pl-ink)}
+
+/* Story flows with the page: no pinning, the replay plays while in view */
+.al-story{height:auto;margin-top:0}
+.al-story-pin{position:static;min-height:0;padding-block:0}
+.al-story-bar span{transition:transform .42s linear}
+.al-lines li{animation-duration:.4s}
+/* Hero: room to breathe between the headline, the stream and the next section */
+.al .pl-hero-in{gap:clamp(3rem,8vh,5.5rem);padding-block:clamp(3.5rem,10vh,7rem) clamp(4rem,11vh,7.5rem)}
+.al .pl-hero-top{gap:2rem clamp(3rem,7vw,7rem)}
+.al .pl-intake{gap:1rem;padding:1.5rem}
+.al-demo-note{margin-top:.125rem}
+@media(max-width:1000px){.al-story-steps{display:grid}}
+@media(max-width:700px){.al-story-steps{display:none}.al .pl-hero-in{gap:2.5rem;padding-block:2.5rem 3rem}}

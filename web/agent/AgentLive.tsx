@@ -123,7 +123,7 @@ export function WorkingCard({ company, events }: { company: Company; events: Age
   const latest = mine.at(-1);
   const stage = latest ? STAGES[Math.max(0, stageOf(latest))] : null;
   return <article className="agent-working-card" aria-label={`${company.domain}, in progress`}>
-    <header><SiteIcon domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="agent-logo" />
+    <header><SiteIcon lookup domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="agent-logo" />
       <h4>{company.name || company.domain}</h4><span className="agent-live-dot" aria-hidden="true" /></header>
     <ol className="agent-track" aria-hidden="true">{['Investigate', 'Skeptic', 'Verdict'].map((label, index) => {
       const at = latest ? Math.max(0, stageOf(latest) - 3) : -1;
@@ -172,7 +172,7 @@ function Wall({ tiles }: { tiles: Tile[] }) {
   if (!tiles.length) return null;
   return <ul className="agent-wall" aria-label="Found so far">
     {tiles.slice(-12).map(tile => <li key={tile.key} className={`agent-tile tile-${tile.kind}`}>
-      {tile.domain ? <SiteIcon domain={tile.domain} fallback={(tile.domain ?? tile.title).slice(0, 1).toUpperCase()} className="agent-logo agent-tile-logo" />
+      {tile.domain ? <SiteIcon lookup domain={tile.domain} fallback={(tile.domain ?? tile.title).slice(0, 1).toUpperCase()} className="agent-logo agent-tile-logo" />
         : <span className="agent-tile-glyph" aria-hidden="true">{tile.kind === 'hiring' ? '●' : '⌕'}</span>}
       <span className="agent-tile-text"><small>{KIND_LABEL[tile.kind]}{tile.board ? ` · ${tile.board}` : ''}</small>
         <strong>{tile.title}</strong>{tile.detail && tile.kind !== 'page' && <em>{tile.detail}</em>}</span>

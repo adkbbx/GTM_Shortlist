@@ -17,7 +17,7 @@ async function startRun(page: Page, website: string) {
   await expect(field).toBeVisible();
   await expect(page.getByRole('button', { name: 'Find 1 company' })).toBeVisible();
   await field.fill(website);
-  await page.locator('#agent-count').selectOption('5');
+  await page.getByRole('radio', { name: '5', exact: true }).check();
   await page.getByRole('button', { name: 'Find 5 companies' }).click();
   await expect(page).toHaveURL(/[?&]agent=[0-9a-f]{32}/);
 }

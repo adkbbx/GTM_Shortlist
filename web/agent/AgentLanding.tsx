@@ -15,6 +15,7 @@ import { STAGES, Stepper, prefixOf, stageOf, stepStates } from './AgentLive';
 import { agentApi, domainOf, ownSearches } from './agent-api';
 import type { AgentRunSummary, AgentRunView, Company } from './agent-api';
 import { countOptions, useAgentConfig } from './agent-config';
+import { CountPicker } from './CountPicker';
 import './agent-landing.css';
 
 const describe = (error: unknown) => error instanceof Error ? error.message : 'Something went wrong. Please try again.';
@@ -23,29 +24,31 @@ const day = (value: string) => new Date(value).toLocaleDateString(undefined, { d
 const verticalQuery = '(max-width: 1180px)';
 function Arrow() { return <span className="pl-arrow" aria-hidden="true">→</span>; }
 
-const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
-
-/** How far the page has scrolled through a pinned section, 0 to 1. Lenis drives the native scroll, so this stays smooth. */
-function useScrollProgress(ref: RefObject<HTMLElement | null>, enabled: boolean) {
-  const [progress, setProgress] = useState(enabled ? 0 : 1);
+/** True while the element is on screen, so the replay plays only where it can be seen. */
+function useInView(ref: RefObject<HTMLElement | null>) {
+  const [inView, setInView] = useState(false);
   useEffect(() => {
-    if (!enabled) { setProgress(1); return; }
-    let frame = 0;
-    const measure = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const node = ref.current;
-        if (!node) return;
-        const range = node.offsetHeight - window.innerHeight;
-        setProgress(clamp01(-node.getBoundingClientRect().top / Math.max(1, range)));
-      });
-    };
-    measure();
-    window.addEventListener('scroll', measure, { passive: true });
-    window.addEventListener('resize', measure);
-    return () => { cancelAnimationFrame(frame); window.removeEventListener('scroll', measure); window.removeEventListener('resize', measure); };
-  }, [ref, enabled]);
-  return progress;
+    const node = ref.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(entries => setInView(entries[0].isIntersecting), { threshold: 0.3 });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [ref]);
+  return inView;
+}
+
+const STEP_MS = 420;
+const HOLD_STEPS = 14;  // about six seconds on the finished result before it plays again
+
+/** Plays the recorded steps one at a time while on screen, holds the result, then starts over. */
+function usePlayback(total: number, playing: boolean, reduced: boolean) {
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    if (reduced || !playing || !total) return;
+    const timer = window.setInterval(() => setTick(value => value >= total + HOLD_STEPS ? 0 : value + 1), STEP_MS);
+    return () => window.clearInterval(timer);
+  }, [total, playing, reduced]);
+  return reduced ? total : Math.min(tick, total);
 }
 
 /** Children marked .al-rise fade up, one after another, when their section scrolls into view. */
@@ -111,27 +114,25 @@ function ReplayConsole({ view, onOpen, shown }: { view: AgentRunView; onOpen: (i
 }
 
 function Logo({ company }: { company: Company }) {
-  return <SiteIcon domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="agent-logo" />;
+  return <SiteIcon lookup domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="agent-logo" />;
 }
 
-/** The real run's recorded steps, played by scrolling: the section stays pinned while each scroll advances the agent. */
+/** The real run's recorded steps, replayed as they happened while the section is on screen. */
 function Story({ view, onOpen, reduced }: { view: AgentRunView; onOpen: (id: string) => void; reduced: boolean }) {
   const root = useRef<HTMLElement>(null);
-  const progress = useScrollProgress(root, !reduced);
   const total = view.events.length;
-  // The last eighth of the scroll holds the finished result on screen.
-  const shown = reduced ? total : Math.min(total, Math.round(clamp01(progress / 0.86) * total));
+  const shown = usePlayback(total, useInView(root), reduced);
   const states = stepStates(view.events.slice(0, shown), shown < total);
-  return <section id="al-replay" ref={root} className={`al-story${reduced ? ' is-static' : ''}`} aria-labelledby="al-replay-heading">
+  return <section id="al-replay" ref={root} className="al-story al-section" aria-labelledby="al-replay-heading">
     <div className="al-story-pin pl-wrap">
       <div className="al-replay-copy">
         <p className="al-kicker">Watch it work</p>
         <Reveal id="al-replay-heading" className="pl-h2" reduced={reduced} lead="A real search," accent="step by step." />
-        <p className="al-replay-text">The recorded activity of a real search for {domainOf(view.run.website)}. Scroll to play it.</p>
+        <p className="al-replay-text">The recorded activity of a real search for {domainOf(view.run.website)}, replayed as it happened.</p>
         <ol className="al-story-steps">{STAGES.map((stage, index) => <li key={stage.label} className={`is-${states[index]}`}>
           <span className="al-story-dot" aria-hidden="true" /><span>{stage.label}</span><small>{stage.by}</small>
         </li>)}</ol>
-        <div className="al-story-bar" aria-hidden="true"><span style={{ transform: `scaleX(${reduced ? 1 : clamp01(progress / 0.86)})` }} /></div>
+        <div className="al-story-bar" aria-hidden="true"><span style={{ transform: `scaleX(${total ? shown / total : 1})` }} /></div>
       </div>
       <ReplayConsole view={view} onOpen={onOpen} shown={shown} />
     </div>
@@ -231,18 +232,16 @@ function Hero({ reduced, onOpen }: { reduced: boolean; onOpen: (id: string) => v
           <label className="pl-label" htmlFor="website">Your company website</label>
           <div className="pl-controls">
             <div className={`pl-field${shake % 2 ? ' shake' : shake ? ' shake-b' : ''}`} onFocus={() => { setInvite(false); stream.current?.setHover(true); }} onBlur={() => stream.current?.setHover(false)}>
-              <CompanySearch value={website} clientId={configuredDirectoryId()} iconLookup={false} disabled={busy} label="Your company website"
+              <CompanySearch value={website} clientId={configuredDirectoryId()} iconLookup disabled={busy} label="Your company website"
                 placeholder="Company name or website" onChange={value => { setInvite(false); setWebsite(value); stream.current?.boost(1100); }} /></div>
             <button className="pl-btn pl-btn-primary pl-btn-block" type="submit" disabled={busy} aria-busy={busy}>{busy ? 'Starting' : `Find ${count} ${count === 1 ? 'company' : 'companies'}`} <Arrow /></button>
           </div>
-          <div className="al-count">
-            <label htmlFor="agent-count">How many companies <span className="optional">optional</span></label>
-            <select id="agent-count" value={count} disabled={busy} onChange={event => setCount(Number(event.target.value))}>
-              {countOptions(config.maxCompanies).map(value => <option key={value} value={value}>{value}</option>)}
-            </select>
-          </div>
+          <CountPicker label="Companies to find" value={count} options={countOptions(config.maxCompanies)} disabled={busy} onChange={setCount} />
           <div ref={check} className="agent-check" />
           {error && <p className="notice" role="alert">{error}</p>}
+          {config.publicDemo && <p className="pl-note al-demo-note"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+            <rect x="3" y="7" width="10" height="7" rx="1" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" /></svg>
+            <span>Public demo: up to {config.maxCompanies} companies per search.</span></p>}
           <span className="pl-port" aria-hidden="true" />
         </form>
         <div className="pl-stream" ref={streamEl} aria-hidden="true">
@@ -258,8 +257,6 @@ function Hero({ reduced, onOpen }: { reduced: boolean; onOpen: (id: string) => v
           <footer><a href="#al-replay">Watch a real run <Arrow /></a></footer>
         </section>
       </div>
-      {config.publicDemo && <p className="al-hint">Public demo: up to {config.maxCompanies} companies per search. Anyone with a
-        search's link can read it; only this browser can change it.</p>}
     </div>
   </section>;
 }

@@ -34,7 +34,10 @@ from shortlist.agent.pipeline import Providers
 from shortlist.agent.providers import ModelCheck, meta_model_check
 from shortlist.agent.service import AgentService, real_providers
 from shortlist.agent.settings import AgentSettings
+from shortlist.api import PUBLIC_HOST, SiteIconInfo
 from shortlist.domain import utcnow
+from shortlist.fetch import canonical_url
+from shortlist.site_icons import SiteIcons
 from shortlist.turnstile import verify_turnstile
 
 LOCAL_HOSTS = ("localhost", "127.0.0.1")
@@ -295,6 +298,22 @@ def create_public_app(settings: PublicSettings | None = None, *, agent_settings:
         if time.monotonic() - checked["at"] > 600:  # at most one /models request per ten minutes
             checked["result"], checked["at"] = model_check(agent), time.monotonic()
         return checked["result"]
+
+    icons = SiteIcons()
+
+    @app.get("/api/site-icon/{domain}", response_model=SiteIconInfo)
+    def site_icon(domain: str):
+        """The icon a company's homepage declares, for logos and suggestions when no directory logo exists. One homepage
+        read per domain per day, two at a time, with the shared fetcher's limits and private-address checks."""
+        if not PUBLIC_HOST.fullmatch(domain):
+            raise HTTPException(404, "Enter a public website domain")
+        try:
+            canonical = urlsplit(canonical_url(f"https://{domain}/")).hostname
+        except ValueError:
+            raise HTTPException(404, "Enter a public website domain") from None
+        if canonical != domain or settings.synthetic:  # synthetic demo: no network
+            return SiteIconInfo()
+        return SiteIconInfo(url=icons.get(domain))
 
     @app.get("/api/health", response_model=PublicHealth)
     def health():

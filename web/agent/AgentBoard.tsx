@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SiteIcon } from '../SiteIcon';
 import { Assumptions } from './Assumptions';
+import { CountPicker } from './CountPicker';
 import { EarlySteps, Feed, Monitor, Working } from './AgentLive';
 import { EvidenceList, QuoteBlock } from './Evidence';
 import { agentApi, domainOf, editToken, isActive } from './agent-api';
@@ -42,15 +43,6 @@ function ExportLink({ run }: { run: AgentRun }) {
   return <a className="agent-share" href={`/api/agent/runs/${run.id}/shortlist.csv`} download>Download CSV</a>;
 }
 
-function ShareLink({ run }: { run: AgentRun }) {
-  const count = run.companies.filter(c => c.verdict?.kind === 'shortlisted').length;
-  const link = `${window.location.origin}${window.location.pathname}?agent=${run.id}`;
-  const text = `An agent found ${count} ${count === 1 ? 'company' : 'companies'} that need what ${domainOf(run.website)} sells, `
-    + 'each with the exact quote behind it. Built with Muse Spark and Muse Spark Open.';
-  const href = `https://x.com/intent/post?${new URLSearchParams({ text, url: link })}`;
-  return <a className="agent-share" href={href} target="_blank" rel="noopener noreferrer">Share on X</a>;
-}
-
 function useCopy() {
   const [copied, setCopied] = useState('');
   const copy = async (key: string, text: string) => {
@@ -90,7 +82,7 @@ function EmailDialog({ company, open, drafting, error, onClose }: { company: Com
   return <dialog ref={dialog} className="agent-dialog" aria-label="Outreach email" onClose={onClose}
     onClick={event => { if (event.target === dialog.current) onClose(); }}>
     <header className="agent-dialog-head">
-      <SiteIcon domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="agent-logo agent-row-logo" />
+      <SiteIcon lookup domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="agent-logo agent-row-logo" />
       <div><p>Outreach email</p><h2>{company.name || company.domain}</h2></div>
       <button type="button" className="agent-dialog-close" aria-label="Close" onClick={onClose}>
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" /></svg></button>
@@ -158,7 +150,7 @@ function CompanyRow({ company, run, events, runId, onUpdate }: { company: Compan
   const mine = events.filter(event => event.company === company.domain);
   return <article className={`agent-row verdict-${verdict.kind}${open ? ' is-open' : ''}`} aria-labelledby={headingId}>
     <div className="agent-row-main">
-      <SiteIcon domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="agent-logo agent-row-logo" />
+      <SiteIcon lookup domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="agent-logo agent-row-logo" />
       <div className="agent-row-text">
         <div className="agent-row-title"><h3 id={headingId}>{company.name || company.domain}</h3>
           <span className={`agent-verdict-pill pill-${verdict.kind}`}>{VERDICT[verdict.kind]}</span></div>
@@ -202,11 +194,8 @@ function Columns({ run, events, apply, busy, onUpdate }: { run: AgentRun; events
   return <section className="agent-results" aria-labelledby="results-heading">
     <div className="agent-section-head agent-results-head">
       <div><h2 id="results-heading">Companies</h2></div>
-      {editable && <label className="agent-count-control">Research up to
-        <select value={run.company_count} disabled={busy || isActive(run.status)} onChange={event => apply({ company_count: Number(event.target.value) })}>
-          {countOptions(maxCompanies, run.company_count).map(count => <option key={count} value={count}>{count} {count === 1 ? 'company' : 'companies'}</option>)}
-        </select>
-      </label>}
+      {editable && <CountPicker label="Companies" value={run.company_count} options={countOptions(maxCompanies, run.company_count)}
+        disabled={busy || isActive(run.status)} onChange={count => apply({ company_count: count })} />}
     </div>
     <Working companies={working} events={events} />
     <div className="agent-groups">
@@ -319,11 +308,12 @@ export function AgentBoard({ runId, onNew }: { runId: string; onNew: () => void 
   const busy = saving || active;
   return <AgentConfigContext.Provider value={{ ...config, editable }}><div className="agent-board">
     <div className="agent-board-head">
-      <div><p className="agent-eyebrow">Shortlist for</p><h1 ref={heading} tabIndex={-1}>{domainOf(run.website)}</h1>
+      <div><p className="agent-eyebrow">Shortlist for</p>
+        <div className="agent-title"><SiteIcon lookup domain={domainOf(run.website)} fallback={domainOf(run.website).slice(0, 1).toUpperCase()} className="agent-logo agent-title-logo" />
+          <h1 ref={heading} tabIndex={-1}>{domainOf(run.website)}</h1></div>
         {!editable && <p className="agent-shared" role="note">You are viewing a shared shortlist. Read only.</p>}</div>
       <div className="agent-board-actions">
         {run.status === 'complete' && <ExportLink run={run} />}
-        {run.status === 'complete' && <ShareLink run={run} />}
         <button type="button" className="secondary" onClick={onNew}>New search</button>
       </div>
     </div>
