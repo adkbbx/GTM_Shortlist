@@ -14,7 +14,13 @@ from shortlist.agent.storage import VERDICT_LABEL
 from shortlist.agent.telemetry import BudgetReached
 from shortlist.domain import Candidate
 from shortlist.fetch import FetchError, canonical_url
-from shortlist.relevance import candidate_issue, company_page_issue
+from shortlist.relevance import (
+    RECRUITING_BUYER,
+    candidate_issue,
+    company_page_issue,
+    product_target,
+    staffing_firm,
+)
 from shortlist.selection import discussion_page
 
 DISCOVERY_INSTRUCTIONS = f"""You find companies that could buy a seller's product now, using web search. {UNTRUSTED}
@@ -46,6 +52,7 @@ def excluded_domains(profile: SellerProfile, competitors: list[Competitor]) -> d
     return excluded
 
 
+STAFFING_ASIDE = "Recruiting or staffing firm: its job posts are for its clients"
 SEARCH_RESULT_PAGE = ("A search result about the company, not its own homepage or product page (for example a news "
                       "article); the publisher is not a candidate")
 
@@ -127,6 +134,8 @@ def discover(profile: SellerProfile, competitors: list[Competitor], count: int, 
     pool: dict[str, CandidateRef] = {c.domain: c for c in known or []}
     set_aside: dict[str, SetAside] = {}
     wanted = min(MAX_COMPANIES, max(count, 1))
+    buyer = profile.buyer.value if profile.buyer else ""
+    others = product_target(buyer) and not RECRUITING_BUYER.search(buyer)  # as competitors.disqualifier_rules
     for attempt in range(2):
         if len(pool) >= wanted:
             break
@@ -160,6 +169,8 @@ def discover(profile: SellerProfile, competitors: list[Competitor], count: int, 
             found += [(result.url, result.title, f'search "{search.query}"', True) for result in search.results]
         for url, name, via, own_page in found:
             ref, aside = admit(url, name or "", via, excluded, profile.domain, own_page=own_page, prior=prior)
+            if ref and others and staffing_firm(name or ""):
+                ref, aside = None, SetAside(domain=ref.domain, url=ref.url, reason=STAFFING_ASIDE)
             if ref and ref.domain not in pool and len(pool) < MAX_COMPANIES:
                 pool[ref.domain] = ref
             elif aside and aside.domain not in pool:

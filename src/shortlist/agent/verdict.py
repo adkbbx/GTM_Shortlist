@@ -12,7 +12,7 @@ from shortlist.agent.models import (
 
 FRESH_DAYS = 180
 RULE_ORDER = {"uses_direct_competitor": 0, "is_competitor": 1, "is_existing_customer": 2,
-              "outside_stated_size_or_region": 3, "inactive": 4}
+              "outside_stated_size_or_region": 3, "inactive": 4, "works_for_others": 5}
 
 
 def excluded_by(company: CompanyResult, exclusions: list[str]) -> str | None:

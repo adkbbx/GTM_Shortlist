@@ -14,7 +14,7 @@ ClaimType = Literal["fit", "need", "timing", "disqualifier"]
 Decision = Literal["supports", "contradicts", "insufficient"]
 VerdictKind = Literal["shortlisted", "needs_look", "rejected"]
 RuleKind = Literal["uses_direct_competitor", "is_competitor", "is_existing_customer",
-                   "outside_stated_size_or_region", "inactive"]
+                   "outside_stated_size_or_region", "inactive", "works_for_others"]
 RunStatus = Literal["queued", "running", "needs_choice", "complete", "failed"]
 CompanyStatus = Literal["pending", "investigating", "done", "budget_reached", "failed"]
 

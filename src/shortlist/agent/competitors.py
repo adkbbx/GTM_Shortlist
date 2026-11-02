@@ -17,7 +17,7 @@ from shortlist.agent.pages import JOB_HOSTS, NEWS_HOSTS, REVIEW_HOSTS, Fetcher, 
 from shortlist.agent.providers import WEB_SEARCH_TOOL, search_label
 from shortlist.agent.scan import rule_id
 from shortlist.fetch import FetchError, canonical_url, domain_of
-from shortlist.relevance import DIRECTORIES, NON_COMPANY_SITES, listed_site
+from shortlist.relevance import DIRECTORIES, NON_COMPANY_SITES, RECRUITING_BUYER, listed_site, product_target
 
 MAX_COMPETITORS = 8
 NOT_COMPANIES = DIRECTORIES | NON_COMPANY_SITES | REVIEW_HOSTS | NEWS_HOSTS | JOB_HOSTS
@@ -146,6 +146,7 @@ def find_competitors(profile: SellerProfile, seller_pages: list[str], calls: Cal
 
 
 TARGET_SIZE_RULE = "outside_target_size"
+WORKS_FOR_OTHERS = "works_for_others"
 # "Companies of any size or stage" (eygentic.com, 30 Oct) limits nothing, so it makes no size rule.
 ANY_SIZE = re.compile(r"\bany (?:company )?size\b|\ball (?:company )?sizes\b|\bof every size\b|\bregardless of size\b",
                       re.IGNORECASE)
@@ -169,4 +170,9 @@ def disqualifier_rules(profile: SellerProfile | None, competitors: list[Competit
                                            f"({profile.target_size.value})"[:500]))
     rules.append(DisqualifierRule(id="inactive", rule="inactive",
                                   text="No longer operating: closed, acquired and shut, or the site is parked"))
+    buyer = profile.buyer.value if profile and profile.buyer else ""
+    if product_target(buyer) and not RECRUITING_BUYER.search(buyer):
+        rules.append(DisqualifierRule(id=WORKS_FOR_OTHERS, rule="works_for_others",
+                                      text="A recruiting firm, staffing firm or agency that works for these companies, "
+                                           "not one of them"))
     return rules

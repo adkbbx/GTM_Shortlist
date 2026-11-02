@@ -207,8 +207,21 @@ function Columns({ run, events, apply, busy, onUpdate }: { run: AgentRun; events
             : <p className="agent-empty">{working.length ? 'Waiting for results.' : column.empty}</p>}
         </section>;
       })}
+      <Skipped run={run} />
     </div>
   </section>;
+}
+
+/** Companies the agent started on but set aside because their website could not be read; another took their place. */
+function Skipped({ run }: { run: AgentRun }) {
+  const skipped = run.set_aside.filter(item => item.reason.startsWith('Website could not be read'));
+  if (!skipped.length) return null;
+  return <details className="agent-skipped">
+    <summary>Skipped {skipped.length} {skipped.length === 1 ? 'company' : 'companies'}: website could not be read</summary>
+    <ul>{skipped.map(item => <li key={item.domain}><a href={item.url} target="_blank" rel="noopener noreferrer">{item.domain}</a>
+      <span>{item.reason.replace(/^Website could not be read: /, '')}</span></li>)}</ul>
+    <p>Another candidate was researched in each one's place.</p>
+  </details>;
 }
 
 /** What we assumed: open while there are no companies to show, then out of the way unless you open it. */

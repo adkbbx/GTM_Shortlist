@@ -37,6 +37,7 @@ from shortlist.agent.providers import FETCH_TOOL, WEB_SEARCH_TOOL, AgentProvider
 from shortlist.agent.scan import brand_names, scan
 from shortlist.agent.telemetry import BudgetReached
 from shortlist.fetch import FetchError, canonical_url, domain_of
+from shortlist.relevance import CLIENT_ROLE, service_business, staffing_firm
 
 MAX_SEARCHES = 4
 MAX_FETCHES = 6
@@ -149,6 +150,30 @@ class Investigation:
         self.posting: Page | None = None
 
     # Pages -----------------------------------------------------------------------------------------------------
+    def works_for_others(self) -> bool:
+        """A recruiting firm, staffing firm or agency in its own homepage's words, when the seller sells to product
+        companies: its hiring is for clients and it is not a buyer. Found with no model call; the skeptic still judges
+        the quote, and the paid research is skipped."""
+        rule = next((r for r in self.ctx.rules if r.enabled and r.rule == "works_for_others"), None)
+        if rule is None or self.home is None:
+            return False
+        for line in [self.home.source.title, *self.home.source.text.splitlines()[:15]]:
+            line = line.strip()
+            if not 12 <= len(line) <= 300 or not (staffing_firm(line) or service_business(line)):
+                continue
+            located = ground(line, self.home)
+            if located is None:
+                continue
+            text, location = located
+            self.result.evidence.append(EvidenceItem(
+                claim_type="disqualifier", criterion_id=rule.id, claim=rule.text, found_by="scan",
+                quote=Quote(text=text, url=self.home.url, source_type="own_site", fetched_at=self.home.fetched_at,
+                            location=location)))
+            self.ctx.emit("investigation", f"Its homepage describes a recruiting firm, staffing firm or agency: "
+                                           f"“{text[:100]}”; skipping deeper research", company=self.company.domain)
+            return True
+        return False
+
     def read_lead_posting(self):
         """The posting discovery confirmed open, read from its board's own data (no model call) and handed to the
         investigator. Live runs found an open, dated posting and still ended "No current need": the investigator
@@ -361,6 +386,11 @@ class Investigation:
                                          quote=str(item.published_date)[:40], url=page.url,
                                          reason="Date not stated on the page; the date was removed"))
             kind = source_type(page.url, self.company.domain, competitor_domains, item.source_type)
+            if kind == "job_post" and item.claim_type in ("need", "timing") and CLIENT_ROLE.search(page.full_text):
+                drop.append(DroppedClaim(stage="investigation", company=self.company.domain, claim_type=item.claim_type,
+                                         quote=text[:1500], url=page.url,
+                                         reason="The posting is for the poster's client, not for this company"))
+                continue
             evidence = EvidenceItem(
                 claim_type=item.claim_type, criterion_id=criterion, claim=(item.claim.strip() or text)[:600],
                 quote=Quote(text=text, url=page.url, published_date=published, fetched_at=page.fetched_at,
@@ -396,6 +426,8 @@ class Investigation:
             if len(self.company.name) >= 4 and self.company.name not in self.names and "." not in self.company.name:
                 self.names.append(self.company.name)
             self.observe(self.home)
+            if self.works_for_others():
+                return self.result
             self.read_board()
             self.read_lead_posting()
             if not self.result.name:

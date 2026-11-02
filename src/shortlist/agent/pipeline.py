@@ -305,6 +305,11 @@ class AgentRunner:
         self.add_pitch(result, company, calls)
         company.cost_usd = calls.meter.company_cost(ref.domain)
         self.replace(result, company)
+        if company.error == HOMEPAGE_UNREADABLE:  # research() sets it aside and tries the next candidate
+            reason = company.blocked[0].split(": ", 1)[-1] if company.blocked else "no response"
+            self.emit("investigation", f"Could not read its website ({reason[:80]}); set aside", company=ref.domain,
+                      level="warn")
+            return
         self.emit("verdict", f"{ref.domain}: {VERDICT_LABEL[company.verdict.kind]}", company=ref.domain, level="done")
 
     def add_pitch(self, result: RunResult, company: CompanyResult, calls: Calls):
