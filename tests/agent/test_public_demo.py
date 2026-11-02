@@ -101,6 +101,8 @@ def test_an_unnamed_description_is_labelled_by_what_it_sells_and_never_by_a_gues
     assert body["run"]["profile"]["name"] == ""
     longer = {**unnamed, "offer": "Inventory and ordering software for independent coffee roasters and the cafés they supply"}
     assert described_label(SellerDescription(**longer)) == "Inventory and ordering software for independent…"
+    typed = {**unnamed, "offer": "bookkeeping software for independent cafes"}
+    assert described_label(SellerDescription(**typed)) == "Bookkeeping software for independent cafes"
 
 
 @pytest.mark.parametrize("body", [{}, {"website": "seller.example", "description": DESCRIBED_SELLER},
@@ -279,6 +281,8 @@ def test_shipped_examples_are_real_finished_searches_that_open_read_only(tmp_pat
     with make_client(tmp_path) as client:
         examples = client.get("/api/health").json()["examples"]
         assert {e["id"] for e in examples} == {p.stem for p in files}
+        # One example per seller: three cards for eygentic.com read as one search repeated.
+        assert len({e["website"] for e in examples}) == len(examples)
         assert all(len(e["shortlisted_names"]) == e["shortlisted"] for e in examples)
         assert any("Storable proudly employs over 800 employees" in r for e in examples for r in e["rejected"])
         example = examples[0]
@@ -293,9 +297,9 @@ def test_shipped_examples_are_real_finished_searches_that_open_read_only(tmp_pat
 def test_a_shared_finished_board_has_a_link_preview(tmp_path):
     with make_client(tmp_path) as client:
         example = next(e for e in client.get("/api/health").json()["examples"]
-                       if e["shortlisted"] == 2 and "eygentic.com" in e["website"])
+                       if e["shortlisted"] == 2 and "crisp.chat" in e["website"])
         page = client.get(f"/?agent={example['id']}").text
-        assert '<meta property="og:title" content="2 companies that need what eygentic.com sells">' in page
+        assert '<meta property="og:title" content="2 companies that need what crisp.chat sells">' in page
         description = page.split('property="og:description" content="', 1)[1].split('"', 1)[0]
         assert description.startswith("Shortlisted: ") and "checked by Muse Spark Open" in description
         assert 'name="twitter:card" content="summary"' in page
@@ -310,14 +314,13 @@ def test_a_finished_board_downloads_as_csv_with_quotes_and_opening_lines(tmp_pat
     from shortlist.agent.export import cell
 
     with make_client(tmp_path) as client:
-        example = next(e for e in client.get("/api/health").json()["examples"]
-                       if e["shortlisted"] == 2 and "eygentic.com" in e["website"])
+        example = next(e for e in client.get("/api/health").json()["examples"] if "eygentic.com" in e["website"])
         response = client.get(f"/api/agent/runs/{example['id']}/shortlist.csv")
         assert response.status_code == 200 and response.headers["content-type"].startswith("text/csv")
         assert response.headers["content-disposition"].startswith('attachment; filename="shortlist-eygentic.com-')
         rows = list(csv.DictReader(io.StringIO(response.text.removeprefix("\ufeff"))))
         shortlisted = [r for r in rows if r["verdict"] == "Shortlisted"]
-        assert len(shortlisted) == 2 and rows[0]["verdict"] == "Shortlisted"
+        assert len(shortlisted) == example["shortlisted"] >= 1 and rows[0]["verdict"] == "Shortlisted"
         assert all(r["opening_line"] and r["opening_line_checked"] == "yes" and '" (http' in r["supporting_quotes"]
                    for r in shortlisted)
         assert client.get("/api/agent/runs/" + "0" * 32 + "/shortlist.csv").status_code == 404

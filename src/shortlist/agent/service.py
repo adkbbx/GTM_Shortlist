@@ -52,6 +52,7 @@ def described_label(description: SellerDescription, limit: int = 48) -> str:
         return description.name.strip()
     offer = " ".join(description.offer.split())
     first = re.split(r"(?<=[.!?])\s", offer, maxsplit=1)[0].rstrip(".!?")
+    first = first[:1].upper() + first[1:]  # a title, though typed in lower case
     if len(first) <= limit:
         return first
     cut = first[:limit].rsplit(" ", 1)[0].rstrip(",;:-")
