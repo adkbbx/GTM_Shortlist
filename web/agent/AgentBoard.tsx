@@ -4,7 +4,7 @@ import { Assumptions } from './Assumptions';
 import { CountPicker } from './CountPicker';
 import { EarlySteps, Feed, Monitor, Working } from './AgentLive';
 import { EvidenceList, QuoteBlock } from './Evidence';
-import { agentApi, domainOf, editToken, isActive } from './agent-api';
+import { agentApi, domainOf, editToken, isActive, keepShortlist } from './agent-api';
 import { AgentConfigContext, countOptions, useAgentConfig } from './agent-config';
 import type { AgentEvent, AgentRun, AgentRunView, Company, EvidenceItem, Overrides, Profile } from './agent-api';
 
@@ -270,6 +270,7 @@ export function AgentBoard({ runId, onNew }: { runId: string; onNew: () => void 
     return next;
   }, [runId]);
   useEffect(() => { load().catch(reason => setError(describe(reason))); }, [load]);
+  useEffect(() => { if (view) keepShortlist(view); }, [view]);
   const focused = useRef(false);
   const loaded = view !== null;
   useEffect(() => {

@@ -44,6 +44,24 @@ export function ownSearches(): { id: string; token: string }[] {
     return found.slice(-30);
   } catch { return []; }
 }
+/** This browser's copy of the Shortlisted companies from a search it started. The free demo server forgets searches
+    when it restarts; Your shortlist then still lists them, from here. Only the browser's own searches are kept. */
+export type KeptShortlist = { id: string; website: string; created_at: string; companies: Company[] };
+const keptKey = (id: string) => `gtm-agent-kept:${id}`;
+export function keepShortlist(view: AgentRunView) {
+  if (!editToken(view.id)) return;
+  const companies = view.run.companies.filter(company => company.verdict?.kind === 'shortlisted');
+  try {
+    if (companies.length) window.localStorage.setItem(keptKey(view.id), JSON.stringify(
+      { id: view.id, website: view.run.website, created_at: view.created_at, companies } satisfies KeptShortlist));
+  } catch { /* storage full or blocked: the server copy is still used while it lasts */ }
+}
+export function keptShortlist(id: string): KeptShortlist | null {
+  try {
+    const value = JSON.parse(window.localStorage.getItem(keptKey(id)) ?? 'null') as KeptShortlist | null;
+    return value && value.id === id && Array.isArray(value.companies) ? value : null;
+  } catch { return null; }
+}
 function keepEditToken(id: string, token: string) {
   try { window.localStorage.setItem(tokenKey(id), token); } catch { /* without storage the search stays read-only here */ }
 }

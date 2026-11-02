@@ -128,7 +128,9 @@
 .al .al-examples a:hover{transform:translateY(-2px);border-color:var(--pl-apricot)}
 .al-example-for{font-size:.75rem;font-weight:600;color:var(--pl-muted)}
 .al-examples strong{font-size:1rem;line-height:1.35}
-.al-example-rejected{font-size:.8125rem;line-height:1.45;color:var(--pl-fail);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* A rejection is the agent working as intended, not an error: neutral text with a small tag */
+.al-example-rejected{font-size:.8125rem;line-height:1.5;color:var(--pl-muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.al-example-rejected b{display:inline-block;margin-right:.375rem;padding:0 .4375rem;border:1px solid var(--pl-card-line);border-radius:999px;font-size:.6875rem;font-weight:600;letter-spacing:.02em;color:var(--pl-charcoal);vertical-align:.0625rem}
 .al-example-open{margin-top:auto;padding-top:.375rem;font-size:.8125rem;font-weight:600;color:var(--pl-ink)}
 
 /* Story flows with the page: no pinning, the replay plays while in view */

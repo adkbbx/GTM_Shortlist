@@ -56,16 +56,15 @@ export function AgentApp({ classic }: { classic: ReactNode }) {
         <svg className="agent-brand-mark" viewBox="0 0 64 64" aria-hidden="true"><path fill="#e0692c" fillRule="evenodd" d="M18 4H46Q48 4 48 6V20Q60 25 60 38V58Q60 60 58 60H48Q46 60 46 58V36Q46 32 42 32H22Q18 32 18 36V58Q18 60 16 60H6Q4 60 4 58V38Q4 25 16 20V6Q16 4 18 4ZM24 12V20H30V12ZM36 12V20H42V12Z"/><path fill="#e0692c" d="M22 46L27 41L31 45L39 37L44 42L31 55Z"/></svg>
         <span>GTM Shortlist</span></a>
       <nav className="agent-header-nav" aria-label="Main">
-        <a className="agent-header-link" href="?shortlist=1" aria-current={shortlist ? 'page' : undefined}
-          onClick={event => { event.preventDefault(); open(null, true); }}>Your shortlist</a>
+        {!shortlist && <a className="agent-header-link" href="?shortlist=1"
+          onClick={event => { event.preventDefault(); open(null, true); }}>Your shortlist</a>}
         {!config.publicDemo && classic !== null && <a className="agent-header-link" href="/?classic=1">Earlier research</a>}
       </nav>
     </header>
     <main id="agent-main" className={`agent-main${runId || shortlist ? '' : ' is-landing'}`} tabIndex={-1}>
       {runId ? <AgentBoard key={runId} runId={runId} onNew={() => open(null)} />
         : shortlist ? <YourShortlist onOpen={id => open(id)} onNew={() => open(null)} /> : <AgentLanding onOpen={open} />}
-      <p className="agent-footer">GTM Shortlist · Muse Spark investigates, Muse Spark Open checks every quote, fixed rules decide.
-        Built with Muse Spark Open.</p>
+      <p className="agent-footer">GTM Shortlist · One model investigates, a second checks every quote, fixed rules decide.</p>
     </main>
   </AgentConfigContext.Provider></BrandfetchContext.Provider>;
 }

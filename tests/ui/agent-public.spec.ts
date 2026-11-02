@@ -16,7 +16,6 @@ test('the public demo starts from a website alone, caps the size and shares a re
   await expect(page.getByRole('group', { name: 'Companies to find' }).getByRole('radio')).toHaveCount(3);
   await expect(page.getByRole('radio', { name: '1', exact: true })).toBeChecked();
   await expect(page.getByRole('button', { name: 'Find 1 company' })).toBeVisible();  // one company by default
-  await expect(page.getByText('Built with Muse Spark Open.')).toBeVisible();
   expect(await noOverflow(page)).toBe(true);
   mkdirSync('.impeccable/review', { recursive: true });
   await page.screenshot({ path: `.impeccable/review/${info.project.name}-agent-public-start.png`, fullPage: true });
@@ -58,8 +57,18 @@ test('the public demo starts from a website alone, caps the size and shares a re
   await page.locator('.ys-list').getByRole('button', { name: 'View email' }).click();
   await expect(page.getByRole('dialog', { name: 'Outreach email' })).toContainText('Hi Trailgear Outfitters team,');
   await page.keyboard.press('Escape');
+  await expect(page.getByRole('link', { name: 'Your shortlist' })).toHaveCount(0);  // no link to the page you are on
   expect(await noOverflow(page)).toBe(true);
   await page.screenshot({ path: `.impeccable/review/${info.project.name}-agent-your-shortlist.png`, fullPage: true });
+
+  // The free demo server forgets searches when it restarts: this browser's copy keeps its Shortlisted companies.
+  await page.route('**/api/agent/runs/*', route => route.request().method() === 'GET'
+    ? route.fulfill({ status: 404, json: { detail: 'This search is no longer here' } }) : route.fallback());
+  await page.reload();
+  await expect(page.locator('.ys-list').getByRole('heading', { name: 'Trailgear Outfitters' })).toBeVisible();
+  await expect(page.getByRole('note')).toContainText('no longer on the server');
+  await expect(page.locator('.ys-list').getByRole('button', { name: 'Open search' })).toHaveCount(0);
+  await page.unroute('**/api/agent/runs/*');
 
   // The start page lists this browser's own searches; another visitor's browser lists none.
   await page.getByRole('link', { name: 'GTM Shortlist' }).click();

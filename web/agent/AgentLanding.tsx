@@ -320,7 +320,7 @@ export function AgentLanding({ onOpen }: { onOpen: (id: string | null) => void }
         <a href={`?agent=${item.id}`} onClick={event => { event.preventDefault(); onOpen(item.id); }}>
           <span className="al-example-for">Seller: {domainOf(item.website)}</span>
           <strong>{item.shortlisted_names?.length ? `${item.shortlisted_names.join(' and ')} shortlisted` : 'Nothing shortlisted'}</strong>
-          {item.rejected?.[0] && <span className="al-example-rejected">Rejected {item.rejected[0]}</span>}
+          {item.rejected?.[0] && <span className="al-example-rejected"><b>Rejected</b> {item.rejected[0]}</span>}
           <span className="al-example-open">Open <span aria-hidden="true">→</span></span>
         </a>
       </li>)}</ul>
