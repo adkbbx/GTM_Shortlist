@@ -287,7 +287,8 @@ def create_public_app(settings: PublicSettings | None = None, *, agent_settings:
 
     @app.exception_handler(KeyError)
     async def not_found(request, exc):
-        return JSONResponse({"detail": "This search was not found. Check the link or start a new search."}, status_code=404)
+        return JSONResponse({"detail": "This search is no longer here: the free demo clears searches when its server "
+                                       "restarts or sleeps. Start a new search."}, status_code=404)
 
     checked: dict = {"at": 0.0, "result": ModelCheck()}
 

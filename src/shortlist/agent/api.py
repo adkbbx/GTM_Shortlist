@@ -15,7 +15,7 @@ from starlette.concurrency import run_in_threadpool
 from shortlist.agent.export import shortlist_csv
 from shortlist.agent.models import AgentEvent, Overrides, RunResult, RunStatus
 from shortlist.agent.providers import AgentProviderError
-from shortlist.agent.service import ACTIVE, AgentService, RunConflict
+from shortlist.agent.service import ACTIVE, AgentService, RunConflict, UnknownCompany
 from shortlist.agent.storage import SQLiteAgentRuns
 from shortlist.fetch import FetchError
 
@@ -127,7 +127,7 @@ def register_agent_routes(app: FastAPI, db_path: Path | None, service: AgentServ
         policy.before_email(request, run_id)
         try:
             service.draft_email(run_id, domain)
-        except KeyError as exc:
+        except UnknownCompany as exc:  # a missing search raises KeyError: the app's "search not found" answer
             raise HTTPException(404, "This company is not in this search.") from exc
         except RunConflict as exc:
             raise HTTPException(409, str(exc)) from exc

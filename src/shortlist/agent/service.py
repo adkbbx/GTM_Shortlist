@@ -21,6 +21,10 @@ class RunConflict(ValueError):
     pass
 
 
+class UnknownCompany(ValueError):
+    """Not a KeyError: that means the search itself is gone (a free demo instance forgets them on restart)."""
+
+
 def real_providers(settings: AgentSettings) -> Providers:
     investigator = MetaInvestigator(settings)
     skeptic = BasetenSkeptic(settings) if settings.use_skeptic else None
@@ -92,7 +96,7 @@ class AgentService:
             raise RunConflict("This run is still working; wait for it to finish before drafting an email")
         company = next((c for c in result.companies if c.domain == domain), None)
         if company is None:
-            raise KeyError(domain)
+            raise UnknownCompany(domain)
         if company.verdict is None or company.verdict.kind != "shortlisted":
             raise RunConflict("Only a Shortlisted company gets an outreach email")
         if company.outreach is not None:

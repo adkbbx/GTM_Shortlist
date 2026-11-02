@@ -56,13 +56,12 @@ test('a website alone produces a live board with three verdicts and quoted evide
     await expect(page.locator('#agent-feed')).toBeVisible();
   }
 
-  // A Shortlisted company carries why now and an opening line, checked against its quotes; others carry none.
+  // The person who ran the search gets one outreach action: Draft outreach. Why now is the row's summary line and the
+  // opening line is not repeated in Details (a shared-link viewer, who cannot draft, still sees it).
   await shortlisted.getByRole('button', { name: 'Details' }).click();
-  const pitch = shortlisted.getByRole('region', { name: 'Why now and an opening line' });
-  await expect(pitch).toContainText('We are hiring two customer support agents');
-  await expect(pitch).toContainText('Checked against the quotes');
-  await expect(pitch.getByRole('button', { name: 'Copy opening line' })).toBeVisible();
-  await expect(page.locator('.column-needs_look, .column-rejected').locator('.agent-pitch')).toHaveCount(0);
+  await expect(shortlisted.locator('.agent-row-reason')).toContainText('We are hiring two customer support agents');
+  await expect(shortlisted.getByRole('button', { name: 'Draft outreach' })).toBeVisible();
+  await expect(page.locator('.agent-pitch')).toHaveCount(0);
 
   // What we assumed: every item opens its quote; nothing had to be typed.
   await openAssumptions(page);

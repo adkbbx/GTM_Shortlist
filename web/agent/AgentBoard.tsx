@@ -51,12 +51,11 @@ function useCopy() {
   return { copied, copy };
 }
 
-/** Why now and an opening line, written only from supported quotes and checked against them. */
+/** The opening line, for a viewer who cannot draft the email (a shared link). Why now is already the row's summary
+    line, and the person who ran the search gets the whole email from Draft outreach instead. */
 function PitchBlock({ pitch }: { pitch: NonNullable<Company['pitch']> }) {
   const { copied, copy } = useCopy();
-  return <section className="agent-pitch" aria-label="Why now and an opening line">
-    <p className="agent-pitch-label">Why now</p>
-    <p className="agent-pitch-why">{pitch.why_now}</p>
+  return <section className="agent-pitch" aria-label="Opening line">
     <p className="agent-pitch-label">Opening line</p>
     <blockquote className="agent-pitch-opener">{pitch.opener}</blockquote>
     <div className="agent-pitch-foot">
@@ -166,7 +165,7 @@ function CompanyRow({ company, run, events, runId, onUpdate }: { company: Compan
     </div>
     <div id={panelId} className="agent-row-panel" hidden={!open}>
       <p className="agent-row-site"><a href={company.url} target="_blank" rel="noopener noreferrer">{company.domain}</a></p>
-      {verdict.kind === 'shortlisted' && company.pitch && <PitchBlock pitch={company.pitch} />}
+      {verdict.kind === 'shortlisted' && company.pitch && !editable && !company.outreach && <PitchBlock pitch={company.pitch} />}
       {verdict.kind === 'shortlisted' && (verdict.unconfirmed ?? []).length > 0 && <div className="agent-unconfirmed">
         <p>Check before you reach out</p>
         <ul>{verdict.unconfirmed!.map(item => <li key={item}>{item}</li>)}</ul>
