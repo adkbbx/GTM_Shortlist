@@ -1,41 +1,72 @@
-# Demo video script (3 minutes)
+# "Who needs you this week?" Demo video production script
 
-For the Meta Global AI Developer Hackathon submission. Judging weights: Impact 30, Meta AI tooling 25, Demo 25, Technical depth 20. The video is the main thing judged. Show only work built during the event (the agent start page, the live board, the examples, the Your shortlist page), never the classic workspace.
+For the Meta Global AI Developer Hackathon. Judging: Impact 30, Meta AI tooling 25, Demo 25, Technical depth 20; the video is judged first. Target length **2:00** (fast, never boring), 16:9 at 1920×1080, plus a 30-second 9:16 cut for X.
 
-The story is a real user: you, running Eygentic, finding startups that need you this week. Every quote below is on screen in the shipped eygentic.com example (31 October, five companies, $0.42). Say only what is visible.
+**Honesty rules for this video.** Every screen is the real product on a real search. Eygentic is the real seller; every other company appears under an invented name (video mode), and the video says so on screen and in the end card. Never show a number or quote that is not on screen.
 
-## Before recording
+## Look and sound
 
-- Open https://gtmshortlist--gtm-shortlist-agent-web.us-east.modal.run a few minutes early. Check `/api/health` shows `"investigator_model_available": true`.
-- Record at 1440 by 900 or larger, browser zoom 110%, cursor still for about 2 seconds on every quote.
-- Shot A (live search): type `eygentic.com`, choose 3, press Find. Record the first minute live: "What we assumed" filling in, competitors, then companies being researched. You do not need to wait for it to finish (it takes 2 to 4 minutes and about $0.40).
-- Shot B (finished board): the eygentic.com example under "Explore a finished search" (ThriveCart Shortlisted, Storable Rejected).
-- Shot C: the start page, "I don't have a website", the popup filled in (do not submit).
-- If shot A's live search finds something better than the example, you may use it instead, but read out only what is on that screen.
+- **Palette:** cream `#faf8f5` background, charcoal `#1b1b1b` text, orange `#d5682f` (accent), deep orange `#b4501c` (headlines), soft grey `#9c958c` (the "in" dots). Pills: green for Shortlisted, amber for Needs a look, red for Rejected, exactly as in the app.
+- **Type:** Schibsted Grotesk 800 for slams and captions, 500 for small labels. Tight tracking (-0.03em), big sizes (140 to 220 px on 1080p).
+- **Signature motif, "the filter":** many fine grey lines with dots flow in from the left; most dots fade out; three orange lines leave to the right. It opens the video, carries every scene change, and closes it. It is the product in one picture: many companies in, a few that need you out.
+- **Captions:** every spoken word, word by word, centred low. Charcoal on a cream pill; the key word of each line in orange. Viewers on X watch muted.
+- **Pace:** a cut or a motion beat every 1 to 2 seconds. Screen recordings get slow push-ins (105% to 112%) and snap zooms onto quotes.
+- **Music:** royalty-free upbeat electronic, 120 to 128 BPM, with a clear drop. Free sources: YouTube Audio Library, Pixabay Music (no credit needed), Uppbeat (credit in the description). Duck the music under the voice by 10 to 12 dB. Hard stop at 0:15 (the turn) and at 1:12 (the plot twist), then back in.
+- **Sound effects (royalty-free packs on Pixabay or Mixkit):** bass hit (slams), whoosh (filter transitions), soft key clicks (typing), pop (each pill appearing), bright ding (Shortlisted), record scratch (the turn), rubber-stamp thud (Rejected), highlighter squeak (quote highlight), cash-register tick (the cost).
+- **Voice:** your own voice. You are the real user; that is the strongest moment for judges. Speak fast and warm, as if telling a friend. Record in a quiet room, phone close to your mouth.
 
-## Script (about 410 words)
+## Shots to record (video mode on)
 
-| Time | Screen | Say |
-|---|---|---|
-| 0:00 to 0:12 | The start page, the lines flowing into the search box | "I run a small growth agency for B2B startups. The work isn't the hard part. Knowing which startups need it *this week* is." |
-| 0:12 to 0:22 | Shot A: type `eygentic.com`, pick 3, press Find | "GTM Shortlist needs one thing: my website. No filters. No ideal customer profile to fill in." |
-| 0:22 to 0:45 | Shot A: "What we assumed" filling in, then the competitors | "Muse Spark 1.3 reads my site and writes down what I sell, who buys it, and what would make a company need me now, and every assumption carries a quote from my own pages. It finds my competitors with web search, and only calls one direct when that company's own homepage proves it." |
-| 0:45 to 1:08 | Shot A: companies being researched, the activity rail | "Then it hunts for signals, not a database: open job posts on Lever, Greenhouse and Ashby first, then news. Each company gets its own agent loop on Muse Spark, with web search and our fetch tool. It reads their site, their job board, even their homepage code, looking for a competitor's widget." |
-| 1:08 to 1:32 | Shot B: ThriveCart card, open its quote, click through to the Greenhouse post | "Here's a search I ran last week. ThriveCart is Shortlisted. Why? Their open job post: 'As one of the first three SDRs in this enterprise initiative'. One click opens that exact sentence. They're building outbound from scratch, which is exactly who I help." |
-| 1:32 to 1:48 | Shot B: ThriveCart's opening line | "It writes the first line of my email from those quotes only. Then Muse Spark Open, a second model on Baseten with no web access, checks every statement. Anything it can't match is rewritten or dropped." |
-| 1:48 to 2:08 | Shot B: Storable in Rejected, its quote | "Storable looked like a fit, but it's Rejected, and it says why: 'Storable proudly employs over 800 employees'. I told it once that I sell to seed to Series A startups. The models gather and judge the evidence; plain code makes the verdict." |
-| 2:08 to 2:24 | Shot B: the Needs a look column | "Everything else is Needs a look, with exactly what's missing. A chatbot will give you reasons too. Nothing makes them true. Here, a claim only appears if its exact sentence is on a page it fetched." |
-| 2:24 to 2:36 | Shot C: "I don't have a website", the three questions | "No website yet? Describe what you sell and who buys it. Every claim about you then quotes your own words." |
-| 2:36 to 2:48 | Shot B: the board's footer (time, searches, cost) | "Every model call is logged with tokens and dollars. That search: five companies, forty-two cents." |
-| 2:48 to 3:00 | The start page with the URL on screen | "Built solo for the Meta hackathon on Muse Spark and Muse Spark Open. Try it on your own website. Link below." |
+Open the demo with `?video=1` once; it stays on for the browser tab. A dark tag in the corner reads "Video mode: company names changed" and stays in frame.
 
-## Optional swaps
+- **R1, start page:** the hero lines flowing, then typing `eygentic.com`, choosing 3, pressing Find. 1440×900, zoom 110%.
+- **R2, live board, first minute:** "What we assumed" filling in, competitors, companies being researched, the activity rail.
+- **R3, the finished eygentic.com example** (Explore a finished search): Loopcart in Shortlisted with its quote popover and opening line; Stackyard in Rejected with its quote; the Needs a look column; the board's footer.
+- **R4, the no-website popup:** fill in the three questions slowly; do not submit.
+- **R5, the homepage code scan (optional):** a Needs a look card's details showing the places checked.
 
-- **Accuracy (use only once the review sheet is labelled):** replace the 2:08 line's last two sentences with "I checked it against [N] companies I reviewed by hand: it agreed with me on [X] of them." Never say a number that has not been measured.
-- **Comparison (use only after you run it):** if ChatGPT or Claude was asked the same question and some of its claims could not be found on the linked page, replace "A chatbot will give you reasons too. Nothing makes them true." with "I asked a chatbot the same question: [X] of its [Y] claims weren't on the page it linked."
+## The script
 
-## Notes
+| Time | Picture | Voice | On-screen text and motion | Sound |
+|---|---|---|---|---|
+| 0:00 | Cream screen. The filter lines draw in from the left, fast. | "Building got easy." | "Building got easy." slams in, charcoal, word by word. | Bass hit on each word, music starts (intro, no drums). |
+| 0:03 | Same, lines keep flowing. | "Finding customers didn't." | "Finding customers didn't." in deep orange underneath. | Bass hit. |
+| 0:06 | A wall of grey logo squares scrolls up at speed (abstract tiles, no real logos). | "Lead lists give you ten thousand logos" | Counter rolls 0 → 10,000 "companies". | Rising whoosh. |
+| 0:09 | The wall freezes; a big red "0" appears. | "and zero reasons why." | "Reasons why: 0" | Pop. |
+| 0:11 | A chatbot-style answer bubble types out a confident list. Fake, generic, no real names. | "Chatbots give you reasons. You still have to check every single one." | Each line of the bubble gets a "?" badge. | Key clicks. |
+| 0:15 | Record scratch. Hard cut to R1: the hero. | "So I built GTM Shortlist." | Logo mark pops top-left. | Record scratch, then the drop. |
+| 0:18 | R1: typing `eygentic.com`, press Find. Snap zoom on the field. | "One input. My website." | "1 input" sticker on the field. | Key clicks, pop. |
+| 0:22 | R2: "What we assumed" filling in. Push in. | "Muse Spark 1.3 reads it and works out what I sell, who buys it, and what makes a company need me now." | Badge slides in: "Muse Spark 1.3 · investigator". Each assumption gets a small "quoted ✓" tick as it appears. | Pops on each tick. |
+| 0:30 | R2: competitors. | "It proves my competitors from their own homepages." | Two competitor chips flash "direct". | Whoosh. |
+| 0:34 | R2: companies being researched; the filter motif overlays the left half. | "Then it hunts signals, not a database: live job posts, news, launches." | Floating labels: "Lever", "Greenhouse", "Ashby", "news". | Rapid whooshes on the beat. |
+| 0:40 | R2 or R5: page code with a script tag highlighted. | "It even reads their homepage code to see which tools they already use." | Code panel slides in; a line glows orange: "already uses a competitor → out". | Glitch tick. |
+| 0:45 | Split screen: two model badges facing each other. | "And a second model, Muse Spark Open on Baseten, tries to disprove every quote. No web access, no mercy." | "Muse Spark Open · skeptic" badge; quotes fly past, a few get crossed out. | Swipe sounds, one buzzer. |
+| 0:53 | Filter transition to R3. | "Here's what came out." | Counter: "10 found → 5 researched → 1 shortlisted". | Whoosh, then ding. |
+| 0:56 | R3: Loopcart card, Shortlisted pill. Snap zoom. | "Loopcart. Shortlisted." | Pill pops; "names changed" tag visible. | Ding. |
+| 0:59 | R3: the quote popover. Highlighter sweeps across the quote. | "Their open job post: 'As one of the first three SDRs in this enterprise initiative.'" | Quote enlarges to full width, the words highlight in orange as you say them. Label: "open job post · read during the search". | Highlighter squeak. |
+| 1:06 | R3: the opening line. Typewriter effect. | "It writes my first line from that quote only. And the skeptic checks it before I ever see it." | "checked ✓ by a second model" stamp. | Key clicks, pop. |
+| 1:12 | Music cuts. R3: Stackyard card, slow push. | "Stackyard looked perfect. Until it didn't." | Screen dims slightly. | Silence, then a single heartbeat thump. |
+| 1:16 | R3: Stackyard's quote. | "'Proudly employs over 800 employees.' I sell to seed to Series A. It's out." | "REJECTED" rubber stamp slams across the card in red; the quote sits under it. | Stamp thud, music back in. |
+| 1:23 | Text slam over the board. | "The models gather the evidence. Plain code makes the call." | "Models gather. Code decides." | Two bass hits. |
+| 1:27 | R3: the Needs a look column, quick pan. | "Everything else? Needs a look, and it tells me exactly what's missing." | Each card's missing-item line glows briefly. | Soft pops. |
+| 1:33 | R4: the popup, typing the answers. | "No website yet? Describe what you sell. It quotes your own words." | "No website? No problem." sticker. | Key clicks. |
+| 1:40 | R3: the board footer. Counters animate. | "Five companies researched. Forty-two cents. Every claim one click from its source." | Big numbers: "5 companies · $0.42 · 100% sourced". | Cash-register tick on "$0.42". |
+| 1:48 | Filter motif, full screen, slowing down. Three orange dots exit right. | "Stop guessing who needs you." | "Find the companies that need you this week." | Music builds. |
+| 1:53 | End card: logo, URL, credits. | "GTM Shortlist. Try it with your website." | URL large; "Built solo for the Meta hackathon · Muse Spark 1.3 · Muse Spark Open on Baseten"; small line: "Real search. Company names changed for this video." | Final bass hit, music out. |
+| 2:00 | End. | | | |
 
-- Keep it under 3:00. If long, cut the 0:45 line to "Each company gets its own agent loop on Muse Spark: its site, its job board, even its homepage code."
-- Name the Meta models out loud (Muse Spark 1.3, Muse Spark Open on Baseten); they are a quarter of the score.
-- Do not show anyone's personal name, home location or email address on screen.
+About 230 spoken words: fast but clear at 2:00.
+
+## Rules while editing
+
+- The "Video mode: company names changed" tag stays visible in every app shot, and the end card repeats it.
+- No real company name or logo anywhere, including the chatbot bubble and the logo wall (use plain shapes).
+- Never show anyone's name, email or location; record in a clean browser profile.
+- Quotes on screen must match the app exactly (they are the real quotes with names changed).
+- "100% sourced" is fair: the app shows no claim without a quote. Do not add accuracy numbers until the review sheet is labelled.
+
+## 30-second vertical cut for X (1080×1920)
+
+0:00 "Building got easy. Finding customers didn't." → 0:04 lead-list logo wall, "0 reasons" → 0:07 record scratch, typing `eygentic.com` → 0:10 the filter motif, "10 found → 1 shortlisted" → 0:14 Loopcart quote highlight → 0:19 Stackyard REJECTED stamp → 0:23 "Models gather. Code decides." → 0:26 URL and "Built with Muse Spark". Same music, captions larger (top third safe area).
+
+Suggested post: "I built an AI agent that finds companies that need what you sell *this week*, and shows the receipt for every claim. One input: your website. Built solo for the Meta hackathon with Muse Spark. Try it on yours:" followed by the link.
