@@ -349,7 +349,7 @@ def test_the_demo_starts_without_the_main_app_or_its_settings():
 
 
 def test_site_icon_lookup_checks_the_domain_and_stays_offline_in_synthetic_mode(client):
-    assert client.get("/api/site-icon/seller.example").json() == {"url": None}
+    assert client.get("/api/site-icon/seller.example").json() == {"url": None, "placeholder": False}
     assert client.get("/api/site-icon/localhost").status_code == 404
     assert client.get("/api/site-icon/127.0.0.1").status_code == 404
 

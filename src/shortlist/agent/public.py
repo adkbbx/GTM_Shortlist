@@ -36,7 +36,7 @@ from shortlist.agent.service import AgentService, real_providers
 from shortlist.agent.settings import AgentSettings
 from shortlist.domain import utcnow
 from shortlist.fetch import canonical_url
-from shortlist.site_icons import PUBLIC_HOST, SiteIconInfo, SiteIcons
+from shortlist.site_icons import PUBLIC_HOST, SiteIconInfo, SiteIcons, icon_info
 from shortlist.turnstile import verify_turnstile
 
 LOCAL_HOSTS = ("localhost", "127.0.0.1")
@@ -313,7 +313,7 @@ def create_public_app(settings: PublicSettings | None = None, *, agent_settings:
             raise HTTPException(404, "Enter a public website domain") from None
         if canonical != domain or settings.synthetic:  # synthetic demo: no network
             return SiteIconInfo()
-        return SiteIconInfo(url=icons.get(domain))
+        return icon_info(icons.get(domain))
 
     @app.get("/api/health", response_model=PublicHealth)
     def health():

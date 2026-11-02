@@ -76,7 +76,7 @@ def test_sample_run_covers_the_whole_flow_offline_and_labelled(tmp_path, monkeyp
     assert any(SAMPLE_NOTE in workbook.read(name).decode() for name in workbook.namelist())
 
     domain = result["records"][0]["research"]["domain"]
-    assert client.get(f"/api/runs/{run_id}/site-icon/{domain}").json() == {"url": None}
+    assert client.get(f"/api/runs/{run_id}/site-icon/{domain}").json() == {"url": None, "placeholder": False}
     reuse = client.post(f"/api/runs/{run_id}/reuse", json={"request_key": "sample-reuse"})
     assert reuse.status_code == 409 and "Sample research" in reuse.json()["detail"]
     real = client.post("/api/sellers", json={"seller_url": "https://eygentic.com", "request_key": "real-request"})

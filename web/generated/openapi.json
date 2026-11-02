@@ -5995,6 +5995,11 @@
               }
             ],
             "title": "Url"
+          },
+          "placeholder": {
+            "type": "boolean",
+            "title": "Placeholder",
+            "default": false
           }
         },
         "type": "object",

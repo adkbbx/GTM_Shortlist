@@ -22,6 +22,11 @@ from shortlist.store import Store
     ('<link rel="icon" href="/icon.svg?icon.1ty.svg?dpl=3" type="image/svg+xml"><link rel="apple-touch-icon" href="/apple-icon?b">',
      'https://eygentic.com/apple-icon?b'),
     ('<link rel="icon" href="/mark.svg"><link rel="icon" href="/mark.png">', 'https://eygentic.com/mark.png'),
+    # mitticafe.org (Wix): only the builder's blank stand-in, so no icon and a flag to show the letter; a real one wins.
+    (('<link rel="icon" href="https://static.parastorage.com/client/pfavico.ico"><link rel="apple-touch-icon" '
+      'href="https://static.parastorage.com/client/pfavico.ico">'), ''),
+    ('<link rel="icon" href="https://static.parastorage.com/client/pfavico.ico"><link rel="icon" href="/own.png">',
+     'https://eygentic.com/own.png'),
     ('<link rel="stylesheet" href="/main.css">', None),
     ('<link rel="icon" href="http://example.com/a.png">', None),
     ('<link rel="icon" href="https://127.0.0.1/a.png">', None),
@@ -70,12 +75,18 @@ def test_site_icon_api_restricts_domains_to_saved_run_and_preserves_data(tmp_pat
         return 'https://eygentic.com/assets/eygentic_logo.png'
     monkeypatch.setattr(SiteIcons, 'get', get_icon)
     with TestClient(create_app(settings)) as client:
-        assert client.get(f'/api/runs/{run_id}/site-icon/eygentic.com').json() == {'url': 'https://eygentic.com/assets/eygentic_logo.png'}
+        assert client.get(f'/api/runs/{run_id}/site-icon/eygentic.com').json() == {'url': 'https://eygentic.com/assets/eygentic_logo.png', 'placeholder': False}
         for domain in ('unrelated.example', '127.0.0.1', 'eygentic.com:443', 'eygentic.com?bust=1'):
             assert client.get(f'/api/runs/{run_id}/site-icon/{quote(domain, safe="")}').status_code == 404
         assert client.get('/api/runs/missing/site-icon/eygentic.com').status_code == 404
     assert calls == ['eygentic.com']
     assert store.get_run(run_id) == before
+
+
+def test_a_site_builders_blank_icon_is_reported_so_the_page_shows_the_letter(tmp_path, monkeypatch):
+    monkeypatch.setattr(SiteIcons, 'get', lambda self, domain: '')  # declared_icon's PLACEHOLDER
+    with TestClient(create_app(Settings(db_path=tmp_path / 'blank.sqlite3'))) as client:
+        assert client.get('/api/site-icon/mitticafe.org').json() == {'url': None, 'placeholder': True}
 
 
 def test_suggestion_icon_reads_only_plain_public_domains_without_changing_data(tmp_path, monkeypatch):
@@ -86,7 +97,7 @@ def test_suggestion_icon_reads_only_plain_public_domains_without_changing_data(t
         return 'https://eygentic.com/assets/eygentic_logo.png'
     monkeypatch.setattr(SiteIcons, 'get', get_icon)
     with TestClient(create_app(settings)) as client:
-        assert client.get('/api/site-icon/eygentic.com').json() == {'url': 'https://eygentic.com/assets/eygentic_logo.png'}
+        assert client.get('/api/site-icon/eygentic.com').json() == {'url': 'https://eygentic.com/assets/eygentic_logo.png', 'placeholder': False}
         for domain in ('127.0.0.1', 'localhost', 'eygentic.com:443', 'eygentic.com?bust=1', 'EYGENTIC.COM', 'user@eygentic.com', 'a..b.com'):
             assert client.get(f'/api/site-icon/{quote(domain, safe="")}').status_code == 404
         assert client.get('/api/runs').json() == []

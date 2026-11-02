@@ -11,6 +11,11 @@
       ],
       "default": null,
       "title": "Url"
+    },
+    "placeholder": {
+      "default": false,
+      "title": "Placeholder",
+      "type": "boolean"
     }
   },
   "title": "SiteIconInfo",

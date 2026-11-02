@@ -2234,6 +2234,11 @@ export interface components {
         SiteIconInfo: {
             /** Url */
             url?: string | null;
+            /**
+             * Placeholder
+             * @default false
+             */
+            placeholder: boolean;
         };
         /** SkepticDecision */
         SkepticDecision: {

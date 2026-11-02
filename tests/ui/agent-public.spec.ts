@@ -88,7 +88,8 @@ test('the public demo starts from a website alone, caps the size and shares a re
   // It keeps its optional corrections.
   await page.locator('.agent-assumed > summary').click();
   await expect(page.locator('summary', { hasText: 'Add a competitor' })).toBeVisible();
-  await expect(page.locator('.agent-results .count-picker')).toBeVisible();
+  // How many to find is chosen once, when the search starts; for more, a new search skips companies already researched.
+  await expect(page.locator('.agent-results .count-picker')).toHaveCount(0);
   await expect(page.locator('.agent-shared')).toHaveCount(0);
   expect(await noOverflow(page)).toBe(true);
   await page.screenshot({ path: `.impeccable/review/${info.project.name}-agent-public-board.png`, fullPage: true });

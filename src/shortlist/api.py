@@ -43,7 +43,7 @@ from shortlist.ranking import by_evidence
 from shortlist.relevance import record_issue
 from shortlist.sample import SAMPLE_SELLER_URL
 from shortlist.selection import Selection
-from shortlist.site_icons import PUBLIC_HOST, SiteIconInfo, SiteIcons
+from shortlist.site_icons import PUBLIC_HOST, SiteIconInfo, SiteIcons, icon_info
 from shortlist.store import BudgetExceeded, Conflict, Store, saved_discovery_available, seller_retry_available
 from shortlist.turnstile import verify_turnstile
 
@@ -629,7 +629,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(404, "Website is not part of this saved run")
         if run["checkpoint"].get("sample"):
             return SiteIconInfo()  # Reserved sample domains never resolve; the page draws their marks.
-        return SiteIconInfo(url=site_icons.get(domain))
+        return icon_info(site_icons.get(domain))
 
     @app.get("/api/site-icon/{domain}", response_model=SiteIconInfo)
     def read_suggestion_icon(domain: str, store: owned):
@@ -643,7 +643,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(404, "Enter a public website domain") from None
         if canonical != domain:
             raise HTTPException(404, "Enter a public website domain")
-        return SiteIconInfo(url=site_icons.get(domain))
+        return icon_info(site_icons.get(domain))
 
     @app.delete("/api/runs/{run_id}", status_code=204)
     def delete_run(run_id: str, store: owned):

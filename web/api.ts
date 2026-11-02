@@ -108,6 +108,7 @@ async function researchCommand(path: string, input: unknown, sample = false): Pr
 
 function iconUrl(data: unknown) {
   if (!isSiteIcon(data)) throw new Error('The site icon response was unreadable.');
+  if (data.placeholder) return '';  // only a site builder's blank icon: show the letter, skip /favicon.ico
   if (!data.url) return null;
   const url = new URL(data.url);
   if (url.protocol !== 'https:' || url.username || url.password || (url.port && url.port !== '443')) return null;

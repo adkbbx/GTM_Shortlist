@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SiteIcon } from '../SiteIcon';
 import { Assumptions } from './Assumptions';
-import { CountPicker } from './CountPicker';
 import { EarlySteps, Feed, Monitor, Working } from './AgentLive';
 import { EvidenceList, QuoteBlock } from './Evidence';
 import { agentApi, domainOf, editToken, isActive, keepShortlist } from './agent-api';
-import { AgentConfigContext, countOptions, useAgentConfig } from './agent-config';
+import { AgentConfigContext, useAgentConfig } from './agent-config';
 import type { AgentEvent, AgentRun, AgentRunView, Company, EvidenceItem, Overrides, Profile } from './agent-api';
 
 const describe = (error: unknown) => error instanceof Error ? error.message : 'Something went wrong. Please try again.';
@@ -200,16 +199,12 @@ function CompanyRow({ company, run, events, runId, onUpdate }: { company: Compan
   </article>;
 }
 
-function Columns({ run, events, apply, busy, onUpdate }: { run: AgentRun; events: AgentEvent[]; apply: (overrides: Overrides) => void; busy: boolean;
-  onUpdate: (view: AgentRunView) => void }) {
-  const { editable, maxCompanies } = useAgentConfig();
+function Columns({ run, events, onUpdate }: { run: AgentRun; events: AgentEvent[]; onUpdate: (view: AgentRunView) => void }) {
   const decided = run.companies.filter(company => company.verdict);
   const working = run.companies.filter(company => !company.verdict);
   return <section className="agent-results" aria-labelledby="results-heading">
     <div className="agent-section-head agent-results-head">
       <div><h2 id="results-heading">Companies</h2></div>
-      {editable && <CountPicker label="Shortlist" value={run.company_count} options={countOptions(maxCompanies, run.company_count)}
-        disabled={busy || isActive(run.status)} onChange={count => apply({ company_count: count })} />}
     </div>
     <Working companies={working} events={events} />
     <div className="agent-groups">
@@ -354,7 +349,7 @@ export function AgentBoard({ runId, onNew }: { runId: string; onNew: () => void 
       {/* Only a site too vague to read: a provider failure has no profile, and typing would not fix it. */}
       {run.profile && !run.profile.offer && editable && <Describe apply={apply} busy={busy} summary="Describe your offer and buyer (optional)" />}</section>}
     {view.status === 'needs_choice' && run.profile && <ReadingChoice profile={run.profile} apply={apply} busy={busy} />}
-    {run.companies.length > 0 && <Columns run={run} events={events} apply={apply} busy={busy} onUpdate={next => { setView(next); setEvents(next.events); lastSeq.current = next.events.at(-1)?.seq ?? 0; }} />}
+    {run.companies.length > 0 && <Columns run={run} events={events} onUpdate={next => { setView(next); setEvents(next.events); lastSeq.current = next.events.at(-1)?.seq ?? 0; }} />}
     {run.profile && view.status !== 'needs_choice' && run.profile.offer && <Assumed run={run} apply={apply} busy={busy} />}
     </div><Feed events={events} open={feedOpen} onClose={() => setFeedOpen(false)} live={active} /></div>
   </div></AgentConfigContext.Provider>;

@@ -44,7 +44,9 @@ function LookedUpIcon({ domain: given, runId, icon, fallback, className, lookup 
   const branded = domain && clientId ? `https://cdn.brandfetch.io/domain/${encodeURIComponent(domain)}/fallback/404?c=${encodeURIComponent(clientId)}` : undefined;
   const declaration = declared?.key === key ? declared.url : undefined;
   const resolving = Boolean(key && declared?.key !== key);
-  const source = (resolving && !icon ? [] : [icon, declaration, domain ? `https://${domain}/favicon.ico` : undefined, branded]).find(url => url && !failed.has(url));
+  // '' means the homepage declares only a site builder's blank icon, which its /favicon.ico serves too.
+  const guess = domain && declaration !== '' ? `https://${domain}/favicon.ico` : undefined;
+  const source = (resolving && !icon ? [] : [icon, declaration, guess, branded]).find(url => url && !failed.has(url));
   const brandfetch = source && new URL(source).hostname.endsWith('.brandfetch.io');
   return <span ref={container} className={`site-icon ${className}`} aria-hidden="true">{source ? <img src={source} alt="" referrerPolicy={brandfetch ? 'origin' : 'no-referrer'} onError={() => setFailed(previous => new Set([...previous, source]))} /> : fallback}</span>;
 }
