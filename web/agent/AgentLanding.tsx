@@ -10,7 +10,7 @@ import { Reveal } from '../landing/Reveal';
 import { turnstileToken } from '../landing/turnstile';
 import { useLenis, usePrefersReducedMotion } from '../landing/useLenis';
 import '../landing/landing.css';
-import { STAGES, Stepper, prefixOf, stageOf, stepStates } from './AgentLive';
+import { STAGES, prefixOf, stageOf, stepStates } from './AgentLive';
 import { agentApi, domainOf, ownSearches } from './agent-api';
 import type { AgentEvent, AgentRunSummary, AgentRunView, Company, SellerDescription } from './agent-api';
 import { countOptions, useAgentConfig } from './agent-config';
@@ -36,6 +36,8 @@ function useInView(ref: RefObject<HTMLElement | null>) {
 
 const STEP_MS = 1100;  // one step at a time, slow enough to read: every line at 420 ms felt jittery
 const HOLD_STEPS = 6;  // about seven seconds on the finished result before it plays again
+const LINES = 9;  // recent steps on screen, enough to fill the box
+const HEAD_START = LINES;  // a full box from the start: one line in an empty box read as unfinished
 
 /** The steps worth watching: searches, what was read and confirmed, the skeptic's tally, verdicts and openers.
     Housekeeping and failed reads stay in the full log on the search's own page. */
@@ -48,10 +50,10 @@ function storyEvents(events: AgentEvent[]) {
 
 /** Plays the recorded steps one at a time while on screen, holds the result, then starts over. */
 function usePlayback(total: number, playing: boolean, reduced: boolean) {
-  const [tick, setTick] = useState(0);
+  const [tick, setTick] = useState(HEAD_START);
   useEffect(() => {
     if (reduced || !playing || !total) return;
-    const timer = window.setInterval(() => setTick(value => value >= total + HOLD_STEPS ? 0 : value + 1), STEP_MS);
+    const timer = window.setInterval(() => setTick(value => value >= total + HOLD_STEPS ? HEAD_START : value + 1), STEP_MS);
     return () => window.clearInterval(timer);
   }, [total, playing, reduced]);
   return reduced ? total : Math.min(tick, total);
@@ -94,7 +96,6 @@ function ReplayConsole({ view, events, onOpen, shown }: { view: AgentRunView; ev
       <span className="al-chip"><span className="agent-live-dot" aria-hidden="true" />Replay of a real search</span>
       <span className="al-console-title">{domainOf(view.run.website)} · {day(view.run.created_at)}</span>
     </div>
-    <Stepper states={states} compact />
     <div className="al-console-body" aria-hidden="true">
       {finished ? <div className="al-result">
         <p className="al-result-head">{shortlisted.length} shortlisted of {view.run.companies.length} researched</p>
@@ -106,7 +107,7 @@ function ReplayConsole({ view, events, onOpen, shown }: { view: AgentRunView; ev
           </div>;
         })}
       </div> : <ol className="al-lines">
-        {played.slice(-6).map(event => <li key={event.seq} className={`level-${event.level}`}>
+        {played.slice(-LINES).map(event => <li key={event.seq} className={`level-${event.level}`}>
           <span className={`al-tag stage-${event.stage}`}>{TAG[event.stage] ?? event.stage}</span>
           <span className="al-line">{prefixOf(event) && <b>{prefixOf(event)} </b>}{event.message}</span>
         </li>)}
@@ -114,7 +115,8 @@ function ReplayConsole({ view, events, onOpen, shown }: { view: AgentRunView; ev
     </div>
     <figcaption className="al-console-foot">
       <span>{finished ? 'Every verdict links to the evidence behind it.'
-        : played.length ? `${STAGES[Math.max(0, active)].label} · ${decided}/${view.run.company_count} companies decided` : 'Starting'}</span>
+        : played.length ? STAGES[Math.max(0, active)].label + (decided ? ` · ${decided} of ${view.run.companies.length} companies decided` : '')
+          : 'Starting'}</span>
       <a href={`?agent=${view.run.id}`} onClick={event => { event.preventDefault(); onOpen(view.run.id); }}>Open this search <Arrow /></a>
     </figcaption>
   </figure>;

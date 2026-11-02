@@ -32,7 +32,8 @@
 .al-console .agent-stepper .step-done .agent-step-dot{background:var(--pl-ink);border-color:var(--pl-ink);color:#fff}
 .al-console .agent-stepper .step-active{color:var(--pl-ink)}
 .al-console .agent-stepper .step-active .agent-step-dot{background:var(--pl-peach);border-color:var(--pl-ink);color:var(--pl-ink)}
-.al-console-body{flex:1;padding:.875rem 0;min-height:15rem}
+.al-console-body{flex:1;display:flex;flex-direction:column;margin-top:.875rem;padding:.875rem 0;min-height:15rem;border-top:1px solid var(--pl-line-soft)}
+.al-console-body>.al-lines{flex:1}
 /* Replay: a fixed window of single-line rows. A new line glides in at the bottom while older ones fade toward the
    top, so nothing reflows between steps. */
 .al-lines{display:flex;flex-direction:column;justify-content:flex-end;gap:.625rem;min-height:12.5rem;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
