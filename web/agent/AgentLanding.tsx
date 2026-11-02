@@ -195,6 +195,8 @@ function StartForm({ id, label = 'Your company website', inputId = 'website', ac
     {!simple && <div className="yc-form-foot">
       <CountPicker label="Companies to find" value={count} options={countOptions(config.maxCompanies)} disabled={busy} onChange={setCount} />
       {config.publicDemo && <span className="yc-note">Free demo: up to {config.maxCompanies} companies per search.</span>}
+    </div>}
+    {!simple && <div className="yc-describe-row">
       <button type="button" className="yc-describe-link" onClick={() => setDescribing(true)} disabled={busy}>I don't have a website</button>
     </div>}
     <div ref={check} className="agent-check" />

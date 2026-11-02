@@ -181,6 +181,7 @@
 .yc-btn:hover{background:#000}.yc-btn:active{transform:translateY(1px)}.yc-btn:disabled{opacity:.7;cursor:progress}
 .yc-form-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem 1.25rem;margin-top:1rem;padding-inline:.25rem}
 .yc-note{font-size:.8125rem;color:var(--pl-muted)}
+.yc-describe-row{display:flex;justify-content:center;margin-top:.75rem}
 /* A text link, not a button: the shared button rules (orange fill, 3.25rem height) are undone here. */
 .yc-describe-link,.yc-describe-link:hover,.yc-describe-link:active{min-height:0;padding:.25rem 0;border:0;border-radius:.25rem;background:none;box-shadow:none;transform:none;font:inherit;font-size:.8125rem;font-weight:500;color:var(--pl-muted);text-decoration:underline;text-decoration-color:rgba(27,27,27,.25);text-underline-offset:.2rem;cursor:pointer}
 .yc-describe-link:hover{color:var(--pl-charcoal);text-decoration-color:currentColor}
