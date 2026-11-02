@@ -5,13 +5,18 @@ import type { Company, EvidenceItem, Quote } from './agent-api';
 
 const sourceLabel: { [kind in Quote['source_type']]: string } = {
   own_site: 'Company site', job_post: 'Job post', news: 'News', review: 'Review site',
-  competitor_site: 'Competitor site', other: 'Other site',
+  competitor_site: 'Competitor site', other: 'Other site', description: 'Your description',
 };
 const day = (value: string) => new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(value));
 const pathOf = (url: string) => { try { const path = new URL(url).pathname; return path === '/' ? '' : path; } catch { return ''; } };
 
 /** An exact quote. The words link to the source page, scrolled to the quote where the browser supports it. */
 export function QuoteBlock({ quote }: { quote: Quote }) {
+  // Words a business without a website typed about itself: there is no page to link to.
+  if (quote.source_type === 'description') return <figure className="agent-quote">
+    <blockquote className="agent-quote-text">“{quote.text}”</blockquote>
+    <figcaption><span>From your description</span><span>Written {day(quote.fetched_at)}</span></figcaption>
+  </figure>;
   return <figure className="agent-quote">
     <a className="agent-quote-text" href={quoteLink(quote)} target="_blank" rel="noopener noreferrer">“{quote.text}”</a>
     <figcaption>

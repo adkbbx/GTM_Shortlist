@@ -85,6 +85,7 @@
 /* Quotes */
 .agent-quote{margin:.75rem 0 0;padding:.875rem 1rem;border:1px solid var(--line);border-radius:.625rem;background:#fcfbf9}
 .agent-quote-text{display:block;color:var(--ink);font-size:.9375rem;line-height:1.65;text-decoration:underline;text-decoration-color:#c4c0b8;text-underline-offset:.2rem;overflow-wrap:anywhere;white-space:pre-wrap}
+blockquote.agent-quote-text{margin:0;text-decoration:none}
 .agent-quote-text:hover{text-decoration-color:var(--orange)}
 .agent-quote figcaption{display:flex;flex-wrap:wrap;gap:.125rem .875rem;margin-top:.5rem;font-size:.75rem;color:var(--muted)}
 .agent-quote figcaption span{overflow-wrap:anywhere;min-width:0}

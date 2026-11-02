@@ -179,6 +179,25 @@
 .yc-btn:hover{background:#000}.yc-btn:active{transform:translateY(1px)}.yc-btn:disabled{opacity:.7;cursor:progress}
 .yc-form-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem 1.25rem;margin-top:1rem;padding-inline:.25rem}
 .yc-note{font-size:.8125rem;color:var(--pl-muted)}
+.yc-describe-link{padding:.25rem 0;border:0;background:none;font:inherit;font-size:.8125rem;color:var(--pl-muted);text-decoration:underline;text-decoration-color:rgba(27,27,27,.25);text-underline-offset:.2rem;cursor:pointer}
+.yc-describe-link:hover{color:var(--pl-charcoal);text-decoration-color:currentColor}
+.yc-describe{width:min(34rem,calc(100vw - 2rem));max-height:calc(100dvh - 2rem);margin:auto;padding:0;border:0;border-radius:1rem;background:#fff;color:var(--pl-charcoal);box-shadow:0 24px 64px rgba(27,27,27,.18)}
+.yc-describe::backdrop{background:rgba(27,27,27,.4)}
+.yc-describe form{display:grid;gap:.375rem;padding:1.5rem;text-align:left}
+.yc-describe-head{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.yc-describe h2{margin:0;font-size:1.25rem;font-weight:700;letter-spacing:-.01em}
+.yc-describe-sub{margin:0 0 .75rem;font-size:.875rem;line-height:1.5;color:var(--pl-muted)}
+.yc-describe label{margin-top:.5rem;font-size:.875rem;font-weight:600}
+.yc-describe label span{margin-left:.375rem;font-weight:400;color:var(--pl-muted)}
+.yc-describe textarea,.yc-describe input{width:100%;box-sizing:border-box;padding:.625rem .75rem;border:1px solid rgba(27,27,27,.16);border-radius:.625rem;background:#fff;font:inherit;font-size:.9375rem;color:inherit;resize:vertical}
+.yc-describe textarea{min-height:4.75rem;field-sizing:content}
+.yc-describe-close{display:grid;place-items:center;width:2.25rem;height:2.25rem;padding:0;border:0;border-radius:.5rem;background:none;color:var(--pl-muted);cursor:pointer}
+.yc-describe-close:hover{background:#f3f1ed;color:var(--pl-charcoal)}
+.yc-describe-close svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.yc-describe textarea:focus-visible,.yc-describe input:focus-visible{outline:2px solid var(--pl-charcoal);outline-offset:1px}
+.yc-describe-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:.75rem;margin-top:1rem}
+.yc-describe-cancel{height:3rem;padding:0 1rem;border:0;border-radius:.625rem;background:none;font:inherit;font-weight:600;color:var(--pl-muted);cursor:pointer}
+.yc-describe-cancel:hover{color:var(--pl-charcoal)}
 .yc-form .notice{margin-top:.875rem}
 @media(max-width:560px){.yc-field{flex-direction:column}.yc-btn{justify-content:center}.yc-form-foot{justify-content:center}}
 

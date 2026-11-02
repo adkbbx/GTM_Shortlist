@@ -13,6 +13,7 @@ export type EvidenceItem = Company['evidence'][number];
 export type Quote = EvidenceItem['quote'];
 export type Profile = NonNullable<AgentRun['profile']>;
 export type Competitor = AgentRun['competitors'][number];
+export type SellerDescription = components['schemas']['SellerDescription-Input'];
 
 const ajv = new Ajv({ strict: false });
 addFormats(ajv);
@@ -66,7 +67,8 @@ function keepEditToken(id: string, token: string) {
   try { window.localStorage.setItem(tokenKey(id), token); } catch { /* without storage the search stays read-only here */ }
 }
 
-async function call(path: string, body?: unknown, headers: Record<string, string> = {}): Promise<unknown> {
+async function call(path: string, body?: unknown, headers: Record<string, string> = {},
+  invalid = 'Enter your company website, for example yourcompany.com.'): Promise<unknown> {
   const response = await fetch(path, body === undefined ? {} : {
     method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body),
   });
@@ -75,7 +77,7 @@ async function call(path: string, body?: unknown, headers: Record<string, string
   if (!response.ok) {
     const detail = data && typeof data === 'object' && 'detail' in data ? (data as { detail: unknown }).detail : null;
     const message = typeof detail === 'string' ? detail
-      : Array.isArray(detail) ? 'Enter your company website, for example yourcompany.com.'
+      : Array.isArray(detail) ? invalid
         : 'The research service is not answering. Wait a moment, then try again.';
     throw new AgentError(message, response.status);
   }
@@ -89,11 +91,14 @@ function parseRun(data: unknown): AgentRunView {
 
 export const agentApi = {
   health: async () => await call('/api/health') as AgentHealth,
-  start: async (website: string, overrides?: Overrides, turnstile?: string) => {
+  /** seller: a website, or a business described in its own words when it has no website. */
+  start: async (seller: string | SellerDescription, overrides?: Overrides, turnstile?: string) => {
     // This browser's earlier searches, so the new one skips companies already researched for the same website.
     const previous = ownSearches();
-    const started = await call('/api/agent/runs', { website, ...(overrides ? { overrides } : {}), ...(turnstile ? { turnstile } : {}),
-      ...(previous.length ? { previous } : {}) }) as
+    const started = await call('/api/agent/runs', { ...(typeof seller === 'string' ? { website: seller } : { description: seller }),
+      ...(overrides ? { overrides } : {}), ...(turnstile ? { turnstile } : {}),
+      ...(previous.length ? { previous } : {}) }, {}, typeof seller === 'string' ? undefined
+      : 'Say what you sell and who your ideal customer is, in a sentence each.') as
       { id: string; status: string; edit_token?: string | null };
     if (started.edit_token) keepEditToken(started.id, started.edit_token);
     return started;

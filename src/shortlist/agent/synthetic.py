@@ -20,7 +20,7 @@ from shortlist.agent.outreach import INSTRUCTIONS as PITCH_INSTRUCTIONS
 from shortlist.agent.pages import Page, page_from_document
 from shortlist.agent.pipeline import Providers
 from shortlist.agent.providers import ChatTurn, FunctionCall, ModelTurn, SearchCall, SearchResult
-from shortlist.agent.seller import SELLER_INSTRUCTIONS
+from shortlist.agent.seller import DESCRIPTION_URL, SELLER_INSTRUCTIONS
 from shortlist.agent.telemetry import Pricing
 from shortlist.fetch import FetchError, canonical_url, domain_of
 
@@ -191,6 +191,40 @@ VAGUE_CHOSEN = {
         _quote("Talk to our experts about automation and reporting.", VAGUE)]}],
     "timing_signals": [], "existing_customers": [], "stated_limits": [], "interpretations": []}
 
+# A seller without a website: the same seller, described in its own words. Tests type DESCRIBED_SELLER, and every
+# quote below is copied from it, so the grounding check runs on the description as it does on a site.
+DESCRIBED_SELLER = {
+    "name": "Northwind Desk",
+    "offer": "Help desk software for online stores. Answer every customer email and chat from one shared inbox.",
+    "buyer": "Customer support teams at online retailers that still answer from shared Gmail inboxes.",
+    "markets": "North America and Europe"}
+DESCRIBED_ANSWER = {
+    "name": "Northwind Desk",
+    "offer": {"value": "Help desk software for online stores",
+              "quotes": [_quote("Help desk software for online stores.", DESCRIPTION_URL)]},
+    "buyer": {"value": "Customer support teams at online retailers",
+              "quotes": [_quote("Customer support teams at online retailers", DESCRIPTION_URL)]},
+    "existing_customers": [],
+    "fit_criteria": [
+        {"id": "fit-1", "text": "Sells products online through its own store", "required": True,
+         "quotes": [_quote("Help desk software for online stores", DESCRIPTION_URL)]},
+        {"id": "fit-2", "text": "Offers customer support by email or chat", "required": True,
+         "quotes": [_quote("Answer every customer email and chat from one shared inbox.", DESCRIPTION_URL)]}],
+    "need_signals": [
+        {"id": "need-1", "text": "Hiring customer support agents", "quotes": [
+            _quote("Customer support teams at online retailers", DESCRIPTION_URL),
+            # Deliberately not in the description: the grounding check drops this quote and logs it.
+            _quote("Teams cut first response times by 80 percent.", DESCRIPTION_URL)]},
+        {"id": "need-2", "text": "Answers support from a shared email inbox or spreadsheets", "quotes": [
+            _quote("still answer from shared Gmail inboxes", DESCRIPTION_URL)]}],
+    "timing_signals": [],
+    "stated_limits": [{"kind": "region", "value": "North America and Europe", "quotes": [
+        _quote("North America and Europe", DESCRIPTION_URL)]}],
+    "target_size": {"value": "Small and mid-sized online stores", "quotes": [
+        _quote("Customer support teams at online retailers", DESCRIPTION_URL)]},
+    "interpretations": [],
+}
+
 COMPETITOR_ANSWER = {"candidates": [
     {"name": "RivalDesk", "domain": "rival-desk.example", "url": "https://rival-desk.example/", "found_via": "Northwind Desk alternatives"},
     {"name": "ChatWidget", "domain": "chatwidget.example", "url": "https://chatwidget.example/", "found_via": "Northwind Desk vs"},
@@ -317,6 +351,8 @@ class SyntheticInvestigator:
         elif instructions == SELLER_INSTRUCTIONS:
             if "vague.example" in first:
                 answer = json.dumps(VAGUE_CHOSEN if "chose this reading" in first else VAGUE_ANSWER)
+            elif DESCRIPTION_URL in first:
+                answer = json.dumps(DESCRIBED_ANSWER)
             else:
                 answer = json.dumps(SELLER_ANSWER)
         elif instructions == SEARCH_INSTRUCTIONS:

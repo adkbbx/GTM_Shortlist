@@ -1151,7 +1151,8 @@
             "news",
             "review",
             "competitor_site",
-            "other"
+            "other",
+            "description"
           ],
           "title": "Source Type",
           "type": "string"
@@ -1211,6 +1212,17 @@
         "website": {
           "title": "Website",
           "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SellerDescription"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "status": {
           "default": "queued",
@@ -1334,6 +1346,7 @@
       "required": [
         "id",
         "website",
+        "description",
         "status",
         "created_at",
         "finished_at",
@@ -1352,6 +1365,44 @@
         "error"
       ],
       "title": "RunResult",
+      "type": "object"
+    },
+    "SellerDescription": {
+      "additionalProperties": false,
+      "description": "A seller without a website describes its business in its own words. The description stands in for the site:\nevery claim about the seller quotes these words, labelled as your description, so nothing is made up.",
+      "properties": {
+        "name": {
+          "default": "",
+          "maxLength": 120,
+          "title": "Name",
+          "type": "string"
+        },
+        "offer": {
+          "maxLength": 600,
+          "minLength": 10,
+          "title": "Offer",
+          "type": "string"
+        },
+        "buyer": {
+          "maxLength": 600,
+          "minLength": 10,
+          "title": "Buyer",
+          "type": "string"
+        },
+        "markets": {
+          "default": "",
+          "maxLength": 300,
+          "title": "Markets",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "offer",
+        "buyer",
+        "markets"
+      ],
+      "title": "SellerDescription",
       "type": "object"
     },
     "SellerProfile": {

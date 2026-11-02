@@ -1,7 +1,10 @@
-"""Stage A: understand the seller from its own website, with no typing required."""
+"""Stage A: understand the seller from its own website, with no typing required, or from its own description when
+it has no website."""
+import hashlib
 import json
 import re
 from collections.abc import Callable
+from datetime import datetime
 
 from shortlist.agent.answers import SellerAnswer, ground_quotes, page_block
 from shortlist.agent.llm import UNTRUSTED, Calls
@@ -11,12 +14,14 @@ from shortlist.agent.models import (
     FitCriterion,
     Interpretation,
     PageRef,
+    SellerDescription,
     SellerProfile,
     Signal,
     StatedLimit,
     Statement,
 )
 from shortlist.agent.pages import Fetcher, Page, comparison_links, seller_links
+from shortlist.domain import Source, utcnow
 from shortlist.fetch import FetchError, canonical_url, domain_of
 
 SELLER_INSTRUCTIONS = f"""You read a B2B seller's own website and describe, for a prospecting tool, what it sells and
@@ -94,6 +99,23 @@ def private_signal(text: str) -> bool:
     return bool(PRIVATE_SIGNAL.search(text))
 
 
+# A described seller's words are read like a page at this address; it is not a link.
+DESCRIPTION_URL = "description:your-words"
+DESCRIBED = ("This seller has no website. The page below is its own description of its business, written for this "
+             "search. Read it as the seller's site: every quote is copied exactly from it, with its url. Infer fit "
+             "checks and signals from what it sells and to whom, and quote the words each one rests on.\n")
+
+
+def description_page(description: SellerDescription, now: datetime) -> Page:
+    """The seller's own words as the one page its profile may quote, so every claim stays grounded."""
+    lines = [("Business", description.name), ("What we sell", description.offer),
+             ("Our ideal customer", description.buyer), ("Markets we sell in", description.markets)]
+    text = "\n".join(f"{label}: {value.strip()}" for label, value in lines if value.strip())
+    source = Source(url=DESCRIPTION_URL, company_domain="", title="Your description", text=text,
+                    content_hash=hashlib.sha256(text.encode()).hexdigest(), retrieved_at=now)
+    return Page(source=source, html="", full_text=text)
+
+
 def choose_pages(home: Page, extra: int = 5) -> list[str]:
     """Up to five same-domain pages: pricing, product, customers, about, integrations, keeping one slot for the
     seller's own comparison page when it has one."""
@@ -128,10 +150,11 @@ def _criterion_id(prefix: str, raw: str, index: int, used: set[str]) -> str:
 
 def build_profile(website: str, answer: SellerAnswer, pages: dict[str, Page], dropped: list[DroppedClaim]) -> SellerProfile:
     home = next(iter(pages.values()))
+    described = home.url == DESCRIPTION_URL
 
     def quotes(items, claim_type, limit=3):
         return ground_quotes(items, pages, stage="seller", dropped=dropped, claim_type=claim_type,
-                             source_type="own_site", limit=limit)
+                             source_type="description" if described else "own_site", limit=limit)
 
     def statement(item, claim_type):
         if item is None or not item.value.strip():
@@ -204,17 +227,26 @@ def build_profile(website: str, answer: SellerAnswer, pages: dict[str, Page], dr
 
 
 def understand_seller(website: str, calls: Calls, fetcher: Fetcher, emit: Callable[..., None],
-                      dropped: list[DroppedClaim], hint: tuple[str, str] | None = None) -> SellerProfile:
-    pages = read_seller_pages(website, fetcher, emit)
+                      dropped: list[DroppedClaim], hint: tuple[str, str] | None = None,
+                      description: SellerDescription | None = None, now: Callable[[], datetime] = utcnow) -> SellerProfile:
+    """website: the seller's site, or for a described seller (description set) its business name, which is not read."""
+    if description is not None:
+        page = description_page(description, now())
+        pages = {page.url: page}
+        emit("seller", "Read your description of your business")
+    else:
+        pages = read_seller_pages(website, fetcher, emit)
     blocks = "\n\n".join(page_block(page, 8000 if index == 0 else 5000) for index, page in enumerate(pages.values()))
-    request = "Describe this seller from its own pages.\n"
+    request = (DESCRIBED if description is not None else "") + "Describe this seller from its own pages.\n"
     if hint:
         request += ("The seller chose this reading of its site; use it and propose criteria and signals for it: "
                     + json.dumps({"offer": hint[0], "buyer": hint[1]}) + "\n")
     answer, _ = calls.investigator_json("seller_profile", SellerAnswer, instructions=SELLER_INSTRUCTIONS,
                                         input=[{"role": "user", "content": request + "<data>\n" + blocks + "\n</data>"}],
                                         max_output_tokens=4000)
-    profile = build_profile(website, answer, pages, dropped)
+    profile = build_profile("" if description is not None else website, answer, pages, dropped)
+    if description is not None and description.name.strip():
+        profile = profile.model_copy(update={"name": description.name.strip()[:200]})
     if profile.offer and not profile.need_signals and all(s.standard for s in profile.timing_signals):
         # Live run (crisp.chat): the answer had no need or timing signal, so no company could ever be Shortlisted.
         # Ask once more and keep only the new signals; the offer, buyer and fit checks stay as first read.
@@ -224,7 +256,7 @@ def understand_seller(website: str, calls: Calls, fetcher: Fetcher, emit: Callab
         again, _ = calls.investigator_json("seller_profile:signals", SellerAnswer, instructions=SELLER_INSTRUCTIONS,
                                            input=[{"role": "user", "content": retry + "<data>\n" + blocks + "\n</data>"}],
                                            max_output_tokens=4000)
-        signals = build_profile(website, again, pages, dropped)
+        signals = build_profile(profile.website, again, pages, dropped)
         profile = profile.model_copy(update={"need_signals": signals.need_signals,
                                              "timing_signals": signals.timing_signals})
     emit("seller", f"Understood the offer with {len(profile.fit_criteria)} fit checks, "

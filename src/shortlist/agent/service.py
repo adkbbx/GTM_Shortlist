@@ -5,7 +5,7 @@ from threading import Thread
 
 from shortlist.agent.assumptions import merge
 from shortlist.agent.jobboards import JobBoards
-from shortlist.agent.models import Overrides, RunResult, Telemetry
+from shortlist.agent.models import Overrides, RunResult, SellerDescription, Telemetry
 from shortlist.agent.pages import fetch_document
 from shortlist.agent.pipeline import AgentRunner, Providers
 from shortlist.agent.providers import AgentProviderError, BasetenSkeptic, MetaInvestigator
@@ -77,16 +77,21 @@ class AgentService:
                            use_skeptic=settings.use_skeptic,
                            on_event=lambda event: self.store.append_event(run_id, event), on_save=self.store.save)
 
-    def start(self, website: str, overrides: Overrides | None = None, history_runs: list[str] | None = None) -> RunResult:
+    def start(self, website: str | None, overrides: Overrides | None = None, history_runs: list[str] | None = None,
+              description: SellerDescription | None = None) -> RunResult:
+        """A seller without a website passes description instead: the search is labelled by its business name and,
+        with no domain to match earlier searches by, starts without history."""
         settings = self.settings()
         overrides = overrides or Overrides()
-        result = RunResult(website=website_url(website), status="queued", overrides=overrides,
+        label = (description.name.strip() or "Your business") if description is not None else website_url(website or "")
+        result = RunResult(website=label, description=description, status="queued", overrides=overrides,
                            company_count=overrides.company_count or 10, skeptic=settings.use_skeptic,
                            telemetry=Telemetry(budget_usd=settings.run_budget_usd))
-        history = self.history(result.website) if history_runs is None else self.history_of(result.website, history_runs)
+        history = {} if description is not None else self.history(result.website) if history_runs is None \
+            else self.history_of(result.website, history_runs)
         self.store.create(result)
-        self._spawn(result.id, lambda runner: runner.run(result.website, overrides, run_id=result.id, history=history),
-                    settings, result)
+        self._spawn(result.id, lambda runner: runner.run(result.website, overrides, run_id=result.id, history=history,
+                                                         description=description), settings, result)
         return result
 
     def draft_email(self, run_id: str, domain: str) -> RunResult:
@@ -118,7 +123,8 @@ class AgentService:
                 reading = next((r for r in result.profile.interpretations if r.id == overrides.interpretation), None)
                 if reading is None:
                     raise RunConflict("That reading is not part of this run")
-            work = lambda runner: runner.run(result.website, merged, run_id=run_id, reading=reading)
+            work = lambda runner: runner.run(result.website, merged, run_id=run_id, reading=reading,
+                                             description=result.description)
         else:
             work = lambda runner: runner.reevaluate(result, overrides)
         self.store.set_status(run_id, "running")

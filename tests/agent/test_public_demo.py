@@ -11,8 +11,9 @@ from pydantic import ValidationError
 from shortlist.agent.files import INTERRUPTED, FileAgentRuns
 from shortlist.agent.models import AgentEvent, RunResult, Telemetry
 from shortlist.agent.public import PublicSettings, create_public_app
+from shortlist.agent.seller import DESCRIPTION_URL
 from shortlist.agent.settings import AgentSettings
-from shortlist.agent.synthetic import synthetic_providers
+from shortlist.agent.synthetic import DESCRIBED_SELLER, synthetic_providers
 from shortlist.domain import utcnow
 
 SECRET = "public-demo-test-secret-0123456789abcdef"
@@ -68,6 +69,32 @@ def test_start_caps_companies_returns_edit_token_and_lists_nothing(client):
     assert client.get("/api/agent/runs").json() == []
     health = client.get("/api/health").json()
     assert health["mode"] == "public" and health["max_companies"] == 5 and health["turnstile_site_key"] is None
+
+
+def test_a_seller_without_a_website_describes_its_business_and_every_claim_quotes_those_words(client):
+    started = client.post("/api/agent/runs", json={"description": DESCRIBED_SELLER})
+    assert started.status_code == 201
+    body = finished(client, started.json()["id"])
+    run, profile = body["run"], body["run"]["profile"]
+    assert body["status"] == "complete" and run["website"] == "Northwind Desk"  # named after the business
+    assert run["description"]["markets"] == "North America and Europe"
+    assert profile["website"] == "" and profile["domain"] == "" and profile["name"] == "Northwind Desk"
+    assert [page["url"] for page in profile["pages"]] == [DESCRIPTION_URL]  # nothing was fetched for the seller
+    quotes = [q for item in [profile["offer"], profile["buyer"], *profile["fit_criteria"], *profile["need_signals"],
+                             *profile["stated_limits"]] for q in item["quotes"]]
+    text = "\n".join(DESCRIBED_SELLER.values())
+    assert quotes and all(q["source_type"] == "description" and q["text"] in text for q in quotes)
+    # A quote the description does not contain is dropped, as one missing from a website would be.
+    assert "Teams cut first response times by 80 percent." in [d["quote"] for d in run["dropped"]]
+    assert any(c["verdict"] and c["verdict"]["kind"] == "shortlisted" for c in run["companies"])
+    csv = client.get(f"/api/agent/runs/{run['id']}/shortlist.csv")
+    assert csv.status_code == 200 and "shortlist-northwinddesk-" in csv.headers["content-disposition"]
+
+
+@pytest.mark.parametrize("body", [{}, {"website": "seller.example", "description": DESCRIBED_SELLER},
+                                  {"description": {**DESCRIBED_SELLER, "offer": "Tools"}}])
+def test_a_search_needs_a_website_or_a_real_description_but_not_both(client, body):
+    assert client.post("/api/agent/runs", json=body).status_code == 422
 
 
 def test_shared_link_reads_but_only_the_starter_can_correct(client):

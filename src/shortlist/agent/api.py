@@ -9,11 +9,11 @@ from typing import Annotated
 
 from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.responses import Response, StreamingResponse
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from starlette.concurrency import run_in_threadpool
 
 from shortlist.agent.export import shortlist_csv
-from shortlist.agent.models import AgentEvent, Overrides, RunResult, RunStatus
+from shortlist.agent.models import AgentEvent, Overrides, RunResult, RunStatus, SellerDescription
 from shortlist.agent.providers import AgentProviderError
 from shortlist.agent.service import ACTIVE, AgentService, RunConflict, UnknownCompany
 from shortlist.agent.storage import SQLiteAgentRuns
@@ -28,13 +28,21 @@ class PreviousRun(BaseModel):
 
 class AgentStartInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    website: str = Field(min_length=3, max_length=300)
+    website: str | None = Field(default=None, min_length=3, max_length=300)
+    # A seller without a website describes its business instead; exactly one of the two is given.
+    description: SellerDescription | None = None
     overrides: Overrides | None = None
     # Cloudflare Turnstile token; only the public demo asks for one.
     turnstile: str | None = Field(default=None, max_length=4096)
     # Public demo: this browser's earlier searches with their edit tokens, so a new search skips companies it already
     # researched for the same website without seeing anyone else's searches.
     previous: list[PreviousRun] = Field(default_factory=list, max_length=30)
+
+    @model_validator(mode="after")
+    def website_or_description(self):
+        if (self.website is None) == (self.description is None):
+            raise ValueError("Enter your company website, or describe your business if you have none")
+        return self
 
 
 class AgentStarted(BaseModel):
@@ -100,7 +108,8 @@ def register_agent_routes(app: FastAPI, db_path: Path | None, service: AgentServ
     def start_agent_run(body: AgentStartInput, request: Request):
         body = policy.before_start(request, body)
         try:
-            result = service.start(body.website, body.overrides, history_runs=policy.history_runs(body))
+            result = service.start(body.website, body.overrides, history_runs=policy.history_runs(body),
+                                   description=body.description)
         except FetchError as exc:
             raise HTTPException(422, str(exc)) from exc
         return AgentStarted(id=result.id, status=result.status, edit_token=policy.started(result))

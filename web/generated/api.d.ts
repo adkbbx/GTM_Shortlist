@@ -713,7 +713,8 @@ export interface components {
         /** AgentStartInput */
         AgentStartInput: {
             /** Website */
-            website: string;
+            website?: string | null;
+            description?: components["schemas"]["SellerDescription-Input"] | null;
             overrides?: components["schemas"]["Overrides-Input"] | null;
             /** Turnstile */
             turnstile?: string | null;
@@ -1759,7 +1760,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "own_site" | "job_post" | "news" | "review" | "competitor_site" | "other";
+            source_type: "own_site" | "job_post" | "news" | "review" | "competitor_site" | "other" | "description";
             /** Published Date */
             published_date: string | null;
             /**
@@ -1911,6 +1912,7 @@ export interface components {
             id: string;
             /** Website */
             website: string;
+            description: components["schemas"]["SellerDescription-Output"] | null;
             /**
              * Status
              * @default queued
@@ -2087,6 +2089,48 @@ export interface components {
              * @default []
              */
             signals: components["schemas"]["CompanySignal"][];
+        };
+        /**
+         * SellerDescription
+         * @description A seller without a website describes its business in its own words. The description stands in for the site:
+         *     every claim about the seller quotes these words, labelled as your description, so nothing is made up.
+         */
+        "SellerDescription-Input": {
+            /**
+             * Name
+             * @default
+             */
+            name: string;
+            /** Offer */
+            offer: string;
+            /** Buyer */
+            buyer: string;
+            /**
+             * Markets
+             * @default
+             */
+            markets: string;
+        };
+        /**
+         * SellerDescription
+         * @description A seller without a website describes its business in its own words. The description stands in for the site:
+         *     every claim about the seller quotes these words, labelled as your description, so nothing is made up.
+         */
+        "SellerDescription-Output": {
+            /**
+             * Name
+             * @default
+             */
+            name: string;
+            /** Offer */
+            offer: string;
+            /** Buyer */
+            buyer: string;
+            /**
+             * Markets
+             * @default
+             */
+            markets: string;
         };
         /** SellerDraft */
         SellerDraft: {

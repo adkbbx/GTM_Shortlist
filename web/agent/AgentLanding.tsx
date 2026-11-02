@@ -12,7 +12,7 @@ import { useLenis, usePrefersReducedMotion } from '../landing/useLenis';
 import '../landing/landing.css';
 import { STAGES, Stepper, prefixOf, stageOf, stepStates } from './AgentLive';
 import { agentApi, domainOf, ownSearches } from './agent-api';
-import type { AgentEvent, AgentRunSummary, AgentRunView, Company } from './agent-api';
+import type { AgentEvent, AgentRunSummary, AgentRunView, Company, SellerDescription } from './agent-api';
 import { countOptions, useAgentConfig } from './agent-config';
 import { CountPicker } from './CountPicker';
 import './agent-landing.css';
@@ -168,18 +168,23 @@ function StartForm({ id, label = 'Your company website', inputId = 'website', ac
   const [error, setError] = useState('');
   const [shake, setShake] = useState(0);
   const check = useRef<HTMLDivElement>(null);
-  const start = async (event: FormEvent) => {
+  const [describing, setDescribing] = useState(false);
+  /** Starts from a website or a description; the browser check renders in `place`, which must be reachable. */
+  const launch = async (seller: string | SellerDescription, place: HTMLDivElement | null, fail: (message: string) => void) => {
+    setBusy(true); setError('');
+    try {
+      const token = config.turnstileSiteKey && place ? await turnstileToken(config.turnstileSiteKey, place) : undefined;
+      const { id: run } = await agentApi.start(seller, { company_count: count }, token);
+      navigate(run);
+    } catch (reason) { fail(describe(reason)); setBusy(false); }
+  };
+  const start = (event: FormEvent) => {
     event.preventDefault();
     const value = website.trim();
     if (!value) { document.querySelector<HTMLInputElement>(`#${id} input`)?.focus(); setShake(n => n + 1); return; }
-    setBusy(true); setError('');
-    try {
-      const token = config.turnstileSiteKey && check.current ? await turnstileToken(config.turnstileSiteKey, check.current) : undefined;
-      const { id: run } = await agentApi.start(value, { company_count: count }, token);
-      navigate(run);
-    } catch (reason) { setError(describe(reason)); setBusy(false); }
+    void launch(value, check.current, setError);
   };
-  return <form id={id} className="yc-form" onSubmit={start} autoComplete="off" noValidate>
+  return <><form id={id} className="yc-form" onSubmit={start} autoComplete="off" noValidate>
     {!simple && <Veins />}
     <div className={`yc-field${shake % 2 ? ' shake' : shake ? ' shake-b' : ''}`}>
       <CompanySearch value={website} clientId={configuredDirectoryId()} iconLookup disabled={busy} label={label}
@@ -190,10 +195,67 @@ function StartForm({ id, label = 'Your company website', inputId = 'website', ac
     {!simple && <div className="yc-form-foot">
       <CountPicker label="Companies to find" value={count} options={countOptions(config.maxCompanies)} disabled={busy} onChange={setCount} />
       {config.publicDemo && <span className="yc-note">Free demo: up to {config.maxCompanies} companies per search.</span>}
+      <button type="button" className="yc-describe-link" onClick={() => setDescribing(true)} disabled={busy}>I don't have a website</button>
     </div>}
     <div ref={check} className="agent-check" />
     {error && <p className="notice" role="alert">{error}</p>}
-  </form>;
+  </form>
+  {describing && <Describe count={count} busy={busy} onClose={() => setDescribing(false)} onStart={launch} />}</>;
+}
+
+/** For a business without a website: its own words stand in for the site, and every claim about it quotes them. */
+function Describe({ count, busy, onClose, onStart }: { count: number; busy: boolean; onClose: () => void;
+  onStart: (seller: SellerDescription, place: HTMLDivElement | null, fail: (message: string) => void) => Promise<void> }) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const check = useRef<HTMLDivElement>(null);
+  const [fields, setFields] = useState({ offer: '', buyer: '', markets: '', name: '' });
+  const [error, setError] = useState('');
+  // showModal focuses the first control, the close button; the first question is where typing starts.
+  useEffect(() => { dialog.current?.showModal(); dialog.current?.querySelector<HTMLTextAreaElement>('#describe-offer')?.focus(); }, []);
+  const set = (key: keyof typeof fields) => (event: { target: { value: string } }) =>
+    { setFields(previous => ({ ...previous, [key]: event.target.value })); setError(''); };
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    const missing = (['offer', 'buyer'] as const).find(key => fields[key].trim().length < 10);
+    if (missing) {
+      setError(missing === 'offer' ? 'Say what you sell or want to build, in a sentence.' : 'Say who your ideal customer is, in a sentence.');
+      dialog.current?.querySelector<HTMLTextAreaElement>(`#describe-${missing}`)?.focus();
+      return;
+    }
+    setError('');
+    void onStart({ offer: fields.offer.trim(), buyer: fields.buyer.trim(), markets: fields.markets.trim(), name: fields.name.trim() },
+      check.current, setError);
+  };
+  return <dialog ref={dialog} className="yc-describe" aria-labelledby="describe-title" onClose={onClose}>
+    <form onSubmit={submit} noValidate>
+      <div className="yc-describe-head">
+        <h2 id="describe-title">Describe your business</h2>
+        <button type="button" className="yc-describe-close" onClick={() => dialog.current?.close()} aria-label="Close">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" /></svg>
+        </button>
+      </div>
+      <p className="yc-describe-sub">Your answers stand in for a website. Everything we say about you quotes your own words.</p>
+      <label htmlFor="describe-offer">What do you sell or want to build?</label>
+      <textarea id="describe-offer" rows={2} maxLength={600} value={fields.offer} onChange={set('offer')} disabled={busy}
+        placeholder="Bookkeeping software for independent cafés" />
+      <label htmlFor="describe-buyer">Who is your ideal customer?</label>
+      <textarea id="describe-buyer" rows={2} maxLength={600} value={fields.buyer} onChange={set('buyer')} disabled={busy}
+        placeholder="Owners of cafés with 2 to 10 staff who still do their books by hand" />
+      <label htmlFor="describe-markets">Which markets or geography? <span>Optional</span></label>
+      <input id="describe-markets" maxLength={300} value={fields.markets} onChange={set('markets')} disabled={busy}
+        placeholder="UK and Ireland" />
+      <label htmlFor="describe-name">Business name <span>Optional</span></label>
+      <input id="describe-name" maxLength={120} value={fields.name} onChange={set('name')} disabled={busy}
+        placeholder="Names your search" />
+      <div ref={check} className="agent-check" />
+      {error && <p className="notice" role="alert">{error}</p>}
+      <div className="yc-describe-actions">
+        <button type="button" className="yc-describe-cancel" onClick={() => dialog.current?.close()} disabled={busy}>Cancel</button>
+        <button className="yc-btn" type="submit" disabled={busy} aria-busy={busy}>
+          {busy ? 'Starting' : `Find ${count} ${count === 1 ? 'company' : 'companies'}`} <Arrow /></button>
+      </div>
+    </form>
+  </dialog>;
 }
 
 const StartContext = createContext<(id: string) => void>(() => undefined);

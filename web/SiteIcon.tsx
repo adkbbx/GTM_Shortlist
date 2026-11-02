@@ -12,7 +12,9 @@ export function SiteIcon({ mark, ...props }: { domain?: string; runId?: string; 
   return mark ? <span className={`site-icon is-mark ${props.className}`} aria-hidden="true" dangerouslySetInnerHTML={{ __html: mark }} /> : <LookedUpIcon {...props} />;
 }
 
-function LookedUpIcon({ domain, runId, icon, fallback, className, lookup = false }: { domain?: string; runId?: string; icon?: string; fallback: string; className: string; lookup?: boolean }) {
+function LookedUpIcon({ domain: given, runId, icon, fallback, className, lookup = false }: { domain?: string; runId?: string; icon?: string; fallback: string; className: string; lookup?: boolean }) {
+  // A search for a business without a website is labelled by its name, which has no icon to look up.
+  const domain = given && /^[a-z0-9-]+(?:\.[a-z0-9-]+)+$/i.test(given) ? given : undefined;
   const [failed, setFailed] = useState<ReadonlySet<string>>(() => new Set());
   const container = useRef<HTMLSpanElement>(null);
   const [visible, setVisible] = useState(false);

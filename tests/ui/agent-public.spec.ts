@@ -8,6 +8,43 @@ test.use({ baseURL: 'http://127.0.0.1:8017' });
 
 const noOverflow = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
 
+test('a business without a website describes itself, and the search quotes its own words', async ({ page }, info) => {
+  await page.goto('/');
+  const open = page.getByRole('button', { name: "I don't have a website" });
+  await open.click();
+  const dialog = page.getByRole('dialog', { name: 'Describe your business' });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByLabel('What do you sell or want to build?')).toBeFocused();
+  await page.keyboard.press('Escape');  // closes from the keyboard
+  await expect(dialog).toBeHidden();
+  await open.click();
+  await dialog.getByRole('button', { name: 'Find 1 company' }).click();  // empty: says what is missing, starts nothing
+  await expect(dialog.getByRole('alert')).toContainText('what you sell');
+  await expect(page).not.toHaveURL(/agent=/);
+  // The labelled synthetic seller (shortlist.agent.synthetic.DESCRIBED_SELLER), typed as a visitor would.
+  await dialog.getByLabel('What do you sell or want to build?').fill('Help desk software for online stores. Answer every customer email and chat from one shared inbox.');
+  await dialog.getByLabel('Who is your ideal customer?').fill('Customer support teams at online retailers that still answer from shared Gmail inboxes.');
+  await dialog.getByLabel(/Which markets or geography/).fill('North America and Europe');
+  await dialog.getByLabel(/Business name/).fill('Northwind Desk');
+  expect(await noOverflow(page)).toBe(true);
+  mkdirSync('.impeccable/review', { recursive: true });
+  await page.screenshot({ path: `.impeccable/review/${info.project.name}-agent-describe.png` });
+  await dialog.getByRole('button', { name: 'Find 1 company' }).click();
+  await expect(page).toHaveURL(/[?&]agent=[0-9a-f]{32}/);
+  await expect(page.getByRole('heading', { level: 1, name: 'Northwind Desk' })).toBeVisible();
+  await expect(page.locator('.column-shortlisted').getByRole('heading', { name: 'Trailgear Outfitters' })).toBeVisible({ timeout: 30000 });
+  // What it assumed rests on the visitor's own words, labelled as such and not linked to any page.
+  await page.locator('.agent-assumed > summary').click();
+  await expect(page.getByText('From your description of your business.')).toBeVisible();
+  await page.locator('.agent-assumption-list .agent-chip').first().click();
+  const quote = page.locator('.agent-popover:popover-open .agent-quote').first();
+  await expect(quote).toContainText('From your description');
+  await expect(quote.getByRole('link')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  expect(await noOverflow(page)).toBe(true);
+  await page.screenshot({ path: `.impeccable/review/${info.project.name}-agent-described-board.png`, fullPage: true });
+});
+
 test('the public demo starts from a website alone, caps the size and shares a read-only link', async ({ page, browser }, info) => {
   await page.goto('/?flow=classic');
   await expect(page.getByLabel('Your company website')).toBeVisible();

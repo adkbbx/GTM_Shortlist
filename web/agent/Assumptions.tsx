@@ -54,7 +54,7 @@ export function Assumptions({ run, apply, busy }: { run: AgentRun; apply: Apply;
   return <section className="agent-assumptions" aria-labelledby="assumed-heading">
     <div className="agent-section-head">
       <h2 id="assumed-heading">What we assumed</h2>
-      <p>Read from your website. Open any item to see the exact words it rests on.{editable ? ' Changes are optional.' : ''}</p>
+      <p>{run.description ? 'From your description of your business.' : 'Read from your website.'} Open any item to see the exact words it rests on.{editable ? ' Changes are optional.' : ''}</p>
     </div>
     <dl className="agent-assumption-list">
       {profile.offer && <div><dt>Offer</dt><dd><Chip label={profile.offer.value} quotes={profile.offer.quotes} note={originNote(profile.offer.origin)} /></dd></div>}

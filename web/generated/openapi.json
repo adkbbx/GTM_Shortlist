@@ -1930,10 +1930,27 @@
       "AgentStartInput": {
         "properties": {
           "website": {
-            "type": "string",
-            "maxLength": 300,
-            "minLength": 3,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300,
+                "minLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Website"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SellerDescription-Input"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "overrides": {
             "anyOf": [
@@ -1968,9 +1985,6 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "required": [
-          "website"
-        ],
         "title": "AgentStartInput"
       },
       "AgentStarted": {
@@ -4630,7 +4644,8 @@
               "news",
               "review",
               "competitor_site",
-              "other"
+              "other",
+              "description"
             ],
             "title": "Source Type"
           },
@@ -5024,6 +5039,16 @@
             "type": "string",
             "title": "Website"
           },
+          "description": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SellerDescription-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -5145,6 +5170,7 @@
         "required": [
           "id",
           "website",
+          "description",
           "status",
           "created_at",
           "finished_at",
@@ -5574,6 +5600,80 @@
           "signals"
         ],
         "title": "Selection"
+      },
+      "SellerDescription-Input": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Name",
+            "default": ""
+          },
+          "offer": {
+            "type": "string",
+            "maxLength": 600,
+            "minLength": 10,
+            "title": "Offer"
+          },
+          "buyer": {
+            "type": "string",
+            "maxLength": 600,
+            "minLength": 10,
+            "title": "Buyer"
+          },
+          "markets": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Markets",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "offer",
+          "buyer"
+        ],
+        "title": "SellerDescription",
+        "description": "A seller without a website describes its business in its own words. The description stands in for the site:\nevery claim about the seller quotes these words, labelled as your description, so nothing is made up."
+      },
+      "SellerDescription-Output": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Name",
+            "default": ""
+          },
+          "offer": {
+            "type": "string",
+            "maxLength": 600,
+            "minLength": 10,
+            "title": "Offer"
+          },
+          "buyer": {
+            "type": "string",
+            "maxLength": 600,
+            "minLength": 10,
+            "title": "Buyer"
+          },
+          "markets": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Markets",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "offer",
+          "buyer",
+          "markets"
+        ],
+        "title": "SellerDescription",
+        "description": "A seller without a website describes its business in its own words. The description stands in for the site:\nevery claim about the seller quotes these words, labelled as your description, so nothing is made up."
       },
       "SellerDraft": {
         "properties": {

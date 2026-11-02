@@ -1,5 +1,27 @@
 # Progress and handoff
 
+## 2 November, Meta hackathon: a search without a website, and logos that load
+
+- **"I don't have a website":** a link under the start form opens a popup with three questions: what you sell or want to build, who your ideal customer is, and which markets (optional). It also asks for an optional business name.
+  - The answers become the seller's only page (`SellerDescription`, `seller.description_page`).
+  - The same grounding check runs on them: each quote must be copied word for word from what the seller typed. Quotes are labelled `description`, shown as "From your description" and never linked.
+  - The search is named after the business (or "Your business"), and nothing is fetched for the seller.
+  - It starts with no earlier-search history, because there is no domain to match by. There is also no own domain to exclude.
+  - API: `POST /api/agent/runs` takes `website` or `description`, never both.
+- **Logos:**
+  - The landing's product shot now shows each company's real icon.
+  - The live icon lookup had stopped working for any new domain: eygentic.com and stripe.com showed letters. A Modal probe proved the lookup code and eygentic.com's site were fine from Modal. Likely cause: stuck lookups, with each failure remembered for 15 minutes. A failed lookup is now retried after a minute, and a lookup waits up to 2 seconds for a free slot. After the redeploy, eygentic.com resolves live (1c36baa).
+- **Verified:**
+  - Backend: 983 passed, 48 skipped; Ruff clean.
+  - TypeScript build clean.
+  - 12 Playwright journeys pass on phone and laptop, including the new described-business journey: Escape closes the popup, an empty form shows an error, quotes are labelled and unlinked, and nothing overflows.
+  - Screenshots of the popup and the board, inspected.
+  - No provider credits spent.
+- **Unfinished:**
+  - No live described search has been run yet; it would use the model like any search.
+  - stripe.com's icon still resolves to nothing live; its homepage likely exceeds what the lookup reads.
+  - The described-search flow needs a line in the video script.
+
 ## 1 November (night), Meta hackathon: size from quotes, CSV, a live monitor and a new landing page
 
 - Size: the investigator now quotes a company's own words about its headcount or stage when a size check exists. Live run (eygentic.com, 5 companies, $0.42): storable.com Rejected on "Storable proudly employs over 800 employees" from its about page; vague team text was judged insufficient. A Shortlisted company whose size no quote addressed shows "Check before you reach out" (`Verdict.unconfirmed`); the three Shortlisted examples carry it.

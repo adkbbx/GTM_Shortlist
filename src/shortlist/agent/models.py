@@ -9,7 +9,8 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from shortlist.domain import new_id, utcnow
 
-SourceType = Literal["own_site", "job_post", "news", "review", "competitor_site", "other"]
+# description: the words a seller without a website typed about its own business (SellerDescription).
+SourceType = Literal["own_site", "job_post", "news", "review", "competitor_site", "other", "description"]
 ClaimType = Literal["fit", "need", "timing", "disqualifier"]
 Decision = Literal["supports", "contradicts", "insufficient"]
 VerdictKind = Literal["shortlisted", "needs_look", "rejected"]
@@ -312,9 +313,20 @@ class AgentEvent(Model):
     level: Literal["info", "warn", "done"] = "info"
 
 
+class SellerDescription(Model):
+    """A seller without a website describes its business in its own words. The description stands in for the site:
+    every claim about the seller quotes these words, labelled as your description, so nothing is made up."""
+    name: str = Field(default="", max_length=120)
+    offer: str = Field(min_length=10, max_length=600)
+    buyer: str = Field(min_length=10, max_length=600)
+    markets: str = Field(default="", max_length=300)
+
+
 class RunResult(Model):
     id: str = Field(default_factory=new_id)
+    # The seller's website, or for a described seller its business name: searches are labelled by it.
     website: str
+    description: SellerDescription | None = None
     status: RunStatus = "queued"
     created_at: datetime = Field(default_factory=utcnow)
     finished_at: datetime | None = None

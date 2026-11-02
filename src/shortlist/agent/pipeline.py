@@ -25,6 +25,7 @@ from shortlist.agent.models import (
     Interpretation,
     Overrides,
     RunResult,
+    SellerDescription,
     SellerProfile,
     SetAside,
     Telemetry,
@@ -102,11 +103,12 @@ class AgentRunner:
     # Run -------------------------------------------------------------------------------------------------------
     def run(self, website: str, overrides: Overrides | None = None, *, run_id: str | None = None,
             domains: list[str] | None = None, reading: Interpretation | None = None,
-            history: dict[str, dict] | None = None) -> RunResult:
-        """history: companies already researched for this seller (storage.prior_research); discovery sets them aside."""
+            history: dict[str, dict] | None = None, description: SellerDescription | None = None) -> RunResult:
+        """history: companies already researched for this seller (storage.prior_research); discovery sets them aside.
+        description: a seller without a website describes its business; website is then its business name."""
         self.history = history or {}
         overrides = overrides or Overrides()
-        result = RunResult(website=website, status="running", skeptic=self.use_skeptic,
+        result = RunResult(website=website, description=description, status="running", skeptic=self.use_skeptic,
                            synthetic=self.providers.synthetic, overrides=overrides,
                            company_count=overrides.company_count or (len(domains) if domains else DEFAULT_COMPANIES),
                            telemetry=Telemetry(budget_usd=self.budget_usd))
@@ -155,8 +157,10 @@ class AgentRunner:
         chosen = reading is not None or bool(overrides.offer and overrides.buyer)
         hint = (reading.offer, reading.buyer) if reading else \
             (overrides.offer, overrides.buyer) if overrides.offer and overrides.buyer else None
-        profile = understand_seller(result.website, calls, fetcher, self.emit, result.dropped, hint=hint)
-        calls.meter.fetched(len(profile.pages))
+        profile = understand_seller(result.website, calls, fetcher, self.emit, result.dropped, hint=hint,
+                                    description=result.description, now=self.providers.clock)
+        if result.description is None:  # a description is typed, not fetched
+            calls.meter.fetched(len(profile.pages))
         result.profile = profile
         assumptions.apply_reading(result, overrides, reading)
         self.save(result)
@@ -166,7 +170,10 @@ class AgentRunner:
                 self.emit("seller", "Your site can be read more than one way: choose the closest reading", level="warn")
             else:
                 result.status = "failed"
-                result.error = ("We could not tell what you sell and to whom from your website. You can optionally "
+                result.error = ("We could not tell what you sell and to whom from your description. Say what you sell "
+                                "and which companies buy it in a sentence each, and start again."
+                                if result.description else
+                                "We could not tell what you sell and to whom from your website. You can optionally "
                                 "describe your offer and buyer in a sentence each and run again.")
                 self.emit("seller", result.error, level="warn")
             return
