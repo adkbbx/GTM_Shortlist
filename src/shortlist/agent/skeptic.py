@@ -29,8 +29,9 @@ For each item answer:
 - "insufficient" for anything else, including vague or promotional wording.
 
 Rules you must apply:
-1. own_site evidence (the company's own website) can support a fit check only, never a need. A need item from
-   own_site is "insufficient".
+1. own_site evidence (the company's own website) can support a fit check, and a need item only when that item has
+   "own_site_ok": true (a need the company shows as a fact about itself on its own site, such as a trust page or
+   compliance work it lists). Any other need item from own_site is "insufficient": marketing cannot show a need.
 2. A disqualifier item supports only when the quote shows CURRENT use or status today. "Integrates with", a
    comparison or alternatives article, an old case study, past use ("switched from", "formerly", "used to") or a plan
    is "insufficient".
@@ -45,7 +46,7 @@ Rules you must apply:
 Return only JSON: {"decisions": [{"id": "item id", "decision": "supports|contradicts|insufficient",
 "reason": "one short sentence"}]}"""
 
-OWN_SITE_NEED = "Rule: the company's own website can support fit only, never need"
+OWN_SITE_NEED = "Rule: the company's own website cannot show this need; it must be shown on another page"
 MAX_ITEMS = 40
 
 
@@ -72,8 +73,14 @@ def check_text(item: EvidenceItem, profile: SellerProfile, rules: list[Disqualif
     return found.text if found else item.criterion_id
 
 
-def apply_rules(item: EvidenceItem, decision: SkepticDecision) -> SkepticDecision:
-    if item.claim_type == "need" and item.quote.source_type == "own_site" and decision.decision == "supports":
+def own_site_needs(profile: SellerProfile) -> set[str]:
+    """Need signals the company's own site may prove (SellerProfile.need_signals with own_site)."""
+    return {signal.id for signal in profile.need_signals if signal.own_site}
+
+
+def apply_rules(item: EvidenceItem, decision: SkepticDecision, own_site_ok: set[str] = frozenset()) -> SkepticDecision:
+    if item.claim_type == "need" and item.quote.source_type == "own_site" and decision.decision == "supports" \
+            and item.criterion_id not in own_site_ok:
         return SkepticDecision(evidence_id=item.id, decision="insufficient", reason=OWN_SITE_NEED, decided_by="rule")
     return decision
 
@@ -83,8 +90,10 @@ def judge(company: CompanyResult, profile: SellerProfile, rules: list[Disqualifi
     """Decisions for this company's evidence; with only, re-judge those items and keep the rest."""
     items = [item for item in company.evidence if only is None or item.id in only][:MAX_ITEMS]
     decided: dict[str, SkepticDecision] = {}
+    own_ok = own_site_needs(profile)
     if items and use_skeptic and calls is not None and calls.skeptic is not None:
         payload = [{"id": item.id, "claim_type": item.claim_type, "check": check_text(item, profile, rules),
+                    **({"own_site_ok": item.criterion_id in own_ok} if item.claim_type == "need" else {}),
                     "quote": item.quote.text, "quote_location": "page code" if item.quote.location == "html" else "page text",
                     "source_type": item.quote.source_type,
                     "published_date": item.quote.published_date.isoformat() if item.quote.published_date else None,
@@ -114,7 +123,7 @@ def judge(company: CompanyResult, profile: SellerProfile, rules: list[Disqualifi
                 evidence_id=item.id, decided_by="no_skeptic" if not use_skeptic else "skeptic",
                 decision="supports" if not use_skeptic else "insufficient",
                 reason="Accepted without the skeptic (ablation)" if not use_skeptic else "No decision returned")
-        decided[item.id] = apply_rules(item, decided[item.id])
+        decided[item.id] = apply_rules(item, decided[item.id], own_ok)
     kept = [d for d in company.decisions if d.evidence_id not in decided and
             any(e.id == d.evidence_id for e in company.evidence)]
     return kept + [decided[item.id] for item in items]

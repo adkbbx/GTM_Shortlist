@@ -1545,6 +1545,11 @@
           "default": false,
           "title": "Standard",
           "type": "boolean"
+        },
+        "own_site": {
+          "default": false,
+          "title": "Own Site",
+          "type": "boolean"
         }
       },
       "required": [
@@ -1552,7 +1557,8 @@
         "kind",
         "text",
         "quotes",
-        "standard"
+        "standard",
+        "own_site"
       ],
       "title": "Signal",
       "type": "object"

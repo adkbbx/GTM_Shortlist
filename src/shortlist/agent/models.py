@@ -64,6 +64,9 @@ class Signal(Model):
     # A common buying moment (a funding round, a launch) added when the seller's site gave none: a seller's site rarely
     # says when to buy, so live runs had no timing signal at all (vanta.com, crisp.chat). It is labelled, not quoted.
     standard: bool = False
+    # A need a company shows on its own website (a trust or security page, compliance work it lists), so its own page
+    # can prove it. Every other need must be shown elsewhere: a company's marketing cannot show that it needs help.
+    own_site: bool = False
 
     @model_validator(mode="after")
     def quoted_unless_standard(self):

@@ -135,8 +135,9 @@ def test_skeptic_sees_only_quote_check_source_and_dates():
     skeptic = ScriptedSkeptic([json.dumps({"decisions": [{"id": need.id, "decision": "supports", "reason": "ok"}]})])
     judge(target, PROFILE, RULES, calls_with(skeptic), use_skeptic=True)
     sent = json.loads(skeptic.messages[0][1]["content"].split("<data>\n")[1].split("\n</data>")[0])["items"][0]
-    assert set(sent) == {"id", "claim_type", "check", "quote", "quote_location", "source_type", "published_date",
-                         "fetched_at"}
+    # own_site_ok: whether this need may be shown by the company's own site (SellerProfile signal), never who it is.
+    assert set(sent) == {"id", "claim_type", "check", "own_site_ok", "quote", "quote_location", "source_type",
+                         "published_date", "fetched_at"}
     assert "shop.example" not in json.dumps(sent)
 
 

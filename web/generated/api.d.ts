@@ -2175,6 +2175,11 @@ export interface components {
              * @default false
              */
             standard: boolean;
+            /**
+             * Own Site
+             * @default false
+             */
+            own_site: boolean;
         };
         /** SiteIconInfo */
         SiteIconInfo: {

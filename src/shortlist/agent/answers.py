@@ -43,6 +43,7 @@ class SignalAnswer(Answer):
     id: str = ""
     text: str = ""
     quotes: list[QuoteAnswer] = Field(default_factory=list)
+    own_site: bool = False
 
 
 class CustomerAnswer(Answer):

@@ -28,7 +28,8 @@ Return only one JSON object with this shape:
  "buyer": {{"value": "which companies buy it, one sentence", "quotes": [...]}},
  "existing_customers": [{{"name": "customer company", "domain": "customer.com or null", "quotes": [...]}}],
  "fit_criteria": [{{"id": "fit-1", "text": "an observable check on a company's own pages", "required": true, "quotes": [...]}}],
- "need_signals": [{{"id": "need-1", "text": "something a company does that shows it needs this", "quotes": [...]}}],
+ "need_signals": [{{"id": "need-1", "text": "something a company does that shows it needs this", "own_site": false,
+   "quotes": [...]}}],
  "timing_signals": [{{"id": "timing-1", "text": "an event that makes now a good time", "quotes": [...]}}],
  "stated_limits": [{{"kind": "size or region", "value": "...", "quotes": [...]}}],
  "target_size": {{"value": "the size and stage of company the offer is written for", "quotes": [...]}},
@@ -51,6 +52,10 @@ Rules:
   (not "does not know what works", "is not confident", "struggles with", "wants to", "before X is proven"): no
   public quote can show those. Never use a competitor's product as a need signal: using a competitor is checked
   separately and rejects the company.
+- own_site on a need signal: true only when the company's own website is where it shows, because the signal is what
+  the company publishes about itself as a fact: a trust or security page, compliance work it lists (SOC 2, ISO 27001,
+  HIPAA), the tools or channels its site runs. false for hiring, news, funding and anything a company's marketing would
+  merely claim about its ambitions or problems ("scaling fast", "needs more pipeline"): only other pages show those.
 - timing_signals: up to 3 dated public events that make now a good time, such as a launch, expansion into a new
   market, new funding or hiring for a new team. The same rule applies: events, not states of mind.
 - existing_customers: only companies the site names as customers (logos, case studies, testimonials).
@@ -157,7 +162,8 @@ def build_profile(website: str, answer: SellerAnswer, pages: dict[str, Page], dr
             found = quotes(item.quotes, f"{kind} signal")
             if len(item.text.strip()) >= 3 and found:
                 kept.append(Signal(id=_criterion_id(kind, item.id, index, used), kind=kind,
-                                   text=item.text.strip()[:500], quotes=found))
+                                   text=item.text.strip()[:500], quotes=found,
+                                   own_site=kind == "need" and item.own_site is True))
         signals[kind] = kept[:cap]
     if not signals["timing"]:
         signals["timing"] = [Signal(id=f"timing-std-{index}", kind="timing", text=text, standard=True)

@@ -29,13 +29,19 @@ def excluded_by(company: CompanyResult, exclusions: list[str]) -> str | None:
     return None
 
 
-def fresh(item: EvidenceItem, today: date) -> bool:
+def fresh(item: EvidenceItem, today: date, own_site_ok: set[str] = frozenset()) -> bool:
     """Current: published within FRESH_DAYS, or a job posting found open on an applicant-tracking system during this
-    run (a role still being hired for is current whenever it was first posted)."""
-    if item.quote.open_posting and abs((item.quote.fetched_at.date() - today).days) <= 1:
-        return True
+    run (a role still being hired for is current whenever it was first posted), or a need the company's own site may
+    show (own_site_ok), read from that site during this run: the site states it today, unless the page is dated old."""
+    read_today = abs((item.quote.fetched_at.date() - today).days) <= 1
     published = item.quote.published_date
-    return published is not None and today - timedelta(days=FRESH_DAYS) <= published <= today + timedelta(days=1)
+    recent = published is not None and today - timedelta(days=FRESH_DAYS) <= published <= today + timedelta(days=1)
+    if item.quote.open_posting and read_today:
+        return True
+    if item.claim_type == "need" and item.quote.source_type == "own_site" and item.criterion_id in own_site_ok \
+            and read_today and (published is None or recent):
+        return True
+    return recent
 
 
 def decide(company: CompanyResult, profile: SellerProfile, rules: list[DisqualifierRule], today: date,
@@ -65,7 +71,8 @@ def decide(company: CompanyResult, profile: SellerProfile, rules: list[Disqualif
             prefix = "Fit contradicted" if criterion.id in contradicted else "Fit not shown"
             gaps.append(f"{prefix}: {criterion.text}")
     signals = [e for e in supported if e.claim_type in ("need", "timing")]
-    if not any(fresh(e, today) for e in signals):
+    own_ok = {signal.id for signal in profile.need_signals if signal.own_site}
+    if not any(fresh(e, today, own_ok) for e in signals):
         if signals:
             gaps.append(f"Need or timing evidence found, but none current (dated within {FRESH_DAYS} days or an open job post)")
         else:

@@ -52,7 +52,8 @@ Work in this order:
 1. Fit: check each fit check against the company's own pages. The homepage text is supplied; call fetch_page for
    other pages on its site (product, pricing, about, careers).
 2. Need and timing (spend most of your searches here): the company's own marketing cannot show need, so look
-   beyond it. Search for its job posts (its careers page, or job boards such as Greenhouse, Lever, Workable or
+   beyond it. The exception is a need signal with own_site: true, a fact the company publishes about itself (a trust
+   or security page, compliance work it lists): fetch that page on its site and quote it. Search for its job posts (its careers page, or job boards such as Greenhouse, Lever, Workable or
    LinkedIn) for roles named in the need signals, and for news or press releases from the last six months for the
    timing signals. open_posting, when present, is a job posting confirmed open just now and its text is supplied:
    quote its own sentences for the need signals it shows, with that url, before searching for more. lead_page, when
@@ -296,7 +297,7 @@ class Investigation:
             "seller_offer": profile.offer.value if profile.offer else "",
             "seller_buyer": profile.buyer.value if profile.buyer else "",
             "fit_checks": [{"id": c.id, "text": c.text, "required": c.required} for c in profile.fit_criteria if c.enabled],
-            "need_signals": [{"id": s.id, "text": s.text} for s in profile.need_signals],
+            "need_signals": [{"id": s.id, "text": s.text, "own_site": s.own_site} for s in profile.need_signals],
             "timing_signals": [{"id": s.id, "text": s.text} for s in profile.timing_signals],
             "disqualifier_checks": [{"id": r.id, "text": r.text} for r in self.ctx.rules
                                     if r.enabled and r.rule not in ("is_competitor", "is_existing_customer")],

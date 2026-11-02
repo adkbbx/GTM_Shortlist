@@ -74,7 +74,8 @@ export function Assumptions({ run, apply, busy }: { run: AgentRun; apply: Apply;
           onSubmit={text => apply({ criteria: [{ id: `user-${Date.now().toString(36)}`, text, required: true }] })} />}
       </dd></div>
       {(profile.need_signals.length > 0 || profile.timing_signals.length > 0) && <div><dt>Need and timing</dt><dd>
-        {profile.need_signals.map(signal => <Chip key={signal.id} label={signal.text} tag="Need" quotes={signal.quotes} />)}
+        {profile.need_signals.map(signal => <Chip key={signal.id} label={signal.text} tag="Need" quotes={signal.quotes}
+          note={signal.own_site ? 'A company shows this on its own site, so a quote from its own security or trust page counts.' : undefined} />)}
         {profile.timing_signals.map(signal => <Chip key={signal.id} label={signal.text} tag="Timing" quotes={signal.quotes}
           note={signal.standard ? 'A common buying moment. Your site did not name one, so the agent also looks for this.' : undefined} />)}
       </dd></div>}

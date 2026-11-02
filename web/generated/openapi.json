@@ -5857,6 +5857,11 @@
             "type": "boolean",
             "title": "Standard",
             "default": false
+          },
+          "own_site": {
+            "type": "boolean",
+            "title": "Own Site",
+            "default": false
           }
         },
         "additionalProperties": false,
@@ -5866,7 +5871,8 @@
           "kind",
           "text",
           "quotes",
-          "standard"
+          "standard",
+          "own_site"
         ],
         "title": "Signal"
       },
