@@ -34,7 +34,13 @@ POSTING_HOSTS = {"lever": ("jobs.lever.co",), "greenhouse": ("job-boards.greenho
                  "ashby": ("jobs.ashbyhq.com",)}
 CAREERS_PATH = re.compile(r"/(?:careers?|jobs|join(?:-us)?|work-with-us|hiring|open-positions)(?:/|$)", re.IGNORECASE)
 MAX_OPENINGS = 25  # shown to the investigator
-MAX_BYTES = 3_000_000
+# AHEAD's Lever list (148 postings with descriptions) is 4 MB; a 3 MB cap read it as no board, so its open posting
+# showed as "not confirmed open". A single posting is read on its own (ONE_POSTING) whenever the board allows it.
+MAX_BYTES = 12_000_000
+ONE_POSTING = {"lever": (re.compile(r"^/([^/]+)/([0-9a-f-]{36})$", re.IGNORECASE),
+                         "https://api.lever.co/v0/postings/{}/{}?mode=json"),
+               "greenhouse": (re.compile(r"^/([^/]+)/jobs/(\d{1,20})$"),
+                              "https://boards-api.greenhouse.io/v1/boards/{}/jobs/{}")}
 
 
 @dataclass(frozen=True)
@@ -138,23 +144,45 @@ class JobBoards:
         if platform == "lever":
             data = self._get(f"https://api.lever.co/v0/postings/{slug}?mode=json")
             items = data if isinstance(data, list) else None
-            fields = lambda j: (j.get("text"), j.get("hostedUrl"), (j.get("categories") or {}).get("location"),
-                                j.get("createdAt"), (j.get("descriptionPlain") or "") + " " + (j.get("additionalPlain") or ""),
-                                lever_body(j))
         elif platform == "greenhouse":
             data = self._get(f"https://boards-api.greenhouse.io/v1/boards/{slug}/jobs?content=true")
             items = data.get("jobs") if isinstance(data, dict) else None
-            fields = lambda j: (j.get("title"), j.get("absolute_url"), (j.get("location") or {}).get("name"),
-                                j.get("first_published") or j.get("updated_at"), j.get("content"),
-                                html.unescape(j.get("content") or ""))
         elif platform == "ashby":
             data = self._get(f"https://api.ashbyhq.com/posting-api/job-board/{slug}")
             items = [j for j in data.get("jobs") or [] if isinstance(j, dict) and j.get("isListed", True)] \
                 if isinstance(data, dict) else None
-            fields = lambda j: (j.get("title"), j.get("jobUrl"), j.get("location"), j.get("publishedAt"),
-                                j.get("descriptionPlain"), j.get("descriptionHtml") or html.escape(j.get("descriptionPlain") or ""))
         else:
             return None
+        return self._board(platform, slug, items)
+
+    def read_one(self, url: str) -> tuple[Board, Opening] | None:
+        """One posting read on its own from a Lever or Greenhouse posting URL: a small answer whatever the board's
+        size, and None once the posting is closed (the API answers 404) or the board has no such endpoint."""
+        refs = board_refs(url)
+        if not refs or refs[0][0] not in ONE_POSTING:
+            return None
+        platform, slug = refs[0]
+        pattern, endpoint = ONE_POSTING[platform]
+        match = pattern.match(urlsplit(url).path.rstrip("/"))
+        if match is None or match.group(1).lower() != slug:
+            return None
+        data = self._get(endpoint.format(slug, match.group(2)))
+        board = self._board(platform, slug, [data] if isinstance(data, dict) else None)
+        return (board, board.openings[0]) if board and board.openings else None
+
+    @staticmethod
+    def _board(platform: str, slug: str, items: list | None) -> Board | None:
+        if platform == "lever":
+            fields = lambda j: (j.get("text"), j.get("hostedUrl"), (j.get("categories") or {}).get("location"),
+                                j.get("createdAt"), (j.get("descriptionPlain") or "") + " " + (j.get("additionalPlain") or ""),
+                                lever_body(j))
+        elif platform == "greenhouse":
+            fields = lambda j: (j.get("title"), j.get("absolute_url"), (j.get("location") or {}).get("name"),
+                                j.get("first_published") or j.get("updated_at"), j.get("content"),
+                                html.unescape(j.get("content") or ""))
+        else:
+            fields = lambda j: (j.get("title"), j.get("jobUrl"), j.get("location"), j.get("publishedAt"),
+                                j.get("descriptionPlain"), j.get("descriptionHtml") or html.escape(j.get("descriptionPlain") or ""))
         if not isinstance(items, list):
             return None
         openings, words = [], []
@@ -190,16 +218,24 @@ class JobBoards:
                 return board
         return None
 
+    def listed(self, url: str) -> tuple[Board | None, Opening | None]:
+        """The board a posting URL belongs to and that posting while it is still open: read on its own when the board
+        allows, else found in the board's whole list."""
+        one = self.read_one(url)
+        if one is not None:
+            return one
+        refs = board_refs(url)
+        board = self.read(*refs[0]) if refs else None
+        if board is None:
+            return None, None
+        key = url.split("?")[0].rstrip("/").lower()
+        return board, next((o for o in board.openings if o.url.split("?")[0].rstrip("/").lower() == key), None)
+
     def page_for(self, url: str) -> Page | None:
         """A posting page built from the board's own job list, for a posting the page fetcher could not read: Ashby
         renders its pages with script (Decagon's posting had "insufficient readable text"). Only a posting still
         listed on its board; the posting date comes from the board."""
-        refs = board_refs(url)
-        board = self.read(*refs[0]) if refs else None
-        if board is None:
-            return None
-        key = url.split("?")[0].rstrip("/").lower()
-        opening = next((o for o in board.openings if o.url.split("?")[0].rstrip("/").lower() == key), None)
+        opening = self.listed(url)[1]
         if opening is None or not opening.body.strip():
             return None
         posted = json.dumps({"@type": "JobPosting", "datePosted": opening.posted.isoformat()}) if opening.posted else ""
@@ -216,14 +252,9 @@ class JobBoards:
         """The board behind a posting URL and that posting, when it is still listed and the board's postings name
         the company. A bare board URL (the vanta.com run got "https://jobs.lever.co/qloo") gives the open role whose
         title best matches role. None: no longer listed, no matching role, or another company's board."""
-        refs = board_refs(url)
-        if not refs:
-            return None
-        board = self.read(*refs[0])
+        board, opening = self.listed(url)
         if board is None:
             return None
-        key = url.split("?")[0].rstrip("/").lower()
-        opening = next((o for o in board.openings if o.url.split("?")[0].rstrip("/").lower() == key), None)
         if opening is None and len([p for p in urlsplit(url).path.split("/") if p]) <= 1:
             opening = best_role(board.openings, role)
         named = any(re.search(r"(?<![\w-])" + re.escape(name.casefold()) + r"(?![\w-])", board.text.casefold())

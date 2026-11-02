@@ -151,3 +151,27 @@ def test_a_bare_board_url_finds_the_matching_role_and_old_greenhouse_links_are_r
     assert "not confirmed open" in lead(vague, boards(), lambda *a, **k: None)
     assert posting_page("https://boards.greenhouse.io/acme/jobs/12") == "https://job-boards.greenhouse.io/acme/jobs/12"
     assert posting_page("https://jobs.lever.co/acme/1") == "https://jobs.lever.co/acme/1"
+
+
+def test_one_posting_is_read_on_its_own_so_a_large_board_cannot_hide_it():
+    """AHEAD's Lever list was 4 MB, over the reader's cap, so its open posting showed as "not confirmed open". A
+    Lever or Greenhouse posting is now asked for by its own id; a closed one answers 404."""
+    posting_id = "1ffb36db-8d38-497e-8eb6-21ad13889464"
+    one = {"text": "Senior AI Engineer", "hostedUrl": f"https://jobs.lever.co/bigboard/{posting_id}",
+           "createdAt": 1764806400000, "descriptionPlain": "Bigboard (SYNTHETIC) is hiring.", "description": "<p>Role</p>"}
+    requests = []
+
+    def handle(request):
+        requests.append(request.url.path)
+        if request.url.path == f"/v0/postings/bigboard/{posting_id}":
+            return httpx.Response(200, json=one)
+        if request.url.path == "/v0/postings/bigboard":
+            return httpx.Response(200, content=b"[" + b" " * 13_000_000 + b"]")  # too large to read whole
+        return httpx.Response(404, json={"ok": False})
+    reader = JobBoards(transport=httpx.MockTransport(handle))
+    board, opening = reader.posting(f"https://jobs.lever.co/bigboard/{posting_id}", ["Bigboard"])
+    assert (board.label, opening.title, opening.posted) == ("Lever", "Senior AI Engineer", date(2025, 12, 4))
+    assert requests == [f"/v0/postings/bigboard/{posting_id}"]  # the whole list was never needed
+    assert reader.page_for(f"https://jobs.lever.co/bigboard/{posting_id}") is not None
+    closed = "https://jobs.lever.co/bigboard/00000000-0000-0000-0000-000000000000"
+    assert reader.posting(closed, ["Bigboard"]) is None and reader.page_for(closed) is None
