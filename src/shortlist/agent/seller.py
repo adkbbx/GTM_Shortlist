@@ -56,7 +56,9 @@ Rules:
   fact, for example "Hiring SDRs or outbound sales reps". Never an internal state, belief, plan or performance
   (not "does not know what works", "is not confident", "struggles with", "wants to", "before X is proven"): no
   public quote can show those. Never use a competitor's product as a need signal: using a competitor is checked
-  separately and rejects the company.
+  separately and rejects the company. A need signal must set likely buyers apart: never something nearly every
+  company in the buyer group shows, such as listing a phone number, an address, opening hours, a contact form or
+  after-hours instructions (a live search Shortlisted a dental clinic for "Levittown Office Phone Number:").
 - own_site on a need signal: true only when the company's own website is where it shows, because the signal is what
   the company publishes about itself as a fact: a trust or security page, compliance work it lists (SOC 2, ISO 27001,
   HIPAA), the tools or channels its site runs. false for hiring, news, funding and anything a company's marketing would
