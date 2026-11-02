@@ -233,7 +233,7 @@ function ProductShot({ view, onOpen }: { view: AgentRunView; onOpen: (id: string
       <ul className="yc-shot-rows">{rows.map(company => {
         const [label, tone] = SHOT_VERDICT[company.verdict!.kind];
         return <li key={company.domain}>
-          <span className="yc-shot-mark" aria-hidden="true">{(company.name || company.domain).slice(0, 1).toUpperCase()}</span>
+          <SiteIcon lookup domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="yc-shot-mark" />
           <span className="yc-shot-name">{company.domain}</span>
           <span className="yc-shot-why">{shotReason(company)}</span>
           <span className={tone}>{label}</span>

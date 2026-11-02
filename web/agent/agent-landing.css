@@ -209,6 +209,7 @@
 .yc-shot-rows li{display:grid;grid-template-columns:2rem minmax(8rem,12rem) 1fr auto;align-items:center;gap:.875rem;padding:.75rem 0}
 .yc-shot-rows li+li{border-top:1px solid rgba(27,27,27,.06)}
 .yc-shot-mark{display:grid;place-items:center;width:2rem;height:2rem;border:1px solid rgba(27,27,27,.1);border-radius:.5rem;background:#faf9f7;font-size:.75rem;font-weight:700;color:var(--pl-muted)}
+.yc-shot-mark:has(img){border:0;background:transparent}
 .yc-shot-name{font-size:.875rem;font-weight:600;color:var(--pl-charcoal);overflow-wrap:anywhere}
 .yc-shot-why{font-size:.8125rem;color:var(--pl-muted)}
 .yc-shot-features{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:.75rem;margin:1rem 0 0;padding:0;text-align:left}

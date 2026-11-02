@@ -1,3 +1,4 @@
+import time
 from urllib.parse import quote
 
 import pytest
@@ -108,6 +109,9 @@ def test_failed_homepage_is_cached_without_retry(monkeypatch):
     assert icons.get('missing.example') is None
     assert icons.get('missing.example') is None
     assert len(calls) == 1
+    # A failed read is retried after a minute, not remembered as iconless for 15 (live: every new domain was).
+    expires, _ = icons.entries['https://missing.example/']
+    assert expires - time.monotonic() <= 60
 
 
 def test_hosted_icon_route_requires_authentication_before_any_lookup(monkeypatch):

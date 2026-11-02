@@ -66,16 +66,20 @@ class SiteIcons:
             if entry and entry[0] > time.monotonic():
                 self.entries.move_to_end(root)
                 return entry[1]
-        if not self.slots.acquire(blocking=False):
+        # A page of logos asks for many at once: wait briefly for a slot rather than answer "no icon" at once.
+        if not self.slots.acquire(timeout=2):
             return None
         try:
             try:
                 final_url, body = fetch_html(root, timeout=8, max_bytes=262_144)
                 icon = declared_icon(final_url, body)
+                keep = 86400 if icon else 900  # a homepage that declares no icon rarely changes soon
             except FetchError:
-                icon = None
+                # A failed read (a slow site, busy DNS) is often brief: the live demo remembered every new domain as
+                # iconless for 15 minutes, so eygentic.com and stripe.com both showed a letter.
+                icon, keep = None, 60
             with self.lock:
-                self.entries[root] = (time.monotonic() + (86400 if icon else 900), icon)
+                self.entries[root] = (time.monotonic() + keep, icon)
                 self.entries.move_to_end(root)
                 while len(self.entries) > 256:
                     self.entries.popitem(last=False)
