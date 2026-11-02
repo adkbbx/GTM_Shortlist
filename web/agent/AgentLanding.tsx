@@ -116,7 +116,7 @@ function ReplayConsole({ view, events, onOpen, shown }: { view: AgentRunView; ev
       </ol>}
     </div>
     <figcaption className="al-console-foot">
-      <span>{finished ? 'Every verdict links to the exact sentence it rests on.'
+      <span>{finished ? 'Every verdict links to the evidence behind it.'
         : played.length ? `${STAGES[Math.max(0, active)].label} · ${decided}/${view.run.company_count} companies decided` : 'Starting'}</span>
       <a href={`?agent=${view.run.id}`} onClick={event => { event.preventDefault(); onOpen(view.run.id); }}>Open this search <Arrow /></a>
     </figcaption>
@@ -233,9 +233,9 @@ function Hero({ reduced, onOpen }: { reduced: boolean; onOpen: (id: string) => v
       <div className="pl-hero-top">
         <div><p className="al-eyebrow">For founders and small sales teams</p>
           <Reveal as="h1" id="agent-start-heading" reduced={reduced} lead="Stop emailing companies" accent="that don't need you." br /></div>
-        <p className="pl-lede">Most prospect lists are guesses, so most cold emails get ignored. Enter your website: the agent finds
-          companies that need what you sell right now, proves it with <strong>the exact sentence from their job post or news</strong>,
-          and drafts the email.</p>
+        <p className="pl-lede">Most prospect lists are guesses, so most cold emails get ignored. Enter your website. GTM Shortlist finds
+          companies with a live reason to buy from you, <strong>backs every pick with evidence you can verify</strong>, and drafts the
+          first email.</p>
       </div>
       <div className={`pl-instrument${on ? ' on' : ''}`} ref={instrument}>
         <canvas ref={canvas} aria-hidden="true" />
