@@ -197,6 +197,7 @@ class OutreachEmail(Model):
     """A cold email for a Shortlisted company, drafted on request from quotes the skeptic supported."""
     subject: str = Field(max_length=120)
     body: str = Field(max_length=1500)
+    short_message: str = Field(default="", max_length=300)  # the same message, short enough for a LinkedIn note
     evidence_ids: list[str] = Field(default_factory=list)
     checked: bool = False  # Muse Spark Open found every statement in the quotes
     reason: str = ""

@@ -76,25 +76,40 @@ export function EmailDialog({ company, open, drafting, error, onClose }: { compa
     if (open && !node.open) node.showModal();
     if (!open && node.open) node.close();
   }, [open]);
+  const [channel, setChannel] = useState<'email' | 'linkedin'>('email');
   const email = company.outreach;
   const mail = email ? `mailto:?${new URLSearchParams({ subject: email.subject, body: email.body }).toString().replace(/\+/g, '%20')}` : '';
-  return <dialog ref={dialog} className="agent-dialog" aria-label="Outreach email" onClose={onClose}
+  const linkedin = email?.short_message ?? '';
+  return <dialog ref={dialog} className="agent-dialog" aria-label="First message" onClose={onClose}
     onClick={event => { if (event.target === dialog.current) onClose(); }}>
     <header className="agent-dialog-head">
       <SiteIcon lookup domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="agent-logo agent-row-logo" />
-      <div><p>Outreach email</p><h2>{company.name || company.domain}</h2></div>
+      <div><p>First message</p><h2>{company.name || company.domain}</h2></div>
       <button type="button" className="agent-dialog-close" aria-label="Close" onClick={onClose}>
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" /></svg></button>
     </header>
     {email ? <div className="agent-dialog-body">
-      <p className="agent-dialog-label">Subject</p>
-      <p className="agent-email-subject">{email.subject}</p>
-      <div className="agent-email-body">{email.body}</div>
-      <footer className="agent-dialog-foot">
-        <button type="button" onClick={() => copy('email', `Subject: ${email.subject}\n\n${email.body}`)}>{copied ? 'Copied' : 'Copy email'}</button>
-        <a className="agent-dialog-link" href={mail}>Open in mail app</a>
-        {email.checked && <span className="agent-dialog-checked">✓ Every claim matches the evidence</span>}
-      </footer>
+      {linkedin && <div className="agent-channels" role="tablist" aria-label="Where to send it">
+        {(['email', 'linkedin'] as const).map(kind => <button key={kind} type="button" role="tab" aria-selected={channel === kind}
+          onClick={() => setChannel(kind)}>{kind === 'email' ? 'Email' : 'LinkedIn'}</button>)}
+      </div>}
+      {channel === 'linkedin' && linkedin ? <>
+        <div className="agent-email-body">{linkedin}</div>
+        <footer className="agent-dialog-foot">
+          <button type="button" onClick={() => copy('linkedin', linkedin)}>{copied ? 'Copied' : 'Copy message'}</button>
+          <span className="agent-dialog-count">{linkedin.length}/300 characters, fits a connection note</span>
+          {email.checked && <span className="agent-dialog-checked">✓ Every claim matches the evidence</span>}
+        </footer>
+      </> : <>
+        <p className="agent-dialog-label">Subject</p>
+        <p className="agent-email-subject">{email.subject}</p>
+        <div className="agent-email-body">{email.body}</div>
+        <footer className="agent-dialog-foot">
+          <button type="button" onClick={() => copy('email', `Subject: ${email.subject}\n\n${email.body}`)}>{copied ? 'Copied' : 'Copy email'}</button>
+          <a className="agent-dialog-link" href={mail}>Open in mail app</a>
+          {email.checked && <span className="agent-dialog-checked">✓ Every claim matches the evidence</span>}
+        </footer>
+      </>}
     </div> : error ? <div className="agent-dialog-body"><p className="notice" role="alert">{error}</p></div>
       : <div className="agent-dialog-body agent-dialog-wait" role="status">
         <p><span className="agent-spinner" aria-hidden="true" />{drafting ? 'Writing from the verified evidence' : 'Starting'}</p>
@@ -156,7 +171,7 @@ function CompanyRow({ company, run, events, runId, onUpdate }: { company: Compan
         <p className="agent-row-reason">{reasonOf(company)}</p>
       </div>
       <div className="agent-row-actions">
-        {verdict.kind === 'shortlisted' && company.outreach && <button type="button" className="agent-expand" onClick={draft}>View email</button>}
+        {verdict.kind === 'shortlisted' && company.outreach && <button type="button" className="agent-expand" onClick={draft}>View message</button>}
         {verdict.kind === 'shortlisted' && editable && !company.outreach && <button type="button" className="agent-draft" onClick={draft}
           aria-busy={drafting}>{drafting ? 'Drafting' : 'Draft outreach'}</button>}
         <button type="button" className="agent-expand" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen(value => !value)}>

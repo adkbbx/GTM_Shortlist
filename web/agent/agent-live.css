@@ -229,6 +229,10 @@
 .agent-dialog-foot{display:flex;align-items:center;flex-wrap:wrap;gap:.75rem;margin-top:1.25rem}
 .agent-dialog-foot>button{min-height:2.75rem;padding:.5rem 1.125rem;font-size:.875rem}
 .agent-dialog-link{font-size:.875rem;font-weight:600;min-height:2.75rem;display:inline-flex;align-items:center}
+.agent-channels{display:inline-flex;gap:.25rem;padding:.25rem;margin-bottom:1rem;border-radius:.625rem;background:#f0eee9}
+.agent-channels button{min-height:0;padding:.375rem .875rem;border:0;border-radius:.4375rem;background:transparent;color:var(--muted);font-weight:600;font-size:.8125rem}
+.agent-channels button[aria-selected=true]{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgb(0 0 0 / .08)}
+.agent-dialog-count{font-size:.75rem;color:var(--muted)}
 .agent-dialog-checked{margin-left:auto;font-size:.75rem;font-weight:600;color:#1f7a4d}
 .agent-dialog-wait p{display:flex;align-items:center;gap:.625rem;font-size:.9375rem;font-weight:600}
 .agent-skeleton{display:block;height:.75rem;margin-top:.875rem;border-radius:.375rem;background:linear-gradient(90deg,#f0eee9 25%,#f8f6f2 50%,#f0eee9 75%);background-size:200% 100%;animation:agent-shimmer 1.2s linear infinite}

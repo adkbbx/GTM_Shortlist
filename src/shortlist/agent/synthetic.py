@@ -351,6 +351,7 @@ class SyntheticInvestigator:
             answer = json.dumps({"subject": f"SYNTHETIC: {data['company']} and {lead['kind']}",
                                  "body": f"Hi {data['company']} team,\n\nSaw this: \"{lead['quote'][:150]}\".\n\n"
                                          f"{data['seller_offer'][:150]}\n\nWorth a reply?\n\nBest,\n{data['seller_name']}",
+                                 "short_message": f"SYNTHETIC: saw \"{lead['quote'][:120]}\". {data['seller_offer'][:80]} Open to a chat?",
                                  "quote_ids": [lead["id"]]})
         else:
             answer = "{}"

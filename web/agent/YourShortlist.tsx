@@ -39,7 +39,7 @@ function Row({ entry, onOpen }: { entry: Entry; onOpen: (id: string) => void }) 
         <p className="agent-row-reason">{company.pitch?.why_now ?? company.verdict?.summary}</p>
       </div>
       <div className="agent-row-actions">
-        {company.outreach && <button type="button" className="agent-expand" onClick={() => setMail(true)}>View email</button>}
+        {company.outreach && <button type="button" className="agent-expand" onClick={() => setMail(true)}>View message</button>}
         {!search.gone && <button type="button" className="agent-expand" onClick={() => onOpen(search.id)}>Open search</button>}
       </div>
     </div>

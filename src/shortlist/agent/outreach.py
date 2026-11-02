@@ -60,14 +60,21 @@ add numbers, dates, names, products or reasons that are not there. Write to the 
 - body: 60 to 110 words in three short paragraphs. 1) What you noticed, from the need or timing quote. 2) How the
   seller's offer helps with exactly that, in plain words. 3) One small ask the team can answer by replying. No
   flattery, no hype, no invented customers or results. End with "Best," and the seller's name on its own line.
+- short_message: the same message for LinkedIn, at most 280 characters so it fits a connection note: what you noticed and
+  how the seller helps, in one or two sentences, ending with a short question. No greeting and no name, held to the
+  same quotes.
 A quote whose source is job_post is an open job post: it shows the company is hiring for that role.
-Reply with only JSON: {{"subject": "...", "body": "...", "quote_ids": ["q1", "..."]}}"""
+Reply with only JSON: {{"subject": "...", "body": "...", "short_message": "...", "quote_ids": ["q1", "..."]}}"""
 
 
 class EmailAnswer(Answer):
     subject: str = ""
     body: str = ""
+    short_message: str = ""
     quote_ids: list[str] = Field(default_factory=list)
+
+
+LINKEDIN_MAX = 300  # LinkedIn's limit for a connection note
 
 
 def supported_quotes(company: CompanyResult) -> dict[str, EvidenceItem] | None:
@@ -149,17 +156,22 @@ def write_pitch(company: CompanyResult, profile: SellerProfile, calls: Calls, *,
 
 def write_email(company: CompanyResult, profile: SellerProfile, calls: Calls, *, use_skeptic: bool,
                 dropped: list[DroppedClaim]) -> OutreachEmail | None:
-    """A subject line and a short cold email, held to the same quotes and check as the opening line."""
+    """A subject line and a short cold email, plus the same message for LinkedIn, held to the same quotes and one check
+    as the opening line: the checker reads both, so a LinkedIn message is never unchecked."""
     def text_of(answer: EmailAnswer) -> str:
         subject, body = answer.subject.strip()[:120], answer.body.strip()[:1500]
-        return f"Subject: {subject}\n\n{body}" if subject and body else ""
+        short = answer.short_message.strip()[:LINKEDIN_MAX]
+        if not (subject and body):
+            return ""
+        return f"Subject: {subject}\n\n{body}" + (f"\n\nLinkedIn message: {short}" if short else "")
     done = checked_note("email", EMAIL, EmailAnswer, text_of, company, profile, calls,
                         use_skeptic=use_skeptic, dropped=dropped)
     if done is None:
         return None
     answer, used, checked, reason = done
-    return OutreachEmail(subject=answer.subject.strip()[:120], body=answer.body.strip()[:1500], evidence_ids=used,
-                         checked=checked, reason=reason)
+    return OutreachEmail(subject=answer.subject.strip()[:120], body=answer.body.strip()[:1500],
+                         short_message=answer.short_message.strip()[:LINKEDIN_MAX], evidence_ids=used, checked=checked,
+                         reason=reason)
 
 
 def pitch_or_none(company: CompanyResult, profile: SellerProfile, calls: Calls, *, use_skeptic: bool,

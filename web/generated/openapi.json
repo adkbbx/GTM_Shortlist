@@ -4047,6 +4047,12 @@
             "maxLength": 1500,
             "title": "Body"
           },
+          "short_message": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Short Message",
+            "default": ""
+          },
           "evidence_ids": {
             "items": {
               "type": "string"
@@ -4070,6 +4076,7 @@
         "required": [
           "subject",
           "body",
+          "short_message",
           "evidence_ids",
           "checked",
           "reason"

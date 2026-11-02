@@ -1554,6 +1554,11 @@ export interface components {
             subject: string;
             /** Body */
             body: string;
+            /**
+             * Short Message
+             * @default
+             */
+            short_message: string;
             /** Evidence Ids */
             evidence_ids: string[];
             /**

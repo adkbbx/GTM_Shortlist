@@ -31,17 +31,23 @@ test('the public demo starts from a website alone, caps the size and shares a re
   // The browser that started the search drafts outreach for a Shortlisted company: subject and email, checked.
   const shortlisted = page.locator('.column-shortlisted');
   await shortlisted.getByRole('button', { name: 'Draft outreach' }).click();
-  const email = page.getByRole('dialog', { name: 'Outreach email' });
+  const email = page.getByRole('dialog', { name: 'First message' });
   await expect(email).toBeVisible();  // opens at once, then shows the email when it is written
   await expect(email.locator('.agent-email-subject')).not.toBeEmpty({ timeout: 15000 });
   await expect(email).toContainText('Hi Trailgear Outfitters team,');
   await expect(email).toContainText('Every claim matches the evidence');
   expect(await noOverflow(page)).toBe(true);
   await page.screenshot({ path: `.impeccable/review/${info.project.name}-agent-public-email.png` });
+  // The same message for LinkedIn, short enough for a connection note and checked with the email.
+  await email.getByRole('tab', { name: 'LinkedIn' }).click();
+  await expect(email.locator('.agent-email-body')).toContainText('Open to a chat?');
+  await expect(email).toContainText('/300 characters');
+  await expect(email.getByRole('button', { name: 'Copy message' })).toBeVisible();
+  await email.getByRole('tab', { name: 'Email' }).click();
   await page.keyboard.press('Escape');
   await expect(email).toBeHidden();
   await expect(shortlisted.getByRole('button', { name: 'Draft outreach' })).toHaveCount(0);
-  await expect(shortlisted.getByRole('button', { name: 'View email' })).toBeVisible();
+  await expect(shortlisted.getByRole('button', { name: 'View message' })).toBeVisible();
   // It keeps its optional corrections.
   await page.locator('.agent-assumed > summary').click();
   await expect(page.locator('summary', { hasText: 'Add a competitor' })).toBeVisible();
@@ -54,8 +60,8 @@ test('the public demo starts from a website alone, caps the size and shares a re
   await page.getByRole('link', { name: 'Your shortlist' }).click();
   await expect(page.getByRole('heading', { name: 'Your shortlist' })).toBeVisible();
   await expect(page.locator('.ys-list').getByRole('heading', { name: 'Trailgear Outfitters' })).toBeVisible();
-  await page.locator('.ys-list').getByRole('button', { name: 'View email' }).click();
-  await expect(page.getByRole('dialog', { name: 'Outreach email' })).toContainText('Hi Trailgear Outfitters team,');
+  await page.locator('.ys-list').getByRole('button', { name: 'View message' }).click();
+  await expect(page.getByRole('dialog', { name: 'First message' })).toContainText('Hi Trailgear Outfitters team,');
   await page.keyboard.press('Escape');
   await expect(page.getByRole('link', { name: 'Your shortlist' })).toHaveCount(0);  // no link to the page you are on
   expect(await noOverflow(page)).toBe(true);
@@ -85,8 +91,8 @@ test('the public demo starts from a website alone, caps the size and shares a re
   await expect(shared.locator('.column-rejected').getByRole('heading', { name: 'Bright Kettle' })).toBeVisible();
   await expect(shared.locator('summary', { hasText: 'Add a competitor' })).toHaveCount(0);
   await expect(shared.getByRole('button', { name: 'Draft outreach' })).toHaveCount(0);
-  await shared.locator('.column-shortlisted').getByRole('button', { name: 'View email' }).click();
-  await expect(shared.getByRole('dialog', { name: 'Outreach email' })).toContainText('Hi Trailgear Outfitters team,');
+  await shared.locator('.column-shortlisted').getByRole('button', { name: 'View message' }).click();
+  await expect(shared.getByRole('dialog', { name: 'First message' })).toContainText('Hi Trailgear Outfitters team,');
   await shared.keyboard.press('Escape');
   await expect(shared.locator('.count-picker')).toHaveCount(0);
   await shared.goto('/');

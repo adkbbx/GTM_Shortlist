@@ -849,6 +849,12 @@
           "title": "Body",
           "type": "string"
         },
+        "short_message": {
+          "default": "",
+          "maxLength": 300,
+          "title": "Short Message",
+          "type": "string"
+        },
         "evidence_ids": {
           "items": {
             "type": "string"
@@ -870,6 +876,7 @@
       "required": [
         "subject",
         "body",
+        "short_message",
         "evidence_ids",
         "checked",
         "reason"
