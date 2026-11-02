@@ -27,8 +27,9 @@ DISCOVERY_INSTRUCTIONS = f"""You find companies that could buy a seller's produc
 Search for the seller's need and timing signals happening now, not for a category. Spread your searches across kinds
 of signal, so the companies are not all found the same way:
 - hiring (at most 2 searches): a role named in the need signals on companies' own job boards: jobs.lever.co,
-  boards.greenhouse.io, job-boards.greenhouse.io or jobs.ashbyhq.com (for example: site:jobs.lever.co "founding
-  account executive"). A posting there is open now and names the company that posted it.
+  boards.greenhouse.io, job-boards.greenhouse.io, jobs.ashbyhq.com or jobs.smartrecruiters.com (for example:
+  site:jobs.lever.co "founding account executive"). A posting there is open now and names the company that posted
+  it. A LinkedIn job result may name a company too; its role is then confirmed on the company's own board.
 - news (at least 1 search): news from the last six months about an event in the timing signals, such as a funding
   round, a launch or an expansion. Name the company the news is about, never the publisher.
 - social (1 search): public LinkedIn or X posts announcing such an event or a hiring push, for example
@@ -202,7 +203,7 @@ def signal_of(declared: str, via: str) -> str:
     via = (via or "").casefold()
     if not via:
         return ""
-    if "job post" in via or re.search(r"lever\.co|greenhouse\.io|ashbyhq\.com", via):
+    if "job post" in via or re.search(r"lever\.co|greenhouse\.io|ashbyhq\.com|smartrecruiters\.com|linkedin\.com/jobs", via):
         return "hiring"
     if "similar to" in via:
         return "lookalike"

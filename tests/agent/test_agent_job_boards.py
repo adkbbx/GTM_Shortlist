@@ -184,6 +184,34 @@ def test_the_posting_discovery_confirmed_open_is_handed_to_the_investigator():
     assert unconfirmed.posting is None  # only a posting discovery confirmed open is handed over
 
 
+def test_smartrecruiters_boards_are_read_like_the_others():
+    """A fourth board system with a public job list (checked live on 2 November): titles and dates in the list, the
+    description from the single posting."""
+    listing = {"content": [{"id": "744000158015889", "name": "Customer Support Representative",
+                            "releasedDate": "2026-10-27T09:00:00.000Z", "location": {"fullLocation": "Remote"},
+                            "company": {"name": "Trailgear"}}]}
+    one = {**listing["content"][0], "postingUrl": "https://jobs.smartrecruiters.com/trailgear/744000158015889-support",
+           "jobAd": {"sections": {"jobDescription": {"title": "Job Description",
+                                                     "text": "<p>Trailgear (SYNTHETIC) needs a support rep for chat.</p>"}}}}
+
+    def handle(request):
+        if request.url.path == "/v1/companies/trailgear/postings":
+            return httpx.Response(200, json=listing)
+        if request.url.path == "/v1/companies/trailgear/postings/744000158015889":
+            return httpx.Response(200, json=one)
+        return httpx.Response(404, json={})
+    reader = JobBoards(transport=httpx.MockTransport(handle))
+    assert board_refs('<a href="https://careers.smartrecruiters.com/Trailgear">Jobs</a>') == [("smartrecruiters", "trailgear")]
+    board = reader.read("smartrecruiters", "trailgear")
+    assert (board.label, board.openings[0].title, board.openings[0].posted) == (
+        "SmartRecruiters", "Customer Support Representative", date(2026, 10, 27))
+    url = "https://jobs.smartrecruiters.com/trailgear/744000158015889-support"
+    board, opening = reader.posting(url, ["Trailgear"])
+    assert opening.posted == date(2026, 10, 27)
+    page = reader.page_for(url)
+    assert page is not None and "support rep for chat" in page.source.text
+
+
 def test_one_posting_is_read_on_its_own_so_a_large_board_cannot_hide_it():
     """AHEAD's Lever list was 4 MB, over the reader's cap, so its open posting showed as "not confirmed open". A
     Lever or Greenhouse posting is now asked for by its own id; a closed one answers 404."""

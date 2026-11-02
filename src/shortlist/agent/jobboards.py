@@ -27,11 +27,14 @@ BOARD_PATTERNS = (
     ("greenhouse", re.compile(r"https?://boards-api\.greenhouse\.io/v1/boards/" + SLUG, re.IGNORECASE)),
     ("ashby", re.compile(r"https?://jobs\.ashbyhq\.com/" + SLUG, re.IGNORECASE)),
     ("ashby", re.compile(r"https?://api\.ashbyhq\.com/posting-api/job-board/" + SLUG, re.IGNORECASE)),
+    ("smartrecruiters", re.compile(r"https?://(?:jobs|careers)\.smartrecruiters\.com/" + SLUG, re.IGNORECASE)),
+    ("smartrecruiters", re.compile(r"https?://api\.smartrecruiters\.com/v1/companies/" + SLUG, re.IGNORECASE)),
 )
 BOARD_PAGE = {"lever": "https://jobs.lever.co/{}", "greenhouse": "https://job-boards.greenhouse.io/{}",
-              "ashby": "https://jobs.ashbyhq.com/{}"}
+              "ashby": "https://jobs.ashbyhq.com/{}", "smartrecruiters": "https://jobs.smartrecruiters.com/{}"}
 POSTING_HOSTS = {"lever": ("jobs.lever.co",), "greenhouse": ("job-boards.greenhouse.io", "boards.greenhouse.io"),
-                 "ashby": ("jobs.ashbyhq.com",)}
+                 "ashby": ("jobs.ashbyhq.com",), "smartrecruiters": ("jobs.smartrecruiters.com",)}
+BOARD_LABEL = {"lever": "Lever", "greenhouse": "Greenhouse", "ashby": "Ashby", "smartrecruiters": "SmartRecruiters"}
 CAREERS_PATH = re.compile(r"/(?:careers?|jobs|join(?:-us)?|work-with-us|hiring|open-positions)(?:/|$)", re.IGNORECASE)
 MAX_OPENINGS = 25  # shown to the investigator
 # AHEAD's Lever list (148 postings with descriptions) is 4 MB; a 3 MB cap read it as no board, so its open posting
@@ -40,7 +43,9 @@ MAX_BYTES = 12_000_000
 ONE_POSTING = {"lever": (re.compile(r"^/([^/]+)/([0-9a-f-]{36})$", re.IGNORECASE),
                          "https://api.lever.co/v0/postings/{}/{}?mode=json"),
                "greenhouse": (re.compile(r"^/([^/]+)/jobs/(\d{1,20})$"),
-                              "https://boards-api.greenhouse.io/v1/boards/{}/jobs/{}")}
+                              "https://boards-api.greenhouse.io/v1/boards/{}/jobs/{}"),
+               "smartrecruiters": (re.compile(r"^/([^/]+)/(\d{6,20})(?:-[^/]*)?$"),
+                                   "https://api.smartrecruiters.com/v1/companies/{}/postings/{}")}
 
 
 @dataclass(frozen=True)
@@ -65,7 +70,7 @@ class Board:
 
     @property
     def label(self) -> str:
-        return {"lever": "Lever", "greenhouse": "Greenhouse", "ashby": "Ashby"}[self.platform]
+        return BOARD_LABEL[self.platform]
 
 
 def board_refs(text: str) -> list[tuple[str, str]]:
@@ -103,6 +108,13 @@ def lever_body(item: dict) -> str:
     lists = "".join(f"<h3>{html.escape(str(entry.get('text') or ''))}</h3><ul>{entry.get('content') or ''}</ul>"
                     for entry in item.get("lists") or [] if isinstance(entry, dict))
     return (item.get("description") or "") + lists + (item.get("additional") or "")
+
+
+def smartrecruiters_body(item: dict) -> str:
+    """A SmartRecruiters posting's sections (company, job, qualifications, more) as HTML; empty in the job list."""
+    sections = ((item.get("jobAd") or {}).get("sections") or {}) if isinstance(item.get("jobAd"), dict) else {}
+    return "".join(f"<h3>{html.escape(str(part.get('title') or ''))}</h3>{part.get('text') or ''}"
+                   for part in sections.values() if isinstance(part, dict))
 
 
 def _text(value) -> str:
@@ -151,6 +163,10 @@ class JobBoards:
             data = self._get(f"https://api.ashbyhq.com/posting-api/job-board/{slug}")
             items = [j for j in data.get("jobs") or [] if isinstance(j, dict) and j.get("isListed", True)] \
                 if isinstance(data, dict) else None
+        elif platform == "smartrecruiters":
+            # The list has titles and dates but no descriptions; one posting is read with read_one for its text.
+            data = self._get(f"https://api.smartrecruiters.com/v1/companies/{slug}/postings?limit=100")
+            items = data.get("content") if isinstance(data, dict) else None
         else:
             return None
         return self._board(platform, slug, items)
@@ -180,6 +196,11 @@ class JobBoards:
             fields = lambda j: (j.get("title"), j.get("absolute_url"), (j.get("location") or {}).get("name"),
                                 j.get("first_published") or j.get("updated_at"), j.get("content"),
                                 html.unescape(j.get("content") or ""))
+        elif platform == "smartrecruiters":
+            fields = lambda j: (j.get("name"), j.get("postingUrl") or f"https://jobs.smartrecruiters.com/{slug}/{j.get('id')}",
+                                (j.get("location") or {}).get("fullLocation"), j.get("releasedDate"),
+                                _text(smartrecruiters_body(j)) + " " + str((j.get("company") or {}).get("name") or ""),
+                                smartrecruiters_body(j))
         else:
             fields = lambda j: (j.get("title"), j.get("jobUrl"), j.get("location"), j.get("publishedAt"),
                                 j.get("descriptionPlain"), j.get("descriptionHtml") or html.escape(j.get("descriptionPlain") or ""))
