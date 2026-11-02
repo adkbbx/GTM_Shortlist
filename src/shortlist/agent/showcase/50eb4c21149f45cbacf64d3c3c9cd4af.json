@@ -1,6 +1,7 @@
 {
  "id": "50eb4c21149f45cbacf64d3c3c9cd4af",
  "website": "https://vanta.com/",
+ "description": null,
  "status": "complete",
  "created_at": "2026-11-02T05:35:26.960972Z",
  "finished_at": "2026-11-02T05:37:29.028766Z",
@@ -1328,10 +1329,19 @@
     "disqualifier": null,
     "rule": null
    },
-   "pitch": null,
+   "pitch": {
+    "why_now": "The company is looking for GRC expertise to design, implement, and maintain processes ensuring adherence to HIPAA, HITRUST, and SOC2.",
+    "opener": "You're looking for expertise in GRC frameworks and compliance standards including HIPAA, HITRUST, and SOC2, and we help automate compliance and continuous monitoring to stay audit-ready.",
+    "evidence_ids": [
+     "07182e6051b54280835467bb92f69b09",
+     "95a24e5d975441d9bba8ae1160bf28d4"
+    ],
+    "checked": true,
+    "reason": "Every company claim about seeking GRC expertise and ensuring adherence to HIPAA, HITRUST, and SOC2 is directly stated in the job post quotes, and the automation/audit-ready language matches the seller offer."
+   },
    "outreach": null,
    "latency_ms": 19969,
-   "cost_usd": 0.055726,
+   "cost_usd": 0.071732,
    "error": null
   },
   {
@@ -1915,10 +1925,18 @@
     "disqualifier": null,
     "rule": null
    },
-   "pitch": null,
+   "pitch": {
+    "why_now": "The company will use funding to scale its Agentic AI platform and accelerate global expansion, which increases the need for audit-ready security controls.",
+    "opener": "With the funding to scale your Agentic AI platform and accelerate global expansion, getting audit-ready and keeping security controls monitored becomes urgent — Vanta automates compliance and continuous monitoring to help.",
+    "evidence_ids": [
+     "f5764e39b3414490b5826f42d7ff545c"
+    ],
+    "checked": true,
+    "reason": "All factual claims about the company (funding to scale Agentic AI platform and accelerate global expansion) are directly stated in the quote, and the Vanta description matches the seller_offer."
+   },
    "outreach": null,
    "latency_ms": 28625,
-   "cost_usd": 0.067913,
+   "cost_usd": 0.08305,
    "error": null
   },
   {
@@ -3059,10 +3077,19 @@
     "disqualifier": null,
     "rule": null
    },
-   "pitch": null,
+   "pitch": {
+    "why_now": "The company is hiring to own and modernize its governance, risk, and compliance program across federal and commercial markets while keeping SOC 2 Type II and ISO 27001 audit cycles completed on time.",
+    "opener": "Noticed you're hiring to own and modernize your governance, risk, and compliance program across federal and commercial markets - Vanta helps teams stay audit-ready and continuously monitor controls without the manual lift.",
+    "evidence_ids": [
+     "334af08462244c0194e624390f9b5d56",
+     "27450f97433b4fa29bdf8cf432153a40"
+    ],
+    "checked": true,
+    "reason": "All company hiring and audit claims are directly stated in the job_post quotes and the Vanta value proposition paraphrases the seller_offer without adding unsupported company facts."
+   },
    "outreach": null,
    "latency_ms": 32843,
-   "cost_usd": 0.093186,
+   "cost_usd": 0.10798,
    "error": null
   },
   {
@@ -3764,15 +3791,24 @@
    "previous_run": null
   }
  ],
- "dropped": [],
+ "dropped": [
+  {
+   "stage": "pitch",
+   "company": "aledade.com",
+   "claim_type": "pitch",
+   "quote": "Aledade is hiring to design and maintain governance, risk, and compliance processes for HIPAA, HITRUST, and SOC2, with expertise in GRC frameworks. | I noticed the focus on designing and maintaining governance, risk, and compliance processes for HIPAA, HITRUST, and SOC2. Vanta provides automated compliance and trust software to stay audit-ready and monitor controls.",
+   "url": "",
+   "reason": "Skeptic: The quotes describe the GRC/HIPAA/HITRUST/SOC2 hiring need but never name Aledade as the hiring company, so the attribution to Aledade is not stated or implied by the quotes."
+  }
+ ],
  "telemetry": {
   "budget_usd": 0.35,
   "budget_reached": true,
-  "cost_usd": 0.380952,
-  "input_tokens": 145185,
-  "output_tokens": 33993,
+  "cost_usd": 0.46453,
+  "input_tokens": 151803,
+  "output_tokens": 51712,
   "searches": 22,
-  "model_calls": 20,
+  "model_calls": 32,
   "pages_fetched": 29,
   "elapsed_ms": 122078,
   "calls": [
@@ -4033,6 +4069,162 @@
     "searches": 0,
     "latency_ms": 11688,
     "usd": 0.017655,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "pitch",
+    "company": null,
+    "input_tokens": 560,
+    "output_tokens": 1250,
+    "searches": 0,
+    "latency_ms": 4609,
+    "usd": 0.006012,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "pitch_check",
+    "company": "aledade.com",
+    "input_tokens": 504,
+    "output_tokens": 1500,
+    "searches": 0,
+    "latency_ms": 4672,
+    "usd": 0.007005,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "pitch_check:longer",
+    "company": "aledade.com",
+    "input_tokens": 504,
+    "output_tokens": 1051,
+    "searches": 0,
+    "latency_ms": 4719,
+    "usd": 0.005097,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "pitch:rewrite",
+    "company": null,
+    "input_tokens": 622,
+    "output_tokens": 2000,
+    "searches": 0,
+    "latency_ms": 12046,
+    "usd": 0.009277,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "pitch:rewrite:longer",
+    "company": null,
+    "input_tokens": 622,
+    "output_tokens": 1429,
+    "searches": 0,
+    "latency_ms": 8172,
+    "usd": 0.006851,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "pitch_check",
+    "company": "aledade.com",
+    "input_tokens": 492,
+    "output_tokens": 774,
+    "searches": 0,
+    "latency_ms": 2296,
+    "usd": 0.003904,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "pitch",
+    "company": null,
+    "input_tokens": 645,
+    "output_tokens": 1621,
+    "searches": 0,
+    "latency_ms": 9047,
+    "usd": 0.007696,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "pitch_check",
+    "company": "omnichat.ai",
+    "input_tokens": 455,
+    "output_tokens": 1500,
+    "searches": 0,
+    "latency_ms": 4500,
+    "usd": 0.006944,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "pitch_check:longer",
+    "company": "omnichat.ai",
+    "input_tokens": 455,
+    "output_tokens": 1794,
+    "searches": 0,
+    "latency_ms": 5577,
+    "usd": 0.008193,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "pitch",
+    "company": null,
+    "input_tokens": 777,
+    "output_tokens": 1608,
+    "searches": 0,
+    "latency_ms": 6813,
+    "usd": 0.007805,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "pitch_check",
+    "company": "mattermost.com",
+    "input_tokens": 491,
+    "output_tokens": 1500,
+    "searches": 0,
+    "latency_ms": 4186,
+    "usd": 0.006989,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "pitch_check:longer",
+    "company": "mattermost.com",
+    "input_tokens": 491,
+    "output_tokens": 1692,
+    "searches": 0,
+    "latency_ms": 4672,
+    "usd": 0.007805,
     "ok": true,
     "error": null
    }

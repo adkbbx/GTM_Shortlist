@@ -19,7 +19,6 @@ from shortlist.agent.models import (
     SellerProfile,
 )
 from shortlist.agent.providers import AgentProviderError
-from shortlist.agent.telemetry import BudgetReached
 
 MAX_QUOTES = 8
 
@@ -173,11 +172,3 @@ def write_email(company: CompanyResult, profile: SellerProfile, calls: Calls, *,
                          short_message=answer.short_message.strip()[:LINKEDIN_MAX], evidence_ids=used, checked=checked,
                          reason=reason)
 
-
-def pitch_or_none(company: CompanyResult, profile: SellerProfile, calls: Calls, *, use_skeptic: bool,
-                  dropped: list[DroppedClaim]) -> Pitch | None:
-    """write_pitch, where a budget stop simply means no pitch."""
-    try:
-        return write_pitch(company, profile, calls, use_skeptic=use_skeptic, dropped=dropped)
-    except BudgetReached:
-        return None

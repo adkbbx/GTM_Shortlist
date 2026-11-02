@@ -103,7 +103,7 @@ class Calls:
     def _respond(self, operation: str, *, instructions: str, input: list[dict], tools: list[dict] | None,
                  company: str | None, previous_response_id: str | None, max_output_tokens: int,
                  max_searches: int | None) -> ModelTurn:
-        self.meter.check()
+        self.meter.check(reserve=self.meter.reserve_for(operation))  # a Shortlisted company's opening line may finish
         model = self.investigator
         limit = {} if max_searches is None else {"max_searches": max_searches}
         try:
@@ -167,7 +167,7 @@ class Calls:
     def _chat(self, operation: str, messages: list[dict], company: str | None, max_tokens: int) -> ChatTurn:
         # The skeptic may finish checking evidence already gathered after the budget is reached, within a small
         # reserve (about $0.01 a company); a live vanta.com run lost its best company to an unchecked quote.
-        self.meter.check(reserve=self.meter.skeptic_reserve() if operation.startswith("skeptic") else 0.0)
+        self.meter.check(reserve=self.meter.reserve_for(operation))
         model = self.skeptic
         try:
             turn = model.chat(messages, max_tokens=max_tokens)

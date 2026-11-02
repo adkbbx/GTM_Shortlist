@@ -4,7 +4,11 @@ from threading import Lock
 
 from shortlist.agent.models import ModelCall, Telemetry
 
-SKEPTIC_RESERVE_USD = 0.10
+FINISHING_RESERVE_USD = 0.15
+# Work that finishes companies already researched, allowed past the budget within the reserve: the skeptic's checks of
+# gathered evidence, a Shortlisted company's opening line and the email you ask for, each with its check. A live
+# vanta.com run reached the budget with three Shortlisted companies and dropped all three opening lines.
+FINISHING = ("skeptic", "pitch", "email")
 
 
 class BudgetReached(RuntimeError):
@@ -41,9 +45,12 @@ class Meter:
             if self.telemetry.cost_usd >= self.telemetry.budget_usd + reserve:
                 raise BudgetReached(f"Run budget of ${self.telemetry.budget_usd:.2f} reached")
 
-    def skeptic_reserve(self) -> float:
-        """What the skeptic may spend past the budget: $0.10, and never more than a quarter of the budget."""
-        return min(SKEPTIC_RESERVE_USD, self.telemetry.budget_usd / 4)
+    def reserve_for(self, operation: str) -> float:
+        """What a call may spend past the budget: finishing work shares $0.15, never more than a third of the budget;
+        anything else stops at the budget."""
+        if not operation.startswith(FINISHING):
+            return 0.0
+        return min(FINISHING_RESERVE_USD, self.telemetry.budget_usd / 3)
 
     def record(self, call: ModelCall):
         with self.lock:

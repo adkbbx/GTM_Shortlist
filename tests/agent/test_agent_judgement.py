@@ -200,9 +200,22 @@ def test_skeptic_checks_gathered_evidence_past_the_budget_within_its_reserve():
     assert calls.meter.telemetry.budget_reached
     with pytest.raises(BudgetReached):  # Everything else stops at the budget.
         calls.meter.check()
-    calls.meter.record(ModelCall(provider="p", model="m", operation="skeptic", usd=0.06))
-    spent = judge(company([fit]), PROFILE, RULES, calls, use_skeptic=True)[0]  # Reserve ($0.10) used up.
+    calls.meter.record(ModelCall(provider="p", model="m", operation="skeptic", usd=0.11))
+    spent = judge(company([fit]), PROFILE, RULES, calls, use_skeptic=True)[0]  # Reserve ($0.15) used up.
     assert (spent.decision, spent.decided_by) == ("insufficient", "budget")
+
+
+def test_only_finishing_work_may_pass_the_budget():
+    from shortlist.agent.models import Telemetry
+    from shortlist.agent.telemetry import Meter
+    meter = Meter(Telemetry(budget_usd=0.30))
+    # The skeptic, a Shortlisted company's opening line and a requested email, each with its check: live vanta.com
+    # dropped all three opening lines when the budget ran out just before them.
+    for operation in ("skeptic", "pitch", "pitch:rewrite", "pitch_check", "email", "email_check"):
+        assert meter.reserve_for(operation) == pytest.approx(0.10)  # a third of a small budget
+    for operation in ("investigate", "discovery", "seller_profile", "competitor_search"):
+        assert meter.reserve_for(operation) == 0.0
+    assert Meter(Telemetry(budget_usd=5.0)).reserve_for("pitch") == 0.15  # never more than $0.15
 
 
 def test_budget_stops_new_calls_and_marks_remaining_companies(providers):
@@ -210,11 +223,11 @@ def test_budget_stops_new_calls_and_marks_remaining_companies(providers):
     result = AgentRunner(providers, budget_usd=0.012, concurrency=1, on_event=events.append).run(SELLER)
     t = result.telemetry
     assert t.budget_reached and result.status == "complete"
-    # The call that crossed the line finished; after it only the skeptic may check evidence already gathered, and
-    # only within its reserve.
+    # The call that crossed the line finished; after it only finishing work (the skeptic's checks of evidence already
+    # gathered, a Shortlisted company's opening line) may run, and only within the reserve.
     crossed = next(i for i, _ in enumerate(t.calls) if sum(c.usd for c in t.calls[:i + 1]) >= 0.012)
-    assert all(c.operation.startswith("skeptic") for c in t.calls[crossed + 1:])
-    assert sum(c.usd for c in t.calls[:-1]) < 0.012 + 0.012 / 4
+    assert all(c.operation.startswith(("skeptic", "pitch")) for c in t.calls[crossed + 1:])
+    assert sum(c.usd for c in t.calls[:-1]) < 0.012 + 0.012 / 3
     # Research stops at the budget; a company it reached unfinished says so, and the run says why it stopped.
     stopped = [c for c in result.companies if c.status == "budget_reached"]
     assert all(c.verdict.kind == "needs_look" and BUDGET_REACHED in c.verdict.missing for c in stopped)

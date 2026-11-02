@@ -550,5 +550,29 @@
   "message": "Done: 3 shortlisted, 1 need a look, 0 rejected",
   "company": null,
   "level": "done"
+ },
+ {
+  "seq": 70,
+  "at": "2026-11-02T07:48:48.373075Z",
+  "stage": "outreach",
+  "message": "Opening line written and checked from the saved quotes on 2 November: the run's budget had stopped it",
+  "company": "aledade.com",
+  "level": "done"
+ },
+ {
+  "seq": 71,
+  "at": "2026-11-02T07:48:48.374073Z",
+  "stage": "outreach",
+  "message": "Opening line written and checked from the saved quotes on 2 November: the run's budget had stopped it",
+  "company": "omnichat.ai",
+  "level": "done"
+ },
+ {
+  "seq": 72,
+  "at": "2026-11-02T07:48:48.374073Z",
+  "stage": "outreach",
+  "message": "Opening line written and checked from the saved quotes on 2 November: the run's budget had stopped it",
+  "company": "mattermost.com",
+  "level": "done"
  }
 ]

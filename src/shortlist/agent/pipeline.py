@@ -30,7 +30,7 @@ from shortlist.agent.models import (
     SetAside,
     Telemetry,
 )
-from shortlist.agent.outreach import pitch_or_none, write_email
+from shortlist.agent.outreach import write_email, write_pitch
 from shortlist.agent.pages import COMPARISON, Fetcher
 from shortlist.agent.providers import AgentProviderError, Investigator, SkepticModel
 from shortlist.agent.scan import scan
@@ -329,8 +329,14 @@ class AgentRunner:
         if company.pitch is not None:
             return
         self.emit("outreach", "Writing why now and an opening line from the supported quotes", company=company.domain)
-        company.pitch = pitch_or_none(company, result.profile, calls, use_skeptic=self.use_skeptic,
-                                      dropped=result.dropped)
+        try:
+            company.pitch = write_pitch(company, result.profile, calls, use_skeptic=self.use_skeptic,
+                                        dropped=result.dropped)
+        except BudgetReached:  # past the budget and its finishing reserve: say so, not that the check failed
+            company.pitch = None
+            self.emit("outreach", "No opening line: the run's budget ran out before it was written and checked",
+                      company=company.domain, level="warn")
+            return
         if company.pitch is None:
             self.emit("outreach", "No opening line kept: nothing it said could be checked against the quotes",
                       company=company.domain, level="warn")

@@ -288,7 +288,10 @@ def test_shipped_examples_are_real_finished_searches_that_open_read_only(tmp_pat
         example = examples[0]
         shown = client.get(f"/api/agent/runs/{example['id']}").json()
         assert shown["run"]["status"] == "complete"
-        assert len(shown["events"]) > 20 and shown["events"][-1]["message"].startswith("Done: ")
+        # The run itself ends with its tally; notes added later (an opening line written from the saved quotes after
+        # a budget fix) follow it, dated when they happened.
+        runs = [e for e in shown["events"] if e["stage"] == "run"]
+        assert len(shown["events"]) > 20 and runs[-1]["message"].startswith("Done: ")
         assert [e["seq"] for e in shown["events"]] == list(range(1, len(shown["events"]) + 1))
         refused = client.post(f"/api/agent/runs/{example['id']}/overrides", json={"exclusions": ["x.example"]})
         assert refused.status_code == 403
