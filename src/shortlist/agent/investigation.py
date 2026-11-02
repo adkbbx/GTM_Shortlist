@@ -52,8 +52,10 @@ Work in this order:
 2. Need and timing (spend most of your searches here): the company's own marketing cannot show need, so look
    beyond it. Search for its job posts (its careers page, or job boards such as Greenhouse, Lever, Workable or
    LinkedIn) for roles named in the need signals, and for news or press releases from the last six months for the
-   timing signals. own_job_board, when present, lists the company's open roles read just now from its own job
-   board: if a role there matches a need signal, fetch that role's url and quote it, because it beats a copy on a
+   timing signals. open_posting, when present, is a job posting confirmed open just now and its text is supplied:
+   quote its own sentences for the need signals it shows, with that url, before searching for more. own_job_board,
+   when present, lists the company's open roles read just now from its own job board: if a role there matches a need
+   signal, fetch that role's url and quote it, because it beats a copy on a
    job site. If found_via names a job post or news item, find and fetch that page first. Fetch the job post or
    article itself and quote it. Note a page's publication date only when the page states it.
 3. Competitor use: ONE search that names all listed competitors together, for example
@@ -128,6 +130,10 @@ def summarize_places(places: list[str]) -> list[str]:
     return summary
 
 
+# discovery.lead's wording for a posting it confirmed open on the company's own board, ending with the posting's url.
+LEAD_POSTING = re.compile(r"^open job post on its \w+ board: .*\((https://[^()\s]+)\)$")
+
+
 class Investigation:
     def __init__(self, company: CandidateRef, ctx: Context):
         self.company = company
@@ -140,8 +146,23 @@ class Investigation:
         self.home: Page | None = None
         self.names: list[str] = []
         self.board: Board | None = None
+        self.posting: Page | None = None
 
     # Pages -----------------------------------------------------------------------------------------------------
+    def read_lead_posting(self):
+        """The posting discovery confirmed open, read from its board's own data (no model call) and handed to the
+        investigator. Live runs found an open, dated posting and still ended "No current need": the investigator
+        quoted the board page's heading instead (rescale.com) or never fetched the posting."""
+        match = LEAD_POSTING.search(self.company.found_via or "")
+        if match is None or self.ctx.job_boards is None:
+            return
+        page = self.ctx.job_boards.page_for(match.group(1))
+        if page is None:
+            return
+        self.posting = self.pages[page.url] = page
+        self.places.append("job post")
+        self.ctx.emit("investigation", f"Read the open posting: {page.source.title[:120]}", company=self.company.domain)
+
     def fetch(self, url: str) -> Page:
         if self.result.fetches >= MAX_FETCHES:
             raise FetchError("Fetch limit for this company reached")
@@ -244,6 +265,9 @@ class Investigation:
                 {"title": o.title, "location": o.location, "url": o.url,
                  "posted": o.posted.isoformat() if o.posted else None} for o in self.board.openings[:MAX_OPENINGS]]}
         home = f'\n<page url="{self.home.url}">\n{excerpt(self.home, 6000)}\n</page>' if self.home else ""
+        if self.posting is not None:
+            data["open_posting"] = self.posting.url
+            home += f'\n<page url="{self.posting.url}">\n{excerpt(self.posting, 6000)}\n</page>'
         return "Investigate this company.\n<data>\n" + json.dumps(data) + home + "\n</data>"
 
     def loop(self) -> InvestigationAnswer:
@@ -373,6 +397,7 @@ class Investigation:
                 self.names.append(self.company.name)
             self.observe(self.home)
             self.read_board()
+            self.read_lead_posting()
             if not self.result.name:
                 self.result.name = self.names[-1] if self.names else self.company.domain
             try:

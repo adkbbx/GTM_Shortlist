@@ -35,7 +35,12 @@ Rules you must apply:
    comparison or alternatives article, an old case study, past use ("switched from", "formerly", "used to") or a plan
    is "insufficient".
 3. need and timing items must be about the company itself, not about its customers or its market.
-4. Never judge, rank or describe individual people.
+4. A fit check says what kind of company this is. A fit item "supports" when the quote, read as the company describing
+   its own business, makes the check plain, even if it does not repeat the check's words: a product homepage offering
+   software to teams shows it sells software to businesses; "Request a demo", pricing or a signup shows it sells through
+   its website; a help desk or live chat shows it talks to customers. A quote too generic to tell what the company
+   does ("Trusted by the world's leading organizations") stays "insufficient". Rules 1 to 3 stay strict.
+5. Never judge, rank or describe individual people.
 
 Return only JSON: {"decisions": [{"id": "item id", "decision": "supports|contradicts|insufficient",
 "reason": "one short sentence"}]}"""

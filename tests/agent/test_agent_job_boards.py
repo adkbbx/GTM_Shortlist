@@ -153,6 +153,37 @@ def test_a_bare_board_url_finds_the_matching_role_and_old_greenhouse_links_are_r
     assert posting_page("https://jobs.lever.co/acme/1") == "https://jobs.lever.co/acme/1"
 
 
+def test_the_posting_discovery_confirmed_open_is_handed_to_the_investigator():
+    """Live runs confirmed an open, dated posting and still ended "No current need": the investigator quoted the
+    board's heading (rescale.com) or never fetched it. Its text is now read from the board and put in the brief."""
+    from types import SimpleNamespace
+
+    from shortlist.agent.investigation import Investigation
+    from shortlist.agent.models import CandidateRef
+    from shortlist.agent.pages import open_posting, verified_date
+
+    posting_id = "0acd1fa9-c3ce-4e84-a5bf-17ec707ab8e5"
+    url = f"https://jobs.lever.co/trailgear/{posting_id}"
+    one = {"text": "Support Lead", "hostedUrl": url, "createdAt": 1793000000000, "descriptionPlain": "Trailgear",
+           "description": "<p>Trailgear (SYNTHETIC) is hiring a support lead to answer customer chats and emails.</p>"}
+    reader = JobBoards(transport=httpx.MockTransport(
+        lambda request: httpx.Response(200, json=one) if posting_id in request.url.path else httpx.Response(404)))
+    events = []
+    ctx = SimpleNamespace(job_boards=reader, emit=lambda *args, **kwargs: events.append(args[1]))
+    via = f"open job post on its Lever board: Support Lead, posted 2026-10-26 ({url})"
+    investigation = Investigation(CandidateRef(domain="trailgear.example", name="Trailgear", url="https://trailgear.example/",
+                                               found_via=via), ctx)
+    investigation.read_lead_posting()
+    page = investigation.posting
+    assert page.url == url and open_posting(page) and verified_date(None, page) == date(2026, 10, 26)
+    assert investigation.pages[url] is page and events == ["Read the open posting: Support Lead"]
+
+    unconfirmed = Investigation(CandidateRef(domain="trailgear.example", name="Trailgear", url="https://trailgear.example/",
+                                             found_via=f"job post: Support Lead ({url} not confirmed open)"), ctx)
+    unconfirmed.read_lead_posting()
+    assert unconfirmed.posting is None  # only a posting discovery confirmed open is handed over
+
+
 def test_one_posting_is_read_on_its_own_so_a_large_board_cannot_hide_it():
     """AHEAD's Lever list was 4 MB, over the reader's cap, so its open posting showed as "not confirmed open". A
     Lever or Greenhouse posting is now asked for by its own id; a closed one answers 404."""
