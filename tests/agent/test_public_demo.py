@@ -9,9 +9,10 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from shortlist.agent.files import INTERRUPTED, FileAgentRuns
-from shortlist.agent.models import AgentEvent, RunResult, Telemetry
+from shortlist.agent.models import AgentEvent, RunResult, SellerDescription, Telemetry
 from shortlist.agent.public import PublicSettings, create_public_app
 from shortlist.agent.seller import DESCRIPTION_URL
+from shortlist.agent.service import described_label
 from shortlist.agent.settings import AgentSettings
 from shortlist.agent.synthetic import DESCRIBED_SELLER, synthetic_providers
 from shortlist.domain import utcnow
@@ -89,6 +90,17 @@ def test_a_seller_without_a_website_describes_its_business_and_every_claim_quote
     assert any(c["verdict"] and c["verdict"]["kind"] == "shortlisted" for c in run["companies"])
     csv = client.get(f"/api/agent/runs/{run['id']}/shortlist.csv")
     assert csv.status_code == 200 and "shortlist-northwinddesk-" in csv.headers["content-disposition"]
+
+
+def test_an_unnamed_description_is_labelled_by_what_it_sells_and_never_by_a_guessed_name(client):
+    unnamed = {**DESCRIBED_SELLER, "name": ""}
+    body = finished(client, client.post("/api/agent/runs", json={"description": unnamed}).json()["id"])
+    # Each unnamed search reads differently in your list, from your own words; "Your business" made them all alike.
+    assert body["run"]["website"] == "Help desk software for online stores"
+    # The synthetic model returns a name ("Northwind Desk"); no one typed it, so no email may be signed with it.
+    assert body["run"]["profile"]["name"] == ""
+    longer = {**unnamed, "offer": "Inventory and ordering software for independent coffee roasters and the cafés they supply"}
+    assert described_label(SellerDescription(**longer)) == "Inventory and ordering software for independent…"
 
 
 @pytest.mark.parametrize("body", [{}, {"website": "seller.example", "description": DESCRIBED_SELLER},

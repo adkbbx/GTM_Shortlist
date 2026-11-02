@@ -248,7 +248,7 @@ function Describe({ count, busy, onClose, onStart }: { count: number; busy: bool
         placeholder="UK and Ireland" />
       <label htmlFor="describe-name">Business name <span>Optional</span></label>
       <input id="describe-name" maxLength={120} value={fields.name} onChange={set('name')} disabled={busy}
-        placeholder="Names your search" />
+        placeholder="Or we name it from what you sell" />
       <div ref={check} className="agent-check" />
       {error && <p className="notice" role="alert">{error}</p>}
       <div className="yc-describe-actions">

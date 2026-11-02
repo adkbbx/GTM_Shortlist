@@ -245,7 +245,7 @@ def understand_seller(website: str, calls: Calls, fetcher: Fetcher, emit: Callab
                                         input=[{"role": "user", "content": request + "<data>\n" + blocks + "\n</data>"}],
                                         max_output_tokens=4000)
     profile = build_profile("" if description is not None else website, answer, pages, dropped)
-    if description is not None and description.name.strip():
+    if description is not None:  # only the name the seller typed: a model's guess could end up signing its emails
         profile = profile.model_copy(update={"name": description.name.strip()[:200]})
     if profile.offer and not profile.need_signals and all(s.standard for s in profile.timing_signals):
         # Live run (crisp.chat): the answer had no need or timing signal, so no company could ever be Shortlisted.

@@ -1,4 +1,5 @@
 """Background execution of agent runs for the local API: one daemon thread per run or correction."""
+import re
 from collections.abc import Callable
 from datetime import timedelta
 from threading import Thread
@@ -44,6 +45,19 @@ def website_url(value: str) -> str:
     return canonical_url(value.split("#")[0])
 
 
+def described_label(description: SellerDescription, limit: int = 48) -> str:
+    """What a described search is called: the business name, or else the start of what it sells, in its own words.
+    One fixed label ("Your business") made every unnamed search look the same in your list of searches."""
+    if description.name.strip():
+        return description.name.strip()
+    offer = " ".join(description.offer.split())
+    first = re.split(r"(?<=[.!?])\s", offer, maxsplit=1)[0].rstrip(".!?")
+    if len(first) <= limit:
+        return first
+    cut = first[:limit].rsplit(" ", 1)[0].rstrip(",;:-")
+    return cut + "…"
+
+
 class AgentService:
     def __init__(self, store: SQLiteAgentRuns, settings: Callable[[], AgentSettings] = AgentSettings.load,
                  providers: Callable[[AgentSettings], Providers] = real_providers,
@@ -83,7 +97,7 @@ class AgentService:
         with no domain to match earlier searches by, starts without history."""
         settings = self.settings()
         overrides = overrides or Overrides()
-        label = (description.name.strip() or "Your business") if description is not None else website_url(website or "")
+        label = described_label(description) if description is not None else website_url(website or "")
         result = RunResult(website=label, description=description, status="queued", overrides=overrides,
                            company_count=overrides.company_count or 10, skeptic=settings.use_skeptic,
                            telemetry=Telemetry(budget_usd=settings.run_budget_usd))
