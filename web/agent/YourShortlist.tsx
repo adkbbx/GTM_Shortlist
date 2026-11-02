@@ -51,10 +51,12 @@ function Row({ entry, onOpen }: { entry: Entry; onOpen: (id: string) => void }) 
 export function YourShortlist({ onOpen, onNew }: { onOpen: (id: string) => void; onNew: () => void }) {
   const { publicDemo } = useAgentConfig();
   const [entries, setEntries] = useState<Entry[] | null>(null);
+  const [searches, setSearches] = useState<Search[]>([]);
   useEffect(() => {
     let cancelled = false;
     mySearches(publicDemo).then(searches => {
       if (cancelled) return;
+      setSearches([...searches].sort((a, b) => b.created_at.localeCompare(a.created_at)));
       const seen = new Set<string>();
       const found: Entry[] = [];
       for (const search of [...searches].sort((a, b) => b.created_at.localeCompare(a.created_at)))
@@ -73,7 +75,16 @@ export function YourShortlist({ onOpen, onNew }: { onOpen: (id: string) => void;
     </div>
     {entries === null ? <p className="agent-status" role="status">Loading your shortlist</p>
       : entries.length === 0 ? <div className="ys-empty"><p>No Shortlisted companies yet.</p>
-        <p>Every company that passes a search lands here, with its reason and any email you drafted.</p></div>
+        {searches.length ? <>
+          <p>{searches.length === 1 ? 'Your search' : `Your ${searches.length} searches`} from this browser found no company with
+            every check passed yet. Open one to see what each company was missing.</p>
+          <ul className="ys-searches">{searches.slice(0, 8).map(search => <li key={search.id}>
+            {search.gone ? <span>{domainOf(search.website)} · {day(search.created_at)}</span>
+              : <a href={`?agent=${search.id}`} onClick={event => { event.preventDefault(); onOpen(search.id); }}>
+                {domainOf(search.website)} · {day(search.created_at)}</a>}
+          </li>)}</ul>
+        </> : <p>Every company that passes a search lands here, with its reason and any email you drafted.
+          Searches are kept per browser and per site address.</p>}</div>
         : <><p className="ys-count">{entries.length} {entries.length === 1 ? 'company' : 'companies'}</p>
           {gone && <p className="ys-note" role="note">Some searches are no longer on the server, so their full page cannot open.
             This browser kept their Shortlisted companies and emails.</p>}

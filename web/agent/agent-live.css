@@ -248,6 +248,8 @@
 .ys-list{list-style:none;margin:0;padding:0}
 .ys-for{font-size:.75rem;color:var(--muted)}
 .ys-note{margin:0 0 .75rem;padding:.625rem .875rem;border:1px solid var(--line,#e1dfd9);border-radius:.625rem;background:#fff;font-size:.8125rem;color:var(--muted)}
+.ys-searches{list-style:none;margin:1rem 0 0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem}
+.ys-searches li a,.ys-searches li span{display:inline-block;padding:.375rem .75rem;border:1px solid var(--line,#e1dfd9);border-radius:999px;background:#fff;font-size:.8125rem;color:var(--ink)}
 .ys-empty{margin-top:2rem;padding:2rem;border:1px dashed #d4d1ca;border-radius:.875rem;text-align:center;color:var(--muted)}
 .ys-empty p:first-child{font-weight:600;color:var(--ink);margin-bottom:.375rem}
 .ys-empty p{max-width:none}

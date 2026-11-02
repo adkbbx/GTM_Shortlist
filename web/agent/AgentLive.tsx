@@ -8,11 +8,11 @@ import './agent-live.css';
 /** The agent's six steps, in the order a run reaches them. Investigation, the skeptic and the verdict repeat per
  *  company, so a later step can light up while an earlier one is still working on the next company. */
 export const STAGES = [
-  { label: 'Read your site', by: 'Muse Spark' },
-  { label: 'Map competitors', by: 'Muse Spark' },
-  { label: 'Find hiring signals', by: 'Job boards' },
-  { label: 'Investigate', by: 'Muse Spark' },
-  { label: 'Check every quote', by: 'Muse Spark Open' },
+  { label: 'Read your site', by: 'Investigator' },
+  { label: 'Map competitors', by: 'Investigator' },
+  { label: 'Find buying signals', by: 'Web search' },
+  { label: 'Investigate', by: 'Investigator' },
+  { label: 'Check every quote', by: 'Skeptic' },
   { label: 'Decide and write', by: 'Fixed rules' },
 ] as const;
 const STAGE_INDEX: Record<string, number> = { seller: 0, competitors: 1, discovery: 2, investigation: 3, skeptic: 4, verdict: 5, outreach: 5 };
@@ -196,7 +196,7 @@ function Wall({ tiles }: { tiles: Tile[] }) {
 }
 
 const EARLY = new Set(['run', 'seller', 'competitors', 'discovery']);
-const HEADLINE = ['Reading your site', 'Mapping your competitors', 'Finding companies with hiring signals'];
+const HEADLINE = ['Reading your site', 'Mapping your competitors', 'Finding companies with buying signals'];
 
 /** Before the first company arrives: what the agent is doing right now and what it has learned so far, at the top of
  *  the page, so the early minutes never look stuck. */

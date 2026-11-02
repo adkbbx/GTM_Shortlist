@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, RefObject } from 'react';
 import '@fontsource/schibsted-grotesk/500.css';
 import '@fontsource/schibsted-grotesk/800.css';
@@ -13,7 +13,7 @@ import { useLenis, usePrefersReducedMotion } from '../landing/useLenis';
 import '../landing/landing.css';
 import { STAGES, Stepper, prefixOf, stageOf, stepStates } from './AgentLive';
 import { agentApi, domainOf, ownSearches } from './agent-api';
-import type { AgentRunSummary, AgentRunView, Company } from './agent-api';
+import type { AgentEvent, AgentRunSummary, AgentRunView, Company } from './agent-api';
 import { countOptions, useAgentConfig } from './agent-config';
 import { CountPicker } from './CountPicker';
 import './agent-landing.css';
@@ -37,8 +37,17 @@ function useInView(ref: RefObject<HTMLElement | null>) {
   return inView;
 }
 
-const STEP_MS = 420;
-const HOLD_STEPS = 14;  // about six seconds on the finished result before it plays again
+const STEP_MS = 1100;  // one step at a time, slow enough to read: every line at 420 ms felt jittery
+const HOLD_STEPS = 6;  // about seven seconds on the finished result before it plays again
+
+/** The steps worth watching: searches, what was read and confirmed, the skeptic's tally, verdicts and openers.
+    Housekeeping and failed reads stay in the full log on the search's own page. */
+function storyEvents(events: AgentEvent[]) {
+  return events.filter(event => !(
+    /^(?:Could not read|Investigating \d+ compan|Skeptic checking|\d+ website\(s\) could not be read)/.test(event.message)
+    || (event.stage === 'investigation' && /^(?:Read https?:|Searched )/.test(event.message))
+    || event.message.includes('set aside')));
+}
 
 /** Plays the recorded steps one at a time while on screen, holds the result, then starts over. */
 function usePlayback(total: number, playing: boolean, reduced: boolean) {
@@ -75,8 +84,8 @@ function supportedQuote(company: Company) {
   return items.find(e => e.claim_type === 'need' || e.claim_type === 'timing') ?? items[0];
 }
 
-function ReplayConsole({ view, onOpen, shown }: { view: AgentRunView; onOpen: (id: string) => void; shown: number }) {
-  const events = view.events;
+function ReplayConsole({ view, events, onOpen, shown }: { view: AgentRunView; events: AgentEvent[]; onOpen: (id: string) => void;
+  shown: number }) {
   const played = events.slice(0, shown);
   const finished = shown >= events.length;
   const decided = new Set(played.filter(e => e.stage === 'verdict' && e.company).map(e => e.company)).size;
@@ -100,7 +109,7 @@ function ReplayConsole({ view, onOpen, shown }: { view: AgentRunView; onOpen: (i
           </div>;
         })}
       </div> : <ol className="al-lines">
-        {played.slice(-8).map(event => <li key={event.seq} className={`level-${event.level}`}>
+        {played.slice(-6).map(event => <li key={event.seq} className={`level-${event.level}`}>
           <span className={`al-tag stage-${event.stage}`}>{TAG[event.stage] ?? event.stage}</span>
           <span className="al-line">{prefixOf(event) && <b>{prefixOf(event)} </b>}{event.message}</span>
         </li>)}
@@ -121,9 +130,10 @@ function Logo({ company }: { company: Company }) {
 /** The real run's recorded steps, replayed as they happened while the section is on screen. */
 function Story({ view, onOpen, reduced }: { view: AgentRunView; onOpen: (id: string) => void; reduced: boolean }) {
   const root = useRef<HTMLElement>(null);
-  const total = view.events.length;
+  const events = useMemo(() => storyEvents(view.events), [view.events]);
+  const total = events.length;
   const shown = usePlayback(total, useInView(root), reduced);
-  const states = stepStates(view.events.slice(0, shown), shown < total);
+  const states = stepStates(events.slice(0, shown), shown < total);
   return <section id="al-replay" ref={root} className="al-story al-section" aria-labelledby="al-replay-heading">
     <div className="al-story-pin pl-wrap">
       <div className="al-replay-copy">
@@ -135,15 +145,15 @@ function Story({ view, onOpen, reduced }: { view: AgentRunView; onOpen: (id: str
         </li>)}</ol>
         <div className="al-story-bar" aria-hidden="true"><span style={{ transform: `scaleX(${total ? shown / total : 1})` }} /></div>
       </div>
-      <ReplayConsole view={view} onOpen={onOpen} shown={shown} />
+      <ReplayConsole view={view} events={events} onOpen={onOpen} shown={shown} />
     </div>
   </section>;
 }
 
 const HOW = [
-  { n: '01', title: 'Reads your site', by: 'Muse Spark', text: 'Works out what you sell, who buys it, your competitors and the size of company you serve. Nothing to fill in.' },
-  { n: '02', title: 'Hunts for buying signals', by: 'Muse Spark + job boards', text: 'Searches Lever, Greenhouse and Ashby for open roles that mean a company needs you now, and confirms each is still open on its own board.' },
-  { n: '03', title: 'Investigates, then doubts', by: 'Muse Spark Open', text: 'Each company is read page by page and quoted word for word. An open-weight skeptic accepts or rejects every quote.' },
+  { n: '01', title: 'Reads your site', by: 'Investigator model', text: 'Works out what you sell, who buys it, your competitors and the size of company you serve. Nothing to fill in.' },
+  { n: '02', title: 'Hunts for buying signals', by: 'Web, job boards, news, social', text: 'Looks for companies hiring for the problem you solve, raising money, launching or expanding, or saying so on LinkedIn and X, then confirms each signal on a page it can read.' },
+  { n: '03', title: 'Investigates, then doubts', by: 'Skeptic model, open weights', text: 'Each company is read page by page and quoted word for word. A second, independent model accepts or rejects every quote.' },
   { n: '04', title: 'Rules decide, then it writes', by: 'Fixed rules', text: 'Code, not a model, sorts Shortlisted, Needs a look and Rejected. Shortlisted companies get why now and an opening line, checked against the quotes.' },
 ];
 
@@ -170,7 +180,7 @@ function ResultCards({ runs, onOpen, reduced }: { runs: AgentRunView[]; onOpen: 
   </section>;
 }
 
-const GATES = [['Hiring signal', 'Open role on a job board'], ['Investigated', 'Quoted from their pages'], ['Skeptic', 'Kept by Muse Spark Open']];
+const GATES = [['Buying signal', 'Hiring, funding, launch or post'], ['Investigated', 'Quoted from their pages'], ['Skeptic', 'Kept by a second model']];
 
 function Hero({ reduced, onOpen }: { reduced: boolean; onOpen: (id: string) => void }) {
   const config = useAgentConfig();
@@ -221,10 +231,11 @@ function Hero({ reduced, onOpen }: { reduced: boolean; onOpen: (id: string) => v
   return <section className="pl-hero" aria-labelledby="agent-start-heading">
     <div className="pl-hero-in pl-wrap">
       <div className="pl-hero-top">
-        <div><p className="al-eyebrow">A sales research agent on Muse Spark</p>
-          <Reveal as="h1" id="agent-start-heading" reduced={reduced} lead="Find who needs it." accent="See the proof." br /></div>
-        <p className="pl-lede">Enter your website. The agent finds companies hiring for the problem you solve, shows <strong>the exact
-          sentence behind every verdict</strong>, and writes the first line of your email.</p>
+        <div><p className="al-eyebrow">For founders and small sales teams</p>
+          <Reveal as="h1" id="agent-start-heading" reduced={reduced} lead="Stop emailing companies" accent="that don't need you." br /></div>
+        <p className="pl-lede">Most prospect lists are guesses, so most cold emails get ignored. Enter your website: the agent finds
+          companies that need what you sell right now, proves it with <strong>the exact sentence from their job post or news</strong>,
+          and drafts the email.</p>
       </div>
       <div className={`pl-instrument${on ? ' on' : ''}`} ref={instrument}>
         <canvas ref={canvas} aria-hidden="true" />
