@@ -60,6 +60,7 @@ test('the public demo starts from a website alone, caps the size and shares a re
   await page.getByRole('link', { name: 'Your shortlist' }).click();
   await expect(page.getByRole('heading', { name: 'Your shortlist' })).toBeVisible();
   await expect(page.locator('.ys-list').getByRole('heading', { name: 'Trailgear Outfitters' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Your searches' }).getByRole('link', { name: 'seller.example' })).toBeVisible();
   await page.locator('.ys-list').getByRole('button', { name: 'View message' }).click();
   await expect(page.getByRole('dialog', { name: 'First message' })).toContainText('Hi Trailgear Outfitters team,');
   await page.keyboard.press('Escape');
@@ -76,11 +77,11 @@ test('the public demo starts from a website alone, caps the size and shares a re
   await expect(page.locator('.ys-list').getByRole('button', { name: 'Open search' })).toHaveCount(0);
   await page.unroute('**/api/agent/runs/*');
 
-  // The start page lists this browser's own searches; another visitor's browser lists none.
+  // The start page offers this browser's last search; another visitor's browser offers none.
   await page.getByRole('link', { name: 'GTM Shortlist' }).click();
-  const yours = page.getByRole('region', { name: 'Your searches' });
-  await expect(yours.getByRole('link', { name: 'seller.example' })).toBeVisible();
-  await yours.getByRole('link', { name: 'seller.example' }).click();
+  const last = page.getByRole('navigation', { name: 'Your searches' }).getByRole('link', { name: /Your last search: seller\.example/ });
+  await expect(last).toBeVisible();
+  await last.click();
   await expect(page.locator('.column-rejected').getByRole('heading', { name: 'Bright Kettle' })).toBeVisible();
 
   // Anyone else with the link reads the same shortlist without edit controls.
@@ -96,7 +97,7 @@ test('the public demo starts from a website alone, caps the size and shares a re
   await shared.keyboard.press('Escape');
   await expect(shared.locator('.count-picker')).toHaveCount(0);
   await shared.goto('/');
-  await expect(shared.getByRole('region', { name: 'Your searches' })).toHaveCount(0);
+  await expect(shared.getByRole('navigation', { name: 'Your searches' })).toHaveCount(0);
   await shared.getByRole('link', { name: 'Your shortlist' }).click();
   await expect(shared.getByText('No Shortlisted companies yet.')).toBeVisible();
   await shared.goto(page.url());

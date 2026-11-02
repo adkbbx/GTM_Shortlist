@@ -1,0 +1,554 @@
+[
+ {
+  "seq": 1,
+  "at": "2026-11-02T05:35:26.960972Z",
+  "stage": "run",
+  "message": "Started research for https://vanta.com/",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 2,
+  "at": "2026-11-02T05:35:27.923259Z",
+  "stage": "seller",
+  "message": "Read your homepage (https://www.vanta.com/)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 3,
+  "at": "2026-11-02T05:35:28.428000Z",
+  "stage": "seller",
+  "message": "Read https://www.vanta.com/pricing",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 4,
+  "at": "2026-11-02T05:35:28.741712Z",
+  "stage": "seller",
+  "message": "Read https://www.vanta.com/products/automated-compliance",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 5,
+  "at": "2026-11-02T05:35:29.155651Z",
+  "stage": "seller",
+  "message": "Read https://www.vanta.com/customers",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 6,
+  "at": "2026-11-02T05:35:29.469941Z",
+  "stage": "seller",
+  "message": "Read https://www.vanta.com/company/about",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 7,
+  "at": "2026-11-02T05:35:29.851599Z",
+  "stage": "seller",
+  "message": "Read https://www.vanta.com/integrations",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 8,
+  "at": "2026-11-02T05:35:50.035596Z",
+  "stage": "seller",
+  "message": "Understood the offer with 3 fit checks, 3 need signals and 8 named customers",
+  "company": null,
+  "level": "done"
+ },
+ {
+  "seq": 9,
+  "at": "2026-11-02T05:35:55.953416Z",
+  "stage": "competitors",
+  "message": "Searched \"Vanta alternatives competitors\" (10 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 10,
+  "at": "2026-11-02T05:35:55.953416Z",
+  "stage": "competitors",
+  "message": "Searched \"Vanta vs compliance automation\" (9 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 11,
+  "at": "2026-11-02T05:35:55.953416Z",
+  "stage": "competitors",
+  "message": "Searched \"best SOC 2 compliance automation software G2\" (9 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 12,
+  "at": "2026-11-02T05:35:56.070050Z",
+  "stage": "competitors",
+  "message": "Could not read drata.com: Website returned HTTP 403",
+  "company": null,
+  "level": "warn"
+ },
+ {
+  "seq": 13,
+  "at": "2026-11-02T05:35:56.267708Z",
+  "stage": "competitors",
+  "message": "Could not read sprinto.com: Website returned HTTP 403",
+  "company": null,
+  "level": "warn"
+ },
+ {
+  "seq": 14,
+  "at": "2026-11-02T05:36:15.186942Z",
+  "stage": "competitors",
+  "message": "Found 6 direct competitors among 8 candidates",
+  "company": null,
+  "level": "done"
+ },
+ {
+  "seq": 15,
+  "at": "2026-11-02T05:36:44.421058Z",
+  "stage": "discovery",
+  "message": "Searched \"site:jobs.lever.co GRC compliance manager SOC 2\" (10 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 16,
+  "at": "2026-11-02T05:36:44.421058Z",
+  "stage": "discovery",
+  "message": "Searched \"site:boards.greenhouse.io security compliance GRC analyst\" (8 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 17,
+  "at": "2026-11-02T05:36:44.421058Z",
+  "stage": "discovery",
+  "message": "Searched \"startup raises seed Series A October 2026 AI launch enterprise\" (9 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 18,
+  "at": "2026-11-02T05:36:44.422060Z",
+  "stage": "discovery",
+  "message": "Searched \"site:linkedin.com/posts \"pursuing SOC 2\" startup\" (6 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 19,
+  "at": "2026-11-02T05:36:44.430060Z",
+  "stage": "discovery",
+  "message": "Found 14 candidate companies; set aside 11 pages (lists, directories, competitors, customers)",
+  "company": null,
+  "level": "done"
+ },
+ {
+  "seq": 20,
+  "at": "2026-11-02T05:36:44.448307Z",
+  "stage": "investigation",
+  "message": "Investigating 4 companies, 5 at a time",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 21,
+  "at": "2026-11-02T05:36:44.448307Z",
+  "stage": "investigation",
+  "message": "Investigating aledade.com",
+  "company": "aledade.com",
+  "level": "info"
+ },
+ {
+  "seq": 22,
+  "at": "2026-11-02T05:36:44.449812Z",
+  "stage": "investigation",
+  "message": "Investigating omnichat.ai",
+  "company": "omnichat.ai",
+  "level": "info"
+ },
+ {
+  "seq": 23,
+  "at": "2026-11-02T05:36:44.451054Z",
+  "stage": "investigation",
+  "message": "Investigating mattermost.com",
+  "company": "mattermost.com",
+  "level": "info"
+ },
+ {
+  "seq": 24,
+  "at": "2026-11-02T05:36:44.453051Z",
+  "stage": "investigation",
+  "message": "Investigating ascerta.com",
+  "company": "ascerta.com",
+  "level": "info"
+ },
+ {
+  "seq": 25,
+  "at": "2026-11-02T05:36:46.285161Z",
+  "stage": "investigation",
+  "message": "Read its own job board on Greenhouse: 10 open roles",
+  "company": "mattermost.com",
+  "level": "info"
+ },
+ {
+  "seq": 26,
+  "at": "2026-11-02T05:36:50.191277Z",
+  "stage": "investigation",
+  "message": "Read https://job-boards.greenhouse.io/mattermost/jobs/5290384008",
+  "company": "mattermost.com",
+  "level": "info"
+ },
+ {
+  "seq": 27,
+  "at": "2026-11-02T05:36:50.356394Z",
+  "stage": "investigation",
+  "message": "Could not read https://mattermost.com/trust-center/",
+  "company": "mattermost.com",
+  "level": "warn"
+ },
+ {
+  "seq": 28,
+  "at": "2026-11-02T05:36:51.057412Z",
+  "stage": "investigation",
+  "message": "Searched \"Omnichat $10M Series A Omni AI Agents global expansion\"",
+  "company": "omnichat.ai",
+  "level": "info"
+ },
+ {
+  "seq": 29,
+  "at": "2026-11-02T05:36:51.057412Z",
+  "stage": "investigation",
+  "message": "Searched \"omnichat.ai trust center security SOC 2 ISO 27001\"",
+  "company": "omnichat.ai",
+  "level": "info"
+ },
+ {
+  "seq": 30,
+  "at": "2026-11-02T05:36:52.333150Z",
+  "stage": "investigation",
+  "message": "Could not read https://www.omnichat.ai/about-us/",
+  "company": "omnichat.ai",
+  "level": "warn"
+ },
+ {
+  "seq": 31,
+  "at": "2026-11-02T05:36:52.580164Z",
+  "stage": "investigation",
+  "message": "Searched \"Aledade security trust center SOC 2 HIPAA\"",
+  "company": "aledade.com",
+  "level": "info"
+ },
+ {
+  "seq": 32,
+  "at": "2026-11-02T05:36:53.126384Z",
+  "stage": "investigation",
+  "message": "Read https://jobs.lever.co/aledade/6de10689-97fd-48b6-a7d9-2abb56791ad9",
+  "company": "aledade.com",
+  "level": "info"
+ },
+ {
+  "seq": 33,
+  "at": "2026-11-02T05:36:54.779923Z",
+  "stage": "investigation",
+  "message": "Searched \"Mattermost trust center security SOC 2 ISO 27001\"",
+  "company": "mattermost.com",
+  "level": "info"
+ },
+ {
+  "seq": 34,
+  "at": "2026-11-02T05:36:55.404917Z",
+  "stage": "investigation",
+  "message": "Read https://mattermost.com/company/about-us/",
+  "company": "mattermost.com",
+  "level": "info"
+ },
+ {
+  "seq": 35,
+  "at": "2026-11-02T05:36:57.022883Z",
+  "stage": "investigation",
+  "message": "Read https://gabriel.hk/beyond-chat-how-omnichats-iso-27001-certification/",
+  "company": "omnichat.ai",
+  "level": "info"
+ },
+ {
+  "seq": 36,
+  "at": "2026-11-02T05:36:57.489855Z",
+  "stage": "investigation",
+  "message": "Read https://www.prnewswire.com/news-releases/omnichat-raises-us10m-series-a-led-by-openspace-capital-to-scale-ai-agent-platform-and-drive-global-expansion-302919732.html",
+  "company": "omnichat.ai",
+  "level": "info"
+ },
+ {
+  "seq": 37,
+  "at": "2026-11-02T05:36:58.273383Z",
+  "stage": "investigation",
+  "message": "Could not read https://www.cake.me/companies/omnichat.ai/jobs/security-manager?locale=en",
+  "company": "omnichat.ai",
+  "level": "warn"
+ },
+ {
+  "seq": 38,
+  "at": "2026-11-02T05:37:00.422787Z",
+  "stage": "investigation",
+  "message": "Searched \"Mattermost Secureframe Thoropass Scrut Scytale Strike Graph Hyperproof\"",
+  "company": "mattermost.com",
+  "level": "info"
+ },
+ {
+  "seq": 39,
+  "at": "2026-11-02T05:37:01.059459Z",
+  "stage": "investigation",
+  "message": "Read https://mattermost.com/platform/security/",
+  "company": "mattermost.com",
+  "level": "info"
+ },
+ {
+  "seq": 40,
+  "at": "2026-11-02T05:37:02.341608Z",
+  "stage": "investigation",
+  "message": "Searched \"Ascerta $18M Series A Dell Technologies Capital\"",
+  "company": "ascerta.com",
+  "level": "info"
+ },
+ {
+  "seq": 41,
+  "at": "2026-11-02T05:37:02.341608Z",
+  "stage": "investigation",
+  "message": "Searched \"Ascerta trust center SOC 2 ISO 27001 security\"",
+  "company": "ascerta.com",
+  "level": "info"
+ },
+ {
+  "seq": 42,
+  "at": "2026-11-02T05:37:02.341608Z",
+  "stage": "investigation",
+  "message": "Searched \"Ascerta hiring security compliance GRC jobs\"",
+  "company": "ascerta.com",
+  "level": "info"
+ },
+ {
+  "seq": 43,
+  "at": "2026-11-02T05:37:02.360272Z",
+  "stage": "skeptic",
+  "message": "Reviewing 5 pieces of evidence",
+  "company": "ascerta.com",
+  "level": "info"
+ },
+ {
+  "seq": 44,
+  "at": "2026-11-02T05:37:04.401352Z",
+  "stage": "investigation",
+  "message": "Searched \"site:aledade.com security HIPAA SOC 2\"",
+  "company": "aledade.com",
+  "level": "info"
+ },
+ {
+  "seq": 45,
+  "at": "2026-11-02T05:37:04.401352Z",
+  "stage": "investigation",
+  "message": "Searched \"Aledade AI product launch 2026\"",
+  "company": "aledade.com",
+  "level": "info"
+ },
+ {
+  "seq": 46,
+  "at": "2026-11-02T05:37:04.401352Z",
+  "stage": "investigation",
+  "message": "Searched \"Aledade Secureframe Thoropass Scrut Scytale Strike Graph Hyperproof\"",
+  "company": "aledade.com",
+  "level": "info"
+ },
+ {
+  "seq": 47,
+  "at": "2026-11-02T05:37:04.420970Z",
+  "stage": "skeptic",
+  "message": "Reviewing 4 pieces of evidence",
+  "company": "aledade.com",
+  "level": "info"
+ },
+ {
+  "seq": 48,
+  "at": "2026-11-02T05:37:09.163873Z",
+  "stage": "skeptic",
+  "message": "Kept 3 of 4; the rest were too weak or contradicted",
+  "company": "aledade.com",
+  "level": "info"
+ },
+ {
+  "seq": 49,
+  "at": "2026-11-02T05:37:09.163873Z",
+  "stage": "outreach",
+  "message": "Writing why now and an opening line from the supported quotes",
+  "company": "aledade.com",
+  "level": "info"
+ },
+ {
+  "seq": 50,
+  "at": "2026-11-02T05:37:10.342613Z",
+  "stage": "skeptic",
+  "message": "Kept 0 of 5; the rest were too weak or contradicted",
+  "company": "ascerta.com",
+  "level": "info"
+ },
+ {
+  "seq": 51,
+  "at": "2026-11-02T05:37:10.358467Z",
+  "stage": "verdict",
+  "message": "ascerta.com: Needs a look",
+  "company": "ascerta.com",
+  "level": "done"
+ },
+ {
+  "seq": 52,
+  "at": "2026-11-02T05:37:13.066653Z",
+  "stage": "investigation",
+  "message": "Searched \"site:omnichat.ai security privacy GDPR data protection\"",
+  "company": "omnichat.ai",
+  "level": "info"
+ },
+ {
+  "seq": 53,
+  "at": "2026-11-02T05:37:13.066653Z",
+  "stage": "investigation",
+  "message": "Searched \"omnichat Secureframe Thoropass Scrut Scytale Strike Graph Hyperproof\"",
+  "company": "omnichat.ai",
+  "level": "info"
+ },
+ {
+  "seq": 54,
+  "at": "2026-11-02T05:37:13.098680Z",
+  "stage": "skeptic",
+  "message": "Reviewing 6 pieces of evidence",
+  "company": "omnichat.ai",
+  "level": "info"
+ },
+ {
+  "seq": 55,
+  "at": "2026-11-02T05:37:17.260143Z",
+  "stage": "investigation",
+  "message": "Searched \"Mattermost AI launch sovereign AI 2026\"",
+  "company": "mattermost.com",
+  "level": "info"
+ },
+ {
+  "seq": 56,
+  "at": "2026-11-02T05:37:17.260143Z",
+  "stage": "investigation",
+  "message": "Searched \"Mattermost expansion new market Japan global growth 2026\"",
+  "company": "mattermost.com",
+  "level": "info"
+ },
+ {
+  "seq": 57,
+  "at": "2026-11-02T05:37:17.329716Z",
+  "stage": "skeptic",
+  "message": "Reviewing 10 pieces of evidence",
+  "company": "mattermost.com",
+  "level": "info"
+ },
+ {
+  "seq": 58,
+  "at": "2026-11-02T05:37:18.685233Z",
+  "stage": "skeptic",
+  "message": "Kept 4 of 6; the rest were too weak or contradicted",
+  "company": "omnichat.ai",
+  "level": "info"
+ },
+ {
+  "seq": 59,
+  "at": "2026-11-02T05:37:18.685233Z",
+  "stage": "outreach",
+  "message": "Writing why now and an opening line from the supported quotes",
+  "company": "omnichat.ai",
+  "level": "info"
+ },
+ {
+  "seq": 60,
+  "at": "2026-11-02T05:37:18.685233Z",
+  "stage": "outreach",
+  "message": "No opening line kept: nothing it said could be checked against the quotes",
+  "company": "omnichat.ai",
+  "level": "warn"
+ },
+ {
+  "seq": 61,
+  "at": "2026-11-02T05:37:18.702382Z",
+  "stage": "verdict",
+  "message": "omnichat.ai: Shortlisted",
+  "company": "omnichat.ai",
+  "level": "done"
+ },
+ {
+  "seq": 62,
+  "at": "2026-11-02T05:37:22.320081Z",
+  "stage": "outreach",
+  "message": "No opening line kept: nothing it said could be checked against the quotes",
+  "company": "aledade.com",
+  "level": "warn"
+ },
+ {
+  "seq": 63,
+  "at": "2026-11-02T05:37:22.337934Z",
+  "stage": "verdict",
+  "message": "aledade.com: Shortlisted",
+  "company": "aledade.com",
+  "level": "done"
+ },
+ {
+  "seq": 64,
+  "at": "2026-11-02T05:37:29.011826Z",
+  "stage": "skeptic",
+  "message": "Kept 8 of 10; the rest were too weak or contradicted",
+  "company": "mattermost.com",
+  "level": "info"
+ },
+ {
+  "seq": 65,
+  "at": "2026-11-02T05:37:29.013378Z",
+  "stage": "outreach",
+  "message": "Writing why now and an opening line from the supported quotes",
+  "company": "mattermost.com",
+  "level": "info"
+ },
+ {
+  "seq": 66,
+  "at": "2026-11-02T05:37:29.013378Z",
+  "stage": "outreach",
+  "message": "No opening line kept: nothing it said could be checked against the quotes",
+  "company": "mattermost.com",
+  "level": "warn"
+ },
+ {
+  "seq": 67,
+  "at": "2026-11-02T05:37:29.028766Z",
+  "stage": "verdict",
+  "message": "mattermost.com: Shortlisted",
+  "company": "mattermost.com",
+  "level": "done"
+ },
+ {
+  "seq": 68,
+  "at": "2026-11-02T05:37:29.028766Z",
+  "stage": "run",
+  "message": "Reached 3 shortlisted",
+  "company": null,
+  "level": "done"
+ },
+ {
+  "seq": 69,
+  "at": "2026-11-02T05:37:29.045099Z",
+  "stage": "run",
+  "message": "Done: 3 shortlisted, 1 need a look, 0 rejected",
+  "company": null,
+  "level": "done"
+ }
+]

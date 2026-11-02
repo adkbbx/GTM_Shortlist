@@ -1,0 +1,4042 @@
+{
+ "id": "50eb4c21149f45cbacf64d3c3c9cd4af",
+ "website": "https://vanta.com/",
+ "status": "complete",
+ "created_at": "2026-11-02T05:35:26.960972Z",
+ "finished_at": "2026-11-02T05:37:29.028766Z",
+ "company_count": 3,
+ "skeptic": true,
+ "synthetic": false,
+ "profile": {
+  "website": "https://vanta.com/",
+  "domain": "vanta.com",
+  "name": "Vanta",
+  "offer": {
+   "value": "Vanta sells automated compliance, risk and trust software that helps companies get audit-ready and continuously monitor security controls.",
+   "quotes": [
+    {
+     "text": "Get and stay compliant with automation, continuous monitoring, and the Vanta Agent.",
+     "url": "https://www.vanta.com/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-11-02T05:35:27.846036Z",
+     "location": "text",
+     "open_posting": false
+    },
+    {
+     "text": "SOC 2, ISO 27001, HIPAA, and 35+ frameworks—automated with AI and continuously monitored.",
+     "url": "https://www.vanta.com/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-11-02T05:35:27.846036Z",
+     "location": "text",
+     "open_posting": false
+    },
+    {
+     "text": "Compliance, risk, and proof. All in the #1 Agentic Trust Platform.",
+     "url": "https://www.vanta.com/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-11-02T05:35:27.846036Z",
+     "location": "text",
+     "open_posting": false
+    }
+   ],
+   "origin": "agent"
+  },
+  "buyer": {
+   "value": "B2B software and technology-enabled companies that need SOC 2, ISO 27001, HIPAA or other certifications to close enterprise deals and prove trust.",
+   "quotes": [
+    {
+     "text": "Are you a startup founder in need of a SOC 2 yesterday, but lacking time and resources? We'll automate the process and get you big-deal-ready.",
+     "url": "https://www.vanta.com/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-11-02T05:35:27.846036Z",
+     "location": "text",
+     "open_posting": false
+    },
+    {
+     "text": "Vanta helped us unblock our sales cycle for security questionnaires in a scalable, sustainable way.",
+     "url": "https://www.vanta.com/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-11-02T05:35:27.846036Z",
+     "location": "text",
+     "open_posting": false
+    },
+    {
+     "text": "Trusted by 16,000 businesses from startup to enterprise",
+     "url": "https://www.vanta.com/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-11-02T05:35:27.846036Z",
+     "location": "text",
+     "open_posting": false
+    }
+   ],
+   "origin": "agent"
+  },
+  "existing_customers": [
+   {
+    "name": "Snowflake",
+    "domain": "snowflake.com",
+    "quotes": [
+     {
+      "text": "How Snowflake saves 2,000+ hours a year with Vanta",
+      "url": "https://www.vanta.com/customers",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:29.062233Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   },
+   {
+    "name": "GitHub",
+    "domain": "github.com",
+    "quotes": [
+     {
+      "text": "How GitHub automates 93% of security questionnaires with Vanta",
+      "url": "https://www.vanta.com/customers",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:29.062233Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   },
+   {
+    "name": "Samsara",
+    "domain": null,
+    "quotes": [
+     {
+      "text": "How Samsara influenced $150M in revenue while scaling GRC with Vanta",
+      "url": "https://www.vanta.com/customers",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:29.062233Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   },
+   {
+    "name": "Duolingo",
+    "domain": "duolingo.com",
+    "quotes": [
+     {
+      "text": "Duolingo saves 12+ hour per week by automating their security and compliance program",
+      "url": "https://www.vanta.com/customers",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:29.062233Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   },
+   {
+    "name": "Ramp",
+    "domain": null,
+    "quotes": [
+     {
+      "text": "How Ramp keeps its global financial operations platform compliant",
+      "url": "https://www.vanta.com/customers",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:29.062233Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   },
+   {
+    "name": "Atlassian",
+    "domain": null,
+    "quotes": [
+     {
+      "text": "How Atlassian strengthens partner compliance for Marketplaces",
+      "url": "https://www.vanta.com/customers",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:29.062233Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   },
+   {
+    "name": "DocGo",
+    "domain": null,
+    "quotes": [
+     {
+      "text": "How DocGo shaved 3–4 Weeks off sales cycles with Vanta",
+      "url": "https://www.vanta.com/customers",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:29.062233Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   },
+   {
+    "name": "Clay",
+    "domain": null,
+    "quotes": [
+     {
+      "text": "Vanta Delivers: See how Clay and Hard Rock Digital run GRC with AI tools.",
+      "url": "https://www.vanta.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:27.846036Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   }
+  ],
+  "fit_criteria": [
+   {
+    "id": "fit-1",
+    "text": "Sells software or technology-enabled services to other businesses",
+    "required": true,
+    "enabled": true,
+    "quotes": [
+     {
+      "text": "Are you a startup founder in need of a SOC 2 yesterday, but lacking time and resources? We'll automate the process and get you big-deal-ready.",
+      "url": "https://www.vanta.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:27.846036Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "Vanta helped us unblock our sales cycle for security questionnaires in a scalable, sustainable way.",
+      "url": "https://www.vanta.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:27.846036Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "origin": "agent"
+   },
+   {
+    "id": "fit-2",
+    "text": "Runs a cloud-hosted product using cloud infrastructure, code repositories, and an identity provider",
+    "required": false,
+    "enabled": true,
+    "quotes": [
+     {
+      "text": "Connect Vanta with your cloud infrastructure, version control, productivity tools, identity provider, and much more to give you a complete and automated view of your security and compliance.",
+      "url": "https://www.vanta.com/integrations",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:29.749052Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "origin": "agent"
+   },
+   {
+    "id": "fit-3",
+    "text": "Sells through a B2B sales motion that involves security reviews and questionnaires",
+    "required": false,
+    "enabled": true,
+    "quotes": [
+     {
+      "text": "Showcase your security posture in real time.",
+      "url": "https://www.vanta.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:27.846036Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "Vanta helped us unblock our sales cycle for security questionnaires in a scalable, sustainable way.",
+      "url": "https://www.vanta.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:27.846036Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "origin": "agent"
+   }
+  ],
+  "need_signals": [
+   {
+    "id": "need-1",
+    "kind": "need",
+    "text": "Publishes a trust center, security page, or lists SOC 2, ISO 27001, HIPAA, GDPR or other framework work on its own site",
+    "quotes": [
+     {
+      "text": "Showcase your security posture in real time.",
+      "url": "https://www.vanta.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:27.846036Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "Trust Center",
+      "url": "https://www.vanta.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:27.846036Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "standard": false,
+    "own_site": true
+   },
+   {
+    "id": "need-2",
+    "kind": "need",
+    "text": "Hiring for security, GRC, compliance, or customer assurance roles",
+    "quotes": [
+     {
+      "text": "Senior Director of Security, GRC, and Program Management",
+      "url": "https://www.vanta.com/customers",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:29.062233Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "Security leaders, your risk doesn't stand still between audits.",
+      "url": "https://www.vanta.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:27.846036Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "standard": false,
+    "own_site": false
+   },
+   {
+    "id": "need-3",
+    "kind": "need",
+    "text": "Announces pursuit of SOC 2, ISO 27001, HIPAA or other audit to unblock enterprise sales",
+    "quotes": [
+     {
+      "text": "Get audit-ready fast",
+      "url": "https://www.vanta.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:27.846036Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "Vanta helped us unblock our sales cycle for security questionnaires in a scalable, sustainable way.",
+      "url": "https://www.vanta.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:27.846036Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "standard": false,
+    "own_site": false
+   }
+  ],
+  "timing_signals": [
+   {
+    "id": "timing-1",
+    "kind": "timing",
+    "text": "Announces expansion to new markets or global growth requiring new frameworks like ISO 27001 or GDPR",
+    "quotes": [
+     {
+      "text": "Secure global growth",
+      "url": "https://www.vanta.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:27.846036Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "How Noventiq overhauled global compliance across 60+ countries without scaling headcount",
+      "url": "https://www.vanta.com/customers",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:29.062233Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "standard": false,
+    "own_site": false
+   },
+   {
+    "id": "timing-2",
+    "kind": "timing",
+    "text": "Launches AI products or features triggering need for AI governance",
+    "quotes": [
+     {
+      "text": "Govern AI as fast as you adopt it.",
+      "url": "https://www.vanta.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:27.846036Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "How Synthesia became the first AI video company certified against ISO 42001—with a two-person team",
+      "url": "https://www.vanta.com/customers",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:35:29.062233Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "standard": false,
+    "own_site": false
+   }
+  ],
+  "stated_limits": [],
+  "target_size": {
+   "value": "Startups to enterprises, about 1 to 8000+ people, pre-seed to public",
+   "quotes": [
+    {
+     "text": "Trusted by 16,000 businesses from startup to enterprise",
+     "url": "https://www.vanta.com/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-11-02T05:35:27.846036Z",
+     "location": "text",
+     "open_posting": false
+    },
+    {
+     "text": "Whether you're managing a complex program or just getting started.",
+     "url": "https://www.vanta.com/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-11-02T05:35:27.846036Z",
+     "location": "text",
+     "open_posting": false
+    }
+   ],
+   "origin": "agent"
+  },
+  "interpretations": [],
+  "pages": [
+   {
+    "url": "https://www.vanta.com/",
+    "title": "SOC 2, HIPAA, ISO 27001, PCI, and GDPR Compliance",
+    "fetched_at": "2026-11-02T05:35:27.846036Z"
+   },
+   {
+    "url": "https://www.vanta.com/pricing",
+    "title": "Plans and Pricing",
+    "fetched_at": "2026-11-02T05:35:28.270017Z"
+   },
+   {
+    "url": "https://www.vanta.com/products/automated-compliance",
+    "title": "Compliance automation software: Automate and scale compliance | Vanta",
+    "fetched_at": "2026-11-02T05:35:28.672381Z"
+   },
+   {
+    "url": "https://www.vanta.com/customers",
+    "title": "Customer Success Stories",
+    "fetched_at": "2026-11-02T05:35:29.062233Z"
+   },
+   {
+    "url": "https://www.vanta.com/company/about",
+    "title": "Vanta: About us",
+    "fetched_at": "2026-11-02T05:35:29.407276Z"
+   },
+   {
+    "url": "https://www.vanta.com/integrations",
+    "title": "Integrations",
+    "fetched_at": "2026-11-02T05:35:29.749052Z"
+   }
+  ]
+ },
+ "competitors": [
+  {
+   "name": "Secureframe",
+   "domain": "secureframe.com",
+   "classification": "direct",
+   "same_job": {
+    "text": "Automate compliance.",
+    "url": "https://secureframe.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T05:35:57.028126Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": {
+    "text": "Easily showcase your security posture to accelerate sales cycles and unlock growth.",
+    "url": "https://secureframe.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T05:35:57.028126Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Same automated compliance and continuous monitoring job for companies proving trust to accelerate sales.",
+   "found_via": "Vanta alternatives competitors search",
+   "origin": "agent"
+  },
+  {
+   "name": "Thoropass",
+   "domain": "thoropass.com",
+   "classification": "direct",
+   "same_job": {
+    "text": "Reuse evidence across frameworks, automatically matched to overlapping requirements to eliminate duplicate work and accelerate every audit.",
+    "url": "https://www.thoropass.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T05:35:56.869407Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": {
+    "text": "Trusted by more than 2,000 organizations globally",
+    "url": "https://www.thoropass.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T05:35:56.869407Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Same evidence automation and audit platform job for organizations needing SOC 2 and other assessments.",
+   "found_via": "Vanta alternatives competitors search",
+   "origin": "agent"
+  },
+  {
+   "name": "Scrut Automation",
+   "domain": "scrut.io",
+   "classification": "direct",
+   "same_job": {
+    "text": "AI Compliance Automation Platform",
+    "url": "https://www.scrut.io/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T05:35:57.235246Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": {
+    "text": "Need SOC 2 to close your next deal?",
+    "url": "https://www.scrut.io/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T05:35:57.235246Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Same compliance automation job for startups needing SOC 2 to close deals.",
+   "found_via": "Vanta alternatives competitors search and best SOC 2 compliance automation software search",
+   "origin": "agent"
+  },
+  {
+   "name": "Scytale",
+   "domain": "scytale.ai",
+   "classification": "direct",
+   "same_job": {
+    "text": "automates compliance, ensures continuous control visibility, and keeps you audit-ready across every framework",
+    "url": "https://scytale.ai/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T05:35:56.687161Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": {
+    "text": "Trusted by 1000+ companies\nworldwide.",
+    "url": "https://scytale.ai/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T05:35:56.687161Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Same continuous compliance and audit-ready job for companies across frameworks.",
+   "found_via": "best SOC 2 compliance automation software search",
+   "origin": "agent"
+  },
+  {
+   "name": "Strike Graph",
+   "domain": "strikegraph.com",
+   "classification": "direct",
+   "same_job": {
+    "text": "stay continuously audit-ready",
+    "url": "https://www.strikegraph.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T05:35:57.929178Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": {
+    "text": "Design a security program that builds trust, scales with your business",
+    "url": "https://www.strikegraph.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T05:35:57.929178Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Same AI-native compliance management job for businesses building trust.",
+   "found_via": "Top 5 Vanta Competitors and Alternatives listing",
+   "origin": "agent"
+  },
+  {
+   "name": "Hyperproof",
+   "domain": "hyperproof.io",
+   "classification": "direct",
+   "same_job": {
+    "text": "Establish continuous compliance at scale. Automate control operations",
+    "url": "https://hyperproof.io/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T05:35:57.771143Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": {
+    "text": "Build transparency and confidence with every stakeholder.",
+    "url": "https://hyperproof.io/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T05:35:57.771143Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Same continuous compliance automation job for teams proving trust to stakeholders.",
+   "found_via": "Best Vanta Alternatives & Competitors listing",
+   "origin": "agent"
+  },
+  {
+   "name": "Drata",
+   "domain": "drata.com",
+   "classification": "adjacent",
+   "same_job": null,
+   "same_buyer": null,
+   "reason": "Not verified: its site could not be read (Website returned HTTP 403). Mark it as a direct competitor if it sells the same thing to your buyers.",
+   "found_via": "Vanta alternatives competitors search",
+   "origin": "agent"
+  },
+  {
+   "name": "Sprinto",
+   "domain": "sprinto.com",
+   "classification": "adjacent",
+   "same_job": null,
+   "same_buyer": null,
+   "reason": "Not verified: its site could not be read (Website returned HTTP 403). Mark it as a direct competitor if it sells the same thing to your buyers.",
+   "found_via": "Vanta alternatives competitors search",
+   "origin": "agent"
+  }
+ ],
+ "disqualifiers": [
+  {
+   "id": "uses_direct_competitor:secureframe.com",
+   "rule": "uses_direct_competitor",
+   "text": "Currently uses Secureframe (secureframe.com), a direct competitor",
+   "competitor_domain": "secureframe.com",
+   "enabled": true
+  },
+  {
+   "id": "uses_direct_competitor:thoropass.com",
+   "rule": "uses_direct_competitor",
+   "text": "Currently uses Thoropass (thoropass.com), a direct competitor",
+   "competitor_domain": "thoropass.com",
+   "enabled": true
+  },
+  {
+   "id": "uses_direct_competitor:scrut.io",
+   "rule": "uses_direct_competitor",
+   "text": "Currently uses Scrut Automation (scrut.io), a direct competitor",
+   "competitor_domain": "scrut.io",
+   "enabled": true
+  },
+  {
+   "id": "uses_direct_competitor:scytale.ai",
+   "rule": "uses_direct_competitor",
+   "text": "Currently uses Scytale (scytale.ai), a direct competitor",
+   "competitor_domain": "scytale.ai",
+   "enabled": true
+  },
+  {
+   "id": "uses_direct_competitor:strikegraph.com",
+   "rule": "uses_direct_competitor",
+   "text": "Currently uses Strike Graph (strikegraph.com), a direct competitor",
+   "competitor_domain": "strikegraph.com",
+   "enabled": true
+  },
+  {
+   "id": "uses_direct_competitor:hyperproof.io",
+   "rule": "uses_direct_competitor",
+   "text": "Currently uses Hyperproof (hyperproof.io), a direct competitor",
+   "competitor_domain": "hyperproof.io",
+   "enabled": true
+  },
+  {
+   "id": "is_competitor",
+   "rule": "is_competitor",
+   "text": "Is itself a direct competitor",
+   "competitor_domain": null,
+   "enabled": true
+  },
+  {
+   "id": "is_existing_customer",
+   "rule": "is_existing_customer",
+   "text": "Is already your customer",
+   "competitor_domain": null,
+   "enabled": true
+  },
+  {
+   "id": "outside_target_size",
+   "rule": "outside_stated_size_or_region",
+   "text": "Much larger or later-stage than the companies you serve (Startups to enterprises, about 1 to 8000+ people, pre-seed to public)",
+   "competitor_domain": null,
+   "enabled": true
+  },
+  {
+   "id": "inactive",
+   "rule": "inactive",
+   "text": "No longer operating: closed, acquired and shut, or the site is parked",
+   "competitor_domain": null,
+   "enabled": true
+  },
+  {
+   "id": "works_for_others",
+   "rule": "works_for_others",
+   "text": "A recruiting firm, staffing firm or agency that works for these companies, not one of them",
+   "competitor_domain": null,
+   "enabled": true
+  }
+ ],
+ "overrides": {
+  "add_competitors": [],
+  "remove_competitors": [],
+  "exclusions": [],
+  "criteria": [],
+  "company_count": 3,
+  "interpretation": null,
+  "offer": null,
+  "buyer": null,
+  "target_size": null
+ },
+ "companies": [
+  {
+   "domain": "aledade.com",
+   "name": "Aledade",
+   "url": "https://aledade.com/",
+   "found_via": "job post: Security Engineer II (GRC) (Lever) (posting https://jobs.lever.co/aledade/6de10689-97fd-48b6-a7d9-2abb56791ad9 not confirmed open on the company's board)",
+   "signal": "hiring",
+   "status": "done",
+   "evidence": [
+    {
+     "id": "f4aa4a358d12474197ef83bc87a5f9c0",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "Aledade sells technology tools and value-based care services to primary care organizations",
+     "quote": {
+      "text": "we’ve built a suite of technology tools and tailored support to help your primary care organization seamlessly adopt value-based care workflows that will benefit your patients, staff and community.",
+      "url": "https://aledade.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:36:45.207418Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "deb82d0511f749238d7679ec508ba826",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "Aledade works with more than 3,000 primary care partners",
+     "quote": {
+      "text": "With more than 3,000 partners, we work with all types of primary care organizations big and small - helping them succeed in value-based care.",
+      "url": "https://aledade.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:36:45.207418Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "07182e6051b54280835467bb92f69b09",
+     "claim_type": "need",
+     "criterion_id": "need-2",
+     "claim": "Aledade is hiring a Security Engineer II for GRC with healthcare compliance expertise",
+     "quote": {
+      "text": "We're looking for someone with solid expertise in GRC frameworks, risk assessment methodologies, and compliance standards.",
+      "url": "https://jobs.lever.co/aledade/6de10689-97fd-48b6-a7d9-2abb56791ad9",
+      "source_type": "job_post",
+      "published_date": "2026-02-04",
+      "fetched_at": "2026-11-02T05:36:53.117787Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "95a24e5d975441d9bba8ae1160bf28d4",
+     "claim_type": "need",
+     "criterion_id": "need-2",
+     "claim": "The GRC role ensures adherence to HIPAA, HITRUST and SOC2",
+     "quote": {
+      "text": "Design, implement, and maintain robust governance, risk, and compliance processes, ensuring adherence to healthcare security standards including HIPAA, HITRUST, and SOC2.",
+      "url": "https://jobs.lever.co/aledade/6de10689-97fd-48b6-a7d9-2abb56791ad9",
+      "source_type": "job_post",
+      "published_date": "2026-02-04",
+      "fetched_at": "2026-11-02T05:36:53.117787Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    }
+   ],
+   "decisions": [
+    {
+     "evidence_id": "f4aa4a358d12474197ef83bc87a5f9c0",
+     "decision": "supports",
+     "reason": "Company describes itself offering a suite of technology tools and support to primary care organizations, showing B2B technology-enabled services.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "deb82d0511f749238d7679ec508ba826",
+     "decision": "insufficient",
+     "reason": "Quote says it works with primary care organizations but does not specify selling software or technology-enabled services.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "07182e6051b54280835467bb92f69b09",
+     "decision": "supports",
+     "reason": "Job post explicitly seeks expertise in GRC frameworks and compliance standards for a company role.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "95a24e5d975441d9bba8ae1160bf28d4",
+     "decision": "supports",
+     "reason": "Job post describes maintaining GRC processes and adherence to HIPAA/HITRUST/SOC2, indicating a security/GRC/compliance hire.",
+     "decided_by": "skeptic"
+    }
+   ],
+   "checked_places": [
+    "homepage code",
+    "job post",
+    "search \"Aledade security trust center SOC 2 HIPAA\"",
+    "job post page on jobs.lever.co",
+    "search \"site:aledade.com security HIPAA SOC 2\"",
+    "search \"Aledade AI product launch 2026\"",
+    "search \"Aledade Secureframe Thoropass Scrut Scytale Strike Graph Hyperproof\""
+   ],
+   "disqualifier_check_completed": true,
+   "blocked": [],
+   "signatures": [
+    {
+     "url": "https://aledade.com/",
+     "kind": "homepage",
+     "fetched_at": "2026-11-02T05:36:45.207418Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://7052064.fs1.hubspotusercontent-na1.net/hubfs/7052064/hub_generated/module_assets/1/-109050482603/1793391319859/module_social_follow.min.css"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/gtag/js?id=G-SN5TS3MH93"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://js.hscollectedforms.net"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://www.gstatic.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdn2.hubspot.net"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://js.hs-analytics.net"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://js.hs-banner.com"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-5PWNNBR"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Aledade-Logo_Blue-1-300x60"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "Aledade-Logo_Blue-1-300x60"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "parallax image"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Health care team uses technology to help-2"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Arrow"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "PentaHealth Charles Catania, MD"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Quotation marks"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mickel Anglin | Aledade"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Christine Meyer Aledade"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Primary Care Group of West Georgia Rodney Smith"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Icon of doctor smiling"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Icon of shield with dollar sign in the center"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Map with Aledade practices dots"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "The US Capital building with a blue sky background"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "doctor and patient converse at the front desk"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "An icon of an award for Top Remote Workplaces is shown"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Aledade-Logo_Blue-1-300x60-2"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "Aledade-Logo_Blue-1-300x60-2"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://individual.carefirst.com/individuals-families/mandates-policies/machine-readable-file.page"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/aledade-inc-/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.facebook.com/AledadeACO/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/aledadeaco/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.youtube.com/channel/UCLsA5NEaXL8aBSDBSA5r1Bg/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.instagram.com/aledadeaco/"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://static.hsappstatic.net/video-embed/ex/loader.js"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://js.hubspot.com/web-interactives-embed.js"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://47301901.fs1.hubspotusercontent-na1.net/hubfs/47301901/video_assets/210008746123/inherited/web_optimized.mp4"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/2000/svg"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://app.hubspot.com"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cp.hubspot.com"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    },
+    {
+     "url": "https://aledade.com/careers",
+     "kind": "other",
+     "fetched_at": "2026-11-02T05:36:46.009769Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://7052064.fs1.hubspotusercontent-na1.net/hubfs/7052064/hub_generated/module_assets/1/-109050482603/1793286477758/module_social_follow.min.css"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/gtag/js?id=G-SN5TS3MH93"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://js.hscollectedforms.net"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://www.gstatic.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdn2.hubspot.net"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://js.hs-analytics.net"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://js.hs-banner.com"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-5PWNNBR"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Aledade-Logo_Blue-1-300x60"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "Aledade-Logo_Blue-1-300x60"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Aledade Core Values - Service"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Aledade Core Values - Accountability"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Aledade Core Values - Curiosity"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Aledade Core Values - Evidence"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Aledade Core Values - Inclusion"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Keshia Oree | Aledade"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Quotation marks"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Rachel Green Makowiecki | Aledade"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "USA today top workplaces 2021 - 2025"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Best Tech Work Culture Finalist Logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Great places to work 2026"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Glassdoor Best Places to Work 2022 Logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Healthcare"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Diversity Jobs Top Employer 2022 Logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Top Work Places 2022-2024 Logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Regional Awards - Multi Year (1)"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Join Us Graphic"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://docs.google.com/forms/d/e/1FAIpQLSctFTZ7QhwnfvxtJcK6tKqqotK5WE7wi7vW7wE9XDZ4G_Emmg/viewform"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Aledade-Logo_Blue-1-300x60-2"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "Aledade-Logo_Blue-1-300x60-2"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://individual.carefirst.com/individuals-families/mandates-policies/machine-readable-file.page"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/aledade-inc-/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.facebook.com/AledadeACO/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/aledadeaco/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.youtube.com/channel/UCLsA5NEaXL8aBSDBSA5r1Bg/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.instagram.com/aledadeaco/"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://static.hsappstatic.net/video-embed/ex/loader.js"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://47301901.fs1.hubspotusercontent-na1.net/hubfs/47301901/video_assets/215079544136/inherited/web_optimized.mp4"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/2000/svg"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://app.hubspot.com"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cp.hubspot.com"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    }
+   ],
+   "searches": 4,
+   "fetches": 3,
+   "turns": 2,
+   "verdict": {
+    "kind": "shortlisted",
+    "summary": "Strong fit, a recent sign they need this, and no competitor in use",
+    "missing": [],
+    "unconfirmed": [
+     "Not shown by a quote either way: Much larger or later-stage than the companies you serve (Startups to enterprises, about 1 to 8000+ people, pre-seed to public)"
+    ],
+    "disqualifier": null,
+    "rule": null
+   },
+   "pitch": null,
+   "outreach": null,
+   "latency_ms": 19969,
+   "cost_usd": 0.055726,
+   "error": null
+  },
+  {
+   "domain": "omnichat.ai",
+   "name": "omnichat.ai",
+   "url": "https://omnichat.ai/",
+   "found_via": "news: $10M Series A to scale Omni AI Agents and drive global expansion (26 Oct 2026)",
+   "signal": "news",
+   "status": "done",
+   "evidence": [
+    {
+     "id": "421ae4e4001f4fd6b8a71f2b398980dc",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "Omnichat sells an AI-powered CRM platform to businesses",
+     "quote": {
+      "text": "Omnichat is an AI-powered omnichannel CRM and customer experience platform that unifies WhatsApp, Instagram, Facebook Messenger, LINE, WeChat and live chat to automate marketing, sales and customer support.",
+      "url": "https://www.omnichat.ai/",
+      "source_type": "own_site",
+      "published_date": "2026-07-07",
+      "fetched_at": "2026-11-02T05:36:46.264941Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "65755e0ae0e1445ca7e597dd4bb63eb6",
+     "claim_type": "fit",
+     "criterion_id": "fit-3",
+     "claim": "Omnichat sells to brands via demo-led B2B motion",
+     "quote": {
+      "text": "Trusted by 5,000+ Brands Worldwide",
+      "url": "https://www.omnichat.ai/",
+      "source_type": "own_site",
+      "published_date": "2026-07-07",
+      "fetched_at": "2026-11-02T05:36:46.264941Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "f5764e39b3414490b5826f42d7ff545c",
+     "claim_type": "timing",
+     "criterion_id": "timing-1",
+     "claim": "Series A will fund global expansion",
+     "quote": {
+      "text": "The company will use the funding to scale its Agentic AI platform, deepen R&D on Omni AI Agents, and accelerate global expansion.",
+      "url": "https://www.prnewswire.com/news-releases/omnichat-raises-us10m-series-a-led-by-openspace-capital-to-scale-ai-agent-platform-and-drive-global-expansion-302919732.html",
+      "source_type": "news",
+      "published_date": "2026-10-27",
+      "fetched_at": "2026-11-02T05:36:57.331743Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "9db61e83cd3f4fc9b23462dd3a91bc3c",
+     "claim_type": "timing",
+     "criterion_id": "timing-1",
+     "claim": "Plans to scale market presence globally from APAC base",
+     "quote": {
+      "text": "Building on its operational footprint across Asia Pacific, Omnichat will deploy its Series A capital to scale its market presence globally.",
+      "url": "https://www.prnewswire.com/news-releases/omnichat-raises-us10m-series-a-led-by-openspace-capital-to-scale-ai-agent-platform-and-drive-global-expansion-302919732.html",
+      "source_type": "news",
+      "published_date": "2026-10-27",
+      "fetched_at": "2026-11-02T05:36:57.331743Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "fd81244d5db047a2b6eeb1954ff07da2",
+     "claim_type": "timing",
+     "criterion_id": "timing-2",
+     "claim": "Launched Omni AI Agents suite in 2026",
+     "quote": {
+      "text": "The round will scale Omni AI Agents, the suite of AI agents Omnichat launched in 2026, to do the core work of marketing, sales and service teams inside the chat:",
+      "url": "https://www.prnewswire.com/news-releases/omnichat-raises-us10m-series-a-led-by-openspace-capital-to-scale-ai-agent-platform-and-drive-global-expansion-302919732.html",
+      "source_type": "news",
+      "published_date": "2026-10-27",
+      "fetched_at": "2026-11-02T05:36:57.331743Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "39f32180a7fd448bb56a9deb1d8a51ae",
+     "claim_type": "disqualifier",
+     "criterion_id": "outside_target_size",
+     "claim": "Company is Series A stage within target size range",
+     "quote": {
+      "text": "US\n$10 million Series A funding round led by\nOpenspace Capital",
+      "url": "https://www.prnewswire.com/news-releases/omnichat-raises-us10m-series-a-led-by-openspace-capital-to-scale-ai-agent-platform-and-drive-global-expansion-302919732.html",
+      "source_type": "news",
+      "published_date": "2026-10-27",
+      "fetched_at": "2026-11-02T05:36:57.331743Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    }
+   ],
+   "decisions": [
+    {
+     "evidence_id": "421ae4e4001f4fd6b8a71f2b398980dc",
+     "decision": "supports",
+     "reason": "Quote describes company's own AI-powered CRM platform automating marketing/sales/support, showing B2B software.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "65755e0ae0e1445ca7e597dd4bb63eb6",
+     "decision": "insufficient",
+     "reason": "Generic 'Trusted by 5,000+ Brands' does not describe a B2B sales motion or security reviews.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "f5764e39b3414490b5826f42d7ff545c",
+     "decision": "supports",
+     "reason": "Quote states the company itself will accelerate global expansion.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "9db61e83cd3f4fc9b23462dd3a91bc3c",
+     "decision": "supports",
+     "reason": "Quote states company will scale market presence globally beyond Asia Pacific.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "fd81244d5db047a2b6eeb1954ff07da2",
+     "decision": "supports",
+     "reason": "Quote states company launched suite of AI agents in 2026.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "39f32180a7fd448bb56a9deb1d8a51ae",
+     "decision": "contradicts",
+     "reason": "Series A $10M shows early-stage startup within 1-8000 people pre-seed to public range, not much larger/later-stage.",
+     "decided_by": "skeptic"
+    }
+   ],
+   "checked_places": [
+    "homepage code",
+    "search \"Omnichat $10M Series A Omni AI Agents global expansion\"",
+    "search \"omnichat.ai trust center security SOC 2 ISO 27001\"",
+    "other page on gabriel.hk",
+    "news page on prnewswire.com",
+    "search \"site:omnichat.ai security privacy GDPR data protection\"",
+    "search \"omnichat Secureframe Thoropass Scrut Scytale Strike Graph Hyperproof\""
+   ],
+   "disqualifier_check_completed": true,
+   "blocked": [
+    "https://www.omnichat.ai/about-us/: Website returned HTTP 404",
+    "https://www.cake.me/companies/omnichat.ai/jobs/security-manager?locale=en: Website returned HTTP 404"
+   ],
+   "signatures": [
+    {
+     "url": "https://www.omnichat.ai/",
+     "kind": "homepage",
+     "fetched_at": "2026-11-02T05:36:46.264941Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://gmpg.org/xfn/11"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://www.googletagmanager.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://js-na2.hs-banner.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://js-na2.hscollectedforms.net"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://js-na2.hsadspixel.net"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://js-na2.hs-analytics.net"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://assets.apollo.io"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://js-na2.hs-scripts.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//js-na2.hs-scripts.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "//www.googletagmanager.com"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-MXMSXL2"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mentholatum logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "dyson logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "fila logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "samsung logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "sasa logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "DFI retail group logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "osim logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "timberland logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "smcp logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Starbucks logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "3HK logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "benefit logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Honda logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "META business partner logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "WhatsApp logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Meta WhatsApp for Business"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Meta Business Messaging Str"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "LINE Biz-Solutions logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "LINE Biz-Solutions Tech Partner Gold logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "AWS partner logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Omnichat ISO logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Infographic of Omnichat omnichannel AI marketing automation and broadcast workflow, showcasing data analytics, customer segmentation, and automated messaging"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Omnichat interface illustrating AI-driven sales conversion and OMO retail solutions, demonstrating personalized product recommendations and exclusive offers sent via WhatsApp and LINE."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "A seamless collaboration between AI agents and human teams to handle omnichannel customer service enquiries."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Whether acting as a dedicated shopping, sales, or CS agent, these autonomous AI agent assistants handle product enquiries contextually"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Seamlessly connect external AI models and agents with Omni AI."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Omnichat's official WhatsApp Business API broadcast feature, enabling secure and compliant WhatsApp bulk messaging to scale global customer acquisition."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Omnichat interface demonstrating WhatsApp interactive gamification marketing and digital eCoupons to comprehensively boost customer conversion rates and engagement."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Omnichat showcasing WhatsApp Product Catalog and Payment features, streamlining the e-commerce sales funnel for high-speed conversions and instant sales."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Open AI"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "Open AI"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Gemini"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "Gemini"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Claude"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "Claude"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Qwen"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "Qwen"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "BytePlus"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "BytePlus"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Amazon Bedrock"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "Amazon Bedrock"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "official Partner-1"
+      },
+      {
+       "tag": "img",
+       "attr": "title",
+       "value": "official Partner-1"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "AWS partner of the year logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "LINE Biz-Solutions Awards logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Stevie-gold-award logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "HKRMA silver logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "MARKies-Awards logo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "AI+Power-Awards logo"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://apps.apple.com/hk/app/omnichat/id1487897117"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://play.google.com/store/apps/details?id=co.omnichat.omnichat&hl=zh-HK"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.facebook.com/OmnichatAI/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.instagram.com/omnichat.ai/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/omnichat-easychat/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.youtube.com/c/OmnichatAI"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://api.whatsapp.com/send/?phone=85291925071&text=Enquiry"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://page.line.me/omnichat"
+      },
+      {
+       "tag": "a",
+       "attr": "title",
+       "value": "Switch to Global (English)"
+      },
+      {
+       "tag": "a",
+       "attr": "title",
+       "value": "Switch to Hong Kong (English)"
+      },
+      {
+       "tag": "a",
+       "attr": "title",
+       "value": "Switch to Southeast Asia (English)"
+      },
+      {
+       "tag": "a",
+       "attr": "title",
+       "value": "Switch to 简体中文"
+      },
+      {
+       "tag": "a",
+       "attr": "title",
+       "value": "Switch to 台灣（繁體中文）"
+      },
+      {
+       "tag": "a",
+       "attr": "title",
+       "value": "Switch to 香港（繁體中文）"
+      },
+      {
+       "tag": "a",
+       "attr": "title",
+       "value": "Switch to 日本 (日本語)"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.facebook.com/OmnichatAI"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://assets.apollo.io/micro/website-tracker/tracker.iife.js?nocache="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://i.ytimg.com/vi/ID/hqdefault.jpg"
+      }
+     ],
+     "powered_by": [
+      "Powered by Advanced LLMs,"
+     ],
+     "lines": []
+    }
+   ],
+   "searches": 4,
+   "fetches": 5,
+   "turns": 3,
+   "verdict": {
+    "kind": "shortlisted",
+    "summary": "Strong fit, a recent sign they need this, and no competitor in use",
+    "missing": [],
+    "unconfirmed": [],
+    "disqualifier": null,
+    "rule": null
+   },
+   "pitch": null,
+   "outreach": null,
+   "latency_ms": 28625,
+   "cost_usd": 0.067913,
+   "error": null
+  },
+  {
+   "domain": "mattermost.com",
+   "name": "mattermost.com",
+   "url": "https://mattermost.com/",
+   "found_via": "job post: GRC Analyst (Remote) (Lever) (posting https://jobs.lever.co/mattermost/bd060fd1-6e94-42cd-8f16-682e20637c69?utm_source=Redpoint+Ventures+job+board&utm_medium=getro.com&gh_src=Redpoint+Ventures+job+board not confirmed open on the company's board)",
+   "signal": "hiring",
+   "status": "done",
+   "evidence": [
+    {
+     "id": "854b5cd9199f47ab9cd2fe3e69678fc7",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "Mattermost sells a collaboration platform to businesses and regulated enterprises.",
+     "quote": {
+      "text": "Our platform runs on-premises and in private clouds, delivering secure messaging, file sharing, workflow automation, audio/screenshare, and project management.",
+      "url": "https://mattermost.com/company/about-us/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:36:55.183704Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "0d01c94a142d4b91a79b60ca9777c62d",
+     "claim_type": "fit",
+     "criterion_id": "fit-2",
+     "claim": "Mattermost runs a cloud-hosted product on major cloud infrastructure.",
+     "quote": {
+      "text": "Sovereign cloud\nAzure, Oracle, Google, and AWS, in regions and tenancies you control.",
+      "url": "https://mattermost.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:36:44.838658Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "0429ba84cc084a70b0e47cdf045eeec2",
+     "claim_type": "fit",
+     "criterion_id": "fit-2",
+     "claim": "Mattermost uses identity provider capabilities like SSO and MFA.",
+     "quote": {
+      "text": "Multi-factor authentication (MFA), single sign-on (SSO), certificate based authentication (CBA), and enterprise mobile management (EMM)",
+      "url": "https://mattermost.com/platform/security/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:37:00.825263Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "365b58da31ee4e9e8b51656259e89c61",
+     "claim_type": "fit",
+     "criterion_id": "fit-3",
+     "claim": "Mattermost sales involve customer security questionnaires and trust center reviews.",
+     "quote": {
+      "text": "Accelerate deal cycles by owning customer security questionnaires, trust center content, and reusable compliance artifacts",
+      "url": "https://job-boards.greenhouse.io/mattermost/jobs/5290384008",
+      "source_type": "job_post",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:36:50.178303Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "e07ca832554142208605be7857f0d5b7",
+     "claim_type": "need",
+     "criterion_id": "need-1",
+     "claim": "Mattermost publishes a Trust Center and security compliance resources.",
+     "quote": {
+      "text": "Trust\nCenter",
+      "url": "https://mattermost.com/platform/security/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:37:00.825263Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "334af08462244c0194e624390f9b5d56",
+     "claim_type": "need",
+     "criterion_id": "need-2",
+     "claim": "Mattermost is hiring a GRC Manager to own its governance risk and compliance program.",
+     "quote": {
+      "text": "to own and modernize our governance, risk, and compliance program across both federal and commercial markets.",
+      "url": "https://job-boards.greenhouse.io/mattermost/jobs/5290384008",
+      "source_type": "job_post",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:36:50.178303Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "27450f97433b4fa29bdf8cf432153a40",
+     "claim_type": "need",
+     "criterion_id": "need-3",
+     "claim": "Mattermost runs SOC 2 Type II and ISO 27001 audit cycles.",
+     "quote": {
+      "text": "SOC 2 Type II and ISO 27001 audit cycles completed on time without slippage",
+      "url": "https://job-boards.greenhouse.io/mattermost/jobs/5290384008",
+      "source_type": "job_post",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:36:50.178303Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "fcf60baeef0b44d495014139ba9114d6",
+     "claim_type": "timing",
+     "criterion_id": "timing-2",
+     "claim": "Mattermost launches sovereign AI agents for operations.",
+     "quote": {
+      "text": "Sovereign AI agents summarise, enrich alerts, and take action using the LLM provider you choose, or a self-hosted model in air-gapped environments.",
+      "url": "https://mattermost.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:36:44.838658Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "2c2e1f8c0bf54a06bce31849fb8a46d1",
+     "claim_type": "timing",
+     "criterion_id": "timing-1",
+     "claim": "Mattermost operates globally with presence including Japan.",
+     "quote": {
+      "text": "8 Locations\nat Global Scale",
+      "url": "https://mattermost.com/company/about-us/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:36:55.183704Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "16b401f81db8464bbeaf2dcd182a9cc3",
+     "claim_type": "disqualifier",
+     "criterion_id": "outside_target_size",
+     "claim": "Mattermost describes itself as a high-growth Series B company.",
+     "quote": {
+      "text": "Unique scope: Own the compliance program end to end across both federal and commercial markets at a high-growth Series B company",
+      "url": "https://job-boards.greenhouse.io/mattermost/jobs/5290384008",
+      "source_type": "job_post",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:36:50.178303Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    }
+   ],
+   "decisions": [
+    {
+     "evidence_id": "854b5cd9199f47ab9cd2fe3e69678fc7",
+     "decision": "supports",
+     "reason": "Own site describes its own platform delivering messaging, file sharing and workflow automation, showing a software product.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "0d01c94a142d4b91a79b60ca9777c62d",
+     "decision": "supports",
+     "reason": "Own site lists sovereign cloud on Azure, Oracle, Google and AWS, showing a cloud-hosted product using cloud infrastructure.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "0429ba84cc084a70b0e47cdf045eeec2",
+     "decision": "supports",
+     "reason": "Own site lists MFA, SSO, CBA and EMM, showing identity provider capabilities for its product.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "365b58da31ee4e9e8b51656259e89c61",
+     "decision": "supports",
+     "reason": "Job post says role will own customer security questionnaires and trust center content to accelerate deal cycles.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "e07ca832554142208605be7857f0d5b7",
+     "decision": "supports",
+     "reason": "Own site text includes 'Trust Center', and own_site_ok allows own site to show this need.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "334af08462244c0194e624390f9b5d56",
+     "decision": "supports",
+     "reason": "Job post seeks to own and modernize governance, risk and compliance program, showing GRC hiring.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "27450f97433b4fa29bdf8cf432153a40",
+     "decision": "supports",
+     "reason": "Job post references SOC 2 Type II and ISO 27001 audit cycles completed on time, showing pursuit of those audits.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "fcf60baeef0b44d495014139ba9114d6",
+     "decision": "supports",
+     "reason": "Own site describes Sovereign AI agents using LLM provider or self-hosted model, showing AI product features.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "2c2e1f8c0bf54a06bce31849fb8a46d1",
+     "decision": "insufficient",
+     "reason": "'8 Locations at Global Scale' is vague and does not announce expansion to new markets or growth.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "16b401f81db8464bbeaf2dcd182a9cc3",
+     "decision": "contradicts",
+     "reason": "Quote identifies company as Series B, which is within 1-8000 people pre-seed to public range, not disqualifyingly large.",
+     "decided_by": "skeptic"
+    }
+   ],
+   "checked_places": [
+    "homepage code",
+    "job post",
+    "own job board on Greenhouse",
+    "job post page on job-boards.greenhouse.io",
+    "search \"Mattermost trust center security SOC 2 ISO 27001\"",
+    "about us page",
+    "search \"Mattermost Secureframe Thoropass Scrut Scytale Strike Graph Hyperproof\"",
+    "security page",
+    "search \"Mattermost AI launch sovereign AI 2026\"",
+    "search \"Mattermost expansion new market Japan global growth 2026\""
+   ],
+   "disqualifier_check_completed": true,
+   "blocked": [
+    "https://mattermost.com/trust-center/: Website returned HTTP 404"
+   ],
+   "signatures": [
+    {
+     "url": "https://mattermost.com/",
+     "kind": "homepage",
+     "fetched_at": "2026-11-02T05:36:44.838658Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://use.typekit.net/fns7sch.css"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdn.cookielaw.org"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://www.googletagmanager.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://js.qualified.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://app.qualified.com"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-5V8LMP7"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Collaboration as Mission Infrastructure"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Incident Response Playbook"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "LISA Consortium"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Professional Certification for Engineers"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mattermost channel and playbook coordinating a strategic force movement assessment"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "U.S. Air Force"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "NASA"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Fujitsu"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Qualcomm"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Türk Telekom"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "RTE"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "NRI"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mattermost Flight Planning channel with a dust storm briefing at Al Udeid"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mattermost playbook run for Incident-765A with an incident task checklist"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mattermost Pacific Response Ops thread where an AI agent summarizes a maritime security incident"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mattermost call with nine participants, two raised hands, and host controls"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mattermost channel settings sharing Release Planning with a connected workspace"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mattermost Operation Aurora channel with an unclassified banner and limited access rules"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mattermost channel with a GitLab bot pipeline failure and slash-command menu"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mattermost system console data retention policies with a five-day global policy"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mattermost Boards tracker for mission MSN-3546B with pending, staging, and maintenance columns"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ISO/IEC 27001"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "DoD IL2 to IL6"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "NIST 800-53 / 800-171"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "DISA STIG"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "FINRA"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "GDPR"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "AICPA SOC 2"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "FIPS 140-3"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Military cargo aircraft in flight"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Satellite dish"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Eiffel Tower, Paris"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Police car with emergency lights"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Power transmission towers"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Financial district towers"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Industrial robot arm in a factory"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Code on a monitor"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "U.S. Air Force, Air Mobility Command"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Glass skyscrapers viewed from below"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Network cables in a server rack"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Globe icon"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "United States flag"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "United Kingdom flag"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "European Union flag"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Germany flag"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Japan flag"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Canada flag"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://linkedin.com/company/mattermost"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/mattermost"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://bsky.app/profile/mattermost.bsky.social"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.instagram.com/mattermostsocial/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.tiktok.com/@mattermost_"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://js.qualified.com/qualified.js?token="
+      }
+     ],
+     "powered_by": [
+      "Plan and run missions with coalition partners, often on classified networks or with limited connectivity. Use a Zero Trust application suite with messaging, playbooks, and secure mobile access that runs on infrastructure you own and federates across mission partner networks."
+     ],
+     "lines": []
+    },
+    {
+     "url": "https://mattermost.com/company/careers/",
+     "kind": "other",
+     "fetched_at": "2026-11-02T05:36:45.551243Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://use.typekit.net/fns7sch.css"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdn.cookielaw.org"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://www.googletagmanager.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://js.qualified.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://app.qualified.com"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-5V8LMP7"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Collaboration as Mission Infrastructure"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Incident Response Playbook"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "LISA Consortium"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Professional Certification for Engineers"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mattermost speakers on stage at a company event"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Two colleagues shaking hands at a professional event"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Team member applauding at a company gathering"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://my.greenhouse.io/users/sign_in?job_board=mattermost&source=job_alert_board"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/mattermost/jobs/5381946008"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/mattermost/jobs/5422430008"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/mattermost/jobs/5379251008"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/mattermost/jobs/5383421008"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/mattermost/jobs/5405811008"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/mattermost/jobs/5405812008"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/mattermost/jobs/5421528008"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/mattermost/jobs/5426759008"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://job-boards.greenhouse.io/mattermost/jobs/5290384008"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mission operators collaborating in a secure environment"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mattermost leadership team in a meeting"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Team collaborating around laptops"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://linkedin.com/company/mattermost"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/mattermost"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://bsky.app/profile/mattermost.bsky.social"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.instagram.com/mattermostsocial/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.tiktok.com/@mattermost_"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://js.qualified.com/qualified.js?token="
+      }
+     ],
+     "powered_by": [
+      "Mattermost is the leading collaborative workflow platform for defense, intelligence, security, and critical infrastructure. Trusted by the U.S. Department of War and Fortune 500s, our platform runs on-premises and in private clouds, delivering secure messaging, file sharing, workflow automation, aud"
+     ],
+     "lines": []
+    },
+    {
+     "url": "https://mattermost.com/company/about-us/",
+     "kind": "other",
+     "fetched_at": "2026-11-02T05:36:55.183704Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://use.typekit.net/fns7sch.css"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdn.cookielaw.org"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://www.googletagmanager.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://js.qualified.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://app.qualified.com"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-5V8LMP7"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Collaboration as Mission Infrastructure"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Incident Response Playbook"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "LISA Consortium"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Professional Certification for Engineers"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mission operator collaborating in a secure command environment"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "CAP light shortlist badge"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "G2 award badge"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Best support badge"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Buyers choice badge"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Best value badge"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Australia flag"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Canada flag"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Japan flag"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Netherlands flag"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Sweden flag"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "United Kingdom flag"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "United States flag"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Team collaborating around laptops"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mattermost team members"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Open source contributors collaborating"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://linkedin.com/company/mattermost"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/mattermost"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://bsky.app/profile/mattermost.bsky.social"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.instagram.com/mattermostsocial/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.tiktok.com/@mattermost_"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://js.qualified.com/qualified.js?token="
+      }
+     ],
+     "powered_by": [
+      "Our platform runs on-premises and in private clouds, delivering secure messaging, file sharing, workflow automation, audio/screenshare, and project management. Mattermost powers high-stakes workflows across mission planning, real-time operations, DevSecOps, incident response, and cybersecurity.",
+      "For AI-enabled organizations, we offer a self-hosted, multi-user, multi-agent framework for AI-accelerated workflows with sovereign and global models. Built on an in-house, hardened, open source platform with complete auditability and supply chain security validation."
+     ],
+     "lines": []
+    },
+    {
+     "url": "https://mattermost.com/platform/security/",
+     "kind": "other",
+     "fetched_at": "2026-11-02T05:37:00.825263Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://use.typekit.net/fns7sch.css"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdn.cookielaw.org"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://www.googletagmanager.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://js.qualified.com"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://app.qualified.com"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-5V8LMP7"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Collaboration as Mission Infrastructure"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Incident Response Playbook"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "LISA Consortium"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Professional Certification for Engineers"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Samsung"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Qualcomm"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Deloitte"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "HIPAA Compliant"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "AICPA SOC 2"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "GDPR"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "FINRA"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "CVE"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Secure architecture diagram with compliance controls"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Self-hosted deployment infrastructure"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Zero trust security model illustration"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mattermost security settings and code review interface"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mattermost user access management interface"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mattermost deployment and data ownership dashboard"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Cyber resilience shield illustration"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://bugcrowd.com/engagements/mattermost-mbb-public"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://linkedin.com/company/mattermost"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://x.com/mattermost"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://bsky.app/profile/mattermost.bsky.social"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.instagram.com/mattermostsocial/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.tiktok.com/@mattermost_"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://js.qualified.com/qualified.js?token="
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    }
+   ],
+   "searches": 4,
+   "fetches": 6,
+   "turns": 4,
+   "verdict": {
+    "kind": "shortlisted",
+    "summary": "Strong fit, a recent sign they need this, and no competitor in use",
+    "missing": [],
+    "unconfirmed": [],
+    "disqualifier": null,
+    "rule": null
+   },
+   "pitch": null,
+   "outreach": null,
+   "latency_ms": 32843,
+   "cost_usd": 0.093186,
+   "error": null
+  },
+  {
+   "domain": "ascerta.com",
+   "name": "ascerta.com",
+   "url": "https://ascerta.com/",
+   "found_via": "news: $18M Series A led by Dell Technologies Capital for enterprise AI ROI (25 Oct 2026)",
+   "signal": "news",
+   "status": "done",
+   "evidence": [
+    {
+     "id": "8db80c60241c4cce96c8865c2c3fb41c",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "Ascerta sells enterprise software to other businesses",
+     "quote": {
+      "text": "Ascerta connects every agent to measurable business outcomes.",
+      "url": "https://ascerta.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:36:45.796189Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "f5e595e250af415f86de66802b244064",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "Its platform is relied on by Fortune 500 companies",
+     "quote": {
+      "text": "Watching them grow into a platform Fortune 500 companies rely on to manage their AI investments has been incredible.",
+      "url": "https://ascerta.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:36:45.796189Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "9601483e5fca471280085d8bab80dacf",
+     "claim_type": "fit",
+     "criterion_id": "fit-2",
+     "claim": "Runs a cloud-hosted product that connects to enterprise AI stack",
+     "quote": {
+      "text": "Connect Your Entire\nAI Stack",
+      "url": "https://ascerta.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:36:45.796189Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "23e42ce4ee3c4d69b8dc8b32727bf6e5",
+     "claim_type": "fit",
+     "criterion_id": "fit-3",
+     "claim": "Sells through enterprise demo motion to executives",
+     "quote": {
+      "text": "Trusted by Executives at",
+      "url": "https://ascerta.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:36:45.796189Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "ba8918e627274bd3a7ec27ee3f87cb4f",
+     "claim_type": "timing",
+     "criterion_id": "timing-2",
+     "claim": "Launches AI products including coding-agent governance",
+     "quote": {
+      "text": "Ascerta Forge shows how your teams use coding agents, guides behaviors that need fixing, and turns adoption into real productivity.",
+      "url": "https://ascerta.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T05:36:45.796189Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    }
+   ],
+   "decisions": [
+    {
+     "evidence_id": "8db80c60241c4cce96c8865c2c3fb41c",
+     "decision": "insufficient",
+     "reason": "Tagline is vague marketing and does not plainly show selling software or tech-enabled services to businesses.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "f5e595e250af415f86de66802b244064",
+     "decision": "insufficient",
+     "reason": "Quote describes 'them' as a platform for Fortune 500s, not Ascerta describing its own business.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "9601483e5fca471280085d8bab80dacf",
+     "decision": "insufficient",
+     "reason": "Generic headline does not show cloud-hosted product, infrastructure, code repos, or identity provider.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "23e42ce4ee3c4d69b8dc8b32727bf6e5",
+     "decision": "insufficient",
+     "reason": "Generic social-proof header does not show B2B sales motion with security reviews.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "ba8918e627274bd3a7ec27ee3f87cb4f",
+     "decision": "insufficient",
+     "reason": "Describes Forge product capability, not a launch of AI products/features by Ascerta triggering governance need.",
+     "decided_by": "skeptic"
+    }
+   ],
+   "checked_places": [
+    "homepage code",
+    "search \"Ascerta $18M Series A Dell Technologies Capital\"",
+    "search \"Ascerta trust center SOC 2 ISO 27001 security\"",
+    "search \"Ascerta hiring security compliance GRC jobs\""
+   ],
+   "disqualifier_check_completed": false,
+   "blocked": [],
+   "signatures": [
+    {
+     "url": "https://ascerta.com/",
+     "kind": "homepage",
+     "fetched_at": "2026-11-02T05:36:45.796189Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://rluvwqqk.api.sanity.io"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/fa9062f4e8adfb8b4a4d446bb142822c5de9ad30-72x19.svg?auto=format"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/247b9653f2bf1adca8c04d85e6be4296d161033a-57x19.svg?auto=format"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/6aefb317199c764fded90f8599168872c830e8d1-54x43.svg?auto=format"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/35c1b7b38c96b6c1c11fc649915313bc640a8935-106x23.svg?auto=format"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/291cb7a973146f51ff985080f8f7b603e7b468fe-117x22.svg?auto=format"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/16be4bf71f6af05a0a86688e74de5c616ad98ddd-55x33.svg?auto=format"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/5738a7617790c7cb55d0f01d92ce9dd1f1271a97-62x25.svg?auto=format"
+      },
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://www.googletagmanager.com/gtm.js?id=GTM-5TWDTV3L"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-5TWDTV3L"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/fa9062f4e8adfb8b4a4d446bb142822c5de9ad30-72x19.svg?auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo 1"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/247b9653f2bf1adca8c04d85e6be4296d161033a-57x19.svg?auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo 2"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/6aefb317199c764fded90f8599168872c830e8d1-54x43.svg?auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo 3"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/35c1b7b38c96b6c1c11fc649915313bc640a8935-106x23.svg?auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo 4"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/291cb7a973146f51ff985080f8f7b603e7b468fe-117x22.svg?auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo 5"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/16be4bf71f6af05a0a86688e74de5c616ad98ddd-55x33.svg?auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo 6"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/5738a7617790c7cb55d0f01d92ce9dd1f1271a97-62x25.svg?auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Logo 7"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/47bd88b623192e14444b22cf8f807d3b39eaf7ed-192x192.jpg?w=96&h=96&auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/554e9afe1b2670bbdda9c6f083fda1a9bba0dfc8-2000x1333.jpg?rect=334,0,1333,1333&w=96&h=96&auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/d49f6ef8139ebf2be212b75eeec582ff2a74911f-50x50.svg?auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/d49c734c50455d6044e19e11101ec80463f922fc-1266x764.jpg?w=1266&auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/247d0a3c25d338a6da4adfbcaef31d9525ee367d-50x50.svg?auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/2b933911eea22251294d84b43e27672b4bef9bb0-1266x764.jpg?w=1266&auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/d85d32ec4d9c8493f08c5c4e02360e03c2ee8a26-50x50.svg?auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/a3aaf5683b5e1ee9503d5c02190be22270f59c18-1266x764.jpg?w=1266&auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/8ce80552c7f38d782001551baabc49944382cc37-2000x1333.jpg?w=2000&auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/40ddb8b376ef903c3e7593abb2c163048dacb11d-56x32.svg?auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/93ade204f6c4e87ff7b58b40283c64f5c99c0afa-2000x1116.jpg?w=2000&auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/69162db42c2badb95314d243dd97ab4f53fa44e3-104x32.svg?auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/82773d75e29ebe741449ff4396c141a583ff0991-2000x1125.jpg?w=2000&auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/446dc3e3e6944d6231f029384e664214d7b7af81-132x32.svg?auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/753233689bbd78849013567e512e15e905a39a8e-2000x1116.jpg?w=2000&auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/9164428530cf4f754e8881d262935bb41035ea0f-74x32.svg?auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/554e9afe1b2670bbdda9c6f083fda1a9bba0dfc8-2000x1333.jpg?w=2000&auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/17cc669f6e8025b5bf845d2552935f3ef6d5789f-62x32.svg?auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/9aa576f563ec32becd1f577c7aa2d87e3628f17e-2000x1116.jpg?w=2000&auto=format"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/5e0b05628edb5a427d340f84606604869b438ccb-84x32.svg?auto=format"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/ascerta-corp/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "LinkedIn"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-5TWDTV3L\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org\\\\\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://ascerta.com\\\\\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://rluvwqqk.api.sanity.io\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://api.sanity.io\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/fa9062f4e8adfb8b4a4d446bb142822c5de9ad30-72x19.svg?auto=format\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/247b9653f2bf1adca8c04d85e6be4296d161033a-57x19.svg?auto=format\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/6aefb317199c764fded90f8599168872c830e8d1-54x43.svg?auto=format\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/35c1b7b38c96b6c1c11fc649915313bc640a8935-106x23.svg?auto=format\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/291cb7a973146f51ff985080f8f7b603e7b468fe-117x22.svg?auto=format\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/16be4bf71f6af05a0a86688e74de5c616ad98ddd-55x33.svg?auto=format\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/5738a7617790c7cb55d0f01d92ce9dd1f1271a97-62x25.svg?auto=format\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/47bd88b623192e14444b22cf8f807d3b39eaf7ed-192x192.jpg?w=96\\u0026h=96\\u0026auto=format\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/554e9afe1b2670bbdda9c6f083fda1a9bba0dfc8-2000x1333.jpg?rect=334,0,1333,1333\\u0026w=96\\u0026h"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://player.mux.com/SDW02hFilZlVxfvY5GUECkI2MwF01S7bFTYf01cNaK7M5g\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://image.mux.com/SDW02hFilZlVxfvY5GUECkI2MwF01S7bFTYf01cNaK7M5g/thumbnail.webp?width=1600\\u0026time=20\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/d49f6ef8139ebf2be212b75eeec582ff2a74911f-50x50.svg?auto=format\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/d49c734c50455d6044e19e11101ec80463f922fc-1266x764.jpg?w=1266\\u0026auto=format\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/247d0a3c25d338a6da4adfbcaef31d9525ee367d-50x50.svg?auto=format\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/2b933911eea22251294d84b43e27672b4bef9bb0-1266x764.jpg?w=1266\\u0026auto=format\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/d85d32ec4d9c8493f08c5c4e02360e03c2ee8a26-50x50.svg?auto=format\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://cdn.sanity.io/images/rluvwqqk/production/a3aaf5683b5e1ee9503d5c02190be22270f59c18-1266x764.jpg?w=1266\\u0026auto=format\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/ascerta-corp/\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://ascerta.com\\"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    }
+   ],
+   "searches": 3,
+   "fetches": 1,
+   "turns": 1,
+   "verdict": {
+    "kind": "needs_look",
+    "summary": "Needs a look",
+    "missing": [
+     "Fit not confirmed: Sells software or technology-enabled services to other businesses",
+     "No recent sign they need this (nothing from the last 6 months, no open job post)",
+     "Competitor check incomplete"
+    ],
+    "unconfirmed": [],
+    "disqualifier": null,
+    "rule": null
+   },
+   "pitch": null,
+   "outreach": null,
+   "latency_ms": 17875,
+   "cost_usd": 0.061419,
+   "error": null
+  }
+ ],
+ "candidate_pool": [
+  {
+   "domain": "aledade.com",
+   "name": "Aledade",
+   "url": "https://aledade.com/",
+   "found_via": "job post: Security Engineer II (GRC) (Lever) (posting https://jobs.lever.co/aledade/6de10689-97fd-48b6-a7d9-2abb56791ad9 not confirmed open on the company's board)",
+   "signal": "hiring",
+   "source_url": ""
+  },
+  {
+   "domain": "omnichat.ai",
+   "name": "Omnichat",
+   "url": "https://omnichat.ai/",
+   "found_via": "news: $10M Series A to scale Omni AI Agents and drive global expansion (26 Oct 2026)",
+   "signal": "news",
+   "source_url": ""
+  },
+  {
+   "domain": "mattermost.com",
+   "name": "Mattermost",
+   "url": "https://mattermost.com/",
+   "found_via": "job post: GRC Analyst (Remote) (Lever) (posting https://jobs.lever.co/mattermost/bd060fd1-6e94-42cd-8f16-682e20637c69?utm_source=Redpoint+Ventures+job+board&utm_medium=getro.com&gh_src=Redpoint+Ventures+job+board not confirmed open on the company's board)",
+   "signal": "hiring",
+   "source_url": ""
+  },
+  {
+   "domain": "ascerta.com",
+   "name": "Ascerta",
+   "url": "https://ascerta.com/",
+   "found_via": "news: $18M Series A led by Dell Technologies Capital for enterprise AI ROI (25 Oct 2026)",
+   "signal": "news",
+   "source_url": ""
+  },
+  {
+   "domain": "yipitdata.com",
+   "name": "YipitData",
+   "url": "https://yipitdata.com/",
+   "found_via": "job post: GRC Analyst (Greenhouse) (posting https://boards.greenhouse.io/yipitdata/jobs/4515935 not confirmed open on the company's board)",
+   "signal": "hiring",
+   "source_url": ""
+  },
+  {
+   "domain": "plutosecurity.com",
+   "name": "Pluto Security",
+   "url": "https://plutosecurity.com/",
+   "found_via": "news: Raises $42M seed + Series A to scale AI security platform (13 Oct 2026)",
+   "signal": "news",
+   "source_url": ""
+  },
+  {
+   "domain": "remote.com",
+   "name": "Remote",
+   "url": "https://remote.com/",
+   "found_via": "job post: Governance, Risk and Compliance Specialist (Greenhouse) (posting https://boards.greenhouse.io/remote not confirmed open on the company's board)",
+   "signal": "hiring",
+   "source_url": ""
+  },
+  {
+   "domain": "melius.ai",
+   "name": "Melius",
+   "url": "https://melius.ai/",
+   "found_via": "news: $25M seed + Series A for AI agent platform, launched from stealth July 2026 (13 Oct 2026)",
+   "signal": "news",
+   "source_url": ""
+  },
+  {
+   "domain": "blockchain.com",
+   "name": "Blockchain.com",
+   "url": "https://blockchain.com/",
+   "found_via": "job post: Security GRC Analyst Buenos Aires (Greenhouse) (posting https://job-boards.greenhouse.io/blockchain/jobs/6653072 not confirmed open on the company's board)",
+   "signal": "hiring",
+   "source_url": ""
+  },
+  {
+   "domain": "avante.com",
+   "name": "Avante",
+   "url": "https://avante.com/",
+   "found_via": "news: $30M Series A for AI platform for corporate benefits teams (27 Oct 2026)",
+   "signal": "news",
+   "source_url": ""
+  },
+  {
+   "domain": "diligent.com",
+   "name": "Diligent",
+   "url": "https://diligent.com/",
+   "found_via": "job post: Security GRC Analyst II (Greenhouse) (posting https://boards.greenhouse.io/diligent not confirmed open on the company's board)",
+   "signal": "hiring",
+   "source_url": ""
+  },
+  {
+   "domain": "getbites.io",
+   "name": "Bites",
+   "url": "https://getbites.io/",
+   "found_via": "news: Series A for enterprise AI workforce training software (29 Oct 2026)",
+   "signal": "news",
+   "source_url": ""
+  },
+  {
+   "domain": "zetaglobal.com",
+   "name": "Zeta Global",
+   "url": "https://zetaglobal.com/",
+   "found_via": "job post: Corporate Risk and Compliance Associate II - SOC 1/SOC 2 (Lever) (posting https://jobs.lever.co/zeta not confirmed open on the company's board)",
+   "signal": "hiring",
+   "source_url": ""
+  },
+  {
+   "domain": "dulo.ai",
+   "name": "Dulo",
+   "url": "https://dulo.ai/",
+   "found_via": "news: $130M seed for AI models for engineering and hardware design (30 Oct 2026)",
+   "signal": "news",
+   "source_url": ""
+  }
+ ],
+ "set_aside": [
+  {
+   "domain": "jobs.lever.co",
+   "url": "https://jobs.lever.co/hhaexchange/b7d86c27-09d4-48a5-8d0c-8d2d092513b7?utm_source=remotive.com&ref=remotive.com",
+   "reason": "Review site, directory, job board or news site, not a company",
+   "previous_run": null
+  },
+  {
+   "domain": "boards.greenhouse.io",
+   "url": "https://boards.greenhouse.io/yipitdata/jobs/4515935",
+   "reason": "Review site, directory, job board or news site, not a company",
+   "previous_run": null
+  },
+  {
+   "domain": "wcia.com",
+   "url": "https://www.wcia.com/business/press-releases/cision/20261026HK81017/omnichat-raises-us10m-series-a-led-by-openspace-capital-to-scale-ai-agent-platform-and-drive-global-expansion/",
+   "reason": "A search result about the company, not its own homepage or product page (for example a news article); the publisher is not a candidate",
+   "previous_run": null
+  },
+  {
+   "domain": "thedatatechtimes.com",
+   "url": "https://thedatatechtimes.com/ai-ml/ascerta-raises-18m-series-track-enterprise-ai-roi",
+   "reason": "A search result about the company, not its own homepage or product page (for example a news article); the publisher is not a candidate",
+   "previous_run": null
+  },
+  {
+   "domain": "morningstar.com",
+   "url": "https://www.morningstar.com/news/pr-newswire/20261026hk81017/omnichat-raises-us10m-series-a-led-by-openspace-capital-to-scale-ai-agent-platform-and-drive-global-expansion",
+   "reason": "Article, guide, news or directory page; an official company or product page is required",
+   "previous_run": null
+  },
+  {
+   "domain": "technode.global",
+   "url": "https://technode.global/prnasia/omnichat-raises-us10m-series-a-led-by-openspace-capital-to-scale-ai-agent-platform-and-drive-global-expansion-2/",
+   "reason": "A search result about the company, not its own homepage or product page (for example a news article); the publisher is not a candidate",
+   "previous_run": null
+  },
+  {
+   "domain": "techstartups.com",
+   "url": "https://techstartups.com/2026/10/30/startup-funding-news-today-october-30-2026-kalshi-cohere-bites-dulo-opentrons-firehawk-defense-more/",
+   "reason": "A search result about the company, not its own homepage or product page (for example a news article); the publisher is not a candidate",
+   "previous_run": null
+  },
+  {
+   "domain": "thesaasnews.com",
+   "url": "https://www.thesaasnews.com/news/pluto-security-raises-42m-seed-series-a/",
+   "reason": "Article, guide, news or directory page; an official company or product page is required",
+   "previous_run": null
+  },
+  {
+   "domain": "geekwire.com",
+   "url": "https://www.geekwire.com/2026/seattle-startup-avante-raises-30m-to-bring-ai-agents-to-corporate-benefits-teams/",
+   "reason": "A search result about the company, not its own homepage or product page (for example a news article); the publisher is not a candidate",
+   "previous_run": null
+  },
+  {
+   "domain": "dev.to",
+   "url": "https://dev.to/techpulse01239/typesafe-ai-raises-870m-at-75b-valuation-for-jev-decision-model-bb0",
+   "reason": "A search result about the company, not its own homepage or product page (for example a news article); the publisher is not a candidate",
+   "previous_run": null
+  },
+  {
+   "domain": "linkedin.com",
+   "url": "https://www.linkedin.com/company/lorikeetsecurity",
+   "reason": "Review site, directory, job board or news site, not a company",
+   "previous_run": null
+  }
+ ],
+ "dropped": [],
+ "telemetry": {
+  "budget_usd": 0.35,
+  "budget_reached": true,
+  "cost_usd": 0.380952,
+  "input_tokens": 145185,
+  "output_tokens": 33993,
+  "searches": 22,
+  "model_calls": 20,
+  "pages_fetched": 29,
+  "elapsed_ms": 122078,
+  "calls": [
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "seller_profile",
+    "company": null,
+    "input_tokens": 7254,
+    "output_tokens": 3494,
+    "searches": 0,
+    "latency_ms": 20077,
+    "usd": 0.023917,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "competitor_search",
+    "company": null,
+    "input_tokens": 6892,
+    "output_tokens": 858,
+    "searches": 3,
+    "latency_ms": 5905,
+    "usd": 0.019762,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "competitor_classify",
+    "company": null,
+    "input_tokens": 4238,
+    "output_tokens": 2856,
+    "searches": 0,
+    "latency_ms": 17125,
+    "usd": 0.017435,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "discovery",
+    "company": null,
+    "input_tokens": 8511,
+    "output_tokens": 2982,
+    "searches": 4,
+    "latency_ms": 17578,
+    "usd": 0.033312,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "mattermost.com",
+    "input_tokens": 4577,
+    "output_tokens": 407,
+    "searches": 0,
+    "latency_ms": 3468,
+    "usd": 0.007451,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "omnichat.ai",
+    "input_tokens": 3917,
+    "output_tokens": 553,
+    "searches": 2,
+    "latency_ms": 4547,
+    "usd": 0.012247,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "aledade.com",
+    "input_tokens": 3678,
+    "output_tokens": 492,
+    "searches": 1,
+    "latency_ms": 6468,
+    "usd": 0.009189,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "mattermost.com",
+    "input_tokens": 5926,
+    "output_tokens": 348,
+    "searches": 1,
+    "latency_ms": 4422,
+    "usd": 0.011387,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "omnichat.ai",
+    "input_tokens": 5338,
+    "output_tokens": 291,
+    "searches": 0,
+    "latency_ms": 3891,
+    "usd": 0.007909,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "mattermost.com",
+    "input_tokens": 7811,
+    "output_tokens": 281,
+    "searches": 1,
+    "latency_ms": 5015,
+    "usd": 0.013458,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "ascerta.com",
+    "input_tokens": 26662,
+    "output_tokens": 2190,
+    "searches": 3,
+    "latency_ms": 16437,
+    "usd": 0.050135,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "aledade.com",
+    "input_tokens": 14778,
+    "output_tokens": 1424,
+    "searches": 3,
+    "latency_ms": 11281,
+    "usd": 0.032024,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "skeptic",
+    "company": "aledade.com",
+    "input_tokens": 1108,
+    "output_tokens": 1448,
+    "searches": 0,
+    "latency_ms": 4734,
+    "usd": 0.007539,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "skeptic",
+    "company": "ascerta.com",
+    "input_tokens": 1129,
+    "output_tokens": 2323,
+    "searches": 0,
+    "latency_ms": 7984,
+    "usd": 0.011284,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "omnichat.ai",
+    "input_tokens": 17689,
+    "output_tokens": 2492,
+    "searches": 2,
+    "latency_ms": 14797,
+    "usd": 0.037702,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "mattermost.com",
+    "input_tokens": 21483,
+    "output_tokens": 2678,
+    "searches": 2,
+    "latency_ms": 16186,
+    "usd": 0.043235,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "pitch",
+    "company": null,
+    "input_tokens": 560,
+    "output_tokens": 1784,
+    "searches": 0,
+    "latency_ms": 8859,
+    "usd": 0.008282,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "skeptic",
+    "company": "omnichat.ai",
+    "input_tokens": 1373,
+    "output_tokens": 1962,
+    "searches": 0,
+    "latency_ms": 5594,
+    "usd": 0.010055,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "pitch_check",
+    "company": "aledade.com",
+    "input_tokens": 479,
+    "output_tokens": 1500,
+    "searches": 0,
+    "latency_ms": 4297,
+    "usd": 0.006974,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "skeptic",
+    "company": "mattermost.com",
+    "input_tokens": 1782,
+    "output_tokens": 3630,
+    "searches": 0,
+    "latency_ms": 11688,
+    "usd": 0.017655,
+    "ok": true,
+    "error": null
+   }
+  ]
+ },
+ "error": null
+}

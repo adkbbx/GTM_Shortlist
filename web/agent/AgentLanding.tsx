@@ -200,79 +200,124 @@ const StartContext = createContext<(id: string) => void>(() => undefined);
 const useStart = () => useContext(StartContext);
 
 /** A real Shortlisted company from a finished search, shown as the product would show it. */
+const SHOT_VERDICT = { shortlisted: ['Shortlisted', 'yc-pill-ok'], needs_look: ['Needs a look', 'yc-pill-look'],
+  rejected: ['Rejected', 'yc-pill-no'] } as const;
+const SHOT_ORDER = { shortlisted: 0, needs_look: 1, rejected: 2 } as const;
+
+/** Why a row got its verdict, in a few words: the dated evidence for a Shortlisted company, the first thing missing
+    for the rest. */
+function shotReason(company: Company) {
+  const quote = supportedQuote(company);
+  if (company.verdict?.kind === 'shortlisted' && quote)
+    return [quote.quote.open_posting ? 'Open job post' : 'Recent evidence', domainOf(quote.quote.url),
+      quote.quote.published_date ? day(quote.quote.published_date) : ''].filter(Boolean).join(' · ');
+  return company.verdict?.missing?.[0]?.split(/[:(]/)[0].trim() ?? 'Not finished';
+}
+
+/** The product, not one company: a real search as the board shows it, with what every row comes with. */
 function ProductShot({ view, onOpen }: { view: AgentRunView; onOpen: (id: string) => void }) {
-  const company = view.run.companies.find(c => c.verdict?.kind === 'shortlisted' && supportedQuote(c));
-  if (!company) return null;
-  const quote = supportedQuote(company)!;
-  const message = company.outreach?.body.split('\n').filter(Boolean).slice(0, 3).join(' ') ?? company.pitch?.opener;
-  return <figure className="yc-shot" aria-label={`A real result: ${company.name || company.domain} for ${domainOf(view.run.website)}`}>
-    <div className="yc-shot-bar" aria-hidden="true"><span /><span /><span /><em>Shortlist for {domainOf(view.run.website)}</em></div>
+  const rows = view.run.companies.filter(c => c.verdict).sort((a, b) => SHOT_ORDER[a.verdict!.kind] - SHOT_ORDER[b.verdict!.kind]).slice(0, 4);
+  if (!rows.some(c => c.verdict?.kind === 'shortlisted')) return null;
+  const count = (kind: string) => view.run.companies.filter(c => c.verdict?.kind === kind).length;
+  const found = view.run.candidate_pool?.length ?? 0;
+  return <figure className="yc-shot" aria-label={`A real search for ${domainOf(view.run.website)}`}>
+    <div className="yc-shot-bar" aria-hidden="true"><span /><span /><span /><em>GTM Shortlist · search for {domainOf(view.run.website)}</em></div>
     <div className="yc-shot-body">
-      <div className="yc-shot-company">
-        <Logo company={company} />
-        <div><strong>{company.name || company.domain}</strong><small>{company.domain}</small></div>
-        <span className="yc-pill-ok">Shortlisted</span>
+      <div className="yc-shot-stats">
+        {found > 0 && <p><strong>{found}</strong> companies found</p>}
+        <p><strong>{view.run.companies.length}</strong> researched</p>
+        <p className="is-ok"><strong>{count('shortlisted')}</strong> shortlisted</p>
+        <p><strong>{count('needs_look') + count('rejected')}</strong> held back, with the reason</p>
       </div>
-      <div className="yc-shot-grid">
-        <div className="yc-shot-card">
-          <p className="yc-shot-label">Why now</p>
-          <blockquote>“{quote.quote.text.length > 220 ? `${quote.quote.text.slice(0, 217)}...` : quote.quote.text}”</blockquote>
-          <p className="yc-shot-source">{domainOf(quote.quote.url)}{quote.quote.open_posting ? ' · open job post' : ''}
-            {quote.quote.published_date ? ` · ${day(quote.quote.published_date)}` : ''}</p>
-        </div>
-        {message && <div className="yc-shot-card">
-          <p className="yc-shot-label">First message</p>
-          <p className="yc-shot-message">{message}</p>
-          <p className="yc-shot-source">✓ Every claim matches the evidence</p>
-        </div>}
-      </div>
+      <ul className="yc-shot-rows">{rows.map(company => {
+        const [label, tone] = SHOT_VERDICT[company.verdict!.kind];
+        return <li key={company.domain}>
+          <span className="yc-shot-mark" aria-hidden="true">{(company.name || company.domain).slice(0, 1).toUpperCase()}</span>
+          <span className="yc-shot-name">{company.domain}</span>
+          <span className="yc-shot-why">{shotReason(company)}</span>
+          <span className={tone}>{label}</span>
+        </li>;
+      })}</ul>
+      <ul className="yc-shot-features">
+        <li><strong>The evidence</strong><span>The quote and link behind every verdict</span></li>
+        <li><strong>A second check</strong><span>Another model tries to disprove each claim</span></li>
+        <li><strong>A first message</strong><span>An email and a LinkedIn note, checked too</span></li>
+      </ul>
     </div>
     <figcaption><a href={`?agent=${view.run.id}`} onClick={event => { event.preventDefault(); onOpen(view.run.id); }}>
-      A real result from a search for {domainOf(view.run.website)}. See the full search <Arrow /></a></figcaption>
+      Open this search <Arrow /></a></figcaption>
   </figure>;
 }
 
-/* Fine lines behind the start field: a fan from the page edges that narrows into the field, with small square dots
-   travelling along it. Drawn 1:1 in an 1800 × 1100 box centred on the field (its left edge at x 612, middle at y 550);
-   the right side is the mirror image. */
+/* The search, drawn behind the start field: many companies flow in from the left and most drop away on the way; a few
+   leave on the right, in orange. Drawn 1:1 in an 1800 × 1100 box centred on the field (left edge x 612, right edge
+   x 1188, middle y 550). */
 const FAN = 13;
 const noise = (n: number) => { const x = Math.sin(n * 12.9898) * 43758.5453; return x - Math.floor(x); };
-const FAN_LINES = Array.from({ length: FAN }, (_, i) => {
+const round = (n: number) => Math.round(n);
+const IN_LINES = Array.from({ length: FAN }, (_, i) => {
   const t = -1 + 2 * i / (FAN - 1), a = Math.abs(t);
   const end = 550 + t * 22;
   const fromEdge = a < .55;
   const sx = fromEdge ? -10 : (a - .55) / .45 * 360, sy = fromEdge ? 550 + t * 960 : t < 0 ? -10 : 1110;
   const k = Math.min(1, Math.max(0, (a - .3) / .7));
   const c1x = sx + (612 - sx) * (.45 - .33 * k), c1y = sy + (end - sy) * .55 * k;
-  const r = (n: number) => Math.round(n);
-  return `M${r(sx)},${r(sy)} C${r(c1x)},${r(c1y)} ${r(Math.max(380, sx + 80))},${r(end)} 616,${r(end)}`;
+  return `M${round(sx)},${round(sy)} C${round(c1x)},${round(c1y)} ${round(Math.max(380, sx + 80))},${round(end)} 616,${round(end)}`;
 });
-const FAN_DOTS = FAN_LINES.flatMap((_, line) => [0, 1].map(n => {
-  const seed = line * 7 + n * 3;
-  return { line, dur: 8 + noise(seed) * 5, begin: -noise(seed + 1) * 13, accent: noise(seed + 2) > .72 };
+const OUT_LINES = [-1, 0, 1].map(t => `M1184,${550 + t * 12} C1420,${550 + t * 12} 1500,${550 + t * 150} 1810,${550 + t * 190}`);
+// Most companies coming in drop out part of the way, like the ones a search sets aside.
+const IN_DOTS = IN_LINES.flatMap((_, line) => [0, 1, 2].map(n => {
+  const seed = line * 11 + n * 5;
+  return { line, dur: 7 + noise(seed) * 4, begin: -noise(seed + 1) * 11, drop: noise(seed + 2) < .6 ? .35 + noise(seed + 3) * .35 : 0 };
 }));
+const OUT_DOTS = OUT_LINES.flatMap((_, line) => [0, 1].map(n => ({ line, dur: 6.5 + line * .8, begin: -(line * 2.3 + n * 3.6) })));
 
 function Veins() {
   const still = usePrefersReducedMotion();
   const id = useId().replace(/:/g, '');
-  const side = (mirror: boolean) => <g key={String(mirror)} transform={mirror ? 'translate(1800 0) scale(-1 1)' : undefined}>
-    {FAN_LINES.map((d, line) => <path key={line} id={`${id}-${mirror ? 'r' : 'l'}${line}`} d={d} stroke={`url(#${id}-fade)`} />)}
-    {!still && FAN_DOTS.map(({ line, dur, begin, accent }, n) => {
-      const time = { dur: `${(dur * (mirror ? 1.07 : 1)).toFixed(2)}s`, begin: `${(begin - (mirror ? 2.9 : 0)).toFixed(2)}s`, repeatCount: 'indefinite' };
-      return <rect key={n} x="-1.5" y="-1.5" width="3" height="3" fill={accent ? '#d5682f' : '#a9a29a'}>
-        <animateMotion {...time}><mpath href={`#${id}-${mirror ? 'r' : 'l'}${line}`} /></animateMotion>
-        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.12;.9;1" {...time} />
-      </rect>;
-    })}
-  </g>;
+  const every = { repeatCount: 'indefinite' };
   return <svg className="yc-veins" viewBox="0 0 1800 1100" aria-hidden="true" focusable="false">
-    <defs><linearGradient id={`${id}-fade`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="320" y2="0">
-      <stop offset="0" stopColor="#1b1b1b" stopOpacity="0" /><stop offset="1" stopColor="#1b1b1b" stopOpacity=".11" /></linearGradient></defs>
-    <g fill="none" strokeWidth="1">{side(false)}{side(true)}</g>
+    <defs>
+      <linearGradient id={`${id}-in`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="420" y2="0">
+        <stop offset="0" stopColor="#1b1b1b" stopOpacity="0" /><stop offset="1" stopColor="#1b1b1b" stopOpacity=".1" /></linearGradient>
+      <linearGradient id={`${id}-out`} gradientUnits="userSpaceOnUse" x1="1188" y1="0" x2="1800" y2="0">
+        <stop offset="0" stopColor="#d5682f" stopOpacity=".45" /><stop offset="1" stopColor="#d5682f" stopOpacity="0" /></linearGradient>
+    </defs>
+    <g fill="none" strokeWidth="1">
+      {IN_LINES.map((d, line) => <path key={line} id={`${id}-i${line}`} d={d} stroke={`url(#${id}-in)`} />)}
+      {OUT_LINES.map((d, line) => <path key={line} id={`${id}-o${line}`} d={d} stroke={`url(#${id}-out)`} strokeWidth="1.25" />)}
+    </g>
+    {!still && IN_DOTS.map(({ line, dur, begin, drop }, n) => {
+      const time = { dur: `${dur.toFixed(2)}s`, begin: `${begin.toFixed(2)}s`, ...every };
+      const fade = drop ? { values: '0;.9;.9;0;0', keyTimes: `0;.1;${(drop - .08).toFixed(2)};${drop.toFixed(2)};1` }
+        : { values: '0;.9;.9;0', keyTimes: '0;.1;.92;1' };
+      return <circle key={n} r="1.75" fill="#9c958c">
+        <animateMotion {...time}><mpath href={`#${id}-i${line}`} /></animateMotion>
+        <animate attributeName="opacity" {...fade} {...time} />
+      </circle>;
+    })}
+    {!still && OUT_DOTS.map(({ line, dur, begin }, n) => {
+      const time = { dur: `${dur}s`, begin: `${begin}s`, ...every };
+      return <circle key={n} r="2.5" fill="#d5682f">
+        <animateMotion {...time}><mpath href={`#${id}-o${line}`} /></animateMotion>
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.08;.7;1" {...time} />
+      </circle>;
+    })}
   </svg>;
 }
 
-function Hero({ example, onOpen }: { example?: AgentRunView; onOpen: (id: string) => void }) {
+/** A returning visitor's way back: the latest search, and the full list on Your shortlist when there are more. */
+function Continue({ last, more, onOpen }: { last: AgentRunSummary; more: boolean; onOpen: (id: string | null, list?: boolean) => void }) {
+  const status = last.status === 'complete' ? `${last.shortlisted} shortlisted` : last.status.replace('_', ' ');
+  return <nav className="yc-continue" aria-label="Your searches">
+    <a href={`?agent=${last.id}`} onClick={event => { event.preventDefault(); onOpen(last.id); }}>
+      Your last search: {domainOf(last.website)} <span>· {status}</span> <Arrow /></a>
+    {more && <a className="yc-continue-all" href="?shortlist=1" onClick={event => { event.preventDefault(); onOpen(null, true); }}>All your searches</a>}
+  </nav>;
+}
+
+function Hero({ example, last, more, onOpen }: { example?: AgentRunView; last?: AgentRunSummary; more: boolean;
+  onOpen: (id: string | null, list?: boolean) => void }) {
   return <section className="yc-hero" aria-labelledby="agent-start-heading">
     <div className="yc-wrap yc-center">
       <p className="yc-eyebrow">For founders and small sales teams</p>
@@ -280,6 +325,7 @@ function Hero({ example, onOpen }: { example?: AgentRunView; onOpen: (id: string
       <p className="yc-sub">Enter your website. GTM Shortlist finds the companies that need what you sell right now, shows the
         evidence behind each one, and drafts your first message.</p>
       <StartForm id="website-start" />
+      {last && <Continue last={last} more={more} onOpen={onOpen} />}
     </div>
     {example && <div className="yc-wrap"><ProductShot view={example} onOpen={onOpen} /></div>}
   </section>;
@@ -292,7 +338,7 @@ const FAQ = [
   ['Does it contact anyone for me?', 'No. It drafts the email and a LinkedIn message for you to review and send yourself. It researches companies, never individual people.'],
 ];
 
-export function AgentLanding({ onOpen }: { onOpen: (id: string | null) => void }) {
+export function AgentLanding({ onOpen }: { onOpen: (id: string | null, list?: boolean) => void }) {
   const config = useAgentConfig();
   const reduced = usePrefersReducedMotion();
   useLenis(!reduced);
@@ -327,7 +373,7 @@ export function AgentLanding({ onOpen }: { onOpen: (id: string | null) => void }
   const how = useRef<HTMLElement>(null);
   useRise(how, reduced);
   return <StartContext.Provider value={id => onOpen(id)}><div className="pl al yc">
-    <Hero example={examples[0]} onOpen={onOpen} />
+    <Hero example={examples[0]} last={recent[0]} more={recent.length > 1} onOpen={onOpen} />
 
     <section ref={how} className="yc-section" aria-labelledby="al-how-heading">
       <div className="yc-wrap">
@@ -370,13 +416,5 @@ export function AgentLanding({ onOpen }: { onOpen: (id: string | null) => void }
       </div>
     </section>
 
-    {recent.length > 0 && <section className="al-section pl-wrap agent-recent" aria-labelledby="agent-recent-heading">
-      <h2 id="agent-recent-heading">{config.publicDemo ? 'Your searches' : 'Recent searches'}</h2>
-      <ul>{recent.map(item => <li key={item.id}>
-        <a href={`?agent=${item.id}`} onClick={event => { event.preventDefault(); onOpen(item.id); }}>{domainOf(item.website)}</a>
-        <span>{day(item.created_at)} · {item.status === 'complete' ? `${item.shortlisted} shortlisted, ${item.needs_look} need a look, ${item.rejected} rejected` : item.status.replace('_', ' ')}</span>
-        {item.synthetic && <span className="agent-tag">Synthetic</span>}
-      </li>)}</ul>
-    </section>}
   </div></StartContext.Provider>;
 }

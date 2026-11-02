@@ -26,68 +26,88 @@ async function mySearches(publicDemo: boolean): Promise<Search[]> {
 }
 
 const day = (value: string) => new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+const count = (search: Search, kind: string) => search.companies.filter(c => c.verdict?.kind === kind).length;
 
-function Row({ entry, onOpen }: { entry: Entry; onOpen: (id: string) => void }) {
+function Card({ entry, onOpen }: { entry: Entry; onOpen: (id: string) => void }) {
   const { company, search } = entry;
   const [mail, setMail] = useState(false);
-  return <li className="agent-row ys-row">
-    <div className="agent-row-main">
-      <SiteIcon lookup domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="agent-logo agent-row-logo" />
-      <div className="agent-row-text">
-        <div className="agent-row-title"><h3>{company.name || company.domain}</h3>
-          <span className="ys-for">for {domainOf(search.website)} · {day(search.created_at)}</span></div>
-        <p className="agent-row-reason">{company.pitch?.why_now ?? company.verdict?.summary}</p>
-      </div>
-      <div className="agent-row-actions">
-        {company.outreach && <button type="button" className="agent-expand" onClick={() => setMail(true)}>View message</button>}
-        {!search.gone && <button type="button" className="agent-expand" onClick={() => onOpen(search.id)}>Open search</button>}
+  return <li className="ys-card">
+    <div className="ys-card-head">
+      <SiteIcon lookup domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="agent-logo ys-logo" />
+      <div className="ys-card-title"><h3>{company.name || company.domain}</h3><p>{company.domain}</p></div>
+      <span className="ys-pill">Shortlisted</span>
+    </div>
+    <p className="ys-why">{company.pitch?.why_now ?? company.verdict?.summary}</p>
+    <div className="ys-card-foot">
+      <span className="ys-for">From your search for {domainOf(search.website)} · {day(search.created_at)}</span>
+      <div className="ys-actions">
+        {company.outreach && <button type="button" className="ys-button is-primary" onClick={() => setMail(true)}>View message</button>}
+        {!search.gone && <button type="button" className="ys-button" onClick={() => onOpen(search.id)}>Open search</button>}
       </div>
     </div>
     <EmailDialog company={company} open={mail} drafting={false} error="" onClose={() => setMail(false)} />
   </li>;
 }
 
-/** Every Shortlisted company from your searches in one list, newest first. */
+function Searches({ searches, onOpen }: { searches: Search[]; onOpen: (id: string) => void }) {
+  return <section className="ys-section" aria-labelledby="ys-searches-heading">
+    <h2 id="ys-searches-heading">Your searches</h2>
+    <ul className="ys-searches">{searches.slice(0, 12).map(search => <li key={search.id}>
+      <SiteIcon lookup domain={domainOf(search.website)} fallback={domainOf(search.website).slice(0, 1).toUpperCase()} className="agent-logo ys-search-logo" />
+      <div className="ys-search-text">
+        {search.gone ? <strong>{domainOf(search.website)}</strong>
+          : <a href={`?agent=${search.id}`} onClick={event => { event.preventDefault(); onOpen(search.id); }}>{domainOf(search.website)}</a>}
+        <span>{day(search.created_at)}{search.gone ? ' · no longer on the server' : ''}</span>
+      </div>
+      <span className="ys-tally"><b>{count(search, 'shortlisted')}</b> shortlisted<i aria-hidden="true">·</i>
+        {count(search, 'needs_look') + count(search, 'rejected')} held back</span>
+    </li>)}</ul>
+  </section>;
+}
+
+/** Every Shortlisted company from your searches in one place, newest first, then the searches themselves. */
 export function YourShortlist({ onOpen, onNew }: { onOpen: (id: string) => void; onNew: () => void }) {
   const { publicDemo } = useAgentConfig();
   const [entries, setEntries] = useState<Entry[] | null>(null);
   const [searches, setSearches] = useState<Search[]>([]);
   useEffect(() => {
     let cancelled = false;
-    mySearches(publicDemo).then(searches => {
+    mySearches(publicDemo).then(found => {
       if (cancelled) return;
-      setSearches([...searches].sort((a, b) => b.created_at.localeCompare(a.created_at)));
+      const newest = [...found].sort((a, b) => b.created_at.localeCompare(a.created_at));
+      setSearches(newest);
       const seen = new Set<string>();
-      const found: Entry[] = [];
-      for (const search of [...searches].sort((a, b) => b.created_at.localeCompare(a.created_at)))
+      const list: Entry[] = [];
+      for (const search of newest)
         for (const company of search.companies)
-          if (company.verdict?.kind === 'shortlisted' && !seen.has(company.domain)) { seen.add(company.domain); found.push({ company, search }); }
-      setEntries(found);
+          if (company.verdict?.kind === 'shortlisted' && !seen.has(company.domain)) { seen.add(company.domain); list.push({ company, search }); }
+      setEntries(list);
     }).catch(() => { if (!cancelled) setEntries([]); });
     return () => { cancelled = true; };
   }, [publicDemo]);
   const gone = entries?.some(entry => entry.search.gone);
   return <section className="ys" aria-labelledby="ys-heading">
-    <div className="agent-board-head">
-      <div><p className="agent-eyebrow">{publicDemo ? 'From searches in this browser' : 'From your searches'}</p>
-        <h1 id="ys-heading">Your shortlist</h1></div>
-      <div className="agent-board-actions"><button type="button" className="secondary" onClick={onNew}>New search</button></div>
-    </div>
+    <header className="ys-head">
+      <div>
+        <p className="ys-eyebrow">{publicDemo ? 'Saved in this browser' : 'From your searches'}</p>
+        <h1 id="ys-heading">Your shortlist</h1>
+        <p className="ys-sub">Every company that passed a search, with the evidence behind it and your first message.</p>
+      </div>
+      <button type="button" className="ys-button is-dark" onClick={onNew}>New search</button>
+    </header>
     {entries === null ? <p className="agent-status" role="status">Loading your shortlist</p>
-      : entries.length === 0 ? <div className="ys-empty"><p>No Shortlisted companies yet.</p>
-        {searches.length ? <>
-          <p>{searches.length === 1 ? 'Your search' : `Your ${searches.length} searches`} from this browser found no company with
-            every check passed yet. Open one to see what each company was missing.</p>
-          <ul className="ys-searches">{searches.slice(0, 8).map(search => <li key={search.id}>
-            {search.gone ? <span>{domainOf(search.website)} · {day(search.created_at)}</span>
-              : <a href={`?agent=${search.id}`} onClick={event => { event.preventDefault(); onOpen(search.id); }}>
-                {domainOf(search.website)} · {day(search.created_at)}</a>}
-          </li>)}</ul>
-        </> : <p>Every company that passes a search lands here, with its reason and any email you drafted.
-          Searches are kept per browser and per site address.</p>}</div>
-        : <><p className="ys-count">{entries.length} {entries.length === 1 ? 'company' : 'companies'}</p>
-          {gone && <p className="ys-note" role="note">Some searches are no longer on the server, so their full page cannot open.
-            This browser kept their Shortlisted companies and emails.</p>}
-          <ul className="ys-list">{entries.map(entry => <Row key={entry.company.domain} entry={entry} onOpen={onOpen} />)}</ul></>}
+      : entries.length === 0 ? <div className="ys-empty">
+        <p className="ys-empty-title">No Shortlisted companies yet.</p>
+        <p>{searches.length ? `${searches.length === 1 ? 'Your search' : `Your ${searches.length} searches`} found no company with every check passed yet. Open one to see what each company was missing.`
+          : 'Every company that passes a search lands here, with its reason and any message you drafted.'}</p>
+        {!searches.length && <button type="button" className="ys-button is-dark" onClick={onNew}>Start a search</button>}
+      </div>
+      : <>
+        <p className="ys-count">{entries.length} {entries.length === 1 ? 'company' : 'companies'} ready to contact</p>
+        {gone && <p className="ys-note" role="note">Some searches are no longer on the server, so their full page cannot open.
+          This browser kept their Shortlisted companies and messages.</p>}
+        <ul className="ys-list">{entries.map(entry => <Card key={entry.company.domain} entry={entry} onOpen={onOpen} />)}</ul>
+      </>}
+    {searches.length > 0 && <Searches searches={searches} onOpen={onOpen} />}
   </section>;
 }
