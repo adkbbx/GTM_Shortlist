@@ -1,0 +1,530 @@
+[
+ {
+  "seq": 1,
+  "at": "2026-11-02T01:10:27.136203Z",
+  "stage": "run",
+  "message": "Started research for https://crisp.chat/",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 2,
+  "at": "2026-11-02T01:10:28.299685Z",
+  "stage": "seller",
+  "message": "Read your homepage (https://crisp.chat/en/)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 3,
+  "at": "2026-11-02T01:10:28.520613Z",
+  "stage": "seller",
+  "message": "Read https://crisp.chat/en/alternatives/",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 4,
+  "at": "2026-11-02T01:10:46.631779Z",
+  "stage": "seller",
+  "message": "Understood the offer with 4 fit checks, 4 need signals and 3 named customers",
+  "company": null,
+  "level": "done"
+ },
+ {
+  "seq": 5,
+  "at": "2026-11-02T01:10:52.286646Z",
+  "stage": "competitors",
+  "message": "Searched \"Crisp chat alternatives\" (11 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 6,
+  "at": "2026-11-02T01:10:52.360461Z",
+  "stage": "competitors",
+  "message": "Could not read freshdesk.com: Redirect changed company identity; manual verification required",
+  "company": null,
+  "level": "warn"
+ },
+ {
+  "seq": 7,
+  "at": "2026-11-02T01:10:52.725965Z",
+  "stage": "competitors",
+  "message": "Could not read zendesk.com: Redirect changed company identity; manual verification required",
+  "company": null,
+  "level": "warn"
+ },
+ {
+  "seq": 8,
+  "at": "2026-11-02T01:11:04.811925Z",
+  "stage": "competitors",
+  "message": "Found 5 direct competitors among 8 candidates",
+  "company": null,
+  "level": "done"
+ },
+ {
+  "seq": 9,
+  "at": "2026-11-02T01:11:33.701078Z",
+  "stage": "discovery",
+  "message": "Confirmed open on Lever: Online Support Representative (Remote) (Luxury Presence)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 10,
+  "at": "2026-11-02T01:11:38.590816Z",
+  "stage": "discovery",
+  "message": "Searched \"site:jobs.lever.co \"customer support\" representative\" (11 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 11,
+  "at": "2026-11-02T01:11:38.590816Z",
+  "stage": "discovery",
+  "message": "Searched \"site:boards.greenhouse.io \"customer support specialist\"\" (12 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 12,
+  "at": "2026-11-02T01:11:38.590816Z",
+  "stage": "discovery",
+  "message": "Searched \"startup \"raised\" seed funding October 2026 SaaS\" (10 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 13,
+  "at": "2026-11-02T01:11:38.590816Z",
+  "stage": "discovery",
+  "message": "Searched \"site:linkedin.com/posts \"we're hiring\" \"customer support\" SaaS\" (12 results)",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 14,
+  "at": "2026-11-02T01:11:38.606458Z",
+  "stage": "discovery",
+  "message": "Found 18 candidate companies; set aside 16 pages (lists, directories, competitors, customers)",
+  "company": null,
+  "level": "done"
+ },
+ {
+  "seq": 15,
+  "at": "2026-11-02T01:11:38.621147Z",
+  "stage": "investigation",
+  "message": "Investigating 4 companies, 5 at a time",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 16,
+  "at": "2026-11-02T01:11:38.621147Z",
+  "stage": "investigation",
+  "message": "Investigating luxurypresence.com",
+  "company": "luxurypresence.com",
+  "level": "info"
+ },
+ {
+  "seq": 17,
+  "at": "2026-11-02T01:11:38.623198Z",
+  "stage": "investigation",
+  "message": "Investigating mintive.ai",
+  "company": "mintive.ai",
+  "level": "info"
+ },
+ {
+  "seq": 18,
+  "at": "2026-11-02T01:11:38.625205Z",
+  "stage": "investigation",
+  "message": "Investigating alia.co",
+  "company": "alia.co",
+  "level": "info"
+ },
+ {
+  "seq": 19,
+  "at": "2026-11-02T01:11:38.627214Z",
+  "stage": "investigation",
+  "message": "Investigating comply.com",
+  "company": "comply.com",
+  "level": "info"
+ },
+ {
+  "seq": 20,
+  "at": "2026-11-02T01:11:38.671154Z",
+  "stage": "investigation",
+  "message": "Could not read its website (Website DNS is unavailable); set aside",
+  "company": "alia.co",
+  "level": "warn"
+ },
+ {
+  "seq": 21,
+  "at": "2026-11-02T01:11:38.959158Z",
+  "stage": "investigation",
+  "message": "Could not read its website (Compressed response is not supported); set aside",
+  "company": "comply.com",
+  "level": "warn"
+ },
+ {
+  "seq": 22,
+  "at": "2026-11-02T01:11:39.358924Z",
+  "stage": "investigation",
+  "message": "Could not read its website (Redirect changed company identity; manual verification required); set aside",
+  "company": "mintive.ai",
+  "level": "warn"
+ },
+ {
+  "seq": 23,
+  "at": "2026-11-02T01:11:41.811452Z",
+  "stage": "investigation",
+  "message": "Read the open posting: Online Support Representative (Remote)",
+  "company": "luxurypresence.com",
+  "level": "info"
+ },
+ {
+  "seq": 24,
+  "at": "2026-11-02T01:11:48.502722Z",
+  "stage": "investigation",
+  "message": "Read https://jobs.lever.co/luxurypresence/40d9d305-98bd-4373-80a9-c25fc112eae4",
+  "company": "luxurypresence.com",
+  "level": "info"
+ },
+ {
+  "seq": 25,
+  "at": "2026-11-02T01:11:52.955816Z",
+  "stage": "investigation",
+  "message": "Could not read https://www.luxurypresence.com/help-center/",
+  "company": "luxurypresence.com",
+  "level": "warn"
+ },
+ {
+  "seq": 26,
+  "at": "2026-11-02T01:11:54.736052Z",
+  "stage": "investigation",
+  "message": "Read https://www.luxurypresence.com/about-us/",
+  "company": "luxurypresence.com",
+  "level": "info"
+ },
+ {
+  "seq": 27,
+  "at": "2026-11-02T01:12:06.153031Z",
+  "stage": "investigation",
+  "message": "Searched \"Luxury Presence help center support articles\"",
+  "company": "luxurypresence.com",
+  "level": "info"
+ },
+ {
+  "seq": 28,
+  "at": "2026-11-02T01:12:06.153031Z",
+  "stage": "investigation",
+  "message": "Searched \"Luxury Presence funding round news 2026\"",
+  "company": "luxurypresence.com",
+  "level": "info"
+ },
+ {
+  "seq": 29,
+  "at": "2026-11-02T01:12:06.153031Z",
+  "stage": "investigation",
+  "message": "Searched \"Luxury Presence new product launch 2026\"",
+  "company": "luxurypresence.com",
+  "level": "info"
+ },
+ {
+  "seq": 30,
+  "at": "2026-11-02T01:12:06.153031Z",
+  "stage": "investigation",
+  "message": "Searched \"Luxury Presence Intercom Gorgias Help Scout tawk.to Tidio\"",
+  "company": "luxurypresence.com",
+  "level": "info"
+ },
+ {
+  "seq": 31,
+  "at": "2026-11-02T01:12:06.185872Z",
+  "stage": "skeptic",
+  "message": "Skeptic checking 7 quotes",
+  "company": "luxurypresence.com",
+  "level": "info"
+ },
+ {
+  "seq": 32,
+  "at": "2026-11-02T01:12:16.849093Z",
+  "stage": "skeptic",
+  "message": "Kept 5 of 7 quotes; the rest were contradicted or too weak",
+  "company": "luxurypresence.com",
+  "level": "info"
+ },
+ {
+  "seq": 33,
+  "at": "2026-11-02T01:12:16.849093Z",
+  "stage": "outreach",
+  "message": "Writing why now and an opening line from the supported quotes",
+  "company": "luxurypresence.com",
+  "level": "info"
+ },
+ {
+  "seq": 34,
+  "at": "2026-11-02T01:12:32.692587Z",
+  "stage": "verdict",
+  "message": "luxurypresence.com: Shortlisted",
+  "company": "luxurypresence.com",
+  "level": "done"
+ },
+ {
+  "seq": 35,
+  "at": "2026-11-02T01:12:32.692587Z",
+  "stage": "investigation",
+  "message": "3 website(s) could not be read; researching 3 more candidate(s) instead",
+  "company": null,
+  "level": "warn"
+ },
+ {
+  "seq": 36,
+  "at": "2026-11-02T01:12:32.707765Z",
+  "stage": "investigation",
+  "message": "Investigating 3 companies, 5 at a time",
+  "company": null,
+  "level": "info"
+ },
+ {
+  "seq": 37,
+  "at": "2026-11-02T01:12:32.707765Z",
+  "stage": "investigation",
+  "message": "Investigating sharewillow.com",
+  "company": "sharewillow.com",
+  "level": "info"
+ },
+ {
+  "seq": 38,
+  "at": "2026-11-02T01:12:32.707765Z",
+  "stage": "investigation",
+  "message": "Investigating frejun.com",
+  "company": "frejun.com",
+  "level": "info"
+ },
+ {
+  "seq": 39,
+  "at": "2026-11-02T01:12:32.723717Z",
+  "stage": "investigation",
+  "message": "Investigating spinquest.com",
+  "company": "spinquest.com",
+  "level": "info"
+ },
+ {
+  "seq": 40,
+  "at": "2026-11-02T01:12:32.858573Z",
+  "stage": "investigation",
+  "message": "Could not read its website (Website returned HTTP 403); set aside",
+  "company": "frejun.com",
+  "level": "warn"
+ },
+ {
+  "seq": 41,
+  "at": "2026-11-02T01:12:35.485530Z",
+  "stage": "investigation",
+  "message": "Read https://jobs.lever.co/Spinquest/fb85fd9b-5af8-43a2-a459-039f6bb48446",
+  "company": "spinquest.com",
+  "level": "info"
+ },
+ {
+  "seq": 42,
+  "at": "2026-11-02T01:12:35.743453Z",
+  "stage": "investigation",
+  "message": "Read https://spinquest.com/",
+  "company": "spinquest.com",
+  "level": "info"
+ },
+ {
+  "seq": 43,
+  "at": "2026-11-02T01:12:40.277212Z",
+  "stage": "investigation",
+  "message": "Searched \"ShareWillow raises $8.5M seed expand AI platform\"",
+  "company": "sharewillow.com",
+  "level": "info"
+ },
+ {
+  "seq": 44,
+  "at": "2026-11-02T01:12:40.277212Z",
+  "stage": "investigation",
+  "message": "Searched \"ShareWillow Intercom Gorgias Help Scout tawk.to Tidio\"",
+  "company": "sharewillow.com",
+  "level": "info"
+ },
+ {
+  "seq": 45,
+  "at": "2026-11-02T01:12:40.835694Z",
+  "stage": "investigation",
+  "message": "Read https://www.sharewillow.com/about",
+  "company": "sharewillow.com",
+  "level": "info"
+ },
+ {
+  "seq": 46,
+  "at": "2026-11-02T01:12:41.425680Z",
+  "stage": "investigation",
+  "message": "Read https://www.sharewillow.com/pricing",
+  "company": "sharewillow.com",
+  "level": "info"
+ },
+ {
+  "seq": 47,
+  "at": "2026-11-02T01:12:41.678820Z",
+  "stage": "investigation",
+  "message": "Searched \"SpinQuest help center support\"",
+  "company": "spinquest.com",
+  "level": "info"
+ },
+ {
+  "seq": 48,
+  "at": "2026-11-02T01:12:41.678820Z",
+  "stage": "investigation",
+  "message": "Searched \"site:spinquest.com support help contact\"",
+  "company": "spinquest.com",
+  "level": "info"
+ },
+ {
+  "seq": 49,
+  "at": "2026-11-02T01:12:41.938284Z",
+  "stage": "investigation",
+  "message": "Read https://spinquest.com/about",
+  "company": "spinquest.com",
+  "level": "info"
+ },
+ {
+  "seq": 50,
+  "at": "2026-11-02T01:12:45.656486Z",
+  "stage": "investigation",
+  "message": "Read https://careers.sharewillow.com/",
+  "company": "sharewillow.com",
+  "level": "info"
+ },
+ {
+  "seq": 51,
+  "at": "2026-11-02T01:12:48.110727Z",
+  "stage": "investigation",
+  "message": "Read https://alleywatch.com/2026/10/sharewillow-home-field-service-technicians-performance-pay-platform-ai-agents-skilled-trades-ryan-shank/",
+  "company": "sharewillow.com",
+  "level": "info"
+ },
+ {
+  "seq": 52,
+  "at": "2026-11-02T01:12:48.290873Z",
+  "stage": "investigation",
+  "message": "Searched \"SpinQuest support help center FAQ live chat\"",
+  "company": "spinquest.com",
+  "level": "info"
+ },
+ {
+  "seq": 53,
+  "at": "2026-11-02T01:12:50.029813Z",
+  "stage": "investigation",
+  "message": "Read https://www.bleachernation.com/sweepstakes-casinos/spinquest/",
+  "company": "spinquest.com",
+  "level": "info"
+ },
+ {
+  "seq": 54,
+  "at": "2026-11-02T01:12:50.441172Z",
+  "stage": "investigation",
+  "message": "Read https://spinquest.com/support",
+  "company": "spinquest.com",
+  "level": "info"
+ },
+ {
+  "seq": 55,
+  "at": "2026-11-02T01:13:02.477152Z",
+  "stage": "investigation",
+  "message": "Searched \"spinquest.com Intercom Gorgias Help Scout tawk.to Tidio\"",
+  "company": "spinquest.com",
+  "level": "info"
+ },
+ {
+  "seq": 56,
+  "at": "2026-11-02T01:13:02.509221Z",
+  "stage": "skeptic",
+  "message": "Skeptic checking 7 quotes",
+  "company": "spinquest.com",
+  "level": "info"
+ },
+ {
+  "seq": 57,
+  "at": "2026-11-02T01:13:04.843765Z",
+  "stage": "investigation",
+  "message": "Searched \"ShareWillow help center support contact chat\"",
+  "company": "sharewillow.com",
+  "level": "info"
+ },
+ {
+  "seq": 58,
+  "at": "2026-11-02T01:13:04.885389Z",
+  "stage": "skeptic",
+  "message": "Skeptic checking 7 quotes",
+  "company": "sharewillow.com",
+  "level": "info"
+ },
+ {
+  "seq": 59,
+  "at": "2026-11-02T01:13:04.887397Z",
+  "stage": "skeptic",
+  "message": "Kept 0 of 7 quotes; the rest were contradicted or too weak",
+  "company": "sharewillow.com",
+  "level": "info"
+ },
+ {
+  "seq": 60,
+  "at": "2026-11-02T01:13:04.906654Z",
+  "stage": "verdict",
+  "message": "sharewillow.com: Needs a look",
+  "company": "sharewillow.com",
+  "level": "done"
+ },
+ {
+  "seq": 61,
+  "at": "2026-11-02T01:13:12.460686Z",
+  "stage": "skeptic",
+  "message": "Kept 3 of 7 quotes; the rest were contradicted or too weak",
+  "company": "spinquest.com",
+  "level": "info"
+ },
+ {
+  "seq": 62,
+  "at": "2026-11-02T01:13:12.460686Z",
+  "stage": "outreach",
+  "message": "Writing why now and an opening line from the supported quotes",
+  "company": "spinquest.com",
+  "level": "info"
+ },
+ {
+  "seq": 63,
+  "at": "2026-11-02T01:13:12.460686Z",
+  "stage": "outreach",
+  "message": "No opening line kept: nothing it said could be checked against the quotes",
+  "company": "spinquest.com",
+  "level": "warn"
+ },
+ {
+  "seq": 64,
+  "at": "2026-11-02T01:13:12.481280Z",
+  "stage": "verdict",
+  "message": "spinquest.com: Shortlisted",
+  "company": "spinquest.com",
+  "level": "done"
+ },
+ {
+  "seq": 65,
+  "at": "2026-11-02T01:13:12.481280Z",
+  "stage": "run",
+  "message": "Run budget reached: 2 of 3 shortlisted",
+  "company": null,
+  "level": "warn"
+ },
+ {
+  "seq": 66,
+  "at": "2026-11-02T01:13:12.493387Z",
+  "stage": "run",
+  "message": "Done: 2 shortlisted, 2 need a look, 0 rejected",
+  "company": null,
+  "level": "done"
+ }
+]

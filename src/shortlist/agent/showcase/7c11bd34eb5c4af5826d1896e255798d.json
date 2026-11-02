@@ -1,0 +1,3224 @@
+{
+ "id": "7c11bd34eb5c4af5826d1896e255798d",
+ "website": "https://crisp.chat/",
+ "status": "complete",
+ "created_at": "2026-11-02T01:10:27.136203Z",
+ "finished_at": "2026-11-02T01:13:12.481280Z",
+ "company_count": 3,
+ "skeptic": true,
+ "synthetic": false,
+ "profile": {
+  "website": "https://crisp.chat/",
+  "domain": "crisp.chat",
+  "name": "Crisp",
+  "offer": {
+   "value": "Sells an all-in-one AI customer support platform with omnichannel shared inbox, AI agents, chat widget, knowledge base, CRM and analytics.",
+   "quotes": [
+    {
+     "text": "The AI Customer Support Platform for Every Business - Crisp",
+     "url": "https://crisp.chat/en/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-11-02T01:10:28.252371Z",
+     "location": "text",
+     "open_posting": false
+    },
+    {
+     "text": "Automate 50% of your inquiries with AI, let your teams focus on what matters.",
+     "url": "https://crisp.chat/en/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-11-02T01:10:28.252371Z",
+     "location": "text",
+     "open_posting": false
+    },
+    {
+     "text": "Omnichannel inbox",
+     "url": "https://crisp.chat/en/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-11-02T01:10:28.252371Z",
+     "location": "text",
+     "open_posting": false
+    }
+   ],
+   "origin": "agent"
+  },
+  "buyer": {
+   "value": "Businesses of all sizes that support, market to and sell to leads and customers through websites, apps and messaging channels.",
+   "quotes": [
+    {
+     "text": "Trusted by 10,000 companies of all sizes",
+     "url": "https://crisp.chat/en/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-11-02T01:10:28.252371Z",
+     "location": "text",
+     "open_posting": false
+    },
+    {
+     "text": "Built for customer support, marketing,\nand sales teams.",
+     "url": "https://crisp.chat/en/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-11-02T01:10:28.252371Z",
+     "location": "text",
+     "open_posting": false
+    },
+    {
+     "text": "Built for every company.",
+     "url": "https://crisp.chat/en/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-11-02T01:10:28.252371Z",
+     "location": "text",
+     "open_posting": false
+    }
+   ],
+   "origin": "agent"
+  },
+  "existing_customers": [
+   {
+    "name": "Emma",
+    "domain": null,
+    "quotes": [
+     {
+      "text": "Evaluated over 20 products, and Crisp came out on top",
+      "url": "https://crisp.chat/en/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:10:28.252371Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   },
+   {
+    "name": "Hoxton Mix",
+    "domain": null,
+    "quotes": [
+     {
+      "text": "Crisp has been amazing and the first thing that really attracted me to, as a techy, was the size of the chat widget.",
+      "url": "https://crisp.chat/en/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:10:28.252371Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   },
+   {
+    "name": "Reedsy",
+    "domain": null,
+    "quotes": [
+     {
+      "text": "Crisp has become a central asset for Reedsy, empowering the team to provide fast, personalized responses and make customer support more effective through AI-powered solutions.",
+      "url": "https://crisp.chat/en/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:10:28.252371Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ]
+   }
+  ],
+  "fit_criteria": [
+   {
+    "id": "fit-1",
+    "text": "Offers a product or service to leads or customers that generates support questions or onboarding needs",
+    "required": true,
+    "enabled": true,
+    "quotes": [
+     {
+      "text": "Automate 50% of your inquiries with AI, let your teams focus on what matters.",
+      "url": "https://crisp.chat/en/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:10:28.252371Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "AI made to support your team & customers.",
+      "url": "https://crisp.chat/en/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:10:28.252371Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "origin": "agent"
+   },
+   {
+    "id": "fit-2",
+    "text": "Sells or supports customers through a website, web app or mobile app",
+    "required": false,
+    "enabled": true,
+    "quotes": [
+     {
+      "text": "Support from your website & mobile apps.",
+      "url": "https://crisp.chat/en/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:10:28.252371Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "Add a chat widget to your website or Web app in minutes.",
+      "url": "https://crisp.chat/en/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:10:28.252371Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "origin": "agent"
+   },
+   {
+    "id": "fit-3",
+    "text": "Communicates with customers over digital messaging channels like chat, email, WhatsApp, Messenger or Instagram",
+    "required": false,
+    "enabled": true,
+    "quotes": [
+     {
+      "text": "All your inbound conversations from all channels go into one collaborative inbox.",
+      "url": "https://crisp.chat/en/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:10:28.252371Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "origin": "agent"
+   },
+   {
+    "id": "fit-4",
+    "text": "Has a customer support, sales or marketing team that handles inbound conversations",
+    "required": false,
+    "enabled": true,
+    "quotes": [
+     {
+      "text": "Built for customer support, marketing,\nand sales teams.",
+      "url": "https://crisp.chat/en/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:10:28.252371Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "Centralize your inbound communications.",
+      "url": "https://crisp.chat/en/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:10:28.252371Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "origin": "agent"
+   }
+  ],
+  "need_signals": [
+   {
+    "id": "need-1",
+    "kind": "need",
+    "text": "Hiring customer support representatives, support operations or customer experience roles",
+    "quotes": [
+     {
+      "text": "See how efficient your customer support team is",
+      "url": "https://crisp.chat/en/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:10:28.252371Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "Give superpowers to your teams and customers.",
+      "url": "https://crisp.chat/en/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:10:28.252371Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "standard": false
+   },
+   {
+    "id": "need-2",
+    "kind": "need",
+    "text": "Maintains a help center or publishes help articles for self-service support",
+    "quotes": [
+     {
+      "text": "Make your customers more autonomous.",
+      "url": "https://crisp.chat/en/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:10:28.252371Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "Create your own help center that fits your brand.",
+      "url": "https://crisp.chat/en/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:10:28.252371Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "standard": false
+   },
+   {
+    "id": "need-3",
+    "kind": "need",
+    "text": "Offers website or in-app live chat to support leads and customers in real time",
+    "quotes": [
+     {
+      "text": "Instantly support leads and customers with a chat widget",
+      "url": "https://crisp.chat/en/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:10:28.252371Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "talk to visitors in real-time, offer support when it counts, and guide users all the way to conversion.",
+      "url": "https://crisp.chat/en/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:10:28.252371Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "standard": false
+   },
+   {
+    "id": "need-4",
+    "kind": "need",
+    "text": "Uses or advertises chat, helpdesk or customer service software for inbound sales and support",
+    "quotes": [
+     {
+      "text": "Compare Crisp to market leaders",
+      "url": "https://crisp.chat/en/alternatives/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:10:28.488761Z",
+      "location": "text",
+      "open_posting": false
+     },
+     {
+      "text": "Sell more by automating your sales pipeline using chatbots and AI workflows.",
+      "url": "https://crisp.chat/en/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:10:28.252371Z",
+      "location": "text",
+      "open_posting": false
+     }
+    ],
+    "standard": false
+   }
+  ],
+  "timing_signals": [
+   {
+    "id": "timing-std-1",
+    "kind": "timing",
+    "text": "Announced a new funding round in the last six months",
+    "quotes": [],
+    "standard": true
+   },
+   {
+    "id": "timing-std-2",
+    "kind": "timing",
+    "text": "Launched a new product or expanded into a new market in the last six months",
+    "quotes": [],
+    "standard": true
+   },
+   {
+    "id": "timing-std-3",
+    "kind": "timing",
+    "text": "Started building or growing the team this offer supports",
+    "quotes": [],
+    "standard": true
+   }
+  ],
+  "stated_limits": [],
+  "target_size": {
+   "value": "Small to mid-market businesses of all sizes, about 10 to 1,000 people, startup to growth-stage",
+   "quotes": [
+    {
+     "text": "The AI Customer Support Platform for Every Business - Crisp",
+     "url": "https://crisp.chat/en/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-11-02T01:10:28.252371Z",
+     "location": "text",
+     "open_posting": false
+    },
+    {
+     "text": "Trusted by 10,000 companies of all sizes",
+     "url": "https://crisp.chat/en/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-11-02T01:10:28.252371Z",
+     "location": "text",
+     "open_posting": false
+    },
+    {
+     "text": "Flat pricing",
+     "url": "https://crisp.chat/en/",
+     "source_type": "own_site",
+     "published_date": null,
+     "fetched_at": "2026-11-02T01:10:28.252371Z",
+     "location": "text",
+     "open_posting": false
+    }
+   ],
+   "origin": "agent"
+  },
+  "interpretations": [],
+  "pages": [
+   {
+    "url": "https://crisp.chat/en/",
+    "title": "The AI Customer Support Platform for Every Business - Crisp",
+    "fetched_at": "2026-11-02T01:10:28.252371Z"
+   },
+   {
+    "url": "https://crisp.chat/en/alternatives/",
+    "title": "Why Crisp is the best alternative to your customer service software? - Crisp",
+    "fetched_at": "2026-11-02T01:10:28.488761Z"
+   }
+  ]
+ },
+ "competitors": [
+  {
+   "name": "Intercom",
+   "domain": "intercom.com",
+   "classification": "direct",
+   "same_job": {
+    "text": "Intercom is a fully-featured\nAI-powered helpdesk",
+    "url": "https://www.intercom.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T01:10:53.802246Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": {
+    "text": "Trusted by 30,000+ leading brands",
+    "url": "https://www.intercom.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T01:10:53.802246Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Sells AI helpdesk with omnichannel inbox to brands like the seller.",
+   "found_via": "Crisp's own alternatives page https://crisp.chat/en/alternatives/ and search 'Crisp chat alternatives'",
+   "origin": "agent"
+  },
+  {
+   "name": "Gorgias",
+   "domain": "gorgias.com",
+   "classification": "direct",
+   "same_job": {
+    "text": "AI Agent + Helpdesk, built as one.",
+    "url": "https://www.gorgias.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T01:10:53.132365Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": {
+    "text": "17,000+\necommerce brands powered globally",
+    "url": "https://www.gorgias.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T01:10:53.132365Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Sells unified AI agent and omnichannel inbox to ecommerce brands.",
+   "found_via": "Crisp's own alternatives page https://crisp.chat/en/alternatives/",
+   "origin": "agent"
+  },
+  {
+   "name": "Help Scout",
+   "domain": "helpscout.com",
+   "classification": "direct",
+   "same_job": {
+    "text": "The AI-driven support platform for customer-first brands",
+    "url": "https://www.helpscout.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T01:10:52.983329Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": {
+    "text": "Powering support for 12,000+ customer-first brands",
+    "url": "https://www.helpscout.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T01:10:52.983329Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Sells AI support platform with shared inbox to customer brands.",
+   "found_via": "Crisp's own alternatives page https://crisp.chat/en/alternatives/ and search 'Crisp chat alternatives'",
+   "origin": "agent"
+  },
+  {
+   "name": "tawk.to",
+   "domain": "tawk.to",
+   "classification": "direct",
+   "same_job": {
+    "text": "Every channel, answered in one place",
+    "url": "https://www.tawk.to/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T01:10:54.010834Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": {
+    "text": "Millions of businesses run on tawk.to.",
+    "url": "https://www.tawk.to/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T01:10:54.010834Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Offers inbox, CRM, knowledge base and chat widget to businesses.",
+   "found_via": "Crisp's own alternatives page https://crisp.chat/en/alternatives/ and search 'Crisp chat alternatives'",
+   "origin": "agent"
+  },
+  {
+   "name": "Tidio",
+   "domain": "tidio.com",
+   "classification": "direct",
+   "same_job": {
+    "text": "Centralize all customer messages in one inbox.",
+    "url": "https://www.tidio.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T01:10:54.404647Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "same_buyer": {
+    "text": "Trusted by 300,000+ businesses:",
+    "url": "https://www.tidio.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T01:10:54.404647Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Sells AI customer service with help desk inbox to businesses.",
+   "found_via": "Crisp's own alternatives page https://crisp.chat/en/alternatives/",
+   "origin": "agent"
+  },
+  {
+   "name": "LiveChat",
+   "domain": "livechat.com",
+   "classification": "adjacent",
+   "same_job": null,
+   "same_buyer": {
+    "text": "products used by 30,000+ customers worldwide.",
+    "url": "https://www.livechat.com/",
+    "source_type": "competitor_site",
+    "published_date": null,
+    "fetched_at": "2026-11-02T01:10:53.374103Z",
+    "location": "text",
+    "open_posting": false
+   },
+   "reason": "Focuses on live chat sales tool, not full all-in-one support platform.",
+   "found_via": "Crisp's own alternatives page https://crisp.chat/en/alternatives/ and search 'Crisp chat alternatives'",
+   "origin": "agent"
+  },
+  {
+   "name": "Freshdesk",
+   "domain": "freshdesk.com",
+   "classification": "adjacent",
+   "same_job": null,
+   "same_buyer": null,
+   "reason": "Not verified: its site could not be read (Redirect changed company identity; manual verification required). Mark it as a direct competitor if it sells the same thing to your buyers.",
+   "found_via": "Crisp's own alternatives page https://crisp.chat/en/alternatives/",
+   "origin": "agent"
+  },
+  {
+   "name": "Zendesk",
+   "domain": "zendesk.com",
+   "classification": "adjacent",
+   "same_job": null,
+   "same_buyer": null,
+   "reason": "Not verified: its site could not be read (Redirect changed company identity; manual verification required). Mark it as a direct competitor if it sells the same thing to your buyers.",
+   "found_via": "Crisp's own alternatives page https://crisp.chat/en/alternatives/ and search 'Crisp chat alternatives'",
+   "origin": "agent"
+  }
+ ],
+ "disqualifiers": [
+  {
+   "id": "uses_direct_competitor:intercom.com",
+   "rule": "uses_direct_competitor",
+   "text": "Currently uses Intercom (intercom.com), a direct competitor",
+   "competitor_domain": "intercom.com",
+   "enabled": true
+  },
+  {
+   "id": "uses_direct_competitor:gorgias.com",
+   "rule": "uses_direct_competitor",
+   "text": "Currently uses Gorgias (gorgias.com), a direct competitor",
+   "competitor_domain": "gorgias.com",
+   "enabled": true
+  },
+  {
+   "id": "uses_direct_competitor:helpscout.com",
+   "rule": "uses_direct_competitor",
+   "text": "Currently uses Help Scout (helpscout.com), a direct competitor",
+   "competitor_domain": "helpscout.com",
+   "enabled": true
+  },
+  {
+   "id": "uses_direct_competitor:tawk.to",
+   "rule": "uses_direct_competitor",
+   "text": "Currently uses tawk.to (tawk.to), a direct competitor",
+   "competitor_domain": "tawk.to",
+   "enabled": true
+  },
+  {
+   "id": "uses_direct_competitor:tidio.com",
+   "rule": "uses_direct_competitor",
+   "text": "Currently uses Tidio (tidio.com), a direct competitor",
+   "competitor_domain": "tidio.com",
+   "enabled": true
+  },
+  {
+   "id": "is_competitor",
+   "rule": "is_competitor",
+   "text": "Is itself a direct competitor",
+   "competitor_domain": null,
+   "enabled": true
+  },
+  {
+   "id": "is_existing_customer",
+   "rule": "is_existing_customer",
+   "text": "Is already your customer",
+   "competitor_domain": null,
+   "enabled": true
+  },
+  {
+   "id": "inactive",
+   "rule": "inactive",
+   "text": "No longer operating: closed, acquired and shut, or the site is parked",
+   "competitor_domain": null,
+   "enabled": true
+  }
+ ],
+ "overrides": {
+  "add_competitors": [],
+  "remove_competitors": [],
+  "exclusions": [],
+  "criteria": [],
+  "company_count": 3,
+  "interpretation": null,
+  "offer": null,
+  "buyer": null,
+  "target_size": null
+ },
+ "companies": [
+  {
+   "domain": "luxurypresence.com",
+   "name": "luxurypresence.com",
+   "url": "https://luxurypresence.com/",
+   "found_via": "open job post on its Lever board: Online Support Representative (Remote), posted 2026-10-30 (https://jobs.lever.co/luxurypresence/40d9d305-98bd-4373-80a9-c25fc112eae4)",
+   "signal": "hiring",
+   "status": "done",
+   "evidence": [
+    {
+     "id": "408b8456d60c454bacb8976fa628cd79",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "Offers websites, CRM and marketing products that generate support and onboarding needs",
+     "quote": {
+      "text": "Help Center\nFind answers to your questions",
+      "url": "https://www.luxurypresence.com/",
+      "source_type": "own_site",
+      "published_date": "2026-06-16",
+      "fetched_at": "2026-11-02T01:11:39.977265Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "bc27780ffc9845959bd5e30887eaa98e",
+     "claim_type": "fit",
+     "criterion_id": "fit-2",
+     "claim": "Sells and supports customers through websites and platform",
+     "quote": {
+      "text": "Launch your dream website",
+      "url": "https://www.luxurypresence.com/",
+      "source_type": "own_site",
+      "published_date": "2026-06-16",
+      "fetched_at": "2026-11-02T01:11:39.977265Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "2545fd6ae1884b988d55d000c5069573",
+     "claim_type": "fit",
+     "criterion_id": "fit-3",
+     "claim": "Communicates with customers over digital channels to respond to leads",
+     "quote": {
+      "text": "Respond to and qualify leads in minutes",
+      "url": "https://www.luxurypresence.com/",
+      "source_type": "own_site",
+      "published_date": "2026-06-16",
+      "fetched_at": "2026-11-02T01:11:39.977265Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "31a91668ae8849e9afc4aeb99e1eb9b4",
+     "claim_type": "need",
+     "criterion_id": "need-1",
+     "claim": "Hiring an Online Support Representative for customer issues and requests",
+     "quote": {
+      "text": "We are looking for an Online Support Representative to assist our customers with issues and requests when using our products and services.",
+      "url": "https://jobs.lever.co/luxurypresence/40d9d305-98bd-4373-80a9-c25fc112eae4",
+      "source_type": "job_post",
+      "published_date": "2026-10-30",
+      "fetched_at": "2026-11-02T01:11:48.485738Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "8d95ac262b604462a341e5e91aa31a05",
+     "claim_type": "need",
+     "criterion_id": "need-3",
+     "claim": "Supports customers in real time via Salesforce chat and email",
+     "quote": {
+      "text": "Responding to customer requests and queries in a timely and accurate way, via Salesforce chat and/or email",
+      "url": "https://jobs.lever.co/luxurypresence/40d9d305-98bd-4373-80a9-c25fc112eae4",
+      "source_type": "job_post",
+      "published_date": "2026-10-30",
+      "fetched_at": "2026-11-02T01:11:48.485738Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "ec15bbb825204147a3775e6b74b48f6b",
+     "claim_type": "need",
+     "criterion_id": "need-4",
+     "claim": "Uses Salesforce help desk software for inbound support",
+     "quote": {
+      "text": "You should also be familiar with help desk software particularly Salesforce.",
+      "url": "https://jobs.lever.co/luxurypresence/40d9d305-98bd-4373-80a9-c25fc112eae4",
+      "source_type": "job_post",
+      "published_date": "2026-10-30",
+      "fetched_at": "2026-11-02T01:11:48.485738Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "9106256e95cc4ca2a5ceac898075ed1a",
+     "claim_type": "timing",
+     "criterion_id": "timing-std-3",
+     "claim": "Growing the customer support team with a new support hire",
+     "quote": {
+      "text": "We are looking for an Online Support Representative to assist our customers with issues and requests when using our products and services.",
+      "url": "https://jobs.lever.co/luxurypresence/40d9d305-98bd-4373-80a9-c25fc112eae4",
+      "source_type": "job_post",
+      "published_date": "2026-10-30",
+      "fetched_at": "2026-11-02T01:11:48.485738Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    }
+   ],
+   "decisions": [
+    {
+     "evidence_id": "408b8456d60c454bacb8976fa628cd79",
+     "decision": "supports",
+     "reason": "Help Center on own site shows company offers product/service requiring customer support.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "bc27780ffc9845959bd5e30887eaa98e",
+     "decision": "insufficient",
+     "reason": "Slogan does not show company sells or supports customers through website/app channel.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "2545fd6ae1884b988d55d000c5069573",
+     "decision": "insufficient",
+     "reason": "Quote mentions lead response but not chat, email, WhatsApp or other messaging channel.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "31a91668ae8849e9afc4aeb99e1eb9b4",
+     "decision": "supports",
+     "reason": "Job post explicitly hiring Online Support Representative to assist customers.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "8d95ac262b604462a341e5e91aa31a05",
+     "decision": "supports",
+     "reason": "Job duties describe responding to customers via Salesforce chat and email.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "ec15bbb825204147a3775e6b74b48f6b",
+     "decision": "supports",
+     "reason": "Job requirement shows company uses help desk software Salesforce.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "9106256e95cc4ca2a5ceac898075ed1a",
+     "decision": "supports",
+     "reason": "Recent job post shows company actively growing support team.",
+     "decided_by": "skeptic"
+    }
+   ],
+   "checked_places": [
+    "homepage code",
+    "2 job posts",
+    "job post page on jobs.lever.co",
+    "about us page",
+    "search \"Luxury Presence help center support articles\"",
+    "search \"Luxury Presence funding round news 2026\"",
+    "search \"Luxury Presence new product launch 2026\"",
+    "search \"Luxury Presence Intercom Gorgias Help Scout tawk.to Tidio\""
+   ],
+   "disqualifier_check_completed": true,
+   "blocked": [
+    "https://www.luxurypresence.com/help-center/: Website returned HTTP 404"
+   ],
+   "signatures": [
+    {
+     "url": "https://www.luxurypresence.com/",
+     "kind": "homepage",
+     "fetched_at": "2026-11-02T01:11:39.977265Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://gmpg.org/xfn/11"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-PHGVTCS"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Kumara Logo Light"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Tracy Tutor Logo Light"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "AKG Logo Light"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Josh Flagg Logo Light"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Carolwood Logo Light"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Ben Belack Logo Light"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "DMG Logo Light"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Gillette Group Logo Light"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Glennda Baker Logo Light"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Umansky Logo Light"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "SERHANT. Logo Light"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Sally Forster Jones Logo Light"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Noble Black Logo Light"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Attract more clients"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Turn your database into deals"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Create relationships for life"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Bonneau Ansley"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://bonneauansley.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Carrie Wells"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://carriewells.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Chase Mizell"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://chasemizell.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Dawn McKenna"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://dawnmckennagroup.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Glennda Baker"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://glennda.net/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Gregg Lynn"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://gregglynn.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Gretchen Coley"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://thecoleygroup.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Heather Domi"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://heatherdomi.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Holly Meyer Lucas"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://meyerlucas.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Jade Mills"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://jademillsestates.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "James Harris"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://harrispartnersre.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Jeff Biebuyck"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://frontgaterealestate.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Jonathan Spears"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://spearsgroupfl.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "K. Ann Brizolis"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://brizolisjanzen.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Kirsten Jordan"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://kirstenjordanteam.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Kumara Wilcoxon"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://kumarawilcoxon.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Matt Breitenbach"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://breitenbachadvisory.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Mauricio Umansky"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Nile Lundgren"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://nilelundgren.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Noble Black"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://nobleblackandpartners.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Paul Benson"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Ricardo Rodriguez"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://ricardohome.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Shelton Wilder"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://sheltonwilder.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Taylor Lucyk"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://taylorlucykgroup.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Tim Allen"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://timallenproperties.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Tomer Fridman"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://thefridmangroup.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Tracy Tutor"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://tracytutor.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Tricia Lee Riley"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://tricialee.com/"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "2024 award logo for Tech100 Real Estate winners by HousingWire."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "2026 award logo for Top 50 Best Software, Real Estate Products, by G2."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Award logo for Best of Proptech by Inman."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Award logo for AI Awards by Inman."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Award logo for AI Innovators by Inman."
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://luxurypresence.my.site.com/helpcenter/s/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.facebook.com/luxurypresence/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.instagram.com/luxurypresence/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.youtube.com/@luxurypresence"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.tiktok.com/@luxurypresence"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/luxurypresence"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.instagram.com/luxurypresence/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.facebook.com/luxurypresence/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.youtube.com/@luxurypresence"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.tiktok.com/@luxurypresence"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/luxurypresence"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://ddwl4m2hdecbv.cloudfront.net/b/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s.w.org/images/core/emoji/17.0.2/72x72/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s.w.org/images/core/emoji/17.0.2/svg/"
+      }
+     ],
+     "powered_by": [
+      "Attract clients, turn your database into deals, and build relationships for life — powered by Presence"
+     ],
+     "lines": []
+    },
+    {
+     "url": "https://www.luxurypresence.com/careers/",
+     "kind": "other",
+     "fetched_at": "2026-11-02T01:11:40.813280Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://gmpg.org/xfn/11"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "//js.hsforms.net/forms/v2.js"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-PHGVTCS"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Screenshot of the Luxury Presence real estate website on a desktop computer"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Carlin Wright, New York City Real Estate Agent"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Josh McConnell, Charleston Real Estate Agent"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Jade Mills, Beverly Hills Real Estate Agent"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Barry Cohen, Toronto Real Estate Agent"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://luxurypresence.my.site.com/helpcenter/s/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.facebook.com/luxurypresence/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.instagram.com/luxurypresence/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.youtube.com/@luxurypresence"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.tiktok.com/@luxurypresence"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/luxurypresence"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.instagram.com/luxurypresence/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.facebook.com/luxurypresence/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.youtube.com/@luxurypresence"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.tiktok.com/@luxurypresence"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/luxurypresence"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://ddwl4m2hdecbv.cloudfront.net/b/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s.w.org/images/core/emoji/17.0.2/72x72/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s.w.org/images/core/emoji/17.0.2/svg/"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    },
+    {
+     "url": "https://www.luxurypresence.com/about-us/",
+     "kind": "other",
+     "fetched_at": "2026-11-02T01:11:54.636712Z",
+     "attributes": [
+      {
+       "tag": "link",
+       "attr": "href",
+       "value": "https://gmpg.org/xfn/11"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "//js.hsforms.net/forms/v2.js"
+      },
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-PHGVTCS"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Barry Cohen, Toronto Real Estate Agent"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Carlin Wright, New York City Real Estate Agent"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Ed Leyson, CMO of Carolwood Estates"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Jade Mills, Beverly Hills Real Estate Agent"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Josh McConnell, Charleston Real Estate Agent"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://luxurypresence.my.site.com/helpcenter/s/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.facebook.com/luxurypresence/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.instagram.com/luxurypresence/"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.youtube.com/@luxurypresence"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.tiktok.com/@luxurypresence"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.linkedin.com/company/luxurypresence"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://schema.org"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.instagram.com/luxurypresence/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.facebook.com/luxurypresence/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.youtube.com/@luxurypresence"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.tiktok.com/@luxurypresence"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.linkedin.com/company/luxurypresence"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/gtm.js?id="
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://ddwl4m2hdecbv.cloudfront.net/b/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s.w.org/images/core/emoji/17.0.2/72x72/"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://s.w.org/images/core/emoji/17.0.2/svg/"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    }
+   ],
+   "searches": 4,
+   "fetches": 5,
+   "turns": 3,
+   "verdict": {
+    "kind": "shortlisted",
+    "summary": "Required fit shown, current need or timing evidence, and no current competitor use found",
+    "missing": [],
+    "unconfirmed": [],
+    "disqualifier": null,
+    "rule": null
+   },
+   "pitch": {
+    "why_now": "luxurypresence.com is hiring an Online Support Representative to assist customers and respond to requests via chat and email, while maintaining a Help Center.",
+    "opener": "I saw you're hiring an Online Support Representative to respond to customer requests via chat and email. Crisp provides a shared inbox with AI agents, chat, and knowledge base to help teams handle that work.",
+    "evidence_ids": [
+     "9106256e95cc4ca2a5ceac898075ed1a",
+     "8d95ac262b604462a341e5e91aa31a05",
+     "408b8456d60c454bacb8976fa628cd79"
+    ],
+    "checked": true,
+    "reason": "All company facts in the note are directly stated in quotes: job posts confirm hiring an Online Support Representative to assist customers via chat/email, own_site confirms a Help Center exists, and seller claims match the seller_offer."
+   },
+   "outreach": null,
+   "latency_ms": 27562,
+   "cost_usd": 0.094595,
+   "error": null
+  },
+  {
+   "domain": "sharewillow.com",
+   "name": "sharewillow.com",
+   "url": "https://sharewillow.com/",
+   "found_via": "news: raises $8.5M seed to expand AI platform (Oct 30 2026)",
+   "signal": "news",
+   "status": "done",
+   "evidence": [
+    {
+     "id": "ae93a82bce6040e48b62d7e802d0acf1",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "ShareWillow offers a performance pay app to service businesses and technicians",
+     "quote": {
+      "text": "Every tech sees what they earned this week and what drove it, live on their phone.",
+      "url": "https://www.sharewillow.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:12:33.229966Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "59ed338256784df7875393100b7efbf8",
+     "claim_type": "fit",
+     "criterion_id": "fit-2",
+     "claim": "ShareWillow sells and supports customers through a phone app",
+     "quote": {
+      "text": "Every closed job shows up in the app the same day.",
+      "url": "https://www.sharewillow.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:12:33.229966Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "e32e96d388bb4309b1213aebc3a99087",
+     "claim_type": "fit",
+     "criterion_id": "fit-4",
+     "claim": "ShareWillow has sales and customer success teams hiring account executives",
+     "quote": {
+      "text": "Account Executive, Enterprise",
+      "url": "https://careers.sharewillow.com/",
+      "source_type": "job_post",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:12:45.639738Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "572b94f356e044fe82b12d94a04e9104",
+     "claim_type": "timing",
+     "criterion_id": "timing-std-1",
+     "claim": "ShareWillow announced an $8.5M seed round in late October 2026",
+     "quote": {
+      "text": "We raised an $8.5M seed round with participation from",
+      "url": "https://alleywatch.com/2026/10/sharewillow-home-field-service-technicians-performance-pay-platform-ai-agents-skilled-trades-ryan-shank/",
+      "source_type": "news",
+      "published_date": "2026-10-29",
+      "fetched_at": "2026-11-02T01:12:48.079323Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "cfe173b78c3248a7943d9b96ec58e08f",
+     "claim_type": "timing",
+     "criterion_id": "timing-std-2",
+     "claim": "ShareWillow is expanding its AI agents into a new product called Willow",
+     "quote": {
+      "text": "Next, we’re expanding those agents into a more agentic product called Willow.",
+      "url": "https://alleywatch.com/2026/10/sharewillow-home-field-service-technicians-performance-pay-platform-ai-agents-skilled-trades-ryan-shank/",
+      "source_type": "news",
+      "published_date": "2026-10-29",
+      "fetched_at": "2026-11-02T01:12:48.079323Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "05dfa8f795e5410d98ab7ddac83c9fe4",
+     "claim_type": "timing",
+     "criterion_id": "timing-std-3",
+     "claim": "ShareWillow is growing its team with open roles in New York City",
+     "quote": {
+      "text": "Open roles · New York City",
+      "url": "https://careers.sharewillow.com/",
+      "source_type": "job_post",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:12:45.639738Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "584361baa4174e1296efcf715ef3b15a",
+     "claim_type": "disqualifier",
+     "criterion_id": "inactive",
+     "claim": "ShareWillow is active serving hundreds of service businesses",
+     "quote": {
+      "text": "Learn what hundreds of service businesses pay their top techs",
+      "url": "https://www.sharewillow.com/",
+      "source_type": "own_site",
+      "published_date": null,
+      "fetched_at": "2026-11-02T01:12:33.229966Z",
+      "location": "text",
+      "open_posting": false
+     },
+     "found_by": "model"
+    }
+   ],
+   "decisions": [
+    {
+     "evidence_id": "ae93a82bce6040e48b62d7e802d0acf1",
+     "decision": "insufficient",
+     "reason": "Run budget reached before the skeptic checked this",
+     "decided_by": "budget"
+    },
+    {
+     "evidence_id": "59ed338256784df7875393100b7efbf8",
+     "decision": "insufficient",
+     "reason": "Run budget reached before the skeptic checked this",
+     "decided_by": "budget"
+    },
+    {
+     "evidence_id": "e32e96d388bb4309b1213aebc3a99087",
+     "decision": "insufficient",
+     "reason": "Run budget reached before the skeptic checked this",
+     "decided_by": "budget"
+    },
+    {
+     "evidence_id": "572b94f356e044fe82b12d94a04e9104",
+     "decision": "insufficient",
+     "reason": "Run budget reached before the skeptic checked this",
+     "decided_by": "budget"
+    },
+    {
+     "evidence_id": "cfe173b78c3248a7943d9b96ec58e08f",
+     "decision": "insufficient",
+     "reason": "Run budget reached before the skeptic checked this",
+     "decided_by": "budget"
+    },
+    {
+     "evidence_id": "05dfa8f795e5410d98ab7ddac83c9fe4",
+     "decision": "insufficient",
+     "reason": "Run budget reached before the skeptic checked this",
+     "decided_by": "budget"
+    },
+    {
+     "evidence_id": "584361baa4174e1296efcf715ef3b15a",
+     "decision": "insufficient",
+     "reason": "Run budget reached before the skeptic checked this",
+     "decided_by": "budget"
+    }
+   ],
+   "checked_places": [
+    "2 homepage codes",
+    "job post",
+    "search \"ShareWillow raises $8.5M seed expand AI platform\"",
+    "search \"ShareWillow Intercom Gorgias Help Scout tawk.to Tidio\"",
+    "about page",
+    "pricing page",
+    "other page on alleywatch.com",
+    "search \"ShareWillow help center support contact chat\""
+   ],
+   "disqualifier_check_completed": true,
+   "blocked": [],
+   "signatures": [
+    {
+     "url": "https://www.sharewillow.com/",
+     "kind": "homepage",
+     "fetched_at": "2026-11-02T01:12:33.229966Z",
+     "attributes": [
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-PPHSFKNN"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://www.servicetitan.com/marketplace"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ServiceTitan Certified App"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ServiceTitan"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Housecall Pro"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Jobber"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "The Clogbusters truck and jetter trailer"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://sw-customerstories.lovable.app/assets/clogbusters-logo-full-CHditXqM.webp"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Clogbusters"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://sw-customerstories.lovable.app/assets/chris-mcdowell-D7OOJWjE.jpeg"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Chris McDowell"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Benjamin Franklin Plumbing and One Hour service van"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://sw-customerstories.lovable.app/assets/bfp-logo-dark-DtdAEu4N.svg"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Benjamin Franklin Plumbing"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://sw-customerstories.lovable.app/assets/ron-williams-Bnf2QXZV.jpg"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Ron Williams"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Burke & Sons"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Rare Restoration"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "LG Electrical"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Priority One"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Camflo"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Ferrell Electric"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Good Guy Plumbing"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Slack"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Intuit"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Zenefits"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Paychex"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Ryan Shank, founder of ShareWillow"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/2000/svg"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-PPHSFKNN\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/2000/svg\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://docs.sharewillow.com\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.servicetitan.com/marketplace\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://sw-customerstories.lovable.app/assets/clogbusters-logo-full-CHditXqM.webp\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://sw-customerstories.lovable.app/assets/chris-mcdowell-D7OOJWjE.jpeg\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://sw-customerstories.lovable.app/assets/bfp-logo-dark-DtdAEu4N.svg\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://sw-customerstories.lovable.app/assets/ron-williams-Bnf2QXZV.jpg\\"
+      }
+     ],
+     "powered_by": [
+      "Runs on the software you already have."
+     ],
+     "lines": []
+    },
+    {
+     "url": "https://www.sharewillow.com/careers",
+     "kind": "other",
+     "fetched_at": "2026-11-02T01:12:34.097606Z",
+     "attributes": [
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-PPHSFKNN"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "The ShareWillow team standing with technicians in front of a contractor van"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://marketplace.servicetitan.com/partner/sharewillow"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ServiceTitan Certified App"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ShareWillow founder Ryan Shank in a ShareWillow vest, standing between two technicians in front of a brick wall"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Circadian Ventures"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Lerer Hippeau"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Charge Ventures"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Asylum Ventures"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Twelve Below"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Ryan Shank"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Ash Read"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Navraj Nat"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Jordan Sweet"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Ashlyn Wray"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Abby Gregg"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/2000/svg"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-PPHSFKNN\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/2000/svg\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://docs.sharewillow.com\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://marketplace.servicetitan.com/partner/sharewillow\\"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    },
+    {
+     "url": "https://www.sharewillow.com/about",
+     "kind": "other",
+     "fetched_at": "2026-11-02T01:12:40.749924Z",
+     "attributes": [
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-PPHSFKNN"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "The ShareWillow team standing with technicians in front of a contractor van"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Ryan Shank"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Navraj Nat"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Ash Read"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Ashlyn Wray"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Abby Gregg"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Jordan Sweet"
+      },
+      {
+       "tag": "img",
+       "attr": "src",
+       "value": "https://sw-customerstories.lovable.app/assets/chris-mcdowell-D7OOJWjE.jpeg"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Chris McDowell"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/2000/svg"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-PPHSFKNN\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/2000/svg\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://docs.sharewillow.com\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://sw-customerstories.lovable.app/assets/chris-mcdowell-D7OOJWjE.jpeg\\"
+      }
+     ],
+     "powered_by": [
+      "— Charlie Munger, the philosophy ShareWillow is built on"
+     ],
+     "lines": []
+    },
+    {
+     "url": "https://www.sharewillow.com/pricing",
+     "kind": "other",
+     "fetched_at": "2026-11-02T01:12:41.343424Z",
+     "attributes": [
+      {
+       "tag": "iframe",
+       "attr": "src",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-PPHSFKNN"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://meetings.hubspot.com/ryan-shank/demo"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/2000/svg"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://www.googletagmanager.com/ns.html?id=GTM-PPHSFKNN\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "http://www.w3.org/2000/svg\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://docs.sharewillow.com\\"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://meetings.hubspot.com/ryan-shank/demo\\"
+      }
+     ],
+     "powered_by": [
+      "Everything runs on techs enrolled in plans. Office users and admins are free on every tier."
+     ],
+     "lines": []
+    },
+    {
+     "url": "https://careers.sharewillow.com/",
+     "kind": "homepage",
+     "fetched_at": "2026-11-02T01:12:45.639738Z",
+     "attributes": [
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ShareWillow"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ServiceTitan Certified App. Opens marketplace details."
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "ShareWillow and ServiceTitan"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://marketplace.servicetitan.com/partner/sharewillow"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Circadian Ventures"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Lerer Hippeau"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Charge Ventures"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Asylum Ventures"
+      },
+      {
+       "tag": "img",
+       "attr": "alt",
+       "value": "Twelve Below"
+      },
+      {
+       "tag": "a",
+       "attr": "href",
+       "value": "https://sharewillow.com"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092"
+      },
+      {
+       "tag": "script",
+       "attr": "inline",
+       "value": "https://sharewillow.com\\"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    }
+   ],
+   "searches": 3,
+   "fetches": 6,
+   "turns": 3,
+   "verdict": {
+    "kind": "needs_look",
+    "summary": "Needs a look",
+    "missing": [
+     "Fit not shown: Offers a product or service to leads or customers that generates support questions or onboarding needs",
+     "No current need or timing evidence (none dated within 180 days, no open job post)"
+    ],
+    "unconfirmed": [],
+    "disqualifier": null,
+    "rule": null
+   },
+   "pitch": null,
+   "outreach": null,
+   "latency_ms": 32172,
+   "cost_usd": 0.08385,
+   "error": null
+  },
+  {
+   "domain": "frejun.com",
+   "name": "FreJun",
+   "url": "https://frejun.com/",
+   "found_via": "social: LinkedIn post We're Hiring Customer Support Intern and Customer Success Executive",
+   "signal": "social",
+   "status": "done",
+   "evidence": [],
+   "decisions": [],
+   "checked_places": [],
+   "disqualifier_check_completed": false,
+   "blocked": [
+    "https://frejun.com/: Website returned HTTP 403"
+   ],
+   "signatures": [],
+   "searches": 0,
+   "fetches": 1,
+   "turns": 0,
+   "verdict": {
+    "kind": "needs_look",
+    "summary": "Needs a look",
+    "missing": [
+     "Investigation incomplete: The homepage could not be read",
+     "Fit not shown: Offers a product or service to leads or customers that generates support questions or onboarding needs",
+     "No current need or timing evidence (none dated within 180 days, no open job post)",
+     "Competitor check not run",
+     "Could not read https://frejun.com/: Website returned HTTP 403"
+    ],
+    "unconfirmed": [],
+    "disqualifier": null,
+    "rule": null
+   },
+   "pitch": null,
+   "outreach": null,
+   "latency_ms": 109,
+   "cost_usd": 0.0,
+   "error": "The homepage could not be read"
+  },
+  {
+   "domain": "spinquest.com",
+   "name": "spinquest.com",
+   "url": "https://spinquest.com/",
+   "found_via": "job post: Customer Service Representative (Lever, Oct 2026) (posting https://jobs.lever.co/Spinquest/fb85fd9b-5af8-43a2-a459-039f6bb48446 not confirmed open on the company's board)",
+   "signal": "hiring",
+   "status": "done",
+   "evidence": [
+    {
+     "id": "7e5f2c9c03b643feb55a832d70b1b389",
+     "claim_type": "need",
+     "criterion_id": "need-1",
+     "claim": "Hiring Customer Service Representatives for full-time and part-time remote support roles",
+     "quote": {
+      "text": "SpinQuest is looking for\nCustomer Service Representatives\nto join our team in the United States on a\nremote\nbasis.",
+      "url": "https://jobs.lever.co/Spinquest/fb85fd9b-5af8-43a2-a459-039f6bb48446",
+      "source_type": "job_post",
+      "published_date": "2026-10-16",
+      "fetched_at": "2026-11-02T01:12:35.468368Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "eb2e319b262c441ea9d2b39f2faa3258",
+     "claim_type": "need",
+     "criterion_id": "need-4",
+     "claim": "Job post lists experience with Intercom customer support platform as bonus",
+     "quote": {
+      "text": "Experience using Intercom or similar customer support platforms.",
+      "url": "https://jobs.lever.co/Spinquest/fb85fd9b-5af8-43a2-a459-039f6bb48446",
+      "source_type": "job_post",
+      "published_date": "2026-10-16",
+      "fetched_at": "2026-11-02T01:12:35.468368Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "a96c4dea1fc84154bf2a24732abb13ec",
+     "claim_type": "disqualifier",
+     "criterion_id": "uses_direct_competitor:intercom.com",
+     "claim": "Job post indicates current use of Intercom support platform",
+     "quote": {
+      "text": "Experience using Intercom or similar customer support platforms.",
+      "url": "https://jobs.lever.co/Spinquest/fb85fd9b-5af8-43a2-a459-039f6bb48446",
+      "source_type": "job_post",
+      "published_date": "2026-10-16",
+      "fetched_at": "2026-11-02T01:12:35.468368Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "99251ae0b75748a6ac223c4efd3e352d",
+     "claim_type": "fit",
+     "criterion_id": "fit-1",
+     "claim": "Social casino product generates account, purchase and gameplay support questions",
+     "quote": {
+      "text": "resolving questions, and troubleshooting issues across accounts, purchases, redemptions, promotions, gameplay, and platform functionality.",
+      "url": "https://jobs.lever.co/Spinquest/fb85fd9b-5af8-43a2-a459-039f6bb48446",
+      "source_type": "job_post",
+      "published_date": "2026-10-16",
+      "fetched_at": "2026-11-02T01:12:35.468368Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "f6c61e2e57d94e84b1189f106074b853",
+     "claim_type": "fit",
+     "criterion_id": "fit-2",
+     "claim": "Operates a scalable social gaming platform with casino-style games",
+     "quote": {
+      "text": "We are building a high-growth platform that blends social gaming with creator partnerships, original games, and community-driven experiences.",
+      "url": "https://jobs.lever.co/Spinquest/fb85fd9b-5af8-43a2-a459-039f6bb48446",
+      "source_type": "job_post",
+      "published_date": "2026-10-16",
+      "fetched_at": "2026-11-02T01:12:35.468368Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "480d95bb451b479ebe3aee664e3aa29c",
+     "claim_type": "fit",
+     "criterion_id": "fit-4",
+     "claim": "Maintains a customer support team handling player service channels",
+     "quote": {
+      "text": "Provide timely, friendly, and professional support across player service channels.",
+      "url": "https://jobs.lever.co/Spinquest/fb85fd9b-5af8-43a2-a459-039f6bb48446",
+      "source_type": "job_post",
+      "published_date": "2026-10-16",
+      "fetched_at": "2026-11-02T01:12:35.468368Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    },
+    {
+     "id": "455b19df2581497cb78a74ca46c91209",
+     "claim_type": "timing",
+     "criterion_id": "timing-std-3",
+     "claim": "Building high-growth platform and hiring support team now",
+     "quote": {
+      "text": "We are building a high-growth platform that blends social gaming with creator partnerships, original games, and community-driven experiences.",
+      "url": "https://jobs.lever.co/Spinquest/fb85fd9b-5af8-43a2-a459-039f6bb48446",
+      "source_type": "job_post",
+      "published_date": "2026-10-16",
+      "fetched_at": "2026-11-02T01:12:35.468368Z",
+      "location": "text",
+      "open_posting": true
+     },
+     "found_by": "model"
+    }
+   ],
+   "decisions": [
+    {
+     "evidence_id": "7e5f2c9c03b643feb55a832d70b1b389",
+     "decision": "supports",
+     "reason": "Quote explicitly states company is hiring Customer Service Representatives.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "eb2e319b262c441ea9d2b39f2faa3258",
+     "decision": "insufficient",
+     "reason": "Quote only lists desired candidate experience with Intercom, not a statement that the company itself uses or advertises helpdesk software.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "a96c4dea1fc84154bf2a24732abb13ec",
+     "decision": "insufficient",
+     "reason": "Quote is a job requirement for Intercom experience, not evidence of current Intercom use today.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "99251ae0b75748a6ac223c4efd3e352d",
+     "decision": "supports",
+     "reason": "Quote describes resolving questions and troubleshooting across accounts, purchases and platform functionality, showing a product that generates support needs.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "f6c61e2e57d94e84b1189f106074b853",
+     "decision": "insufficient",
+     "reason": "Quote describes building a platform generally but does not mention selling or supporting customers through a website, web app or mobile app.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "480d95bb451b479ebe3aee664e3aa29c",
+     "decision": "supports",
+     "reason": "Quote describes providing support across player service channels, indicating an inbound support function.",
+     "decided_by": "skeptic"
+    },
+    {
+     "evidence_id": "455b19df2581497cb78a74ca46c91209",
+     "decision": "insufficient",
+     "reason": "Quote describes building a platform/product, not building or growing the support team.",
+     "decided_by": "skeptic"
+    }
+   ],
+   "checked_places": [
+    "2 homepage codes",
+    "job post page on jobs.lever.co",
+    "search \"SpinQuest help center support\"",
+    "search \"site:spinquest.com support help contact\"",
+    "about page",
+    "search \"SpinQuest support help center FAQ live chat\"",
+    "other page on bleachernation.com",
+    "support page",
+    "search \"spinquest.com Intercom Gorgias Help Scout tawk.to Tidio\""
+   ],
+   "disqualifier_check_completed": true,
+   "blocked": [],
+   "signatures": [
+    {
+     "url": "https://spinquest.com/",
+     "kind": "homepage",
+     "fetched_at": "2026-11-02T01:12:33.147728Z",
+     "attributes": [
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://cdn.geocomply.com/264/gc-html5.js"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    },
+    {
+     "url": "https://spinquest.com/",
+     "kind": "homepage",
+     "fetched_at": "2026-11-02T01:12:35.740838Z",
+     "attributes": [
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://cdn.geocomply.com/264/gc-html5.js"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    },
+    {
+     "url": "https://spinquest.com/about",
+     "kind": "other",
+     "fetched_at": "2026-11-02T01:12:41.938284Z",
+     "attributes": [
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://cdn.geocomply.com/264/gc-html5.js"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    },
+    {
+     "url": "https://spinquest.com/support",
+     "kind": "other",
+     "fetched_at": "2026-11-02T01:12:50.441172Z",
+     "attributes": [
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js"
+      },
+      {
+       "tag": "script",
+       "attr": "src",
+       "value": "https://cdn.geocomply.com/264/gc-html5.js"
+      }
+     ],
+     "powered_by": [],
+     "lines": []
+    }
+   ],
+   "searches": 4,
+   "fetches": 6,
+   "turns": 4,
+   "verdict": {
+    "kind": "shortlisted",
+    "summary": "Required fit shown, current need or timing evidence, and no current competitor use found",
+    "missing": [],
+    "unconfirmed": [],
+    "disqualifier": null,
+    "rule": null
+   },
+   "pitch": null,
+   "outreach": null,
+   "latency_ms": 29750,
+   "cost_usd": 0.096574,
+   "error": null
+  }
+ ],
+ "candidate_pool": [
+  {
+   "domain": "luxurypresence.com",
+   "name": "Luxury Presence",
+   "url": "https://luxurypresence.com/",
+   "found_via": "open job post on its Lever board: Online Support Representative (Remote), posted 2026-10-30 (https://jobs.lever.co/luxurypresence/40d9d305-98bd-4373-80a9-c25fc112eae4)",
+   "signal": "hiring",
+   "source_url": ""
+  },
+  {
+   "domain": "mintive.ai",
+   "name": "Mintive",
+   "url": "https://mintive.ai/",
+   "found_via": "news: raised $7M seed led by Cowboy Ventures (Oct 29 2026)",
+   "signal": "news",
+   "source_url": ""
+  },
+  {
+   "domain": "alia.co",
+   "name": "Alia",
+   "url": "https://alia.co/",
+   "found_via": "social: LinkedIn post hiring Customer Support Specialist with Shopify / Intercom experience",
+   "signal": "social",
+   "source_url": ""
+  },
+  {
+   "domain": "comply.com",
+   "name": "Comply",
+   "url": "https://comply.com/",
+   "found_via": "job post: Customer Support Representative - West Coast Hours (Lever, Oct 2026) (posting https://jobs.lever.co/comply not confirmed open on the company's board)",
+   "signal": "hiring",
+   "source_url": ""
+  },
+  {
+   "domain": "sharewillow.com",
+   "name": "ShareWillow",
+   "url": "https://sharewillow.com/",
+   "found_via": "news: raises $8.5M seed to expand AI platform (Oct 30 2026)",
+   "signal": "news",
+   "source_url": ""
+  },
+  {
+   "domain": "frejun.com",
+   "name": "FreJun",
+   "url": "https://frejun.com/",
+   "found_via": "social: LinkedIn post We're Hiring Customer Support Intern and Customer Success Executive",
+   "signal": "social",
+   "source_url": ""
+  },
+  {
+   "domain": "spinquest.com",
+   "name": "SpinQuest",
+   "url": "https://spinquest.com/",
+   "found_via": "job post: Customer Service Representative (Lever, Oct 2026) (posting https://jobs.lever.co/Spinquest/fb85fd9b-5af8-43a2-a459-039f6bb48446 not confirmed open on the company's board)",
+   "signal": "hiring",
+   "source_url": ""
+  },
+  {
+   "domain": "slingshotinsurance.com",
+   "name": "Slingshot",
+   "url": "https://slingshotinsurance.com/",
+   "found_via": "news: raises $27M seed for embedded insurance AI platform (Oct 22 2026)",
+   "signal": "news",
+   "source_url": ""
+  },
+  {
+   "domain": "digitickets.co.uk",
+   "name": "DigiTickets",
+   "url": "https://digitickets.co.uk/",
+   "found_via": "social: LinkedIn post We're Hiring Client Support Specialists",
+   "signal": "social",
+   "source_url": ""
+  },
+  {
+   "domain": "prodigygame.com",
+   "name": "Prodigy Education",
+   "url": "https://prodigygame.com/",
+   "found_via": "job post: Customer Support Representative (Lever, Oct 2026) (posting https://jobs.lever.co/prodigyeducation/676c4621-a008-4c9f-8a56-85283fa10dd3 not confirmed open on the company's board)",
+   "signal": "hiring",
+   "source_url": ""
+  },
+  {
+   "domain": "forgepoint.ai",
+   "name": "Forgepoint",
+   "url": "https://forgepoint.ai/",
+   "found_via": "news: raises $9.8M seed for AI sales rep (Oct 14 2026)",
+   "signal": "news",
+   "source_url": ""
+  },
+  {
+   "domain": "altegio.com",
+   "name": "Altegio",
+   "url": "https://altegio.com/",
+   "found_via": "social: LinkedIn post hiring Customer Support Manager",
+   "signal": "social",
+   "source_url": ""
+  },
+  {
+   "domain": "mercury.com",
+   "name": "Mercury",
+   "url": "https://mercury.com/",
+   "found_via": "job post: Customer Support Specialist (Greenhouse, Oct 2026) (posting https://boards.greenhouse.io/mercury/jobs/5432529004 not confirmed open on the company's board)",
+   "signal": "hiring",
+   "source_url": ""
+  },
+  {
+   "domain": "confidohealth.com",
+   "name": "Confido Health",
+   "url": "https://confidohealth.com/",
+   "found_via": "news: raised $12.5M Series A (Oct 15 2026)",
+   "signal": "news",
+   "source_url": ""
+  },
+  {
+   "domain": "qorusdocs.com",
+   "name": "QorusDocs",
+   "url": "https://qorusdocs.com/",
+   "found_via": "social: LinkedIn post hiring Senior Support Consultant in Cape Town for SaaS support",
+   "signal": "social",
+   "source_url": ""
+  },
+  {
+   "domain": "tide.co",
+   "name": "Tide",
+   "url": "https://tide.co/",
+   "found_via": "job post: Customer Support Specialist with German (Greenhouse, Oct 2026) (posting https://boards.greenhouse.io/tide/jobs/5241222003 not confirmed open on the company's board)",
+   "signal": "hiring",
+   "source_url": ""
+  },
+  {
+   "domain": "clipboardhealth.com",
+   "name": "Clipboard Health",
+   "url": "https://clipboardhealth.com/",
+   "found_via": "job post: Client Support Specialist B2B (Greenhouse, Oct 2026) (posting https://job-boards.greenhouse.io/clipboardhealth not confirmed open on the company's board)",
+   "signal": "hiring",
+   "source_url": ""
+  },
+  {
+   "domain": "blinkhealth.com",
+   "name": "Blink Health",
+   "url": "https://blinkhealth.com/",
+   "found_via": "job post: Bilingual Customer Support Specialist (Greenhouse, Oct 2026) (posting https://boards.greenhouse.io/blinkhealth/jobs/5264679002 not confirmed open on the company's board)",
+   "signal": "hiring",
+   "source_url": ""
+  }
+ ],
+ "set_aside": [
+  {
+   "domain": "jobs.lever.co",
+   "url": "https://jobs.lever.co/getwingapp/cd7afa1c-fd90-45d8-aea6-9ab71b185708?ref=dailyremote&utm_source=dailyremote.com&utm_campaign=dailyremote.com&utm_medium=dailyremote.com",
+   "reason": "Review site, directory, job board or news site, not a company",
+   "previous_run": null
+  },
+  {
+   "domain": "boards.greenhouse.io",
+   "url": "https://boards.greenhouse.io/xometry/jobs/4377488007?utm_source=SOAR+Kentucky+job+board&utm_medium=getro.com&gh_src=SOAR+Kentucky+job+board",
+   "reason": "Review site, directory, job board or news site, not a company",
+   "previous_run": null
+  },
+  {
+   "domain": "valueaddvc.com",
+   "url": "https://valueaddvc.com/pulse/mintive-7m-seed-agent-identity-2026",
+   "reason": "A search result about the company, not its own homepage or product page (for example a news article); the publisher is not a candidate",
+   "previous_run": null
+  },
+  {
+   "domain": "thesaasnews.com",
+   "url": "https://www.thesaasnews.com/news/sharewillow-raises-8-5m-seed/",
+   "reason": "Article, guide, news or directory page; an official company or product page is required",
+   "previous_run": null
+  },
+  {
+   "domain": "headlinesbriefing.com",
+   "url": "https://headlinesbriefing.com/private-markets/crunchbase-news/slingshot-raises-27m-seed-funding-for-embedded-insurance-ai-platform-8e6da55e",
+   "reason": "A search result about the company, not its own homepage or product page (for example a news article); the publisher is not a candidate",
+   "previous_run": null
+  },
+  {
+   "domain": "maliktimes.in",
+   "url": "https://maliktimes.in/indian-startup-funding-this-week/",
+   "reason": "A search result about the company, not its own homepage or product page (for example a news article); the publisher is not a candidate",
+   "previous_run": null
+  },
+  {
+   "domain": "askwiki.blogspot.com",
+   "url": "https://askwiki.blogspot.com/2026/10/from-simple-energy-to-arivihan-indian.html",
+   "reason": "A search result about the company, not its own homepage or product page (for example a news article); the publisher is not a candidate",
+   "previous_run": null
+  },
+  {
+   "domain": "techstartups.com",
+   "url": "https://techstartups.com/2026/10/01/startup-funding-news-today-october-1-2026-armadin-foundational-frank-1club-osavul-more/",
+   "reason": "A search result about the company, not its own homepage or product page (for example a news article); the publisher is not a candidate",
+   "previous_run": null
+  },
+  {
+   "domain": "trustlist.uk",
+   "url": "https://trustlist.uk/funding-news/forgepoint-raises-9-8-million-seed-ai-sales-rep-manufacturers-quotes",
+   "reason": "A search result about the company, not its own homepage or product page (for example a news article); the publisher is not a candidate",
+   "previous_run": null
+  },
+  {
+   "domain": "businessinfomedia.com",
+   "url": "https://businessinfomedia.com/from-boldfit-to-origin-indian-startups-raised-over-236-mn-this-week",
+   "reason": "A search result about the company, not its own homepage or product page (for example a news article); the publisher is not a candidate",
+   "previous_run": null
+  },
+  {
+   "domain": "start-midwest.com",
+   "url": "https://www.start-midwest.com/news/midwest-startup-funding-for-the-week-ending-october-23-2026",
+   "reason": "Article, guide, news or directory page; an official company or product page is required",
+   "previous_run": null
+  },
+  {
+   "domain": "bitcomme.com",
+   "url": "https://bitcomme.com/copperpilot-an-ai-design-agent-startup-for-electronics-hardware-raises-390000-in-funding/",
+   "reason": "A search result about the company, not its own homepage or product page (for example a news article); the publisher is not a candidate",
+   "previous_run": null
+  },
+  {
+   "domain": "in.linkedin.com",
+   "url": "https://in.linkedin.com/company/origain-global-corp",
+   "reason": "Review site, directory, job board or news site, not a company",
+   "previous_run": null
+  },
+  {
+   "domain": "ng.linkedin.com",
+   "url": "https://ng.linkedin.com/company/g-tateth",
+   "reason": "Review site, directory, job board or news site, not a company",
+   "previous_run": null
+  },
+  {
+   "domain": "linkedin.com",
+   "url": "https://www.linkedin.com/posts/katherine-marquez-7258552b0_remotejobs-hiring-customersuccess-activity-7497572756956471296-wV-3",
+   "reason": "Review site, directory, job board or news site, not a company",
+   "previous_run": null
+  },
+  {
+   "domain": "cy.linkedin.com",
+   "url": "https://cy.linkedin.com/company/altegio",
+   "reason": "Review site, directory, job board or news site, not a company",
+   "previous_run": null
+  },
+  {
+   "domain": "mintive.ai",
+   "url": "https://mintive.ai/",
+   "reason": "Website could not be read: Redirect changed company identity; manual verification required",
+   "previous_run": null
+  },
+  {
+   "domain": "alia.co",
+   "url": "https://alia.co/",
+   "reason": "Website could not be read: Website DNS is unavailable",
+   "previous_run": null
+  },
+  {
+   "domain": "comply.com",
+   "url": "https://comply.com/",
+   "reason": "Website could not be read: Compressed response is not supported",
+   "previous_run": null
+  }
+ ],
+ "dropped": [
+  {
+   "stage": "seller",
+   "company": null,
+   "claim_type": "fit criterion",
+   "quote": "Chat Widget",
+   "url": "https://crisp.chat/en/",
+   "reason": "Quote not found in the fetched page"
+  },
+  {
+   "stage": "seller",
+   "company": null,
+   "claim_type": "fit criterion",
+   "quote": "Email",
+   "url": "https://crisp.chat/en/",
+   "reason": "Quote not found in the fetched page"
+  },
+  {
+   "stage": "seller",
+   "company": null,
+   "claim_type": "fit criterion",
+   "quote": "WhatsApp",
+   "url": "https://crisp.chat/en/",
+   "reason": "Quote not found in the fetched page"
+  },
+  {
+   "stage": "seller",
+   "company": null,
+   "claim_type": "fit criterion",
+   "quote": "Messenger",
+   "url": "https://crisp.chat/en/",
+   "reason": "Quote not found in the fetched page"
+  },
+  {
+   "stage": "seller",
+   "company": null,
+   "claim_type": "existing customer",
+   "quote": "Emma",
+   "url": "https://crisp.chat/en/",
+   "reason": "Quote not found in the fetched page"
+  },
+  {
+   "stage": "seller",
+   "company": null,
+   "claim_type": "existing customer",
+   "quote": "Hoxton Mix",
+   "url": "https://crisp.chat/en/",
+   "reason": "Quote not found in the fetched page"
+  },
+  {
+   "stage": "seller",
+   "company": null,
+   "claim_type": "existing customer",
+   "quote": "Reedsy",
+   "url": "https://crisp.chat/en/",
+   "reason": "Quote not found in the fetched page"
+  },
+  {
+   "stage": "seller",
+   "company": null,
+   "claim_type": "offer",
+   "quote": "All-in-one",
+   "url": "https://crisp.chat/en/",
+   "reason": "Quote not found in the fetched page"
+  }
+ ],
+ "telemetry": {
+  "budget_usd": 0.38,
+  "budget_reached": true,
+  "cost_usd": 0.410461,
+  "input_tokens": 164160,
+  "output_tokens": 36532,
+  "searches": 20,
+  "model_calls": 21,
+  "pages_fetched": 31,
+  "elapsed_ms": 165342,
+  "calls": [
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "seller_profile",
+    "company": null,
+    "input_tokens": 2937,
+    "output_tokens": 3184,
+    "searches": 0,
+    "latency_ms": 13717,
+    "usd": 0.017203,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "seller_profile:repair",
+    "company": null,
+    "input_tokens": 2514,
+    "output_tokens": 1585,
+    "searches": 0,
+    "latency_ms": 4282,
+    "usd": 0.009879,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "competitor_search",
+    "company": null,
+    "input_tokens": 6169,
+    "output_tokens": 1277,
+    "searches": 1,
+    "latency_ms": 5655,
+    "usd": 0.015638,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "competitor_classify",
+    "company": null,
+    "input_tokens": 4593,
+    "output_tokens": 2484,
+    "searches": 0,
+    "latency_ms": 10266,
+    "usd": 0.016298,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "discovery",
+    "company": null,
+    "input_tokens": 9862,
+    "output_tokens": 3000,
+    "searches": 4,
+    "latency_ms": 14531,
+    "usd": 0.035077,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "discovery:longer",
+    "company": null,
+    "input_tokens": 10021,
+    "output_tokens": 3054,
+    "searches": 4,
+    "latency_ms": 12202,
+    "usd": 0.035506,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "luxurypresence.com",
+    "input_tokens": 5002,
+    "output_tokens": 908,
+    "searches": 0,
+    "latency_ms": 5280,
+    "usd": 0.010112,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "luxurypresence.com",
+    "input_tokens": 6342,
+    "output_tokens": 184,
+    "searches": 0,
+    "latency_ms": 3172,
+    "usd": 0.00871,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "luxurypresence.com",
+    "input_tokens": 21071,
+    "output_tokens": 1909,
+    "searches": 4,
+    "latency_ms": 11422,
+    "usd": 0.044452,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "skeptic",
+    "company": "luxurypresence.com",
+    "input_tokens": 1336,
+    "output_tokens": 3459,
+    "searches": 0,
+    "latency_ms": 10655,
+    "usd": 0.016371,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "pitch",
+    "company": null,
+    "input_tokens": 637,
+    "output_tokens": 1187,
+    "searches": 0,
+    "latency_ms": 5094,
+    "usd": 0.005841,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "pitch_check",
+    "company": "luxurypresence.com",
+    "input_tokens": 513,
+    "output_tokens": 1500,
+    "searches": 0,
+    "latency_ms": 5140,
+    "usd": 0.007016,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "pitch_check:longer",
+    "company": "luxurypresence.com",
+    "input_tokens": 513,
+    "output_tokens": 1716,
+    "searches": 0,
+    "latency_ms": 5594,
+    "usd": 0.007934,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "spinquest.com",
+    "input_tokens": 2614,
+    "output_tokens": 302,
+    "searches": 0,
+    "latency_ms": 2000,
+    "usd": 0.004551,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "sharewillow.com",
+    "input_tokens": 4228,
+    "output_tokens": 1028,
+    "searches": 2,
+    "latency_ms": 6077,
+    "usd": 0.014654,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "spinquest.com",
+    "input_tokens": 15837,
+    "output_tokens": 635,
+    "searches": 2,
+    "latency_ms": 5938,
+    "usd": 0.027495,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "sharewillow.com",
+    "input_tokens": 7728,
+    "output_tokens": 356,
+    "searches": 0,
+    "latency_ms": 3577,
+    "usd": 0.011173,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "spinquest.com",
+    "input_tokens": 11081,
+    "output_tokens": 638,
+    "searches": 1,
+    "latency_ms": 6359,
+    "usd": 0.019063,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "spinquest.com",
+    "input_tokens": 14954,
+    "output_tokens": 2068,
+    "searches": 1,
+    "latency_ms": 12030,
+    "usd": 0.029981,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "meta",
+    "model": "muse-spark-1.3",
+    "operation": "investigate",
+    "company": "sharewillow.com",
+    "input_tokens": 34847,
+    "output_tokens": 2815,
+    "searches": 1,
+    "latency_ms": 16734,
+    "usd": 0.058023,
+    "ok": true,
+    "error": null
+   },
+   {
+    "provider": "baseten",
+    "model": "meta-models/muse-spark-open-1026",
+    "operation": "skeptic",
+    "company": "spinquest.com",
+    "input_tokens": 1361,
+    "output_tokens": 3243,
+    "searches": 0,
+    "latency_ms": 9952,
+    "usd": 0.015484,
+    "ok": true,
+    "error": null
+   }
+  ]
+ },
+ "error": null
+}
