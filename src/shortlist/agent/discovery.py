@@ -45,6 +45,7 @@ existing customers, or people. At most 4 searches.
 Return only JSON: {{"companies": [{{"name": "company", "domain": "company.com", "url": "https://company.com/",
 "found_via": "the signal you saw and where, for example 'job post: SDR (Greenhouse, 12 Oct 2026)' or 'similar to <customer>'",
 "posting_url": "the job posting's own url when found_via is a job post, else empty",
+"source_url": "the news article or post where you saw the signal, else empty",
 "signal": "hiring|news|social|lookalike"}}]}}"""
 
 
@@ -169,18 +170,20 @@ def discover(profile: SellerProfile, competitors: list[Competitor], count: int, 
             break
         # Companies the model named come first; raw search results only when they are a company's own page.
         postings = [result.url for search in turn.searches for result in search.results if board_refs(result.url)]
+        seen = {result.url for search in turn.searches for result in search.results}
         found = [(item.url or item.domain, item.name, lead(with_posting(item, postings), boards, emit), False,
-                  signal_of(item.signal, item.found_via)) for item in answer.companies]
+                  signal_of(item.signal, item.found_via), source_link(item.source_url, seen))
+                 for item in answer.companies]
         for search in turn.searches:
             emit("discovery", f"Searched {search_label(search.query)} ({len(search.results)} results)")
-            found += [(result.url, result.title, f'search "{search.query}"', True, signal_of("", search.query))
+            found += [(result.url, result.title, f'search "{search.query}"', True, signal_of("", search.query), "")
                       for result in search.results]
-        for url, name, via, own_page, signal in found:
+        for url, name, via, own_page, signal, source in found:
             ref, aside = admit(url, name or "", via, excluded, profile.domain, own_page=own_page, prior=prior)
             if ref and others and staffing_firm(name or ""):
                 ref, aside = None, SetAside(domain=ref.domain, url=ref.url, reason=STAFFING_ASIDE)
             if ref and ref.domain not in pool and len(pool) < MAX_COMPANIES:
-                pool[ref.domain] = ref.model_copy(update={"signal": signal})
+                pool[ref.domain] = ref.model_copy(update={"signal": signal, "source_url": source})
             elif aside and aside.domain not in pool:
                 set_aside.setdefault(aside.domain, aside)
         if not answer.companies and not turn.searches:
@@ -194,6 +197,13 @@ def discover(profile: SellerProfile, competitors: list[Competitor], count: int, 
 
 
 SIGNALS = ("hiring", "news", "social", "lookalike")
+
+
+def source_link(url: str, seen: set[str]) -> str:
+    """Where discovery saw a company's signal, kept only when that page was one of its search results: a model-written
+    link can be invented (greenlight.com's job link answered 404)."""
+    url = (url or "").strip()
+    return url[:2048] if url.startswith("https://") and url in seen else ""
 
 
 def signal_of(declared: str, via: str) -> str:

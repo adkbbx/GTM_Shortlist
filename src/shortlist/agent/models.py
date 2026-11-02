@@ -217,6 +217,7 @@ class CandidateRef(Model):
     url: str
     found_via: str = ""
     signal: LeadSignal = ""  # the kind of signal discovery found the company by
+    source_url: str = ""  # the news article or post where discovery saw it; the investigation reads it first
 
 
 class SetAside(Model):

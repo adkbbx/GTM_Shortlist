@@ -27,6 +27,7 @@ from shortlist.agent.pages import (
     excerpt,
     ground,
     open_posting,
+    own_role_page,
     parse_date,
     place_name,
     signature,
@@ -54,7 +55,9 @@ Work in this order:
    beyond it. Search for its job posts (its careers page, or job boards such as Greenhouse, Lever, Workable or
    LinkedIn) for roles named in the need signals, and for news or press releases from the last six months for the
    timing signals. open_posting, when present, is a job posting confirmed open just now and its text is supplied:
-   quote its own sentences for the need signals it shows, with that url, before searching for more. own_job_board,
+   quote its own sentences for the need signals it shows, with that url, before searching for more. lead_page, when
+   present, is the news article or post where this company was found, and its text is supplied: quote it for the
+   timing or need signal it shows, with its url and the date the page states. own_job_board,
    when present, lists the company's open roles read just now from its own job board: if a role there matches a need
    signal, fetch that role's url and quote it, because it beats a copy on a
    job site. If found_via names a job post or news item, find and fetch that page first. Fetch the job post or
@@ -148,6 +151,7 @@ class Investigation:
         self.names: list[str] = []
         self.board: Board | None = None
         self.posting: Page | None = None
+        self.source: Page | None = None
 
     # Pages -----------------------------------------------------------------------------------------------------
     def works_for_others(self) -> bool:
@@ -173,6 +177,21 @@ class Investigation:
                                            f"“{text[:100]}”; skipping deeper research", company=self.company.domain)
             return True
         return False
+
+    def read_lead_source(self):
+        """The news article or post discovery saw the company's signal on, read first and handed to the investigator.
+        A live run found mintive.com by its seed round and launch, then quoted only the company's own pages, which
+        cannot show need. LinkedIn is never fetched: its terms forbid automated access."""
+        url = self.company.source_url
+        if not url or self.posting is not None or re.search(r"(?:^|\.)linkedin\.com$", urlsplit(url).hostname or ""):
+            return
+        try:
+            page = self.fetch(url)
+        except FetchError as exc:
+            self.result.blocked.append(f"{url[:300]}: {exc}")
+            return
+        self.source = page
+        self.ctx.emit("investigation", f"Read where it was found: {url[:120]}", company=self.company.domain)
 
     def read_lead_posting(self):
         """The posting discovery confirmed open, read from its board's own data (no model call) and handed to the
@@ -293,6 +312,9 @@ class Investigation:
         if self.posting is not None:
             data["open_posting"] = self.posting.url
             home += f'\n<page url="{self.posting.url}">\n{excerpt(self.posting, 6000)}\n</page>'
+        if self.source is not None:
+            data["lead_page"] = self.source.url
+            home += f'\n<page url="{self.source.url}">\n{excerpt(self.source, 6000)}\n</page>'
         return "Investigate this company.\n<data>\n" + json.dumps(data) + home + "\n</data>"
 
     def loop(self) -> InvestigationAnswer:
@@ -395,7 +417,8 @@ class Investigation:
                 claim_type=item.claim_type, criterion_id=criterion, claim=(item.claim.strip() or text)[:600],
                 quote=Quote(text=text, url=page.url, published_date=published, fetched_at=page.fetched_at,
                             source_type=kind, location=location,
-                            open_posting=kind == "job_post" and open_posting(page)))
+                            open_posting=kind == "job_post" and (open_posting(page)
+                                                                 or own_role_page(page, self.company.domain))))
             if all((e.criterion_id, e.quote.text) != (evidence.criterion_id, text) for e in self.result.evidence):
                 self.result.evidence.append(evidence)
 
@@ -430,6 +453,7 @@ class Investigation:
                 return self.result
             self.read_board()
             self.read_lead_posting()
+            self.read_lead_source()
             if not self.result.name:
                 self.result.name = self.names[-1] if self.names else self.company.domain
             try:

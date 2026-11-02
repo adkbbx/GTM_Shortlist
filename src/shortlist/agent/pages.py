@@ -326,6 +326,23 @@ def open_posting(page: Page) -> bool:
     return listed_site(host, ATS_HOSTS) and posting and not CLOSED_POSTING.search(page.full_text)
 
 
+def own_role_page(page: Page, company_domain: str) -> bool:
+    """A single role on the company's own careers pages (/careers/<role>, jobs.<company>/<role>), read during the run
+    and not saying it is closed: as current as an open posting on a job board. A careers index page is not a role."""
+    try:
+        host = domain_of(page.url)
+    except FetchError:
+        return False
+    if host != company_domain and not host.endswith("." + company_domain):
+        return False
+    parts = [part for part in urlsplit(page.url).path.split("/") if part]
+    hostname = urlsplit(page.url).hostname or ""
+    on_jobs_host = hostname.startswith(("jobs.", "careers."))
+    after = next((len(parts) - index - 1 for index, part in enumerate(parts) if JOB_PATH.search("/" + part + "/")), None)
+    role = (after is not None and after >= 1) or (on_jobs_host and len(parts) >= 1)
+    return role and not CLOSED_POSTING.search(page.full_text)
+
+
 REVIEW_HOSTS = frozenset({"g2.com", "capterra.com", "trustradius.com", "getapp.com", "softwareadvice.com",
                           "trustpilot.com", "gartner.com", "peerspot.com"})
 NEWS_HOSTS = frozenset({"techcrunch.com", "reuters.com", "bloomberg.com", "businesswire.com", "prnewswire.com",

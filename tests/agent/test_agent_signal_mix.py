@@ -27,6 +27,26 @@ def test_candidates_are_researched_one_signal_at_a_time():
         "hiring1.example", "news1.example", "social1.example", "hiring2.example", "news2.example", "hiring3.example"]
 
 
+def test_a_role_on_the_companys_own_careers_pages_counts_as_open():
+    from shortlist.agent.pages import own_role_page, page_from_document
+
+    def page(url, body="<p>SYNTHETIC careers page: we are hiring a support lead for chat and email.</p>"):
+        return page_from_document(url, f"<html><body>{body}</body></html>".encode(), None)
+    assert own_role_page(page("https://trailgear.example/careers/support-lead"), "trailgear.example")
+    assert own_role_page(page("https://jobs.trailgear.example/support-lead"), "trailgear.example")
+    assert not own_role_page(page("https://trailgear.example/careers"), "trailgear.example")  # an index, not a role
+    assert not own_role_page(page("https://other.example/careers/support-lead"), "trailgear.example")
+    closed = "<p>SYNTHETIC: this position has been filled. Thank you for your interest in Trailgear.</p>"
+    assert not own_role_page(page("https://trailgear.example/careers/support-lead", closed), "trailgear.example")
+
+
+def test_only_a_source_link_that_search_returned_is_kept():
+    from shortlist.agent.discovery import source_link
+    seen = {"https://news.example/trailgear-raises-seed"}
+    assert source_link("https://news.example/trailgear-raises-seed", seen) == "https://news.example/trailgear-raises-seed"
+    assert source_link("https://news.example/invented-article", seen) == ""
+
+
 def test_a_standard_timing_signal_is_labelled_and_needs_no_quote():
     assert Signal(id="timing-std-1", kind="timing", text="Announced a new funding round", standard=True).quotes == []
     try:

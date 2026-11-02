@@ -124,6 +124,11 @@
           ],
           "title": "Signal",
           "type": "string"
+        },
+        "source_url": {
+          "default": "",
+          "title": "Source Url",
+          "type": "string"
         }
       },
       "required": [
@@ -131,7 +136,8 @@
         "name",
         "url",
         "found_via",
-        "signal"
+        "signal",
+        "source_url"
       ],
       "title": "CandidateRef",
       "type": "object"

@@ -2228,6 +2228,11 @@
             ],
             "title": "Signal",
             "default": ""
+          },
+          "source_url": {
+            "type": "string",
+            "title": "Source Url",
+            "default": ""
           }
         },
         "additionalProperties": false,
@@ -2237,7 +2242,8 @@
           "name",
           "url",
           "found_via",
-          "signal"
+          "signal",
+          "source_url"
         ],
         "title": "CandidateRef"
       },

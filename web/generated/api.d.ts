@@ -831,6 +831,11 @@ export interface components {
              * @enum {string}
              */
             signal: "" | "hiring" | "news" | "social" | "lookalike";
+            /**
+             * Source Url
+             * @default
+             */
+            source_url: string;
         };
         /** CompanyFact */
         CompanyFact: {
