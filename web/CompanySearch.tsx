@@ -7,8 +7,10 @@ import './CompanySearch.css';
 
 type Lookup = { kind: 'idle' } | { kind: 'loading'; query: string } | { kind: 'loaded'; query: string; items: CompanySuggestion[] } | { kind: 'error'; query: string; message: string };
 
-export function CompanySearch({ value, onChange, clientId, disabled, label = 'Company name or website', placeholder = 'Company name or example.com', iconLookup = true }: {
+export function CompanySearch({ value, onChange, clientId, disabled, label = 'Company name or website', placeholder = 'Company name or example.com', iconLookup = true, inputId = 'website' }: {
   value: string; onChange: (value: string) => void; clientId: string; disabled: boolean; label?: string; placeholder?: string;
+  /** A page with two of these fields gives the second its own id. */
+  inputId?: string;
   /** Look up a suggestion's own declared icon when the directory has no logo (needs a signed-in or local workspace). */
   iconLookup?: boolean;
 }) {
@@ -37,7 +39,7 @@ export function CompanySearch({ value, onChange, clientId, disabled, label = 'Co
   return <ComboBox<CompanySuggestion> className="company-search" aria-label={label} inputValue={value} onInputChange={next => { if (next !== picked) setPicked(null); onChange(next); }}
     items={items} selectedKey={picked} allowsCustomValue allowsEmptyCollection={Boolean(directory)} menuTrigger="input" isDisabled={disabled}
     onSelectionChange={key => { setPicked(key === null ? null : String(key)); if (key !== null) onChange(String(key)); }} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}>
-    <Input id="website" type="text" autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder={placeholder} required maxLength={2048} />
+    <Input id={inputId} type="text" autoComplete="off" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder={placeholder} required maxLength={2048} />
     <Popover className="company-suggestions" placement="bottom start" offset={8}>
       <p className="company-suggestions-source">Company suggestions</p>
       <ListBox<CompanySuggestion> aria-label="Company suggestions" className="company-suggestions-list" data-lenis-prevent="" renderEmptyState={() => <p className="suggestions-empty" role="status">{message}</p>}>

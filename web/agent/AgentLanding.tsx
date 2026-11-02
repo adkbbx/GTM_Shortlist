@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, RefObject } from 'react';
 import '@fontsource/schibsted-grotesk/500.css';
 import '@fontsource/schibsted-grotesk/800.css';
@@ -7,7 +7,6 @@ import { SiteIcon } from '../SiteIcon';
 import { configuredDirectoryId } from '../company-suggestions';
 import { clearKeptCompany, peekKeptCompany } from '../landing/kept-company';
 import { Reveal } from '../landing/Reveal';
-import { SignalStream } from '../landing/signal-stream';
 import { turnstileToken } from '../landing/turnstile';
 import { useLenis, usePrefersReducedMotion } from '../landing/useLenis';
 import '../landing/landing.css';
@@ -20,8 +19,6 @@ import './agent-landing.css';
 
 const describe = (error: unknown) => error instanceof Error ? error.message : 'Something went wrong. Please try again.';
 const day = (value: string) => new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
-// Same breakpoint as the hosted landing page: below it the stream runs top to bottom.
-const verticalQuery = '(max-width: 1180px)';
 function Arrow() { return <span className="pl-arrow" aria-hidden="true">→</span>; }
 
 /** True while the element is on screen, so the replay plays only where it can be seen. */
@@ -157,33 +154,11 @@ const HOW = [
   { n: '04', title: 'Gives you a clear answer', by: 'Shortlisted, Needs a look or Rejected', text: 'Every company gets a verdict and the reason for it. For the strongest fits, you also get why now and a first email.' },
 ];
 
-function ResultCards({ runs, onOpen, reduced }: { runs: AgentRunView[]; onOpen: (id: string) => void; reduced: boolean }) {
-  const root = useRef<HTMLElement>(null);
-  const cards = runs.flatMap(view => view.run.companies.filter(c => c.verdict?.kind === 'shortlisted').map(company => ({ view, company }))).slice(0, 3);
-  useRise(root, reduced, cards.length > 0);
-  if (!cards.length) return null;
-  return <section ref={root} className="al-section pl-wrap" aria-labelledby="al-results-heading">
-    <p className="al-kicker">Real results</p>
-    <Reveal id="al-results-heading" className="pl-h2" reduced={reduced} lead="Why they need you," accent="and how to start the conversation." />
-    <div className="al-cards">
-      {cards.map(({ view, company }, index) => {
-        const quote = supportedQuote(company);
-        return <article key={view.run.id + company.domain} className="al-card al-rise" style={{ ['--rise' as string]: index }}>
-          <header><span className="al-verdict">Shortlisted</span><span className="al-for">for {domainOf(view.run.website)}</span></header>
-          <h3><Logo company={company} />{company.name || company.domain}</h3>
-          {quote && <blockquote>“{quote.quote.text}”<cite>{domainOf(quote.quote.url)}</cite></blockquote>}
-          {company.pitch && <div className="al-opener"><p>Suggested opener</p><span>{company.pitch.opener}</span></div>}
-          <a href={`?agent=${view.run.id}`} onClick={event => { event.preventDefault(); onOpen(view.run.id); }}>See the evidence <Arrow /></a>
-        </article>;
-      })}
-    </div>
-  </section>;
-}
-
-const GATES = [['Buying signal', 'Hiring, funding or a launch'], ['Researched', 'Checked on their own pages'], ['Verified', 'Confirmed by a second review']];
-
-function Hero({ reduced, onOpen }: { reduced: boolean; onOpen: (id: string) => void }) {
+/** The website field and its start logic; the same form opens the page and closes it. */
+function StartForm({ id, label = 'Your company website', inputId = 'website', action, simple = false }: { id: string; label?: string;
+  inputId?: string; action?: string; simple?: boolean }) {
   const config = useAgentConfig();
+  const navigate = useStart();
   // A website typed on the landing page only prefills the field; research waits for the visitor's click.
   const [website, setWebsite] = useState(peekKeptCompany);
   useEffect(() => { clearKeptCompany(); }, []);
@@ -191,86 +166,90 @@ function Hero({ reduced, onOpen }: { reduced: boolean; onOpen: (id: string) => v
   const [count, setCount] = useState(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [invite, setInvite] = useState(true);
   const [shake, setShake] = useState(0);
   const check = useRef<HTMLDivElement>(null);
-  const instrument = useRef<HTMLDivElement>(null);
-  const stream = useRef<SignalStream | null>(null);
-  const canvas = useRef<HTMLCanvasElement>(null), cardIn = useRef<HTMLFormElement>(null), cardOut = useRef<HTMLElement>(null), streamEl = useRef<HTMLDivElement>(null);
-  const rows = useRef<HTMLOListElement>(null), tally = useRef<HTMLSpanElement>(null), portOut = useRef<HTMLSpanElement>(null);
-  const [on, setOn] = useState(false);
-  useEffect(() => {
-    const node = instrument.current;
-    if (!node || !canvas.current || !cardIn.current || !cardOut.current || !streamEl.current || !rows.current || !tally.current || !portOut.current) return;
-    const all = <T extends HTMLElement>(selector: string) => [...node.querySelectorAll<T>(selector)];
-    let created: SignalStream | null = null, cancelled = false;
-    const elements = { instrument: node, canvas: canvas.current, cardIn: cardIn.current, cardOut: cardOut.current, stream: streamEl.current,
-      gates: all('.pl-gate'), gateTops: all('.pl-g-top'), gateBottoms: all('.pl-g-bot'), kept: all('[data-kept]'), checked: all('[data-checked]'),
-      count: tally.current, rows: rows.current, portOut: portOut.current };
-    // Lay the stream out against final type metrics, but never wait long for fonts.
-    void Promise.race([document.fonts?.ready ?? Promise.resolve(), new Promise(resolve => window.setTimeout(resolve, 1200))]).then(() => {
-      if (cancelled) return;
-      created = new SignalStream(elements, reduced, window.matchMedia(verticalQuery));
-      stream.current = created; setOn(true);
-    });
-    return () => { cancelled = true; created?.destroy(); stream.current = null; elements.rows.replaceChildren(); };
-  }, [reduced]);
-
   const start = async (event: FormEvent) => {
     event.preventDefault();
     const value = website.trim();
-    if (!value) { document.getElementById('website')?.focus(); setShake(n => n + 1); return; }
-    setBusy(true); setError(''); stream.current?.burst();
+    if (!value) { document.querySelector<HTMLInputElement>(`#${id} input`)?.focus(); setShake(n => n + 1); return; }
+    setBusy(true); setError('');
     try {
       const token = config.turnstileSiteKey && check.current ? await turnstileToken(config.turnstileSiteKey, check.current) : undefined;
-      const { id } = await agentApi.start(value, { company_count: count }, token);
-      onOpen(id);
+      const { id: run } = await agentApi.start(value, { company_count: count }, token);
+      navigate(run);
     } catch (reason) { setError(describe(reason)); setBusy(false); }
   };
-  const domain = domainOf(website);
-  return <section className="pl-hero" aria-labelledby="agent-start-heading">
-    <div className="pl-hero-in pl-wrap">
-      <div className="pl-hero-top">
-        <div><p className="al-eyebrow">For founders and small sales teams</p>
-          <Reveal as="h1" id="agent-start-heading" reduced={reduced} lead="Stop emailing companies" accent="that don't need you." br /></div>
-        <p className="pl-lede">Most prospect lists are guesses. Enter your website and get a short list of companies that need what you
-          sell right now, <strong>the evidence behind each one</strong>, and a first email ready to send.</p>
+  return <form id={id} className="yc-form" onSubmit={start} autoComplete="off" noValidate>
+    <div className={`yc-field${shake % 2 ? ' shake' : shake ? ' shake-b' : ''}`}>
+      <CompanySearch value={website} clientId={configuredDirectoryId()} iconLookup disabled={busy} label={label}
+        inputId={inputId} placeholder="yourcompany.com" onChange={setWebsite} />
+      <button className="yc-btn" type="submit" disabled={busy} aria-busy={busy}>
+        {busy ? 'Starting' : action ?? `Find ${count} ${count === 1 ? 'company' : 'companies'}`} <Arrow /></button>
+    </div>
+    {!simple && <div className="yc-form-foot">
+      <CountPicker label="Companies to find" value={count} options={countOptions(config.maxCompanies)} disabled={busy} onChange={setCount} />
+      {config.publicDemo && <span className="yc-note">Free demo: up to {config.maxCompanies} companies per search.</span>}
+    </div>}
+    <div ref={check} className="agent-check" />
+    {error && <p className="notice" role="alert">{error}</p>}
+  </form>;
+}
+
+const StartContext = createContext<(id: string) => void>(() => undefined);
+const useStart = () => useContext(StartContext);
+
+/** A real Shortlisted company from a finished search, shown as the product would show it. */
+function ProductShot({ view, onOpen }: { view: AgentRunView; onOpen: (id: string) => void }) {
+  const company = view.run.companies.find(c => c.verdict?.kind === 'shortlisted' && supportedQuote(c));
+  if (!company) return null;
+  const quote = supportedQuote(company)!;
+  const message = company.outreach?.body.split('\n').filter(Boolean).slice(0, 3).join(' ') ?? company.pitch?.opener;
+  return <figure className="yc-shot" aria-label={`A real result: ${company.name || company.domain} for ${domainOf(view.run.website)}`}>
+    <div className="yc-shot-bar" aria-hidden="true"><span /><span /><span /><em>Shortlist for {domainOf(view.run.website)}</em></div>
+    <div className="yc-shot-body">
+      <div className="yc-shot-company">
+        <Logo company={company} />
+        <div><strong>{company.name || company.domain}</strong><small>{company.domain}</small></div>
+        <span className="yc-pill-ok">Shortlisted</span>
       </div>
-      <div className={`pl-instrument${on ? ' on' : ''}`} ref={instrument}>
-        <canvas ref={canvas} aria-hidden="true" />
-        <form ref={cardIn} className={`pl-card pl-intake${invite ? ' invite' : ''}`} onSubmit={start} autoComplete="off" noValidate
-          onPointerEnter={() => stream.current?.setHover(true)} onPointerLeave={() => stream.current?.setHover(document.activeElement?.id === 'website')}>
-          <label className="pl-label" htmlFor="website">Your company website</label>
-          <div className="pl-controls">
-            <div className={`pl-field${shake % 2 ? ' shake' : shake ? ' shake-b' : ''}`} onFocus={() => { setInvite(false); stream.current?.setHover(true); }} onBlur={() => stream.current?.setHover(false)}>
-              <CompanySearch value={website} clientId={configuredDirectoryId()} iconLookup disabled={busy} label="Your company website"
-                placeholder="Company name or website" onChange={value => { setInvite(false); setWebsite(value); stream.current?.boost(1100); }} /></div>
-            <button className="pl-btn pl-btn-primary pl-btn-block" type="submit" disabled={busy} aria-busy={busy}>{busy ? 'Starting' : `Find ${count} ${count === 1 ? 'company' : 'companies'}`} <Arrow /></button>
-          </div>
-          <CountPicker label="Companies to find" value={count} options={countOptions(config.maxCompanies)} disabled={busy} onChange={setCount} />
-          <div ref={check} className="agent-check" />
-          {error && <p className="notice" role="alert">{error}</p>}
-          {config.publicDemo && <p className="pl-note al-demo-note"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-            <rect x="3" y="7" width="10" height="7" rx="1" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" /></svg>
-            <span>Free demo: up to {config.maxCompanies} companies per search.</span></p>}
-          <span className="pl-port" aria-hidden="true" />
-        </form>
-        <div className="pl-stream" ref={streamEl} aria-hidden="true">
-          {GATES.map(([name, sub], index) => <div className="pl-gate" key={name}>
-            <div className="pl-g-top"><span className="pl-g-h">{name}</span><span className="pl-g-sub">{index === 0 && domain ? `Needs ${domain}` : sub}</span></div>
-            <div className="pl-g-bot"><b data-kept="">0</b><span>kept of <em data-checked="">0</em></span></div>
-          </div>)}
+      <div className="yc-shot-grid">
+        <div className="yc-shot-card">
+          <p className="yc-shot-label">Why now</p>
+          <blockquote>“{quote.quote.text.length > 220 ? `${quote.quote.text.slice(0, 217)}...` : quote.quote.text}”</blockquote>
+          <p className="yc-shot-source">{domainOf(quote.quote.url)}{quote.quote.open_posting ? ' · open job post' : ''}
+            {quote.quote.published_date ? ` · ${day(quote.quote.published_date)}` : ''}</p>
         </div>
-        <section ref={cardOut} className="pl-card pl-shortlist" aria-label="Illustrative sample shortlist">
-          <span ref={portOut} className="pl-port" aria-hidden="true" />
-          <header><div><strong>Shortlist</strong><small>Sample</small></div><span ref={tally} className="pl-badge" aria-label="Companies kept in this example">0</span></header>
-          <ol ref={rows} className="pl-rows" />
-          <footer><a href="#al-replay">Watch a real search <Arrow /></a></footer>
-        </section>
+        {message && <div className="yc-shot-card">
+          <p className="yc-shot-label">First message</p>
+          <p className="yc-shot-message">{message}</p>
+          <p className="yc-shot-source">✓ Every claim matches the evidence</p>
+        </div>}
       </div>
     </div>
+    <figcaption><a href={`?agent=${view.run.id}`} onClick={event => { event.preventDefault(); onOpen(view.run.id); }}>
+      A real result from a search for {domainOf(view.run.website)}. See the full search <Arrow /></a></figcaption>
+  </figure>;
+}
+
+function Hero({ example, onOpen }: { example?: AgentRunView; onOpen: (id: string) => void }) {
+  return <section className="yc-hero" aria-labelledby="agent-start-heading">
+    <div className="yc-wrap yc-center">
+      <p className="yc-eyebrow">For founders and small sales teams</p>
+      <h1 id="agent-start-heading" className="yc-h1">Building got easy.<br /><span>Finding customers didn't.</span></h1>
+      <p className="yc-sub">Enter your website. GTM Shortlist finds the companies that need what you sell right now, shows the
+        evidence behind each one, and drafts your first message.</p>
+      <StartForm id="website-start" />
+    </div>
+    {example && <div className="yc-wrap"><ProductShot view={example} onOpen={onOpen} /></div>}
   </section>;
 }
+
+const FAQ = [
+  ['Where does the evidence come from?', "Public pages only: each company's own website, its job posts, news coverage and public posts. Every claim links to the page it came from, so you can check it in one click."],
+  ['How is this different from a lead database?', 'A database gives you thousands of names that match a filter. GTM Shortlist gives you a few companies with a reason to talk to you this month, and shows you that reason.'],
+  ['What does it cost?', 'The demo is free, up to 5 companies per search, with no signup. A search takes a few minutes.'],
+  ['Does it contact anyone for me?', 'No. It drafts the email and a LinkedIn message for you to review and send yourself. It researches companies, never individual people.'],
+];
 
 export function AgentLanding({ onOpen }: { onOpen: (id: string | null) => void }) {
   const config = useAgentConfig();
@@ -306,20 +285,20 @@ export function AgentLanding({ onOpen }: { onOpen: (id: string | null) => void }
   const replay = examples[0];
   const how = useRef<HTMLElement>(null);
   useRise(how, reduced);
-  return <div className="pl al">
-    <Hero reduced={reduced} onOpen={onOpen} />
+  return <StartContext.Provider value={id => onOpen(id)}><div className="pl al yc">
+    <Hero example={examples[0]} onOpen={onOpen} />
 
-    {replay && <Story view={replay} onOpen={onOpen} reduced={reduced} />}
-
-    <section ref={how} className="al-section pl-wrap" aria-labelledby="al-how-heading">
-      <p className="al-kicker">How it works</p>
-      <Reveal id="al-how-heading" className="pl-h2" reduced={reduced} lead="The research you'd do by hand," accent="done in minutes." />
-      <ol className="al-how">{HOW.map((step, index) => <li key={step.n} className="al-rise" style={{ ['--rise' as string]: index }}>
-        <span className="al-how-n">{step.n}</span><h3>{step.title}</h3><p className="al-how-by">{step.by}</p><p>{step.text}</p>
-      </li>)}</ol>
+    <section ref={how} className="yc-section" aria-labelledby="al-how-heading">
+      <div className="yc-wrap">
+        <p className="yc-eyebrow">How it works</p>
+        <h2 id="al-how-heading" className="yc-h2">The research you'd do by hand, done in minutes.</h2>
+        <ol className="yc-steps">{HOW.map((step, index) => <li key={step.n} className="al-rise" style={{ ['--rise' as string]: index }}>
+          <span className="yc-step-n">{step.n}</span><h3>{step.title}</h3><p>{step.text}</p>
+        </li>)}</ol>
+      </div>
     </section>
 
-    <ResultCards runs={examples} onOpen={onOpen} reduced={reduced} />
+    {replay && <Story view={replay} onOpen={onOpen} reduced={reduced} />}
 
     {config.examples.length > 0 && <section className="al-section pl-wrap" aria-labelledby="agent-examples-heading">
       <p className="al-kicker">Examples</p>
@@ -335,6 +314,21 @@ export function AgentLanding({ onOpen }: { onOpen: (id: string | null) => void }
         </a>
       </li>)}</ul>
     </section>}
+    <section className="yc-section" aria-labelledby="yc-faq-heading">
+      <div className="yc-wrap yc-narrow">
+        <h2 id="yc-faq-heading" className="yc-h2">Questions</h2>
+        <div className="yc-faq">{FAQ.map(([question, answer]) => <details key={question}><summary>{question}</summary><p>{answer}</p></details>)}</div>
+      </div>
+    </section>
+
+    <section className="yc-cta" aria-labelledby="yc-cta-heading">
+      <div className="yc-wrap yc-center">
+        <h2 id="yc-cta-heading" className="yc-h2">Find the companies that need you this week.</h2>
+        <p className="yc-sub">Start with your website. Nothing to set up.</p>
+        <StartForm id="website-end" label="Your website" inputId="website-again" action="Start your search" simple />
+      </div>
+    </section>
+
     {recent.length > 0 && <section className="al-section pl-wrap agent-recent" aria-labelledby="agent-recent-heading">
       <h2 id="agent-recent-heading">{config.publicDemo ? 'Your searches' : 'Recent searches'}</h2>
       <ul>{recent.map(item => <li key={item.id}>
@@ -343,5 +337,5 @@ export function AgentLanding({ onOpen }: { onOpen: (id: string | null) => void }
         {item.synthetic && <span className="agent-tag">Synthetic</span>}
       </li>)}</ul>
     </section>}
-  </div>;
+  </div></StartContext.Provider>;
 }

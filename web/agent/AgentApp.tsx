@@ -64,7 +64,7 @@ export function AgentApp({ classic }: { classic: ReactNode }) {
     <main id="agent-main" className={`agent-main${runId || shortlist ? '' : ' is-landing'}`} tabIndex={-1}>
       {runId ? <AgentBoard key={runId} runId={runId} onNew={() => open(null)} />
         : shortlist ? <YourShortlist onOpen={id => open(id)} onNew={() => open(null)} /> : <AgentLanding onOpen={open} />}
-      <p className="agent-footer">GTM Shortlist · One model investigates, a second checks every quote, fixed rules decide.</p>
+      <p className="agent-footer">GTM Shortlist · Find the companies that need you.</p>
     </main>
   </AgentConfigContext.Provider></BrandfetchContext.Provider>;
 }
