@@ -18,6 +18,10 @@ from shortlist.store import Store
     ('<link rel="apple-touch-icon" href="/touch.png"><link rel="icon" href="/small.ico">', 'https://eygentic.com/small.ico'),
     ('<link rel="icon" href="https://cdn.example/icon.png">', 'https://cdn.example/icon.png'),
     ('<link rel="icon" href="data:image/svg+xml,bad"><link rel="icon" href="/safe.png">', 'https://eygentic.com/safe.png'),
+    # ascerta.com: an SVG icon that turns white in dark mode loses to its PNG touch icon; alone, it is still used.
+    ('<link rel="icon" href="/icon.svg?icon.1ty.svg?dpl=3" type="image/svg+xml"><link rel="apple-touch-icon" href="/apple-icon?b">',
+     'https://eygentic.com/apple-icon?b'),
+    ('<link rel="icon" href="/mark.svg"><link rel="icon" href="/mark.png">', 'https://eygentic.com/mark.png'),
     ('<link rel="stylesheet" href="/main.css">', None),
     ('<link rel="icon" href="http://example.com/a.png">', None),
     ('<link rel="icon" href="https://127.0.0.1/a.png">', None),

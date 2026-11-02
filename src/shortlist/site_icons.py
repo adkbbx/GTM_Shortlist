@@ -37,6 +37,11 @@ def declared_icon(page_url: str, body: bytes) -> str | None:
         priority = 0 if "icon" in rel else 1 if rel & {"apple-touch-icon", "apple-touch-icon-precomposed"} else None
         if priority is None:
             continue
+        # An SVG icon comes last: many restyle themselves for dark mode (ascerta.com's strokes turn white), which
+        # leaves them invisible on a light page. The PNG touch icon is drawn for any background.
+        svg = "svg" in str(link.get("type", "")).lower() or urlsplit(str(link["href"])).path.lower().endswith(".svg")
+        if priority == 0 and svg:
+            priority = 2
         try:
             candidates.append((priority, canonical_url(urljoin(base, link["href"]))))
         except ValueError:
