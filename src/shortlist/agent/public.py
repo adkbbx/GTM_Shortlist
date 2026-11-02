@@ -290,12 +290,14 @@ def create_public_app(settings: PublicSettings | None = None, *, agent_settings:
         return JSONResponse({"detail": "This search is no longer here: the free demo clears searches when its server "
                                        "restarts or sleeps. Start a new search."}, status_code=404)
 
-    checked: dict = {"at": 0.0, "result": ModelCheck()}
+    # "at" is None until the first check: the monotonic clock starts near zero on a fresh machine (a new container,
+    # a CI runner), so starting from 0.0 skipped every check for the first ten minutes after boot.
+    checked: dict = {"at": None, "result": ModelCheck()}
 
     def model_state(agent: AgentSettings) -> ModelCheck:
         if settings.synthetic:
             return ModelCheck()
-        if time.monotonic() - checked["at"] > 600:  # at most one /models request per ten minutes
+        if checked["at"] is None or time.monotonic() - checked["at"] > 600:  # at most one /models request per ten minutes
             checked["result"], checked["at"] = model_check(agent), time.monotonic()
         return checked["result"]
 

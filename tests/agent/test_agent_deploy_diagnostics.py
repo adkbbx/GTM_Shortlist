@@ -72,6 +72,9 @@ def test_demo_health_reports_model_availability_at_most_every_ten_minutes(tmp_pa
                               data_dir=tmp_path / "runs", dist_dir=tmp_path / "missing")
     app = create_public_app(settings, agent_settings=lambda: AgentSettings(meta_api_key=KEY),
                             providers=lambda agent: synthetic_providers(), model_check=check)
+    # A fresh machine: the monotonic clock is seconds old (a new container, a CI runner). The first health check must
+    # still ask; it once waited ten minutes, which failed only on GitHub's fresh Linux runners.
+    monkeypatch.setattr("shortlist.agent.public.time.monotonic", lambda: 5.0)
     with TestClient(app, base_url="https://demo.example") as client:
         health = client.get("/api/health").json()
         assert (health["investigator_model_available"], health["investigator_models_offered"],
