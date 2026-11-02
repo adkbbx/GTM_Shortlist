@@ -4,6 +4,8 @@ from threading import Lock
 
 from shortlist.agent.models import ModelCall, Telemetry
 
+SKEPTIC_RESERVE_USD = 0.10
+
 
 class BudgetReached(RuntimeError):
     """The run's budget is spent: no new model calls start."""
@@ -32,11 +34,16 @@ class Meter:
         with self.lock:
             return self.telemetry.cost_usd
 
-    def check(self):
+    def check(self, reserve: float = 0.0):
         with self.lock:
             if self.telemetry.cost_usd >= self.telemetry.budget_usd:
                 self.telemetry.budget_reached = True
+            if self.telemetry.cost_usd >= self.telemetry.budget_usd + reserve:
                 raise BudgetReached(f"Run budget of ${self.telemetry.budget_usd:.2f} reached")
+
+    def skeptic_reserve(self) -> float:
+        """What the skeptic may spend past the budget: $0.10, and never more than a quarter of the budget."""
+        return min(SKEPTIC_RESERVE_USD, self.telemetry.budget_usd / 4)
 
     def record(self, call: ModelCall):
         with self.lock:

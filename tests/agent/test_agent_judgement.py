@@ -190,14 +190,31 @@ def test_meter_blocks_calls_once_the_budget_is_spent():
     assert meter.telemetry.budget_reached
 
 
+def test_skeptic_checks_gathered_evidence_past_the_budget_within_its_reserve():
+    from shortlist.agent.models import ModelCall
+    fit = item("fit", "fit-1")
+    good = json.dumps({"decisions": [{"id": fit.id, "decision": "supports", "reason": "ok"}]})
+    calls = calls_with(ScriptedSkeptic([good]), budget=1.0)
+    calls.meter.record(ModelCall(provider="p", model="m", operation="investigate", usd=1.05))
+    assert judge(company([fit]), PROFILE, RULES, calls, use_skeptic=True)[0].decision == "supports"
+    assert calls.meter.telemetry.budget_reached
+    with pytest.raises(BudgetReached):  # Everything else stops at the budget.
+        calls.meter.check()
+    calls.meter.record(ModelCall(provider="p", model="m", operation="skeptic", usd=0.06))
+    spent = judge(company([fit]), PROFILE, RULES, calls, use_skeptic=True)[0]  # Reserve ($0.10) used up.
+    assert (spent.decision, spent.decided_by) == ("insufficient", "budget")
+
+
 def test_budget_stops_new_calls_and_marks_remaining_companies(providers):
     events = []
     result = AgentRunner(providers, budget_usd=0.012, concurrency=1, on_event=events.append).run(SELLER)
     t = result.telemetry
     assert t.budget_reached and result.status == "complete"
-    # The call that crossed the line finished; none started after it.
+    # The call that crossed the line finished; after it only the skeptic may check evidence already gathered, and
+    # only within its reserve.
     crossed = next(i for i, _ in enumerate(t.calls) if sum(c.usd for c in t.calls[:i + 1]) >= 0.012)
-    assert len(t.calls) == crossed + 1
+    assert all(c.operation.startswith("skeptic") for c in t.calls[crossed + 1:])
+    assert sum(c.usd for c in t.calls[:-1]) < 0.012 + 0.012 / 4
     # Research stops at the budget; a company it reached unfinished says so, and the run says why it stopped.
     stopped = [c for c in result.companies if c.status == "budget_reached"]
     assert all(c.verdict.kind == "needs_look" and BUDGET_REACHED in c.verdict.missing for c in stopped)

@@ -295,7 +295,7 @@ class AgentRunner:
                 company = from_ref(ref, status="done", error=UNEXPECTED)
                 self.emit("investigation", f"Investigation incomplete: {UNEXPECTED}", company=ref.domain, level="warn")
         company.evidence += self.profile_evidence(result, company)
-        if company.evidence and company.status != "budget_reached":
+        if company.evidence:
             self.emit("skeptic", f"Reviewing {len(company.evidence)} pieces of evidence", company=ref.domain)
         company.decisions = judge(company, result.profile, result.disqualifiers, calls, use_skeptic=self.use_skeptic)
         if company.decisions:

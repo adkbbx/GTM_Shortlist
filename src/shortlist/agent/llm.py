@@ -165,7 +165,9 @@ class Calls:
             raise AgentOutputError(f"{operation}: skeptic answer stayed invalid after one repair ({problem(exc)})") from exc
 
     def _chat(self, operation: str, messages: list[dict], company: str | None, max_tokens: int) -> ChatTurn:
-        self.meter.check()
+        # The skeptic may finish checking evidence already gathered after the budget is reached, within a small
+        # reserve (about $0.01 a company); a live vanta.com run lost its best company to an unchecked quote.
+        self.meter.check(reserve=self.meter.skeptic_reserve() if operation.startswith("skeptic") else 0.0)
         model = self.skeptic
         try:
             turn = model.chat(messages, max_tokens=max_tokens)
