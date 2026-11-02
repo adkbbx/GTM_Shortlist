@@ -4,7 +4,7 @@ For the Meta Global AI Developer Hackathon submission. Judging weights: Impact 3
 
 **Before recording**
 
-- Open https://gtm-shortlist-agent.onrender.com once a few minutes before, so the free instance is awake, and check `/api/health` says `"investigator_model_available": true`.
+- Open https://gtmshortlist--gtm-shortlist-agent-web.us-east.modal.run (always on, on Modal) a few minutes before and check `/api/health` says `"investigator_model_available": true`.
 - Run one search for `eygentic.com` with 5 companies (about $0.30) and keep its link. Recording a search from scratch takes 2 to 4 minutes, so record the start live and cut to the finished board.
 - Every company and quote below comes from the 30 October live runs. If your recording shows different companies, read out what is on screen instead. Never say a quote that is not visible.
 
@@ -19,7 +19,7 @@ For the Meta Global AI Developer Hackathon submission. Judging weights: Impact 3
 | 2:05 to 2:15 | The "Why now" and "Opening line" box on the same card, press Copy | "And it tells me what to say. The opening line is written only from those quotes, and Muse Spark Open checks every statement against them before it is shown." |
 | 2:15 to 2:35 | A Rejected card (Dr. Squatch from the crisp.chat run) | "And this is why it is not just a search wrapper. With crisp.chat as the seller, Dr. Squatch was Rejected: its homepage code loads Gorgias, a direct competitor. A second model, Muse Spark Open on Baseten, never sees the web or the company name. It only judges whether each quote really supports the claim. Plain code makes the verdict, not a model." |
 | 2:35 to 2:50 | Telemetry footer, then terminal running `shortlist agent eval` | "Every call is logged with tokens, searches and dollars: about seven cents a company. And I score it against companies I labelled by hand, with precision, recall, cost and latency, plus an ablation without the skeptic." |
-| 2:50 to 3:00 | The start page with the URL | "Try it with your own website at gtm-shortlist-agent.onrender.com. Built solo at the Meta hackathon with Muse Spark and Muse Spark Open." |
+| 2:50 to 3:00 | The start page with the URL | "Try it with your own website, link below. Built solo at the Meta hackathon with Muse Spark and Muse Spark Open." |
 
 **Notes**
 
