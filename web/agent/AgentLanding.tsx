@@ -209,8 +209,9 @@ const SHOT_ORDER = { shortlisted: 0, needs_look: 1, rejected: 2 } as const;
 function shotReason(company: Company) {
   const quote = supportedQuote(company);
   if (company.verdict?.kind === 'shortlisted' && quote)
-    return [quote.quote.open_posting ? 'Open job post' : 'Recent evidence', domainOf(quote.quote.url),
-      quote.quote.published_date ? day(quote.quote.published_date) : ''].filter(Boolean).join(' · ');
+    return quote.quote.source_type === 'own_site' && !quote.quote.open_posting ? 'Shown on their own site'
+      : [quote.quote.open_posting ? 'Open job post' : 'Recent evidence', domainOf(quote.quote.url),
+        quote.quote.published_date ? day(quote.quote.published_date) : ''].filter(Boolean).join(' · ');
   return company.verdict?.missing?.[0]?.split(/[:(]/)[0].trim() ?? 'Not finished';
 }
 
