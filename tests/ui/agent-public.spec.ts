@@ -8,6 +8,23 @@ test.use({ baseURL: 'http://127.0.0.1:8017' });
 
 const noOverflow = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
 
+test('video mode renames every company and says so, and outreach still reaches the real company', async ({ page }) => {
+  await page.goto('/?video=1');
+  await expect(page.getByRole('note').filter({ hasText: 'Video mode: company names changed' })).toBeVisible();
+  await page.getByLabel('Your company website').fill('seller.example');
+  await page.getByRole('button', { name: /^Find/ }).click();
+  const shortlisted = page.locator('.column-shortlisted');
+  await expect(shortlisted.locator('article')).toHaveCount(1, { timeout: 30000 });
+  await expect(page.getByRole('status').first()).toContainText('Done:', { timeout: 30000 });
+  const text = await page.locator('main').innerText();
+  expect(text).not.toMatch(/Trailgear|Bright Kettle|Oak and Pine|trailgear\.example/);  // the synthetic companies' real names
+  await shortlisted.getByRole('button', { name: 'Draft outreach' }).click();
+  await expect(page.getByRole('dialog', { name: 'First message' }).locator('.agent-email-subject')).not.toBeEmpty({ timeout: 15000 });
+  await page.keyboard.press('Escape');
+  await page.goto('/?video=0');
+  await expect(page.getByText('Video mode: company names changed')).toHaveCount(0);
+});
+
 test('a business without a website describes itself, and the search quotes its own words', async ({ page }, info) => {
   await page.goto('/');
   const open = page.getByRole('button', { name: "I don't have a website" });

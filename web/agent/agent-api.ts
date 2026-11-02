@@ -2,6 +2,7 @@ import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import type { components } from '../generated/api';
 import runSchema from '../generated/AgentRunView.json';
+import { disguiseEvent, disguiseText, disguiseView, realDomain, videoMode } from './video-mode';
 
 export type AgentRunView = components['schemas']['AgentRunView'];
 export type AgentRun = AgentRunView['run'];
@@ -86,11 +87,22 @@ async function call(path: string, body?: unknown, headers: Record<string, string
 
 function parseRun(data: unknown): AgentRunView {
   if (!isRun(data)) throw new AgentError('The saved run could not be read. Please reload.', 500);
-  return data;
+  return videoMode() ? disguiseView(data) : data;
+}
+
+/** The start page's examples, renamed in video mode like every board. */
+function shownHealth(health: AgentHealth): AgentHealth {
+  if (!videoMode() || !health.examples) return health;
+  return { ...health, examples: health.examples.map(example => {
+    const names = [example.website, ...(example.shortlisted_names ?? []), ...(example.rejected ?? []).map(item => item.split(': ')[0])];
+    return { ...example, website: disguiseText(example.website, names),
+      shortlisted_names: example.shortlisted_names?.map(name => disguiseText(name, names)),
+      rejected: example.rejected?.map(item => disguiseText(item, names)) };
+  }) };
 }
 
 export const agentApi = {
-  health: async () => await call('/api/health') as AgentHealth,
+  health: async () => shownHealth(await call('/api/health') as AgentHealth),
   /** seller: a website, or a business described in its own words when it has no website. */
   start: async (seller: string | SellerDescription, overrides?: Overrides, turnstile?: string) => {
     // This browser's earlier searches, so the new one skips companies already researched for the same website.
@@ -111,14 +123,17 @@ export const agentApi = {
   },
   outreach: async (id: string, domain: string) => {
     const token = editToken(id);
-    return parseRun(await call(`/api/agent/runs/${encodeURIComponent(id)}/companies/${encodeURIComponent(domain)}/outreach`, {},
+    return parseRun(await call(`/api/agent/runs/${encodeURIComponent(id)}/companies/${encodeURIComponent(realDomain(domain))}/outreach`, {},
       token ? { 'X-Agent-Edit-Token': token } : {}));
   },
   /** Server-Sent Events for one run. Returns a function that closes the stream. */
   follow(id: string, after: number, onEvent: (event: AgentEvent) => void, onEnd: () => void): () => void {
     const source = new EventSource(`/api/agent/runs/${encodeURIComponent(id)}/events?after=${after}`);
     source.addEventListener('progress', message => {
-      try { onEvent(JSON.parse((message as MessageEvent<string>).data) as AgentEvent); } catch { /* ignore a malformed line */ }
+      try {
+        const event = JSON.parse((message as MessageEvent<string>).data) as AgentEvent;
+        onEvent(videoMode() ? disguiseEvent(event) : event);
+      } catch { /* ignore a malformed line */ }
     });
     source.addEventListener('end', () => { source.close(); onEnd(); });
     source.onerror = () => { source.close(); onEnd(); };

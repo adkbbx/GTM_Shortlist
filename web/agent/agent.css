@@ -77,6 +77,7 @@
 .agent-edit label{font-size:.8125rem;margin:.875rem 0 .375rem}
 .agent-edit-row{display:flex;flex-wrap:wrap;gap:.5rem;align-items:stretch}
 .agent-edit-row>input{flex:1 1 12rem}
+.agent-video-tag{position:fixed;left:1rem;bottom:1rem;z-index:50;margin:0;padding:.375rem .75rem;border-radius:999px;background:rgba(27,27,27,.82);color:#fff;font-size:.75rem;font-weight:600;letter-spacing:.01em;pointer-events:none}
 /* One calm focus on text boxes: the box's own border and a soft glow, not a second outline around it. */
 .agent-edit-row>input:focus,.agent-edit-row>input:focus-visible,.agent-start-row>input:focus,.agent-start-row>input:focus-visible{outline:0;border-color:#d5682f;box-shadow:0 0 0 4px rgba(213,104,47,.14)}
 .agent-main .agent-edit-row>button,.agent-popover .agent-edit-row>button{min-height:2.75rem;padding:.5rem .875rem;font-size:.875rem}

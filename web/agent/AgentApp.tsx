@@ -8,6 +8,7 @@ import { YourShortlist } from './YourShortlist';
 import { agentApi } from './agent-api';
 import { AgentConfigContext, localConfig } from './agent-config';
 import type { AgentConfig } from './agent-config';
+import { videoMode } from './video-mode';
 import './agent.css';
 
 const currentRun = () => new URLSearchParams(window.location.search).get('agent');
@@ -66,5 +67,6 @@ export function AgentApp({ classic }: { classic: ReactNode }) {
         : shortlist ? <YourShortlist onOpen={id => open(id)} onNew={() => open(null)} /> : <AgentLanding onOpen={open} />}
       <p className="agent-footer">GTM Shortlist · Find the companies that need you.</p>
     </main>
+    {videoMode() && <p className="agent-video-tag" role="note">Video mode: company names changed</p>}
   </AgentConfigContext.Provider></BrandfetchContext.Provider>;
 }
