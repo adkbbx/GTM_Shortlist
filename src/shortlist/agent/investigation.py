@@ -140,7 +140,7 @@ class Investigation:
         self.company = company
         self.ctx = ctx
         self.result = CompanyResult(domain=company.domain, name=company.name, url=company.url,
-                                    found_via=company.found_via, status="investigating")
+                                    found_via=company.found_via, signal=company.signal, status="investigating")
         self.pages: dict[str, Page] = {}
         self.places: list[str] = []
         self.queries: list[str] = []

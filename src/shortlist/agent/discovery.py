@@ -24,13 +24,18 @@ from shortlist.relevance import (
 from shortlist.selection import discussion_page
 
 DISCOVERY_INSTRUCTIONS = f"""You find companies that could buy a seller's product now, using web search. {UNTRUSTED}
-Search for the seller's need and timing signals happening now, not for a category. When a signal is about hiring a
-role, start with companies' own job boards: search for that role on jobs.lever.co, boards.greenhouse.io,
-job-boards.greenhouse.io or jobs.ashbyhq.com (for example: site:jobs.lever.co "founding account executive"). A posting
-there is open now and names the company that posted it. For other signals, search news from the last six months
-about a launch, expansion or funding round named in the timing signals. Name the companies those results are about,
-with each company's own website domain, never the job board's. You may also search for companies similar to the
-seller's named customers.
+Search for the seller's need and timing signals happening now, not for a category. Spread your searches across kinds
+of signal, so the companies are not all found the same way:
+- hiring (at most 2 searches): a role named in the need signals on companies' own job boards: jobs.lever.co,
+  boards.greenhouse.io, job-boards.greenhouse.io or jobs.ashbyhq.com (for example: site:jobs.lever.co "founding
+  account executive"). A posting there is open now and names the company that posted it.
+- news (at least 1 search): news from the last six months about an event in the timing signals, such as a funding
+  round, a launch or an expansion. Name the company the news is about, never the publisher.
+- social (1 search): public LinkedIn or X posts announcing such an event or a hiring push, for example
+  site:linkedin.com/posts "we're hiring" "first SDR" or site:x.com "just raised" seed. A post counts only when it
+  names the company that is hiring or announcing; a recruiter's post about an unnamed client names nobody.
+- lookalike (only when named_customers is not empty, at most 1 search): companies similar to a named customer.
+Name each company with its own website domain, never a job board's, news site's or social network's.
 Aim for companies this seller can realistically win: within target_size (the size and stage the seller serves) and
 like its named customers. Leave out companies clearly bigger or later-stage than target_size, and household-name
 enterprises and category leaders unless the seller says it serves enterprises.
@@ -38,7 +43,8 @@ Never return list articles, directories, review sites, news sites, job boards, t
 existing customers, or people. At most 4 searches.
 Return only JSON: {{"companies": [{{"name": "company", "domain": "company.com", "url": "https://company.com/",
 "found_via": "the signal you saw and where, for example 'job post: SDR (Greenhouse, 12 Oct 2026)' or 'similar to <customer>'",
-"posting_url": "the job posting's own url when found_via is a job post, else empty"}}]}}"""
+"posting_url": "the job posting's own url when found_via is a job post, else empty",
+"signal": "hiring|news|social|lookalike"}}]}}"""
 
 
 def excluded_domains(profile: SellerProfile, competitors: list[Competitor]) -> dict[str, str]:
@@ -162,17 +168,18 @@ def discover(profile: SellerProfile, competitors: list[Competitor], count: int, 
             break
         # Companies the model named come first; raw search results only when they are a company's own page.
         postings = [result.url for search in turn.searches for result in search.results if board_refs(result.url)]
-        found = [(item.url or item.domain, item.name, lead(with_posting(item, postings), boards, emit), False)
-                 for item in answer.companies]
+        found = [(item.url or item.domain, item.name, lead(with_posting(item, postings), boards, emit), False,
+                  signal_of(item.signal, item.found_via)) for item in answer.companies]
         for search in turn.searches:
             emit("discovery", f"Searched {search_label(search.query)} ({len(search.results)} results)")
-            found += [(result.url, result.title, f'search "{search.query}"', True) for result in search.results]
-        for url, name, via, own_page in found:
+            found += [(result.url, result.title, f'search "{search.query}"', True, signal_of("", search.query))
+                      for result in search.results]
+        for url, name, via, own_page, signal in found:
             ref, aside = admit(url, name or "", via, excluded, profile.domain, own_page=own_page, prior=prior)
             if ref and others and staffing_firm(name or ""):
                 ref, aside = None, SetAside(domain=ref.domain, url=ref.url, reason=STAFFING_ASIDE)
             if ref and ref.domain not in pool and len(pool) < MAX_COMPANIES:
-                pool[ref.domain] = ref
+                pool[ref.domain] = ref.model_copy(update={"signal": signal})
             elif aside and aside.domain not in pool:
                 set_aside.setdefault(aside.domain, aside)
         if not answer.companies and not turn.searches:
@@ -182,4 +189,37 @@ def discover(profile: SellerProfile, competitors: list[Competitor], count: int, 
     emit("discovery", f"Found {len(pool)} candidate companies; set aside {len(set_aside)} pages "
                       "(lists, directories, competitors, customers"
                       + (f", {seen} already researched for you" if seen else "") + ")", level="done")
-    return list(pool.values()), list(set_aside.values())
+    return interleaved(list(pool.values())), list(set_aside.values())
+
+
+SIGNALS = ("hiring", "news", "social", "lookalike")
+
+
+def signal_of(declared: str, via: str) -> str:
+    """The kind of signal a company was found by: the model's own label, else read from how it was found."""
+    if (declared := (declared or "").strip().casefold()) in SIGNALS:
+        return declared
+    via = (via or "").casefold()
+    if not via:
+        return ""
+    if "job post" in via or re.search(r"lever\.co|greenhouse\.io|ashbyhq\.com", via):
+        return "hiring"
+    if "similar to" in via:
+        return "lookalike"
+    if re.search(r"linkedin\.com|\bx\.com|twitter\.com", via):
+        return "social"
+    return "news"
+
+
+def interleaved(refs: list[CandidateRef]) -> list[CandidateRef]:
+    """One company of each signal in turn, so the first researched are not all found the same way: live runs
+    researched only job-post leads and missed every company with a funding round or a launch."""
+    groups: dict[str, list[CandidateRef]] = {}
+    for ref in refs:
+        groups.setdefault(ref.signal, []).append(ref)
+    ordered = []
+    while any(groups.values()):
+        for group in groups.values():
+            if group:
+                ordered.append(group.pop(0))
+    return ordered

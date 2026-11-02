@@ -5,7 +5,7 @@ There are no person, name or role fields: the agent qualifies companies only and
 from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from shortlist.domain import new_id, utcnow
 
@@ -60,7 +60,16 @@ class Signal(Model):
     id: str = Field(min_length=1, max_length=80)
     kind: Literal["need", "timing"]
     text: str = Field(min_length=3, max_length=500)
-    quotes: list[Quote] = Field(min_length=1, max_length=4)
+    quotes: list[Quote] = Field(default_factory=list, max_length=4)
+    # A common buying moment (a funding round, a launch) added when the seller's site gave none: a seller's site rarely
+    # says when to buy, so live runs had no timing signal at all (vanta.com, crisp.chat). It is labelled, not quoted.
+    standard: bool = False
+
+    @model_validator(mode="after")
+    def quoted_unless_standard(self):
+        if not self.standard and not self.quotes:
+            raise ValueError("A signal inferred from the site needs a quote from it")
+        return self
 
 
 class ExistingCustomer(Model):
@@ -199,11 +208,15 @@ class Pitch(Model):
     reason: str = ""
 
 
+LeadSignal = Literal["", "hiring", "news", "social", "lookalike"]
+
+
 class CandidateRef(Model):
     domain: str
     name: str = ""
     url: str
     found_via: str = ""
+    signal: LeadSignal = ""  # the kind of signal discovery found the company by
 
 
 class SetAside(Model):
@@ -219,6 +232,7 @@ class CompanyResult(Model):
     name: str = ""
     url: str
     found_via: str = ""
+    signal: LeadSignal = ""
     status: CompanyStatus = "pending"
     evidence: list[EvidenceItem] = Field(default_factory=list)
     decisions: list[SkepticDecision] = Field(default_factory=list)

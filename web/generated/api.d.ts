@@ -825,6 +825,12 @@ export interface components {
              * @default
              */
             found_via: string;
+            /**
+             * Signal
+             * @default
+             * @enum {string}
+             */
+            signal: "" | "hiring" | "news" | "social" | "lookalike";
         };
         /** CompanyFact */
         CompanyFact: {
@@ -865,6 +871,12 @@ export interface components {
              * @default
              */
             found_via: string;
+            /**
+             * Signal
+             * @default
+             * @enum {string}
+             */
+            signal: "" | "hiring" | "news" | "social" | "lookalike";
             /**
              * Status
              * @default pending
@@ -1093,7 +1105,7 @@ export interface components {
              * Rule
              * @enum {string}
              */
-            rule: "uses_direct_competitor" | "is_competitor" | "is_existing_customer" | "outside_stated_size_or_region" | "inactive";
+            rule: "uses_direct_competitor" | "is_competitor" | "is_existing_customer" | "outside_stated_size_or_region" | "inactive" | "works_for_others";
             /** Text */
             text: string;
             /** Competitor Domain */
@@ -2153,6 +2165,11 @@ export interface components {
             text: string;
             /** Quotes */
             quotes: components["schemas"]["Quote"][];
+            /**
+             * Standard
+             * @default false
+             */
+            standard: boolean;
         };
         /** SiteIconInfo */
         SiteIconInfo: {
@@ -2353,7 +2370,7 @@ export interface components {
             unconfirmed: string[];
             disqualifier: components["schemas"]["EvidenceItem"] | null;
             /** Rule */
-            rule: ("uses_direct_competitor" | "is_competitor" | "is_existing_customer" | "outside_stated_size_or_region" | "inactive") | null;
+            rule: ("uses_direct_competitor" | "is_competitor" | "is_existing_customer" | "outside_stated_size_or_region" | "inactive" | "works_for_others") | null;
         };
         /** WalletView */
         WalletView: {

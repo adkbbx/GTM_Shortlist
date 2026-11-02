@@ -43,6 +43,11 @@ from shortlist.fetch import FetchError
 logger = logging.getLogger(__name__)
 UNEXPECTED = "an unexpected error while reading its pages"
 
+
+def from_ref(ref: CandidateRef, **fields) -> CompanyResult:
+    return CompanyResult(domain=ref.domain, name=ref.name, url=ref.url, found_via=ref.found_via, signal=ref.signal,
+                         **fields)
+
 VERDICT_LABEL = {"shortlisted": "Shortlisted", "needs_look": "Needs a look", "rejected": "Rejected"}
 
 
@@ -265,7 +270,7 @@ class AgentRunner:
             for ref in refs:
                 if ref.domain not in known:
                     result.companies.append(CompanyResult(domain=ref.domain, name=ref.name, url=ref.url,
-                                                          found_via=ref.found_via))
+                                                          found_via=ref.found_via, signal=ref.signal))
         self.save(result)
         ctx = Context(calls=calls, fetcher=self.providers.fetcher, profile=result.profile, competitors=result.competitors,
                       rules=result.disqualifiers, emit=self.emit, dropped=result.dropped,
@@ -277,20 +282,17 @@ class AgentRunner:
 
     def process(self, result: RunResult, calls: Calls, ctx: Context, ref: CandidateRef):
         if calls.meter.telemetry.budget_reached:
-            company = CompanyResult(domain=ref.domain, name=ref.name, url=ref.url, found_via=ref.found_via,
-                                    status="budget_reached")
+            company = from_ref(ref, status="budget_reached")
         else:
             self.emit("investigation", f"Investigating {ref.domain}", company=ref.domain)
-            self.replace(result, CompanyResult(domain=ref.domain, name=ref.name, url=ref.url, found_via=ref.found_via,
-                                               status="investigating"))
+            self.replace(result, from_ref(ref, status="investigating"))
             try:
                 company = Investigation(ref, ctx).run()
             except (BudgetReached, AgentProviderError, AgentOutputError, FetchError):
                 raise
             except Exception:  # One company's unexpected page must not stop the run and leave it "Investigating".
                 logger.exception("Investigation of %s failed", ref.domain)
-                company = CompanyResult(domain=ref.domain, name=ref.name, url=ref.url, found_via=ref.found_via,
-                                        status="done", error=UNEXPECTED)
+                company = from_ref(ref, status="done", error=UNEXPECTED)
                 self.emit("investigation", f"Investigation incomplete: {UNEXPECTED}", company=ref.domain, level="warn")
         company.evidence += self.profile_evidence(result, company)
         if company.evidence and company.status != "budget_reached":

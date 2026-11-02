@@ -82,6 +82,7 @@ class CandidateAnswer(Answer):
     url: str = ""
     found_via: str = ""
     posting_url: str = ""
+    signal: str = ""  # hiring, news, social or lookalike: which kind of signal found the company
 
 
 class CandidatesAnswer(Answer):

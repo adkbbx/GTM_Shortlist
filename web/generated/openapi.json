@@ -2216,6 +2216,18 @@
             "type": "string",
             "title": "Found Via",
             "default": ""
+          },
+          "signal": {
+            "type": "string",
+            "enum": [
+              "",
+              "hiring",
+              "news",
+              "social",
+              "lookalike"
+            ],
+            "title": "Signal",
+            "default": ""
           }
         },
         "additionalProperties": false,
@@ -2224,7 +2236,8 @@
           "domain",
           "name",
           "url",
-          "found_via"
+          "found_via",
+          "signal"
         ],
         "title": "CandidateRef"
       },
@@ -2303,6 +2316,18 @@
           "found_via": {
             "type": "string",
             "title": "Found Via",
+            "default": ""
+          },
+          "signal": {
+            "type": "string",
+            "enum": [
+              "",
+              "hiring",
+              "news",
+              "social",
+              "lookalike"
+            ],
+            "title": "Signal",
             "default": ""
           },
           "status": {
@@ -2431,6 +2456,7 @@
           "name",
           "url",
           "found_via",
+          "signal",
           "status",
           "evidence",
           "decisions",
@@ -2929,7 +2955,8 @@
               "is_competitor",
               "is_existing_customer",
               "outside_stated_size_or_region",
-              "inactive"
+              "inactive",
+              "works_for_others"
             ],
             "title": "Rule"
           },
@@ -5818,8 +5845,12 @@
             },
             "type": "array",
             "maxItems": 4,
-            "minItems": 1,
             "title": "Quotes"
+          },
+          "standard": {
+            "type": "boolean",
+            "title": "Standard",
+            "default": false
           }
         },
         "additionalProperties": false,
@@ -5828,7 +5859,8 @@
           "id",
           "kind",
           "text",
-          "quotes"
+          "quotes",
+          "standard"
         ],
         "title": "Signal"
       },
@@ -6310,7 +6342,8 @@
                   "is_competitor",
                   "is_existing_customer",
                   "outside_stated_size_or_region",
-                  "inactive"
+                  "inactive",
+                  "works_for_others"
                 ]
               },
               {

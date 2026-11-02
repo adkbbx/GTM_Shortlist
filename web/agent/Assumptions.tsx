@@ -75,7 +75,8 @@ export function Assumptions({ run, apply, busy }: { run: AgentRun; apply: Apply;
       </dd></div>
       {(profile.need_signals.length > 0 || profile.timing_signals.length > 0) && <div><dt>Need and timing</dt><dd>
         {profile.need_signals.map(signal => <Chip key={signal.id} label={signal.text} tag="Need" quotes={signal.quotes} />)}
-        {profile.timing_signals.map(signal => <Chip key={signal.id} label={signal.text} tag="Timing" quotes={signal.quotes} />)}
+        {profile.timing_signals.map(signal => <Chip key={signal.id} label={signal.text} tag="Timing" quotes={signal.quotes}
+          note={signal.standard ? 'A common buying moment. Your site did not name one, so the agent also looks for this.' : undefined} />)}
       </dd></div>}
       <div><dt>Competitors</dt><dd>
         {competitors.length === 0 && <span className="agent-empty">None proven</span>}

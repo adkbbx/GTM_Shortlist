@@ -112,13 +112,26 @@
           "default": "",
           "title": "Found Via",
           "type": "string"
+        },
+        "signal": {
+          "default": "",
+          "enum": [
+            "",
+            "hiring",
+            "news",
+            "social",
+            "lookalike"
+          ],
+          "title": "Signal",
+          "type": "string"
         }
       },
       "required": [
         "domain",
         "name",
         "url",
-        "found_via"
+        "found_via",
+        "signal"
       ],
       "title": "CandidateRef",
       "type": "object"
@@ -142,6 +155,18 @@
         "found_via": {
           "default": "",
           "title": "Found Via",
+          "type": "string"
+        },
+        "signal": {
+          "default": "",
+          "enum": [
+            "",
+            "hiring",
+            "news",
+            "social",
+            "lookalike"
+          ],
+          "title": "Signal",
           "type": "string"
         },
         "status": {
@@ -272,6 +297,7 @@
         "name",
         "url",
         "found_via",
+        "signal",
         "status",
         "evidence",
         "decisions",
@@ -441,7 +467,8 @@
             "is_competitor",
             "is_existing_customer",
             "outside_stated_size_or_region",
-            "inactive"
+            "inactive",
+            "works_for_others"
           ],
           "title": "Rule",
           "type": "string"
@@ -1505,16 +1532,21 @@
             "$ref": "#/$defs/Quote"
           },
           "maxItems": 4,
-          "minItems": 1,
           "title": "Quotes",
           "type": "array"
+        },
+        "standard": {
+          "default": false,
+          "title": "Standard",
+          "type": "boolean"
         }
       },
       "required": [
         "id",
         "kind",
         "text",
-        "quotes"
+        "quotes",
+        "standard"
       ],
       "title": "Signal",
       "type": "object"
@@ -1752,7 +1784,8 @@
                 "is_competitor",
                 "is_existing_customer",
                 "outside_stated_size_or_region",
-                "inactive"
+                "inactive",
+                "works_for_others"
               ],
               "type": "string"
             },

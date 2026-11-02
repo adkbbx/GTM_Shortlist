@@ -4,6 +4,7 @@ Every network fetch goes through shortlist.fetch (fetch_html, the same TLS-pinne
 fetch_page) and page_from_html, which builds the same readable text fetch_page saves. The raw document is kept as
 well so the competitor scan can read script sources, badges and "powered by" lines the readable text drops.
 """
+import html
 import json
 import re
 from collections.abc import Callable
@@ -11,6 +12,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from urllib.parse import urljoin, urlsplit
 
+import httpx
 from bs4 import BeautifulSoup
 
 from shortlist.agent.models import Attribute, PageSignature, SourceType
@@ -119,8 +121,52 @@ def page_from_document(current: str, body: bytes, expected_domain: str | None = 
 
 
 def fetch_document(url: str, expected_domain: str | None = None) -> Page:
+    if X_POST.match(url):
+        return x_post(url)
     current, body = fetch_html(url, expected_domain)
     return page_from_document(current, body, expected_domain)
+
+
+X_POST = re.compile(r"^https://(?:www\.|mobile\.)?(?:x|twitter)\.com/([A-Za-z0-9_]{1,15})/status/(\d{1,25})(?:[/?#]|$)")
+X_EMBED = "https://publish.x.com/oembed"  # publish.twitter.com now answers 301 to here
+X_EMBED_HOSTS = ("publish.x.com", "publish.twitter.com")
+
+
+def x_post(url: str, transport: httpx.BaseTransport | None = None) -> Page:
+    """A public X post read through X's own embed endpoint, which serves its text, author and date without a login
+    (x.com pages are script-only). The page holds only the post's words and its date, so quotes are checked as usual."""
+    match = X_POST.match(url)
+    if match is None:
+        raise FetchError("Not an X post address")
+    canonical = f"https://x.com/{match.group(1)}/status/{match.group(2)}"
+    try:
+        with httpx.Client(timeout=15, trust_env=False, follow_redirects=False, transport=transport) as client:
+            response = client.get(X_EMBED, params={"url": canonical, "omit_script": "true", "dnt": "true"})
+            if response.is_redirect and urlsplit(response.headers.get("location", "")).hostname in X_EMBED_HOSTS:
+                response = client.get(response.headers["location"])
+        response.raise_for_status()
+        embed = response.json()
+    except (httpx.HTTPError, ValueError) as exc:
+        raise FetchError("The X post could not be read; it may be private or deleted") from exc
+    markup = embed.get("html") if isinstance(embed, dict) else None
+    quote = BeautifulSoup(markup, "html.parser").blockquote if isinstance(markup, str) else None
+    if quote is None:
+        raise FetchError("The X post could not be read; it may be private or deleted")
+    text = " ".join(p.get_text(" ", strip=True) for p in quote.find_all("p"))
+    links = quote.find_all("a")
+    posted = None
+    if links:
+        try:
+            posted = datetime.strptime(links[-1].get_text(strip=True), "%B %d, %Y").date()
+        except ValueError:
+            posted = None
+    author = str(embed.get("author_name") or match.group(1))[:100]
+    stamp = json.dumps({"@type": "SocialMediaPosting", "datePublished": posted.isoformat()}) if posted else ""
+    document = (f"<html><head><title>Post by {html.escape(author)} (@{match.group(1)}) on X</title>"
+                + (f'<script type="application/ld+json">{stamp}</script>' if stamp else "")
+                + f"</head><body><p>{html.escape(text)}</p><p>Posted on X by {html.escape(author)} (@{match.group(1)})"
+                + (f", {posted:%d %B %Y}" if posted else "") + "</p></body></html>")
+    return page_from_document(canonical, document.encode("utf-8"), None)
 
 
 # Same-domain pages that explain a seller: one of each kind, in this order, at most five.

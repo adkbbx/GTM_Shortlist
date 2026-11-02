@@ -67,6 +67,10 @@ Rules:
 
 
 MAX_REQUIRED_FIT = 2
+# Buying moments that hold for most B2B offers, used only when the seller's own site supports no timing signal.
+STANDARD_TIMING = ("Announced a new funding round in the last six months",
+                   "Launched a new product or expanded into a new market in the last six months",
+                   "Started building or growing the team this offer supports")
 
 # A need or timing signal must be something a public page can show. These describe a company's internal state
 # (knowledge, confidence, intent, performance), which no quote from a target's site can support, so nothing could
@@ -155,6 +159,9 @@ def build_profile(website: str, answer: SellerAnswer, pages: dict[str, Page], dr
                 kept.append(Signal(id=_criterion_id(kind, item.id, index, used), kind=kind,
                                    text=item.text.strip()[:500], quotes=found))
         signals[kind] = kept[:cap]
+    if not signals["timing"]:
+        signals["timing"] = [Signal(id=f"timing-std-{index}", kind="timing", text=text, standard=True)
+                             for index, text in enumerate(STANDARD_TIMING, 1)]
     customers = []
     for item in answer.existing_customers[:30]:
         found = quotes(item.quotes, "existing customer", limit=2)
@@ -202,7 +209,7 @@ def understand_seller(website: str, calls: Calls, fetcher: Fetcher, emit: Callab
                                         input=[{"role": "user", "content": request + "<data>\n" + blocks + "\n</data>"}],
                                         max_output_tokens=4000)
     profile = build_profile(website, answer, pages, dropped)
-    if profile.offer and not profile.need_signals and not profile.timing_signals:
+    if profile.offer and not profile.need_signals and all(s.standard for s in profile.timing_signals):
         # Live run (crisp.chat): the answer had no need or timing signal, so no company could ever be Shortlisted.
         # Ask once more and keep only the new signals; the offer, buyer and fit checks stay as first read.
         emit("seller", "No need or timing signals in the first reading; asking once more", level="warn")
