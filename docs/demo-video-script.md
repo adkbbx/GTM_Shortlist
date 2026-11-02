@@ -40,7 +40,7 @@ Open the demo with `?video=1` once; it stays on for the browser tab. A dark tag 
 | 0:30 | R2: competitors. | "It proves my competitors from their own homepages." | Two competitor chips flash "direct". | Whoosh. |
 | 0:34 | R2: companies being researched; the filter motif overlays the left half. | "Then it hunts signals, not a database: live job posts, news, launches." | Floating labels: "Lever", "Greenhouse", "Ashby", "news". | Rapid whooshes on the beat. |
 | 0:40 | R2 or R5: page code with a script tag highlighted. | "It even reads their homepage code to see which tools they already use." | Code panel slides in; a line glows orange: "already uses a competitor → out". | Glitch tick. |
-| 0:45 | Split screen: two model badges facing each other. | "And a second model, Muse Spark Open on Baseten, tries to disprove every quote. No web access, no mercy." | "Muse Spark Open · skeptic" badge; quotes fly past, a few get crossed out. | Swipe sounds, one buzzer. |
+| 0:45 | Split screen: two model badges facing each other. | "Then a second model, Muse Spark Open on Baseten, reads each quote cold, without the web, and throws out the weak ones." | "Muse Spark Open · skeptic" badge; quotes fly past, a few get crossed out. | Swipe sounds, one buzzer. |
 | 0:53 | Filter transition to R3. | "Here's what came out." | Counter: "10 found → 5 researched → 1 shortlisted". | Whoosh, then ding. |
 | 0:56 | R3: Loopcart card, Shortlisted pill. Snap zoom. | "Loopcart. Shortlisted." | Pill pops; "names changed" tag visible. | Ding. |
 | 0:59 | R3: the quote popover. Highlighter sweeps across the quote. | "Their open job post: 'As one of the first three SDRs in this enterprise initiative.'" | Quote enlarges to full width, the words highlight in orange as you say them. Label: "open job post · read during the search". | Highlighter squeak. |
@@ -50,8 +50,8 @@ Open the demo with `?video=1` once; it stays on for the browser tab. A dark tag 
 | 1:23 | Text slam over the board. | "The models gather the evidence. Plain code makes the call." | "Models gather. Code decides." | Two bass hits. |
 | 1:27 | R3: the Needs a look column, quick pan. | "Everything else? Needs a look, and it tells me exactly what's missing." | Each card's missing-item line glows briefly. | Soft pops. |
 | 1:33 | R4: the popup, typing the answers. | "No website yet? Describe what you sell. It quotes your own words." | "No website? No problem." sticker. | Key clicks. |
-| 1:40 | R3: the board footer. Counters animate. | "Five companies researched. Forty-two cents. Every claim one click from its source." | Big numbers: "5 companies · $0.42 · 100% sourced". | Cash-register tick on "$0.42". |
-| 1:48 | Filter motif, full screen, slowing down. Three orange dots exit right. | "Stop guessing who needs you." | "Find the companies that need you this week." | Music builds. |
+| 1:40 | R3: the board footer. Counters animate. | "Five companies, forty-two cents. And I can click through to every sentence it used." | Big numbers: "5 companies · $0.42". | Cash-register tick on "$0.42". |
+| 1:48 | Filter motif, full screen, slowing down. Three orange dots exit right. | "Now I know who to email this week, and what to say." | "Find the companies that need you this week." | Music builds. |
 | 1:53 | End card: logo, URL, credits. | "GTM Shortlist. Try it with your website." | URL large; "Built solo for the Meta hackathon · Muse Spark 1.3 · Muse Spark Open on Baseten"; small line: "Real search. Company names changed for this video." | Final bass hit, music out. |
 | 2:00 | End. | | | |
 
@@ -63,10 +63,11 @@ About 230 spoken words: fast but clear at 2:00.
 - No real company name or logo anywhere, including the chatbot bubble and the logo wall (use plain shapes).
 - Never show anyone's name, email or location; record in a clean browser profile.
 - Quotes on screen must match the app exactly (they are the real quotes with names changed).
-- "100% sourced" is fair: the app shows no claim without a quote. Do not add accuracy numbers until the review sheet is labelled.
+- Do not add accuracy numbers until the review sheet is labelled.
+- Say it like a person: no slogans such as "receipts", "no mercy" or "100% sourced". Plain words about what you saw.
 
 ## 30-second vertical cut for X (1080×1920)
 
 0:00 "Building got easy. Finding customers didn't." → 0:04 lead-list logo wall, "0 reasons" → 0:07 record scratch, typing `eygentic.com` → 0:10 the filter motif, "10 found → 1 shortlisted" → 0:14 Loopcart quote highlight → 0:19 Stackyard REJECTED stamp → 0:23 "Models gather. Code decides." → 0:26 URL and "Built with Muse Spark". Same music, captions larger (top third safe area).
 
-Suggested post: "I built an AI agent that finds companies that need what you sell *this week*, and shows the receipt for every claim. One input: your website. Built solo for the Meta hackathon with Muse Spark. Try it on yours:" followed by the link.
+Suggested post: "Put in your website. It tells you which companies need what you sell right now, and why, in their own words, with the link to where they said it. Built solo for the Meta hackathon on Muse Spark. Try it on yours:" followed by the link.
