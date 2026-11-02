@@ -182,6 +182,13 @@
 .yc-form .notice{margin-top:.875rem}
 @media(max-width:560px){.yc-field{flex-direction:column}.yc-btn{justify-content:center}.yc-form-foot{justify-content:center}}
 
+/* Veins behind the hero field: dots flow in from both edges and disappear into it */
+.yc-hero{position:relative;isolation:isolate;overflow-x:clip}
+.yc-form{position:relative}
+.yc-veins{position:absolute;z-index:-1;left:50%;top:calc(33px - 260px);width:1800px;height:520px;margin-left:-900px;pointer-events:none}
+.yc-vein-dot circle{fill:#d5682f;stroke:none}
+@media(max-width:720px){.yc-veins{display:none}}
+
 /* Product shot: a real Shortlisted company, framed like the app */
 .yc-shot{margin:clamp(3rem,6vw,4.5rem) auto 0;max-width:60rem;border:1px solid rgba(27,27,27,.1);border-radius:1rem;background:#fff;
   box-shadow:0 2px 4px rgba(27,27,27,.04),0 40px 80px -32px rgba(64,36,20,.28);overflow:hidden}

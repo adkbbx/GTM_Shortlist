@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { FormEvent, RefObject } from 'react';
 import '@fontsource/schibsted-grotesk/500.css';
 import '@fontsource/schibsted-grotesk/800.css';
@@ -180,6 +180,7 @@ function StartForm({ id, label = 'Your company website', inputId = 'website', ac
     } catch (reason) { setError(describe(reason)); setBusy(false); }
   };
   return <form id={id} className="yc-form" onSubmit={start} autoComplete="off" noValidate>
+    {!simple && <Veins />}
     <div className={`yc-field${shake % 2 ? ' shake' : shake ? ' shake-b' : ''}`}>
       <CompanySearch value={website} clientId={configuredDirectoryId()} iconLookup disabled={busy} label={label}
         inputId={inputId} placeholder="yourcompany.com" onChange={setWebsite} />
@@ -229,6 +230,40 @@ function ProductShot({ view, onOpen }: { view: AgentRunView; onOpen: (id: string
     <figcaption><a href={`?agent=${view.run.id}`} onClick={event => { event.preventDefault(); onOpen(view.run.id); }}>
       A real result from a search for {domainOf(view.run.website)}. See the full search <Arrow /></a></figcaption>
   </figure>;
+}
+
+/* Veins behind the start field: branches from the page edge merge into trunks that enter the field (its left edge sits
+   at x 612 and its middle at y 260 in this 1800 × 520 box, drawn at 1:1). The right side is the left turned 180°. */
+const VEIN_TRUNKS = ['C450,236 520,244 618,244', 'C430,268 520,262 618,262', 'C480,320 540,282 618,280'];
+const VEINS = [
+  'M0,40 C130,50 200,180 230,196 S300,208 330,214 ' + VEIN_TRUNKS[0],
+  'M0,150 C100,150 190,196 250,200 S310,210 330,214 ' + VEIN_TRUNKS[0],
+  'M0,232 C100,240 160,330 210,322 S280,305 300,300 ' + VEIN_TRUNKS[1],
+  'M0,360 C100,360 180,330 230,317 S285,304 300,300 ' + VEIN_TRUNKS[1],
+  'M0,490 C120,480 200,390 270,372 S340,355 360,350 ' + VEIN_TRUNKS[2],
+  'M0,410 C110,400 200,380 290,367 S345,354 360,350 ' + VEIN_TRUNKS[2],
+];
+const VEIN_DOTS = VEINS.flatMap((_, vein) => [0, 1].map(n => ({ vein, dur: 5.2 + (vein % 3) * .9, begin: -(vein * 1.7 + n * 3.1) })));
+
+function Veins() {
+  const still = usePrefersReducedMotion();
+  const id = useId().replace(/:/g, '');
+  const side = (turn: boolean) => <g key={String(turn)} transform={turn ? 'rotate(180 900 260)' : undefined}>
+    {VEINS.map((d, vein) => <path key={vein} id={`${id}-${turn ? 'r' : 'l'}${vein}`} d={d} />)}
+    {!still && VEIN_DOTS.map(({ vein, dur, begin }) => <g key={`${vein}-${begin}`} className="yc-vein-dot">
+      <circle r="6" opacity=".16" /><circle r="2.25" />
+      <animateMotion dur={`${dur + (turn ? .6 : 0)}s`} begin={`${begin - (turn ? 1.3 : 0)}s`} repeatCount="indefinite"
+        calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines=".35 0 .65 1"><mpath href={`#${id}-${turn ? 'r' : 'l'}${vein}`} /></animateMotion>
+      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.18;.9;1" dur={`${dur + (turn ? .6 : 0)}s`}
+        begin={`${begin - (turn ? 1.3 : 0)}s`} repeatCount="indefinite" />
+    </g>)}
+  </g>;
+  return <svg className="yc-veins" viewBox="0 0 1800 520" aria-hidden="true" focusable="false">
+    <defs><linearGradient id={`${id}-fade`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="618" y2="0">
+      <stop offset="0" stopColor="#d5682f" stopOpacity="0" /><stop offset=".55" stopColor="#d5682f" stopOpacity=".2" />
+      <stop offset="1" stopColor="#d5682f" stopOpacity=".38" /></linearGradient></defs>
+    <g fill="none" stroke={`url(#${id}-fade)`} strokeWidth="1.25" strokeLinecap="round">{side(false)}{side(true)}</g>
+  </svg>;
 }
 
 function Hero({ example, onOpen }: { example?: AgentRunView; onOpen: (id: string) => void }) {
