@@ -174,13 +174,17 @@
 .yc-field:focus-within{border-color:var(--pl-apricot);box-shadow:0 0 0 4px rgba(213,104,47,.14),0 12px 32px -12px rgba(106,52,23,.25)}
 .yc-field .company-search{flex:1;min-width:0}
 .yc-field input{width:100%;height:3rem;padding:0 .875rem;border:0;outline:0;background:transparent;font-size:1.0625rem;color:var(--pl-charcoal)}
+/* The whole field shows focus (above); the text box inside it draws no second ring. */
+.yc-field input:focus,.yc-field input:focus-visible{outline:0;box-shadow:none}
 .yc-btn{flex:none;display:inline-flex;align-items:center;gap:.5rem;height:3rem;padding:0 1.25rem;border:0;border-radius:.625rem;
   background:var(--pl-charcoal);color:#fff;font-size:.9375rem;font-weight:700;cursor:pointer;transition:background .2s,transform .2s}
 .yc-btn:hover{background:#000}.yc-btn:active{transform:translateY(1px)}.yc-btn:disabled{opacity:.7;cursor:progress}
 .yc-form-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem 1.25rem;margin-top:1rem;padding-inline:.25rem}
 .yc-note{font-size:.8125rem;color:var(--pl-muted)}
-.yc-describe-link{padding:.25rem 0;border:0;background:none;font:inherit;font-size:.8125rem;color:var(--pl-muted);text-decoration:underline;text-decoration-color:rgba(27,27,27,.25);text-underline-offset:.2rem;cursor:pointer}
+/* A text link, not a button: the shared button rules (orange fill, 3.25rem height) are undone here. */
+.yc-describe-link,.yc-describe-link:hover,.yc-describe-link:active{min-height:0;padding:.25rem 0;border:0;border-radius:.25rem;background:none;box-shadow:none;transform:none;font:inherit;font-size:.8125rem;font-weight:500;color:var(--pl-muted);text-decoration:underline;text-decoration-color:rgba(27,27,27,.25);text-underline-offset:.2rem;cursor:pointer}
 .yc-describe-link:hover{color:var(--pl-charcoal);text-decoration-color:currentColor}
+.yc-describe-link:focus-visible{outline:2px solid var(--pl-charcoal);outline-offset:3px}
 .yc-describe{width:min(34rem,calc(100vw - 2rem));max-height:calc(100dvh - 2rem);margin:auto;padding:0;border:0;border-radius:1rem;background:#fff;color:var(--pl-charcoal);box-shadow:0 24px 64px rgba(27,27,27,.18)}
 .yc-describe::backdrop{background:rgba(27,27,27,.4)}
 .yc-describe form{display:grid;gap:.375rem;padding:1.5rem;text-align:left}
@@ -191,10 +195,12 @@
 .yc-describe label span{margin-left:.375rem;font-weight:400;color:var(--pl-muted)}
 .yc-describe textarea,.yc-describe input{width:100%;box-sizing:border-box;padding:.625rem .75rem;border:1px solid rgba(27,27,27,.16);border-radius:.625rem;background:#fff;font:inherit;font-size:.9375rem;color:inherit;resize:vertical}
 .yc-describe textarea{min-height:4.75rem;field-sizing:content}
-.yc-describe-close{display:grid;place-items:center;width:2.25rem;height:2.25rem;padding:0;border:0;border-radius:.5rem;background:none;color:var(--pl-muted);cursor:pointer}
+.yc-describe-close{display:grid;place-items:center;width:2.25rem;height:2.25rem;min-height:0;padding:0;border:0;border-radius:.5rem;background:none;box-shadow:none;color:var(--pl-muted);cursor:pointer}
+.yc-describe-cancel{min-height:0;box-shadow:none}
 .yc-describe-close:hover{background:#f3f1ed;color:var(--pl-charcoal)}
 .yc-describe-close svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
-.yc-describe textarea:focus-visible,.yc-describe input:focus-visible{outline:2px solid var(--pl-charcoal);outline-offset:1px}
+.yc-describe textarea:hover,.yc-describe input:hover{border-color:rgba(27,27,27,.3)}
+.yc-describe textarea:focus,.yc-describe input:focus,.yc-describe textarea:focus-visible,.yc-describe input:focus-visible{outline:0;border-color:var(--pl-apricot);box-shadow:0 0 0 4px rgba(213,104,47,.14)}
 .yc-describe-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:.75rem;margin-top:1rem}
 .yc-describe-cancel{height:3rem;padding:0 1rem;border:0;border-radius:.625rem;background:none;font:inherit;font-weight:600;color:var(--pl-muted);cursor:pointer}
 .yc-describe-cancel:hover{color:var(--pl-charcoal)}
