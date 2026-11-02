@@ -232,37 +232,43 @@ function ProductShot({ view, onOpen }: { view: AgentRunView; onOpen: (id: string
   </figure>;
 }
 
-/* Veins behind the start field: branches from the page edge merge into trunks that enter the field (its left edge sits
-   at x 612 and its middle at y 260 in this 1800 × 520 box, drawn at 1:1). The right side is the left turned 180°. */
-const VEIN_TRUNKS = ['C450,236 520,244 618,244', 'C430,268 520,262 618,262', 'C480,320 540,282 618,280'];
-const VEINS = [
-  'M0,40 C130,50 200,180 230,196 S300,208 330,214 ' + VEIN_TRUNKS[0],
-  'M0,150 C100,150 190,196 250,200 S310,210 330,214 ' + VEIN_TRUNKS[0],
-  'M0,232 C100,240 160,330 210,322 S280,305 300,300 ' + VEIN_TRUNKS[1],
-  'M0,360 C100,360 180,330 230,317 S285,304 300,300 ' + VEIN_TRUNKS[1],
-  'M0,490 C120,480 200,390 270,372 S340,355 360,350 ' + VEIN_TRUNKS[2],
-  'M0,410 C110,400 200,380 290,367 S345,354 360,350 ' + VEIN_TRUNKS[2],
-];
-const VEIN_DOTS = VEINS.flatMap((_, vein) => [0, 1].map(n => ({ vein, dur: 5.2 + (vein % 3) * .9, begin: -(vein * 1.7 + n * 3.1) })));
+/* Fine lines behind the start field: a fan from the page edges that narrows into the field, with small square dots
+   travelling along it. Drawn 1:1 in an 1800 × 1100 box centred on the field (its left edge at x 612, middle at y 550);
+   the right side is the mirror image. */
+const FAN = 13;
+const noise = (n: number) => { const x = Math.sin(n * 12.9898) * 43758.5453; return x - Math.floor(x); };
+const FAN_LINES = Array.from({ length: FAN }, (_, i) => {
+  const t = -1 + 2 * i / (FAN - 1), a = Math.abs(t);
+  const end = 550 + t * 22;
+  const fromEdge = a < .55;
+  const sx = fromEdge ? -10 : (a - .55) / .45 * 360, sy = fromEdge ? 550 + t * 960 : t < 0 ? -10 : 1110;
+  const k = Math.min(1, Math.max(0, (a - .3) / .7));
+  const c1x = sx + (612 - sx) * (.45 - .33 * k), c1y = sy + (end - sy) * .55 * k;
+  const r = (n: number) => Math.round(n);
+  return `M${r(sx)},${r(sy)} C${r(c1x)},${r(c1y)} ${r(Math.max(380, sx + 80))},${r(end)} 616,${r(end)}`;
+});
+const FAN_DOTS = FAN_LINES.flatMap((_, line) => [0, 1].map(n => {
+  const seed = line * 7 + n * 3;
+  return { line, dur: 8 + noise(seed) * 5, begin: -noise(seed + 1) * 13, accent: noise(seed + 2) > .72 };
+}));
 
 function Veins() {
   const still = usePrefersReducedMotion();
   const id = useId().replace(/:/g, '');
-  const side = (turn: boolean) => <g key={String(turn)} transform={turn ? 'rotate(180 900 260)' : undefined}>
-    {VEINS.map((d, vein) => <path key={vein} id={`${id}-${turn ? 'r' : 'l'}${vein}`} d={d} />)}
-    {!still && VEIN_DOTS.map(({ vein, dur, begin }) => <g key={`${vein}-${begin}`} className="yc-vein-dot">
-      <circle r="6" opacity=".16" /><circle r="2.25" />
-      <animateMotion dur={`${dur + (turn ? .6 : 0)}s`} begin={`${begin - (turn ? 1.3 : 0)}s`} repeatCount="indefinite"
-        calcMode="spline" keyPoints="0;1" keyTimes="0;1" keySplines=".35 0 .65 1"><mpath href={`#${id}-${turn ? 'r' : 'l'}${vein}`} /></animateMotion>
-      <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.18;.9;1" dur={`${dur + (turn ? .6 : 0)}s`}
-        begin={`${begin - (turn ? 1.3 : 0)}s`} repeatCount="indefinite" />
-    </g>)}
+  const side = (mirror: boolean) => <g key={String(mirror)} transform={mirror ? 'translate(1800 0) scale(-1 1)' : undefined}>
+    {FAN_LINES.map((d, line) => <path key={line} id={`${id}-${mirror ? 'r' : 'l'}${line}`} d={d} stroke={`url(#${id}-fade)`} />)}
+    {!still && FAN_DOTS.map(({ line, dur, begin, accent }, n) => {
+      const time = { dur: `${(dur * (mirror ? 1.07 : 1)).toFixed(2)}s`, begin: `${(begin - (mirror ? 2.9 : 0)).toFixed(2)}s`, repeatCount: 'indefinite' };
+      return <rect key={n} x="-1.5" y="-1.5" width="3" height="3" fill={accent ? '#d5682f' : '#a9a29a'}>
+        <animateMotion {...time}><mpath href={`#${id}-${mirror ? 'r' : 'l'}${line}`} /></animateMotion>
+        <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.12;.9;1" {...time} />
+      </rect>;
+    })}
   </g>;
-  return <svg className="yc-veins" viewBox="0 0 1800 520" aria-hidden="true" focusable="false">
-    <defs><linearGradient id={`${id}-fade`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="618" y2="0">
-      <stop offset="0" stopColor="#d5682f" stopOpacity="0" /><stop offset=".55" stopColor="#d5682f" stopOpacity=".2" />
-      <stop offset="1" stopColor="#d5682f" stopOpacity=".38" /></linearGradient></defs>
-    <g fill="none" stroke={`url(#${id}-fade)`} strokeWidth="1.25" strokeLinecap="round">{side(false)}{side(true)}</g>
+  return <svg className="yc-veins" viewBox="0 0 1800 1100" aria-hidden="true" focusable="false">
+    <defs><linearGradient id={`${id}-fade`} gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="320" y2="0">
+      <stop offset="0" stopColor="#1b1b1b" stopOpacity="0" /><stop offset="1" stopColor="#1b1b1b" stopOpacity=".11" /></linearGradient></defs>
+    <g fill="none" strokeWidth="1">{side(false)}{side(true)}</g>
   </svg>;
 }
 

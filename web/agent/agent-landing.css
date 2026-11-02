@@ -182,11 +182,11 @@
 .yc-form .notice{margin-top:.875rem}
 @media(max-width:560px){.yc-field{flex-direction:column}.yc-btn{justify-content:center}.yc-form-foot{justify-content:center}}
 
-/* Veins behind the hero field: dots flow in from both edges and disappear into it */
-.yc-hero{position:relative;isolation:isolate;overflow-x:clip}
+/* Fine lines behind the hero field: small dots travel in from both edges and disappear into it */
+.yc-hero{position:relative;isolation:isolate;overflow:clip}
 .yc-form{position:relative}
-.yc-veins{position:absolute;z-index:-1;left:50%;top:calc(33px - 260px);width:1800px;height:520px;margin-left:-900px;pointer-events:none}
-.yc-vein-dot circle{fill:#d5682f;stroke:none}
+.yc-veins{position:absolute;z-index:-1;left:50%;top:calc(33px - 550px);width:1800px;height:1100px;margin-left:-900px;pointer-events:none;
+  -webkit-mask-image:radial-gradient(50% 46% at 50% 50%,#000 58%,transparent 100%);mask-image:radial-gradient(50% 46% at 50% 50%,#000 58%,transparent 100%)}
 @media(max-width:720px){.yc-veins{display:none}}
 
 /* Product shot: a real Shortlisted company, framed like the app */
