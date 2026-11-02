@@ -1,5 +1,6 @@
 """The whole run: understand the seller, find competitors and companies, investigate in parallel, let the skeptic
 judge each quote, then decide verdicts in code. Progress events and saved snapshots are emitted along the way."""
+import logging
 import time
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
@@ -38,6 +39,9 @@ from shortlist.agent.telemetry import BudgetReached, Meter
 from shortlist.agent.verdict import decide
 from shortlist.domain import utcnow
 from shortlist.fetch import FetchError
+
+logger = logging.getLogger(__name__)
+UNEXPECTED = "an unexpected error while reading its pages"
 
 VERDICT_LABEL = {"shortlisted": "Shortlisted", "needs_look": "Needs a look", "rejected": "Rejected"}
 
@@ -115,7 +119,18 @@ class AgentRunner:
         except (AgentProviderError, AgentOutputError, FetchError) as exc:
             result.status, result.error = "failed", str(exc)[:500]
             self.emit("run", f"Stopped: {result.error}", level="warn")
+        except Exception:
+            logger.exception("Run %s failed", result.id)
+            result.status, result.error = "failed", "The run stopped on an unexpected error"
+            self.emit("run", f"Stopped: {result.error}", level="warn")
         finally:
+            # A company still marked in progress would otherwise show as working forever on a finished board.
+            with self.lock:
+                for company in result.companies:
+                    if company.status == "investigating":
+                        company.status, company.error = "done", company.error or "The run stopped before it finished"
+                        company.verdict = decide(company, result.profile, result.disqualifiers,
+                                                 self.providers.clock().date(), result.overrides.exclusions)
             result.telemetry.elapsed_ms += int((time.monotonic() - started) * 1000)
             if result.status == "running":
                 result.status = "complete"
@@ -268,7 +283,15 @@ class AgentRunner:
             self.emit("investigation", f"Investigating {ref.domain}", company=ref.domain)
             self.replace(result, CompanyResult(domain=ref.domain, name=ref.name, url=ref.url, found_via=ref.found_via,
                                                status="investigating"))
-            company = Investigation(ref, ctx).run()
+            try:
+                company = Investigation(ref, ctx).run()
+            except (BudgetReached, AgentProviderError, AgentOutputError, FetchError):
+                raise
+            except Exception:  # One company's unexpected page must not stop the run and leave it "Investigating".
+                logger.exception("Investigation of %s failed", ref.domain)
+                company = CompanyResult(domain=ref.domain, name=ref.name, url=ref.url, found_via=ref.found_via,
+                                        status="done", error=UNEXPECTED)
+                self.emit("investigation", f"Investigation incomplete: {UNEXPECTED}", company=ref.domain, level="warn")
         company.evidence += self.profile_evidence(result, company)
         if company.evidence and company.status != "budget_reached":
             self.emit("skeptic", f"Skeptic checking {len(company.evidence)} quotes", company=ref.domain)

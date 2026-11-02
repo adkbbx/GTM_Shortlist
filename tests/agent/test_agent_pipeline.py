@@ -104,6 +104,28 @@ def test_needs_a_look_lists_what_is_missing(run_result):
     assert decisions[own_need.id].decision == "insufficient"
 
 
+def test_an_unexpected_error_on_one_company_does_not_stop_the_run(providers, monkeypatch):
+    """A live run ended with mastra.ai shown as Investigating forever: an error outside the model loop escaped."""
+    from shortlist.agent.investigation import Investigation
+    from shortlist.agent.models import Overrides
+
+    real = Investigation.run
+    broken = []
+
+    def run(self):
+        if not broken:
+            broken.append(self.company.domain)
+            raise ValueError("Invalid IPv6 URL")
+        return real(self)
+    monkeypatch.setattr(Investigation, "run", run)
+    result = AgentRunner(providers, concurrency=1).run(SELLER, Overrides(company_count=1))
+    assert result.status == "complete"
+    failed = next(c for c in result.companies if c.domain == broken[0])
+    assert failed.status == "done" and failed.verdict.kind == "needs_look"
+    assert any("unexpected error" in gap for gap in failed.verdict.missing)
+    assert len(result.companies) > 1 and all(c.status != "investigating" for c in result.companies)
+
+
 def test_the_count_is_how_many_shortlisted_companies_and_research_stops_there(providers):
     """Needs a look and Rejected do not count: the run keeps researching until one company is Shortlisted, then stops."""
     from shortlist.agent.models import Overrides

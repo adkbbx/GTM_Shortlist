@@ -100,7 +100,7 @@ def observed_links(url: str, soup: BeautifulSoup) -> tuple[str, ...]:
             continue
         try:
             destination = canonical_url(urljoin(url, href))
-        except FetchError:
+        except (FetchError, ValueError):  # urljoin rejects some page strings, e.g. "Invalid IPv6 URL"
             continue
         if domain_of(destination) == owner and destination not in links and destination != canonical_url(url):
             links.append(destination)
@@ -185,6 +185,15 @@ INLINE_URL = re.compile(r"(?:https?:)?//[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z
                         re.IGNORECASE)
 
 
+def host_of(page_url: str, value: str) -> str:
+    """The host a page's address points to, or "" when Python cannot parse it: mastra.ai's inline code held a
+    bracketed string that raised "Invalid IPv6 URL" and stopped a whole live run."""
+    try:
+        return (urlsplit(urljoin(page_url, value)).hostname or "").casefold()
+    except ValueError:
+        return ""
+
+
 def inline_urls(soup: BeautifulSoup, page_url: str, owner: str) -> list[str]:
     found = []
     for element in soup.find_all("script"):
@@ -192,7 +201,7 @@ def inline_urls(soup: BeautifulSoup, page_url: str, owner: str) -> list[str]:
             continue
         for match in INLINE_URL.finditer(element.string or ""):
             value = match.group(0)
-            host = (urlsplit(urljoin(page_url, value)).hostname or "").casefold()
+            host = host_of(page_url, value)
             if host and host != owner and not host.endswith("." + owner) and value not in found:
                 found.append(value)
     return found[:100]
@@ -209,7 +218,7 @@ def signature(page: Page, homepage: bool = False) -> PageSignature:
                 continue
             value = value.strip()
             if attr in ("src", "href"):
-                host = (urlsplit(urljoin(page.url, value)).hostname or "").casefold()
+                host = host_of(page.url, value)
                 if not host or host == owner or host.endswith("." + owner):
                     continue  # First-party code and links cannot name a third-party tool by address.
             elif len(value) > 300:

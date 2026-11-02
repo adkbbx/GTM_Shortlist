@@ -96,6 +96,16 @@ def test_scan_finds_script_badges_powered_by_and_integrations_pages():
     assert [h.quote.text for h in scan(sig, [RIVAL], "Shop")] == ["Connect RivalDesk in a click"]
 
 
+def test_addresses_python_cannot_parse_are_skipped_not_fatal():
+    """A live run stopped on mastra.ai: a bracketed string in its inline code raised "Invalid IPv6 URL"."""
+    home = page("https://shop.example/", '<p>SYNTHETIC shop homepage with enough readable text.</p><a href="https://[broken/">x</a><img src="//cdn.vendor.example]x/a.png">'
+                                         '<script>var u = "//cdn.vendor.example]x/load.js";</script>'
+                                         '<script src="https://widget.example/w.js"></script>')
+    sig = signature(home, homepage=True)
+    assert [a.value for a in sig.attributes if a.attr == "src"] == ["https://widget.example/w.js"]
+    assert not any(a.attr == "inline" for a in sig.attributes)
+
+
 def test_scan_reads_inline_widget_snippets_and_vendor_hosts():
     """Live runs never produced a Rejected verdict: widgets install with inline snippets and load from vendor domains
     (widget.intercom.io for intercom.com), which a src-only, website-domain-only scan missed. SYNTHETIC pages."""
