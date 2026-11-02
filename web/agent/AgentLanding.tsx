@@ -44,7 +44,7 @@ const HOLD_STEPS = 6;  // about seven seconds on the finished result before it p
     Housekeeping and failed reads stay in the full log on the search's own page. */
 function storyEvents(events: AgentEvent[]) {
   return events.filter(event => !(
-    /^(?:Could not read|Investigating \d+ compan|Skeptic checking|\d+ website\(s\) could not be read)/.test(event.message)
+    /^(?:Could not read|Investigating \d+ compan|Skeptic checking|Reviewing \d+ pieces|\d+ website\(s\) could not be read)/.test(event.message)
     || (event.stage === 'investigation' && /^(?:Read https?:|Searched )/.test(event.message))
     || event.message.includes('set aside')));
 }
@@ -75,8 +75,8 @@ function useRise(ref: RefObject<HTMLElement | null>, reduced: boolean, ready = t
   }, [ref, reduced, ready]);
 }
 
-const TAG: Record<string, string> = { seller: 'Site', competitors: 'Rivals', discovery: 'Discover', investigation: 'Read',
-  skeptic: 'Skeptic', verdict: 'Verdict', outreach: 'Opener', run: 'Run', overrides: 'Change' };
+const TAG: Record<string, string> = { seller: 'Site', competitors: 'Rivals', discovery: 'Discover', investigation: 'Research',
+  skeptic: 'Verify', verdict: 'Verdict', outreach: 'Opener', run: 'Run', overrides: 'Change' };
 
 function supportedQuote(company: Company) {
   const supported = new Set(company.decisions.filter(d => d.decision === 'supports').map(d => d.evidence_id));
@@ -94,7 +94,7 @@ function ReplayConsole({ view, events, onOpen, shown }: { view: AgentRunView; ev
   const active = states.indexOf('active');
   return <figure className="al-console" aria-label={`Replay of a real search for ${domainOf(view.run.website)}`}>
     <div className="al-console-bar">
-      <span className="al-chip"><span className="agent-live-dot" aria-hidden="true" />Replay of a real run</span>
+      <span className="al-chip"><span className="agent-live-dot" aria-hidden="true" />Replay of a real search</span>
       <span className="al-console-title">{domainOf(view.run.website)} · {day(view.run.created_at)}</span>
     </div>
     <Stepper states={states} compact />
@@ -137,9 +137,9 @@ function Story({ view, onOpen, reduced }: { view: AgentRunView; onOpen: (id: str
   return <section id="al-replay" ref={root} className="al-story al-section" aria-labelledby="al-replay-heading">
     <div className="al-story-pin pl-wrap">
       <div className="al-replay-copy">
-        <p className="al-kicker">Watch it work</p>
-        <Reveal id="al-replay-heading" className="pl-h2" reduced={reduced} lead="A real search," accent="step by step." />
-        <p className="al-replay-text">The recorded activity of a real search for {domainOf(view.run.website)}, replayed as it happened.</p>
+        <p className="al-kicker">See it in action</p>
+        <Reveal id="al-replay-heading" className="pl-h2" reduced={reduced} lead="A real search," accent="start to finish." />
+        <p className="al-replay-text">The actual activity from a search for {domainOf(view.run.website)}, played back as it ran.</p>
         <ol className="al-story-steps">{STAGES.map((stage, index) => <li key={stage.label} className={`is-${states[index]}`}>
           <span className="al-story-dot" aria-hidden="true" /><span>{stage.label}</span><small>{stage.by}</small>
         </li>)}</ol>
@@ -151,10 +151,10 @@ function Story({ view, onOpen, reduced }: { view: AgentRunView; onOpen: (id: str
 }
 
 const HOW = [
-  { n: '01', title: 'Reads your site', by: 'Investigator model', text: 'Works out what you sell, who buys it, your competitors and the size of company you serve. Nothing to fill in.' },
-  { n: '02', title: 'Hunts for buying signals', by: 'Web, job boards, news, social', text: 'Looks for companies hiring for the problem you solve, raising money, launching or expanding, or saying so on LinkedIn and X, then confirms each signal on a page it can read.' },
-  { n: '03', title: 'Investigates, then doubts', by: 'Skeptic model, open weights', text: 'Each company is read page by page and quoted word for word. A second, independent model accepts or rejects every quote.' },
-  { n: '04', title: 'Rules decide, then it writes', by: 'Fixed rules', text: 'Code, not a model, sorts Shortlisted, Needs a look and Rejected. Shortlisted companies get why now and an opening line, checked against the quotes.' },
+  { n: '01', title: 'Learns your business', by: 'From your website', text: 'Reads your site to understand what you sell, who buys it, who you compete with and the size of company you serve. No forms to fill in.' },
+  { n: '02', title: 'Finds companies ready to buy', by: 'Hiring, funding, launches', text: 'Looks for companies hiring for the problem you solve, raising money, launching something new, or announcing it on LinkedIn or X.' },
+  { n: '03', title: 'Checks every claim', by: 'A second, independent review', text: "Reads each company's own pages and job posts. A second model reviews every piece of evidence and throws out anything weak." },
+  { n: '04', title: 'Gives you a clear answer', by: 'Shortlisted, Needs a look or Rejected', text: 'Every company gets a verdict and the reason for it. For the strongest fits, you also get why now and a first email.' },
 ];
 
 function ResultCards({ runs, onOpen, reduced }: { runs: AgentRunView[]; onOpen: (id: string) => void; reduced: boolean }) {
@@ -163,8 +163,8 @@ function ResultCards({ runs, onOpen, reduced }: { runs: AgentRunView[]; onOpen: 
   useRise(root, reduced, cards.length > 0);
   if (!cards.length) return null;
   return <section ref={root} className="al-section pl-wrap" aria-labelledby="al-results-heading">
-    <p className="al-kicker">Real output</p>
-    <Reveal id="al-results-heading" className="pl-h2" reduced={reduced} lead="Not a score. A reason you can check," accent="and a line you can send." />
+    <p className="al-kicker">Real results</p>
+    <Reveal id="al-results-heading" className="pl-h2" reduced={reduced} lead="Why they need you," accent="and how to start the conversation." />
     <div className="al-cards">
       {cards.map(({ view, company }, index) => {
         const quote = supportedQuote(company);
@@ -172,15 +172,15 @@ function ResultCards({ runs, onOpen, reduced }: { runs: AgentRunView[]; onOpen: 
           <header><span className="al-verdict">Shortlisted</span><span className="al-for">for {domainOf(view.run.website)}</span></header>
           <h3><Logo company={company} />{company.name || company.domain}</h3>
           {quote && <blockquote>“{quote.quote.text}”<cite>{domainOf(quote.quote.url)}</cite></blockquote>}
-          {company.pitch && <div className="al-opener"><p>Opening line</p><span>{company.pitch.opener}</span></div>}
-          <a href={`?agent=${view.run.id}`} onClick={event => { event.preventDefault(); onOpen(view.run.id); }}>See every quote <Arrow /></a>
+          {company.pitch && <div className="al-opener"><p>Suggested opener</p><span>{company.pitch.opener}</span></div>}
+          <a href={`?agent=${view.run.id}`} onClick={event => { event.preventDefault(); onOpen(view.run.id); }}>See the evidence <Arrow /></a>
         </article>;
       })}
     </div>
   </section>;
 }
 
-const GATES = [['Buying signal', 'Hiring, funding, launch or post'], ['Investigated', 'Quoted from their pages'], ['Skeptic', 'Kept by a second model']];
+const GATES = [['Buying signal', 'Hiring, funding or a launch'], ['Researched', 'Checked on their own pages'], ['Verified', 'Confirmed by a second review']];
 
 function Hero({ reduced, onOpen }: { reduced: boolean; onOpen: (id: string) => void }) {
   const config = useAgentConfig();
@@ -233,9 +233,8 @@ function Hero({ reduced, onOpen }: { reduced: boolean; onOpen: (id: string) => v
       <div className="pl-hero-top">
         <div><p className="al-eyebrow">For founders and small sales teams</p>
           <Reveal as="h1" id="agent-start-heading" reduced={reduced} lead="Stop emailing companies" accent="that don't need you." br /></div>
-        <p className="pl-lede">Most prospect lists are guesses, so most cold emails get ignored. Enter your website. GTM Shortlist finds
-          companies with a live reason to buy from you, <strong>backs every pick with evidence you can verify</strong>, and drafts the
-          first email.</p>
+        <p className="pl-lede">Most prospect lists are guesses. Enter your website and get a short list of companies that need what you
+          sell right now, <strong>the evidence behind each one</strong>, and a first email ready to send.</p>
       </div>
       <div className={`pl-instrument${on ? ' on' : ''}`} ref={instrument}>
         <canvas ref={canvas} aria-hidden="true" />
@@ -253,7 +252,7 @@ function Hero({ reduced, onOpen }: { reduced: boolean; onOpen: (id: string) => v
           {error && <p className="notice" role="alert">{error}</p>}
           {config.publicDemo && <p className="pl-note al-demo-note"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
             <rect x="3" y="7" width="10" height="7" rx="1" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" /></svg>
-            <span>Public demo: up to {config.maxCompanies} companies per search.</span></p>}
+            <span>Free demo: up to {config.maxCompanies} companies per search.</span></p>}
           <span className="pl-port" aria-hidden="true" />
         </form>
         <div className="pl-stream" ref={streamEl} aria-hidden="true">
@@ -264,9 +263,9 @@ function Hero({ reduced, onOpen }: { reduced: boolean; onOpen: (id: string) => v
         </div>
         <section ref={cardOut} className="pl-card pl-shortlist" aria-label="Illustrative sample shortlist">
           <span ref={portOut} className="pl-port" aria-hidden="true" />
-          <header><div><strong>Shortlist</strong><small>Illustrative sample</small></div><span ref={tally} className="pl-badge" aria-label="Companies kept in this example">0</span></header>
+          <header><div><strong>Shortlist</strong><small>Sample</small></div><span ref={tally} className="pl-badge" aria-label="Companies kept in this example">0</span></header>
           <ol ref={rows} className="pl-rows" />
-          <footer><a href="#al-replay">Watch a real run <Arrow /></a></footer>
+          <footer><a href="#al-replay">Watch a real search <Arrow /></a></footer>
         </section>
       </div>
     </div>
@@ -314,7 +313,7 @@ export function AgentLanding({ onOpen }: { onOpen: (id: string | null) => void }
 
     <section ref={how} className="al-section pl-wrap" aria-labelledby="al-how-heading">
       <p className="al-kicker">How it works</p>
-      <Reveal id="al-how-heading" className="pl-h2" reduced={reduced} lead="Two models and a rulebook." accent="Nothing to trust blindly." />
+      <Reveal id="al-how-heading" className="pl-h2" reduced={reduced} lead="The research you'd do by hand," accent="done in minutes." />
       <ol className="al-how">{HOW.map((step, index) => <li key={step.n} className="al-rise" style={{ ['--rise' as string]: index }}>
         <span className="al-how-n">{step.n}</span><h3>{step.title}</h3><p className="al-how-by">{step.by}</p><p>{step.text}</p>
       </li>)}</ol>
@@ -323,16 +322,16 @@ export function AgentLanding({ onOpen }: { onOpen: (id: string | null) => void }
     <ResultCards runs={examples} onOpen={onOpen} reduced={reduced} />
 
     {config.examples.length > 0 && <section className="al-section pl-wrap" aria-labelledby="agent-examples-heading">
-      <p className="al-kicker">Real searches</p>
-      <h2 id="agent-examples-heading" className="al-examples-title">Open a finished search</h2>
-      <p className="al-examples-note">Real searches run on {[...new Set(config.examples.map(item => day(item.created_at)))].join(', ')}, with every quote
-        and verdict as recorded. Nothing is re-run when you open one.</p>
+      <p className="al-kicker">Examples</p>
+      <h2 id="agent-examples-heading" className="al-examples-title">Explore a finished search</h2>
+      <p className="al-examples-note">Real searches from {[...new Set(config.examples.map(item => day(item.created_at)))].join(', ')}. Open one to see every
+        company we checked, the evidence and the verdict.</p>
       <ul className="al-examples">{config.examples.map(item => <li key={item.id}>
         <a href={`?agent=${item.id}`} onClick={event => { event.preventDefault(); onOpen(item.id); }}>
-          <span className="al-example-for">Seller: {domainOf(item.website)}</span>
+          <span className="al-example-for">For {domainOf(item.website)}</span>
           <strong>{item.shortlisted_names?.length ? `${item.shortlisted_names.join(' and ')} shortlisted` : 'Nothing shortlisted'}</strong>
           {item.rejected?.[0] && <span className="al-example-rejected"><b>Rejected</b> {item.rejected[0]}</span>}
-          <span className="al-example-open">Open <span aria-hidden="true">→</span></span>
+          <span className="al-example-open">View search <span aria-hidden="true">→</span></span>
         </a>
       </li>)}</ul>
     </section>}

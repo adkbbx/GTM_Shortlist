@@ -11,14 +11,14 @@ export const STAGES = [
   { label: 'Read your site', by: 'Investigator' },
   { label: 'Map competitors', by: 'Investigator' },
   { label: 'Find buying signals', by: 'Web search' },
-  { label: 'Investigate', by: 'Investigator' },
-  { label: 'Check every quote', by: 'Skeptic' },
-  { label: 'Decide and write', by: 'Fixed rules' },
+  { label: 'Research companies', by: 'Investigator' },
+  { label: 'Verify the evidence', by: 'Second review' },
+  { label: 'Decide and draft', by: 'Fixed rules' },
 ] as const;
 const STAGE_INDEX: Record<string, number> = { seller: 0, competitors: 1, discovery: 2, investigation: 3, skeptic: 4, verdict: 5, outreach: 5 };
 export const stageOf = (event: AgentEvent) => STAGE_INDEX[event.stage] ?? -1;
-const STAGE_TAG: Record<string, string> = { seller: 'Site', competitors: 'Competitors', discovery: 'Discovery', investigation: 'Investigate',
-  skeptic: 'Skeptic', verdict: 'Verdict', outreach: 'Opener', overrides: 'Your change', run: 'Run' };
+const STAGE_TAG: Record<string, string> = { seller: 'Site', competitors: 'Competitors', discovery: 'Discovery', investigation: 'Research',
+  skeptic: 'Verify', verdict: 'Verdict', outreach: 'Opener', overrides: 'Your change', run: 'Run' };
 
 type StepState = 'done' | 'active' | 'todo';
 export function stepStates(events: AgentEvent[], running: boolean): StepState[] {
@@ -95,7 +95,7 @@ export function Monitor({ view, events, feedOpen, onFeed }: { view: AgentRunView
         <div><dt>Time</dt><dd>{clock(elapsed)}</dd></div>
         <div><dt>Shortlisted</dt><dd>{run.companies.filter(c => c.verdict?.kind === 'shortlisted').length}<span>/{run.company_count}</span></dd></div>
         <div><dt>Checked</dt><dd>{decided}</dd></div>
-        <div><dt>Quotes kept</dt><dd>{supported}<span>/{checked}</span></dd></div>
+        <div><dt>Evidence kept</dt><dd>{supported}<span>/{checked}</span></dd></div>
         <div><dt>Searches</dt><dd>{run.telemetry.searches}</dd></div>
         <div><dt>Cost</dt><dd>${run.telemetry.cost_usd.toFixed(2)}</dd></div>
       </dl>
@@ -140,12 +140,12 @@ export function WorkingCard({ company, events }: { company: Company; events: Age
   return <article className="agent-working-card" aria-label={`${company.domain}, in progress`}>
     <header><SiteIcon lookup domain={company.domain} fallback={(company.name || company.domain).slice(0, 1).toUpperCase()} className="agent-logo" />
       <h4>{company.name || company.domain}</h4><span className="agent-live-dot" aria-hidden="true" /></header>
-    <ol className="agent-track" aria-hidden="true">{['Investigate', 'Skeptic', 'Verdict'].map((label, index) => {
+    <ol className="agent-track" aria-hidden="true">{['Research', 'Verify', 'Verdict'].map((label, index) => {
       const at = latest ? Math.max(0, stageOf(latest) - 3) : -1;
       return <li key={label} className={index < at ? 'is-done' : index === at ? 'is-now' : ''}><span />{label}</li>;
     })}</ol>
     <p className="agent-working-step">{stage ? stage.label : 'Queued'}</p>
-    <p className="agent-working-message">{latest?.message ?? 'Waiting for its turn.'}</p>
+    <p className="agent-working-message">{latest?.message ?? 'Up next.'}</p>
     {mine.length > 0 && <p className="agent-working-count">
       <b>{mine.filter(e => e.message.startsWith('Read ')).length}</b> pages read · <b>{mine.filter(e => e.message.startsWith('Searched ')).length}</b> searches</p>}
   </article>;

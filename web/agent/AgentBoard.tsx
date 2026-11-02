@@ -10,7 +10,7 @@ import type { AgentEvent, AgentRun, AgentRunView, Company, EvidenceItem, Overrid
 
 const describe = (error: unknown) => error instanceof Error ? error.message : 'Something went wrong. Please try again.';
 const COLUMNS = [
-  { kind: 'shortlisted', title: 'Shortlisted', empty: 'No company has every required check yet.' },
+  { kind: 'shortlisted', title: 'Shortlisted', empty: 'No strong fits yet.' },
   { kind: 'needs_look', title: 'Needs a look', empty: 'Nothing here.' },
   { kind: 'rejected', title: 'Rejected', empty: 'Nothing rejected.' },
 ] as const;
@@ -29,7 +29,7 @@ function Missing({ items }: { items: string[] }) {
   const unread = items.filter(item => item.startsWith('Could not read '));
   const gaps = items.filter(item => !item.startsWith('Could not read '));
   return <div className="agent-missing">
-    <p>What is missing</p>
+    <p>What's missing</p>
     {gaps.length > 0 && <ul>{gaps.map(item => <li key={item}>{item}</li>)}</ul>}
     {unread.length > 0 && <details className="agent-unread">
       <summary>Could not read {unread.length} {unread.length === 1 ? 'page' : 'pages'}</summary>
@@ -60,7 +60,7 @@ function PitchBlock({ pitch }: { pitch: NonNullable<Company['pitch']> }) {
     <blockquote className="agent-pitch-opener">{pitch.opener}</blockquote>
     <div className="agent-pitch-foot">
       <button type="button" className="agent-small-button" onClick={() => copy('opener', pitch.opener)}>{copied ? 'Copied' : 'Copy opening line'}</button>
-      {pitch.checked && <span>✓ Checked against the quotes</span>}
+      {pitch.checked && <span>✓ Every claim matches the evidence</span>}
     </div>
   </section>;
 }
@@ -93,11 +93,11 @@ export function EmailDialog({ company, open, drafting, error, onClose }: { compa
       <footer className="agent-dialog-foot">
         <button type="button" onClick={() => copy('email', `Subject: ${email.subject}\n\n${email.body}`)}>{copied ? 'Copied' : 'Copy email'}</button>
         <a className="agent-dialog-link" href={mail}>Open in mail app</a>
-        {email.checked && <span className="agent-dialog-checked">✓ Checked against the quotes</span>}
+        {email.checked && <span className="agent-dialog-checked">✓ Every claim matches the evidence</span>}
       </footer>
     </div> : error ? <div className="agent-dialog-body"><p className="notice" role="alert">{error}</p></div>
       : <div className="agent-dialog-body agent-dialog-wait" role="status">
-        <p><span className="agent-spinner" aria-hidden="true" />{drafting ? 'Writing from the quotes the skeptic accepted' : 'Starting'}</p>
+        <p><span className="agent-spinner" aria-hidden="true" />{drafting ? 'Writing from the verified evidence' : 'Starting'}</p>
         <span className="agent-skeleton" /><span className="agent-skeleton" /><span className="agent-skeleton short" />
       </div>}
   </dialog>;
@@ -119,7 +119,7 @@ function Trace({ events }: { events: AgentEvent[] }) {
   return <details className="agent-trace">
     <summary>How the agent checked this ({events.length} {events.length === 1 ? 'step' : 'steps'})</summary>
     <ol>{events.map(event => <li key={event.seq} className={`level-${event.level}`}>
-      <span className={`agent-log-tag stage-${event.stage}`}>{event.stage === 'investigation' ? 'Investigate' : event.stage}</span>
+      <span className={`agent-log-tag stage-${event.stage}`}>{event.stage === 'investigation' ? 'Research' : event.stage === 'skeptic' ? 'Verify' : event.stage}</span>
       <span>{event.message}</span>
     </li>)}</ol>
   </details>;
@@ -143,7 +143,7 @@ function CompanyRow({ company, run, events, runId, onUpdate }: { company: Compan
       const next = await agentApi.outreach(runId, company.domain);
       onUpdate(next);
       if (!next.run.companies.find(c => c.domain === company.domain)?.outreach)
-        setError('No email this time: nothing it wrote could be checked against the quotes.');
+        setError("We couldn't write an email we could back with evidence this time.");
     } catch (reason) { setError(describe(reason)); } finally { setDrafting(false); }
   };
   const mine = events.filter(event => event.company === company.domain);
@@ -220,7 +220,7 @@ function Skipped({ run }: { run: AgentRun }) {
     <summary>Skipped {skipped.length} {skipped.length === 1 ? 'company' : 'companies'}: website could not be read</summary>
     <ul>{skipped.map(item => <li key={item.domain}><a href={item.url} target="_blank" rel="noopener noreferrer">{item.domain}</a>
       <span>{item.reason.replace(/^Website could not be read: /, '')}</span></li>)}</ul>
-    <p>Another candidate was researched in each one's place.</p>
+    <p>We researched another company in each one's place.</p>
   </details>;
 }
 
@@ -239,7 +239,7 @@ function ReadingChoice({ profile, apply, busy }: { profile: Profile; apply: (ove
   const { editable } = useAgentConfig();
   return <section className="agent-choice" aria-labelledby="choice-heading">
     <h2 id="choice-heading">Which reading is closest?</h2>
-    <p>Your site can be read more than one way. Pick the closest; there is nothing to type.</p>
+    <p>Your site could describe a few different businesses. Pick the one that fits best.</p>
     <div className="agent-readings">
       {profile.interpretations.map(reading => <button key={reading.id} type="button" className="agent-reading" disabled={busy || !editable}
         onClick={() => apply({ interpretation: reading.id })}>
@@ -316,7 +316,7 @@ export function AgentBoard({ runId, onNew }: { runId: string; onNew: () => void 
     } catch (reason) { setError(describe(reason)); } finally { setSaving(false); }
   };
 
-  if (!view) return <div className="agent-board">{error ? <p className="notice" role="alert">{error}</p> : <p className="agent-status" role="status">Loading the run</p>}</div>;
+  if (!view) return <div className="agent-board">{error ? <p className="notice" role="alert">{error}</p> : <p className="agent-status" role="status">Loading your search</p>}</div>;
   const run = view.run;
   const busy = saving || active;
   return <AgentConfigContext.Provider value={{ ...config, editable }}><div className="agent-board">
@@ -324,7 +324,7 @@ export function AgentBoard({ runId, onNew }: { runId: string; onNew: () => void 
       <div><p className="agent-eyebrow">Shortlist for</p>
         <div className="agent-title"><SiteIcon lookup domain={domainOf(run.website)} fallback={domainOf(run.website).slice(0, 1).toUpperCase()} className="agent-logo agent-title-logo" />
           <h1 ref={heading} tabIndex={-1}>{domainOf(run.website)}</h1></div>
-        {!editable && <p className="agent-shared" role="note">You are viewing a shared shortlist. Read only.</p>}</div>
+        {!editable && <p className="agent-shared" role="note">You're viewing a shared shortlist. Only the person who ran it can make changes.</p>}</div>
       <div className="agent-board-actions">
         {run.status === 'complete' && <ExportLink run={run} />}
         <button type="button" className="secondary" onClick={onNew}>New search</button>
@@ -335,7 +335,7 @@ export function AgentBoard({ runId, onNew }: { runId: string; onNew: () => void 
     {error && <p className="notice" role="alert">{error}</p>}
     <div className="agent-board-grid"><div className="agent-board-main">
     {active && run.companies.length === 0 && <EarlySteps run={run} events={events} />}
-    {view.status === 'failed' && <section className="notice agent-failed" role="alert"><p>{run.error ?? 'The run stopped.'}</p>
+    {view.status === 'failed' && <section className="notice agent-failed" role="alert"><p>{run.error ?? 'The search stopped.'}</p>
       {/* Only a site too vague to read: a provider failure has no profile, and typing would not fix it. */}
       {run.profile && !run.profile.offer && editable && <Describe apply={apply} busy={busy} summary="Describe your offer and buyer (optional)" />}</section>}
     {view.status === 'needs_choice' && run.profile && <ReadingChoice profile={run.profile} apply={apply} busy={busy} />}

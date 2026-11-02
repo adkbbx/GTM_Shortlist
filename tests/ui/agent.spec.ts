@@ -30,7 +30,7 @@ test('a website alone produces a live board with three verdicts and quoted evide
   const rejected = page.locator('.column-rejected');
   await expect(shortlisted.getByRole('heading', { name: 'Trailgear Outfitters' })).toBeVisible({ timeout: 30000 });
   await expect(needsLook.getByRole('heading', { name: 'Oak and Pine' })).toBeVisible();
-  await expect(needsLook).toContainText('No current need or timing evidence (none dated within 180 days, no open job post)');
+  await expect(needsLook).toContainText('No recent sign they need this (nothing from the last 6 months, no open job post)');
   await expect(rejected.getByRole('heading', { name: 'Bright Kettle' })).toBeVisible();
   // Each company is one row; its quotes and checks open on request.
   await expect(rejected.locator('.agent-row-panel').first()).toBeHidden();

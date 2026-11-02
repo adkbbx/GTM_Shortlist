@@ -12,7 +12,7 @@ test('the public demo starts from a website alone, caps the size and shares a re
   await page.goto('/?flow=classic');
   await expect(page.getByLabel('Your company website')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Earlier research' })).toHaveCount(0);
-  await expect(page.getByText('Public demo: up to 5 companies per search.')).toBeVisible();
+  await expect(page.getByText('Free demo: up to 5 companies per search.')).toBeVisible();
   await expect(page.getByRole('group', { name: 'Companies to find' }).getByRole('radio')).toHaveCount(3);
   await expect(page.getByRole('radio', { name: '1', exact: true })).toBeChecked();
   await expect(page.getByRole('button', { name: 'Find 1 company' })).toBeVisible();  // one company by default
@@ -35,7 +35,7 @@ test('the public demo starts from a website alone, caps the size and shares a re
   await expect(email).toBeVisible();  // opens at once, then shows the email when it is written
   await expect(email.locator('.agent-email-subject')).not.toBeEmpty({ timeout: 15000 });
   await expect(email).toContainText('Hi Trailgear Outfitters team,');
-  await expect(email).toContainText('Checked against the quotes');
+  await expect(email).toContainText('Every claim matches the evidence');
   expect(await noOverflow(page)).toBe(true);
   await page.screenshot({ path: `.impeccable/review/${info.project.name}-agent-public-email.png` });
   await page.keyboard.press('Escape');
@@ -81,7 +81,7 @@ test('the public demo starts from a website alone, caps the size and shares a re
   const visitor = await browser.newContext({ viewport: page.viewportSize() ?? undefined });
   const shared = await visitor.newPage();
   await shared.goto(page.url());
-  await expect(shared.getByText('You are viewing a shared shortlist.')).toBeVisible();
+  await expect(shared.getByText("You're viewing a shared shortlist.")).toBeVisible();
   await expect(shared.locator('.column-rejected').getByRole('heading', { name: 'Bright Kettle' })).toBeVisible();
   await expect(shared.locator('summary', { hasText: 'Add a competitor' })).toHaveCount(0);
   await expect(shared.getByRole('button', { name: 'Draft outreach' })).toHaveCount(0);

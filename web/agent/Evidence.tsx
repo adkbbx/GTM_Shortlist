@@ -67,7 +67,7 @@ export function EvidenceList({ company, checkName }: { company: Company; checkNa
   return <>
     {byCheck.size > 0 && <div className="agent-evidence-chips" aria-label="Supported evidence">
       {[...byCheck.values()].map(items => <Chip key={items[0].id} label={checkName(items[0])} tag={claimLabel[items[0].claim_type]}
-        quotes={items.map(item => item.quote)} tone="good" note={`Skeptic: ${decisions.get(items[0].id)?.reason || 'supports'}`} />)}
+        quotes={items.map(item => item.quote)} tone="good" note={`Reviewer: ${decisions.get(items[0].id)?.reason || 'supports'}`} />)}
     </div>}
     {company.evidence.length > 0 && <details className="agent-all-quotes">
       <summary>All checked quotes ({company.evidence.length})</summary>
@@ -78,7 +78,7 @@ export function EvidenceList({ company, checkName }: { company: Company; checkNa
             <p className="agent-evidence-line"><span className={`agent-decision ${decision?.decision ?? 'insufficient'}`}>
               {decision ? decisionLabel[decision.decision] : 'Not checked'}</span>{claimLabel[item.claim_type]}: {checkName(item)}</p>
             <QuoteBlock quote={item.quote} />
-            {decision?.reason && <p className="agent-decision-reason">{decision.decided_by === 'rule' ? 'Rule' : decision.decided_by === 'no_skeptic' ? 'No skeptic' : 'Skeptic'}: {decision.reason}</p>}
+            {decision?.reason && <p className="agent-decision-reason">{decision.decided_by === 'rule' ? 'Rule' : decision.decided_by === 'no_skeptic' ? 'Not reviewed' : 'Reviewer'}: {decision.reason}</p>}
           </li>;
         })}
       </ul>

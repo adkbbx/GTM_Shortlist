@@ -296,11 +296,11 @@ class AgentRunner:
                 self.emit("investigation", f"Investigation incomplete: {UNEXPECTED}", company=ref.domain, level="warn")
         company.evidence += self.profile_evidence(result, company)
         if company.evidence and company.status != "budget_reached":
-            self.emit("skeptic", f"Skeptic checking {len(company.evidence)} quotes", company=ref.domain)
+            self.emit("skeptic", f"Reviewing {len(company.evidence)} pieces of evidence", company=ref.domain)
         company.decisions = judge(company, result.profile, result.disqualifiers, calls, use_skeptic=self.use_skeptic)
         if company.decisions:
             kept = sum(d.decision == "supports" for d in company.decisions)
-            self.emit("skeptic", f"Kept {kept} of {len(company.decisions)} quotes; the rest were contradicted or too weak",
+            self.emit("skeptic", f"Kept {kept} of {len(company.decisions)}; the rest were too weak or contradicted",
                       company=ref.domain)
         company.verdict = decide(company, result.profile, result.disqualifiers, self.providers.clock().date(),
                                  result.overrides.exclusions)

@@ -62,7 +62,7 @@ export function Assumptions({ run, apply, busy }: { run: AgentRun; apply: Apply;
       {(profile.target_size || editable) && <div><dt>Company size</dt><dd>
         {profile.target_size && <Chip label={profile.target_size.value} tag={profile.target_size.origin === 'user' ? 'You set' : 'Inferred'}
           quotes={profile.target_size.quotes}
-          note={profile.target_size.origin === 'user' ? 'You set this.' : 'Inferred from who your site speaks to. A company is rejected only when a quote shows it is clearly bigger.'} />}
+          note={profile.target_size.origin === 'user' ? 'You set this.' : 'Based on who your site speaks to. A company is only rejected when the evidence shows it is clearly bigger.'} />}
         {editable && <SmallForm label="Change the company size" placeholder="For example: seed to Series A startups, 5 to 50 people" action="Save"
           busy={busy} onSubmit={value => apply({ target_size: value })} />}
       </dd></div>}
@@ -80,7 +80,7 @@ export function Assumptions({ run, apply, busy }: { run: AgentRun; apply: Apply;
           note={signal.standard ? 'A common buying moment. Your site did not name one, so the agent also looks for this.' : undefined} />)}
       </dd></div>}
       <div><dt>Competitors</dt><dd>
-        {competitors.length === 0 && <span className="agent-empty">None proven</span>}
+        {competitors.length === 0 && <span className="agent-empty">None confirmed</span>}
         {competitors.map(competitor => <Chip key={competitor.domain} label={competitor.name} tone={competitor.classification === 'direct' ? 'bad' : 'neutral'}
           tag={competitor.classification === 'direct' ? 'Direct' : 'Adjacent'}
           quotes={[competitor.same_job, competitor.same_buyer].filter((quote): quote is NonNullable<typeof quote> => Boolean(quote))}
@@ -98,7 +98,7 @@ export function Assumptions({ run, apply, busy }: { run: AgentRun; apply: Apply;
         {rules.map(rule => <Chip key={rule.id} label={rule.text} tone="bad" quotes={[]}
           note={rule.id === 'outside_target_size' ? 'From the company size above; change it there if it is wrong.'
             : rule.rule === 'outside_stated_size_or_region' ? 'From what your site says you serve.'
-              : 'Applied automatically. A company is rejected only when the skeptic agrees a quote shows it.'} />)}
+              : 'Applied automatically. A company is only rejected when the evidence clearly shows it.'} />)}
         {run.overrides.exclusions.map(entry => <Chip key={entry} label={`Excluded: ${entry}`} tone="bad" quotes={[]} note="You excluded this." />)}
         {editable && <SmallForm label="Exclude a company" placeholder="company.com or name" action="Exclude" busy={busy} onSubmit={value => apply({ exclusions: [value] })} />}
       </dd></div>

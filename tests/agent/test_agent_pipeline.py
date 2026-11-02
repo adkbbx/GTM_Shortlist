@@ -96,7 +96,7 @@ def test_rejected_company_shows_disqualifier_quote(run_result):
 
 def test_needs_a_look_lists_what_is_missing(run_result):
     oak = company(run_result, "oakandpine.example")
-    assert oak.verdict.missing == ["No current need or timing evidence (none dated within 180 days, no open job post)"]
+    assert oak.verdict.missing == ["No recent sign they need this (nothing from the last 6 months, no open job post)"]
     decisions = {d.evidence_id: d for d in oak.decisions}
     integration = next(e for e in oak.evidence if e.claim_type == "disqualifier")
     assert decisions[integration.id].decision == "insufficient"

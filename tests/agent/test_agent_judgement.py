@@ -56,11 +56,11 @@ def test_shortlisted_needs_fit_fresh_signal_and_completed_check():
     stale = item("need", "need-1", source="job_post", published=TODAY - timedelta(days=181))
     verdict = decide(company([fit, stale]), PROFILE, RULES, TODAY)
     assert verdict.kind == "needs_look"
-    assert verdict.missing == ["Need or timing evidence found, but none current (dated within 180 days or an open job post)"]
+    assert verdict.missing == ["Signs of need found, but none recent (from the last 6 months or an open job post)"]
     undone = decide(company([fit, need], disqualifier_check_completed=False), PROFILE, RULES, TODAY)
-    assert undone.missing == ["Competitor check incomplete: no search for current competitor use was run"]
+    assert undone.missing == ["Competitor check incomplete"]
     unchecked = decide(company([fit, need], checked_places=[], disqualifier_check_completed=False), PROFILE, RULES, TODAY)
-    assert unchecked.missing == ["Competitor check not run"]
+    assert unchecked.missing == ["Competitor check didn't run"]
 
 
 def test_missing_required_fit_and_blocked_pages_are_listed():
@@ -68,7 +68,7 @@ def test_missing_required_fit_and_blocked_pages_are_listed():
     verdict = decide(company([need], blocked=["https://shop.example/careers: Website returned HTTP 403"]),
                      PROFILE, RULES, TODAY)
     assert verdict.kind == "needs_look"
-    assert verdict.missing == ["Fit not shown: Sells online",
+    assert verdict.missing == ["Fit not confirmed: Sells online",
                                "Could not read https://shop.example/careers: Website returned HTTP 403"]
 
 

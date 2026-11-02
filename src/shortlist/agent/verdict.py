@@ -63,31 +63,31 @@ def decide(company: CompanyResult, profile: SellerProfile, rules: list[Disqualif
     if company.status == "budget_reached":
         gaps.append(BUDGET_REACHED)
     if company.error:
-        gaps.append(f"Investigation incomplete: {company.error}")
+        gaps.append(f"Research incomplete: {company.error}")
     contradicted = {e.criterion_id for e in company.evidence
                     if e.claim_type == "fit" and (d := decisions.get(e.id)) is not None and d.decision == "contradicts"}
     for criterion in (c for c in profile.fit_criteria if c.enabled and c.required):
         if not any(e.claim_type == "fit" and e.criterion_id == criterion.id for e in supported):
-            prefix = "Fit contradicted" if criterion.id in contradicted else "Fit not shown"
+            prefix = "Not a fit" if criterion.id in contradicted else "Fit not confirmed"
             gaps.append(f"{prefix}: {criterion.text}")
     signals = [e for e in supported if e.claim_type in ("need", "timing")]
     own_ok = {signal.id for signal in profile.need_signals if signal.own_site}
     if not any(fresh(e, today, own_ok) for e in signals):
         if signals:
-            gaps.append(f"Need or timing evidence found, but none current (dated within {FRESH_DAYS} days or an open job post)")
+            gaps.append("Signs of need found, but none recent (from the last 6 months or an open job post)")
         else:
-            gaps.append(f"No current need or timing evidence (none dated within {FRESH_DAYS} days, no open job post)")
+            gaps.append("No recent sign they need this (nothing from the last 6 months, no open job post)")
     if not company.checked_places:
-        gaps.append("Competitor check not run")
+        gaps.append("Competitor check didn't run")
     elif not company.disqualifier_check_completed:
-        gaps.append("Competitor check incomplete: no search for current competitor use was run")
+        gaps.append("Competitor check incomplete")
     if not gaps:
         judged = {e.criterion_id for e in company.evidence
                   if (d := decisions.get(e.id)) is not None and d.decision in ("supports", "contradicts")}
         unconfirmed = [f"Not shown by a quote either way: {rule.text}" for rule in enabled.values()
                        if rule.rule == "outside_stated_size_or_region" and rule.id not in judged]
         return Verdict(kind="shortlisted",
-                       summary="Required fit shown, current need or timing evidence, and no current competitor use found",
+                       summary="Strong fit, a recent sign they need this, and no competitor in use",
                        unconfirmed=unconfirmed)
     notes = [f"Could not read {page}" for page in company.blocked[:5]]
     return Verdict(kind="needs_look", summary="Needs a look", missing=gaps + notes)
