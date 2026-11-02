@@ -1,5 +1,9 @@
 # Meta Global AI Developer Hackathon: website-only research agent
 
+> **The hackathon entry is https://github.com/adkbbx/gtm-shortlist-agent**, a fresh repository holding only the work
+> built during the event. This branch is where that work was first built; it is kept so every change can be audited
+> against the pre-event tag.
+
 GTM Shortlist already existed before the event: an open-source tool that researches companies for a B2B seller and keeps the source passage behind every assessment. For the hackathon (Indie track) I built a new agent on top of it. You type your company website and nothing else. The agent works out what you sell and who buys it, proves who your competitors are, finds companies, investigates each one, and sorts them into **Shortlisted**, **Needs a look** and **Rejected**, with the exact quote and source link behind every verdict.
 
 Everything built during the event lives in its own places: `src/shortlist/agent/` (backend), `web/agent/` (UI), `tests/agent/`, `tests/ui/agent.spec.ts` and `tests/ui/agent-public.spec.ts` (tests), and for the public demo `deploy/modal_agent.py`, `docs/agent-public-demo.md` and `scripts/public_demo_test_server.py`. The few wiring edits outside those places are listed below.
